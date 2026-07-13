@@ -1,5 +1,12 @@
 """Equation metadata and registry primitives."""
 
+from .forces import (
+    aerodynamic_force_from_axial_and_normal_coefficients,
+    aerodynamic_force_from_body_axis_coefficients,
+    aerodynamic_force_from_lift_drag_side_coefficients,
+    body_windward_meridian_unit_vector,
+    propulsive_force_vector,
+)
 from .frames import (
     AerodynamicAngles,
     BodyAxes,
@@ -103,6 +110,9 @@ __all__ = [
     "GeodeticPosition",
     "VelocityAngles",
     "aerodynamic_angles_from_body_axes",
+    "aerodynamic_force_from_axial_and_normal_coefficients",
+    "aerodynamic_force_from_body_axis_coefficients",
+    "aerodynamic_force_from_lift_drag_side_coefficients",
     "augmented_trajectory_derivative_vector",
     "augmented_trajectory_state_vector",
     "earth_fixed_equation_of_motion",
@@ -158,11 +168,13 @@ __all__ = [
     "polar_radius_from_equatorial_radius",
     "RadarObservation",
     "RadarAngles",
+    "body_windward_meridian_unit_vector",
     "radar_azimuth_elevation",
     "radar_line_of_sight_unit_vector",
     "radar_observation",
     "radar_range_rate",
     "radar_relative_position",
+    "propulsive_force_vector",
     "wind_axes_from_bank_angle",
     "wind_body_axes_from_aerodynamic_angles",
     "wind_corrected_velocity",
