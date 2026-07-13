@@ -1,0 +1,8 @@
+(corpus-ch3-021)
+  table output
+  start
+    add alpha
+    cos
+    sqr
+    csto ca2
+  end

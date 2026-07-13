@@ -76,6 +76,7 @@ def test() -> None:
 def grammar() -> None:
     run([project_python(), "-m", "pytest", "tests/parser"])
     run([project_python(), str(TOOLS / "check_taos_fixtures.py")])
+    run([project_python(), str(TOOLS / "check_manual_snippet_corpus.py")])
 ####
 
 

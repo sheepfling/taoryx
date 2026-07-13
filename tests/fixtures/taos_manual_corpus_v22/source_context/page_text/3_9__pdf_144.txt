@@ -1,0 +1,46 @@
+3. Table Files 
+3.4. Simple Tables 
+3.4. Simple Tables 
+Two table formats are available in TAOS. The frrst is called the simple format be- 
+cause it is easy to create, but it has limited capability. The second is called the full 
+format because it provides the full capabilities of the software, but it is somewhat 
+more difficult to create. 
+Simple tables consist of a single set of tabulated numbers. The set of tabulated num- 
+bers defines afunction of one or more state variables (or independent variables). The 
+simplest table is a function of one variable; for example, a table of thrust values given 
+as a function of time is shown below. 
+(motor-1) 
+table thrust (time) 
+time 
+= 0.0, 
+0.5, 
+2.0, 
+4.0, 
+4.5, 
+5.0 
+thrust = 0.0, 3500., 3100., 2950., 600., 0.0 
+The table begins with a name in parentheses followed by the keyword table. This is 
+followed by the table type, thrust, and a list of independent variables, in this case the 
+variable time. Tabulated values for the independent variable, time, and the dependent 
+variable, thrust, are given next. For each value of time, a corresponding thrust value 
+is given. 
+Table Identification Name 
+Simple tables always begin with a name enclosed in parentheses. This name is called 
+the table identification name and is used in the problem file to reference the table. 
+The name must be unique among all input table files. The name cannot have spaces 
+or other delimiters in it; however, the use of nondelimiter special characters, such as 
+underscores, dots, or dashes, is encouraged to make the name readable. 
+Table Function Definition 
+The table identification name is followed by the keyword table and the table type 
+(from Table 3-1). A list of up to five state variables (or independent variables) for 
+the table is given next. These variables must be separated with commas and enclosed 
+in parentheses, so it reads like a function definition. For example, 
+table ca (mach, 
+alt, alpha) 
+says that CA is a function of Mach number, altitude, and angle of attack. 
+Extrapolation Option 
+The function definition is followed by an extrapolation keyword, either extrap or 
+no-extrap. This keyword is optional and controls extrapolation of the table values 
+when the independent values are not within the range of the tabulated values as 
+shown in Figure 3-5. 
+3-9 

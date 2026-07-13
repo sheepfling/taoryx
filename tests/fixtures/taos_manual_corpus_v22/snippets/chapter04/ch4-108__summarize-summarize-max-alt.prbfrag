@@ -1,0 +1,5 @@
+*summarize max-alt
+  add max(alt[1])
+
+*summarize range
+  add last(range) trajectory 1

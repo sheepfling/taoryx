@@ -1,0 +1,10 @@
+(corpus-ch4-103)
+*search 1 vary alpha until alt=30000 on segment 3, trajectory 1
+  xlo=0.5 xhi=10.0 xest=5.0 dx=1.0 tol=0.001
+  xref=1.0 fref=10000 maxitr=20 print=1 integ=0
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=0 gama=0 psi=90 time=0 wt=1
+  *segment 1 test
+    *when time>1 stop
+*end

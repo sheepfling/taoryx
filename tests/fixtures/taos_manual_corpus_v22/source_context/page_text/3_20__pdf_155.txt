@@ -1,0 +1,31 @@
+3. Table Files 
+3.5. Full Tables 
+3.5.6. &-Then Statements 
+3.5.6. If-Then Statements 
+The ifmath operation provides a simple way to control the flow of calculations in a 
+table. Ifstatements are of the form 
+if (relationship) then math-operation 
+where relationship is 
+value relation value 
+and where value is a constant or a variable name. The relation is the symbol <, >, or 
+=. For example, the statement 
+if (mach > 5.0) then add f2(time) no-extrap 
+time = 
+0, 
+1, 
+2, 
+3 
+f2 
+= 2.5, 2.6, 2.95, 3.8 
+says to add the value@ that is a function of time to the table value if the Mach number 
+is greater than 5. 
+In an ifstatement, the relationship, such as mach > 5.0, is evaluated fust. If the rela- 
+tionship is true, then the math operation following the then keyword is executed. In 
+this case if the Mach number is greater than 5, the value off2 is interpolated as a func- 
+tion of time and added to the table value. If the relationship is false, that is, the Mach 
+number is less than or equal to 5, nothing is done and the calculations proceed to the 
+next math operation. 
+Only simple relationships are allowed in TAOS. Combinations such as mach < 5 & 
+alt > 50000 are not allowed. Relations for not equal to and greater than or equal to 
+are not provided because they are redundant. 
+3 -20 

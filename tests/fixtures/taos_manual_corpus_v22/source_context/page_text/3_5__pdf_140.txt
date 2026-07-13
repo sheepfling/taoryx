@@ -1,0 +1,21 @@
+3. Table Files 
+3.2. TablelPmblem File Relationship 
+3.2. Table/Problem File Relationship 
+Information in the problem file tells TAOS which tables to use for each part of the 
+trajectory. Trajectories are divided into segments, and different tables can be used in 
+each segment. For example, the line 
+*aero ca=(stagel-ca-on) 
+cn=(stagel-cn) 
+in the problem file tells TAOS to use a table called stargel-ca-un for the axial force 
+coefficient and a table called stargel-cn for the normal force coefficient (Section 
+4.2.1). These table names must be in the input table files. When TAOS needs a value 
+for the axial force coefficient, it will retrieve it from the table stagel-ca-on. 
+Table names are given in *aero, *prop, *cg, and *wind data blocks in the problem 
+file. They can also be used in *define data blocks when defining user-defined output 
+variables. All tables referenced in a problem file must be in the table files. 
+More than one table of each type can be given in atrajectory segment; the values from 
+each table are added together. For example, if two thrust tables are given, they are 
+evaluated separately and then added together to get the total thrust force. Multiple 
+tables can also be used for a component buildup of the total vehicle lift and drag 
+forces. 
+3-5 

@@ -1,0 +1,96 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.4. *Fly Data Block 
+betae 
+Phi 
+I 
+beta 
+I 
+B 
+I Angle of sideslip 
+1 
+Be 
+Euler angle of sideslip 
+$w 
+Windward meridian 
+pitchgc 
+pitchgd 
+e,, 
+Geocentric pitch angle 
+e& 
+Geodetic pitch angle 
+pitchi 
+rollgc 
+' si 
+Inertial platform pitch angle 
+djgc 
+Geocentric roll angle 
+rollgd 
+roui 
+Table 4 3 .  Consistent Sets of BoeAttitude Angles. 
+djd 
+Geodetic roll angle 
+@i 
+Inertial platform roll angle 
+I Set I 
+Body-AttitudeAngles 
+I 
+Yaws 
+Yaw@ 
+yawi 
+Ygc 
+Geocentric yaw angle 
+Yd 
+Geodetic yaw angle 
+!e 
+Inertial platform yaw angle 
+1 
+2 
+3 
+4 
+5 
+alpha 
+betae 
+bankgc 
+alpha 
+beta 
+bankgc 
+alphat 
+phi 
+bankgc 
+alpha 
+betae 
+bankgd 
+alpha 
+beta 
+bankgd 
+The angles given in the vy data blocks are checked to ensure that they form a consis- 
+tent set according to Table 4-3. If some angles are not specified directly, those that 
+are specified are checked for consistency with Table 4-3. The lowest numbered set 
+is selected containing the specified angles. The remaining unspecified body-attitude 
+angles in this set are allowed to vary to meet other vy flight conditions. 
+Some examples of vy data blocks will help clarify their use. The data blocks 
+*fly alpha = 5.0 
+*fly betae = 2.5 
+say to fly at an angle of attack of 5' and a sideslip of 2.5'. Only two angles are speci- 
+fied. Using Table 4-3, these angles are both in Set 1 and Set 4, but Set 1 is chosen 
+because it has a lower set number, so the remaining body-attitude angle is bankgc. 
+Since this angle is not specified and no other vy data blocks are given, it defaults 
+to zero. Power setting also defaults to zero because it is not specified. 
+6 
+7 
+4- 14 
+alphat 
+phi 
+bankgd 
+yawgc 
+pitchgc 
+rollgc 
+8 
+9 
+yawgd 
+pitchgd 
+rollgd 
+yawi 
+pitchi 
+rolli 

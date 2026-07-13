@@ -1,0 +1,74 @@
+4. Problem Files 
+4.5. Examples 
+4.5.3. Air-Launched Intercept 
+*segment 1 Drop for 2 sec 
+*integ dtprnt=0.50 dt=O.lO 
+*cg 
+cgd34.0 
+*aero ca=(stagel-ca-off) 
+cn=(stagel-cn) 
+*when tseg=2 goto 2 
+*segment 2 1st stage burn 
+*integ dtprnt=0.5 dt=O.lO 
+*cg 
+cg=119.8 
+*aero ca=(stagel-ca-on) 
+cn=(stagel-cn) 
+*prop thrust=(thrustl) mdot(mdot1) 
+*fly alpha vrs tseg 
+opta-1 
+0.0 
+opta-2 
+1.25 
+opta-3 
+2.50 
+opta-4 
+3.75 
+opta-5 
+5.00 
+*when tseg=5.0 goto 3 
+*when alt<O goto 8 
+*segment 3 Coast 
+*integ dtprnh0.5 dt=O.lO 
+*cg 
+cg=105.7 
+*aero ca=(stagel-ca-off) 
+cn=(stagel-cn) 
+*when tseg=0.25 goto 4 
+*when alt<O goto 8 
+*segment 4 Stage and coast 
+*integ dtprnk0.5 dt=O.lO 
+*reset wk368.0 
+*cg 
+cg=61.6 
+*aero ca=(stage2_ca_off) cn=(stage2_cn) 
+*when tseg=0.25 goto 5 
+*when alt<O goto 8 
+*segment 5 2nd stage burn 
+*integ dtprnk0.5 dt=O.lO 
+*cg 
+cg=57.2 
+*aero ca=(stage2_ca_on) cn=(stage2_cn) 
+*prop thrust=(thrust2) mdot(mdot2) 
+*fly alpha vrs tseg 
+opta-6 
+0.0 
+opta-7 
+2.0 
+opta-8 
+4.0 
+opta-9 
+6.0 
+opta-10 
+8.0 
+opta-11 
+10.0 
+opta-12 
+13.1 
+*when tsegd3.1 goto 6 
+*when alt<O goto 8 
+*segment 6 Coast and stage 
+*integ dtprnk0.5 dt=O.lO 
+*cg 
+cg=52.a 
+4- 106 

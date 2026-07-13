@@ -1,0 +1,21 @@
+(corpus-ch4-026)
+*trajectory 1 source start on 6
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=0 gama=0 psi=90 time=0 wt=1
+  *segment 6 source state
+    *when time>1 stop
+*trajectory 2 Obj2 start on 1
+
+  *initial from trajectory 1, segment 6
+
+  *segment 1 deployment
+    *reset wt=50
+    *increment velibx=5
+    *increment dxb=0.5 dyb=3.2 dzb=0.35
+    *fly pitchi=*
+    *fly yawi=*
+    *fly rolli=*
+    *when tseg>0 goto 2
+  *segment 2 synthetic target
+    *when time>1 stop
+*end

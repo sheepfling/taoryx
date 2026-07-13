@@ -1,0 +1,21 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.12. *Etle Data Block 
+4.4.12. "Title Data Block 
+A problem title, consisting of one or more lines of text, is optional. If a title is sup- 
+plied, it is printed at the top of each page of printout and at the beginning of EGS data- 
+base files. A title can be used to help identify or document a problem. There is no 
+limit on the number of lines in a title; although the printout begins to look cluttered 
+with more than 5 or 6 title lines. 
+Titles are input as follows: 
+*title 
+This is the first line of the title 
+this is the second line of the title 
+and so on, until a data block name is hit 
+*atmos standard 
+The title begins with the first nonblank character following the *title keyword, and 
+extends to the next valid data block keyword. In the example above, the title extends 
+from the word This to just before the *atnws keyword; thus, a title can contain any 
+text except for data block keywords. All data block keywords begin with an asterisk, 
+so difficulties can be avoided by not putting asterisks in front of a word in the title. 
+4-85 

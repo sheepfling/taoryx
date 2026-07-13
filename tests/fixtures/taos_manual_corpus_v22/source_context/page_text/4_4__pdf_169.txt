@@ -1,0 +1,42 @@
+4. Problem Files 
+4.1. File F o m t  
+4.1. File Format 
+Problem files are text files so they can be created with any standard text editor such 
+as UNIX’s vi or Silicon Graphics’ jot. They can also be created with other software, 
+such as an interactive trajectory design code. 
+Information in problem files is read into TAOS one line at a time. Each line of text 
+contains some names and values separated by special characters such as spaces or 
+commas. These special characters are called delimiters; valid delimiters are white- 
+space characters (space, tab, etc.), commas, equal signs, parentheses, colons, great- 
+er-than signs and less-than signs. Because delimiters are used to separate names and 
+values, they cannot be imbedded within a name or value. 
+Internally TAOS requires names that are lowercase. Names and keywords entered 
+in uppercase are automatically converted to lowercase, so from auser standpoint case 
+is not important. 
+Names and Values 
+Names and values can be placed anywhere on a line; they do not have to be in certain 
+columns. This free-field style of input allows indentation to make it easier to visual- 
+ize the problem file structure and to avoid input errors. 
+Because of the free-field style of input, the order of names and values in the problem 
+file is often important. For example, in the trajectory data block 
+*trajectory 3 missile start on 23 
+the order of each item in the data block is important. The keyword *trajectory must 
+be followed by a trajectory number. This is followed by a trajectory or vehicle name. 
+The keywords start on must follow these two values, and, finally, the last value is the 
+starting segment number. In other data blocks, where lists of variables and values are 
+given, the order may be less critical. 
+Numerical values can be input as integers without a decimal point, as real numbers 
+with a decimal point, or as real numbers in scientific notation (e-format). For exam- 
+ple, 
+*initial geodetic 
+time = 20, 
+vel = 2.0e4, 
+wt=345.5, 
+gama = -24.3 
+uses the value 2.0e4 which is read as 2.0 x I040r 20,000. 
+Note that delimiters cannot be imbedded within a value, so the value 
+wt = 10,000 
+# Incorrect value 
+is incorrect. The comma is interpreted as a delimiter, so TAOS thinks there are two 
+values instead of one. In this case, it reads 10 and 0 instead of 10000. 
+4-4 

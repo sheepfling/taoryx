@@ -1,0 +1,34 @@
+3. Table Files 
+3.3. Table File Fonnot 
+plseg 
+Phi 
+pitcbgc 
+Segment path length 
+yawgc 
+Geocentric yaw angle 
+Windward meridian 
+yawgd 
+Geodetic yaw angle 
+Geocentric pitch angle 
+yawi 
+Inertial yaw angle 
+Wind and center of gravity tables can only be functions of a limited number of the 
+state variables which are designated with the symbol in Table 3-2. These tables are 
+evaluated before all of the state variables are known. Tables also cannot be functions 
+of themselves; for example, a thrust table cannot be a function of thrust. 
+The default units for the state variables are given in the appendix. These can be 
+changed in the problem file with the *unifs/&t data block (Section 4.4.13). 
+User-Defined Variables 
+There are times when the state variables alone do not provide enough flexibility; for 
+example, there may be three thrust versus time curves for three different versions of 
+a rocket motor. These curves can be placed in separate tables, or they can be placed 
+in the same table. If they are put in the same table, thrust becomes a function of both 
+time and another variable that can be called version. This new variable is called a 
+user-defined variable because any name can be used except those reserved for the 
+state variables in Table 3-2. When a user-defined variable is detected, it must be giv- 
+en a value in the problem file. For example, the line 
+*prop thrust=(stagel) version=2 
+says to use a table called stage1 for thrust and to set the user-defined variable version 
+equal to two. The value of version is constant within a segment of a trajectory, but 
+it can be surveyed like any other numerical input value (Section 4.4.11). 
+3-8 

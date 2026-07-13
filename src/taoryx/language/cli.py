@@ -5,9 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from taoryx.language.problem_parser import parse_problem_file
-from taoryx.language.semantic_validation import validate_problem, validate_table_file
-from taoryx.language.table_parser import parse_table_file
+from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
+from taoryx.language.ingest import ingest_file
 
 
 def _serialize(value: Any) -> Any:
@@ -22,21 +21,31 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Parse and validate TAOS .prb and .tbl files.")
     parser.add_argument("paths", nargs="+", type=Path)
     parser.add_argument("--json", action="store_true", dest="as_json")
+    parser.add_argument("--report", type=Path, help="Write the complete machine-readable report to this JSON file.")
     arguments = parser.parse_args()
     reports: list[dict[str, Any]] = []
     error_count = 0
     for path in arguments.paths:
-        if path.suffix.lower() == ".prb":
-            document = parse_problem_file(path)
-            diagnostics = validate_problem(document)
-        elif path.suffix.lower() == ".tbl":
-            document = parse_table_file(path)
-            diagnostics = validate_table_file(document)
-        else:
-            parser.error(f"Unsupported file extension for {path}.")
+        try:
+            ingested = ingest_file(path)
+            document = ingested.document
+            diagnostics = list(ingested.diagnostics)
+        except (OSError, UnicodeError, ValueError) as exc:
+            document = None
+            diagnostics = [
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="file-ingest-failed",
+                    message=str(exc),
+                    location=SourceLocation(path=str(path), line=1),
+                )
+            ]
         ####
         error_count += sum(item.severity == "error" for item in diagnostics)
         reports.append({"path": str(path), "document": _serialize(document), "diagnostics": [_serialize(item) for item in diagnostics]})
+    ####
+    if arguments.report:
+        arguments.report.write_text(json.dumps(reports, indent=2) + "\n", encoding="utf-8")
     ####
     if arguments.as_json:
         print(json.dumps(reports, indent=2))
@@ -45,7 +54,7 @@ def main() -> int:
             print(report["path"])
             for diagnostic in report["diagnostics"]:
                 location = diagnostic.get("location")
-                prefix = f"{location['line']}: " if location else ""
+                prefix = f"{location['line']}:{location.get('column', 1)}: " if location else ""
                 print(f"  {diagnostic['severity']}: {prefix}{diagnostic['code']}: {diagnostic['message']}")
             ####
             if not report["diagnostics"]:

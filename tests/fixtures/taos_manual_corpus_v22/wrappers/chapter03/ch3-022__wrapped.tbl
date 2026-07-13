@@ -1,0 +1,9 @@
+(corpus-ch3-022)
+  table output
+  start
+    add alpha
+    cos
+    sqr
+    csto ca2
+    add factor(ca2,mach)
+  end

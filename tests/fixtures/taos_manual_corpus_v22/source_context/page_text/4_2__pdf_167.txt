@@ -1,0 +1,43 @@
+4. Problem Files 
+- Problem File 
+Problem 1 
+Trajectory 1 
+Segment 1 
+Segment 2 
+Trajectory 2 
+Problem 2 
+Trajectory 1 
+I Problem File Hierarchical Structure1 
+Problem File 
+etc. 
+- 
+Figure 4-2. Problem File Organization. 
+Each trajectory in a problem is identified with a unique trajectory number and name. 
+The trajectory number is used within TAOS to identify each trajectory. Both the tra- 
+jectory number and name appear on output files to identify each trajectory. 
+Within a trajectory7 each segment is identified with a unique segment number. Al- 
+though a descriptive title can be given for a segment, it is not used to identify the seg- 
+ment. The segment numbers must be unique within a trajectory7 but different trajec- 
+tories can use the same set of segment numbers. 
+The following problem file defines a simple trajectory: 
+(pullout 
+1 
+*title 
+Example of a maneuvering trajectory 
+*atmos standard 
+*earth wgs-84 
+*trajectory 1 rv start on 1 
+*initial geodetic 
+long=O . 0 
+lat=O .O 
+psi=90.0 
+time=O . O  
+alt=300000 
+vel=18000 
+gama=-3 0 
+wt=1000.0 
+*print time alt range mach vel gamgd dynprs alpha ca cn 
+*segment 1 Ballistic flight 
+*aero ca=(rv,ca) 
+cn=(rv-cn) 
+4-2 

@@ -1,0 +1,48 @@
+3. Table Files 
+3.5. Full Tatles 
+3.5. Full Tables 
+Full tables provide more ways to define table values than simple tables. In a simple 
+table, the table value is obtained by interpolating a table. Values of the independent 
+variables (the state variables) are known from the flight path integration, and the tab- 
+ulated data values are known from the input. Linear interpolation is used to compute 
+the table value or dependent variable. The only flexibility is in the selection of the 
+independent variables and their values. 
+In a full table, the table value is obtained by executing a sequence of math operations. 
+When TAOS needs to compute a table value, it is first initialized to zero. Then a se- 
+quence of math operations, provided in the table input, is executed one at a time. Each 
+math operation adds, subtracts, multiplies, etc. the current table value with another 
+value. The other value can be a constant, a value interpolated from a table, a state vari- 
+able, or a user-defined variable. It is analogous to using a calculator with an accu- 
+mulation register to compute the table value. 
+The sequence of math operations is much like a simple programming language. The 
+math operations let the user control how atable value is computed. Temporary values 
+can be stored for later use just l i e  a calculator, and simple if-then and goto state- 
+ments give some flow control over the calculation. 
+The following example illustrates this concept: 
+(1st-stage) 
+start 
+sub pres 
+# subtract atmospheric pressure 
+mult 3.219 
+# multiply by nozzle exit area 
+add tvac ( time ) 
+# add the vacuum thrust 
+table 
+thrust units=lb 
+time = 0, 0.1, 0.2, 0.5, 1.0, 4.0, 4.1, 4.2, 4.3 
+tvac = 0, 1200, 1050, 980, 950, 910, 100, 50, 0 
+end 
+This table defines thrust magnitude in lbf as the vacuum thrust minus the atmospheric 
+pressure times the nozzle exit area, that is, 
+The calculation begins at the start statement by initializing thrust to zero. Then the 
+atmospheric pressure is subtracted from zero giving a negative value with the sub 
+pres statement. After this statement is executed the table value is equal to negative 
+pressure. The next statement, mult 3.219, multiplies the current table value by a 
+constant representing the nozzle exit area. After this statement executes, the table 
+value is equal to a negative pressure times the nozzle exit area. Finally the statement 
+add tvac(time) interpolates the table values for the vacuum thrust as a function of 
+time and adds this value to the table value. The resulting thrust value is used in the 
+flight path calculations. 
+Like any programming language there are many ways that this same calculation can 
+be done. Another method for the same calculation is to multiply the pressure and exit 
+3-13 

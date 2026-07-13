@@ -1,0 +1,111 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.13. *UnitdFm Data Block 
+mmt. 
+Wsec 
+Metershour 
+slugs/hr 
+Slugs/hour 
+KilomeWsecond 
+g/= 
+Grams/second 
+Wmin I KilomeWminute 
+I g/min 
+I Grams/minute 
+I 
+lanmt. 
+de@= 
+Kilometershour 
+€m 
+GramSmour 
+Deg&second 
+kg/= 
+Kilograms/second 
+deg/min 
+degmt. 
+Degreeslininute 
+kg/min 
+Kilograms/minute 
+Degreesmour 
+k€m 
+Kilogramsmour 
+d s e c  
+d m i n  
+Radians/second 
+Ibf 
+Poundsforce 
+Radiis/minute 
+n 
+Newtons 
+rad/hr 
+rev/sec 
+RdiZUlS/hOUr 
+kn 
+Kilonewtons 
+Revolutions/sec 
+Ibflft2 
+Pounds fordinch2 
+nm/hr2 
+I Nautical miles/hour2 
+I kg/m3 
+I Kdograms/mete$ 
+I 
+rpm 
+The aerodynamic reference areasrefis not a standard output variable, but its units can 
+be changed with the *units&? data block. Its default units are# (ft2), but these units 
+can be changed by giving a different distance unit. For example, 
+Revolu tions/minute 
+psi 
+Pounds force/inch2 
+G'S 
+P
+d
+ 
+Pascals 
+*units/fmt sref in 
+fr/sec2 
+fVmin2 
+ftmn 
+in/sec2 
+idmin2 
+ink2 
+changes the units of Smf to in2. 
+Feet/second2 
+kpascal 
+Kilopascals 
+Feethninu& 
+l/in 
+Per inch 
+Feetmod 
+l/ft 
+Per foot 
+Inches/sd 
+l/m 
+Per meter 
+Inches/min2 
+fWsec 
+Feet2/second 
+Incheslhod 
+d s e c  
+Mete$/second 
+Output Format 
+Printout format only affects output files, but it affects all output files including plot 
+frles and EGS database files. It is given by the letter e or& followed by a period, fol- 
+lowed by a number. The letter tells whether the variable is printed in e-format or f- 
+format. E-format is commonly used in computers for scientific notation; for exam- 
+ple, the number 250 is printed as 2.50e02 where e02 means x102. F-format prints 
+numbers the standard way, that is, 250 is printed as 250. The number following the 
+period tells how many digits are printed following the decimal point. 
+milsec2 
+mi/min2 
+mi/hr2 
+4-87 
+Statute miles/second2 
+Ib/ft3 
+Pounds madfeet3 
+Statute miledminu& 
+lb/m3 
+Pounds mass/rneteG 
+Statute mileshour2 
+g/m3 
+Grams/centime& 

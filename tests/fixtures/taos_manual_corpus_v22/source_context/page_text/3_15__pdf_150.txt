@@ -1,0 +1,95 @@
+3. Table Files 
+3.5. Full Tables 
+3.5.1. Math Operations 
+Operation 
+Description 
+add 
+Add value to table value 
+3.5.1. Math Operations 
+Math operations available in TAOS are given in Table 3-4. The sequence of math 
+operations always begins with the start keyword and ends with the end math opera- 
+tion. The last math operation in a table must be the end operation. 
+Table 3-4. Math Operations. 
+Operation 
+Description 
+In 
+Natural log of table value 
+sub 
+mult 
+~ 
+Subtract value from table value 
+Multiply value by table value 
+log 
+e 
+Log base 10 of table value 
+e raised to the table value power 
+diV 
+idiv 
+Divide table value by value 
+Divide value by table value 
+sin 
+cos 
+sin of table value (in degrees) 
+cos of table value (in degrees) 
+~ 
+eXP 
+iexp 
+Raise table value to power of value 
+Raise value to power of table value 
+tan 
+asin 
+tan of table value (in degrees) 
+sin-1 of table value (in degrees) 
+min 
+salt 
+I Sauare mot of table value 
+I end 
+I Endoftable 
+I 
+Limit table value to greater than a value 
+atan 
+tan-l of table value (in degrees) 
+Math operations that only operate on the current table value do not require additional 
+information, such as a constant or table. For example, 
+max 
+Limit table value to less than a value 
+start 
+add alpha 
+sin 
+sqr 
+add 1.0 
+end 
+acos 
+cos1 of table value (in degrees) 
+computes (I + sin2a). The math operations sin and sqr do not require additional val- 
+ues; they operate only on the current table value. The math operation add does require 
+another value. Angle of attack is added in the first add statement, and the constant 
+1.0 is added in the second add statement. 
+set 
+abs 
+In Table 3-4, operations add through set require an additional value; operations abs 
+through zero do not require an additional value. The csto, iJ and goto operations are 
+special operations discussed later in this document. The additional value required by 
+operations add through set can be a constant, a state variable, a value interpolated 
+from a table, a temporary storage variable, or a user-defined variable. 
+Set table value to a value 
+Absolute value of table value 
+ZHO 
+csto 
+Set table value to zero 
+Store table value and set it to zero 
+3-15 
+neg 
+sw 
+I 
+.
+.
+ 
+. -., 
+~. 
+Negate table value 
+if 
+If-then statement 
+Square table value 
+goto 
+Goto statement 

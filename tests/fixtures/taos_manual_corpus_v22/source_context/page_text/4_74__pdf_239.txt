@@ -1,0 +1,44 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.8. *Radar Data Block 
+4.4.8. *Radar Data Block 
+Radar observations of trajectories can be simulated from one or more fixed radar sta- 
+tion locations. Radar observations include the range, azimuth, and elevation angles, 
+their rates, and their accelerations. The vehicle aspect and meridional angles relative 
+to the station are also computed (Section 2.4.2). 
+The presence of one or more radar output variables in the problem triggers the radar 
+observation calculations. The radar stations are identified with a number, starting 
+with 1. Subscripts enclosed in square brackets are used on the radar output variables 
+to indicate the station number. For example, radmg[2] is the radar range from station 
+number 2, and radmg[3][2] is the radar range from station number 3 for trajectory 
+number 2. When double subscripts are used, the trajectory number is given last. 
+A *radar data block is required for each radar station giving its location. For exam- 
+ple, 
+*radar 1 station-x alt=539.24, long=-91.43562, 
+latgd=30.02347 
+defines radar station number 1, called stution-x7 at a geodetic latitude of 
+30.02347"N, a longitude of 91.43562"E, and an altitude of 539.24 ft. 
+Any number of radar stations can be defined. Although they are identified with a sta- 
+tion number, they also have a station name which is used as a comment to further 
+identify the station. The station number and name must immediately follow the *ra- 
+dar keyword. The remaining variables, giving the station location, follow. These 
+variables can be given in any order. 
+The station location is input with the geodetic position variables ult, long, and latgd. 
+Additional Cartesian offset values from this location can be input with the variables 
+diste, distn, and distd. These adjustments are made relative to the position given by 
+alt, long, and Zatgd, in the local geodetic horizon coordinate system, and they do not 
+follow the curvature of the earth's surface. Therefore, these adjustments should be 
+small to maintain accuracy. 
+The station location variables are normally referenced to the earth model shape given 
+in the *earth data block; however, this can be changed by entering earth shape in- 
+formation in the *radar data block. Earth geometry input in the *radar data block 
+is only used for the radar calculations; it is not used anywhere else in the trajectory 
+calculations. 
+The keywords wgs-72 and wgs-84 can be used to select an earth model, or the earth 
+shape values can be input directly with the variables reqtr7 rpolr7j7at, and ecc. As with 
+the *earth data block, the earth shape variables must produce consistent geometry. 
+The variable reqa is required, and one of the other shape variables (rpolr,gut, or ecc) 
+must be given. Additional values are redundant and may form inconsistent geometry. 
+The input variables for the *radar data block are summarized in Table 4-21. The fol- 
+lowing *radar data block 
+4-74 

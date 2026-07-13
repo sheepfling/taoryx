@@ -1,0 +1,46 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.N. *Survey Data Block 
+4.4.11. *Survey Data Block 
+The purpose of a survey is to change the value of one or more input parameters and 
+determine the effect on the trajectories. This is called a tradeoff study or sensitivity 
+study. Trajectories are computed for all values of the survey variable. 
+As noted in Section 4.1, any numerical value in the problem file can be systematically 
+varied by defining a survey. For example, 
+*initial 
+alt=surv-1 lat=O long=O wk1200 
+has the variable alt set to the value of survey one. The keyword sum-1 is aplacehold- 
+er for the actual value that will be used when the problem is run. The actual value is 
+determined from the corresponding *survey data block. The survey numbers are 
+used to relate the survey keywords to the survey data blocks, so s u n 4  corresponds 
+to the *survey 1 data block, sum-2 corresponds to the *survey 2 data block, and so 
+on. 
+The sum-1, surv-2, etc., keywords control which variables in the problem file are 
+modified by the survey. The *survey data blocks control the values assigned to these 
+variables. In the above example, the variable aZt in the *initial data block is set to 
+sum-l, so there must be a corresponding *survey 1 data block in the problem that 
+assigns values for the initial altitude. 
+For example, 
+*survey 
+1 alto 10=40000 hi=80000 inc=20000 
+says to run three cases with the initial altitude set to 40,000,60,000, 
+and 80,000 ft. 
+TAOS substitutes the survey value everywhere the surv-n keyword is found in the 
+problem file. So more than one variable in the problem file can be set to the survey 
+value. 
+Survey Numbers and Names 
+The survey data block begins with the *survey data block name and the survey num- 
+ber. Survey numbers are normally assigned in sequence beginning with one. Any 
+number of survey loops can be defined. The surveys form nested loops with the low- 
+est-numbered survey the inner most and the highest-numbered survey the outer 
+most, 
+A survey variable name follows the survey number. This name must be unique from 
+other output variable names. It is used in the EGS database files for plotting the re- 
+sults of a s~rvey.~ 
+In the example above, the EGS database would contain one or more 
+trajectories associated with aZt0=40000, another set of trajectories associated with 
+aZt0=60000, and so on. 
+Lo, Hi, and Increment Survey Values 
+There are two ways that survey values can be assigned. The example above shows 
+one method where the values take on incremental values. A starting value is given, 
+4-83 

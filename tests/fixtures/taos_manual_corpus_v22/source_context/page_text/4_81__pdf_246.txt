@@ -1,0 +1,45 @@
+4. Pmblem Files 
+4.4. Problem Data Blocks 
+44.10. *Summarize Data Block 
+of summary variables; they are usually used to retrieve a specific value from a trajec- 
+tory rather than perform a complex sequence of math operations. 
+The two other summary variables in Figure 4-12 are defined with the data blocks 
+*summarize max-alt 
+add max(a1t [ l l  ) 
+*summarize range 
+add last(range) trajectory 1 
+Max, Min, First, and Last Special Functions 
+These data blocks illustrate some special functions that are available for summary 
+variables. The max function, used to retrieve the maximum altitude, searches the en- 
+tire trajectory for the maximum value of a variable. The last function retrieves the 
+last or final trajectory value. Other similar functions are min andfirst. These func- 
+tions eliminate the need for segment numbers because they apply to the entire trajec- 
+tory. 
+Trajectory data is saved in memory at the beginning and end of each segment and at 
+every print interval. When the special functions max and min scan the trajectory data 
+for maximum and minimum values, they only look at the saved trajectory data. They 
+select the maximum or minimum saved value and then use the two adjacent values 
+to fit a parabola and estimate the actual minimum. Thus, the accuracy of the result 
+depends on the print interval. If the value changes rapidly, the print interval may need 
+to be reduced to obtain more accurate results. 
+Normally segment and trajectory numbers are required when any variable is re- 
+trieved from a trajectory. Segment numbers are given first following the keywords 
+on segment. Trajectory numbers are given next following the keyword trajectory, as 
+shown in the first example for vel-bo. Trajectory numbers can also be given as sub- 
+scripts enclosed in square brackets as shown in the definition for mux-alt. 
+Math Operations 
+All of the examples shown above use the addmath operation, but there are many oth- 
+ers as shown in Table 4-23. The first set of operations (add through iexp in the first 
+column of the table) require an additional value, in other words, they operate on the 
+current summary value and an additional input value. This value can be an output 
+variable from a trajectory as shown above or it can be a constant. The remaining math 
+operations (abs through am) do not require an additional value. They only operate 
+on the current value of the summary variable. 
+Table 623. Summary Variable Math Operations. 
+Operation Description 
+Operation Description 
+add 
+Add a value to the summary 
+sqrt 
+Square root of summary value 
+value 

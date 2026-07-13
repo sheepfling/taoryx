@@ -1,0 +1,58 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.6. *Optimize Data Block 
+When angle-of-attack time histories are used in a 
+for example, 
+data block for optimization, 
+*fly alpha vrs 
+opta-1 
+opta-2 
+opta-3 
+opta-4 
+opta-5 
+opta-6 
+opta-7 
+tseg 
+0 
+20 
+40 
+60 
+80 
+100 
+opta-8 
+*when tseg>opta-8 stop 
+the segment times have to be estimated. The optimization procedure generally works 
+best when these points are evenly distributed within the segment as shown above. 
+However, during optimization the final segment time, upta-8, can change to either 
+a very large number or to a number very close to the previous point, 100. In either 
+case, the distribution of time history points becomes uneven, which can affect the 
+solution. 
+The guidance table adjustment variable, adjust, controls whether these time values 
+are automatically adjusted to be evenly spaced when the optimization procedure re- 
+starts. If it is set to zero, no adjustment takes place, and if it is set to one, then the val- 
+ues are adjusted at each restart. 
+Numerical Derivatives 
+The optimization procedure requires partial derivatives during the solution process. 
+These derivatives can be computed numerically with a central-difference method, 
+derivs = 0, or a forward-difference method, derivs = 1. Forward-difference deriva- 
+tives are computed from 
+-- - f(x + 6x1 - f(x) 
+-- 
+V(X) - f(x + wYf(x-6x) 
+ax 
+6X 
+and central-difference derivatives are computed from 
+ax 
+2 d X  
+The accuracy of both derivative methods is controlled 
+(4-7) 
+(4-8) 
+by the derivative increment 
+variable dxor dx. Smaller values of dxgive more accurate derivatives than larger val- 
+ues until the limits of numerical precision are reached. The central-difference meth- 
+od requires more function evaluations, but gives more accurate derivatives than the 
+forward-difference method for the same value of 6x. The default values for derivs 
+and dx generally work well and do not have to be modified. 
+Survey Control Flag 
+If surveys are used with optimization, the surveys variable controls the starting tra- 
+jectory for each set of survey values. For the first set of survey values, the starting 

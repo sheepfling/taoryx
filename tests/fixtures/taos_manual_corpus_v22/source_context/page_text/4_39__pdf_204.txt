@@ -1,0 +1,25 @@
+4. Pmblem Files 
+4.3. Trajectory Data Blocks 
+4.3.2. *Dwn/crs Data Block 
+4.3.2. *Dwn/crs Data Block 
+East, north, downrange, and crossrange are defrned from a reference point, given by 
+a longitude and geodetic latitude, as shown in Figure 4-4. The trajectory is projected 
+to the earth's surface, and the distances are measured along this curve (Section 2.4.1). 
+East is the component of distance traveled along a constant latitude and north is the 
+component of distance traveled along a constant longitude. Downrange is the com- 
+ponent of distance traveled along a reference azimuth or heading, and crossrange is 
+the component of distance traveled perpendicular to this heading. 
+Point 
+Figure U. 
+Downrange and Crossrange Definition. 
+All of these distances use the same reference point. The reference heading is only 
+used by the downrange and crossrange calculations. The reference longitude, lati- 
+tude, and heading default to the beginning of the trajectory given by the initial condi- 
+tions. 
+If adifferent reference point is required or if multiple trajectories need to use the same 
+reference point, then these values can be given in the *dwdcrs data block. For exam- 
+ple, 
+*dwn/crs latgd=lO long=95 azm=45 
+places the reference point at a latitude of 10°N and alongitude of 95'E. The reference 
+heading or azimuth is 45' from north or northeast. 
+4-39 

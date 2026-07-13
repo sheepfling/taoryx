@@ -1,0 +1,2 @@
+*define del_alt
+  del_alt = (alt[1] - alt[2]) / 3280.84;

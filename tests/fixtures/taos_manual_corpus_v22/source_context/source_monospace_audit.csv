@@ -1,0 +1,3142 @@
+manual_page,source_pdf_page,block_index,courier_ratio,best_score,best_snippet_id,review_status,captured_by,review_note,text
+3-5,140,3,1.0,94.74,ch3-001,automatic_match,ch3-001,Fuzzy or exact source-text match at or above the review threshold.,"*aero ca=(stagel-ca-on)
+cn=(stagel-cn)"
+3-6,141,11,0.9524,100.0,ch3-002,automatic_match,ch3-002,Fuzzy or exact source-text match at or above the review threshold.,"#
+the entire line is used for comments
+0.2
+0.3
+0.4
+0.5
+# Mach numbers"
+3-8,143,9,1.0,96.77,ch3-003,automatic_match,ch3-003,Fuzzy or exact source-text match at or above the review threshold.,*prop thrust=(stagel) version=2
+3-9,144,4,0.8713,98.99,ch3-004,automatic_match,ch3-004,Fuzzy or exact source-text match at or above the review threshold.,"(motor-1)
+table thrust (time)
+time
+= 0.0,
+0.5,
+2.0,
+4.0,
+4.5,
+5.0
+thrust = 0.0, 3500., 3100., 2950., 600., 0.0"
+3-9,144,11,1.0,95.83,ch3-005,automatic_match,ch3-005,Fuzzy or exact source-text match at or above the review threshold.,"table ca (mach,
+alt, alpha)"
+3-10,145,36,1.0,100.0,ch3-006,automatic_match,ch3-006,Fuzzy or exact source-text match at or above the review threshold.,"table ca(mach,alpha) extrap sref=2.162"
+3-11,146,2,1.0,100.0,ch3-007,automatic_match,ch3-007,Fuzzy or exact source-text match at or above the review threshold.,"table mdot(time,motor) no-extrap
+units=lb/hr"
+3-11,146,6,0.7333,100.0,ch3-008,automatic_match,ch3-008,Fuzzy or exact source-text match at or above the review threshold.,"mach = 0.2, 0.4, 0.6, 0.8, 0.9
+alpha = 0, 2, 4"
+3-11,146,9,0.95,98.15,ch3-009,automatic_match,ch3-009,Fuzzy or exact source-text match at or above the review threshold.,"time = O.,
+1.0e1, 2.0e1, 6.0e1, 7.0e1, 9.0e1,
+2e02, 4e02, 6e02"
+3-11,146,12,0.8158,99.52,ch3-010,automatic_match,ch3-010,Fuzzy or exact source-text match at or above the review threshold.,"table cx(alt,mach) extrap sref5.30
+# CORRECT:
+alt = 0, 10000
+# Altitudes first
+mach = 5, 10, 15, 20
+# then Mach numbers"
+3-11,146,14,0.8571,97.28,ch3-011,automatic_match,ch3-011,Fuzzy or exact source-text match at or above the review threshold.,"table cx(alt,mach) extrap srefS.30 ’ # INCORRECT: Altitude
+mach = 5, 10, 15, 20
+# is first in definition
+alt = 0, 10000
+# but Mach values given
+# first"
+3-12,147,2,0.9265,98.79,ch3-012,automatic_match,ch3-012,Fuzzy or exact source-text match at or above the review threshold.,"(example-thrust)
+table thrust(time1 units=lb no-extrap
+time = 0.0, 0.1, 1.0, 2.0, 3.0, 3.4, 3.5
+thrust = 0, 51008 4950, 4900, 4840, 4700, 0"
+3-12,147,5,0.9106,99.14,ch3-013,automatic_match,ch3-013,Fuzzy or exact source-text match at or above the review threshold.,"( example-cx)
+table cx(alt,mach) extrap sref=5.30
+alt = 0, 10000
+mach = 5, 10, 15, 20
+cx = 0.030, 0.027, 0.025, 0.024
+# Values for alt=O
+0.035, 0.031, 0.029, 0.028
+# Values for alt=10000"
+3-12,147,8,0.8981,91.18,ch3-014,automatic_match,ch3-014,Fuzzy or exact source-text match at or above the review threshold.,"(example-ca)
+table Ca(alt,maCh,alpha) no-extrap sref=l0.0
+alt = 0, 5000
+mach = 4, 6, 8
+alpha = 0, 2, 4, 6
+ca = 0.020, 0.021, 0.022, 0.024 # Values for mach=4, alt=O
+0.018, 0.0198 0.020, 0.022 # Values for mach=6, alt=O
+0.0178 0.018, 0.019, 0.021 # Values for mach=8, alt=O"
+3-12,147,9,0.9167,92.99,ch3-014,automatic_match,ch3-014,Fuzzy or exact source-text match at or above the review threshold.,"0.021, 0.022, 0.023, 0.025 # Values for mach=4, alt=5000
+0.020, 0.021, 0.022, 0.024 # Values for mach=6, alt=5000
+0.019, 0.020, 0.021, 0.023 # Values for mach=8, alt=5000"
+3-13,148,6,1.0,100.0,ch3-015,automatic_match,ch3-015,Fuzzy or exact source-text match at or above the review threshold.,(1st-stage)
+3-13,148,7,1.0,100.0,ch3-015,automatic_match,ch3-015,Fuzzy or exact source-text match at or above the review threshold.,"table
+thrust units=lb"
+3-13,148,8,0.9113,98.33,ch3-015,automatic_match,ch3-015,Fuzzy or exact source-text match at or above the review threshold.,"start
+sub pres
+# subtract atmospheric pressure
+mult 3.219
+# multiply by nozzle exit area
+add tvac ( time )
+# add the vacuum thrust"
+3-13,148,9,0.898,100.0,ch3-015,automatic_match,ch3-015,Fuzzy or exact source-text match at or above the review threshold.,"time = 0, 0.1, 0.2, 0.5, 1.0, 4.0, 4.1, 4.2, 4.3
+tvac = 0, 1200, 1050, 980, 950, 910, 100, 50, 0
+end"
+3-15,150,29,0.9667,100.0,ch3-016,automatic_match,ch3-016,Fuzzy or exact source-text match at or above the review threshold.,"start
+add alpha
+sin
+sqr
+add 1.0
+end"
+3-16,151,3,0.7727,100.0,ch3-017,automatic_match,ch3-017,Fuzzy or exact source-text match at or above the review threshold.,"add 2.0
+mult 1.5e-6
+exp
+3"
+3-16,151,6,0.8235,100.0,ch3-018,automatic_match,ch3-018,Fuzzy or exact source-text match at or above the review threshold.,"add 0.7
+mult pres
+mult mach
+mult mach"
+3-17,152,4,0.8434,98.77,ch3-019,automatic_match,ch3-019,Fuzzy or exact source-text match at or above the review threshold.,"add cdh(a1t)
+alt =
+0, 50000, 100000, 150000, 200000
+cdh = 0.0, 0.002,
+0.006,
+0.011,
+0.042"
+3-17,152,7,0.8344,100.0,ch3-020,automatic_match,ch3-020,Fuzzy or exact source-text match at or above the review threshold.,"mult factor(type,mach)
+type = 0, 1
+mach = 0.0, 0.999, 1.000, 25.0
+factor = 0.5, 0.5, 1.0, 1.0,
+1.0, 1.0, 2.0, 2.0
+# Values for type = 0
+# Values for type = 1"
+3-18,153,3,1.0,100.0,ch3-021,automatic_match,ch3-021,Fuzzy or exact source-text match at or above the review threshold.,add alpha
+3-18,153,5,1.0,100.0,ch3-021,automatic_match,ch3-021,Fuzzy or exact source-text match at or above the review threshold.,"sqr
+csto ca2"
+3-18,153,9,1.0,100.0,ch3-021,automatic_match,ch3-021,Fuzzy or exact source-text match at or above the review threshold.,add alpha
+3-18,153,11,1.0,100.0,ch3-022,automatic_match,ch3-022,Fuzzy or exact source-text match at or above the review threshold.,"sqr
+csto ca2
+add factor(ca2,mach)"
+3-19,154,4,1.0,100.0,ch3-023,automatic_match,ch3-023,Fuzzy or exact source-text match at or above the review threshold.,"(constant-thr)
+table thrust units=lb
+start
+sub pres
+mult anoz
+add tvac
+end"
+3-20,155,3,1.0,100.0,ch3-024,automatic_match,ch3-024,Fuzzy or exact source-text match at or above the review threshold.,if (relationship) then math-operation
+3-20,155,5,1.0,100.0,ch3-025,automatic_match,ch3-025,Fuzzy or exact source-text match at or above the review threshold.,value relation value
+3-20,155,7,0.8987,100.0,ch3-026,automatic_match,ch3-026,Fuzzy or exact source-text match at or above the review threshold.,"if (mach > 5.0) then add f2(time) no-extrap
+time =
+0,
+1,
+2,
+3
+f2
+= 2.5, 2.6, 2.95, 3.8"
+3-21,156,3,1.0,100.0,ch3-027,automatic_match,ch3-027,Fuzzy or exact source-text match at or above the review threshold.,"label-1:
+add time
+label-2:
+sub tmark
+lable-3:
+csto delta-time"
+3-21,156,6,0.8,100.0,ch3-028,automatic_match,ch3-028,Fuzzy or exact source-text match at or above the review threshold.,"start
+super: if (mach < 1.0) then goto sub # ""if"" test
+add mach
+mult mach
+# This set of math
+csto mach2
+# operations is for
+add cdsup(mach2)
+# Mach > 1 (supersonic)
+mach2 = 1.0, 4.0,
+9.0, 25.0
+cdsup = 0.120, 0.094, 0.075, 0.055
+goto done"
+3-21,156,7,0.8264,99.19,ch3-028,automatic_match,ch3-028,Fuzzy or exact source-text match at or above the review threshold.,"sub:
+add cdsub(a1pha)
+# This set of math
+alpha = 0, 5, 10
+# operations is for
+cdsub = 0.020, 0.023, 0.027
+# Mach < 1 (subsonic)"
+3-21,156,8,1.0,100.0,ch3-028,automatic_match,ch3-028,Fuzzy or exact source-text match at or above the review threshold.,done: end
+3-22,157,8,0.8904,98.61,ch3-029,automatic_match,ch3-029,Fuzzy or exact source-text match at or above the review threshold.,"add cxo(alt,mach)
+alt = 0, 50000
+mach =
+3,
+5,
+7,
+9
+cxo = .020, .021, .019, -018,"
+3-22,157,10,0.7213,95.83,ch3-029,automatic_match,ch3-029,Fuzzy or exact source-text match at or above the review threshold.,"alt = 100000, 150000
+mach =
+7,
+10,
+15
+cxo = -024, .023, -021,
+# Values for alt = 100000
+-027, .025, .024
+# Values for alt = 150000"
+3-23,158,1,0.8939,95.52,ch3-030,automatic_match,ch3-030,Fuzzy or exact source-text match at or above the review threshold.,"add cxo(alt,mach)
+alt =
+0
+mach =
+3,
+5 8
+7,
+9
+cxo = .020, .021, -019, -018,"
+3-23,158,2,0.8333,91.07,ch3-030,automatic_match,ch3-030,Fuzzy or exact source-text match at or above the review threshold.,"alt = 50000
+mach =
+38
+5 8
+7,
+9
+cxo = .021, .022., .021, -020"
+3-23,158,3,0.8298,100.0,ch3-030,automatic_match,ch3-030,Fuzzy or exact source-text match at or above the review threshold.,"alt = 100000
+mach =
+7,
+10,
+15
+cxo = .024, .023, .021"
+3-23,158,4,0.8298,100.0,ch3-030,automatic_match,ch3-030,Fuzzy or exact source-text match at or above the review threshold.,"alt = 150000
+mach =
+7,
+10,
+15
+cxo = .027, .025, .024"
+3-23,158,7,1.0,100.0,ch3-031,automatic_match,ch3-031,Fuzzy or exact source-text match at or above the review threshold.,"add ca(alt,mach,alpha)"
+3-23,158,9,0.8571,96.36,ch3-031,automatic_match,ch3-031,Fuzzy or exact source-text match at or above the review threshold.,"alt=10000,
+mach=5, alpha=0,2,4,6,8
+ca = .20 , .21, -23 , .26, .28"
+3-23,158,10,0.9455,92.31,ch3-031,automatic_match,ch3-031,Fuzzy or exact source-text match at or above the review threshold.,"alt=10000,
+mach=lO, alpha=0,2,4,6
+ca = .19, .19, -20, -22"
+3-23,158,11,0.9375,100.0,ch3-031,automatic_match,ch3-031,Fuzzy or exact source-text match at or above the review threshold.,"alt=10000,
+mach=15, alpha=0,2,4
+ca = .18, .19, .21"
+3-23,158,13,0.9455,81.82,ch3-031,automatic_match,ch3-031,Fuzzy or exact source-text match at or above the review threshold.,"alt=30000,
+mach=lO, alpha=0,2,4,6
+ca = .21, .23, -25, -29"
+3-23,158,14,0.9375,100.0,ch3-031,automatic_match,ch3-031,Fuzzy or exact source-text match at or above the review threshold.,"alt=30000,
+mach=15, alpha=0,2,4
+ca = .20, .21, .23"
+3-25,160,3,1.0,98.97,ch3-032,automatic_match,ch3-032,Fuzzy or exact source-text match at or above the review threshold.,"(recruits-thr)
+table thrust
+start
+add thr (tmark)"
+3-25,160,4,0.9697,100.0,ch3-032,automatic_match,ch3-032,Fuzzy or exact source-text match at or above the review threshold.,"tmark = 0.00,
+0.04,
+0.06,
+0.11,
+0.21,
+0.36
+0.65,
+0.84,
+0.96,
+1.16,
+1.36,
+1.49
+1.52,
+1.61,
+1.70,
+1.80,
+2.00,
+2.16
+99.0"
+3-25,160,8,0.9249,98.57,ch3-034,automatic_match,ch3-034,Fuzzy or exact source-text match at or above the review threshold.,"(stmi)
+table
+ca (mach) sref=5 -241
+mach = 0.00
+0.6
+0.72
+0.8
+0.85
+0.9
+1.02
+1.1
+1.18
+1.5
+1.75
+2.1
+2.9
+3.2
+4.0
+5.2
+6.2
+8.0
+ca
+= 0.97
+0.96
+0.99
+1.03
+1.1
+1.27
+1.93
+1.82
+1.72
+1.39
+1.2
+1.01
+0.74
+0.68
+0.62
+0.54
+0.47
+0.36"
+3-26,161,2,1.0,99.12,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"(orbus-mdt)
+table mdot units=lb/sec
+start
+add mdt (tmark)"
+3-26,161,3,1.0,97.22,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"0.06
+0.18
+0.30
+0.42
+0.54
+0.90
+1.50
+1.86
+1.98
+2.10
+2.22
+2.34
+3.00
+4.20
+5.40
+6.60
+7.80
+9.00
+10.20
+11.40
+12.60
+13 -80
+15.00
+16.20
+17.40
+18.60
+19.80
+21.00
+22 -20
+23.40
+24.60
+25.80
+27.00
+28.20
+29.40
+30.60
+31.80
+33.00
+34.20
+35.40
+36.60
+37.80
+39.00
+39.80
+40.40
+41.00"
+3-26,161,4,0.9868,100.0,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"tmark = -999.00
+0.08
+0.20
+0.32
+0.44
+0.56
+1.00
+1.60
+1.88
+2.00
+2.12
+2.24
+2.36
+3.20
+4.40
+5.60
+6.80
+8.00
+9.20
+10.40
+11.60
+12.80
+14.00
+15.20
+16.40
+17.60
+18.80
+20.00
+21.20
+22.40
+23.60
+24.80
+26.00
+27.20
+28.40
+29.60
+30.80
+32.00
+33.20
+34.40
+35.60
+36.80
+38.00
+39.20
+39.90
+40.50
+41.10"
+3-26,161,5,1.0,96.08,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"0.00
+0.10
+0.22
+0.34
+0.46
+0.58
+1.10
+1.70
+1.90
+2.02
+2.14
+2.26
+2 -38
+3.40
+4.60
+5.80
+7.00
+8.20
+9.40
+10.60
+11.80
+13.00
+14 -20
+15.40
+16.60
+17.80
+19.00
+20.20
+21.40
+22.60
+23.80
+25.00
+26.20
+27.40
+28.60
+29.80
+31.00
+32.20
+33 -40
+34.60
+35.80
+37.00
+38.20
+39.40
+40.00
+40.60
+41.20"
+3-26,161,6,0.9954,98.85,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"0.00
+0.12
+0 -24
+0.36
+0.48
+0.60
+1.20
+1.80
+1.92
+2.04
+2.16
+2.28
+2.40
+3.60
+4.80
+6.00
+7.20
+8.40
+9.60
+10.80
+12.00
+13.20
+14.40
+15.60
+16.80
+18.00
+19.20
+20.40
+21.60
+22.80
+24.00
+25.20
+26.40
+27.60
+28.80
+30.00
+31.20
+32.40
+33.60
+34.80
+36.00
+37.20
+38.40
+39.50
+40.10
+40.70
+41.30"
+3-26,161,7,1.0,95.87,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"0.02
+0.14
+0.26
+0.38
+0.50
+0.70
+1.30
+1.82
+1.94
+2.06
+2.18
+2.30
+2.60
+3.80
+5.00
+6.20
+7.40
+8.60
+9.80
+11.00
+12 -20
+13 -40
+14.60
+15.80
+17.00
+18.20
+19.40
+20.60
+21.80
+23.00
+24.20
+25.40
+26.60
+27.80
+29.00
+30.20
+31.40
+32.60
+33 -80
+35.00
+36.20
+37.40
+38.60
+39.60
+40.20
+40.80
+41.38"
+3-26,161,8,1.0,96.28,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"0.04
+0.16
+0.28
+0.40
+0.52
+0.80
+1.40
+1.84
+1.96
+2.08
+2.20
+2.32
+2.80
+4.00
+5.20
+6 -40
+7.60
+8.80
+10.00
+11.20
+12.40
+13.60
+14.80
+16.00
+17 -20
+18.40
+19.60
+20.80
+22.00
+23.20
+24.40
+25.60
+26.80
+28.00
+29.20
+30.40
+31.60
+32.80
+34.00
+35.20
+36.40
+37.60
+38.80
+39.70
+40.30
+40.90
+999.0"
+3-26,161,9,0.9661,100.0,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"mdt =
+0.00
+18.10
+19.46
+19.20
+19.09
+19.20
+19.96
+21.00
+21.43
+21.26
+21.09"
+3-26,161,10,1.0,100.0,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"0.00
+18.85
+19.42
+19.18
+19.07
+19.24
+20.13
+21.18
+21.40
+21.23
+21.06"
+3-26,161,11,1.0,95.08,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"0.50
+19.60
+19.38
+19.16
+19-09
+19.27
+20.30
+21.35
+21.37
+21.20
+21.03"
+3-26,161,12,1.0,100.0,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"11.12
+19.58
+19.33
+19.14
+19.12
+19.45
+20.48
+21.39
+21.34
+21.17
+21.00"
+3-26,161,13,1.0,100.0,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"16.38
+19.54
+19.29
+19.12
+19.15
+19.62
+20.65
+21.42
+21.31
+21.14
+20.98"
+3-26,161,14,1.0,83.19,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"17.35
+19-50
+19 -24
+19-10
+19.17
+19.79
+20.83
+21.46
+21.29
+21.12
+20.95"
+3-27,162,1,1.0,96.53,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"20.78
+20.69
+20.60
+20.43
+20.20
+19.83
+19 -37
+19.40
+20 -27
+21.16
+22.01
+22.79
+23.55
+24.25
+24.84
+25.43
+25.85
+26.13
+26.40
+26.63
+26.74
+26.82
+26.92
+26.95
+26.35
+25.73
+24.42
+23.15
+21.92
+20.65
+19.31
+18.03
+17.18
+3.99
+1.15"
+3-27,162,2,1.0,98.34,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"20.92
+20.75
+20.68
+20.58
+20.40
+20.16
+19.77
+19.24
+19.54
+20 -41
+21.30
+22.14
+22.92
+23.67
+24.35
+24.94
+25.51
+25.89
+26.18
+26.44
+26.66
+26.76
+26.83
+26.94
+26.90
+26.28
+25.53
+24.20
+22.94
+21.71
+20.43
+19.07
+17.82
+17.07
+3.11
+0.86"
+3-27,162,3,1.0,90.31,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"20.89
+20.75
+20.67
+20.55
+20.36
+20.10
+19.70
+19.12
+19.68
+20.56
+21.44
+22 -27
+23.05
+23 -79
+24 -44
+25.05
+25 -59
+25.94
+26.23
+26.48
+26.68
+26.77
+26.85
+26.95
+26.74
+26.22
+25.32
+23.99
+22 -73
+21.50
+20.21
+18.86
+17.62
+15-10
+2.57
+0.54"
+3-27,162,4,1.0,95.59,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"20.86
+20.74
+20.65
+20.53
+20.32
+20.04
+19.64
+19.05
+19.83
+20.71
+21.58
+22.40
+23.18
+23 -91
+24.54
+25.15
+25.66
+25.99
+26.27
+26.52
+26.70
+26.79
+26.86
+26.96
+26 -58
+26.14
+25.10
+23 -77
+22.54
+21.29
+19.99
+18.67
+17.52
+11.23
+2.08
+0.25"
+3-27,162,5,1.0,90.96,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"20.83
+20 -72
+20.63
+20.50
+20.28
+19.97
+19.56
+19.14
+19.97
+20.86
+21.73
+22.53
+23 -31
+24.03
+24.63
+25 -24
+25.73
+26.03
+26.32
+26.56
+26.71
+26.80
+26.88
+26.96
+26.49
+26.05
+24.87
+23.57
+22 -34
+21.08
+19 -77
+18.46
+17.41
+7.30
+1.76
+0.00"
+3-27,162,6,1.0,91.46,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"20.81
+20 -70
+20.61
+20.47
+20.24
+19-90
+19 -48
+19.27
+20.12
+21.01
+21.88
+22.66
+23.43
+24.14
+24 -74
+25.34
+25.79
+26.08
+26.36
+26.60
+26.72
+26.81
+26.90
+26.96
+26.42
+25.93
+24.65
+23 -36
+22.13
+20.87
+19.55
+18.25
+17.29
+5.30
+1.44
+0.00"
+3-27,162,7,1.0,100.0,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,csto mdmotor
+3-27,162,8,0.8077,100.0,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"#
+ACS roll control gas loss"
+3-27,162,9,0.8364,88.42,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"add
+macsr (tmark)
+tmark =
+-999.9
+-0.000001
+0.0
+macsr =
+0.
+0.
+1.0"
+3-27,162,10,1.0,92.31,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"41.5
+41.500001
+1.0
+0."
+3-27,162,11,1.0,87.5,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"999.9
+0."
+3-27,162,12,0.8889,100.0,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"div 41.5
+div 32.174"
+3-27,162,13,1.0,100.0,ch3-035,automatic_match,ch3-035,Fuzzy or exact source-text match at or above the review threshold.,"add mdmotor
+end"
+3-28,163,1,0.9722,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"#
+Aerodynamic axial force coefficient"
+3-28,163,2,0.8421,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"table ca
+sref = 2.50"
+3-28,163,4,1.0,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"add ca(alt,mach,alphat)"
+3-28,163,5,0.8906,98.51,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"alt =
+0.0
+math = 14.00
+alphat =
+0.000,
+1.000,
+2.000,
+3.000,
+4.000,
+5.000,"
+3-28,163,6,1.0,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"6.000,
+8.000,
+10.000,
+12.000,
+14.000,
+15.000,
+16.000,
+18.000,
+20.000,
+24.000,"
+3-28,163,7,0.9483,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"ca = 0.04556, 0.04673, 0.04990, 0.05401, 0.05877, 0.06408,"
+3-28,163,8,1.0,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"0.06987, 0.08267, 0.09685, 0.11260, 0.13030, 0.13991,
+0.15006, 0.17202, 0.19634, 0.25216,"
+3-28,163,9,0.9327,99.07,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"alt =
+0.0
+math = 16.00
+alphat =
+0.000,
+1.000,
+2.000,
+3.000,
+4.000,
+5.000,
+6.000,
+8.000,
+10.000,
+12.000,
+14.000,
+15.000,"
+3-28,163,10,1.0,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"16.000,
+18.000,
+20.000,
+24.000,"
+3-28,163,11,0.9795,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"ca = 0.04263, 0.04381, 0.04720, 0.05167, 0.05684, 0.06255,
+0.06864, 0.08179, 0.09642, 0.11307, 0.13210, 0.14253,
+0.15358, 0.17765, 0.20473, 0.26911,"
+3-28,163,12,0.9327,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"alt =
+0.0
+mach = 18.00
+alphat =
+0.000,
+1.000,
+2.000,
+3.000,
+4.000,
+5.000,
+6.000,
+8.000,
+10.000,
+12.000,
+14.000,
+15.000,"
+3-28,163,13,1.0,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"16.000,
+18.000,
+20.000,
+24.000,"
+3-28,163,14,0.9795,99.25,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"ca = 0.04051, 0.04169, 0.04508. 0.04955, 0.05472, 0.06043,
+0.06652, 0.07967, 0.09430, 0.11095, 0.12998, 0.14041,
+0.15146, 0.17553, 0.20261, 0.26699,"
+3-28,163,15,0.9352,99.11,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"alt =
+20000.0
+mach = 14.00
+alphat =
+0.000,
+1.000.
+2.000,
+3.000,
+4.000,
+5.000,
+6.000,
+8.000,
+10.000,
+12.000,
+14.000,
+15.000,"
+3-28,163,16,1.0,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"16.000,
+18.000,
+20.000,
+24.000,"
+3-28,163,17,0.9795,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"ca = 0.04620, 0.04738, 0.05054, 0.05465, 0.05942, 0.06473,
+0.07052, 0.08332, 0.09750, 0.11325, 0.13094, 0.14056,
+0.15071, 0.17266, 0.19699, 0.25280,"
+3-28,163,18,0.9352,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"alt =
+20000.0
+mach = 16.00
+alphat =
+0.000,
+1.000,
+2.000,
+3.000,
+4.000,
+5.000,
+6.000,
+8.000,
+10.000,
+12.000,
+14.000,
+15.000,"
+3-28,163,19,1.0,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"16.000,
+18.000,
+20.000,
+24.000,"
+3-28,163,20,0.966,98.5,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"ca = 0.04330, 0.04448, 0.04787, 0.05234, 0.05751, 0.06322,
+0.06931, 0.08247, 0.09710, 0.11374, 0.13278, 0.14320,
+0.15425, 0.17832, 0 -20540, 0.26978,"
+3-28,163,21,0.9352,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"alt =
+20000.0
+mach = 18.00
+alphat =
+0.000,
+1.000,
+2.000,
+3.000,
+4.000,
+5.000,
+6.000,
+8.000,
+10.000,
+12.000,
+14.000,
+15.000,"
+3-28,163,22,1.0,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"16.000,
+18.000,
+20.000,
+24.000,"
+3-28,163,23,0.9795,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"ca = 0.04121, 0.04239, 0.04578, 0.05025, 0.05542, 0.06112,
+0.06722, 0.08037, 0.09500, 0.11165, 0.13068, 0.14111,
+0.15216, 0.17623, 0.20331, 0.26769,"
+3-28,163,25,0.9489,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"alt =
+250000.0
+mach = 18.00
+alphat =
+0.000,
+1.000,
+2.000,
+3.000,
+4.000,
+5.000,
+6.000,
+8.000,
+10.000,
+12.000,
+14.000,
+15.000,
+16.000,
+18.000,
+20.000,
+24.000,"
+3-29,164,1,0.9795,100.0,ch3-036,automatic_match,ch3-036,Fuzzy or exact source-text match at or above the review threshold.,"ca = 0.50320, 0.50438, 0.50777, 0.51224, 0.51741, 0.52311,
+0.52921, 0.54236, 0.55699, 0.57364, 0.59267, 0.60310,
+0.61415, 0.63822, 0.66530, 0.72968,"
+4-2,167,15,0.8889,90.0,ch4-001,automatic_match,ch4-001,Fuzzy or exact source-text match at or above the review threshold.,"(pullout
+1"
+4-2,167,16,0.9565,100.0,ch4-001,automatic_match,ch4-001,Fuzzy or exact source-text match at or above the review threshold.,"*title
+Example of a maneuvering trajectory
+*atmos standard
+*earth wgs-84"
+4-2,167,17,0.9259,100.0,ch4-001,automatic_match,ch4-001,Fuzzy or exact source-text match at or above the review threshold.,*trajectory 1 rv start on 1
+4-2,167,18,0.9,88.78,ch4-001,automatic_match,ch4-001,Fuzzy or exact source-text match at or above the review threshold.,"*initial geodetic
+long=O . 0
+lat=O .O
+psi=90.0
+time=O . O
+alt=300000
+vel=18000
+gama=-3 0
+wt=1000.0"
+4-2,167,19,1.0,100.0,ch4-001,automatic_match,ch4-001,Fuzzy or exact source-text match at or above the review threshold.,*print time alt range mach vel gamgd dynprs alpha ca cn
+4-2,167,20,0.9623,98.18,ch4-001,automatic_match,ch4-001,Fuzzy or exact source-text match at or above the review threshold.,"*segment 1 Ballistic flight
+*aero ca=(rv,ca)
+cn=(rv-cn)"
+4-3,168,1,0.9583,100.0,ch4-001,automatic_match,ch4-001,Fuzzy or exact source-text match at or above the review threshold.,*when dynprs>1000 goto 2
+4-3,168,2,0.9732,96.58,ch4-001,automatic_match,ch4-001,Fuzzy or exact source-text match at or above the review threshold.,"*segment 2 Constant alpha pullout to level flight
+*aero ca=(rv-ca)
+cn=(rv-cn)
+*fly alphado. 0
+*when gamgd=O stop
+*end"
+4-3,168,7,0.9355,87.13,ch4-001,automatic_match,ch4-001,Fuzzy or exact source-text match at or above the review threshold.,"*initial geodetic
+long=O. 0
+lat=O. 0
+psi=90.0
+time=O. 0
+a1 t=3 00 0 0 0
+vel=18000
+gama=-3 0
+wt=1000.0"
+4-4,169,8,0.9394,100.0,ch4-003,automatic_match,ch4-003,Fuzzy or exact source-text match at or above the review threshold.,*trajectory 3 missile start on 23
+4-4,169,11,0.85,90.91,ch4-004,automatic_match,ch4-004,Fuzzy or exact source-text match at or above the review threshold.,"*initial geodetic
+time = 20,
+vel = 2.0e4,
+wt=345.5,
+gama = -24.3"
+4-4,169,14,0.8214,94.34,ch4-005,automatic_match,ch4-005,Fuzzy or exact source-text match at or above the review threshold.,"wt = 10,000
+# Incorrect value"
+4-5,170,5,0.8525,89.29,ch4-006,automatic_match,ch4-006,Fuzzy or exact source-text match at or above the review threshold.,"*initial geodetic
+time = 20,
+vel = 2.0e4,
+wt=surv-l,
+gama = -24.3"
+4-6,171,1,0.8375,98.44,ch4-007,automatic_match,ch4-007,Fuzzy or exact source-text match at or above the review threshold.,"+define alt-km
+alt-km = alt / 3280.84;
+# Altitude in km
+# Convert units of altitude"
+4-7,172,4,1.0,100.0,ch4-050,automatic_match,ch4-050,Fuzzy or exact source-text match at or above the review threshold.,*segment 23 2nd Stage Boost
+4-7,172,21,1.0,93.44,ch4-051,automatic_match,ch4-051,Fuzzy or exact source-text match at or above the review threshold.,"*segment 1 Rail Launch
+*integ dtprnt=0.10 dt=O.Ol
+*aero ca=(stagel-ca)
+cn=(stagel-cn)
+*prop thrust= (thrustl) mdot= (mdotl)"
+4-8,173,1,0.9903,98.1,ch4-051,automatic_match,ch4-051,Fuzzy or exact source-text match at or above the review threshold.,"*prop thrust=(t-recruits) mdot=(m-recruits)
+*rail launch cfstak0.15 cfslid=0.01
+*when plength=25.0 goto 3"
+4-9,174,8,1.0,100.0,ch4-008,automatic_match,ch4-008,Fuzzy or exact source-text match at or above the review threshold.,"*aero
+ca=0.0215
+cn=0.118
+sref=5.437"
+4-9,174,14,0.8286,87.88,ch4-009,automatic_match,ch4-009,Fuzzy or exact source-text match at or above the review threshold.,"*aero
+ca = (ca-clean)
+cn = (cn-clean)"
+4-10,175,3,1.0,100.0,ch4-010,automatic_match,ch4-010,Fuzzy or exact source-text match at or above the review threshold.,"*aero
+cl=(lift-x)
+cd=0.2351"
+4-10,175,10,1.0,98.39,ch4-011,automatic_match,ch4-011,Fuzzy or exact source-text match at or above the review threshold.,"*aero cd=(drg-model) cl=(lft-model)
+flaps=25,
+gear=O, sref=225.0"
+4-11,176,7,0.975,92.11,ch4-012,automatic_match,ch4-012,Fuzzy or exact source-text match at or above the review threshold.,"*constants type=3, tmultz1.2,
+mmult=l. 15"
+4-12,177,5,1.0,90.91,ch4-013,automatic_match,ch4-013,Fuzzy or exact source-text match at or above the review threshold.,"*cg
+cg=O.69"
+4-12,177,8,1.0,100.0,ch4-014,automatic_match,ch4-014,Fuzzy or exact source-text match at or above the review threshold.,"*cg
+cg=(wt-cg)
+config=2"
+4-15,180,2,0.881,74.07,ch4-016,manual_match,ch4-016,Captured intentionally inconsistent *fly example; comments and spacing are normalized in the transcription.,"*fly alphat = 5.0
+*fly betae = 5.0
+# Incorrect guidance rules
+# Angles are inconsistent"
+4-17,182,3,0.7903,85.19,ch4-018,automatic_match,ch4-018,Fuzzy or exact source-text match at or above the review threshold.,"*fly g m g d = 0
+*fly mach = 0.80
+*fly bankgd = 0
+*fly betae = 0"
+4-17,182,7,1.0,100.0,ch4-019,automatic_match,ch4-019,Fuzzy or exact source-text match at or above the review threshold.,*fly l/d-max
+4-17,182,9,0.8333,93.75,ch4-020,automatic_match,ch4-020,Fuzzy or exact source-text match at or above the review threshold.,*fly intercept = 3
+4-17,182,12,0.8125,92.86,ch4-021,automatic_match,ch4-021,Fuzzy or exact source-text match at or above the review threshold.,*fly propnav = 2
+4-18,183,4,0.8571,89.47,ch4-022,automatic_match,ch4-022,Fuzzy or exact source-text match at or above the review threshold.,*fly downria = 100000
+4-18,183,9,0.8088,86.67,ch4-023,automatic_match,ch4-023,Fuzzy or exact source-text match at or above the review threshold.,"*fly g m g d = 0
+*fly psigddt = 5.0
+*fly betae = 0
+*fly powerdt = 1000"
+4-18,183,13,0.7627,97.06,ch4-024,automatic_match,ch4-024,Fuzzy or exact source-text match at or above the review threshold.,"*fly alpha vrs tseg interp-2
+0.0
+0.0
+5.0
+1.0
+6.0
+2 .o
+5.0
+3.0
+0.0
+4.0"
+4-20,185,2,1.0,100.0,ch4-025,automatic_match,ch4-025,Fuzzy or exact source-text match at or above the review threshold.,"*increment
+wt=-325"
+4-22,187,4,0.9655,100.0,ch4-026,automatic_match,ch4-026,Fuzzy or exact source-text match at or above the review threshold.,*trajectory 2 Obj2 start on 1
+4-22,187,5,0.9189,100.0,ch4-026,automatic_match,ch4-026,Fuzzy or exact source-text match at or above the review threshold.,"*initial from trajectory 1, segment 6"
+4-22,187,6,0.9048,96.37,ch4-026,automatic_match,ch4-026,Fuzzy or exact source-text match at or above the review threshold.,"*segment 1 deployment
+*reset wt=50
+*increment velibx=5
+*increment dxbd.5 dyb=3.2 dzbz0.35
+*fly pitchi = *
+*fly yawi = *
+*fly rolli = *
+*when tseg>0 goto 2"
+4-23,188,12,1.0,100.0,ch4-027,automatic_match,ch4-027,Fuzzy or exact source-text match at or above the review threshold.,"*inertial platform alignment
+geocentric"
+4-23,188,15,1.0,97.25,ch4-028,automatic_match,ch4-028,Fuzzy or exact source-text match at or above the review threshold.,"*inertial platform lak28.8 long=-81.5
+alt=550 time=100"
+4-24,189,5,1.0,100.0,ch4-029,automatic_match,ch4-029,Fuzzy or exact source-text match at or above the review threshold.,*inertial platform body
+4-24,189,11,0.9494,93.67,ch4-030,automatic_match,ch4-030,Fuzzy or exact source-text match at or above the review threshold.,"*inertial ecfc eastx=0.7071 easty=0.7071 eastz=0.0
+downx=O . 0
+downy=O. 0
+downz=-l"
+4-25,190,3,1.0,88.89,ch4-031,automatic_match,ch4-031,Fuzzy or exact source-text match at or above the review threshold.,*integ dk0.25
+4-25,190,6,1.0,93.88,ch4-032,automatic_match,ch4-032,Fuzzy or exact source-text match at or above the review threshold.,"*integ dtprnt=0.5
+dk0.05"
+4-25,190,12,1.0,90.14,ch4-033,automatic_match,ch4-033,Fuzzy or exact source-text match at or above the review threshold.,*integ dtprnt=l.O dk0.20 dtguid=5.0
+4-26,191,4,1.0,96.15,ch4-034,automatic_match,ch4-034,Fuzzy or exact source-text match at or above the review threshold.,*limits alpha<2O alphas-10
+4-26,191,7,1.0,94.49,ch4-035,automatic_match,ch4-035,Fuzzy or exact source-text match at or above the review threshold.,"*limits bankgd>-60 bankgdx60 alpha>-15 alpha45.0
+beta>-15
+betad5"
+4-27,192,6,1.0,79.65,ch4-036,automatic_match,ch4-036,Fuzzy or exact source-text match at or above the review threshold.,"*prop
+thrusk250
+thr,units=kn
+mdot=l20.0
+mdt-units=kg/sec"
+4-28,193,2,1.0,97.44,ch4-037,automatic_match,ch4-037,Fuzzy or exact source-text match at or above the review threshold.,"*prop
+thrust=(thr-recruits)
+mdot(mdt-recruits)
+nrecruitsz2"
+4-28,193,7,0.98,81.25,ch4-038,automatic_match,ch4-038,Fuzzy or exact source-text match at or above the review threshold.,"*prop thrust=(thr-flOOx) mdot=(mdt-flOOx)
+epl=lO .O"
+4-29,194,4,1.0,95.77,ch4-039,automatic_match,ch4-039,Fuzzy or exact source-text match at or above the review threshold.,"*rail launch cfstak0.15
+cfslid=0.01"
+4-29,194,8,1.0,93.94,ch4-040,automatic_match,ch4-040,Fuzzy or exact source-text match at or above the review threshold.,frail sled cfstak0.17 cfslid=0.02
+4-30,195,4,1.0,96.3,ch4-041,automatic_match,ch4-041,Fuzzy or exact source-text match at or above the review threshold.,*reset tmark=O
+4-30,195,7,0.9286,100.0,ch4-042,automatic_match,ch4-042,Fuzzy or exact source-text match at or above the review threshold.,*reset wt=1100
+4-31,196,5,0.9565,100.0,ch4-043,automatic_match,ch4-043,Fuzzy or exact source-text match at or above the review threshold.,*when alt<200000 goto 4
+4-31,196,8,0.8966,89.29,ch4-044,automatic_match,ch4-044,Fuzzy or exact source-text match at or above the review threshold.,*when alpha = alphpl/d goto 2
+4-31,196,12,0.84,91.3,ch4-045,automatic_match,ch4-045,Fuzzy or exact source-text match at or above the review threshold.,*when mach[3] > 4 goto 21
+4-32,197,5,1.0,100.0,ch4-047,automatic_match,ch4-047,Fuzzy or exact source-text match at or above the review threshold.,*when time=65 stop
+4-32,197,10,0.9535,100.0,ch4-048,automatic_match,ch4-048,Fuzzy or exact source-text match at or above the review threshold.,"*when tmark>25 goto 6
+*when alphat>5 goto 11"
+4-32,197,14,0.9535,97.73,ch4-049,automatic_match,ch4-049,Fuzzy or exact source-text match at or above the review threshold.,"*when gamgd<O goto 4
+*when tseg>1000 goto 10"
+4-33,198,16,0.9062,100.0,ch4-069,automatic_match,ch4-069,Fuzzy or exact source-text match at or above the review threshold.,*trajectory 2 target start on 31
+4-33,198,21,0.8352,98.92,ch4-070,automatic_match,ch4-070,Fuzzy or exact source-text match at or above the review threshold.,"*trajectory 1 missile start on 1
+*initial ...
+*print . . .
+*segment 1 First segment definition"
+4-33,198,22,0.7879,100.0,ch4-070,automatic_match,ch4-070,Fuzzy or exact source-text match at or above the review threshold.,"*segment 2 Second segment definition
+...
+...
+*trajectory 2 target ..."
+4-35,200,7,0.8108,100.0,ch4-052,automatic_match,ch4-052,Fuzzy or exact source-text match at or above the review threshold.,"*define alt-km
+alt-km = alt / 3280.84;"
+4-36,201,2,0.9,99.1,ch4-053,automatic_match,ch4-053,Fuzzy or exact source-text match at or above the review threshold.,"*define stag-heat
+rnose = 1.0 / 12.0;
+stag-heat
+= (17600.0/sqrt(rnose))*sqrt(rho/0.0023769)
+* (ve1/26000.0) ^3.15;"
+4-37,202,5,0.95,98.33,ch4-054,automatic_match,ch4-054,Fuzzy or exact source-text match at or above the review threshold.,"*define special
+special = (rho/0.0023769)*table(special~tbl);"
+4-37,202,8,0.8,98.28,ch4-055,automatic_match,ch4-055,Fuzzy or exact source-text match at or above the review threshold.,"*define nx-max
+nx-max = max (nx) ;
+if (nx-max < 0) nx-max = 0;"
+4-37,202,11,0.7629,97.92,ch4-056,automatic_match,ch4-056,Fuzzy or exact source-text match at or above the review threshold.,"*define new-var
+new-var = 0;
+if (time > 20)
+{
+ratio = pres / 2116.2;
+new-var = ratio * table(tb1,id);
+1"
+4-37,202,14,0.7945,98.63,ch4-057,automatic_match,ch4-057,Fuzzy or exact source-text match at or above the review threshold.,"*define var
+if (mach > 1.0)
+x = 1 + mach*mach;
+var = sqrt (x) * table(outx1;"
+4-38,203,2,0.7619,94.74,ch4-057,automatic_match,ch4-057,Fuzzy or exact source-text match at or above the review threshold.,"I
+var = table (outy) ;"
+4-38,203,11,0.7581,98.25,ch4-058,automatic_match,ch4-058,Fuzzy or exact source-text match at or above the review threshold.,"*define integral qmin=-0.10
+if (dynprs > 100 I I vel < 1000) {"
+4-38,203,12,0.7273,100.0,ch4-058,automatic_match,ch4-058,Fuzzy or exact source-text match at or above the review threshold.,qmin = 0.0;
+4-38,203,14,0.7667,90.2,ch4-058,automatic_match,ch4-058,Fuzzy or exact source-text match at or above the review threshold.,. W i n = (100.0 - dynprs)”2;
+4-39,204,7,0.9062,93.75,ch4-059,automatic_match,ch4-059,Fuzzy or exact source-text match at or above the review threshold.,*dwn/crs latgd=lO long=95 azm=45
+4-40,205,4,0.913,93.18,ch4-060,automatic_match,ch4-060,Fuzzy or exact source-text match at or above the review threshold.,"*file tra j . dat
+time alt long latgd range vel"
+4-40,205,7,0.9741,96.0,ch4-061,automatic_match,ch4-061,Fuzzy or exact source-text match at or above the review threshold.,"Alt
+300000 -0
+294835.2
+289665.1
+284489.8
+279309.3
+274123.5
+268932.4
+263736.2
+258534.7
+253328.0
+248116.2
+242899.1
+237676.9
+232449.5"
+4-40,205,8,0.9322,95.28,ch4-061,automatic_match,ch4-061,Fuzzy or exact source-text match at or above the review threshold.,"Long
+20 .ooooo
+20.01991
+20.03982
+20.05975
+.
+20.07968
+20.09962
+20.11958
+20.13954
+20.15951
+20.17950
+20.19949
+20.21949
+20.23950
+20.25952"
+4-40,205,10,0.9667,77.06,ch4-061,automatic_match,ch4-061,Fuzzy or exact source-text match at or above the review threshold.,"Vel
+18000 -00
+18008.93
+18017 -86
+18026.78
+18035.69
+18044.58
+18053.45
+18062.31
+18071.13
+18079 -91
+18088.65
+18097 -33
+18105 -96
+18114.52"
+4-40,205,11,1.0,91.53,ch4-061,automatic_match,ch4-061,Fuzzy or exact source-text match at or above the review threshold.,"Range
+0.000
+1.196
+2.394
+3 -591
+4.789
+5.988
+7.188
+8.388
+9.588
+10.789
+11.991
+13.193
+14 -396
+15.599"
+4-42,207,4,1.0,96.67,ch4-062,automatic_match,ch4-062,Fuzzy or exact source-text match at or above the review threshold.,"*iip iip,beta=550
+iip_alt=1000"
+4-43,208,21,0.9407,95.14,ch4-063,automatic_match,ch4-063,Fuzzy or exact source-text match at or above the review threshold.,"*initial
+alt=30000
+long=O
+lat=45
+# Position vector variables
+vek750
+gamma=O
+psi=90
+# Velocity vector variables
+wt=2 0 0 0
+time=O
+# Other variables"
+4-45,210,1,0.7919,90.44,ch4-064,automatic_match,ch4-064,Fuzzy or exact source-text match at or above the review threshold.,"*initial ecfc
+x = 19099345.2
+y = 9974312.7
+z = 6489105.4
+# Position
+xdt = -173.973
+ydt = 10327.52 zdt = 26425.9
+# Velocity
+time = 769.35
+wt = 1053.9
+# Time and Wt
+t-epoch = -1045.2
+omega-0 = 25.3
+# ECFC to ECIC"
+4-45,210,5,1.0,100.0,ch4-065,automatic_match,ch4-065,Fuzzy or exact source-text match at or above the review threshold.,"*initial from segment 6, trajectory 1"
+4-46,211,4,1.0,100.0,ch4-066,automatic_match,ch4-066,Fuzzy or exact source-text match at or above the review threshold.,*print time alt range mach gamgd dynprs
+4-46,211,7,0.9604,99.17,ch4-067,automatic_match,ch4-067,Fuzzy or exact source-text match at or above the review threshold.,"Example of a ballistic RV trajectory
+Problem lmarv) /
+1976 US Standard Atmosphere / Non-rotating WGS-84 Earth
+Trajectory for vehicle:
+rv
+gama = -35
+Time
+A1 t
+Range
+Hach
+Gamgd
+Dynprs
+0.000
+300000.0
+0.000
+19.9642
+-35.000
+0.829
+0.500
+294835.2
+1.196
+19.9741
+-35.021
+1.100
+1.000
+289665.1
+2.394
+19.9840
+-35.042
+1.457
+1.500
+284489.8
+3.591
+19.9939
+-35.063
+1.932
+2.000
+279309.3
+4.789
+19.9653
+-35.083
+2.537
+2.500
+274123.5
+5.988
+19.8147
+-35.104
+3.295
+3.000
+268932.4
+7.188
+19.6670
+-35.125
+4.263"
+4-46,211,8,1.0,100.0,ch4-067,automatic_match,ch4-067,Fuzzy or exact source-text match at or above the review threshold.,"3.500
+263736.2
+8.388
+19.5225
+-35.146
+5.495"
+4-46,211,9,1.0,100.0,ch4-067,automatic_match,ch4-067,Fuzzy or exact source-text match at or above the review threshold.,"4.000
+258534.7
+9.588
+19.3812
+-35.167
+7.059
+4.500
+253328.0
+10.789
+19.2429
+-35.187
+9.036"
+4-46,211,10,1.0,100.0,ch4-067,automatic_match,ch4-067,Fuzzy or exact source-text match at or above the review threshold.,"5.000
+248116.2
+11.991
+19.1075
+-35.208
+11.528"
+4-46,211,11,1.0,100.0,ch4-067,automatic_match,ch4-067,Fuzzy or exact source-text match at or above the review threshold.,"5.500
+242899.1
+13.193
+18.9750
+-35.229
+14.660
+6.000
+237676.9
+14.396
+18.8451
+-35.249
+18.584"
+4-47,212,5,1.0,97.09,ch4-068,automatic_match,ch4-068,Fuzzy or exact source-text match at or above the review threshold.,"*tangent latgd=21.982 long=-159.759
+alk87.2 azm=140"
+4-50,215,6,0.8889,100.0,ch4-071,automatic_match,ch4-071,Fuzzy or exact source-text match at or above the review threshold.,*atmos 20
+4-52,217,6,0.8302,94.34,ch4-074,automatic_match,ch4-074,Fuzzy or exact source-text match at or above the review threshold.,"*define del-alt
+del-alt = (alt[ll - alt[21) / 3280.84;"
+4-53,218,4,0.8438,90.62,ch4-075,automatic_match,ch4-075,Fuzzy or exact source-text match at or above the review threshold.,"*define relrange
+dx = (east[21 - east[ll)""2;
+dy = (northfa1 - north[ll)""2;
+rel-range = sqrt(dx+dy);"
+4-54,219,8,1.0,97.87,ch4-076,automatic_match,ch4-076,Fuzzy or exact source-text match at or above the review threshold.,*earth spherical omega=O
+4-55,220,1,0.9048,97.56,ch4-077,automatic_match,ch4-077,Fuzzy or exact source-text match at or above the review threshold.,*earth wgs-84 omega=O
+4-58,223,5,0.9556,96.63,ch4-078,automatic_match,ch4-078,Fuzzy or exact source-text match at or above the review threshold.,"*egs tra j . dbf
+time alt range vel mach long latgd gamgd
+psigd dynprs alpha nx ny nz ntotal"
+4-58,223,7,1.0,100.0,ch4-079,automatic_match,ch4-079,Fuzzy or exact source-text match at or above the review threshold.,"(deg)
+(deg)"
+4-58,223,8,0.7749,94.65,ch4-079,automatic_match,ch4-079,Fuzzy or exact source-text match at or above the review threshold.,"*EGS DATA FILE
+*TITLE
+Example of a ballistic RV trajectory
+*SmBOLS
+gama I
+gama
+trajectory = Trajectory Number
+time = Time bec)
+alt = Altitude (ft)
+range = Range [nm)
+vel = Velocity (ftlsec)
+mach = Mach Number
+long = Longitude (deg)
+latgd = Geodetic Latitude (degl
+g a w d = Geodetic Flight Path Angle
+psigd = Oeodetic Heading Angle
+dynprs = Dynamic Pressure (slugs1
+alpha = Angle of Attack (deg)
+nx = Body x-axis Load Factor (9)
+nY = Body Y-aXlS G's"
+4-58,223,10,0.7652,100.0,ch4-079,automatic_match,ch4-079,Fuzzy or exact source-text match at or above the review threshold.,"VARIABLES
+LEVEL
+1 gama
+LEVEL
+2
+trajectory
+LEVEL
+3
+time alt range vel mach long
+latgd gamgd psigd dynprs alpha nx
+ny nz ntotal"
+4-58,223,11,1.0,100.0,ch4-079,automatic_match,ch4-079,Fuzzy or exact source-text match at or above the review threshold.,*TABLE
+4-59,224,6,0.9048,95.24,ch4-080,automatic_match,ch4-080,Fuzzy or exact source-text match at or above the review threshold.,*egs summary file-dbf
+4-60,225,5,1.0,82.09,ch4-081,automatic_match,ch4-081,Fuzzy or exact source-text match at or above the review threshold.,"*file compare.dat
+timelll alt[lI
+alt[21 alt[31 vel[ll
+ve1[21
+ve1[3]"
+4-60,225,7,1.0,66.67,ch4-082,manual_match,ch4-082,Captured output table; PDF text extraction split the printed table vertically by column.,"Vel111
+9000.00
+8992.80
+8985.61
+8978.43
+8971.24
+8964.07
+8956.89
+8949.72
+8942.56
+8935.40
+8928.24
+8921.09
+8913.94
+8306.80
+8899.66
+8892.53
+8885.40
+8878.27
+8871.15
+8864.04
+8856.93"
+4-60,225,8,1.0,71.26,ch4-082,manual_match,ch4-082,Captured output table; PDF text extraction split the printed table vertically by column.,"AltI31
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0
+90000.0"
+4-60,225,9,1.0,70.11,ch4-082,manual_match,ch4-082,Captured output table; PDF text extraction split the printed table vertically by column.,"Alt(21
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0
+80000.0"
+4-60,225,10,0.9826,64.68,ch4-082,manual_match,ch4-082,Captured output table; PDF text extraction split the printed table vertically by column.,"Time I1 1
+0.000
+0.500
+1.000
+1.500
+2.000
+2.500
+3.000
+3.500
+4.000
+4.500
+5.000
+5.500
+6.000
+6.500
+7.000
+7.500
+8.000
+8.500
+9.000
+9.500
+10.000"
+4-60,225,11,1.0,70.26,ch4-082,manual_match,ch4-082,Captured output table; PDF text extraction split the printed table vertically by column.,"Alttll
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0
+100000.0"
+4-60,225,12,1.0,66.67,ch4-082,manual_match,ch4-082,Captured output table; PDF text extraction split the printed table vertically by column.,"Velt31
+8000.00
+7991.04
+7982.09
+7973.14
+7964.21
+7955.29
+7946.39
+7937.49
+7928.60
+7919.73
+7910.86
+7902.00
+7893.16
+7884.33
+7875.51
+7866.69
+7857.88
+7849.08
+7840.28
+7831.49
+7822.70"
+4-60,225,13,0.9935,66.41,ch4-082,manual_match,ch4-082,Captured output table; PDF text extraction split the printed table vertically by column.,"Vel I21
+7000.00
+6987.89
+6975.80
+6963.73
+6951.68
+6939.65
+6927.64
+6915.65
+6903.67
+6891.72
+6879.78
+6867.86
+6855.97
+6844.09
+6832.23
+6820.39
+6808.56
+6796.76
+6784.98
+6773.21
+6761.47"
+4-62,227,11,0.7895,88.89,ch4-083,automatic_match,ch4-083,Fuzzy or exact source-text match at or above the review threshold.,*fly alpha = opta-2
+4-63,228,3,0.971,100.0,ch4-084,automatic_match,ch4-084,Fuzzy or exact source-text match at or above the review threshold.,"*fly alpha vrs tseg
+opta-1
+0.0
+opta-2
+5.0
+opta-3
+10.0
+opta-4
+15.0
+opta-5
+opta-6"
+4-63,228,4,1.0,100.0,ch4-084,automatic_match,ch4-084,Fuzzy or exact source-text match at or above the review threshold.,*when tseg>opta-6 stop
+4-63,228,9,0.94,100.0,ch4-085,automatic_match,ch4-085,Fuzzy or exact source-text match at or above the review threshold.,"*optimize a for vel=max on segment 6, trajectory 1"
+4-63,228,13,1.0,99.08,ch4-086,automatic_match,ch4-086,Fuzzy or exact source-text match at or above the review threshold.,"constrain vel=3000
+constrain gamgd=-80
+constrain qmin<O"
+4-64,229,4,0.8298,100.0,ch4-087,automatic_match,ch4-087,Fuzzy or exact source-text match at or above the review threshold.,"constrain vel on segment 3, trajectory 2 = 3000"
+4-64,229,12,0.9524,95.0,ch4-088,automatic_match,ch4-088,Fuzzy or exact source-text match at or above the review threshold.,constrain alt=alt [23
+4-65,230,2,0.9167,100.0,ch4-089,automatic_match,ch4-089,Fuzzy or exact source-text match at or above the review threshold.,"constrain alt on segment 6, trajectory 1
+= alt on segment 4, trajectory 3"
+4-65,230,5,0.9057,94.34,ch4-090,automatic_match,ch4-090,Fuzzy or exact source-text match at or above the review threshold.,constrain east[21 on segment 4 = east111 on segment 7
+4-65,230,7,0.92,99.32,ch4-090,automatic_match,ch4-090,Fuzzy or exact source-text match at or above the review threshold.,"constraint east on segment 4, trajectory 2
+= east on segment 7, trajectory 1"
+4-65,230,13,0.9153,96.55,ch4-091,automatic_match,ch4-091,Fuzzy or exact source-text match at or above the review threshold.,"constrain vel on segment 11 = ve1[31 on segment 4, ref=1000"
+4-67,232,2,0.9643,100.0,ch4-092,automatic_match,ch4-092,Fuzzy or exact source-text match at or above the review threshold.,"*fly alpha vrs
+opta-1
+opta-2
+opta-3
+opta-4
+opta-5
+opta-6
+opta-7"
+4-67,232,3,1.0,100.0,ch4-092,automatic_match,ch4-092,Fuzzy or exact source-text match at or above the review threshold.,"tseg
+0
+20
+40
+60
+80
+100
+opta-8"
+4-67,232,4,1.0,100.0,ch4-092,automatic_match,ch4-092,Fuzzy or exact source-text match at or above the review threshold.,*when tseg>opta-8 stop
+4-68,233,10,1.0,94.51,ch4-094,automatic_match,ch4-094,Fuzzy or exact source-text match at or above the review threshold.,"par-24000,
+10-2=-10000, hi-2=100000, ref-2=10000"
+4-69,234,1,1.0,100.0,ch4-095,automatic_match,ch4-095,Fuzzy or exact source-text match at or above the review threshold.,"*optimize a for range=max on segment 12, trajectory 1"
+4-69,234,2,1.0,100.0,ch4-095,automatic_match,ch4-095,Fuzzy or exact source-text match at or above the review threshold.,"constrain vel=4000
+constrain gamgd=-75"
+4-69,234,3,0.9655,77.42,ch4-095,automatic_match,ch4-095,Fuzzy or exact source-text match at or above the review threshold.,"f ref =lo0
+maxitr=40
+told. Oe-7"
+4-69,234,4,0.9764,90.71,ch4-095,automatic_match,ch4-095,Fuzzy or exact source-text match at or above the review threshold.,"par-k9.9
+lo-1-15
+hi-1=15
+par-2 =8.5
+10-2-15
+. hi-2=15
+par-3 =5.0
+10-3 -15
+hi-3 =15
+par-4=1. 0
+10-4-15
+hi-4=15
+par-5=65.0
+lo-5=51.0
+hi-5=300.0"
+4-71,236,8,0.963,100.0,ch4-097,automatic_match,ch4-097,Fuzzy or exact source-text match at or above the review threshold.,"*fly alpha vrs tseg
+opta-1
+0
+opta-2
+10
+opta-3
+20
+opta-4
+opta-5"
+4-72,237,6,1.0,76.92,ch4-098,automatic_match,ch4-098,Fuzzy or exact source-text match at or above the review threshold.,"*print
+time111 alttll alt121 rangell1 ranget21"
+4-72,237,8,0.8951,94.94,ch4-099,automatic_match,ch4-099,Fuzzy or exact source-text match at or above the review threshold.,"Sandia National
+Laboratories
+(TAOS -Version 96.0)
+Trajectory Analysis L optimization software
+....................................................................................
+Example of two vehicles relative to each other
+Problem (two) I
+1976 US Standard Atmosphere I Non-rotating WS-84 Earth
+Trajectory for vehicle: vehicle-1
+Time [ 1 I
+Alt[l]
+Alt[21
+RMge[l]
+RMge[2]
+0.000
+100000.0
+80000.0
+0.000
+0.000
+0.500
+100000.0
+80000.0
+0.737
+0.573
+1.000
+100000.0
+80000.0
+1.473
+1.146
+1.500
+100000.0
+80000.0
+2.209
+1.717
+2.000
+100000.0
+80000.0
+2.944
+2.287
+'
+2.500
+100000.0
+80000.0
+3.678
+2.857
+3.000
+100000.0
+80000.0
+4.412
+3.425
+3.500
+100000.0
+80000.0
+5.145
+3.993
+4.000
+100000.0
+80000.0
+5.878
+4.559
+4.500
+100000.0
+80000.0
+6.610
+5.124
+5.000
+100000.0
+80000.0
+7.341
+5.689
+5.500
+100000.0
+80000.0
+.
+8.072
+6.252
+6.000
+100000.0
+80000.0
+8.803
+6.815
+6.500
+100000.0
+80000.0
+9.532
+7.376
+7.000
+100000.0
+80000.0
+10.262
+7.937
+7.500
+100000.0
+80000.0
+10.930
+8.497
+8.000
+100000.0
+80000.0
+11.718
+9.055
+8.500
+100000.0
+80000.0
+12.446
+9.613
+9.000
+100000.0
+80000.0
+13.172
+10.170
+9.500
+100000.0
+80000.0
+13.899
+10.725
+10.000
+100000.0
+80000.0
+14.624
+11.280"
+4-74,239,5,0.9667,100.0,ch4-100,automatic_match,ch4-100,Fuzzy or exact source-text match at or above the review threshold.,"*radar 1 station-x alt=539.24, long=-91.43562,
+latgd=30.02347"
+4-75,240,1,1.0,94.05,ch4-101,automatic_match,ch4-101,Fuzzy or exact source-text match at or above the review threshold.,"*radar 2 station>
+altd12.4 long=65.345 latgdd2.435
+wgs-72 distn=25.5 distez15.2 distd=-10.3"
+4-76,241,6,0.8421,88.89,ch4-102,automatic_match,ch4-102,Fuzzy or exact source-text match at or above the review threshold.,*fly alpha = srch-1
+4-76,241,10,0.9527,89.7,ch4-103,automatic_match,ch4-103,Fuzzy or exact source-text match at or above the review threshold.,"*search 1 vary alpha until alt=30000 on segment 3,trajectory 1
+~ 1 0 ~ 0 . 5 xhkl0.0
+xesk5.0
+dx=l. 0
+tol=O .001
+xrefd.0 fref=10000
+maxitr=20
+prink1
+integ=O"
+4-77,242,4,0.9186,100.0,ch4-104,automatic_match,ch4-104,Fuzzy or exact source-text match at or above the review threshold.,"*search 1 vary pitch-rate until pitchi on segment 2
+= pitchi on segment 3, trajectory 2"
+4-77,242,7,0.9118,97.1,ch4-105,automatic_match,ch4-105,Fuzzy or exact source-text match at or above the review threshold.,"*search 1 vary weight until alt[ll on segment 3
+= alt[2] on segment 5"
+4-80,245,5,0.9333,96.55,ch4-106,automatic_match,ch4-106,Fuzzy or exact source-text match at or above the review threshold.,"75 .OOO
+2000.0
+5979.9
+560694
+178.38
+75 -000
+3000.0
+4975.7
+390018
+131.45
+75.000
+4000.0
+4252.3
+285922
+101.79
+75.000
+5000.0
+3702.0
+216962
+81.42
+75.000
+6000.0
+3270.9
+168834
+66.64"
+4-80,245,6,0.8021,88.24,ch4-106,automatic_match,ch4-106,Fuzzy or exact source-text match at or above the review threshold.,"80 -000
+2000.0
+6042.7
+652736
+133.66
+80 -000
+3000.0
+5022.0
+460668
+99.95
+80.000
+4000.0
+4282.3
+342741
+78.58
+80.000
+5000.0
+3716.8
+264181
+63.91
+80.000
+6000.0
+3270.7
+209022
+53.31
+Figure 4-12. Summary Variable Printout."
+4-80,245,10,0.9412,100.0,ch4-107,automatic_match,ch4-107,Fuzzy or exact source-text match at or above the review threshold.,"*summarize vel-bo
+add vel on segment 3, trajectory 1"
+4-81,246,3,0.7632,86.96,ch4-108,automatic_match,ch4-108,Fuzzy or exact source-text match at or above the review threshold.,"*summarize max-alt
+add max(a1t [ l l )"
+4-81,246,4,0.9773,100.0,ch4-108,automatic_match,ch4-108,Fuzzy or exact source-text match at or above the review threshold.,"*summarize range
+add last(range) trajectory 1"
+4-82,247,2,0.9851,91.3,ch4-109,automatic_match,ch4-109,Fuzzy or exact source-text match at or above the review threshold.,"*summarize delta-rng
+add last (rangell1
+1
+sub last(range[21)
+mult 1.852"
+4-82,247,5,1.0,100.0,ch4-110,automatic_match,ch4-110,Fuzzy or exact source-text match at or above the review threshold.,"*summarize delta-alt
+add alt on segment 4, trajectory 1
+sub alt on segment 11, trajectory 2
+div 3280.84"
+4-83,248,4,0.9737,91.14,ch4-111,automatic_match,ch4-111,Fuzzy or exact source-text match at or above the review threshold.,"*initial
+alt=surv-1 lat=O long=O wk1200"
+4-83,248,8,0.7561,92.86,ch4-112,automatic_match,ch4-112,Fuzzy or exact source-text match at or above the review threshold.,"*survey
+1 alto 10=40000 hi=80000 inc=20000"
+4-84,249,5,0.7297,94.59,ch4-113,automatic_match,ch4-113,Fuzzy or exact source-text match at or above the review threshold.,"*survey 1 alto va1s=30000,60000,75000"
+4-84,249,8,0.8136,86.96,ch4-114,automatic_match,ch4-114,Fuzzy or exact source-text match at or above the review threshold.,"*survey
+1 alto 10=40000, hi=80000, inc=20000
+vals=35OOO,45OOO"
+4-85,250,4,0.9407,100.0,ch4-115,automatic_match,ch4-115,Fuzzy or exact source-text match at or above the review threshold.,"*title
+This is the first line of the title
+this is the second line of the title
+and so on, until a data block name is hit"
+4-85,250,5,1.0,100.0,ch4-115,automatic_match,ch4-115,Fuzzy or exact source-text match at or above the review threshold.,*atmos standard
+4-87,252,7,1.0,33.33,ch4-116,not_a_snippet,,"This is the deg/min unit cell in Table 4-24, not a TAOS input snippet. The allowable-unit table is retained in grammar-reference metadata.",degmt.
+4-87,252,21,0.9444,100.0,ch4-116,automatic_match,ch4-116,Fuzzy or exact source-text match at or above the review threshold.,*units/fmt sref in
+4-89,254,13,1.0,98.88,ch4-118,automatic_match,ch4-118,Fuzzy or exact source-text match at or above the review threshold.,*wind geodetic windv=(winds) windh=90 windd=O
+4-92,257,6,1.0,92.59,ch4-119,automatic_match,ch4-119,Fuzzy or exact source-text match at or above the review threshold.,"table
+ca (mach)
+srefz2.1817"
+4-92,257,7,0.9524,100.0,ch4-119,automatic_match,ch4-119,Fuzzy or exact source-text match at or above the review threshold.,"mach
+=
+6.000, 8.000, 10.000, 12.000, 14.000,"
+4-92,257,8,0.9692,100.0,ch4-119,automatic_match,ch4-119,Fuzzy or exact source-text match at or above the review threshold.,"ca
+= 0.0950, 0.0742, 0.0643, 0.0587, 0.0553,
+16.000, 18.000, 20.000"
+4-92,257,9,1.0,100.0,ch4-119,automatic_match,ch4-119,Fuzzy or exact source-text match at or above the review threshold.,"0.0528, 0.0513, 0.0503"
+4-92,257,12,1.0,100.0,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,(ballistic)
+4-92,257,13,1.0,100.0,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,"*title
+Ballistic reentry trajectories"
+4-92,257,14,1.0,97.3,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,"*atmos standard
+*earth wgs-84 omega=O"
+4-92,257,15,0.9259,100.0,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,*trajectory 1 RV start on 1
+4-92,257,16,0.9355,74.26,ch4-120,manual_match,ch4-120,Captured inside the complete Ballistic Reentry problem file; source OCR inserts spaces in numeric tokens.,"*initial geodetic
+long=O . 0
+lat=O .O
+alt=3 00000
+vel =surv-2
+psi=90.0
+gama=surv-1
+time=O .O
+wt=550.0"
+4-92,257,17,1.0,100.0,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,*print time alt range vel dynprs nx
+4-92,257,18,1.0,93.98,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,"*segment 1 Ballistic
+*integ dtprnt=0.50 dt=O.lO
+*aero ca=(ca-ex-l)
+*when alt<O stop"
+4-92,257,19,0.9481,97.53,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,"*survey 1 gentry
+vals=-20,-25,-30,-35
+*survey 2
+ventry
+10=15000 hi=18000 inc=1000"
+4-93,258,1,0.8684,87.18,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,"*summarize max-q
+add max (dynprs [ 11 )"
+4-93,258,2,1.0,94.29,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,"*summarize max-g
+add min(nx[ll)
+neg"
+4-93,258,3,1.0,97.56,ch4-120,automatic_match,ch4-120,Fuzzy or exact source-text match at or above the review threshold.,"*egs exl.dbf
+time alt range vel dynprs nx"
+4-94,259,7,1.0,100.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,Ballistic reentry trajectories
+4-94,259,8,0.9079,98.65,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,"Problem (ballistic) I
+1976 US Standard Atmosphere I Non-rotating WGS-84 Earth"
+4-94,259,9,0.72,96.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,Trajectory for vehicle: N
+4-94,259,10,0.7857,100.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,ventry = 15000
+4-94,259,11,0.75,100.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,gentry = -35
+4-94,259,17,1.0,83.33,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,DVnprs
+4-94,259,18,1.0,97.9,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,"15000.00
+15008.98
+15017.97
+15026.96
+15035.97
+15044.99
+15054 -02
+15063.06
+15072.10
+15081.16
+15090.22
+15099.29
+15108.36
+15117.44
+15126.53
+15135.61
+15144.70
+15153.79
+15162.87
+15171.95
+15181.02
+15190.08
+15199.12
+15208.14
+15217.14
+15226.10
+15235.01"
+4-94,259,19,1.0,85.71,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,15243.m
+4-94,259,20,1.0,100.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,"0.000
+1.011
+2.023
+3.034
+4.046
+5.058
+6.070
+7.083
+8.096
+9.108
+10.121
+11.135
+12.148
+13.162
+14.176
+15.190
+16.204
+17.219
+18.234
+19.248
+20.264
+21.279
+22.294
+23.310
+24.326
+25.342
+26.359
+27.375
+28.392
+29.409
+30.426
+31.443
+32.461
+33.478
+34.496"
+4-94,259,21,1.0,100.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,"0.000
+0.500
+1.000
+1.500
+2.000
+2.500
+3.000
+3.500
+4.000
+4.500
+5.000
+5.500
+6.000
+6.500
+7.000
+7.500
+8.000
+8.500
+9.000
+9.500
+10.000
+10.500
+11.000
+11.500
+12.000
+12.500
+13.000
+13.500
+14.000
+14.500
+15.000
+15.500
+16.000
+16.500
+17.000"
+4-94,259,22,1.0,100.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,"0.575
+0.729
+0.922
+1.167
+1.478
+1.847
+2.298
+2.852
+3.532
+4.362
+5.375
+6.609
+8.107
+9.924
+12.122
+14.763
+17.860
+21.547
+25.925
+31.109
+37.234
+44.454
+52.946
+62.912
+74.584
+88.224
+104.134
+122.654
+144.171
+169.124
+198.292
+235.270
+279.221
+332.102
+400.575"
+4-94,259,23,1.0,100.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,"300000.0
+295695.2
+291384.3
+287067.3
+282744.3
+278415.3
+274080.2
+269739.0
+265391.8
+261038.6
+256679.2
+252313.8
+247942.4
+243564.9
+239181.3
+234791.7
+230396.0
+225994.2
+221586.4
+217172.5
+212752.5
+208326.6
+203894.5
+199456.4
+195012.3
+190562.2
+186106.1
+181644.0
+177175.9
+172701.8
+168221.8
+163735.9
+159244.1
+154746.5
+150243.2"
+4-94,259,24,1.0,100.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,"-0.0001
+-0.0002
+-0.0002
+-0.0002
+-0.0003
+-0.0004
+-0.0005
+-0.0006
+-0.0007
+-0.0009
+-0.0011
+-0.0014
+-0.0017
+-0.0021
+-0.0026
+-0.0031
+-0.0038
+-0.0046
+-0.0055
+-0.0066
+-0.0080
+-0.0095
+-0.0114
+-0.0136
+-0.0161
+-0.0191
+-0.0226
+-0.0267
+-0.0314
+-0.0369
+-0.0434
+-0.0515
+-0.0611
+-0.0726
+-0.0874"
+4-94,259,25,1.0,100.0,ch4-121,automatic_match,ch4-121,Fuzzy or exact source-text match at or above the review threshold.,"15252.69
+15261.43
+15270.08
+15278.63
+15287.04
+15295.30
+15303.36"
+4-95,260,2,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,Ballistic reentry trajectories
+4-95,260,3,0.7973,93.42,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"Problem (ballistic) I
+1976 US Standard Atmowhere I
+Non-rotating WGS-84 Earth"
+4-95,260,4,0.9444,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,Summary Variables:
+4-95,260,6,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,ventry
+4-95,260,8,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,gentry
+4-95,260,9,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"34.481
+31.951
+28.690
+25.567"
+4-95,260,10,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"15000
+15000
+15000
+15000"
+4-95,260,11,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"-35.000
+-30.000
+-25.000
+-20.000"
+4-95,260,12,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"129020
+117570
+105508
+93019"
+4-95,260,13,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"-35.000
+-30.000
+-25.000
+-20.000"
+4-95,260,14,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"16000
+16000
+16000
+16000"
+4-95,260,15,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"37.581
+34.986
+31.498
+27.428"
+4-95,260,16,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"147262
+133858
+119649
+104853"
+4-95,260,17,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"-35.000
+-30.000
+-25.000
+-20.000"
+4-95,260,18,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"17000
+17000
+17000
+17000"
+4-95,260,19,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"41.352
+37.914
+34.284
+29.700"
+4-95,260,20,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"166764
+151231
+134723
+117416"
+4-95,260,21,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"-35.000
+-30.000
+-25.000
+-20.000"
+4-95,260,22,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"18000
+18000
+18000
+18000"
+4-95,260,23,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"45.204
+41.533
+36.976
+31.966"
+4-95,260,24,1.0,100.0,ch4-122,automatic_match,ch4-122,Fuzzy or exact source-text match at or above the review threshold.,"187562
+169742
+150720
+130690"
+4-98,263,7,0.875,94.12,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"(rocket
+)"
+4-98,263,8,0.9889,98.91,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*title
+.
+Trajectory for a Ballistic Sounding Rocket
+2nd Stage Fires Down to Maximize Velocity"
+4-98,263,9,1.0,97.3,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*atmos standard
+*earth wgs-84 omega=O"
+4-98,263,10,1.0,100.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,*trajectory 1 Rocket start on 1
+4-98,263,11,0.9651,77.85,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*initial geodetic
+long=0.0
+1atZO.O
+alt=O .O
+vel=O. 0
+psi=90.0
+time=O .O
+gama=opta-1
+wt=12000.0"
+4-98,263,12,1.0,100.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,*print time alt vel range gamgd pitchgd wt
+4-98,263,13,1.0,97.26,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 1 1st stage ignition to first movement
+*integ dtprnk0.1
+dt=0.001"
+4-99,264,1,1.0,87.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*aero ca=(ca-1st-recruits)
+*prop thrust=(castor-thr)
+mdot=
+*prop thrust=(recruits-thr) mdot=
+*rail launch cfstak0.15 cfslid=O"
+4-99,264,2,1.0,70.59,ch4-123,manual_match,ch4-123,Captured inside the complete Ballistic Rocket problem file; this source block is an OCR-fragmented continuation.,"castor-mdt)
+recruits-mdt)
+01
+*when ve1>0.001 goto 2"
+4-99,264,3,1.0,97.37,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 2 Rail launch
+*integ dtprnk0.1
+dtZO.01
+*aero ca=(ca-1st-recruits)
+*prop thrust=(castor-thr)
+mdot=(castor-mdt)
+*prop thrust=(recruits-thr) mdot=(recruits-mdt)
+*rail launch cfstak0.15 cfslid=0.01
+*when plength>25.0 goto 3"
+4-99,264,4,0.9742,98.49,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 3 Recruits & 1st stage burn
+*integ dtprnt=0.5 dk.05
+*aero ca=(ca-1st-recruits)
+*prop thrust=(castor-thr)
+mdot=(castor-mdt)
+*prop thrust=(recruits-thr)
+mdot=(recruits-mdt)
+*when time>3.0 goto 4"
+4-99,264,5,0.9891,96.79,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 4 Jetison recruits, continue 1st stage burn
+*integ dtprnt=0.5 dt=.lO
+*increment wt=-350.0
+*aero ca=(ca-lst-stage)
+*prop thrust=(castor-thr) mdot=(castormdt)
+*when time>40.0 goto 5"
+4-99,264,6,1.0,94.44,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 5 Coast
+*integ dtprnt=l.O dk0.20
+*aero ca=(ca-lst-off)
+*when alt>300000 goto 6
+*when gamgd<O goto 6"
+4-99,264,7,0.9781,97.86,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 6 Stage and coast, allow time for orientation
+*integ dtprnkl.0 dt=0.20
+*reset wt=1650.0
+*aero ca=(ca_2nd_off)
+*when tseg>30.0 goto 7"
+4-99,264,8,0.92,95.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 7 Orientation correct, coast until ready to fire
+*integ dtprnkl.0 dk0.20
+*aero ca=(ca_2nd_off)
+*fly pitchgd = opta-2
+*fly yawgd = *
+*fly rollgd = *
+*when tseg>opta-3 goto 8"
+4-99,264,9,0.9868,96.2,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 8 Fire 2nd stage
+*integ dtprnt=l.O dt=O.lO
+*reset tmark=O
+*aero ca=(ca_2nd_stage)
+*prop thrust=(orbus-thr) mdot=(orbus-mdt)
+*fly pitchi=*
+*fly yawi=*"
+4-100,265,1,0.9706,100.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*fly rolli=*
+*when tseg=41.5 goto 9"
+4-100,265,2,0.9717,95.41,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 9 Coast to payload separation
+*integ dtprnk0.5 dk0.20
+*aero ca=(ca,2nd_off)
+*when alt<300000 goto 10"
+4-100,265,3,0.9541,94.59,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 10 Release payload & fly to impact
+*integ dtprnk0.5 dt=O.lO
+*reset wt=350
+*aero ca=(rv)
+*when alt<O stop"
+4-100,265,4,0.9688,100.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,*trajectory 2 Booster start on 1
+4-100,265,5,0.9792,100.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*initial from trajectory 1, segment 6
+*print time alt vel range gamgd pitchgd wt thrust nx dynprs"
+4-100,265,6,0.9796,94.17,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*segment 1 Ballistic
+*reset wt=2100.0
+*integ dtprnk0.5
+dk0.20
+*aero ca=(ca-lst-tumble)
+*when alt<O stop"
+4-100,265,7,0.9412,100.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*optimize a for vel=max on segment 10, trajectory 1"
+4-100,265,8,0.9692,100.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"constrain alt=450000 on segment 8
+constrain range=60 on segment 10"
+4-100,265,9,0.9655,93.55,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"fref=10000
+maxitr=3 0
+tok5.0e-7"
+4-100,265,10,0.7664,79.49,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"par-1 =
+85.0
+10-1 = 80.0
+hi-1 = 86.0
+par-2 = -90.0
+10-2 = -120.0
+hi-2 = -70.0
+par-3 = 200.0
+10-3 = 150.0
+hi-3
+= 500.0"
+4-100,265,11,0.9688,100.0,ch4-123,automatic_match,ch4-123,Fuzzy or exact source-text match at or above the review threshold.,"*egs ex2.dbf
+time alt vel range gamgd pitchgd wt thrust nx dynprs"
+4-105,270,7,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,(intercept)
+4-105,270,8,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*title
+Ballistic Missile Intercept"
+4-105,270,9,1.0,97.3,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*atmos standard
+*earth wgs-84 omega=O"
+4-105,270,10,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*trajectory 1
+Interceptor start on 1"
+4-105,270,11,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,*define alt-km
+4-105,270,12,0.9118,85.29,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*define rng-km
+alt-km = alV3280.84;"
+4-105,270,13,0.8571,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,rng-km = range*1.852;
+4-105,270,14,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,*dwn/crs long=0.0 latgd=0.0 azm=90.0
+4-105,270,15,0.9519,92.86,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*initial geodetic
+long=opta-13
+lat=O.O
+psi=-90.0
+time=25.0
+range=O . 0
+gama=O. 0
+alt=35000.0
+vel=73 0.0
+~t=1965.0"
+4-105,270,16,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,*print time east alt vel gamgd alpha dynprs
+4-106,271,1,0.9831,94.35,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 1 Drop for 2 sec
+*integ dtprnt=0.50 dt=O.lO
+*cg
+cgd34.0
+*aero ca=(stagel-ca-off)
+cn=(stagel-cn)
+*when tseg=2 goto 2"
+4-106,271,2,0.9916,96.9,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 2 1st stage burn
+*integ dtprnt=0.5 dt=O.lO
+*cg
+cg=119.8
+*aero ca=(stagel-ca-on)
+cn=(stagel-cn)
+*prop thrust=(thrustl) mdot(mdot1)
+*fly alpha vrs tseg
+opta-1
+0.0
+opta-2
+1.25
+opta-3
+2.50
+opta-4
+3.75
+opta-5
+5.00
+*when tseg=5.0 goto 3
+*when alt<O goto 8"
+4-106,271,3,1.0,94.12,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 3 Coast
+*integ dtprnh0.5 dt=O.lO
+*cg
+cg=105.7
+*aero ca=(stagel-ca-off)
+cn=(stagel-cn)
+*when tseg=0.25 goto 4
+*when alt<O goto 8"
+4-106,271,4,1.0,95.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 4 Stage and coast
+*integ dtprnk0.5 dt=O.lO
+*reset wk368.0
+*cg
+cg=61.6
+*aero ca=(stage2_ca_off) cn=(stage2_cn)
+*when tseg=0.25 goto 5
+*when alt<O goto 8"
+4-106,271,5,0.9883,96.77,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 5 2nd stage burn
+*integ dtprnk0.5 dt=O.lO
+*cg
+cg=57.2
+*aero ca=(stage2_ca_on) cn=(stage2_cn)
+*prop thrust=(thrust2) mdot(mdot2)
+*fly alpha vrs tseg
+opta-6
+0.0
+opta-7
+2.0
+opta-8
+4.0
+opta-9
+6.0
+opta-10
+8.0
+opta-11
+10.0
+opta-12
+13.1
+*when tsegd3.1 goto 6
+*when alt<O goto 8"
+4-106,271,6,1.0,92.06,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 6 Coast and stage
+*integ dtprnk0.5 dt=O.lO
+*cg
+cg=52.a"
+4-107,272,1,1.0,97.53,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*aero ca=(stage2,ca_off)
+cn=(stage2_cn)
+*when tseg=0.50 goto 7
+*when alt<O goto 8"
+4-107,272,2,1.0,96.51,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 7 Separate kill vehicle and coast
+*integ dtprnt=0.5 dt=O.lO
+*reset wk80.0
+*cg
+cg=32.3
+*aero ca=(payload-ca) cn=(payload-cn)
+*when time=80 goto 8
+*when alt<O goto 8"
+4-107,272,3,0.986,94.7,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 8 Remove shroud and coast
+*integ dtprnk0.5 dt=O.lO
+*reset wk70.0
+*cg
+cg=18.0
+*aero ca=(kkv-ca)
+cn=(kkv-cn)
+*when time=90 stop
+*when alt<O stop"
+4-107,272,4,0.9677,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*trajectory 2
+Target start on 21"
+4-107,272,5,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,*define alt-km
+4-107,272,6,0.9118,85.29,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*define rng-km
+alt-km = alW3280.84;"
+4-107,272,7,0.8571,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,rng-km = range*1.852;
+4-107,272,8,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,*dwn/crs long=0.0 latgd=0.0 azm=90.0
+4-107,272,9,1.0,77.55,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"psi=90.0
+gama=7 9.0
+wt=13000.0"
+4-107,272,10,0.8857,71.05,ch4-125,manual_match,ch4-125,Captured inside the complete Air-Launched Intercept problem file; source OCR splits the initial block.,"*initial geodetic
+long=O. 0
+lat=O .O
+time=O .O
+range=O . 0
+alt=O .O
+vel=O. 0"
+4-107,272,11,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,*print time east alt vel gamgd alpha dynprs
+4-107,272,12,0.9843,95.96,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 21 Launch
+*integ dtprnt=l.O
+dt=O.Ol
+*aero ca=(target-ca-on)
+cn=(target-cn)
+*prop thrust=(target-thrust) mdot=(target-mdot)
+*rail launch cfstak0.15 cfslid=0.01
+*when plength > 1000.0 goto 22"
+4-107,272,13,0.9814,95.73,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 22 1st stage burn
+*integ dtprnkl.0 dt=O.lO
+*aero ca= (target-ca-on)
+cn= (target-cn)
+*prop thrust=(target-thrust) ' mdot=(target-mdot)
+*when time>75.0 goto 23"
+4-107,272,14,1.0,97.52,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 23 Coast to intercept time
+*integ dtprnt=2.0 dt=O.lO
+*aero ca=(target-ca) cn=(target-cn)
+*when time>90.0 goto 24"
+4-108,273,1,0.9802,93.33,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*segment 24 Coast to impact
+*integ dtprnk2.0 dt=O.lO
+*aero ca=(target,ca)
+cn=(target-cn)
+*when alt<O stop"
+4-108,273,2,0.96,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"*optimize a for vel=max on segment 8, trajectory 1"
+4-108,273,3,0.8962,93.46,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"constrain alttll on segment 8 = altt21 on segment 23
+constrain long[ll on segment 8 = long[2] on segment 23"
+4-108,273,4,1.0,85.71,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,integ=O
+4-108,273,5,0.9231,69.23,ch4-125,manual_match,ch4-125,Captured inside the complete Air-Launched Intercept optimization block; source OCR separates maxitr from its assignment.,maxi t r= 6 0
+4-108,273,6,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,fref=10000
+4-108,273,7,0.9916,77.67,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"hi-l=lO .O
+hi-2=10.0
+hi-3~10.0
+hi-4d0.0
+hi-5=10.0
+hi-6~10.0
+hi-7=10.0
+hi-8=10.0
+hi-9=10.0
+hi-10=10.0
+hi-lklO.0
+hi-12=10.0
+hi-13~6.0"
+4-108,273,8,0.963,64.63,ch4-125,manual_match,ch4-125,Captured inside the complete Air-Launched Intercept optimization block; source OCR confuses lo with 10 and minus signs.,"lo-1=-10.0
+lo-2-10.0
+10-3 =-lo . 0
+10-4=-10.0
+10-5=-10.0
+10-6=-10.0
+10-7=-10.0
+10-8=-10.0
+10-9 =-lo. 0
+lo-lo=-10.0
+lo-ll=-10.0
+lo-12-10.0
+10-13=1.0"
+4-108,273,9,1.0,75.45,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,"par-l=9.9
+par-2=9.9
+par-3=9.9
+par-4=8.4
+par-5=3.7
+par-6=3.7
+par-7-0.5
+par-8=-2.0
+par-9=-4.2
+par-l0=-5.0
+par-11-6.5
+par-12-8.3
+par-13=3.50"
+4-108,273,10,1.0,100.0,ch4-125,automatic_match,ch4-125,Fuzzy or exact source-text match at or above the review threshold.,*egs ex3.dbf time alt east alt-km rng-km vel
+4-110,275,1,0.9714,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,Trajectory for vehicle: interceptor
+4-110,275,8,1.0,83.33,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,Dynpra
+4-110,275,10,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"35000.0
+34996.0
+34984.0
+34964.0
+34936.0"
+4-110,275,11,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"730.00
+729.41
+729.17
+729.28
+729.74"
+4-110,275,12,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"25.000
+25.500
+26.000
+26.500
+27.000"
+4-110,275,13,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"159.002
+158.943
+158.883
+158.823
+158.763"
+4-110,275,14,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"0.000
+-1.259
+-2.518
+-3.776
+-5.031"
+4-110,275,15,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"196.695
+196.406
+196.368
+196.580
+197.041"
+4-110,275,16,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"34936.0
+34917.3
+34944.8
+35049.1
+35269.8
+36269.4
+37159.4
+38380.8
+39980.3
+41995.9"
+4-110,275,17,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"729.74
+1268.67
+1842.92
+2456.79
+3114.68
+4600.80
+5470.27
+6461.27
+7619.95
+9003.70"
+4-110,275,18,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"158.763
+158.681
+158.554
+158.378
+158.153
+157.545
+157.159
+156.713
+156.199
+155.604"
+4-110,275,19,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"27.000
+27.500
+28.000
+28.500
+29.000
+30.000
+30.500
+31.000
+31.500
+32.000"
+4-110,275,20,0.8966,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"-5.031
+-0.035
+3.752
+7.246
+10.914
+18.829
+22.496
+25.766
+28.215
+29.762"
+4-110,275,21,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"10.000
+10.000
+10.000
+10.000
+10.000
+8.671
+7.343
+5.651
+3.596
+1.541"
+4-110,275,22,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"197.041
+595.968
+1256.261
+2223.641
+3543.810
+7431.352
+10067.147
+13247.085
+17065.785
+21634.940"
+4-110,275,24,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"41995.9
+43109.6"
+4-110,275,25,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"32.000
+32.250"
+4-110,275,26,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"9003.70
+8955.59"
+4-110,275,27,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"29.762
+29.723"
+4-110,275,28,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"155.604
+155.284"
+4-110,275,29,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"21634.940
+20293.170"
+4-110,275,31,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"8955.59
+8904.93"
+4-110,275,32,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"155.284
+154.966"
+4-110,275,33,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"43109.6
+44215.9"
+4-110,275,34,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"32.250
+32.500"
+4-110,275,35,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"29.723
+29.684"
+4-110,275,36,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"20293.170
+19029.550"
+4-110,275,37,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"154.966
+154.327
+153.680
+153.025
+151.688
+151.003
+150.306
+148.869
+148.127
+147.369
+145.795
+144.979
+144.143
+142.405"
+4-110,275,38,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"44215.9
+46429.8
+48663.5
+50919.2
+55503.8
+57826.4
+60159.2
+64826.9
+67146.0
+69443.7
+73943.9
+76139.1
+78297.8
+82505.7"
+4-110,275,39,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"32.500
+33.000
+33.500
+34.000
+35.000
+35.500
+36.000
+37.000
+37.500
+38.000
+39.000
+39.500
+40.000
+41.000"
+4-110,275,40,0.75,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"0.000
+0.000
+0.000
+0.000
+-0.483
+-0.966
+-1.449
+-2.573
+-3.213
+-3.854
+-4.625
+-4.756
+-4.886
+-5.003"
+4-110,275,41,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"29.684
+29.605
+29.528
+29.451
+29.231
+28.956
+28.569
+27.495
+26.800
+26.013
+24.246
+23.368
+22.505
+20.827"
+4-110,275,42,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"8904.93
+9001.47
+9107.63
+9223.24
+9481.16
+9620.92
+9767.44
+10080.34
+10245.75
+10417.14
+10780.37
+10976.73
+11183.90
+11632.88"
+4-110,275,43,1.0,100.0,ch4-126,automatic_match,ch4-126,Fuzzy or exact source-text match at or above the review threshold.,"19029.550
+17489.631
+16089.808
+14813.096
+12571.639
+11584.664
+10680.508
+9101.865
+8402.093
+7761.076
+6674.944
+6221.524
+5818.652
+5141.478"
+4-112,277,3,1.0,100.0,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,(intercept)
+4-112,277,4,1.0,100.0,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,"*title
+Example intercept trajectory"
+4-112,277,5,1.0,97.3,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,"*atmos standard
+*earth wgs-84 omega=O"
+4-112,277,6,0.9375,100.0,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,*trajectory 1 missile start on 1
+4-112,277,7,0.9634,91.21,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,"*initial
+geodetic
+long=0.0
+lat=O.O
+psi=90.0
+timez30.0
+alt=O. 0
+vel=O .O
+gama=75.0
+wt=2000.0"
+4-112,277,8,1.0,100.0,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,*dwn/crs long=0.0 latgd=0.0 azm=90.0
+4-112,277,9,1.0,94.64,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,*print time alt east vel gamgd alpha relrng[21 relve1[21
+4-112,277,10,0.988,95.93,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,"*segment 1 Rail launch
+*integ dtprnk0.5
+dk0.05
+*aero ca=(missile-on) cn=(missile-cn)
+*prop thrust=25000 mdotz3.0
+*rail launch cfstak0.12 cfslid=0.01
+*when plength>30 goto 2"
+4-112,277,11,0.9862,94.0,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,"*segment 2 Ballistic to get up to speed
+*integ dtprnk0.5
+dt=O.lO
+*aero ca=(missile-on) cn=(missile-cn)
+*prop thrust=25000 mdok3.0
+*when veb2500 goto 3"
+4-112,277,12,0.9952,94.39,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,"*segment 3 1st stage burn, intercept
+*integ dtprntz0.5 dt=O.lO dtguidd
+*limits alphat45
+*aero ca=(missile-on) cn=(missile-cn)
+*prop thrust=25000 mdok3.O
+*fly intercept=2
+*when time>42.0 goto 4
+*when relvel[21>0 stop"
+4-112,277,13,0.9755,94.67,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,"*segment 4 coast 6c continue intercept
+*integ dtprnt=0.5
+dt=O.lO dtguid=l
+*limits alphat45
+*aero ca=(missile-off) cn=(missile-cn)
+*fly intercept=2
+*when relvel[21>0 stop"
+4-113,278,1,0.9062,100.0,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,*trajectory 2 target start on 10
+4-113,278,2,0.9663,92.86,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,"*initial
+geodetic
+long=O -35
+lat=O. 0
+psi=-90.0
+time=O. 0
+alt=200000
+vel=4000
+gama=-50.0
+wt=1000.0"
+4-113,278,3,1.0,100.0,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,*dwn/crs long=0.0 latgd=0.0 azm=90.0
+4-113,278,4,1.0,100.0,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,*print time alt east vel
+4-113,278,5,0.9756,94.19,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,"*segment 10 Ballistic reentry
+*integ dtprntz0.5
+dt=O.lO
+*aero ca=(rv)
+*when alt<O stop"
+4-113,278,6,1.0,100.0,ch4-127,automatic_match,ch4-127,Fuzzy or exact source-text match at or above the review threshold.,*egs ex4.dbf time alt east vel
+4-114,279,2,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,Example intercept trajectory
+4-114,279,3,0.92,96.1,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"Problem (intercept) I
+1976 US Standard Atmosphere I
+Non-rotating WOS-84 Earth"
+4-114,279,4,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,Trajectory for vehicle: missile
+4-114,279,10,1.0,77.78,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,Relvel(2l
+4-114,279,11,1.0,70.0,ch4-128,manual_match,ch4-128,Captured as the Relrng[2] column header in the worked-example output listing; OCR reads the brackets as parentheses.,Relrng (21
+4-114,279,13,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"0.000
+0.000"
+4-114,279,14,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"30.000
+30.402"
+4-114,279,15,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"0.0
+29.0"
+4-114,279,17,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"75.000
+75.000"
+4-114,279,18,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"0.000
+0.000"
+4-114,279,19,1.0,73.68,ch4-128,manual_match,ch4-128,Captured in the worked-example output listing; source PDF text extraction isolated two column values.,"-4131.560
+-4885.690"
+4-114,279,20,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"107129.87
+105196.07"
+4-114,279,22,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"30.402
+30.500
+31.000
+31.500
+32.000
+32.500
+33.000
+33.500
+34.000
+34.500
+35.000
+35.500
+36.000
+36.500
+37.000
+37.059"
+4-114,279,23,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"0.000
+0.000
+0.008
+0.019
+0.035
+0.055
+0.081
+0.111
+0.146
+0.186
+0.231
+0.281
+0.336
+0.396
+0.460
+0.468"
+4-114,279,24,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"29.0
+44.8
+178.6
+400.8
+710.8
+1107.9
+1591.5
+2160.4
+2813.0
+3548.0
+4364.5
+5261.5
+6238.0
+7293.2
+8426.0
+8564.1"
+4-114,279,25,1.0,96.61,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"149.21
+185.52
+370.96
+556.02
+740.45
+924. 08
+1106.04
+1285.29
+1461.56
+1635.96
+1808.51
+1979.14
+2147.95
+2315.09
+2480.66
+2500.00"
+4-114,279,26,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"75.000
+74.717
+73.782
+73.209
+72.791
+72.459
+72.183
+71.945
+71.736
+71.549
+71.380
+71.224
+71.081
+70.947
+70.823
+70.808"
+4-114,279,27,1.0,96.44,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"-4885.690
+-4923.407
+-5116.459
+-5309.504
+-5502.083
+-5693 .880
+-5883.948
+-6071.168
+-6255.191
+-6437.020
+-6616.610
+-6793.784
+-6968.562
+-7140.967
+-7311.005
+-7330.807"
+4-114,279,28,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"105196.07
+104716.17
+102206.22
+99599.71
+96896.79
+94097.76
+91203.20
+88214.29
+85132.59
+81959.45
+78695.95
+75343.25
+71902.56
+68375.08
+64761.99
+64332.43"
+4-114,279,29,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"37.059
+37.500
+38.000
+38.500
+39.000
+39.500
+40.000
+40.500
+41.000
+41.500
+42.000"
+4-114,279,30,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"8564.1
+9628.8
+10894.5
+12226.8
+13627.0
+15095.5
+16632.6
+18238.0
+19911.8
+21654.0
+23464.7"
+4-114,279,31,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"0.468
+0.532
+0.614
+0.704
+0.802
+0.907
+1.019
+1.139
+1.266
+1.400
+1.541"
+4-114,279,32,0.962,95.29,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"2500.00
+2638.96
+2799.91
+2961.40
+3122.75
+3283.89
+3444.74
+3605.49
+3766.34
+3927 - 52
+4089.26"
+4-114,279,33,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"-7.684
+-4.479
+-2.893
+-2.132
+-1.753
+-1.542
+-1.415
+-1.339
+-1.301
+-1.297
+-1.331"
+4-114,279,34,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"70.808
+69.181
+68.069
+67.313
+66.731
+66.246
+65.822
+65.441
+65.093
+64.772
+64.470"
+4-114,279,35,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"64332.43
+61063.55
+57279.49
+53411.14
+49459.73
+45426.29
+41311.82
+37117.30
+32843.65
+28491.74
+24062.39"
+4-114,279,36,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"-7330.807
+-7482.917
+-7652.839
+-7820.130
+-7985.181
+-8148.241
+-8309.294
+-8468.458
+-8625.841
+-8781.529
+-8935.589"
+4-114,279,37,0.9153,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"-8935.589
+-8880.050
+-8824.381
+-8768.221
+-8711.190
+-8653.038
+0.000"
+4-114,279,38,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"42.000
+42.500
+43.000
+43.500
+44.000
+44.500
+44.740"
+4-114,279,39,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"23464.7
+25297.3
+27106.7
+28894.8
+30662.6
+32410.5
+33242.0"
+4-114,279,40,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"1.541
+1.686
+1.830
+1.974
+2.117
+2.259
+2.328"
+4-114,279,41,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"4089.26
+4043.67
+4000.70
+3960.05
+3921.46
+3884.53
+3865.29"
+4-114,279,42,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"64.470
+64.224
+64.042
+63.881
+63.712
+63.487
+63.249"
+4-114,279,43,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"-1.323
+-1.268
+-1.221
+-1.531
+-2.479
+-6.877
+15.000"
+4-114,279,44,1.0,100.0,ch4-128,automatic_match,ch4-128,Fuzzy or exact source-text match at or above the review threshold.,"24062.39
+19608.49
+15182.36
+10784.19
+6414.29
+2073.19
+3.51"

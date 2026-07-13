@@ -1,0 +1,2 @@
+*limits bankgd>-60 bankgd<60 alpha>-15 alpha<15.0
+        beta>-15 beta<15

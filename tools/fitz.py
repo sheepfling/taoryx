@@ -4,7 +4,7 @@ import importlib.util
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("_taoryx_fitz", ROOT / "fitz.py")
+SPEC = importlib.util.spec_from_file_location("_taoryx_fitz", ROOT / "tools" / "fitz_compat.py")
 if SPEC is None or SPEC.loader is None:
     raise ImportError("Could not load local fitz compatibility shim.")
 ####

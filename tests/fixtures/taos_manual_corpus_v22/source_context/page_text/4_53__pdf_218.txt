@@ -1,0 +1,24 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.2. *Define Data Bbck 
+so they must be associated with a specific trajectory. They cannot be evaluated out- 
+side of a trajectory. 
+Equations must end with a semicolon like in C. The semicolon is required even when 
+there is only one equation like in the example shown above. Since equations continue 
+until a semicolon is encountered, they can extend across multiple lines as necessary. 
+When more than one equation is required to define a value, temporary variables can 
+be used. These variables must be unique, that is, they cannot have the same name as 
+a standard output variable or another user-defined variable. They are only defined 
+within the *dejine data block. For example, 
+*define relrange 
+dx = (east[21 - east[ll)"2; 
+dy = (northfa1 - north[ll)"2; 
+rel-range = sqrt(dx+dy); 
+computes a relative horizontal range between two trajectories using two temporary 
+variables, dx and dy, in the calculation. 
+If-then-eke statements can be used as shown in Section 4.3.1, but while loops,for 
+loops, and other C-language control statements are not allowed. 
+User-defined variables given outside of the trajectory definitions can only be refer- 
+enced by *print, YZe, *egs, and other *define data blocks that are also outside of the 
+trajectory definitions. 
+4-53 

@@ -1,0 +1,46 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.4. *Fly Data Block 
+The most common format of each vy data block is the YEy keyword followed by one 
+of the guidance variables and its value. Another format is available, used primarily 
+for optimization, which is discussed later in this section. 
+In the example above, use of alpha and betae is encouraged over alpha and beta be- 
+cause of the way that the two sideslip angles, beta and betae, are defined. When alpha 
+and beta are used and they become f 
+90°, the standard angle definitions are unde- 
+fined. The standard definitions are modified to avoid these problems, but this system 
+of angles is not as robust as alphu and betae (Section 2.1.9). 
+The following example illustrates an incorrect set of vy data blocks: 
+*fly alphat = 5.0 
+*fly betae = 5.0 
+# Incorrect guidance rules 
+# Angles are inconsistent 
+This is an inconsistent set of body-attitude angles because total angle of attack is 
+associated with windward meridian, not sideslip. Alphat and betae are not contained 
+in one of the valid sets of angles in Table 4-3, so this set of vy data blocks generates 
+an input error. 
+Referencing Current Values 
+The data blocks 
+*fly yawgd = * 
+*fly pitchgd = * 
+*fly rollgd = * 
+show another feature of the vy data block. All of the values have been set to an aster- 
+isk rather than a number. An asterisk tells TAOS to use the value from the end of the 
+previous segment; asterisks can be used in the vy data block in place of any number. 
+Asterisk values should not be used on the frrst segment of a trajectory because there 
+are no previous values to reference. 
+Power Setting 
+The power setting variable, power, is a special control variable that can be used in 
+combination with the tables to simulate an engine throttle. If the thrust and mass flow 
+tables are a function of power, then power can be used to vary the thrust and mass 
+flow values like a throttle. Power setting is a nondimensional value so its units can 
+be anything as long as they are consistent in both the table and problem files. 
+For example, if thrust and fuel flow tables for a jet engine are entered as a function 
+of the engine rpm usingpower to represent rpm, then the rpm value can be controlled 
+in the vy data block by setting thepower variable. A value forpower can be directly 
+input, or it can be indirectly specified by entering a desired flight condition, such as 
+constant Mach number. 
+Flight Condition Guidance 
+So far control variables have been specified directly, but they can also be specified 
+indirectly with desired flight conditions, such as level flight. When they are specified 
+4- 15 

@@ -1,0 +1,8 @@
+(corpus-ch3-018)
+  table output
+  start
+    add 0.7
+    mult pres
+    mult mach
+    mult mach
+  end

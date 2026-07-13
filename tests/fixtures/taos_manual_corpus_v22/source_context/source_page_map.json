@@ -1,0 +1,656 @@
+[
+  {
+    "excerpt_page": 1,
+    "source_pdf_page": 140,
+    "manual_page": "3-5",
+    "text_path": "source_context/page_text/3_5__pdf_140.txt"
+  },
+  {
+    "excerpt_page": 2,
+    "source_pdf_page": 141,
+    "manual_page": "3-6",
+    "text_path": "source_context/page_text/3_6__pdf_141.txt"
+  },
+  {
+    "excerpt_page": 3,
+    "source_pdf_page": 143,
+    "manual_page": "3-8",
+    "text_path": "source_context/page_text/3_8__pdf_143.txt"
+  },
+  {
+    "excerpt_page": 4,
+    "source_pdf_page": 144,
+    "manual_page": "3-9",
+    "text_path": "source_context/page_text/3_9__pdf_144.txt"
+  },
+  {
+    "excerpt_page": 5,
+    "source_pdf_page": 145,
+    "manual_page": "3-10",
+    "text_path": "source_context/page_text/3_10__pdf_145.txt"
+  },
+  {
+    "excerpt_page": 6,
+    "source_pdf_page": 146,
+    "manual_page": "3-11",
+    "text_path": "source_context/page_text/3_11__pdf_146.txt"
+  },
+  {
+    "excerpt_page": 7,
+    "source_pdf_page": 147,
+    "manual_page": "3-12",
+    "text_path": "source_context/page_text/3_12__pdf_147.txt"
+  },
+  {
+    "excerpt_page": 8,
+    "source_pdf_page": 148,
+    "manual_page": "3-13",
+    "text_path": "source_context/page_text/3_13__pdf_148.txt"
+  },
+  {
+    "excerpt_page": 9,
+    "source_pdf_page": 150,
+    "manual_page": "3-15",
+    "text_path": "source_context/page_text/3_15__pdf_150.txt"
+  },
+  {
+    "excerpt_page": 10,
+    "source_pdf_page": 151,
+    "manual_page": "3-16",
+    "text_path": "source_context/page_text/3_16__pdf_151.txt"
+  },
+  {
+    "excerpt_page": 11,
+    "source_pdf_page": 152,
+    "manual_page": "3-17",
+    "text_path": "source_context/page_text/3_17__pdf_152.txt"
+  },
+  {
+    "excerpt_page": 12,
+    "source_pdf_page": 153,
+    "manual_page": "3-18",
+    "text_path": "source_context/page_text/3_18__pdf_153.txt"
+  },
+  {
+    "excerpt_page": 13,
+    "source_pdf_page": 154,
+    "manual_page": "3-19",
+    "text_path": "source_context/page_text/3_19__pdf_154.txt"
+  },
+  {
+    "excerpt_page": 14,
+    "source_pdf_page": 155,
+    "manual_page": "3-20",
+    "text_path": "source_context/page_text/3_20__pdf_155.txt"
+  },
+  {
+    "excerpt_page": 15,
+    "source_pdf_page": 156,
+    "manual_page": "3-21",
+    "text_path": "source_context/page_text/3_21__pdf_156.txt"
+  },
+  {
+    "excerpt_page": 16,
+    "source_pdf_page": 157,
+    "manual_page": "3-22",
+    "text_path": "source_context/page_text/3_22__pdf_157.txt"
+  },
+  {
+    "excerpt_page": 17,
+    "source_pdf_page": 158,
+    "manual_page": "3-23",
+    "text_path": "source_context/page_text/3_23__pdf_158.txt"
+  },
+  {
+    "excerpt_page": 18,
+    "source_pdf_page": 160,
+    "manual_page": "3-25",
+    "text_path": "source_context/page_text/3_25__pdf_160.txt"
+  },
+  {
+    "excerpt_page": 19,
+    "source_pdf_page": 161,
+    "manual_page": "3-26",
+    "text_path": "source_context/page_text/3_26__pdf_161.txt"
+  },
+  {
+    "excerpt_page": 20,
+    "source_pdf_page": 162,
+    "manual_page": "3-27",
+    "text_path": "source_context/page_text/3_27__pdf_162.txt"
+  },
+  {
+    "excerpt_page": 21,
+    "source_pdf_page": 163,
+    "manual_page": "3-28",
+    "text_path": "source_context/page_text/3_28__pdf_163.txt"
+  },
+  {
+    "excerpt_page": 22,
+    "source_pdf_page": 164,
+    "manual_page": "3-29",
+    "text_path": "source_context/page_text/3_29__pdf_164.txt"
+  },
+  {
+    "excerpt_page": 23,
+    "source_pdf_page": 167,
+    "manual_page": "4-2",
+    "text_path": "source_context/page_text/4_2__pdf_167.txt"
+  },
+  {
+    "excerpt_page": 24,
+    "source_pdf_page": 168,
+    "manual_page": "4-3",
+    "text_path": "source_context/page_text/4_3__pdf_168.txt"
+  },
+  {
+    "excerpt_page": 25,
+    "source_pdf_page": 169,
+    "manual_page": "4-4",
+    "text_path": "source_context/page_text/4_4__pdf_169.txt"
+  },
+  {
+    "excerpt_page": 26,
+    "source_pdf_page": 170,
+    "manual_page": "4-5",
+    "text_path": "source_context/page_text/4_5__pdf_170.txt"
+  },
+  {
+    "excerpt_page": 27,
+    "source_pdf_page": 171,
+    "manual_page": "4-6",
+    "text_path": "source_context/page_text/4_6__pdf_171.txt"
+  },
+  {
+    "excerpt_page": 28,
+    "source_pdf_page": 172,
+    "manual_page": "4-7",
+    "text_path": "source_context/page_text/4_7__pdf_172.txt"
+  },
+  {
+    "excerpt_page": 29,
+    "source_pdf_page": 173,
+    "manual_page": "4-8",
+    "text_path": "source_context/page_text/4_8__pdf_173.txt"
+  },
+  {
+    "excerpt_page": 30,
+    "source_pdf_page": 174,
+    "manual_page": "4-9",
+    "text_path": "source_context/page_text/4_9__pdf_174.txt"
+  },
+  {
+    "excerpt_page": 31,
+    "source_pdf_page": 175,
+    "manual_page": "4-10",
+    "text_path": "source_context/page_text/4_10__pdf_175.txt"
+  },
+  {
+    "excerpt_page": 32,
+    "source_pdf_page": 176,
+    "manual_page": "4-11",
+    "text_path": "source_context/page_text/4_11__pdf_176.txt"
+  },
+  {
+    "excerpt_page": 33,
+    "source_pdf_page": 177,
+    "manual_page": "4-12",
+    "text_path": "source_context/page_text/4_12__pdf_177.txt"
+  },
+  {
+    "excerpt_page": 34,
+    "source_pdf_page": 179,
+    "manual_page": "4-14",
+    "text_path": "source_context/page_text/4_14__pdf_179.txt"
+  },
+  {
+    "excerpt_page": 35,
+    "source_pdf_page": 180,
+    "manual_page": "4-15",
+    "text_path": "source_context/page_text/4_15__pdf_180.txt"
+  },
+  {
+    "excerpt_page": 36,
+    "source_pdf_page": 182,
+    "manual_page": "4-17",
+    "text_path": "source_context/page_text/4_17__pdf_182.txt"
+  },
+  {
+    "excerpt_page": 37,
+    "source_pdf_page": 183,
+    "manual_page": "4-18",
+    "text_path": "source_context/page_text/4_18__pdf_183.txt"
+  },
+  {
+    "excerpt_page": 38,
+    "source_pdf_page": 185,
+    "manual_page": "4-20",
+    "text_path": "source_context/page_text/4_20__pdf_185.txt"
+  },
+  {
+    "excerpt_page": 39,
+    "source_pdf_page": 187,
+    "manual_page": "4-22",
+    "text_path": "source_context/page_text/4_22__pdf_187.txt"
+  },
+  {
+    "excerpt_page": 40,
+    "source_pdf_page": 188,
+    "manual_page": "4-23",
+    "text_path": "source_context/page_text/4_23__pdf_188.txt"
+  },
+  {
+    "excerpt_page": 41,
+    "source_pdf_page": 189,
+    "manual_page": "4-24",
+    "text_path": "source_context/page_text/4_24__pdf_189.txt"
+  },
+  {
+    "excerpt_page": 42,
+    "source_pdf_page": 190,
+    "manual_page": "4-25",
+    "text_path": "source_context/page_text/4_25__pdf_190.txt"
+  },
+  {
+    "excerpt_page": 43,
+    "source_pdf_page": 191,
+    "manual_page": "4-26",
+    "text_path": "source_context/page_text/4_26__pdf_191.txt"
+  },
+  {
+    "excerpt_page": 44,
+    "source_pdf_page": 192,
+    "manual_page": "4-27",
+    "text_path": "source_context/page_text/4_27__pdf_192.txt"
+  },
+  {
+    "excerpt_page": 45,
+    "source_pdf_page": 193,
+    "manual_page": "4-28",
+    "text_path": "source_context/page_text/4_28__pdf_193.txt"
+  },
+  {
+    "excerpt_page": 46,
+    "source_pdf_page": 194,
+    "manual_page": "4-29",
+    "text_path": "source_context/page_text/4_29__pdf_194.txt"
+  },
+  {
+    "excerpt_page": 47,
+    "source_pdf_page": 195,
+    "manual_page": "4-30",
+    "text_path": "source_context/page_text/4_30__pdf_195.txt"
+  },
+  {
+    "excerpt_page": 48,
+    "source_pdf_page": 196,
+    "manual_page": "4-31",
+    "text_path": "source_context/page_text/4_31__pdf_196.txt"
+  },
+  {
+    "excerpt_page": 49,
+    "source_pdf_page": 197,
+    "manual_page": "4-32",
+    "text_path": "source_context/page_text/4_32__pdf_197.txt"
+  },
+  {
+    "excerpt_page": 50,
+    "source_pdf_page": 198,
+    "manual_page": "4-33",
+    "text_path": "source_context/page_text/4_33__pdf_198.txt"
+  },
+  {
+    "excerpt_page": 51,
+    "source_pdf_page": 200,
+    "manual_page": "4-35",
+    "text_path": "source_context/page_text/4_35__pdf_200.txt"
+  },
+  {
+    "excerpt_page": 52,
+    "source_pdf_page": 201,
+    "manual_page": "4-36",
+    "text_path": "source_context/page_text/4_36__pdf_201.txt"
+  },
+  {
+    "excerpt_page": 53,
+    "source_pdf_page": 202,
+    "manual_page": "4-37",
+    "text_path": "source_context/page_text/4_37__pdf_202.txt"
+  },
+  {
+    "excerpt_page": 54,
+    "source_pdf_page": 203,
+    "manual_page": "4-38",
+    "text_path": "source_context/page_text/4_38__pdf_203.txt"
+  },
+  {
+    "excerpt_page": 55,
+    "source_pdf_page": 204,
+    "manual_page": "4-39",
+    "text_path": "source_context/page_text/4_39__pdf_204.txt"
+  },
+  {
+    "excerpt_page": 56,
+    "source_pdf_page": 205,
+    "manual_page": "4-40",
+    "text_path": "source_context/page_text/4_40__pdf_205.txt"
+  },
+  {
+    "excerpt_page": 57,
+    "source_pdf_page": 207,
+    "manual_page": "4-42",
+    "text_path": "source_context/page_text/4_42__pdf_207.txt"
+  },
+  {
+    "excerpt_page": 58,
+    "source_pdf_page": 208,
+    "manual_page": "4-43",
+    "text_path": "source_context/page_text/4_43__pdf_208.txt"
+  },
+  {
+    "excerpt_page": 59,
+    "source_pdf_page": 210,
+    "manual_page": "4-45",
+    "text_path": "source_context/page_text/4_45__pdf_210.txt"
+  },
+  {
+    "excerpt_page": 60,
+    "source_pdf_page": 211,
+    "manual_page": "4-46",
+    "text_path": "source_context/page_text/4_46__pdf_211.txt"
+  },
+  {
+    "excerpt_page": 61,
+    "source_pdf_page": 212,
+    "manual_page": "4-47",
+    "text_path": "source_context/page_text/4_47__pdf_212.txt"
+  },
+  {
+    "excerpt_page": 62,
+    "source_pdf_page": 215,
+    "manual_page": "4-50",
+    "text_path": "source_context/page_text/4_50__pdf_215.txt"
+  },
+  {
+    "excerpt_page": 63,
+    "source_pdf_page": 216,
+    "manual_page": "4-51",
+    "text_path": "source_context/page_text/4_51__pdf_216.txt"
+  },
+  {
+    "excerpt_page": 64,
+    "source_pdf_page": 217,
+    "manual_page": "4-52",
+    "text_path": "source_context/page_text/4_52__pdf_217.txt"
+  },
+  {
+    "excerpt_page": 65,
+    "source_pdf_page": 218,
+    "manual_page": "4-53",
+    "text_path": "source_context/page_text/4_53__pdf_218.txt"
+  },
+  {
+    "excerpt_page": 66,
+    "source_pdf_page": 219,
+    "manual_page": "4-54",
+    "text_path": "source_context/page_text/4_54__pdf_219.txt"
+  },
+  {
+    "excerpt_page": 67,
+    "source_pdf_page": 220,
+    "manual_page": "4-55",
+    "text_path": "source_context/page_text/4_55__pdf_220.txt"
+  },
+  {
+    "excerpt_page": 68,
+    "source_pdf_page": 223,
+    "manual_page": "4-58",
+    "text_path": "source_context/page_text/4_58__pdf_223.txt"
+  },
+  {
+    "excerpt_page": 69,
+    "source_pdf_page": 224,
+    "manual_page": "4-59",
+    "text_path": "source_context/page_text/4_59__pdf_224.txt"
+  },
+  {
+    "excerpt_page": 70,
+    "source_pdf_page": 225,
+    "manual_page": "4-60",
+    "text_path": "source_context/page_text/4_60__pdf_225.txt"
+  },
+  {
+    "excerpt_page": 71,
+    "source_pdf_page": 227,
+    "manual_page": "4-62",
+    "text_path": "source_context/page_text/4_62__pdf_227.txt"
+  },
+  {
+    "excerpt_page": 72,
+    "source_pdf_page": 228,
+    "manual_page": "4-63",
+    "text_path": "source_context/page_text/4_63__pdf_228.txt"
+  },
+  {
+    "excerpt_page": 73,
+    "source_pdf_page": 229,
+    "manual_page": "4-64",
+    "text_path": "source_context/page_text/4_64__pdf_229.txt"
+  },
+  {
+    "excerpt_page": 74,
+    "source_pdf_page": 230,
+    "manual_page": "4-65",
+    "text_path": "source_context/page_text/4_65__pdf_230.txt"
+  },
+  {
+    "excerpt_page": 75,
+    "source_pdf_page": 232,
+    "manual_page": "4-67",
+    "text_path": "source_context/page_text/4_67__pdf_232.txt"
+  },
+  {
+    "excerpt_page": 76,
+    "source_pdf_page": 233,
+    "manual_page": "4-68",
+    "text_path": "source_context/page_text/4_68__pdf_233.txt"
+  },
+  {
+    "excerpt_page": 77,
+    "source_pdf_page": 234,
+    "manual_page": "4-69",
+    "text_path": "source_context/page_text/4_69__pdf_234.txt"
+  },
+  {
+    "excerpt_page": 78,
+    "source_pdf_page": 235,
+    "manual_page": "4-70",
+    "text_path": "source_context/page_text/4_70__pdf_235.txt"
+  },
+  {
+    "excerpt_page": 79,
+    "source_pdf_page": 236,
+    "manual_page": "4-71",
+    "text_path": "source_context/page_text/4_71__pdf_236.txt"
+  },
+  {
+    "excerpt_page": 80,
+    "source_pdf_page": 237,
+    "manual_page": "4-72",
+    "text_path": "source_context/page_text/4_72__pdf_237.txt"
+  },
+  {
+    "excerpt_page": 81,
+    "source_pdf_page": 239,
+    "manual_page": "4-74",
+    "text_path": "source_context/page_text/4_74__pdf_239.txt"
+  },
+  {
+    "excerpt_page": 82,
+    "source_pdf_page": 240,
+    "manual_page": "4-75",
+    "text_path": "source_context/page_text/4_75__pdf_240.txt"
+  },
+  {
+    "excerpt_page": 83,
+    "source_pdf_page": 241,
+    "manual_page": "4-76",
+    "text_path": "source_context/page_text/4_76__pdf_241.txt"
+  },
+  {
+    "excerpt_page": 84,
+    "source_pdf_page": 242,
+    "manual_page": "4-77",
+    "text_path": "source_context/page_text/4_77__pdf_242.txt"
+  },
+  {
+    "excerpt_page": 85,
+    "source_pdf_page": 245,
+    "manual_page": "4-80",
+    "text_path": "source_context/page_text/4_80__pdf_245.txt"
+  },
+  {
+    "excerpt_page": 86,
+    "source_pdf_page": 246,
+    "manual_page": "4-81",
+    "text_path": "source_context/page_text/4_81__pdf_246.txt"
+  },
+  {
+    "excerpt_page": 87,
+    "source_pdf_page": 247,
+    "manual_page": "4-82",
+    "text_path": "source_context/page_text/4_82__pdf_247.txt"
+  },
+  {
+    "excerpt_page": 88,
+    "source_pdf_page": 248,
+    "manual_page": "4-83",
+    "text_path": "source_context/page_text/4_83__pdf_248.txt"
+  },
+  {
+    "excerpt_page": 89,
+    "source_pdf_page": 249,
+    "manual_page": "4-84",
+    "text_path": "source_context/page_text/4_84__pdf_249.txt"
+  },
+  {
+    "excerpt_page": 90,
+    "source_pdf_page": 250,
+    "manual_page": "4-85",
+    "text_path": "source_context/page_text/4_85__pdf_250.txt"
+  },
+  {
+    "excerpt_page": 91,
+    "source_pdf_page": 252,
+    "manual_page": "4-87",
+    "text_path": "source_context/page_text/4_87__pdf_252.txt"
+  },
+  {
+    "excerpt_page": 92,
+    "source_pdf_page": 253,
+    "manual_page": "4-88",
+    "text_path": "source_context/page_text/4_88__pdf_253.txt"
+  },
+  {
+    "excerpt_page": 93,
+    "source_pdf_page": 254,
+    "manual_page": "4-89",
+    "text_path": "source_context/page_text/4_89__pdf_254.txt"
+  },
+  {
+    "excerpt_page": 94,
+    "source_pdf_page": 257,
+    "manual_page": "4-92",
+    "text_path": "source_context/page_text/4_92__pdf_257.txt"
+  },
+  {
+    "excerpt_page": 95,
+    "source_pdf_page": 258,
+    "manual_page": "4-93",
+    "text_path": "source_context/page_text/4_93__pdf_258.txt"
+  },
+  {
+    "excerpt_page": 96,
+    "source_pdf_page": 259,
+    "manual_page": "4-94",
+    "text_path": "source_context/page_text/4_94__pdf_259.txt"
+  },
+  {
+    "excerpt_page": 97,
+    "source_pdf_page": 260,
+    "manual_page": "4-95",
+    "text_path": "source_context/page_text/4_95__pdf_260.txt"
+  },
+  {
+    "excerpt_page": 98,
+    "source_pdf_page": 263,
+    "manual_page": "4-98",
+    "text_path": "source_context/page_text/4_98__pdf_263.txt"
+  },
+  {
+    "excerpt_page": 99,
+    "source_pdf_page": 264,
+    "manual_page": "4-99",
+    "text_path": "source_context/page_text/4_99__pdf_264.txt"
+  },
+  {
+    "excerpt_page": 100,
+    "source_pdf_page": 265,
+    "manual_page": "4-100",
+    "text_path": "source_context/page_text/4_100__pdf_265.txt"
+  },
+  {
+    "excerpt_page": 101,
+    "source_pdf_page": 268,
+    "manual_page": "4-103",
+    "text_path": "source_context/page_text/4_103__pdf_268.txt"
+  },
+  {
+    "excerpt_page": 102,
+    "source_pdf_page": 270,
+    "manual_page": "4-105",
+    "text_path": "source_context/page_text/4_105__pdf_270.txt"
+  },
+  {
+    "excerpt_page": 103,
+    "source_pdf_page": 271,
+    "manual_page": "4-106",
+    "text_path": "source_context/page_text/4_106__pdf_271.txt"
+  },
+  {
+    "excerpt_page": 104,
+    "source_pdf_page": 272,
+    "manual_page": "4-107",
+    "text_path": "source_context/page_text/4_107__pdf_272.txt"
+  },
+  {
+    "excerpt_page": 105,
+    "source_pdf_page": 273,
+    "manual_page": "4-108",
+    "text_path": "source_context/page_text/4_108__pdf_273.txt"
+  },
+  {
+    "excerpt_page": 106,
+    "source_pdf_page": 275,
+    "manual_page": "4-110",
+    "text_path": "source_context/page_text/4_110__pdf_275.txt"
+  },
+  {
+    "excerpt_page": 107,
+    "source_pdf_page": 277,
+    "manual_page": "4-112",
+    "text_path": "source_context/page_text/4_112__pdf_277.txt"
+  },
+  {
+    "excerpt_page": 108,
+    "source_pdf_page": 278,
+    "manual_page": "4-113",
+    "text_path": "source_context/page_text/4_113__pdf_278.txt"
+  },
+  {
+    "excerpt_page": 109,
+    "source_pdf_page": 279,
+    "manual_page": "4-114",
+    "text_path": "source_context/page_text/4_114__pdf_279.txt"
+  }
+]

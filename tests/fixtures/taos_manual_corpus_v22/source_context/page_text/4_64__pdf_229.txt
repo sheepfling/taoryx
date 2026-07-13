@@ -1,0 +1,42 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.6. *Optimize Data Block 
+define three constraints. These constraints are on the trajectory output variables, not 
+on the input optimization parameters. Limits on the parameters are given later in the 
+data block. 
+In this example, the constraints are evaluated at the same point in the trajectory as 
+the objective function because no trajectory or segment numbers are provided. If 
+these constraints are applied as a continuation to the *optimize example above, then 
+the velocity must be equal to 3000, the flight path angle must be equal to -80, and 
+the user-defined variable qmin must be less than zero at the end of segment number 
+6 on trajectory number 1. 
+Segment and trajectory numbers can be specified on each constraint if they are differ- 
+ent from those given for the objective function. For example, 
+constrain vel on segment 3, trajectory 2 = 3000 
+constrains the velocity on segment 3 in trajectory 2 to 3000 ft/sec. 
+User-defined integral variables, such as qmin shown above, are often used for in- 
+equality constraints in optimization to keep a trajectory parameter within known 
+boundaries. For example, vehicles with aerodynamic control surfaces must operate 
+within the atmosphere, that is, they require a minimum dynamic pressure to maintain 
+vehicle control. This limit must be maintained over the entire trajectory, not just at 
+the end of a segment. If the limit is 500 Ibf/ft2, then a user-defined integral variable 
+can be defined as 
+q h  = \(q - 500)2 
+for q e 500 
+otherwise 
+Ifqmin is constrained to be less than zero, it forces the dynamic pressure to stay above 
+the minimum value of 500 lbdft2. Altitude, g loads, and other flight path constraints 
+can be defined similarly. Section 4.3.1 contains information explaining how to input 
+an integral user-defined variable. 
+Multiple-Vehicle Constraints 
+The full constraint expression consists of the keyword constrain followed by a rela- 
+tionship and an optional reference factor. The relationship consists of an output vari- 
+able name, followed by a relationship (=, <, or >), followed by a value. The value 
+can either be anumber, like shown in the examples above, or another output variable 
+evaluated at the same or different point in the trajectory. This feature is useful when 
+computing intercept trajectories, for example, 
+constrain alt=alt [23 
+says to make the altitude on the optimization trajectory equal to the altitude on trajec- 
+tory number 2. Enclosing the trajectory number in brackets is one method for enter- 
+ing the trajectory number. 
+4-64 

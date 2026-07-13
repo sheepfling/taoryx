@@ -1,0 +1,7 @@
+(constant-thr)
+  table thrust units=lb
+  start
+    sub pres
+    mult anoz
+    add tvac
+  end

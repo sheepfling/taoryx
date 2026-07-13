@@ -1,0 +1,123 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+4.3.3. *File Data Block 
+4.3.3. *File Data Block 
+The V l e  data block is used to create files containing columns of trajectory informa- 
+tion. Trajectory output variables are written to the file as columns of numbers, and 
+each column is separated by at least one space. Column headings are placed at the 
+beginning of the file, but, thereafter, the columns are continuous. This format is ideal 
+for importing to other software, such as a plotting program or a spreadsheet. There 
+are no page headings or other information that must be removed; at most, the column 
+headings must be removed. 
+For example, 
+*file tra j . dat 
+time alt long latgd range vel 
+writes the trajectory variables to the file trajht. Figure 4-5 shows the first part of 
+this file. 
+Time 
+0.000 
+0 -500 
+1.000 
+1.500 
+2.000 
+2 -500 
+3.000 
+3 -500 
+4.000 
+4 .SO0 
+5.000 
+5 -500 
+6.000 
+6 .SO0 
+Alt 
+300000 -0 
+294835.2 
+289665.1 
+284489.8 
+279309.3 
+274123.5 
+268932.4 
+263736.2 
+258534.7 
+253328.0 
+248116.2 
+242899.1 
+237676.9 
+232449.5 
+Long 
+20 .ooooo 
+20.01991 
+20.03982 
+20.05975 
+. 
+20.07968 
+20.09962 
+20.11958 
+20.13954 
+20.15951 
+20.17950 
+20.19949 
+20.21949 
+20.23950 
+20.25952 
+Latgd 
+0 .ooooo 
+0 .ooooo 
+0.00000 
+0 .ooooo 
+0 .ooooo 
+0 .ooooo 
+0 .ooooo 
+0 .ooooo 
+0 .ooooo 
+0 .ooooo 
+0 .ooooo 
+0 .ooooo 
+0 .ooooo 
+0 .ooooo 
+Range 
+0.000 
+1.196 
+2.394 
+3 -591 
+4.789 
+5.988 
+7.188 
+8.388 
+9.588 
+10.789 
+11.991 
+13.193 
+14 -396 
+15.599 
+Vel 
+18000 -00 
+18008.93 
+18017 -86 
+18026.78 
+18035.69 
+18044.58 
+18053.45 
+18062.31 
+18071.13 
+18079 -91 
+18088.65 
+18097 -33 
+18105 -96 
+18114.52 
+Figure 4 5 .  Trajectory Output File Example. 
+The filename must be valid. If the file already exists, it is overwritten with no warning 
+and the old data is lost. This is normally satisfactory because the file will be updated 
+to contain information from the most recent run. 
+Any standard output variable or user-defmed output variable can be written to the 
+file. User-defined variables referenced in a YZe data block must be defined prior to 
+the reference. The units and printout format are controlled with the *units/@t data 
+block (Section 4.4.13). 
+Each output line is limited to 400 characters, so this limits the number of output vari- 
+ables that can be listed to about 30. Usually it is best to limit the number of output 
+variables to 12 or fewer because some screen editors and printers can only handle 
+about 130 characters per line. 
+Radar and relative vehicle output variables, those starting with rad or rel, must con- 
+tain a subscript enclosed in square brackets. For example, the variable radrng[2] is 
+used to print the radar range of the current trajectory from radar station number 2, 
+4-40 

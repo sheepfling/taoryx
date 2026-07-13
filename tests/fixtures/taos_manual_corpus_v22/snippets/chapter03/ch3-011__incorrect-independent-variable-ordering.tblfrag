@@ -1,0 +1,4 @@
+table cx(alt,mach) extrap sref=5.30 # INCORRECT: altitude
+  mach = 5, 10, 15, 20             # is first in definition,
+  alt = 0, 10000                    # but Mach values are
+                                    # given first

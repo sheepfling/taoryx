@@ -1,0 +1,6 @@
+*define new-var
+  new-var = 0;
+  if (time > 20) {
+    ratio = pres / 2116.2;
+    new-var = ratio * table(tbl-id);
+  }

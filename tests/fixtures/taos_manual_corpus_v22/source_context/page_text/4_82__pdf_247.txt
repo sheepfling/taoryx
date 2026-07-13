@@ -1,0 +1,31 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.10. *Summarize Data Block 
+A *summarize data block can include any number of math operations, although most 
+summary variables are defined with only one or two operations. The following exam- 
+ple, which calculates the difference in final range between two trajectories, has 3 
+math operations: 
+*summarize delta-rng 
+add last (rangell1 
+1 
+sub last(range[21) 
+mult 1.852 
+The summary variable, delta-mg, is initialized to zero. The first operation adds the 
+final range from trajectory 1 to the summary value which is zero. The next operation 
+subtracts the final range from trajectory 2 resulting in the difference between the two 
+ranges. The last operation converts the units of range from nautical miles to kilome- 
+ters. 
+The previous example used the last function to select the final range so no segment 
+numbers were given. The following example selects altitudes from within two trajec- 
+tories and calculates the difference: 
+*summarize delta-alt 
+add alt on segment 4, trajectory 1 
+sub alt on segment 11, trajectory 2 
+div 3280.84 
+This example calculates the difference between the altitude at the end of segment 4 
+on trajectory 1 and the altitude at the end of segment 11 on trajectory 2 in kilometers. 
+Segment numbers are required because the special functions (m, 
+rnin,jirst and Zmt) 
+are not used, and trajectory numbers are given with the trajectory keyword to illus- 
+trate this style. 
+4-82 

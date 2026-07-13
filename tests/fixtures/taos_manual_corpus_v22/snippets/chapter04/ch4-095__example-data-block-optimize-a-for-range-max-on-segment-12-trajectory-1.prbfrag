@@ -1,0 +1,12 @@
+*optimize a for range=max on segment 12, trajectory 1
+
+  constrain vel=4000
+  constrain gamgd=-75
+
+  fref=100 maxitr=40 tol=1.0e-7
+
+  par-1=9.9  lo-1=-15 hi-1=15
+  par-2=8.5  lo-2=-15 hi-2=15
+  par-3=5.0  lo-3=-15 hi-3=15
+  par-4=1.0  lo-4=-15 hi-4=15
+  par-5=65.0 lo-5=51.0 hi-5=300.0

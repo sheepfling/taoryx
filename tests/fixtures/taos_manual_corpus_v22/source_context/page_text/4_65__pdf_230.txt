@@ -1,0 +1,40 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.6. *Optimize Data Block 
+Another method is to use keywords as follows: 
+constrain alt on segment 6, trajectory 1 
+= alt on segment 4, trajectory 3 
+This makes the altitude on segment number 6 in trajectory number 1 equal to the alti- 
+tude on segment number 4 in trajectory number 3. These altitudes are undefined un- 
+less both segment 6 in trajectory 1 and segment 4 in trajectory 3 have been computed 
+at the time the objective function is evaluated. The keywords trajectory and on seg- 
+m n t  are used to provide the trajectory and segment numbers. 
+Trajectory numbers can be given with subscripts enclosed in square brackets, for ex- 
+ample, 
+constrain east[21 on segment 4 = east111 on segment 7 
+Or they can be given following the keyword trajectory as follows: 
+constraint east on segment 4, trajectory 2 
+= east on segment 7, trajectory 1 
+Both methods result in the same constraint. Trajectory numbers cannot be given 
+twice using both a subscript and the trajectory keyword. 
+If both trajectory and segment numbers are given, the segment number is given first 
+followed by the trajectory number. If trajectory and segment numbers are not given 
+in the constraint, they default to the objective function values. 
+Referencing Values 
+The optimization method is more reliable if all values involved in the calculations, 
+that is, the parameters, the objective function, and the constraints, are of approxi- 
+mately the same order of magnitude. If some constraints or parameters have values 
+that are orders of magnitude larger than others, then numerical difficulties often re- 
+sult, Methods are provided in TAOS to normalize or reference values involved in the 
+optimization process. 
+Constraint relationships that contain a number, such as aZt=30000, are automatically 
+normalized or referenced by the number (unless it is zero). Other constraints can be 
+referenced by an input value, for example, 
+constrain vel on segment 11 = ve1[31 on segment 4, ref=1000 
+references both velocity values in the constraint by a factor of 1000. The refvariable 
+must be the last item in the constraint (it follows the relationship). It is optional, and 
+its only purpose is to improve the numerical calculations. 
+Optimization Control Variables 
+After constraints have been given, some variables, summarized in Table 4-20, are 
+input that control the optimization process. AU of these variables have reasonable de- 
+fault values, so they are optional. 

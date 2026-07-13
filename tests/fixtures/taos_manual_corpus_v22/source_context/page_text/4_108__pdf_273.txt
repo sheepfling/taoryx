@@ -1,0 +1,72 @@
+4. Problem Files 
+4.5. Examples 
+4.53. Air-Launched Intercept 
+*segment 24 Coast to impact 
+*integ dtprnk2.0 dt=O.lO 
+*aero ca=(target,ca) 
+cn=(target-cn) 
+*when alt<O stop 
+*optimize a for vel=max on segment 8, trajectory 1 
+constrain alttll on segment 8 = altt21 on segment 23 
+constrain long[ll on segment 8 = long[2] on segment 23 
+fref=10000 
+par-l=9.9 
+par-2=9.9 
+par-3=9.9 
+par-4=8.4 
+par-5=3.7 
+par-6=3.7 
+par-7-0.5 
+par-8=-2.0 
+par-9=-4.2 
+par-l0=-5.0 
+par-11-6.5 
+par-12-8.3 
+par-13=3.50 
+maxi t r= 6 0 
+lo-1=-10.0 
+lo-2-10.0 
+10-3 =-lo . 0 
+10-4=-10.0 
+10-5=-10.0 
+10-6=-10.0 
+10-7=-10.0 
+10-8=-10.0 
+10-9 =-lo. 0 
+lo-lo=-10.0 
+lo-ll=-10.0 
+lo-12-10.0 
+10-13=1.0 
+integ=O 
+hi-l=lO .O 
+hi-2=10.0 
+hi-3~10.0 
+hi-4d0.0 
+hi-5=10.0 
+hi-6~10.0 
+hi-7=10.0 
+hi-8=10.0 
+hi-9=10.0 
+hi-10=10.0 
+hi-lklO.0 
+hi-12=10.0 
+hi-13~6.0 
+*egs ex3.dbf time alt east alt-km rng-km vel 
+*end 
+Trajectory number 1 simulates the interceptor with 8 segments and trajectory number 
+2 simulates the target with 4 segments. This problem is set up similarly to previous 
+examples so only the differences are discussed. 
+Optimization 
+The main feature of this problem is the use of optimization to calculate the shape of 
+the intercept trajectory. Segments 2 and 5 in the first trajectory, representing the bum 
+times of the first and second stages, have guidance rules with angle-of-attack time 
+histories. All of the angle-of-attack values are optimization parameters. The opti- 
+mization procedure varies these angle-of-attack values to achieve maximum veloc- 
+ity at impact. Maximum velocity is used instead of maximum range because it con- 
+verges faster and gives similar results. 
+The other optimization parameter is the initial longitude of the interceptor. The target 
+is launched from a zero longitude and latitude heading east. The interceptor is 
+launched from zero latitude heading west, but its initial longitude is unknown. Its ini- 
+tial longitude needs to be as far east as possible and still intercept the target 90 se- 
+conds after launch. 
+4- 108 

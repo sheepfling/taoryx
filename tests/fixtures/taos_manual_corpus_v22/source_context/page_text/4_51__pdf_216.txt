@@ -1,0 +1,85 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.1. *Amos Data Block 
+*atmos 
+u s e r  
+alt 
+temp 
+0 
+548.2 
+5000 
+530.0 
+10000 
+511.0 
+15000 
+494.9 
+20000 
+477.5 
+pres 
+r h o  
+sndspd 
+visc 
+2111. 
+-00224 
+1147 
+3.895e-7 
+1774. 
+-00195 
+1128 
+3 -780e-7 
+1480. 
+-00168 
+1109 
+3.701e-7 
+1229. 
+.00124 
+1072 
+2.602e-7 
+833. 
+-00105 
+1051 
+3.400e-7 
+The keyword user indicates that this is a user-defined atmosphere with all properties 
+specified. The next line gives column headers for the atmosphere properties and for 
+altitude. All of these keywords are required, but their order is not important, that is, 
+temp can be given before pres or vice versa. These keywords are the same as the at- 
+mosphere output variables given in the appendix, and the units for each variable can 
+be changed with the *units/fmt data block (Section 4.4.13). 
+The atmospheric properties are given as a function of altitude, so usually altitude is 
+the fmt column of the table. The atmospheric properties on each line in the table cor- 
+respond to an altitude. The altitude values must be strictly increasing, and no dupli- 
+cate altitudes are allowed. 
+As the flight path is calculated the table values are linearly interpolated to obtain the 
+atmospheric properties. Enough values must be provided so that linear interpolation 
+models the atmospheric properties adequately. There are no limits on the number of 
+values that can be input. 
+Site-Measured Atmosphere 
+The second type of user-defined atmosphere requires only pressure and density as 
+a function of altitude. It is called a site-measured atmosphere and an exponential 
+function is used for interpolation. This means that fewer points are required to repre- 
+sent a realistic atmosphere. 
+A site-measured atmosphere is input the same way as a user-defined atmosphere ex- 
+cept that there are fewer columns of data. For example, 
+*atmos 
+site 
+alt 
+0 
+10000 
+20000 
+30000 
+40000 
+pres 
+2115. 
+1485. 
+830. 
+627. 
+241. 
+rho 
+0.00223 
+0.00166 
+0.00105 
+0.00089 
+0.00058 
+A temperature is estimated from the pressure and density with the ideal gas law, and 
+speed of sound and viscosity are computed from this temperature. 
+4-51 

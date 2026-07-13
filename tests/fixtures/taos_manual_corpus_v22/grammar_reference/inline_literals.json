@@ -1,0 +1,6139 @@
+[
+  {
+    "literal": "**",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 68,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "*aero",
+    "count": 20,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/02_relationship.tex",
+        "line": 17,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 182,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 231,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 112,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 3,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 5,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 6,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 15,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 21,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 24,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 46,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 47,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 49,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 81,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 94,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 6,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 19,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 20,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 65,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 59,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Aero",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*atmos",
+    "count": 6,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 88,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 105,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_01_atmos.tex",
+        "line": 15,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_12_title.tex",
+        "line": 20,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 30,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 75,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Atmos",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_01_atmos.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*cg",
+    "count": 7,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/02_relationship.tex",
+        "line": 18,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 232,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 6,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 21,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_03_cg.tex",
+        "line": 18,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_03_cg.tex",
+        "line": 30,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_03_cg.tex",
+        "line": 42,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Cg",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_03_cg.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*constants",
+    "count": 6,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 231,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 86,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 7,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 11,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 14,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 22,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Constants",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*define",
+    "count": 11,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/02_relationship.tex",
+        "line": 19,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 27,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 11,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 13,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 16,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 20,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 36,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 54,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 66,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 84,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_13_units_fmt.tex",
+        "line": 113,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Define",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 1,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Dwn/crs",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_02_dwn_crs.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*dwn/crs",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_02_dwn_crs.tex",
+        "line": 25,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_03_air_intercept.tex",
+        "line": 72,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_04_ground_intercept.tex",
+        "line": 16,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*earth",
+    "count": 6,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 106,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 112,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_03_earth.tex",
+        "line": 47,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 37,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 31,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 75,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Earth",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_03_earth.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*egs",
+    "count": 11,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 84,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 7,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 11,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 13,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 14,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 17,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 43,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 71,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 81,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 82,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 71,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Egs",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*end",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 80,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 40,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*File",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 1,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*file",
+    "count": 13,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 3,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 33,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 47,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 4,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 41,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 83,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 3,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 10,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 12,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 14,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 16,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 41,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 42,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*fly",
+    "count": 10,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 113,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 7,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 9,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 11,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 13,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 82,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 86,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 233,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_10_rail.tex",
+        "line": 5,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 5,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Fly",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Iip",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_04_iip.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Increment",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*increment",
+    "count": 11,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 5,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 15,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 18,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 19,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 22,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 36,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 110,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 4,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 7,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 151,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_02_ballistic_rocket.tex",
+        "line": 58,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Inertial",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*inertial",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 12,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*inertial geocentric",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 45,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "*initial",
+    "count": 7,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 93,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 101,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 103,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 110,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 4,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 47,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 67,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Initial",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*integ",
+    "count": 6,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 186,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 230,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_07_integ.tex",
+        "line": 10,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 64,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 429,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 57,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Integ",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_07_integ.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*limits",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 184,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 7,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Limits",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*optimize",
+    "count": 6,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 170,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 35,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 80,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 89,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 303,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_02_ballistic_rocket.tex",
+        "line": 92,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Optimize",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*print",
+    "count": 16,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 102,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 111,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 3,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 10,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 41,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 49,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 68,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 83,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 3,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 5,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 11,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 15,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 17,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 51,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 51,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 53,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Print",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 1,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*prop",
+    "count": 14,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/02_relationship.tex",
+        "line": 17,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 182,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 232,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 254,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 6,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 21,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 3,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 4,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 7,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 70,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 76,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 66,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_02_ballistic_rocket.tex",
+        "line": 55,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_04_ground_intercept.tex",
+        "line": 24,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Prop",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Radar",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*radar",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 14,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 27,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Rail",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_10_rail.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*rail",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_10_rail.tex",
+        "line": 4,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 5,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 67,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*reset",
+    "count": 9,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 16,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 17,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 22,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 36,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 109,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 3,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 6,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 8,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 151,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Reset",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*search",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 44,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 26,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 34,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 79,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Search",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*search 1",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 27,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "*segment",
+    "count": 9,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 111,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 114,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 9,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 16,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 22,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 23,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 48,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 69,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 69,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Summarize",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*summarize",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 28,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*survey",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 80,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 33,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 30,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 46,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 73,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Survey",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*survey 1",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 15,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 17,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 21,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "*survey 2",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 17,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "*tangent",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_04_iip.tex",
+        "line": 26,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_07_tangent.tex",
+        "line": 12,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Tangent",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_07_tangent.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*title",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 88,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 104,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_12_title.tex",
+        "line": 18,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Title",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_12_title.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*trajectory",
+    "count": 11,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 89,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 112,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 31,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 24,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 28,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 37,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 39,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 43,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 66,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 5,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 30,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*units/fmt",
+    "count": 13,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 121,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 104,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 145,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 35,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 96,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 31,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 44,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_01_atmos.tex",
+        "line": 69,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 40,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 49,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 48,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_13_units_fmt.tex",
+        "line": 4,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/05_03_air_intercept.tex",
+        "line": 66,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Units/Fmt",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_13_units_fmt.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*when",
+    "count": 6,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/00_introduction.tex",
+        "line": 113,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 9,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 12,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 58,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 68,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 69,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*When",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*wind",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/02_relationship.tex",
+        "line": 18,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 232,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_14_wind.tex",
+        "line": 4,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_14_wind.tex",
+        "line": 22,
+        "macro": "problemblock"
+      },
+      {
+        "source": "chapters/chapter04/04_problem_overview.tex",
+        "line": 31,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": "*Wind",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_14_wind.tex",
+        "line": 1,
+        "macro": "problemblock"
+      }
+    ]
+  },
+  {
+    "literal": ".dbf",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 13,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": ".out",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 7,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 7,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": ".prb",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 7,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 8,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "0",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 21,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "2.0e3",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 31,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "2.0e4",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 45,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "2.50e02",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_13_units_fmt.tex",
+        "line": 92,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "2000",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 31,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "2000.0",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 31,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "250",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_13_units_fmt.tex",
+        "line": 93,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "2nd Stage Boost",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_segment_overview.tex",
+        "line": 18,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "30",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 21,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "30,000",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 19,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "30000",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 21,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "<",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 276,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 139,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "=",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 277,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 139,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": ">",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 277,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 139,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "\\#",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 39,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 48,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 51,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 96,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "\\textasciicircum",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 67,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "a",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 32,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 53,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "abs",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 112,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 82,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "add",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 107,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 109,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 111,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 78,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 79,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "add tvac(time)",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 48,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "adjust",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 270,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "alignment",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 45,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "alpha",
+    "count": 8,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 68,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 69,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 71,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 72,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 100,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 100,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 103,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 32,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "alphat",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 70,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 73,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "alt",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 58,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 23,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 32,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 42,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 30,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "alt-km",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 105,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 27,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 29,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/05_03_air_intercept.tex",
+        "line": 64,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "alt0=35000",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 76,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "alt0=40000",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 41,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 77,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "alt0=60000",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 42,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "alt=30000",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 183,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "alt[1]",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 33,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "alt[2]",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 33,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "anoz",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 253,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "atan",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 82,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "bankgc",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 68,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 69,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 70,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 97,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "bankgd",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 71,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 72,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 73,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 200,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 33,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "beta",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 69,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 72,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 101,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 101,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 32,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "betae",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 68,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 71,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 100,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 103,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 200,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "ca2",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 203,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 211,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 223,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "cdh",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 164,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 165,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 165,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "cfslid",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_10_rail.tex",
+        "line": 17,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "cfstat",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_10_rail.tex",
+        "line": 16,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "cg",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 55,
+        "macro": "tabletype"
+      },
+      {
+        "source": "chapters/chapter04/02_03_cg.tex",
+        "line": 17,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_03_cg.tex",
+        "line": 17,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "compare.dat",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 27,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "config",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_03_cg.tex",
+        "line": 41,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "constrain",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 137,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "csto",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 113,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 192,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 204,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 207,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "del_alt",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 35,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 38,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "derivs=0",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 276,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 436,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "derivs=1",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 277,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "distd",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 32,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "diste",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 32,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "distn",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 32,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "downria",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 208,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 235,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 12,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "downx",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 88,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "downy",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 88,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "downz",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 89,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "dt",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 252,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "dtguid",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 186,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 230,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_07_integ.tex",
+        "line": 38,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_07_integ.tex",
+        "line": 40,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "dtprnt",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_07_integ.tex",
+        "line": 24,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "dx",
+    "count": 6,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 76,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 293,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 435,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 437,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 84,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 106,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "dxb",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 117,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 147,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "dy",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 76,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "dyb",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 117,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 147,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "dzb",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 117,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 147,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "e",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 32,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_13_units_fmt.tex",
+        "line": 90,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "e02",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_13_units_fmt.tex",
+        "line": 92,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "eastx",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 87,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "easty",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 87,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "eastz",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 88,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "ecc",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 40,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 64,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "end",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 64,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 65,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "endif",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 150,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "ep1",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 10,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 33,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "ep2",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 10,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 33,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "extrap",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 51,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "f",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_13_units_fmt.tex",
+        "line": 90,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "f2",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 285,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "factor",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 224,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "first",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 60,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "flaps",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 104,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "flat",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 39,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 63,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "for",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 79,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 90,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "fref",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 199,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 112,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "fref=10000",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 116,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "from",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 140,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "fuel",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 23,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "g/hr",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 87,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 51,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "g/min",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 87,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 51,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "g/sec",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 87,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 51,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "gama",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 59,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "gamgd<0",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_02_ballistic_rocket.tex",
+        "line": 61,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "gear",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 104,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "gem-t1-full",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_03_earth.tex",
+        "line": 112,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "gentry",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 73,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "geocentric",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_14_wind.tex",
+        "line": 22,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "geodetic",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_14_wind.tex",
+        "line": 23,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "goto",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 20,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 113,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 298,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 311,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 75,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "grmark",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 105,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 22,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "grseg",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 94,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "hi",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 51,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 74,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 50,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "id",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 107,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "iexp",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 80,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "if",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 113,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 263,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 299,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 134,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "if-then",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 20,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "iip_azm",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_04_iip.tex",
+        "line": 11,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_04_iip.tex",
+        "line": 24,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "iip_latgd",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_04_iip.tex",
+        "line": 10,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "iip_long",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_04_iip.tex",
+        "line": 10,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "iip_rng",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_04_iip.tex",
+        "line": 11,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_04_iip.tex",
+        "line": 24,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "iip_time",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_04_iip.tex",
+        "line": 10,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "inc",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 48,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 74,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 50,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "integ",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 236,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 120,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/05_03_air_intercept.tex",
+        "line": 57,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "integ=0",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 395,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "integ=1",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 396,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "integral",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 198,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "intercept",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 207,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 12,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "intercept=2",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_04_ground_intercept.tex",
+        "line": 28,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "jot",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 5,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 4,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "kg/hr",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 88,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 52,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "kg/min",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 88,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 52,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "kg/sec",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 88,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 52,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "kn",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 87,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 51,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "l/d-max",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 207,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "l/d\\_max",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 13,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "last",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 59,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 124,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "lat",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 57,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 59,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "latgd",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 31,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "lb",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 85,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 49,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "lb/hr",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 85,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 49,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "lb/min",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 85,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 49,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "lb/sec",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 85,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 49,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "lo",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 46,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 74,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 50,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "long",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 57,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 59,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 30,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "mach",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 99,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "mach < 5 \\& alt > 50000",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 293,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "mach=3",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 67,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 69,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "mach>3",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 67,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 67,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "mass",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 98,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "max",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 91,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 56,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 58,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 65,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "max(alt[1])",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 74,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "max-alt",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 14,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "max_g",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 64,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "max_q",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 64,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "maxitr",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 229,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 247,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 314,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 375,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 118,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "maxitr=0",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 231,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 398,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 119,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/05_02_ballistic_rocket.tex",
+        "line": 100,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "mdot",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/06_examples.tex",
+        "line": 33,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 30,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "mdt\\_units",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 31,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "min",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 90,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 56,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 60,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 65,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 68,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "mmult",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 32,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "motor",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 112,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "mult 3.219",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 46,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "n",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 86,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 81,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 83,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 50,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "neg",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 69,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "no-extrap",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 51,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "none",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_01_atmos.tex",
+        "line": 24,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "nrecruits",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 68,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "nx-max",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 133,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "omega_0",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 89,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 103,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 146,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "on segment",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 159,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 72,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "opta-5",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 461,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "opta-8",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 267,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "optx-n",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 82,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 47,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "output",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 107,
+        "macro": "tabletype"
+      },
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 113,
+        "macro": "tabletype"
+      }
+    ]
+  },
+  {
+    "literal": "par-n",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 303,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "payload",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 12,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "phi",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 70,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 73,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "pitchgc",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 74,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "pitchgd",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 75,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "pitchi",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 76,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 4,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/05_02_ballistic_rocket.tex",
+        "line": 77,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "platform",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 44,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "plength",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 108,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_10_rail.tex",
+        "line": 26,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "plmark",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 106,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 22,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "plseg",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 95,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "pow",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 68,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "power",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 130,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 132,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "print",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 122,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "print=1",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 312,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "prop",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 12,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 40,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "propnav",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 207,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 42,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "qe",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 12,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "qmin",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 198,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 108,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "qmin<0",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 130,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "rad",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 41,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 35,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 48,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 57,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 54,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "radrng[2]",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 43,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 37,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 51,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 10,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "radrng[2][1]",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 61,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 58,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "radrng[3][2]",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 11,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "range",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 108,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 14,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "rcm",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 60,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "ref",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 192,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 200,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "rel",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 42,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 36,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 49,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 58,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 55,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "relvel[2]",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_04_ground_intercept.tex",
+        "line": 29,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "relvel[2]>0",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_04_ground_intercept.tex",
+        "line": 32,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "relvel[4]",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 44,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_06_print.tex",
+        "line": 38,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 53,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "relvel[4][2]",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_05_file.tex",
+        "line": 63,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_07_print.tex",
+        "line": 60,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "reqtr",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 39,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "restarts",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 246,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "rng-km",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_03_air_intercept.tex",
+        "line": 64,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "rnose",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 61,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "rollgc",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 74,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "rollgd",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 75,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "rolli",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 76,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 5,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/05_02_ballistic_rocket.tex",
+        "line": 77,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "rpolr",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 39,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "segment",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 143,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "set",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 111,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "sin",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 106,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "slugs/hr",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 86,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 50,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "slugs/min",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 86,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 50,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "slugs/sec",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 86,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 50,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "special-tbl",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 120,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "sqr",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 106,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "srch-1",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 27,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "srch-n",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 81,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 19,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 33,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "sref",
+    "count": 4,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 73,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 103,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_01_aero.tex",
+        "line": 49,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_13_units_fmt.tex",
+        "line": 76,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "stag-heat",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 51,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "standard",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_01_atmos.tex",
+        "line": 23,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "start",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 44,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 64,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "start on",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 32,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 29,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "station\\_x",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 21,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "stop",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 77,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_12_when.tex",
+        "line": 84,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "sub pres",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 45,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "summary",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 70,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 72,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "surv-1",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 14,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 16,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "surv-2",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 17,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "surv-n",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 28,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "surveys",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 301,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "surveys=0",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 304,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "surveys=1",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 305,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "t_0",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 90,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 103,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 146,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "table",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 21,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 36,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 111,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "table()",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 53,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "target",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_trajectory_overview.tex",
+        "line": 36,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "then",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 289,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/03_01_define.tex",
+        "line": 149,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "This",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_12_title.tex",
+        "line": 19,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "thr\\_units",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 31,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "thrust",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 4,
+        "macro": "tabletype"
+      },
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 118,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 21,
+        "macro": "tabletype"
+      },
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 178,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_09_prop.tex",
+        "line": 30,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "time",
+    "count": 9,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 22,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 176,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 177,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter03/06_examples.tex",
+        "line": 9,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 301,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 99,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 101,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 108,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 19,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "time>42",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_04_ground_intercept.tex",
+        "line": 34,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "tmark",
+    "count": 9,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/06_examples.tex",
+        "line": 8,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter03/06_examples.tex",
+        "line": 11,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter03/06_examples.tex",
+        "line": 33,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 301,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 103,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 105,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 11,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 18,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 21,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "tmult",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 32,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "tol",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 202,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 109,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "traj.dat",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_03_file.tex",
+        "line": 16,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "traj.dbf",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_04_egs.tex",
+        "line": 25,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "trajectory",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 143,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 160,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 172,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 73,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 137,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "tsap-72",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_03_earth.tex",
+        "line": 93,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "tsap-84",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_03_earth.tex",
+        "line": 93,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "tseg",
+    "count": 6,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/06_examples.tex",
+        "line": 10,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter03/06_examples.tex",
+        "line": 10,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 301,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 94,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 103,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/02_11_reset.tex",
+        "line": 19,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "tseg>0",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 155,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 73,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 146,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "tvac",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 253,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "type",
+    "count": 5,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 171,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 181,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 182,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 184,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_02_constants.tex",
+        "line": 32,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "units",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/04_simple_tables.tex",
+        "line": 73,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "until",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 54,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "upria",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 208,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 235,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_08_limits.tex",
+        "line": 12,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "user",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_01_atmos.tex",
+        "line": 65,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "vals",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_11_survey.tex",
+        "line": 75,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "vary",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 53,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "vel",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 32,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 83,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 99,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "vel-bo",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 13,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_10_summarize.tex",
+        "line": 38,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "ventry",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/05_01_ballistic_reentry.tex",
+        "line": 73,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "version",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 130,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 142,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 142,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "vf02ad",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 20,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 230,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_06_optimize.tex",
+        "line": 387,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "vi",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/03_file_format.tex",
+        "line": 4,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 4,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "vrs",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 282,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "wgs-72",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_03_earth.tex",
+        "line": 46,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 38,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "wgs-84",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_03_earth.tex",
+        "line": 46,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/04_08_radar.tex",
+        "line": 38,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "wgs-84-full",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_03_earth.tex",
+        "line": 112,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "while",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_02_define.tex",
+        "line": 79,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "windd",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 65,
+        "macro": "tabletype"
+      }
+    ]
+  },
+  {
+    "literal": "winde",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 62,
+        "macro": "tabletype"
+      },
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 64,
+        "macro": "tabletype"
+      }
+    ]
+  },
+  {
+    "literal": "windh",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 61,
+        "macro": "tabletype"
+      },
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 63,
+        "macro": "tabletype"
+      }
+    ]
+  },
+  {
+    "literal": "windn",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 62,
+        "macro": "tabletype"
+      },
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 64,
+        "macro": "tabletype"
+      }
+    ]
+  },
+  {
+    "literal": "windv",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 60,
+        "macro": "tabletype"
+      },
+      {
+        "source": "chapters/chapter03/01_table_types.tex",
+        "line": 63,
+        "macro": "tabletype"
+      }
+    ]
+  },
+  {
+    "literal": "wt",
+    "count": 2,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 85,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/03_05_initial.tex",
+        "line": 97,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "x",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/01_file_format.tex",
+        "line": 83,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "xecicdt",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 30,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "xest",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 84,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "xest+dx",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 107,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "xest-dx",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 107,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "xhi",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 85,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "xlo",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 85,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "xref",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 112,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "xref=1.0",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/04_09_search.tex",
+        "line": 115,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "yawgc",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 74,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "yawgd",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 75,
+        "macro": "texttt"
+      }
+    ]
+  },
+  {
+    "literal": "yawi",
+    "count": 3,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_04_fly.tex",
+        "line": 76,
+        "macro": "texttt"
+      },
+      {
+        "source": "chapters/chapter04/02_06_inertial.tex",
+        "line": 4,
+        "macro": "statevar"
+      },
+      {
+        "source": "chapters/chapter04/05_02_ballistic_rocket.tex",
+        "line": 77,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "yecicdt",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 30,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "zecicdt",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter04/02_05_increment.tex",
+        "line": 31,
+        "macro": "statevar"
+      }
+    ]
+  },
+  {
+    "literal": "zero",
+    "count": 1,
+    "occurrences": [
+      {
+        "source": "chapters/chapter03/05_full_tables.tex",
+        "line": 112,
+        "macro": "texttt"
+      }
+    ]
+  }
+]

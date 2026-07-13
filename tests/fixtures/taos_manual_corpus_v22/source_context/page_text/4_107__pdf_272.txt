@@ -1,0 +1,61 @@
+4. Problem Files 
+4.5. Examples 
+4.5.3. Air-Launched Intercept 
+*aero ca=(stage2,ca_off) 
+cn=(stage2_cn) 
+*when tseg=0.50 goto 7 
+*when alt<O goto 8 
+*segment 7 Separate kill vehicle and coast 
+*integ dtprnt=0.5 dt=O.lO 
+*reset wk80.0 
+*cg 
+cg=32.3 
+*aero ca=(payload-ca) cn=(payload-cn) 
+*when time=80 goto 8 
+*when alt<O goto 8 
+*segment 8 Remove shroud and coast 
+*integ dtprnk0.5 dt=O.lO 
+*reset wk70.0 
+*cg 
+cg=18.0 
+*aero ca=(kkv-ca) 
+cn=(kkv-cn) 
+*when time=90 stop 
+*when alt<O stop 
+*trajectory 2 
+Target start on 21 
+*define alt-km 
+*define rng-km 
+alt-km = alW3280.84; 
+rng-km = range*1.852; 
+*dwn/crs long=0.0 latgd=0.0 azm=90.0 
+*initial geodetic 
+long=O. 0 
+lat=O .O 
+time=O .O 
+range=O . 0 
+alt=O .O 
+vel=O. 0 
+psi=90.0 
+gama=7 9.0 
+wt=13000.0 
+*print time east alt vel gamgd alpha dynprs 
+*segment 21 Launch 
+*integ dtprnt=l.O 
+dt=O.Ol 
+*aero ca=(target-ca-on) 
+cn=(target-cn) 
+*prop thrust=(target-thrust) mdot=(target-mdot) 
+*rail launch cfstak0.15 cfslid=0.01 
+*when plength > 1000.0 goto 22 
+*segment 22 1st stage burn 
+*integ dtprnkl.0 dt=O.lO 
+*aero ca= (target-ca-on) 
+cn= (target-cn) 
+*prop thrust=(target-thrust) ' mdot=(target-mdot) 
+*when time>75.0 goto 23 
+*segment 23 Coast to intercept time 
+*integ dtprnt=2.0 dt=O.lO 
+*aero ca=(target-ca) cn=(target-cn) 
+*when time>90.0 goto 24 
+4- 107 

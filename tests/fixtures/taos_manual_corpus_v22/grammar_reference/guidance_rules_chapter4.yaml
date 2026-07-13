@@ -1,0 +1,24 @@
+chapter: 4
+source_table: '4-4'
+status: complete
+rules:
+  - {name: alt, description: Fly at a constant altitude}
+  - {name: cl, description: Fly at a constant lift coefficient}
+  - {name: cs, description: Fly at a constant side-force coefficient}
+  - {name: downria, description: Fly down the range-insensitive axis}
+  - {name: dynprs, description: Fly at a constant dynamic pressure}
+  - {name: gamgc, description: Fly at a constant geocentric flight-path angle}
+  - {name: gamgd, description: Fly at a constant geodetic flight-path angle}
+  - {name: intercept, description: Fly to intercept another trajectory}
+  - {name: l/d, description: Fly at a constant lift-to-drag ratio}
+  - {name: l/d-max, description: Fly at the maximum lift-to-drag ratio}
+  - {name: mach, description: Fly at a constant Mach number}
+  - {name: nx, description: Fly at a constant axial specific-load factor}
+  - {name: ny, description: Fly at a constant lateral specific-load factor}
+  - {name: nz, description: Fly at a constant normal specific-load factor}
+  - {name: propnav, description: Fly to intercept with proportional navigation}
+  - {name: psigc, description: Fly at a constant geocentric heading angle}
+  - {name: psigd, description: Fly at a constant geodetic heading angle}
+  - {name: thrust, description: Fly at a constant thrust}
+  - {name: upria, description: Fly up the range-insensitive axis}
+  - {name: vel, description: Fly at a constant velocity}

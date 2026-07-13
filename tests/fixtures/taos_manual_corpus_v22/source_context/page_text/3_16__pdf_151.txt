@@ -1,0 +1,24 @@
+3. Table Files 
+3.5. Full Tables 
+3.5.2. Constant Values and State Variable Values 
+3.5.2. Constant Values and State Variable Values 
+Constant values are always treated as real numbers. They can be entered with or with- 
+out decimal points and scientific notation using e-format is acceptable. Some exam- 
+ples of math operations with constants are 
+add 2.0 
+mult 1.5e-6 
+exp 
+3 
+which computes the value ((x + 2.0) - 1 . 5 ~ l 0 - 9 ~  
+where x is the current table value. 
+Values of the state variables change as the flight path is integrated. When table values 
+are computed during path integration, current values of the state variables can be re- 
+trieved by using the variable names from Table 3-2. For example, dynamic pressure 
+(defined as 0.7pM2) can be computed with 
+add 0.7 
+mult pres 
+mult mach 
+mult mach 
+The default units for these variables are given in the appendix, but these can be 
+changed in the problem file with the *units/fmt data block (Section 4.4.13). 
+3-16 

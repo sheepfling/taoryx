@@ -1,0 +1,7 @@
+(corpus-ch4-050)
+*trajectory 1 vehicle start on 23
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=0 gama=0 psi=90 time=0 wt=1
+  *segment 23 2nd Stage Boost
+    *when time>1 stop
+*end

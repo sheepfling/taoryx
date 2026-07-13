@@ -1,0 +1,15 @@
+(corpus-ch4-084)
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=0 gama=0 psi=90 time=0 wt=1
+  *segment 1 test
+    *fly alpha vrs tseg
+      opta-1   0.0
+      opta-2   5.0
+      opta-3  10.0
+      opta-4  15.0
+      opta-5  opta-6
+
+    *when tseg>opta-6 stop
+
+*end

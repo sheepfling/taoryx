@@ -1,0 +1,39 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+4.3.1. *Define Data Block 
+4.3.1. *Define Data Block 
+The standard trajectory variables computed in TAOS are listed in the appendix. 
+These are always computed and available for printout and plotting; however, some 
+problems require other variables that are not among the standard output variables. 
+These variables are different depending on the type of problem. 
+In an effort to solve this problem, TAOS provides user-defined output variables. As 
+long as the variables of interest can be calculated from the standard variables with 
+one or more equations, that is, they are functions of the standard variables, then they 
+can be computed as user-defined variables. 
+User-defined variables are given a name which must be different from the standard 
+output variables. This is followed by one or more equations that show how to com- 
+pute the new variable. The user-defined variable can be computed directly from the 
+equations, or the equations can define the variable's derivative, which can be inte- 
+grated along with the other equations of motion. 
+The equations defining how to calculate auser-definedvariable are given in asimpli- 
+fied C language. This is similar to Fortran so users familiar with programming in ei- 
+ther of these languages should not have trouble entering the equations. The examples 
+below help clarify how equations are input. 
+The first example, 
+*define alt-km 
+alt-km = alt / 3280.84; 
+computes altitude in kilometers rather than feet. The name of the new variable is 
+alt-km. It is given following the *define keyword, and it must also appear on the left 
+side of an equation somewhere in the definition. In this example, there is only one 
+simple equation, so alt-km must be the variable on the left side of the equal sign. The 
+values and variables on the right side of the equal sign must all be standard output 
+variables, previously input user-defined variables, temporary variables, or 
+constants. In this case, alt is a standard output variable and 3280.84 is a constant. The 
+equation ends with a required semicolon. 
+Temporary Variables 
+In the next example, the stagnation point heat transfer rate for a blunt body of revolu- 
+tion in hypersonic flow is approximated with 
+where & is the nose radius, e and eo are the ambient and sea-level density, 11 
+is the flight velocity, aqd 11 Gc 11 is satellite velocity (usually 26,000 ft/sec). 
+11 
+4-35 

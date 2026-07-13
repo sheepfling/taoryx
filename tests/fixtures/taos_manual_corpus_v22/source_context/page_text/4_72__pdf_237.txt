@@ -1,0 +1,150 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.7. *Print Data Block 
+4.4.7. *Print Data Block 
+The *print data block can appear either within a trajectory or within a problem (out- 
+side of a trajectory definition). The purpose of the *print data block is the same in 
+either case: to write trajectory information to the standard output file. The standard 
+output file has the same filename as the problem file, but it is of type .out instead of 
+.prb. It has page breaks and headings formatted for a standard printer with 132 char- 
+acters per line and 60 lines per page. 
+The difference between *print data blocks located within a trajectory definition and 
+those located outside of a trajectory is that those located within a trajectory assume 
+the printed information is for that trajectory. The variables printed are assumed to be 
+associated with the trajectory containing the *print data block. 
+*Print data blocks that are not within a trajectory defrnition do not make this assump- 
+tion, so trajectory numbers enclosed in brackets are required in addition to the vari- 
+able names. This provides the capability to print variables from several trajectories 
+on the Same page. 
+For example, 
+*print 
+time111 alttll alt121 rangell1 ranget21 
+prints the time from trajectory number 1, the altitude from trajectories 1 and 2, and 
+the range from trajectories 1 and 2 as shown in Figure 4-10. This makes it easy to 
+compare values from different trajectories. Data from different trajectories are re- 
+lated by mission time so aZt[l] and alt[2] refer to the altitudes of trajectories 1 and 
+2 at the same instant in time. 
+Sandia National 
+Laboratories 
+(TAOS -Version 96.0) 
+Trajectory Analysis L optimization software 
+.................................................................................... 
+Example of two vehicles relative to each other 
+Problem (two) I 
+1976 US Standard Atmosphere I Non-rotating WS-84 Earth 
+Trajectory for vehicle: vehicle-1 
+Time [ 1 I 
+Alt[l] 
+Alt[21 
+RMge[l] 
+RMge[2] 
+0.000 
+100000.0 
+80000.0 
+0.000 
+0.000 
+0.500 
+100000.0 
+80000.0 
+0.737 
+0.573 
+1.000 
+100000.0 
+80000.0 
+1.473 
+1.146 
+1.500 
+100000.0 
+80000.0 
+2.209 
+1.717 
+2.000 
+100000.0 
+80000.0 
+2.944 
+2.287 
+' 
+2.500 
+100000.0 
+80000.0 
+3.678 
+2.857 
+3.000 
+100000.0 
+80000.0 
+4.412 
+3.425 
+3.500 
+100000.0 
+80000.0 
+5.145 
+3.993 
+4.000 
+100000.0 
+80000.0 
+5.878 
+4.559 
+4.500 
+100000.0 
+80000.0 
+6.610 
+5.124 
+5.000 
+100000.0 
+80000.0 
+7.341 
+5.689 
+5.500 
+100000.0 
+80000.0 
+. 
+8.072 
+6.252 
+6.000 
+100000.0 
+80000.0 
+8.803 
+6.815 
+6.500 
+100000.0 
+80000.0 
+9.532 
+7.376 
+7.000 
+100000.0 
+80000.0 
+10.262 
+7.937 
+7.500 
+100000.0 
+80000.0 
+10.930 
+8.497 
+8.000 
+100000.0 
+80000.0 
+11.718 
+9.055 
+8.500 
+100000.0 
+80000.0 
+12.446 
+9.613 
+9.000 
+100000.0 
+80000.0 
+13.172 
+10.170 
+9.500 
+100000.0 
+80000.0 
+13.899 
+10.725 
+10.000 
+100000.0 
+80000.0 
+14.624 
+11.280 
+Figure 4 1  
+0. Trajectory Printout Example. 
+4-72 

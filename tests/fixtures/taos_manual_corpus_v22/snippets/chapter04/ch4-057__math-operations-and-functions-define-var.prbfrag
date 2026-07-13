@@ -1,0 +1,7 @@
+*define var
+  if (mach > 1.0) {
+    x = 1 + mach*mach;
+    var = sqrt(x) * table(outx);
+  } else {
+    var = table(outy);
+  }

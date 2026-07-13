@@ -1,0 +1,4 @@
+*summarize delta-rng
+  add last(range[1])
+  sub last(range[2])
+  mult 1.852

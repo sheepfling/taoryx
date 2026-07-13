@@ -1,0 +1,53 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.3. *Earth Data Block 
+~ 
+gm 
+g 
+4.4.3. *Earth Data Block 
+TAOS requires an earth model to 
+Gravity constant (€t3/sec2) 
+1.40764438125~10~~ 
+Ibm to slug conversion 
+32.1740485 
+nerate a trajectory. A earth model 
+sists of 
+an earth or planet shape, a gravity model, and some additional parameters such as the 
+earth rotation rate. Four standard models are provided: a spherical earth model, the 
+WGS-72 model? the WGS-84 model,6 and the GEM-T1 model.ll If these models 
+are not acceptable, parameters can be modified to produce a user-defined earth mod- 
+el. 
+The earth is assumed to be an ellipsoid with the equatorial radius greater than the po- 
+lar radius. Its shape is given by an equatorial radius and either the polar radius, the 
+eccentricity, or the flatness. If one of the latter parameters is provided, for example, 
+eccentricity, the other two can be computed (Sections 2.1.5 and 2.1.6). 
+The earth's gravity is defined by a gravity constant (GM) and gravity harmonic coef- 
+ficients (either Jn or C;l,m and Sn,m). Two additional values, the earth rotation rate and 
+the lbm to slug conversion factor, are required to complete the earth model. 
+Spherical Earth Model 
+The simplest earth model is spherical. It requires an earth radius, an earth rotation 
+rate, a gravity constant, and a lbm to slug conversion factor. These values default to 
+the WGS-84 values as shown in Table 4-15. The spherical earth model is selected 
+with the *earth data block as follows: 
+*earth spherical omega=O 
+where the keyword spherical sets the spherical earth default values. The remaining 
+variables and values, in this case omga=O, override the defaults. 
+Table 4-15. Spherical Earth Model. 
+I Symbol I Description 
+I Default Value 
+I 
+I reqtr 
+I Earth radius (ft) 
+120925646.3255 
+I 
+. I omega 
+I Rotation rate (radsec) 
+I 7.292115x1W5 
+I 
+WGS-72 and WGS-84 Earth Models 
+The WGS-72 and WGS-84 earth models assume the earth has an ellipsoidal shape 
+with the equatorial radius greater than the polar radius. These models are selected 
+with the wgs-72 or wgs-84 keywords. One of these keywords must immediately fol- 
+low the *earth data block name. Variables and values overriding the defaults can be 
+given following this keyword. For example, 
+4-54 

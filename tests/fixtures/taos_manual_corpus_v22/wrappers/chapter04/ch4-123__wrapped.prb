@@ -1,0 +1,109 @@
+(rocket)
+
+*title Trajectory for a Ballistic Sounding Rocket
+       2nd Stage Fires Down to Maximize Velocity
+
+*atmos standard
+*earth wgs-84 omega=0
+
+*trajectory 1 Rocket start on 1
+
+  *initial geodetic
+    long=0.0 lat=0.0 psi=90.0 time=0.0
+    alt=0.0 vel=0.0 gama=opta-1 wt=12000.0
+
+  *print time alt vel range gamgd pitchgd wt
+
+  *segment 1 1st stage ignition to first movement
+    *integ dtprnt=0.1 dt=0.001
+    *aero ca=(ca-1st-recruits)
+    *prop thrust=(castor-thr) mdot=(castor-mdt)
+    *prop thrust=(recruits-thr) mdot=(recruits-mdt)
+    *rail launch cfstat=0.15 cfslid=0.01
+    *when vel>0.001 goto 2
+
+  *segment 2 Rail launch
+    *integ dtprnt=0.1 dt=0.01
+    *aero ca=(ca-1st-recruits)
+    *prop thrust=(castor-thr) mdot=(castor-mdt)
+    *prop thrust=(recruits-thr) mdot=(recruits-mdt)
+    *rail launch cfstat=0.15 cfslid=0.01
+    *when plength>25.0 goto 3
+
+  *segment 3 Recruits & 1st stage burn
+    *integ dtprnt=0.5 dt=0.05
+    *aero ca=(ca-1st-recruits)
+    *prop thrust=(castor-thr) mdot=(castor-mdt)
+    *prop thrust=(recruits-thr) mdot=(recruits-mdt)
+    *when time>3.0 goto 4
+
+  *segment 4 Jettison recruits, continue 1st stage burn
+    *integ dtprnt=0.5 dt=0.10
+    *increment wt=-350.0
+    *aero ca=(ca-1st-stage)
+    *prop thrust=(castor-thr) mdot=(castor-mdt)
+    *when time>40.0 goto 5
+
+  *segment 5 Coast
+    *integ dtprnt=1.0 dt=0.20
+    *aero ca=(ca-1st-off)
+    *when alt>300000 goto 6
+    *when gamgd<0 goto 6
+
+  *segment 6 Stage and coast, allow time for orientation
+    *integ dtprnt=1.0 dt=0.20
+    *reset wt=1650.0
+    *aero ca=(ca_2nd_off)
+    *when tseg>30.0 goto 7
+
+  *segment 7 Orientation correct, coast until ready to fire
+    *integ dtprnt=1.0 dt=0.20
+    *aero ca=(ca_2nd_off)
+    *fly pitchgd=opta-2
+    *fly yawgd=*
+    *fly rollgd=*
+    *when tseg>opta-3 goto 8
+
+  *segment 8 Fire 2nd stage
+    *integ dtprnt=1.0 dt=0.10
+    *reset tmark=0
+    *aero ca=(ca_2nd_stage)
+    *prop thrust=(orbus-thr) mdot=(orbus-mdt)
+    *fly pitchi=*
+    *fly yawi=*
+    *fly rolli=*
+    *when tseg=41.5 goto 9
+
+  *segment 9 Coast to payload separation
+    *integ dtprnt=0.5 dt=0.20
+    *aero ca=(ca_2nd_off)
+    *when alt<300000 goto 10
+
+  *segment 10 Release payload & fly to impact
+    *integ dtprnt=0.5 dt=0.10
+    *reset wt=350
+    *aero ca=(rv)
+    *when alt<0 stop
+
+*trajectory 2 Booster start on 1
+
+  *initial from trajectory 1, segment 6
+  *print time alt vel range gamgd pitchgd wt thrust nx dynprs
+
+  *segment 1 Ballistic
+    *reset wt=2100.0
+    *integ dtprnt=0.5 dt=0.20
+    *aero ca=(ca-1st-tumble)
+    *when alt<0 stop
+
+*optimize a for vel=max on segment 10, trajectory 1
+  constrain alt=450000 on segment 8
+  constrain range=60 on segment 10
+  fref=10000 maxitr=30 tol=5.0e-7
+  par-1=85.0 lo-1=80.0 hi-1=86.0
+  par-2=-90.0 lo-2=-120.0 hi-2=-70.0
+  par-3=200.0 lo-3=150.0 hi-3=500.0
+
+*egs ex2.dbf time alt vel range gamgd pitchgd wt thrust nx dynprs
+
+*end

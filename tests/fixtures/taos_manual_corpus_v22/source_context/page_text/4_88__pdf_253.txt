@@ -1,0 +1,28 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4-4-13. *UnitdFm Data Block 
+The data block 
+*units/fmt 
+alt 
+km 
+f.3 
+vel 
+m / s  
+f.2 
+range km 
+mach 
+e.5 
+changes the units or output format for four variables. The units of altitude are 
+changed to km and it is printed with three decimal places. Velocity is changed to d s  
+and is printed with two decimal places. The units of range are changed to km, and the 
+default format is used. The units of Mach number are not changed (it is nondimen- 
+sional), but it is printed with five decimal places in scientific notation. 
+Any number of variables can be changed within the data block. The variable’s units 
+can be changed, its output format can be changed, or both can be changed. If both 
+the units and the output format are changed, the new units must be given first, fol- 
+lowed by the new output format as shown in the example above. 
+The output format of user-defined variables can be controlled with the *units/&nt 
+data block as shown above. But the units for a user-defined variable cannot be 
+changed because TAOS does not know the original units of the variable. User-de- 
+fined variables must be computed with the desired units in the *define data block. 
+4-88 

@@ -1,0 +1,40 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.1. *Aero Data Block 
+requests a table called ca-dean for the axial force coefficient and a table called 
+cn-dean for the normal force coefficient. 
+Tables can be used for some coefficients while others can be set to constants. In the 
+following example, the lift coefficient is set to a table name and the drag coefficient 
+is set to a constant: 
+*aero 
+cl=(lift-x) 
+cd=0.2351 
+The side force coefficient is not given, so it is set to zero. The reference area is not 
+given either, so it must be provided in the Z&x 
+table. 
+User-Defined Variables 
+Tables can be functions of user-defined variables as shown in Section 3.5.5. If user- 
+defined variables are referenced in a table, then values for them must be given in the 
+problem file. 
+One place values can be given for user-defined variables is in the *aero data block. 
+Although values can be given for any user-defined variable within this data block, 
+usually values are only given for the user-defined variables in the aerodynamic 
+tables. Values for other user-defined variables are given in the data blocks where 
+they are referenced. This way the table name and its user-defined variables are given 
+together in the problem fde. Another method is to give values for the user-defined 
+variables in a *constants data block (Section 4.2.2). 
+Once a value has been given for a user-defined variable, it remains set at that value 
+unless changed in a subsequent data block. This means that values for user-defined 
+variables do not have to be repeated within each segment if they do not change. How- 
+ever, it is good practice to provide values in each segment to avoid input errors. 
+The following *aero data block defines values for two user-defined variables: 
+*aero cd=(drg-model) cl=(lft-model) 
+flaps=25, 
+gear=O, sref=225.0 
+This block provides table names for CL and CD, 
+and it sets the reference area to 225 
+ft2. It also provides values for two user-defined variab1es:jlaps and gear. These vari- 
+ables must appear in the tables; arbitrary variable names that never appear in a table 
+cannot be input. These variables could be flags in the table used for flap deflection 
+and gear up or down. 
+4- 10 

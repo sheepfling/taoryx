@@ -1,0 +1,49 @@
+4. Pmblem Files 
+4.4. Problem Data Blocks 
+4.4.6. *Optimize Data Block 
+designates the angle-of-attack value as optimization parameter number 2 in loop a. 
+Any input variable with a numerical value (a number, not a table name) can be desig- 
+nated as an optimization parameter. The initial conditions and guidance rules are 
+most commonly used as optimization parameters. 
+A common technique used to optimize part of a trajectory is to define a segment with 
+a guidance rule and final condition similar to the following: 
+*fly alpha vrs tseg 
+opta-1 
+0.0 
+opta-2 
+5.0 
+opta-3 
+10.0 
+opta-4 
+15.0 
+opta-5 
+opta-6 
+*when tseg>opta-6 stop 
+This uses six parameters to define an angle-of-attack time history for a segment. Al- 
+though the segment times must be estimated, optimization is used to determine the 
+angle of attack values required to satisfy the objective function and constraints. The 
+final segment time is included as a parameter to give more flexibility to the flight 
+path. 
+Objective function 
+So far, only the optimization parameters 4 
+have been specified. The remaining parts 
+of the optimization loop, that is, the objective function and constraints, are given in 
+an *optimize data block. 
+The first line of the *optimize data block defines the objective functionflxi). The most 
+commonly used variables for the objective function are time, range, and velocity. For 
+example, 
+*optimize a for vel=max on segment 6, trajectory 1 
+defines the objective function as the final velocity of segment number 6 in trajectory 
+number 1. The goal of optimization is to maximize this value. The optimization loop 
+letter, in this case a, is given fust immediately following the *optimize keyword. The 
+keywordfor is required between the loop letter and the objective function. Any out- 
+put variable can be used for the objective function, and the output variable can be set 
+to min or m. The segment and trajectory numbers are required. 
+Constraints 
+The next set of lines can be used to define constraints on the flight path. These 
+constraints are optional, and they can be equality or inequality constraints. For exam- 
+ple, the lines 
+constrain vel=3000 
+constrain gamgd=-80 
+constrain qmin<O 
+4-63 

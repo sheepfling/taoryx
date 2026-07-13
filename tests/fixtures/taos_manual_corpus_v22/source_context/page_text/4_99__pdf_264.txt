@@ -1,0 +1,59 @@
+4. Problem Files 
+4.5. Emmples 
+4.5.2. Ballistic Rocket 
+*aero ca=(ca-1st-recruits) 
+*prop thrust=(castor-thr) 
+mdot= 
+*prop thrust=(recruits-thr) mdot= 
+*rail launch cfstak0.15 cfslid=O 
+castor-mdt) 
+recruits-mdt) 
+01 
+*when ve1>0.001 goto 2 
+*segment 2 Rail launch 
+*integ dtprnk0.1 
+dtZO.01 
+*aero ca=(ca-1st-recruits) 
+*prop thrust=(castor-thr) 
+mdot=(castor-mdt) 
+*prop thrust=(recruits-thr) mdot=(recruits-mdt) 
+*rail launch cfstak0.15 cfslid=0.01 
+*when plength>25.0 goto 3 
+*segment 3 Recruits & 1st stage burn 
+*integ dtprnt=0.5 dk.05 
+*aero ca=(ca-1st-recruits) 
+*prop thrust=(castor-thr) 
+mdot=(castor-mdt) 
+*prop thrust=(recruits-thr) 
+mdot=(recruits-mdt) 
+*when time>3.0 goto 4 
+*segment 4 Jetison recruits, continue 1st stage burn 
+*integ dtprnt=0.5 dt=.lO 
+*increment wt=-350.0 
+*aero ca=(ca-lst-stage) 
+*prop thrust=(castor-thr) mdot=(castormdt) 
+*when time>40.0 goto 5 
+*segment 5 Coast 
+*integ dtprnt=l.O dk0.20 
+*aero ca=(ca-lst-off) 
+*when alt>300000 goto 6 
+*when gamgd<O goto 6 
+*segment 6 Stage and coast, allow time for orientation 
+*integ dtprnkl.0 dt=0.20 
+*reset wt=1650.0 
+*aero ca=(ca_2nd_off) 
+*when tseg>30.0 goto 7 
+*segment 7 Orientation correct, coast until ready to fire 
+*integ dtprnkl.0 dk0.20 
+*aero ca=(ca_2nd_off) 
+*fly pitchgd = opta-2 
+*fly yawgd = * 
+*fly rollgd = * 
+*when tseg>opta-3 goto 8 
+*segment 8 Fire 2nd stage 
+*integ dtprnt=l.O dt=O.lO 
+*reset tmark=O 
+*aero ca=(ca_2nd_stage) 
+*prop thrust=(orbus-thr) mdot=(orbus-mdt) 
+*fly pitchi=* 
+*fly yawi=* 

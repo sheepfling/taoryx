@@ -1,0 +1,50 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+DataBlock 
+*defme 
+*dwn/crs 
+*file 
+*iip 
+4.3. Trajectory Data Blocks 
+Description 
+User-defmed output variables 
+Downrangdcrossrange reference 
+Create output file 
+Initial impact point variables 
+Trajectory data blocks contain information associated with the entire trajectory. Seg- 
+ment data blocks, discussed in Section 4.2, are one of the trajectory data blocks. 0th- 
+er trajectory data blocks are shown in Table 4-8. 
+*initial 
+*print 
+Table 4-8. Trajectory Data Blocks. 
+Initial conditions 
+Printout variables 
+*segment 
+*tangent 
+Segment definition (Section 4.2) 
+Tangent plane coordinate system 
+Trajectories begin with the *trajectory keyword, a trajectory number, a trajectory 
+name, the keywords start on, and a segment number. For example, the data block 
+*trajectory 2 target start on 31 
+begins trajectory number 2 for a vehicle called target on segment number 3 1. All of 
+the items following the *trajectory keyword are required. 
+Trajectory information continues until another *trajectory keyword is found or until 
+a unique problem data block keyword is found. Some keywords, such as %le and 
+*print, are used both inside and outside of atrajectory definition, so they do not termi- 
+nate a set of trajectory data. Only those keywords that are unique to a problem file, 
+such as *trajectory, *search, and *urns, end a set of trajectory data (Section 4.4). 
+Trajectory definitions must contain an *initial data blockgiving the initial conditions 
+and at least one *segment data block. Usually they contain at least one *print data 
+block so that trajectory results are written to a printout file. 
+The following gives an outline of a trajectory definition: 
+*trajectory 1 missile start on 1 
+*initial ... 
+*print . . . 
+*segment 1 First segment definition 
+*segment 2 Second segment definition 
+... 
+... 
+*trajectory 2 target ... 
+Indentation has been used to show the organization of the trajectory information. Tra- 
+jectory 1 extends from the frrst *trajectory keyword to the second *trajectory key- 
+4-33 

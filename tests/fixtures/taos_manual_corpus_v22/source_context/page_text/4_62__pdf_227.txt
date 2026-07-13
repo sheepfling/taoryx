@@ -1,0 +1,43 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.6. *Optimize Data Block 
+4.4.6. *Optimize Data Block 
+Parametric optimization can be used to maximize or minimize a trajectory character- 
+istic, such as final range or velocity, and it can be used to satisfy trajectory constraints, 
+such as a final impact position or flight path angle. Although optimization is one of 
+the most powerful features of TAOS, the numerical optimization methods are com- 
+plex and not as reliable as the rest of the trajectory integration methods. 
+A parametric optimization problem varies a set of parameters4 in order to maximize 
+or minimize an objective functionflq) subject to a set of constraints ~(4). 
+The param- 
+eters& are input variables in the problem fde. The objective functionflxii) is an output 
+variable at a specified point in the trajectory, for example, an output variable at the 
+end of a trajectory segment. The constraints c(xi) can be equality constraints, where 
+an output variable must be equal to a value, or inequality constraints, where a limit 
+or boundary is imposed. 
+TAOS uses a nonlinear constrained optimization method based on recursive quadrat- 
+ic programming called vjU2ad (Section 2.6.3)? The partial derivatives required by 
+the algorithm are estimated with forward or central differences. 
+Optimization Loops 
+Optimization is often only applied to part of a trajectory, called the optimization loop. 
+The loop extends from the fust segment containing an optimization parameter xi to 
+the segment defining the objective functionflxj). It can contain any number of seg- 
+ments. 
+A problem can have up to five optimization loops, but they must not overlap and they 
+cannot be nested. Each loop in a problem must be completely independent from other 
+search and optimization loops. The optimization loops are given a letter identifier (a, 
+b, c, d, or e) which is used to associate the optimization parameters xi with the opti- 
+mization data block defining the objective functionflxi) and constraints c(xi). 
+An optimization loop can have any number of parameters xi, but in practice the opti- 
+mization method works best if the number of parameters is less than 25. The method 
+converges faster and better with fewer parameters, so the goal in setting up an opti- 
+mization loop is to include just enough parameters to adequately model a trajectory. 
+The parameters are numbered starting from one. The numbers must be sequential, 
+so if there are 10 parameters, they must be numbered from 1 to 10. However, they 
+do not have to appear in any particular order in the problem file. 
+Optimization Parameters 
+Optimization parameters are identified by setting an input variable equal to the key- 
+word optx-n, where x is the optimization loop letter and n is the parameter number. 
+For example, 
+*fly alpha = opta-2 
+4-62 

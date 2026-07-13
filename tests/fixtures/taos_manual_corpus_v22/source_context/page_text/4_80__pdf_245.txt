@@ -1,0 +1,89 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.10. *Summarize Data Block 
+4.4.1 0. *Summarize Data Block 
+Summary variables are used in conjunction with surveys to perform tradeoff and sen- 
+sitivity studies. A survey systematically changes the value of one or more input vari- 
+ables, and for each set of values, trajectories are calculated (Section 4.4.11). Summa- 
+ry variables are calculated after each set of trajectories is completed. When values 
+are surveyed, summary variables can be tabulated as a function of the survey vari- 
+ables. 
+summary Variables: 
+qe 
+payload 
+vel- 
+max-alt 
+range 
+75 .OOO 
+2000.0 
+5979.9 
+560694 
+178.38 
+75 -000 
+3000.0 
+4975.7 
+390018 
+131.45 
+75.000 
+4000.0 
+4252.3 
+285922 
+101.79 
+75.000 
+5000.0 
+3702.0 
+216962 
+81.42 
+75.000 
+6000.0 
+3270.9 
+168834 
+66.64 
+80 -000 
+2000.0 
+6042.7 
+652736 
+133.66 
+80 -000 
+3000.0 
+5022.0 
+460668 
+99.95 
+80.000 
+4000.0 
+4282.3 
+342741 
+78.58 
+80.000 
+5000.0 
+3716.8 
+264181 
+63.91 
+80.000 
+6000.0 
+3270.7 
+209022 
+53.31 
+Figure 4-12. Summary Variable Printout. 
+Figure 4-12 contains an example printout of summary variables for a problem that 
+calculates sounding rocket trajectories for different payload weights and launch 
+angles. The survey variables are the launch elevation angle, qe, and the payload 
+weight,pqload. The summary variables are the burnout velocity, vel-bo, the maxi- 
+mum altitude or apogee, m-alt, and the final range, range. Each line of the summa- 
+ry printout represents a trajectory. In this case, ten trajectories have been calculated 
+for five payload weights and two launch angles. 
+For each trajectory (or set of trajectories for a multi-vehicle problem), a summary 
+variable has a single value. This value is calculated from a set of input commands, 
+given in a *summarize data block, representing math operations. The math opera- 
+tions work the same way as in table files (Section 3.5). 
+For example, the fust summary variable shown above, vel-bo, is defined with the 
+data block 
+*summarize vel-bo 
+add vel on segment 3, trajectory 1 
+The summary variable name, vel-bo, is given fust, followed by a single math opera- 
+tion. Summary variable names do not have to be unique; they are only used for the 
+column headings in the printout file. 
+Summary values are initialized to zero and then the math operations are executed. 
+In this case, the velocity at the end of segment 3 on trajectory 1 is added to zero. Only 
+one math operation is given, so the calculation is finished. This example is typical 
+4-80 

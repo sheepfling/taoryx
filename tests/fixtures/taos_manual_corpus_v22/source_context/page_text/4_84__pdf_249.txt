@@ -1,0 +1,27 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.11. *Survey Data Block 
+calledthe low or lo value. Aset of trajectories is always run first with survey variables 
+set to their starting values. After trajectories are computed for the low value, the low 
+value is incremented by the value of inc. If the incremental value is zero, the trajecto- 
+ries are only run for the low value. 
+After the survey value is incremented, it is compared to the high or hi value. If it ex- 
+ceeds the high value, then it is set equal to the high value and a flag is set indicating 
+that this is the last case. Then another set of trajectories is computed. This process 
+continues until the last case, or high value, is reached. 
+Specific Survey Values 
+Another way of specifying the survey values is to enter them directly. For example, 
+*survey 1 alto va1s=30000,60000,75000 
+runs three cases with the initial altitude set to 30,000,60,000, and 75,000 ft. This type 
+of input is used when the desired values do not fit the pattern of the first method (lo, 
+hi, and inc). 
+The two methods can be combined as follows: 
+*survey 
+1 alto 10=40000, hi=80000, inc=20000 
+vals=35OOO,45OOO 
+This survey defines five values: 35000,40000,45000,60000, and 80000. The val- 
+ues defined by the lo, hi, and inc variables are run along with the specific values given 
+by the vals variable. The extra values given by the vals variable are inserted in the 
+survey in order from lowest to highest value, so the first set of trajectories is run for 
+alt0=35000, the next set is run for alt0=40000, etc. 
+4-84 

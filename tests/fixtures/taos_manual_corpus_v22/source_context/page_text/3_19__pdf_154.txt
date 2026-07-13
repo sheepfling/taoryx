@@ -1,0 +1,30 @@
+3. Table Files 
+3.5. Full Tables 
+3.5.5. User-demed Variables 
+3.5.5. User-defined Variables 
+If a variable name is used in a math operation and it is not a state variable or a storage 
+variable, then TAOS assumes that it is a user-defined variable. TAOS expects its val- 
+ue to be given in the problem file in the *aero, *constants, *cg, *prop, or *wind data 
+blocks (Sections4.2.l74.2.2,4.2.3,4.2.9,and4.4.14).Thesearethesameplacesthat 
+the table identification names are given telling TAOS which tables to use. 
+User-defined variables can be used in math operations just like state variables. They 
+are just constants that have values set in the problem file. The advantage of using 
+user-defmed variables and setting the values in the problem file versus using 
+constants in the table file is that the user-defmed values can be automatically sur- 
+veyed in the problem file (Section 4.4.11). Thus, if the table constant takes on differ- 
+ent values, then it is wise to make it a user-defmed variable. For example, the table 
+(constant-thr) 
+table thrust units=lb 
+start 
+sub pres 
+mult anoz 
+add tvac 
+end 
+uses two user-defined variables: anoz and Wac. Because this is a thrust table, values 
+for anoz and tvac are given in the *prop data block in the problem file. This table is 
+generic in the sense that it can be used to represent any constant thrust rocket motor. 
+User-defined variables are a powerful tool, but they must be documented carefully. 
+It is easy to create a table file with many user-defined variables and then later on for- 
+get that they are required when setting up a problem file. Comments should be used 
+to document all user-defined variables. 
+3- 19 

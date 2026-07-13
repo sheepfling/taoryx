@@ -1,0 +1,35 @@
+*EGS DATA FILE
+*TITLE
+Example of a ballistic RV trajectory
+*SYMBOLS
+  gama       = gama
+  trajectory = Trajectory Number
+  time       = Time (sec)
+  alt        = Altitude (ft)
+  range      = Range (nm)
+  vel        = Velocity (ft/sec)
+  mach       = Mach Number
+  long       = Longitude (deg)
+  latgd      = Geodetic Latitude (deg)
+  gamgd      = Geodetic Flight Path Angle (deg)
+  psigd      = Geodetic Heading Angle (deg)
+  dynprs     = Dynamic Pressure
+  alpha      = Angle of Attack (deg)
+  nx         = Body x-axis Load Factor (g)
+  ny         = Body y-axis Load Factor (g)
+  nz         = Body z-axis Load Factor (g)
+  ntotal     = Total g's
+*VARIABLES
+  LEVEL 1 gama
+  LEVEL 2 trajectory
+  LEVEL 3 time alt range vel mach long
+          latgd gamgd psigd dynprs alpha nx
+          ny nz ntotal
+*TABLE
+  -35.000  1.00
+  0.000 300000.0 0.000 18000.00 19.9642 20.00000
+  0.00000 -35.000 90.000 0.829 0.000 -0.0026
+  0.0000 0.0000 0.0026
+  0.500 294835.2 1.196 18008.93 19.9741 20.01991
+  0.00000 -35.021 90.000 1.100 0.000 -0.0034
+  0.0000 0.0000 0.0034

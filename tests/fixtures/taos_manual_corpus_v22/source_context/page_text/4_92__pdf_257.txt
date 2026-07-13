@@ -1,0 +1,53 @@
+4. Problem Files 
+4.5. Examples 
+4.5.1. Ballistic Reentry 
+4.5.1 Ballistic Reentry 
+One of the simplest problems for TAOS is a ballistic reentry. Ballistic flight occurs 
+when all of the control variables (angle of attack, angle of sideslip, bank angle, and 
+power setting) are zero so no guidance rules are required. If the vehicle’s configura- 
+tion is assumed to remain the same throughout reentry, its trajectory can be modeled 
+with one segment that starts from the entry point and continues to impact. 
+Table File 
+The only forces acting on the vehicle are from aerodynamic drag and gravity so only 
+a drag table is required. For conceptual design drag is often assumed to be only a 
+function of Mach number because altitude effects are usually small. The following 
+simple table file contains the axial force coefficient as a function of Mach number: 
+table 
+ca (mach) 
+srefz2.1817 
+mach 
+= 
+6.000, 8.000, 10.000, 12.000, 14.000, 
+ca 
+= 0.0950, 0.0742, 0.0643, 0.0587, 0.0553, 
+16.000, 18.000, 20.000 
+0.0528, 0.0513, 0.0503 
+Problem File 
+The following problem file is used to calculate a set of ballistic reentry trajectories: 
+(ballistic) 
+*title 
+Ballistic reentry trajectories 
+*atmos standard 
+*earth wgs-84 omega=O 
+*trajectory 1 RV start on 1 
+*initial geodetic 
+long=O . 0 
+lat=O .O 
+alt=3 00000 
+vel =surv-2 
+psi=90.0 
+gama=surv-1 
+time=O .O 
+wt=550.0 
+*print time alt range vel dynprs nx 
+*segment 1 Ballistic 
+*integ dtprnt=0.50 dt=O.lO 
+*aero ca=(ca-ex-l) 
+*when alt<O stop 
+*survey 1 gentry 
+vals=-20,-25,-30,-35 
+*survey 2 
+ventry 
+10=15000 hi=18000 inc=1000 
+4-92 
+b 

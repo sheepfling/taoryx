@@ -1,0 +1,124 @@
+4. Problem Files 
+4.3. Trajectov Data Blocks 
+4.3.6. *Print Data Block 
+4.3.6. *Print Data Block 
+The *print data block is similar to the V l e  data block, described in Section 4.3.3. 
+However, it writes trajectory output variables to a standard output file formatted for 
+printing rather than to auser-specified file. The standard output file has the same file- 
+name as the problem file, but it is of type .out instead of .prb. It has page breaks and 
+headings formatted for a standard printer with 132 characters per line and 60 lines 
+Per page* 
+A table of trajectory data is written for each *print data block. Any number of *print 
+data blocks can be included within a trajectory, and a maximum of 10 trajectory out- 
+put variables can be given per *print data block. For example, 
+*print time alt range mach gamgd dynprs 
+creates the output shown in Figure 4-6. The output begins with a page heading, a title, 
+and column headings that are repeated on every page. This is followed by the trajec- 
+tory variables. The output format of each variable is controlled with the *units/fmt 
+data block (Section 4.4.13). 
+sandia National 
+Laboratories 
+Trajectory Analysis C optimization software 
+tTAOS - Version 36.0) 
+........................................................................................ 
+Example of a ballistic RV trajectory 
+Problem lmarv) / 
+1976 US Standard Atmosphere / Non-rotating WGS-84 Earth 
+Trajectory for vehicle: 
+rv 
+gama = -35 
+Time 
+A1 t 
+Range 
+Hach 
+Gamgd 
+Dynprs 
+0.000 
+300000.0 
+0.000 
+19.9642 
+-35.000 
+0.829 
+0.500 
+294835.2 
+1.196 
+19.9741 
+-35.021 
+1.100 
+1.000 
+289665.1 
+2.394 
+19.9840 
+-35.042 
+1.457 
+1.500 
+284489.8 
+3.591 
+19.9939 
+-35.063 
+1.932 
+2.000 
+279309.3 
+4.789 
+19.9653 
+-35.083 
+2.537 
+2.500 
+274123.5 
+5.988 
+19.8147 
+-35.104 
+3.295 
+3.000 
+268932.4 
+7.188 
+19.6670 
+-35.125 
+4.263 
+4.000 
+258534.7 
+9.588 
+19.3812 
+-35.167 
+7.059 
+4.500 
+253328.0 
+10.789 
+19.2429 
+-35.187 
+9.036 
+5.500 
+242899.1 
+13.193 
+18.9750 
+-35.229 
+14.660 
+6.000 
+237676.9 
+14.396 
+18.8451 
+-35.249 
+18.584 
+3.500 
+263736.2 
+8.388 
+19.5225 
+-35.146 
+5.495 
+5.000 
+248116.2 
+11.991 
+19.1075 
+-35.208 
+11.528 
+Figure 46. 
+Trajectory Printout Example. 
+A line of trajectory data is printed at the beginning and end of each segment as well 
+as at each print interval within the segment. A line is skipped between segments so 
+they can be easily identified. 
+Radar and relative vehicle output variables, those starting with rad or rel, must con- 
+tain a subscript enclosed in square brackets. For example, the variable radrng[2] is 
+used to print the radar range of the current trajectory from radar station number 2, 
+and the variable reZvel[4] is used to print the closing velocity of trajectory number 
+4 relative to the current trajectory. 
+4-46 

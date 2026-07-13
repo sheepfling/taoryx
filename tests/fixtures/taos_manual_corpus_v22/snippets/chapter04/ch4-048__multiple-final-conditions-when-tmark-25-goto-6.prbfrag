@@ -1,0 +1,2 @@
+*when tmark>25 goto 6
+*when alphat>5 goto 11

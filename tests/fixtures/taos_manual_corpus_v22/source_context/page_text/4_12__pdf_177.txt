@@ -1,0 +1,39 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.3. *Cg Data BIock 
+One of the assumptions in TAOS is that the control system is capable of maintaining 
+the vehicle’s body attitude. For example, when a constant angle of attack guidance 
+scheme is requested, it is assumed that there is a control system capable of maintain- 
+ing a constant angle4f-attack body attitude. For many aerospace vehicles, this con- 
+trol system uses aerodynamic controls, such as flaps, canards, and elevators. The 
+control settings required to maintain steady flight at various body attitudes are a func- 
+tion of the vehicle’s center of gravity, that is, maintaining a constant angle of attack 
+requires different control settings depending on the vehicle’s center of gravity. 
+The aerodynamic coefficients used in TAOS are for steady trimmed flight. Because 
+of this, they are generally a function of the vehicle’s center of gravity. The vehicle’s 
+center of gravity, in turn, is often afunction of its weight. As fuel or propellant is used, 
+the weight and center of gravity change, and this affects the aerodynamics. 
+This is handled in TAOS by making the aerodynamic tables a function of the center 
+of gravity or cg state variable and by defining a value for cg in the *cg data block. 
+The cg can be set to a constant, or a table can be used to compute its value. The *cg 
+data block is optional; cg is set to zero if it is not input. 
+The *cg data block consists of the *cg keyword, followed by the cg variable name 
+and its value. The following *cg data block sets the center of gravity to a constant 
+value: 
+*cg 
+cg=O.69 
+The center of gravity can be stated in inches, in percent of body length, or in any other 
+convenient units as long as its use is consistent in both the *cg data block and the aero- 
+dynamic tables. TAOS treats the center of gravity as a nondimensional value. 
+A cg table can also be used to compute the vehicle’s center of gravity. For example, 
+*cg 
+cg=(wt-cg) 
+config=2 
+requests TAOS to use a table called wt-cg to compute the center of gravity. This table, 
+like others, can be a function of weight or any of the other state and user-defined vari- 
+ables. 
+In the example above, auser-defmed variable, config, has been assigned a value. The 
+*cg data block can be used to assign values to any of the user-defined variables, but 
+it is usually only used to assign values to the user-defined variables referenced in the 
+cg table. 
+4- 12 

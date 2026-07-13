@@ -1,0 +1,47 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.9. *Prop Data Block 
+Thrust Units 
+Mass Flow Units 
+lb 
+lb/sec 
+n (Newtons) 
+slugdsec 
+kn (Kilonewtons) glsec 
+kglsec 
+4.2.9. *Prop Data Block 
+Mass Flow Units 
+lb/min 
+l b h  
+Mass Flow Units 
+slugs/min 
+slugs/hr 
+glmin 
+g h  
+kglmin 
+kg/hr 
+Each *prop data block defines a thrust force and its corresponding fuel flow or mass 
+flow rate. If more than one *prop data block is given in a segment, the propulsive 
+forces and m a s  flow rates from each data block are added together to get the total 
+propulsive force and mass flow rate. If no *prop data blocks are given in a segment, 
+thrust and m a s  flow are set to zero. 
+A propulsive force vector is defined by a magnitude and a direction. The direction 
+is given by two angles, epl and ep2, defined in Figure 4-3 as ~1 and ~ 2 .  
+If both thrust 
+vector angles are zero, the default, the thrust force is aligned with the body x axis. 
+Figure 4 3 .  Thrust Vector Angles. 
+Values for the thrust force, the thrust vector angles, and the mass flow rate can be 
+constants or they can be obtained from tables. The following data blocksets the thrust 
+and mass flow rate to constant values: 
+*prop 
+thrusk250 
+thr,units=kn 
+mdot=l20.0 
+mdt-units=kg/sec 
+The variables thrust and mdot give values for the thrust force and the mass flow rate. 
+The variables thr-units and dt-units give the units for the thrust and mass flow rate. 
+If no value or table name is provided for a variable, it is set to zero. So in the example 
+shown above, the thrust vector angles, epl and ep2, are both zero. 
+The default unit for thrust is Zb and for mass flow rate is Zbhec; other allowable units 
+are given in Table 4-7. 
+4-27 

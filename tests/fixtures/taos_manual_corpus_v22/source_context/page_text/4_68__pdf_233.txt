@@ -1,0 +1,44 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.6. *Optimize Data Block 
+trajectory is always the one given by thepar-n variables in the *optimize data block. 
+The default (surveys = 0) uses this same starting trajectory for all other survey values. 
+But if surveys = I ,  the solution from the previous set of survey values is used as a 
+starting trajectory for the next set of survey values. This often improves convergence 
+when the optimum trajectories do not change much from one survey value to the next. 
+Printout Control 
+The optimization process always prints a summary giving the optimization parame- 
+ters, the objective function, and the constraints at each iteration. By setting the vari- 
+ableprint to one, the trajectory is printed after each iteration. This is sometimes use- 
+ful for locating problems with the optimization process, but it produces a large 
+amount of output. It is not recommended except when the variable maXitr is set to 
+a small value such as 0 or 1. 
+Initial Estimates and Limits on Parameters 
+The optimization procedure requires an initial estimate or starting trajectory. The 
+procedure works best when this trajectory has similar characteristics to the final solu- 
+tion. The initial estimate is given by providing a value for each optimization parame- 
+ter. In addition to the initial estimate, upper and lower boundaries, and a reference 
+or normalizing value can be specified for each parameter. 
+These values are given according to the optimization parameter numbers used in the 
+problem file. For example, values for the parameter upta-3 are given with 
+par-3 =6.5, 
+10-3 =-lo, 
+hi-3 =3 0 
+This input line sets the initial estimate for parameter 3 to 6.5, and it limits parameter 
+3 to values between -10 and 30. No reference value is given with the ref-3 variable 
+because this parameter does not take on extremely large or small values. 
+The following example: 
+par-24000, 
+10-2=-10000, hi-2=100000, ref-2=10000 
+uses the ref-2 variable to normalize or reference the parameter to values in the range 
+of -1 to 1O:This is only necessary if the parameter values become very large (greater 
+than 1000) or very small (less than 0.01). 
+Values for the initial estimate are required for each parameter. Values for the upper 
+and lower limits are not required, but they are recommended. Reference values are 
+optional. Usually values for each parameter are given on separate lines making it 
+easy to read as shown in the example below. 
+Example Data Block 
+The full optimization data block consists of the objective function definition, the 
+constraints, the control variables, and the parameter values. The following example 
+contains a complete optimization data block showing how these parts fit together: 
+4-68 

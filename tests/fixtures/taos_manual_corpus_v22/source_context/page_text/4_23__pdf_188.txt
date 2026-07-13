@@ -1,0 +1,55 @@
+4. Pmblem Files 
+4.2. Segment Data Blocks 
+4.2.6. *Inertial Data Block 
+Name 
+MY 
+4.2.6. *Inertial Data Block 
+Description 
+Body axis system 
+TAOS maintains an inertial platform coordinate system that is fxed in inertial space. 
+The Euler angles yawi,pitchi, and rolli are referenced to this system and the position, 
+velocity, and acceleration vectors can be output in this system (Section 2.1.10). 
+The inertial platform coordinate system is initially aligned with the local geodetic 
+horizon coordinate system and located at the trajectory initial position. It is aligned 
+such that the x axis points north, the y axis points east, and the z axis points down 
+(towards the earth’s center). This alignment and position can be changed at the begin- 
+ning of any segment with the *inertial data block. 
+The coordinate systems that the inertial system can be aligned with are given in Table 
+46. 
+The default coordinate system is geodetic. All of the coordinate systems are de- 
+fined in Section 2. l. 
+Table 4-6. Inertial Plagorm Alignment Coordinate Systems. 
+I 
+Earth-centered-fied coordinate system 
+lWfC 
+I (specify east and down vectors) 
+I 
+geocentric Local geocentric horizon system 
+I 
+I (specify longitudeflatitude position) 
+I 
+Local geodetic horizon system 
+lgeodetic 
+I (specify longitudeflatitude position) 
+I 
+x-axis parallel to velocity vector and 
+I z-axis coplanar with geodetic z-axis 
+velocity 
+I 
+wind 
+I Wind axis system 
+I 
+Geocentric and Geodetic Alignment 
+The data block 
+*inertial platform alignment 
+geocentric 
+aligns the inertial coordinate system with the local geocentric horizon system and lo- 
+cates the system at the vehicle’s center of mass. The keywords platform and align- 
+ment are both optional. 
+If aligning with the geodetic or geocentric coordinate systems, normally the current 
+vehicle latitude, longitude, altitude, and time are used for alignment. However, align- 
+ment can occur at another location by specifying a latitude, longitude, and altitude 
+or it can occur at a different time by specifying a time. For example, 
+*inertial platform lak28.8 long=-81.5 
+alt=550 time=100 
+4-23 

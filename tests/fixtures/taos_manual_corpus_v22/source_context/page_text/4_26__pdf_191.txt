@@ -1,0 +1,27 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.8. *Limits Data Block 
+4.2.8. *Limits Data Block 
+TAOS, 
+being a 3-DOF simulation, assumes that acontrol system is available that can 
+achieve the body attitudesrequested in the guidance scheme. Usually the control sys- 
+tem can only maintain body attitudes for certain flight conditions, and the body atti- 
+tude angles are restricted as well. The *limits data block provides a way to keep the 
+trajectory within these bounds. 
+Limits can be set on any of the guidance variables given in Tables 4-2 and 4-4, except 
+for intercept, prop, downria, upria, and Vd-mux. For example, 
+*limits alpha<2O alphas-10 
+puts a 20' upper boundary and a -10' lower boundary on angle of attack. Greater- 
+than and less-than signs are used to designate whether the limit is an upper or lower 
+bound. 
+The limiting variables do not have to be the same as those used for the guidance 
+scheme; limits can be imposed on any of the guidance variables. Any number of lim- 
+its can be specified. For example, 
+*limits bankgd>-60 bankgdx60 alpha>-15 alpha45.0 
+beta>-15 
+betad5 
+puts limits on three of the control variables: alpha, beta, and bankgd. 
+Flight condition guidance (Table 4-4) requires iterative searches to solve for the con- 
+trol variables. Limits on the body attitude angles help control convergence during 
+these searches. 
+4-26 

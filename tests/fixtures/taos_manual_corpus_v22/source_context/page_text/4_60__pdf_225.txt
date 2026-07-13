@@ -1,0 +1,188 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.5. *File Data Block 
+4.4.5. *File Data Block 
+The V l e  data block is used to create files containing columns of trajectory informa- 
+tion. A list of variable names is given in the data block, and a column of trajectory 
+data is written for each variable. These files are not formatted for printing, that is, 
+they do not contain page breaks and page headers. They are intended for use by other 
+applications, such as plotting programs or spreadsheets, that require columns of data. 
+*File data blocks can appear either within trajectory definitions or outside of the tra- 
+jectory definitions. The difference is that V l e  data blocks within a trajectory defini- 
+tion assume the information written to the file is for a specific trajectory; whereas, 
+%le data blocks outside of the trajectory definitions do not make this assumption. 
+The result is that the variables listed for V l e  data blocks outside of the trajectory defi- 
+nitions must contain trajectory numbers enclosed in brackets. 
+For example, 
+*file compare.dat 
+timelll alt[lI 
+alt[21 alt[31 vel[ll 
+ve1[21 
+ve1[3] 
+writes the time from trajectory number 1, the altitudes from trajectories 1,2, and 3, 
+and the velocity from trajectories 1, 2, and 3 to the file compure.dut. Figure 4-9 
+shows the first part of this file. 
+Time I1 1 
+0.000 
+0.500 
+1.000 
+1.500 
+2.000 
+2.500 
+3.000 
+3.500 
+4.000 
+4.500 
+5.000 
+5.500 
+6.000 
+6.500 
+7.000 
+7.500 
+8.000 
+8.500 
+9.000 
+9.500 
+10.000 
+Alttll 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+100000.0 
+Alt(21 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+80000.0 
+AltI31 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+90000.0 
+Vel111 
+9000.00 
+8992.80 
+8985.61 
+8978.43 
+8971.24 
+8964.07 
+8956.89 
+8949.72 
+8942.56 
+8935.40 
+8928.24 
+8921.09 
+8913.94 
+8306.80 
+8899.66 
+8892.53 
+8885.40 
+8878.27 
+8871.15 
+8864.04 
+8856.93 
+Vel I21 
+7000.00 
+6987.89 
+6975.80 
+6963.73 
+6951.68 
+6939.65 
+6927.64 
+6915.65 
+6903.67 
+6891.72 
+6879.78 
+6867.86 
+6855.97 
+6844.09 
+6832.23 
+6820.39 
+6808.56 
+6796.76 
+6784.98 
+6773.21 
+6761.47 
+Velt31 
+8000.00 
+7991.04 
+7982.09 
+7973.14 
+7964.21 
+7955.29 
+7946.39 
+7937.49 
+7928.60 
+7919.73 
+7910.86 
+7902.00 
+7893.16 
+7884.33 
+7875.51 
+7866.69 
+7857.88 
+7849.08 
+7840.28 
+7831.49 
+7822.70 
+Figure 49. Trajectory Output File Example. 
+The filename must be valid. If the file already exists, it is overwritten with no warning 
+and old data is lost. This is normally satisfactory because the file always contains in- 
+formation from the most recent run. Any number of V l e  data blocks can be included 
+in a problem; one output file is created for each V l e  data block. 
+Any standard output variable or user-defined output variable can be written to the 
+file. Most variables are associated with a trajectory so a trajectory number is required, 
+and it must be enclosed in brackets as shown above. The only exceptions are user-de- 
+fined variables defined outside of the trajectory definitions because they are 
+4-60 

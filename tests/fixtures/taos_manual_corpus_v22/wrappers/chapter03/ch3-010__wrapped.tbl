@@ -1,0 +1,5 @@
+(corpus-ch3-010)
+  table cx(alt,mach) extrap sref=5.30 # CORRECT:
+    alt = 0, 10000                    # altitudes first,
+    mach = 5, 10, 15, 20             # then Mach numbers
+  cx = 0, 0, 0, 0, 0, 0, 0, 0

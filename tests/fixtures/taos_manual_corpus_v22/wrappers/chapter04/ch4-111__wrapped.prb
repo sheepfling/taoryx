@@ -1,0 +1,6 @@
+(corpus-ch4-111)
+*trajectory 1 vehicle start on 1
+  *initial alt=surv-1 lat=0 long=0 wt=1200
+  *segment 1 test
+    *when time>1 stop
+*end

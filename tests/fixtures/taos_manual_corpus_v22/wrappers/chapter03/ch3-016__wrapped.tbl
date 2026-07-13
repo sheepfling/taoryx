@@ -1,0 +1,8 @@
+(corpus-ch3-016)
+  table output
+  start
+    add alpha
+    sin
+    sqr
+    add 1.0
+  end

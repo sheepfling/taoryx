@@ -1,0 +1,9 @@
+(corpus-ch4-063)
+*trajectory 1 vehicle start on 1
+  *initial
+    alt=30000 long=0 lat=45       # Position vector variables
+    vel=750 gamma=0 psi=90        # Velocity vector variables
+    wt=2000 time=0                # Other variables
+  *segment 1 test
+    *when time>1 stop
+*end

@@ -1,0 +1,9 @@
+(1st-stage)
+  table thrust units=lb
+  start
+    sub pres          # subtract atmospheric pressure
+    mult 3.219        # multiply by nozzle exit area
+    add tvac(time)    # add the vacuum thrust
+      time = 0, 0.1, 0.2, 0.5, 1.0, 4.0, 4.1, 4.2, 4.3
+      tvac = 0, 1200, 1050, 980, 950, 910, 100, 50, 0
+  end

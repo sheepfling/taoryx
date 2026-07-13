@@ -1,0 +1,36 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.12. *When Data Block 
+4.2.12. *When Data Block 
+Segment initial conditions are obtained from the trajectory initial conditions or from 
+the final conditions of the previous segment. Segments are flown according to the 
+guidance rules given in the vy or *rail data blocks and they continue until a final 
+condition is met. At that point, the segment ends, and if there is another segment in 
+the trajectory, it is started. 
+The *when data block is used to provide a segment final condition. It also tells TAOS 
+what to do next, that is, whether to transfer to another segment or to end the trajectory. 
+Each segment must have at least one *when data block giving a final condition; other- 
+wise, the segment never terminates. 
+An example of a segment final condition is 
+*when alt<200000 goto 4 
+which reads “end the current segment when altitude becomes less than 200,000 fi 
+and then start executing segment number 4.” The variable name, in this case alt, can 
+be any valid output variable name including user-defined output variables. A list of 
+output variables is given in the appendix. 
+Final conditions can also compare two output variables, for example, 
+*when alpha = alphpl/d goto 2 
+ends the segment when the angle of attack equals the angle of attack for maximum 
+lift-arag ratio. 
+Values from other Trajectories 
+Output variables from other trajectories can be referenced by using subscripts, for 
+example, 
+*when mach[3] > 4 goto 21 
+says to end the segment when the Mach number on trajectory 3 becomes greater than 
+4.0. Subscripts are always enclosed in square brackets. 
+When final conditions are used to compare two variables, subscripts can be used on 
+both variables to compare values from different trajectories. For example, 
+ends the segment when the two trajectories have the same east position. 
+Final Condition Relationships 
+The relationship in a *when data block can be greater than, less than, or equal to. 
+Since all values are continuous real numbers, using the greater than or less than often 
+4-31 

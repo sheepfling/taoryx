@@ -1,0 +1,47 @@
+4. Problem Files 
+*when dynprs>1000 goto 2 
+*segment 2 Constant alpha pullout to level flight 
+*aero ca=(rv-ca) 
+cn=(rv-cn) 
+*fly alphado. 0 
+*when gamgd=O stop 
+*end 
+This problem file contains a single problem beginning with (pullout) and ending with 
+*end. Although problem files can contain more than one problem, it is good practice 
+to only put one problem in each file and run each problem as a separate task or pro- 
+cess. This way if the first problem fails, it does not prevent other problems from run- 
+ning. 
+Data Blocks 
+Each set of information in the problem file begins with an asterisk and a name, for 
+example, *title, *annos, and *trajectory. These are special names TAOS keys on so 
+it will know what type of information follows. 
+For example, information defining the initial conditions of the trajectory is given af- 
+ter the *initial keyword as follows: 
+*initial geodetic 
+long=O. 0 
+lat=O. 0 
+psi=90.0 
+time=O. 0 
+a1 t=3 00 0 0 0 
+vel=18000 
+gama=-3 0 
+wt=1000.0 
+This set of information (everything from the *initial keyword up to the next *print 
+keyword) is called a data block. This particular one is called the *initial data block. 
+Information in this data block gives the vehicle’s initial state. 
+Other data blocks in this problem file include the *title data block which gives a prob- 
+lem title, the *ahnos data block which says to use the 1976 U.S. standard atmosphere, 
+and the *earth data block which says to use the WGS-84 earth model. Each data 
+block has a variety of options to choose from. 
+This problem defines a single trajectory containing two segments. Indentation is 
+used to show the problem frle structure. The *initial, *print, and *segment data 
+blocks are all part of the *trajectory block. The *aero, w, and %hen data blocks 
+are part of the *segment blocks; they are repeated for each segment. The indentation 
+follows the structure shown in Figure 4-2. 
+Section 4 of this report is organized the same way as the problem file. Each data block 
+is discussed in a separate subsection. The subsections are grouped according to the 
+organization shown in Figure 4-2. Section 4.1 contains some general information 
+about the problem file format, Section 4.2 discusses the segment data blocks, Section 
+4.3 discusses the trajectory data blocks, and Section 4.4 discusses the problem data 
+blocks. The last section, Section 4.5, contains several example problem files. 
+4-3 

@@ -122,6 +122,7 @@ class ParseIssue(BaseModel):
     code: str
     message: str
     line: int | None = None
+    column: int | None = None
     ####
 ####
 
@@ -157,6 +158,7 @@ class TableOperation(BaseModel):
     condition: str | None = None
     label: str | None = None
     extrapolation: str | None = None
+    nested: "TableOperation | None" = None
     ####
 ####
 
@@ -323,6 +325,7 @@ class _TableTokenParser:
                     code="expected-token",
                     message=f"Expected {value!r}, found {current.value!r}" if current else f"Expected {value!r} at end of file.",
                     line=current.line if current else None,
+                    column=current.column if current else None,
                 )
             )
         ####
@@ -428,6 +431,7 @@ class _TableTokenParser:
                         code="nonnumeric-table-value",
                         message=f"Table assignment {name_token.value!r} contains nonnumeric value {token.value!r}.",
                         line=token.line,
+                        column=token.column,
                     )
                 )
             ####
@@ -440,6 +444,7 @@ class _TableTokenParser:
                     code="empty-table-assignment",
                     message=f"Table assignment {name_token.value!r} has no numeric values.",
                     line=name_token.line,
+                    column=name_token.column,
                 )
             )
         ####
@@ -485,6 +490,16 @@ class _TableTokenParser:
                         condition_tokens.append(current.value)
                     ####
                 ####
+            else:
+                self.issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="invalid-if-condition",
+                        message="If operation requires a parenthesized relationship.",
+                        line=line,
+                        column=token.column,
+                    )
+                )
             ####
             self.accept("then")
             nested = self.parse_operation()
@@ -495,13 +510,12 @@ class _TableTokenParser:
                         code="invalid-if-operation",
                         message="If statement is missing its then-operation.",
                         line=line,
+                        column=token.column,
                     )
                 )
                 return TableOperation(operator=operator, line=line, condition=" ".join(condition_tokens), label=label)
             ####
-            nested.condition = " ".join(condition_tokens)
-            nested.label = label
-            return nested
+            return TableOperation(operator=operator, line=line, condition=" ".join(condition_tokens), label=label, nested=nested)
         ####
         if operator in TABLE_OPERATIONS_WITH_OPERAND:
             call = self.parse_table_call()
@@ -513,6 +527,17 @@ class _TableTokenParser:
                 else:
                     operand = call
                 ####
+            ####
+            if operand is None:
+                self.issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="missing-operation-operand",
+                        message=f"Operation {operator!r} requires a value, table call, or variable operand.",
+                        line=line,
+                        column=token.column,
+                    )
+                )
             ####
         ####
         if self.current() is not None and self.current().value.lower() in {"extrap", "no-extrap"}:
@@ -552,6 +577,7 @@ class _TableTokenParser:
                     code="missing-table-name",
                     message=f"Expected table identification name, found {token.value!r}." if token else "Missing table name.",
                     line=token.line if token else None,
+                    column=token.column if token else None,
                 )
             )
             return None
@@ -578,6 +604,7 @@ class _TableTokenParser:
                     code="unknown-table-type",
                     message=f"Unknown table type {table_type!r}.",
                     line=type_token.line,
+                    column=type_token.column,
                 )
             )
         ####
@@ -618,6 +645,7 @@ class _TableTokenParser:
                     code="unparsed-table-header-token",
                     message=f"Unparsed table-header token {self.current().value!r}.",
                     line=self.current().line,
+                    column=self.current().column,
                 )
             )
             self.advance()
@@ -651,12 +679,14 @@ class _TableTokenParser:
                     ParseIssue(
                         severity="warning",
                         code="unparsed-simple-table-token",
-                        message=f"Unparsed simple-table token {token.value!r}." if token else "Unparsed token.",
-                        line=token.line if token else None,
+                    message=f"Unparsed simple-table token {token.value!r}." if token else "Unparsed token.",
+                    line=token.line if token else None,
+                    column=token.column if token else None,
                     )
                 )
             ####
         else:
+            saw_end = False
             while self.current() is not None:
                 self.skip_newlines()
                 if self.current() is None:
@@ -668,7 +698,10 @@ class _TableTokenParser:
                     continue
                 ####
                 if self.current().value.lower() == "end":
-                    self.advance()
+                    end_token = self.advance()
+                    assert end_token is not None
+                    operations.append(TableOperation(operator="end", line=end_token.line))
+                    saw_end = True
                     break
                 ####
                 if self._looks_like_assignment() and operations:
@@ -681,18 +714,32 @@ class _TableTokenParser:
                 operation = self.parse_operation()
                 if operation is not None:
                     operations.append(operation)
+                    if operation.operator == "end":
+                        saw_end = True
+                        break
                     continue
                 ####
                 token = self.advance()
                 self.issues.append(
                     ParseIssue(
-                        severity="warning",
+                        severity="error",
                         code="unparsed-full-table-token",
-                        message=f"Unparsed full-table token {token.value!r}." if token else "Unparsed token.",
-                        line=token.line if token else None,
+                    message=f"Unparsed full-table token {token.value!r}." if token else "Unparsed token.",
+                    line=token.line if token else None,
+                    column=token.column if token else None,
                     )
                 )
             ####
+            if not saw_end:
+                self.issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="missing-full-table-end",
+                        message=f"Full table {name_token.value!r} is missing its final 'end' operation.",
+                        line=name_token.line,
+                        column=name_token.column,
+                    )
+                )
         ####
         return TaosTable(
             name=name_token.value,
@@ -714,9 +761,14 @@ class _TableTokenParser:
             if self.current() is None:
                 break
             ####
+            start_position = self.position
             table = self.parse_table()
             if table is None:
-                break
+                if self.position == start_position:
+                    self.advance()
+                while self.current() is not None and self.current().value != "(":
+                    self.advance()
+                continue
             ####
             tables.append(table)
         ####

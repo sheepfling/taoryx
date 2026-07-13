@@ -1,0 +1,16 @@
+add ca(alt,mach,alpha)
+
+  alt=10000, mach=5, alpha=0,2,4,6,8 # Values for 10,000
+  ca = .20, .21, .23, .26, .28       # start here
+
+  alt=10000, mach=10, alpha=0,2,4,6
+  ca = .19, .19, .20, .22
+
+  alt=10000, mach=15, alpha=0,2,4
+  ca = .18, .19, .21
+
+  alt=30000, mach=10, alpha=0,2,4,6  # Values for 30,000
+  ca = .21, .23, .25, .29            # start here
+
+  alt=30000, mach=15, alpha=0,2,4
+  ca = .20, .21, .23

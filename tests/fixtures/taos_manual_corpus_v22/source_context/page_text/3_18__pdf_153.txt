@@ -1,0 +1,28 @@
+3. Table Files 
+3.5. Full Tables 
+3.5.4. Storage Variables 
+3.5.4. Storage Variables 
+The math operation csto (clear and store) is used to save temporary calculations for 
+later use, just like a storage register on a calculator. After a value is saved and given 
+a name, it can be retrieved and used in subsequent math operations. For example, the 
+operations 
+add alpha 
+sqr 
+csto ca2 
+cos 
+calculate cos2a and save it as the variable ca2. The csto operation also sets the current 
+table value to zero in preparation for subsequent math operations. 
+The storage variable name given with the csto operation must be unique; in other 
+words, it cannot be a state variable from Table 3-2 or a user-defined variable used 
+elsewhere in the table or problem fdes. 
+The variable ca2 with its value of cos2a can be usedin subsequent calculations, either 
+as a value for a math operation or as an independent variable of a table. For example, 
+add alpha 
+sqr 
+csto ca2 
+add factor(ca2,mach) 
+cos 
+uses the variable ca2 as an independent variable in a table. This provides the capabili- 
+ty to enter tables that are complex functions of the state variables. In this case factor 
+is a function of cos2a and Mach number. 
+3-18 

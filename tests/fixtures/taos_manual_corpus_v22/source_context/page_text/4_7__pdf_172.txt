@@ -1,0 +1,54 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2. Segment Data Blocks 
+Segment data blocks provide information describing how to calculate a trajectory 
+segment. This includes numerical integration parameters, the vehicle configuration, 
+guidance rules, segment finalconditions, and what to do next. This is alot of informa- 
+tion, so it is organized into data blocks. Thus, segment data blocks contain other types 
+of data blocks. 
+Segment data blocks begin with a line containing the keyword *segment, for exam- 
+ple, 
+*segment 23 2nd Stage Boost 
+The value following *segment is the segment number, in this case segment number 
+23. It is required and it must be unique within a trajectory. An optional title, such as 
+2nd Stage Boost, follows the segment number. 
+The remainder of the segment data block is made up of other types of data blocks as 
+shown in Table 4-1. A segment data block extends from the *segment keyword to 
+the next trajectory or problem data block keyword. Usually this is another *segment 
+keyword or a *trajectory keyword (See Table 4-8 for a list of trajectory data block 
+keywords and Table 4-13 for a list of problem data block keywords). 
+Table 4-1. Segment Data Blocks. 
+Data Block 
+Description 
+*aero 
+Defines aerodynamic coefficients 
+*constants 
+Provides values for user-defined variables 
+*cg 
+*fly 
+Defines a guidance rule 
+Defines the center of gravity 
+~~ 
+*increment 
+I Allows discontinuities in the vehicle’s state 
+*inertial 
+*integ 
+Aligns an inertial platform coordinate system 
+Provides parameters for numerical integration 
+*limits 
+*prop 
+Defines limits on the flight path 
+Defines propulsive thrust and mass flow 
+*rail 
+*reset 
+Provides parameters for rail launches and sleds 
+Allows discontinuities in the vehicle’s state 
+*when 
+I Provides final conditions and what to do next 
+The following segment data block is an example of a rail-launched missile: 
+*segment 1 Rail Launch 
+*integ dtprnt=0.10 dt=O.Ol 
+*aero ca=(stagel-ca) 
+cn=(stagel-cn) 
+*prop thrust= (thrustl) mdot= (mdotl) 
+4-7 

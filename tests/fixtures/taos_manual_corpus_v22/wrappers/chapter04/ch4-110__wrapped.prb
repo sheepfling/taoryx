@@ -1,0 +1,11 @@
+(corpus-ch4-110)
+*summarize delta-alt
+  add alt on segment 4, trajectory 1
+  sub alt on segment 11, trajectory 2
+  div 3280.84
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=0 gama=0 psi=90 time=0 wt=1
+  *segment 1 test
+    *when time>1 stop
+*end

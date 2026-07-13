@@ -1,0 +1,245 @@
+4. Problem Files 
+4.5. Eumples 
+4.5.1. Ballistic Reentry 
+decelerating giving negative axial g's so the min function is used to select the most 
+negative value and then the neg operation is used to convert this to a positive number. 
+The *egs data block is used to create an EGS database file so the trajectory informa- 
+tion can be plotted. The names given in the *survey data block, gentry and ventry, 
+appear in the EGS database file and are used for plotting. 
+Results 
+This problem calculates 16 trajectories, one for each combination of survey values. 
+On a Silicon Graphics workstation, the problem runs in about 9 seconds so it takes 
+a little over 0.5 seconds to compute each trajectory. 
+The following listing is typical of the trajectory printout for this problem: 
+sandia National 
+Laboratories 
+(TAOS - Version 96.0) 
+Trajectory Analysis & Optimization software 
+.............................................................................................. 
+Ballistic reentry trajectories 
+Problem (ballistic) I 
+1976 US Standard Atmosphere I Non-rotating WGS-84 Earth 
+Trajectory for vehicle: N 
+ventry = 15000 
+Time 
+0.000 
+0.500 
+1.000 
+1.500 
+2.000 
+2.500 
+3.000 
+3.500 
+4.000 
+4.500 
+5.000 
+5.500 
+6.000 
+6.500 
+7.000 
+7.500 
+8.000 
+8.500 
+9.000 
+9.500 
+10.000 
+10.500 
+11.000 
+11.500 
+12.000 
+12.500 
+13.000 
+13.500 
+14.000 
+14.500 
+15.000 
+15.500 
+16.000 
+16.500 
+17.000 
+AI+ 
+300000.0 
+295695.2 
+291384.3 
+287067.3 
+282744.3 
+278415.3 
+274080.2 
+269739.0 
+265391.8 
+261038.6 
+256679.2 
+252313.8 
+247942.4 
+243564.9 
+239181.3 
+234791.7 
+230396.0 
+225994.2 
+221586.4 
+217172.5 
+212752.5 
+208326.6 
+203894.5 
+199456.4 
+195012.3 
+190562.2 
+186106.1 
+181644.0 
+177175.9 
+172701.8 
+168221.8 
+163735.9 
+159244.1 
+154746.5 
+150243.2 
+gentry = -35 
+Range 
+0.000 
+1.011 
+2.023 
+3.034 
+4.046 
+5.058 
+6.070 
+7.083 
+8.096 
+9.108 
+10.121 
+11.135 
+12.148 
+13.162 
+14.176 
+15.190 
+16.204 
+17.219 
+18.234 
+19.248 
+20.264 
+21.279 
+22.294 
+23.310 
+24.326 
+25.342 
+26.359 
+27.375 
+28.392 
+29.409 
+30.426 
+31.443 
+32.461 
+33.478 
+34.496 
+Vel 
+15000.00 
+15008.98 
+15017.97 
+15026.96 
+15035.97 
+15044.99 
+15054 -02 
+15063.06 
+15072.10 
+15081.16 
+15090.22 
+15099.29 
+15108.36 
+15117.44 
+15126.53 
+15135.61 
+15144.70 
+15153.79 
+15162.87 
+15171.95 
+15181.02 
+15190.08 
+15199.12 
+15208.14 
+15217.14 
+15226.10 
+15235.01 
+15252.69 
+15261.43 
+15270.08 
+15278.63 
+15287.04 
+15295.30 
+15303.36 
+15243.m 
+DVnprs 
+0.575 
+0.729 
+0.922 
+1.167 
+1.478 
+1.847 
+2.298 
+2.852 
+3.532 
+4.362 
+5.375 
+6.609 
+8.107 
+9.924 
+12.122 
+14.763 
+17.860 
+21.547 
+25.925 
+31.109 
+37.234 
+44.454 
+52.946 
+62.912 
+74.584 
+88.224 
+104.134 
+122.654 
+144.171 
+169.124 
+198.292 
+235.270 
+279.221 
+332.102 
+400.575 
+Nx 
+-0.0001 
+-0.0002 
+-0.0002 
+-0.0002 
+-0.0003 
+-0.0004 
+-0.0005 
+-0.0006 
+-0.0007 
+-0.0009 
+-0.0011 
+-0.0014 
+-0.0017 
+-0.0021 
+-0.0026 
+-0.0031 
+-0.0038 
+-0.0046 
+-0.0055 
+-0.0066 
+-0.0080 
+-0.0095 
+-0.0114 
+-0.0136 
+-0.0161 
+-0.0191 
+-0.0226 
+-0.0267 
+-0.0314 
+-0.0369 
+-0.0434 
+-0.0515 
+-0.0611 
+-0.0726 
+-0.0874 
+This page corresponds to the first trajectory computed by TAOS which is for an initial 
+velocity of 15,000 ft/sec and an initial flight path angle of -35". 
+The summary variables are tabulated as a function of the survey variables on the last 
+printout page as follows: 
+4-94 

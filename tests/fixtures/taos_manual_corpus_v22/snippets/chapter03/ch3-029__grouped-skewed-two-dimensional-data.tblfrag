@@ -1,0 +1,10 @@
+add cxo(alt,mach)
+  alt = 0, 50000
+  mach = 3, 5, 7, 9
+  cxo = .020, .021, .019, .018, # Values for alt=0
+        .021, .022, .021, .020  # Values for alt=50000
+
+  alt = 100000, 150000
+  mach = 7, 10, 15
+  cxo = .024, .023, .021,       # Values for alt=100000
+        .027, .025, .024        # Values for alt=150000

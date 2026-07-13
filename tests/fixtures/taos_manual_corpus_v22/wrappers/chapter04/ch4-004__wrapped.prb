@@ -1,0 +1,7 @@
+(corpus-ch4-004)
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    time=20, vel=2.0e4, wt=345.5, gama=-24.3
+  *segment 1 test
+    *when time>1 stop
+*end

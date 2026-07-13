@@ -1,0 +1,17 @@
+(corpus-ch3-028)
+  table output
+  start
+  super: if (mach < 1.0) then goto sub # "if" test
+         add mach
+         mult mach                         # This set of math
+         csto mach2                        # operations is for
+         add cdsup(mach2)                  # Mach > 1 (supersonic)
+           mach2 = 1.0, 4.0, 9.0, 25.0
+           cdsup = 0.120, 0.094, 0.075, 0.055
+         goto done
+  
+  sub:   add cdsub(alpha)                  # This set of math
+           alpha = 0, 5, 10                # operations is for
+           cdsub = 0.020, 0.023, 0.027     # Mach < 1 (subsonic)
+  
+  done:  end

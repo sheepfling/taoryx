@@ -1,0 +1,2 @@
+*prop thrust=250 mdot=120.0
+      thr_units=kn mdt_units=kg/sec

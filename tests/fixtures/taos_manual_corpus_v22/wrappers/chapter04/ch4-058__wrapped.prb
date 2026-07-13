@@ -1,0 +1,13 @@
+(corpus-ch4-058)
+*trajectory 1 vehicle start on 1
+  *define integral qmin=-0.10
+    if (dynprs > 100 || vel < 1000) {
+      qmin = 0.0;
+    } else {
+      qmin = (100.0 - dynprs)^2;
+    }
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=0 gama=0 psi=90 time=0 wt=1
+  *segment 1 test
+    *when time>1 stop
+*end

@@ -1,0 +1,2 @@
+*define alt-km
+  alt-km = alt / 3280.84;

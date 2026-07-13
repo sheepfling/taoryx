@@ -1,0 +1,23 @@
+(pullout)
+
+*title  Example of a maneuvering trajectory
+*atmos  standard
+*earth  wgs-84
+
+*trajectory 1 rv start on 1
+
+  *initial geodetic
+    long=0.0       lat=0.0        psi=90.0       time=0.0
+    alt=300000     vel=18000      gama=-30       wt=1000.0
+
+  *print time alt range mach vel gamgd dynprs alpha ca cn
+
+  *segment 1 Ballistic flight
+    *aero ca=(rv-ca) cn=(rv-cn)
+    *when dynprs>1000 goto 2
+
+  *segment 2 Constant alpha pullout to level flight
+    *aero ca=(rv-ca) cn=(rv-cn)
+    *fly alpha=10.0
+    *when gamgd=0 stop
+*end

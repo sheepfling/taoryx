@@ -1,0 +1,61 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+4.3.5. *Initial Data Bbck 
+Coordinate System 
+Geodetic 
+Geocentric 
+I 
+4.3.5. "Initial Data Block 
+Variable 
+Description 
+alt 
+Altitude 
+long 
+Longitude 
+lat 
+Latitude 
+rcm 
+Distance to earth center 
+long 
+Longitude 
+lat 
+Latitude 
+The initial conditions or starting point of a trajectory are given in the *initial data 
+block. Initial conditions define the initial state of the vehicle, that is, its position and 
+velocity vectors and its mass. They also defrne a starting time, range, and path length. 
+Y 
+z 
+Initial conditions can be provided directly by giving specific values for the position, 
+velocity, and mass, or they can be provided indirectly by using values from a different 
+trajectory. The latter method is used when avehicle releases or drops objects or when 
+a missile stages. This way trajectories for all objects or stages can be computed at the 
+same time. 
+Position y component 
+Position z comwnent 
+Specific Initial Conditions 
+When entering specific initial conditions, the *initial data block consists of a key- 
+word designating a coordinate system followed by aset of variables and values defm- 
+ing the vehicle's initial state. The position and velocity variables must be consistent 
+with the coordinate system. Table 4-10 contains sets of position variables for each 
+coordinate system, and Table 4-11 contains sets of velocity variables for each sys- 
+tem. 
+Table 4-1 0. Initial Position Variables. 
+JXFC or ECIC 
+X 
+I Position x component I 
+The geodetic coordinate system is the default for initial conditions. For example, 
+*initial 
+alt=30000 
+long=O 
+lat=45 
+# Position vector variables 
+vek750 
+gamma=O 
+psi=90 
+# Velocity vector variables 
+wt=2 0 0 0 
+time=O 
+# Other variables 
+defaults to the geodetic coordinate system. The three position variables are from 
+Table 4-10 for the geodetic coordinate system, and the three velocity variables are 
+from Table 4-11. 

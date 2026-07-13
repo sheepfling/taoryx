@@ -1,0 +1,13 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+*prop thrust=(t-recruits) mdot=(m-recruits) 
+*rail launch cfstak0.15 cfslid=0.01 
+*when plength=25.0 goto 3 
+This segment data block contains an *integ block giving integration and print step 
+sizes, an *aero block with aerodynamic table names, two *prop blocks with thrust 
+and mass flow table names, a *rail block for the rail launch guidance, and a %hen 
+block with the final conditions. The %hen block is also used for continuing the tra- 
+jectory; in this case, segment 3 is computed next. 
+The following sections describe the input parameters and format for each segment 
+data block. Additional examples of segment data blocks are given in Section 4.5. 
+4-8 

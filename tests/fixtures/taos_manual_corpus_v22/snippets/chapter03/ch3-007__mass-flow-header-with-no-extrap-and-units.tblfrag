@@ -1,0 +1,1 @@
+table mdot(time,motor) no-extrap units=lb/hr

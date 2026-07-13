@@ -1,0 +1,12 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.8. *Radar Data Block 
+*radar 2 station> 
+altd12.4 long=65.345 latgdd2.435 
+wgs-72 distn=25.5 distez15.2 distd=-10.3 
+shows another example which defines a station relative to a WGS-72 earth model 
+that is located at an altitude of 112.4 ft, a longitude of 65.34SoE, and a latitude of 
+12.435"N. From this position the radar is offset 25.5 ft north, 15.2 ft east, and 10.3 
+* ft up. 
+Table 4-21. Radar Data Block Variables. 
+4-75 

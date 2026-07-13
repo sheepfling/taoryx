@@ -1,0 +1,43 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.6. *Optimize Data Block 
+making very small perturbations in the trajectory. The integration step size, given in 
+the *integ data block, must be small enough to accurately capture these small per- 
+turbations. If it is too large, numerical errors in the trajectory integration cause incor- 
+rect derivatives and these cause the optimization procedure to work towards an incor- 
+rect solution. Experimentation is required to judge how small to make the integration 
+step size. 
+Accurate derivatives are critical to the performance of the optimization procedure. 
+If the integration step size is not the problem, then the truncation error from the deriv- 
+ative calculation may be too large. The accuracy of the derivatives can be improved 
+by decreasing the size of the derivative increment dx by an order of magnitude or 
+more or by changing the derivative method to central differences with derivs = 0. 
+The value of dx is limited by the numerical precision of the computer. When it is too 
+small, numerical errors become larger than the truncation error, and the optimization 
+procedure continues to have dXiculties. At this point, the value of dx should be in- 
+creased and central differences should be used. 
+Troubleshooting - Surveys 
+Using surveys with optimization often causes problems because the same starting 
+solution cannot be used for all survey values. This is particularly a problem when op- 
+timization parameters are in an angle-of-attack time history. Trajectories with opti- 
+mized angle-of-attack time histories are best run individually and not surveyed un- 
+less the survey value does not change much. Sometimes the restart and adjust options 
+can be used to solve this problem with surveys, but they should only be tried as a last 
+resort. 
+Troubleshooting - Angle-of-Attack Time Histories 
+A common problem with optimization parameters in an angle-of-attack time histo- 
+ry, such as 
+*fly alpha vrs tseg 
+opta-1 
+0 
+opta-2 
+10 
+opta-3 
+20 
+opta-4 
+opta-5 
+is with the lower limit on the last time value opta-5. If this value becomes less than 
+the previous time value (20), then the time values in the table will not be continuously 
+increasing and table interpolation will fail. So the lower limit of this parameter must 
+be set to a value slightly larger than the previous time point, for example, 
+4-71 

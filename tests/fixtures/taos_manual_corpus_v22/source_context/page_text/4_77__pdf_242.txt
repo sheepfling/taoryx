@@ -1,0 +1,55 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.9. *Search Data Block 
+maximum. The search function, given in the *search data block, determines the type 
+of search. 
+The first values in the *search data block are the search number, the keyword vary, 
+a name, and the keyword until. The name is used to identify the search parameter in 
+the printout file; any name can be used. 
+The search objective is given next as an output variable set equal to avalue. The value 
+can be a constant, another output variable, the keyword min, or the keyword m. A 
+segment and trajectory number must be provided for the output variable, and if a se- 
+cond output variable is given, segment and trajectory numbers can be provided for 
+it as well. For example, 
+*search 1 vary pitch-rate until pitchi on segment 2 
+= pitchi on segment 3, trajectory 2 
+says to modify the pitch rate (most likely a value in a guidance rule) until the inertial 
+pitch angles on two segments are equal. The trajectory number is only given for one 
+of the variables, so it is assumed to be the same for both. 
+In the following example, subscripts enclosed in square brackets are used to denote 
+the trajectory numbers: 
+*search 1 vary weight until alt[ll on segment 3 
+= alt[2] on segment 5 
+Trajectory numbers can be given with subscripts or with the trajectory keyword, but 
+not with both. When segment and trajectory numbers are given and the trajectory 
+keyword is used, the segment number must be given first, followed by the trajectory 
+number. If a trajectory or segment number is not provided for a variable, it is assumed 
+to be the same for both variables. 
+Search Control Variables 
+Table 4-22 contains a list of the search control variables. The search methods require 
+an initial estimate of the search parameterxest, an initial search increment dx, a lower 
+search boundary xlo, and an upper search boundary xhi. The other search control 
+variables have default values so they are optional. 
+Table 4-22. Search Data Block Variables. 
+Variable 
+xlo 
+xhi 
+xest 
+Description 
+Lower search boundary 
+Upper search boundary 
+Initial search estimate 
+Variable 
+xref 
+fref 
+maxitr 
+' Description 
+Search variable reference value 
+(default = 1.0) 
+Search function reference value 
+(default = 1.0) 
+Maximum no. of iterations 
+(default = 20) 
+4-77 
+' 
+I. 

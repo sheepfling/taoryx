@@ -1,0 +1,44 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+4.3.5. *Initial Data Block 
+*initial ecfc 
+x = 19099345.2 
+y = 9974312.7 
+z = 6489105.4 
+# Position 
+xdt = -173.973 
+ydt = 10327.52 zdt = 26425.9 
+# Velocity 
+time = 769.35 
+wt = 1053.9 
+# Time and Wt 
+t-epoch = -1045.2 
+omega-0 = 25.3 
+# ECFC to ECIC 
+This trajectory starts at time 769.35 seconds. However, the angular difference be- 
+tween the ECFC and ECIC Coordinate systems is not known at this time, so it is input 
+at the known time of -1045.2 seconds or 18 14.55 seconds before the trajectory starts. 
+The times of all trajectories are relative to a t = 0 mission time. 
+Initial Conditions from a Trajectory 
+Initial conditions for atrajectory can be obtained from another trajectory, so that mul- 
+tiple trajectories can branch from a single trajectory. For example, in trajectory l an 
+aircraft releases a weapon at the beginning of segment 6. The weapon’s initial condi- 
+tions are the same as the aircraft’s initial conditions at the beginning of segment 6, 
+that is, 
+*initial from segment 6, trajectory 1 
+Thefrom keyword says to retrieve initial conditions from another trajectory. Initial 
+conditions always are taken from the beginning of a segment; in this case, from the 
+beginning of segment 6 in trajectory 1. 
+When initial conditions are obtained from another trajectory, the variables trajectory 
+and segment are input as shown above. Variables from Tables 4-10 and 4-1 1 defining 
+the position and velocity should not be given. Values for the variables t-0 and ome- 
+ga-0 from Table 4-12 can be given following the segment and trajectory numbers. 
+These variables are often set to the same values in all trajectories to ensure the same 
+ECIC coordinate system. 
+After a trajectory has been initialized from another, the *increment (Section 4.2.5) 
+and *reset (Section 4.2.11) data blocks can be used in the first segment to adjust its 
+initial state. In general, the deployed object’s weight must be set because its weight 
+is different from the original vehicle. In addition, its position is usually adjusted be- 
+cause its center of mass is not at exactly the same place as the original vehicle’s center 
+of mass. 
+4-45 

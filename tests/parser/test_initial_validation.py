@@ -1,0 +1,39 @@
+from taoryx.language.models import InitialBlock
+from taoryx.language.problem_parser import parse_problem_text
+
+
+def test_initial_accepts_authoritative_segment_trajectory_copy_form() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 2 vehicle start on 1\n"
+        "*initial from segment 6, trajectory 1\n"
+        "*end\n"
+    )
+
+    block = document.problems[0].trajectories[0].blocks[0]
+    assert isinstance(block, InitialBlock)
+    assert block.mode == "from"
+    assert block.source_segment == 6
+    assert block.source_trajectory == 1
+    assert not document.diagnostics
+
+
+def test_initial_rejects_coordinate_inconsistent_and_conflicting_values() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*initial ecfc\n"
+        "alt=100 x=1 wt=2 mass=3 vel=4 mach=5\n"
+        "*end\n"
+    )
+
+    codes = [diagnostic.code for diagnostic in document.diagnostics]
+    assert "unsupported-initial-parameter" in codes
+    assert "conflicting-initial-mass" in codes
+    assert "conflicting-initial-velocity" in codes
+
+
+def test_initial_requires_weight_or_mass_for_direct_state() -> None:
+    document = parse_problem_text("(demo)\n*trajectory 1 vehicle start on 1\n*initial geodetic\nalt=100\n*end\n")
+
+    assert any(diagnostic.code == "missing-initial-mass" for diagnostic in document.diagnostics)

@@ -1,0 +1,144 @@
+3. Table Files 
+3.6 Examples 
+3.6 Examples 
+The following examples are provided to show what complete tables look like in prac- 
+tice. The first example is a thrust table for a rocket motor. 
+(recruits-thr) 
+table thrust 
+start 
+add thr (tmark) 
+tmark = 0.00, 
+0.04, 
+0.06, 
+0.11, 
+0.21, 
+0.36 
+0.65, 
+0.84, 
+0.96, 
+1.16, 
+1.36, 
+1.49 
+1.52, 
+1.61, 
+1.70, 
+1.80, 
+2.00, 
+2.16 
+99.0 
+thr 
+= 
+0, 
+493, 37113, 37507, 36520, 36520, 
+39482, 39235, 37803, 34842, 33263, 33361, 
+32276, 18556, 11845, 
+7501, 
+2270, 
+0 ,  
+0 
+mult 2.0 
+R No. of recruits 
+mult 0.9936 
+# cosine of nozzle cant angle (6.5 deg) 
+end 
+Thrust is a function of time, but the variable tmurk is used instead of time because 
+it can be reset to zero at any point in the trajectory. It is preferable to Beg because tseg 
+is automatically reset at the beginning of each segment, whereas m r k  is only reset 
+when requested by the user. The value from the thrust table is multiplied by two fac- 
+tors: the first one is the number of rocket motors, and the second one accounts for 
+the nozzles canted at 6.5" to the vehicle centerline. 
+The second example is an axial force coefficient table that is only a function of Mach 
+number. This type of table is commonly used for ballistic sounding rockets that fly 
+at zero angle of attack. 
+(stmi) 
+table ca sref=5.241 
+start 
+add ca(mach) 
+mach = 0.00 
+0.6 
+0.72 
+0.8 
+0.85 
+0.9 
+1.02 
+1.1 
+1.18 
+1.5 
+1.75 
+2.1 
+2.9 
+3.2 
+4.0 
+5.2 
+6.2 
+8.0 
+ca 
+= 0.97 
+0.96 
+0.99 
+1.03 
+1.1 
+1.27 
+1.93 
+1.82 
+1.72 
+1.39 
+1.2 
+1.01 
+0.74 
+0.68 
+0.62 
+0.54 
+0.47 
+0.36 
+end 
+The table shown above is in the full table format, but it qualifies for the simple table 
+format. In the simple table format, it appears as follows: 
+(stmi) 
+table 
+ca (mach) sref=5 -241 
+mach = 0.00 
+0.6 
+0.72 
+0.8 
+0.85 
+0.9 
+1.02 
+1.1 
+1.18 
+1.5 
+1.75 
+2.1 
+2.9 
+3.2 
+4.0 
+5.2 
+6.2 
+8.0 
+ca 
+= 0.97 
+0.96 
+0.99 
+1.03 
+1.1 
+1.27 
+1.93 
+1.82 
+1.72 
+1.39 
+1.2 
+1.01 
+0.74 
+0.68 
+0.62 
+0.54 
+0.47 
+0.36 
+The tables shown so far are small, but they do not have to be. In practice, tables tend 
+to be larger so they more accurately simulate the vehicle's characteristics. The trajec- 
+tory calculations are often only as accurate as the aerodynamic and propulsion data. 
+3-25 
+- 7 i  
+.. 
+I 
+- 

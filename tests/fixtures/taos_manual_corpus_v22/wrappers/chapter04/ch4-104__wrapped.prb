@@ -1,0 +1,9 @@
+(corpus-ch4-104)
+*search 1 vary pitch-rate until pitchi on segment 2
+  = pitchi on segment 3, trajectory 2
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=0 gama=0 psi=90 time=0 wt=1
+  *segment 1 test
+    *when time>1 stop
+*end

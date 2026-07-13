@@ -1,0 +1,48 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.14. *wind Data Block 
+4.4.14. *Wind Data Block 
+Atmospheric winds with respect to the earth's surface can be defined with a *wind 
+data block. If a *wind data block is not input, then all wind velocities are set to zero. 
+Winds are divided into a vertical component and a horizontal component which can 
+be defined as a wind velocity and heading or as east and north components. Winds 
+can be defined in either the local geocentric or geodetic horizon coordinate system. 
+Wind heading is the direction the wind is from measured clockwise from north as 
+shown in Figure 4-13. For example, a heading of 180" means the wind is from the 
+south, that is, it moves from south to north. Similarly, the wind east component is pos- 
+itive when the wind is from the east or moving from east to west. The wind vertical 
+component is positive when the air movement is towards the ground or downward. 
+North 4 
+Wind 
+Vector 
+Heading 
+East 
+Figure 4 I 3 .  Wind Horizontal Component Direction. 
+The wind data block begins with the keyword *wind followed by the keyword geo- 
+centric or geodetic giving the coordinate system. Three variables and their values 
+from Table 4-25 are given next. The three variables in the first column can be given, 
+or the ones in the second column can be given, but not both. 
+Table 425. Wind Data Block Variables. 
+Variable Description 
+Variable Description 
+windv 
+Total horizontal wind velocity 
+winde 
+East wind velocity component 
+windh 
+Horizontal wind heading 
+windn 
+North wind velocity component 
+I 
+Wind velocity component 
+I towards earth center 
+II windd 
+I towards earth center 
+Wind velocity component 
+windd 
+Wind values can be constants or they can be table identification names enclosed in 
+parentheses. TAOS keys on the parentheses to decide whether a table identification 
+name or a constant has been input. Winds that are a function of a state variable, such 
+as altitude or time, can be input with tables. 
+The following wind data block 
+*wind geodetic windv=(winds) windh=90 windd=O 

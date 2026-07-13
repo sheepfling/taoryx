@@ -1,0 +1,30 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.10. *Rail Data Bbck 
+4.2.10. *Rail Data Block 
+Rail launches and sled tests are special cases because the vehicle is constrained by 
+rails to move only in one direction. For rail launches and sled tests, the *rail data 
+block is used instead of the vy data blocks to determine the body attitude and the 
+trajectory. The direction of the rail or sled is obtained from the trajectory initial condi- 
+tions or from the end of the previous segment. The motion of the vehicle is 
+constrained in this direction for the duration of the segment (Section 2.2.2). 
+A rail launch is requested with the data block 
+*rail launch cfstak0.15 
+cfslid=0.01 
+where cfstat is the static coefficient of friction and cfslid is the sliding or kinematic 
+coefficient of friction. The static coefficient of friction is used when the velocity is 
+less than 0.001 ft/sec; otherwise, the sliding coefficient of friction is used. Because 
+of this, two segments are often used to simulate rail launches: the fust segment is 
+from a velocity of 0 ft/sec to a velocity of 0.001 ft/sec, and the second segment is for 
+velocities greater than 0.001 ft/sec. This simulates the amount of time required for 
+the thrust forces to overcome the static friction force and move the vehicle. 
+For a rail launch, TAOS assumes the missile is attached to the rail such that it cannot 
+move backwards, so negative accelerations in the direction of the rail are ignored. 
+The path length, plength, can be used as a segment fmal condition to represent the 
+rail length (Section 4.2.12). 
+A sled test can be simulated with 
+frail sled cfstak0.17 cfslid=0.02 
+where again cfstat and cfsZid are the coefficients of friction. Negative accelerations 
+are allowed for the sled test because the vehicle accelerates up to speed and then 
+slows to a stop. 
+4-29 

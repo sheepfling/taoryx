@@ -8,10 +8,10 @@ from pydantic import BaseModel, Field
 
 _TOKEN_RE = re.compile(
     r"\s*(?:"
-    r"(?P<number>(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?)|"
+    r"(?P<number>(?:\d+(?:\.\d*)?|\.\d+)(?:[EeDd][+-]?\d+)?)|"
     r"(?P<parameter>(?:surv|srch)-\d+|opt[a-e]-\d+)|"
     r"(?P<name>[A-Za-z_][A-Za-z0-9_.-]*)|"
-    r"(?P<operator><=|>=|==|!=|[+\-*/^<>=(),\[\]])|"
+    r"(?P<operator>\+=|-=|\*=|/=|<=|>=|==|!=|&&|\|\||!|[+\-*/^<>=(),\[\]])|"
     r"(?P<wildcard>\*)"
     r")",
     re.IGNORECASE,
@@ -131,6 +131,10 @@ def tokenize_expression(text: str) -> list[ExpressionToken]:
 
 class _ExpressionParser:
     _PRECEDENCE: dict[str, int] = {
+        "or": 5,
+        "||": 5,
+        "and": 6,
+        "&&": 6,
         "=": 10,
         "==": 10,
         "!=": 10,
@@ -199,13 +203,13 @@ class _ExpressionParser:
         if token is None:
             raise ExpressionSyntaxError("Unexpected end of expression.")
         ####
-        if token.value in {"+", "-"}:
+        if token.value in {"+", "-", "!"} or token.value.lower() == "not":
             self.position += 1
             return UnaryExpression(operator=token.value, operand=self.parse_prefix())
         ####
         if token.category == "number":
             self.position += 1
-            return NumberExpression(value=float(token.value))
+            return NumberExpression(value=float(token.value.replace("D", "E").replace("d", "e")))
         ####
         if token.category == "parameter":
             self.position += 1

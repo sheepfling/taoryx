@@ -1,0 +1,53 @@
+4. Problem Files 
+4.5. Examples 
+4.5.2. Ballistic Rocket 
+4.5.2. Ballistic Rocket 
+This example problem simulates a two-stage ballistic rocket trajectory which maxi- 
+mizes impact velocity. The rocket is rail launched, but the best launch-rail elevation 
+angle is unknown. The second stage is fired downward after apogee to increase im- 
+pact velocity, but the time of firing and the vehicle orientation at firing are unknown. 
+Payload separation needs to occur above the atmosphere and second stage burnout 
+needs to occur before this. A final constraint is that the range of the trajectory must 
+be 60 nm. Optimization is used to solve for these unknown values to meet the 
+constraints. The trajectory of the fmt-stage booster after separation is calculated in 
+addition to the basic vehicle to illustrate multiple-vehicle calculations. 
+The first stage of the rocket has a Castor main motor with two smaller Recruit motors. 
+The Recruits are jettisoned after they burnout at 3 seconds. The Castor motor contin- 
+ues to burn for about 40 seconds. The frst stage has fins for aerodynamic spin stabil- 
+ity so it is not separated until the vehicle is above the atmosphere which is assumed 
+to be 300,000 ft. After first stage separation, the second stage is pointed with an atti- 
+tude control system to its firing orientation. The vehicle coasts past apogee and then 
+fires the second stage motor. Some time is allowed after second stage burnout to 
+make sure the motor is no longer thrusting. Then, the payload separates and reenters 
+the atmosphere. 
+Table files required for this problem are not given because they are too large. Tables 
+are required for the thrust and mass flow of the first and second stage motors. Sepa- 
+rate drag tables are required for all of the vehicle’s configurations. Drag is different 
+depending on whether a motor is firing or not, so separate tables are also required for 
+boosting and coasting. 
+Problem File 
+The problem file appears as follows: 
+(rocket 
+) 
+*title 
+. 
+Trajectory for a Ballistic Sounding Rocket 
+2nd Stage Fires Down to Maximize Velocity 
+*atmos standard 
+*earth wgs-84 omega=O 
+*trajectory 1 Rocket start on 1 
+*initial geodetic 
+long=0.0 
+1atZO.O 
+alt=O .O 
+vel=O. 0 
+psi=90.0 
+time=O .O 
+gama=opta-1 
+wt=12000.0 
+*print time alt vel range gamgd pitchgd wt 
+*segment 1 1st stage ignition to first movement 
+*integ dtprnk0.1 
+dt=0.001 
+4-98 
+r 

@@ -1,0 +1,4 @@
+*define rel_range
+  dx = (east[2] - east[1])^2;
+  dy = (north[2] - north[1])^2;
+  rel_range = sqrt(dx+dy);

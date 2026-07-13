@@ -1,0 +1,10 @@
+(corpus-ch4-037)
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=0 gama=0 psi=90 time=0 wt=1
+  *segment 1 test
+    *prop thrust=(thr-recruits) mdot=(mdt-recruits)
+          nrecruits=2
+    *when time>1 stop
+
+*end

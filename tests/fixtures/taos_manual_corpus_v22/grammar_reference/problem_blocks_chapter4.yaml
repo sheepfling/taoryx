@@ -1,0 +1,46 @@
+chapter: 4
+source_title: Problem Files
+status: complete
+scopes:
+  segment:
+    section: '4.2'
+    blocks:
+      - {name: aero, section: '4.2.1', manual_page: '4-9', pdf_page: 174, status: complete}
+      - {name: constants, section: '4.2.2', manual_page: '4-11', pdf_page: 176, status: complete}
+      - {name: cg, section: '4.2.3', manual_page: '4-12', pdf_page: 177, status: complete}
+      - {name: fly, section: '4.2.4', manual_page: '4-13', pdf_page: 178, status: complete}
+      - {name: increment, section: '4.2.5', manual_page: '4-20', pdf_page: 185, status: complete}
+      - {name: inertial, section: '4.2.6', manual_page: '4-23', pdf_page: 188, status: complete}
+      - {name: integ, section: '4.2.7', manual_page: '4-25', pdf_page: 190, status: complete}
+      - {name: limits, section: '4.2.8', manual_page: '4-26', pdf_page: 191, status: complete}
+      - {name: prop, section: '4.2.9', manual_page: '4-27', pdf_page: 192, status: complete}
+      - {name: rail, section: '4.2.10', manual_page: '4-29', pdf_page: 194, status: complete}
+      - {name: reset, section: '4.2.11', manual_page: '4-30', pdf_page: 195, status: complete}
+      - {name: when, section: '4.2.12', manual_page: '4-31', pdf_page: 196, status: complete}
+  trajectory:
+    section: '4.3'
+    blocks:
+      - {name: define, section: '4.3.1', manual_page: '4-35', pdf_page: 200, status: complete}
+      - {name: dwn/crs, section: '4.3.2', manual_page: '4-39', pdf_page: 204, status: complete}
+      - {name: file, section: '4.3.3', manual_page: '4-40', pdf_page: 205, status: complete}
+      - {name: iip, section: '4.3.4', manual_page: '4-42', pdf_page: 207, status: complete}
+      - {name: initial, section: '4.3.5', manual_page: '4-43', pdf_page: 208, status: complete}
+      - {name: print, section: '4.3.6', manual_page: '4-46', pdf_page: 211, status: complete}
+      - {name: tangent, section: '4.3.7', manual_page: '4-47', pdf_page: 212, status: complete}
+  problem:
+    section: '4.4'
+    blocks:
+      - {name: atmos, section: '4.4.1', manual_page: '4-50', pdf_page: 215, status: complete}
+      - {name: define, section: '4.4.2', manual_page: '4-52', pdf_page: 217, status: complete}
+      - {name: earth, section: '4.4.3', manual_page: '4-54', pdf_page: 219, status: complete}
+      - {name: egs, section: '4.4.4', manual_page: '4-58', pdf_page: 223, status: complete}
+      - {name: file, section: '4.4.5', manual_page: '4-60', pdf_page: 225, status: complete}
+      - {name: optimize, section: '4.4.6', manual_page: '4-62', pdf_page: 227, status: complete}
+      - {name: print, section: '4.4.7', manual_page: '4-72', pdf_page: 237, status: complete}
+      - {name: radar, section: '4.4.8', manual_page: '4-74', pdf_page: 239, status: complete}
+      - {name: search, section: '4.4.9', manual_page: '4-76', pdf_page: 241, status: complete}
+      - {name: summarize, section: '4.4.10', manual_page: '4-80', pdf_page: 245, status: complete}
+      - {name: survey, section: '4.4.11', manual_page: '4-83', pdf_page: 248, status: complete}
+      - {name: title, section: '4.4.12', manual_page: '4-85', pdf_page: 250, status: complete}
+      - {name: units/fmt, section: '4.4.13', manual_page: '4-86', pdf_page: 251, status: complete}
+      - {name: wind, section: '4.4.14', manual_page: '4-89', pdf_page: 254, status: complete}

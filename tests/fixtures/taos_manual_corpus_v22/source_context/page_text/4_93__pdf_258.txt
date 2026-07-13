@@ -1,0 +1,45 @@
+4. Pmblem Files 
+4.5. Examples 
+4.5.1. Ballistic Reentry 
+*summarize max-q 
+add max (dynprs [ 11 ) 
+*summarize max-g 
+add min(nx[ll) 
+neg 
+*egs exl.dbf 
+time alt range vel dynprs nx 
+*end 
+Like all problems, it begins with a name enclosed in parentheses. This is followed 
+by data blocks that provide a title, an atmosphere model, and an earth model. 
+This problem involves only one vehicle so a single trajectory has been defined that 
+starts with segment number 1. The trajectory definition extends from the *trajectory 
+keyword to the first *survey keyword. Data blocks within the trajectory defrnition 
+have been indented to show the problem structure. 
+Trajectory Definition and Surveys 
+Trajectories require initial conditions and at least one segment definition. Since this 
+problem has only one trajectory, specific initial conditions must be given. It cannot 
+be initialized from another trajectory because no other trajectories exist. 
+This set of trajectories is generic in that the location of the trajectory on the earth‘s 
+surface and the direction of the trajectories is not important. Thus, the initial latitude 
+and longitude can be set to zero and an initial heading angle of 90” (east) can be cho- 
+sen. This is typical of trajectories calculated during conceptual design. 
+W o  of the initial conditions, velocity and flight path angle, are set to survey vari- 
+ables. The *survey data blocks near the end of the problem provide values for these 
+variables. Survey number 1, which varies the initial flight path angle, is the inner loop 
+and has a set of specific values. Survey number 2, which varies the initial velocity, 
+is the outer loop. Its values have been given in the “b, 
+hi, inc” fonn so initial velocity 
+takes on the values 15,000,16,000,17,000, 
+and 18,000 Wsec. 
+In general, trajectories must have a *print data block giving a list of variables that 
+will be written to the printout file. Often this is the same list of variables written to 
+the EGS database file. 
+This trajectory only requires one segment. The *integ data block is used to enter an 
+integration step size and a print interval, and an *aero data block is used to provide 
+the name of the drag table. The segment final condition ends the trajectory when the 
+altitude becomes less than zero. 
+Summary variables have been defined for the maximum dynamic pressure, m - q ,  
+and the maximum axial g loading, md. Even though there is only one trajectory, 
+trajectory numbers are still required in the summary variable definitions. In this case, 
+the trajectory numbers are given as subscripts enclosed in brackets. The vehicle is 
+4-93 

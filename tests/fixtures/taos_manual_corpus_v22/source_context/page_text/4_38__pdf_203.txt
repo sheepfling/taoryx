@@ -1,0 +1,43 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+4.3.1. *Define Data Block 
+1 else { 
+I 
+var = table (outy) ; 
+The current version of TAOS only supports assignment statements and if-then-else 
+statements. While loops,for loops, and other C language control statements cannot 
+be used. 
+Integral Variables 
+A common use of integral user-defined variables is in a flight path optimization 
+constraint. Constraints at specific points along the flight path are given directly in the 
+*optimize data block (Section 4.4.6). However, an integral variable is necessary to 
+keep the entire flight path within a constraint. 
+For example, to keep the flight path within a minimum dynamic pressure of 100 lbfl 
+ft2, an integral variable can be defined as 
+if q > 100 or vel < 1000 
+qmin = 
+0.0 dt 
+otherwise 
+qmb = 
+(100.0 - qI2dt 
+(4-3) 
+Optimization constraints work best if the constraint variable is set up such that it is 
+less than zero if the constraint is satisfied and greater than zero if the constraint is vio- 
+lated. In this case, if the dynamic pressure is greater than the minimum value while 
+the vehicle is flying at a high speed, the derivative is set to zero. However, if the dy- 
+namic pressure drops below 100 lbflft2, then the derivative takes on a positive value. 
+This can be converted to a user-defined variable definition as follows: 
+*define integral qmin=-0.10 
+if (dynprs > 100 I I  vel < 1000) { 
+I 
+else 
+1 
+qmin = 0.0; 
+. W i n  = (100.0 - dynprs)”2; 
+The integral keyword says that the variable qmin is defined as a derivative that must 
+be integrated with respect to time along the flight path. Its initial value is set to-O.10, 
+a negative value, so initially the constraint is satisfied. The ifstatement is written us- 
+ing C syntax. It translates to “ifthe dynamicpressure isgreater than IO0 or the veloc- 
+ity is less than 1000, set qmin equal to zero; otherwise, set qmin equal to 100 minus 
+the dynamic pressure squared” 
+4-38 

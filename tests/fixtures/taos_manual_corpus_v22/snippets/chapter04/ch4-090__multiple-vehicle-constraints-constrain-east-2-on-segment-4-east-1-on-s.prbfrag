@@ -1,0 +1,4 @@
+constrain east[2] on segment 4 = east[1] on segment 7
+
+constrain east on segment 4, trajectory 2
+  = east on segment 7, trajectory 1

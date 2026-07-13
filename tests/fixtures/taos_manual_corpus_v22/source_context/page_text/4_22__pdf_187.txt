@@ -1,0 +1,39 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.5. *Increment Data Block 
+Object Deployment 
+The variables dxb, dyb, and dzb are used for deploying objects or dropping weapons 
+where one trajectory is initialized from another. A deployed object's initial position 
+is usually offset slightly from the vehicle's center of mass. This offset is the position 
+of the object relative to the body coordinate system before the object is deployed or 
+dropped. 
+A deployed object is generally initialized from the beginning of an existing trajectory 
+segment, for example, 
+*trajectory 2 Obj2 start on 1 
+*initial from trajectory 1, segment 6 
+*segment 1 deployment 
+*reset wt=50 
+*increment velibx=5 
+*increment dxbd.5 dyb=3.2 dzbz0.35 
+*fly pitchi = * 
+*fly yawi = * 
+*fly rolli = * 
+*when tseg>0 goto 2 
+initializes a new trajectory 2 from the beginning of segment 6 in trajectory 1 repre- 
+senting an object deployment in space. The initial state of the new object is copied 
+from trajectory 1 and it can be adjusted with *reset and *increment data blocks in the 
+fmt segment. 
+In this example, the weight of the new object is set to 50 lb, and it is deployed with 
+avelocity increment (delta-v) of 5 ft/sec along the body x axis. Its position is adjusted 
+relative to the body coordinate system with the variables dxb, dyb, and dzb because 
+its center of mass is slightly offset from the original vehicle. The variables dxb, dyb, 
+and dzb always act as increments to a vehicle's position so their values can be set in 
+a *increment or *reset data block with the same effect. 
+The guidance rules used in this example hold a constant body attitude in inertial 
+space. This ensures that the body attitude of the object matches the body attitude of 
+the original vehicle so the position (dxb, dyb, and dzb) and velocity (velibx) incre- 
+ments are applied in the correct direction. The same result can be obtained by making 
+the guidance rules of the fust segment the same as those of the original vehicle. The 
+fmt segment can be immediately terminated with a final condition of tseg>O so that 
+other guidance rules can be used to calculate the trajectory of the deployed object, 
+4-22 

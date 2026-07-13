@@ -11,18 +11,19 @@ def test_all_documented_block_keywords_dispatch() -> None:
 *file out.dat time
 *optimize a for vel=max on segment 1, trajectory 1
 *print time
-*radar 1
-*search 1
+*radar 1 station
+*search 1 vary alpha until alt=100 on segment 1, trajectory 1
 *summarize sum
 *survey 1 survey
 *units/fmt
-*wind geodetic
+*wind geodetic windv=10 windh=90 windd=0
 *trajectory 1 vehicle start on 1
 *define local
 *dwn/crs long=0
 *file trj.dat time
-*iip beta=1
+*iip iip_beta=1
 *initial geodetic
+wt=1
 *print time
 *tangent long=0
 *segment 1 only

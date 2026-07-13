@@ -1,0 +1,5 @@
+(corpus-ch3-007)
+  table mdot(time,motor) no-extrap units=lb/hr
+    time = 0, 1
+    motor = 0, 1
+    mdot = 0, 0, 0, 0

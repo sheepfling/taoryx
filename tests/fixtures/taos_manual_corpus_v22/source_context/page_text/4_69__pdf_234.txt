@@ -1,0 +1,54 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.6. *Optimize Data Block 
+*optimize a for range=max on segment 12, trajectory 1 
+constrain vel=4000 
+constrain gamgd=-75 
+f ref =lo0 
+maxitr=40 
+told. Oe-7 
+par-k9.9 
+lo-1-15 
+hi-1=15 
+par-2 =8.5 
+10-2-15 
+. hi-2=15 
+par-3 =5.0 
+10-3 -15 
+hi-3 =15 
+par-4=1. 0 
+10-4-15 
+hi-4=15 
+par-5=65.0 
+lo-5=51.0 
+hi-5=300.0 
+This data block sets up an optimization problem with five parameters that maximizes 
+the range at the end of segment 12 on trajectory 1. While maximizing the range, the 
+final velocity must be 4000 and the final flight path angle must be -75. The optimiza- 
+tion procedure ends either when it has converged or after 40 iterations with no re- 
+Starts. 
+Convergence 
+The optimization procedure ends when the maximum number of iterations is exceed- 
+ed, when it detects convergence, or when it has problems converging. If the maxi- 
+mum number of iterations is exceeded, values for the objective function for the last 
+few iterations can be inspected in the printout file. If the objective function is not 
+changing much, then the resulting trajectory is probably near optimum. Otherwise, 
+the value for the input variable maxitr needs to be increased. 
+The optimization procedure often ends with the message “optimization procedure 
+does not detect convergence, but it cannot make further progress towards the mini- 
+mum.”This message means that the optimization procedure found a search direction, 
+but while searching along this direction, it could not find a minimum. In other words, 
+the one-dimensional search failed to locate a minimum. This usually means that the 
+optimization procedure has converged as far as it can given the numerical precision 
+of the computer, that is, the convergence tolerance is too small for the optimization 
+method to achieve. This message can be treated as a warning message, but in general 
+it means a good solution has been found. 
+Troubleshooting - Optimization Loop 
+Trajectory optimization is more an art than a science because the methods used, such 
+as @2ad, are sensitive to the starting trajectory and to the accuracy of the partial de- 
+rivatives. Experience and judgement are required to successfully use optimization. 
+The optimization loop definition is the first place to check if the optimization proce- 
+dure fails to converge or gives poor results. When an optimization parameter is var- 
+ied, the objective function and constraint values should change. If they do not 
+change, then the parameter has no effect and can be eliminated. 
+4-69 

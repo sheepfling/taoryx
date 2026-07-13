@@ -12,10 +12,16 @@ metadata and examples, and the emerging Python implementation.
 - `grammars/` — documentary EBNF for `.tbl` and `.prb` files
 - `docs/grammar/` — grammar-validation workflow and coverage boundaries
 - `examples/chapter03/` and `examples/chapter04/` — extracted TAOS fixtures
+- `tests/fixtures/taos_manual_corpus_v22/` — source-faithful Chapter 3/4
+  snippet corpus and parser/lexer baseline wrappers
 - `src/taoryx/` — the installable Python package
 - `tests/parser/` and `tests/unit/` — parser and package tests
 - `tools/` — build, audit, generation, and validation tooling
 - `docs/manual/` and `docs/qa/` — project notes and retained QA guidance
+- `build/` and `qa/` — local generated manual and audit products
+- `.venv/` — local development environment; `INBOX/` — ignored temporary intake
+- `tools/fitz_compat.py` and `tools/fitz.py` — local PDF compatibility shim
+  used by historical audit tools when PyMuPDF is unavailable
 
 Generated build products, QA renders, release bundles, checksums, and other
 handoff artifacts are intentionally not part of the long-term source tree.

@@ -93,6 +93,15 @@ def _record_kind(raw_text: str) -> RecordKind:
     return "content"
 
 
+def _inline_comment(raw_text: str) -> str | None:
+    marker = raw_text.find("#")
+    if marker < 0:
+        return None
+    ####
+    return raw_text[marker + 1 :]
+####
+
+
 def parse_lossless_bytes(
     data: bytes,
     *,
@@ -110,6 +119,7 @@ def parse_lossless_bytes(
                 raw_text=raw_text,
             ),
             line_ending=line_ending.decode("ascii"),
+            inline_comment=_inline_comment(raw_text),
         )
         for line_number, (raw_line, line_ending) in enumerate(physical_lines, start=1)
     )

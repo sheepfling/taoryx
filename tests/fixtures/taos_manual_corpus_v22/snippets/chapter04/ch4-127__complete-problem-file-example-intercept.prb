@@ -1,0 +1,64 @@
+(intercept)
+
+*title Example intercept trajectory
+
+*atmos standard
+*earth wgs-84 omega=0
+
+*trajectory 1 missile start on 1
+
+  *initial geodetic
+    long=0.0 lat=0.0 psi=90.0 time=30.0
+    alt=0.0 vel=0.0 gama=75.0 wt=2000.0
+
+  *dwn/crs long=0.0 latgd=0.0 azm=90.0
+
+  *print time alt east vel gamgd alpha relrng[2] relvel[2]
+
+  *segment 1 Rail launch
+    *integ dtprnt=0.5 dt=0.05
+    *aero ca=(missile-on) cn=(missile-cn)
+    *prop thrust=25000 mdot=3.0
+    *rail launch cfstat=0.12 cfslid=0.01
+    *when plength>30 goto 2
+
+  *segment 2 Ballistic to get up to speed
+    *integ dtprnt=0.5 dt=0.10
+    *aero ca=(missile-on) cn=(missile-cn)
+    *prop thrust=25000 mdot=3.0
+    *when vel>2500 goto 3
+
+  *segment 3 1st stage burn, intercept
+    *integ dtprnt=0.5 dt=0.10 dtguid=1
+    *limits alphat<15
+    *aero ca=(missile-on) cn=(missile-cn)
+    *prop thrust=25000 mdot=3.0
+    *fly intercept=2
+    *when time>42.0 goto 4
+    *when relvel[2]>0 stop
+
+  *segment 4 Coast & continue intercept
+    *integ dtprnt=0.5 dt=0.10 dtguid=1
+    *limits alphat<15
+    *aero ca=(missile-off) cn=(missile-cn)
+    *fly intercept=2
+    *when relvel[2]>0 stop
+
+*trajectory 2 target start on 10
+
+  *initial geodetic
+    long=0.35 lat=0.0 psi=-90.0 time=0.0
+    alt=200000 vel=4000 gama=-50.0 wt=1000.0
+
+  *dwn/crs long=0.0 latgd=0.0 azm=90.0
+
+  *print time alt east vel
+
+  *segment 10 Ballistic reentry
+    *integ dtprnt=0.5 dt=0.10
+    *aero ca=(rv)
+    *when alt<0 stop
+
+*egs ex4.dbf time alt east vel
+
+*end

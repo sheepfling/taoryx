@@ -1,0 +1,10 @@
+(corpus-ch4-064)
+*trajectory 1 vehicle start on 1
+  *initial ecfc
+    x=19099345.2  y=9974312.7   z=6489105.4   # Position
+    xdt=-173.973  ydt=10327.52  zdt=26425.9   # Velocity
+    time=769.35   wt=1053.9                   # Time and weight
+    t_epoch=-1045.2 omega_0=25.3              # ECFC to ECIC
+  *segment 1 test
+    *when time>1 stop
+*end

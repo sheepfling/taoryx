@@ -1,0 +1,28 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+4.3.4. *I@ Data Block 
+4.3.4. *lip Data Block 
+The initial impact point (TIP) is obtained by integrating a ballistic trajectory from the 
+current state of the vehicle to a final altitude with no propulsive forces (Section 
+2.4.4). A constant drag coefficient aerodynamic model, given by a ballistic coeffi- 
+cient, is used to simplify the analysis. This simulates the impact point if the propul- 
+sive system fails and is used for range safety analysis. 
+The initial impact point is calculated if one of the associated output variables is refer- 
+enced in the problem (iip-ht, iip-bng, iip-time, iip-rng, or iip-am). These calcula- 
+tions require a ballistic coefficient and a fmal impact altitude which are given in the 
+*iip data block. For example, 
+*iip iip,beta=550 
+iip_alt=1000 
+sets the ballistic coefficient to 550 lbdft2 and the impact altitude to 1000 ft for the IIP 
+calculations. The default ballistic coefficient and impact altitude are both zero. For 
+zero drag, the ballistic coefficient should be set to zero instead of a large number. The 
+ballistic coefficient can be reset anytime during the trajectory with an *increment 
+(Section 4.2.5) or *reset data block (Section 4.2.11). 
+The output variables iip-rng and iip-am give the range and azimuth of the initial 
+impact point relative to the origin of the tangent plane coordinate system. The range 
+is the distance from the initial impact point to the origin of the tangent plane system. 
+The azimuth is the forward azimuth from the tangent plane origin to the initial impact 
+point measured from north. If these ouput variables are required, a *tangent data 
+block should be included to define the origin of this coordinate system (Section 
+4.3.7). 
+4-42 

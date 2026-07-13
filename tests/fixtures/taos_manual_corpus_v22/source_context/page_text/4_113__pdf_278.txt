@@ -1,0 +1,46 @@
+4. Problem Files 
+4.5. Examples 
+4.5.4. Ground-Launched Intercept 
+*trajectory 2 target start on 10 
+*initial 
+geodetic 
+long=O -35 
+lat=O. 0 
+psi=-90.0 
+time=O. 0 
+alt=200000 
+vel=4000 
+gama=-50.0 
+wt=1000.0 
+*dwn/crs long=0.0 latgd=0.0 azm=90.0 
+*print time alt east vel 
+*segment 10 Ballistic reentry 
+*integ dtprntz0.5 
+dt=O.lO 
+*aero ca=(rv) 
+*when alt<O stop 
+*egs ex4.dbf time alt east vel 
+*end 
+Trajectory number 1 is the interceptor missile and trajectory number 2 is the target 
+missile. The interceptor is heading east and the target is heading west as in the pre- 
+vious problem. The *dwn/crs data blocks are required in both trajectories to set the 
+reference point for the east and north output variables. 
+The interceptor is rail launched and allowed to accelerate to avelocity of 2500 ft/sec 
+before trying to intercept the target. The launch angle of 75" is an estimated value 
+used to get the missile in the air. 
+The problem assumes constant thrust and mass flow for the interceptor missile so the 
+values are entered directly in the *prop data block rather than using table values. This 
+illustrates that any table value can be replaced with a constant number for simple 
+problems. 
+The intercept guidance rule is used in segments 3 and 4 to maneuver the missile to 
+hit the target. The velocity of trajectory 2, the target, relative to trajectory 1, the inter- 
+ceptor, is the closing velocity given by the output variable reZveZ[2] within trajectory 
+1. The subscript indicates the relative velocity of trajectory number 2. When this ve- 
+locity changes sign (when it is zero), the interceptor has reached its closest distance 
+to the target so it is used as a final condition for segments 3 and 4. 
+Segment 3 also has a final condition of tim>42 which represents the bum time of 
+the motor. The time value of 42 seconds does not look correct, but the missile is 
+launched at a time of 30 seconds so the burn time is really 42 - 30 = 12 seconds. 
+Results 
+This problem requires 1.5 seconds to run on a Silicon Graphics workstation. The 
+printout for the interceptor trajectory follows: 

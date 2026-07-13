@@ -1,0 +1,48 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.9. *Search Data Block 
+4.4.9. *Search Data Block 
+Trajectories often have constraints that must be satisfied, such as a final velocity or 
+range. Generally optimization is used in TAOS to obtain a trajectory that meets a set 
+of constraints (Section 4.4.6). Optimization varies a set of parameters to maximize 
+or minimize an objective function subject to a set of constraints. However, if the 
+problem is simple and there are only one or two parameters and constraints, opti- 
+mization may not be necessary, especially since optimization techniques are not 
+completely reliable. A simpler, more reliable, search method is provided to handle 
+the simple cases. 
+Search Parameters 
+Each search is one dimensional, that is, it repeatedly modifies a value in the problem 
+file until a condition is met. For example, a constant angle of attack used in a pullout 
+from descending flight to level flight can be varied until the pullout occurs at a given 
+altitude. More than one variable in a problem file can be changed in a search, but all 
+of the variables are set to the same value each time the variable is modified. 
+The search variables in a problem file are designated with the keyword srch-n (Sec- 
+tion 4.1). For example, 
+*fly alpha = srch-1 
+says that a search is going to be used to determine the value of the angle of attack. 
+The search, that is, how to compute this value, is defined later in the problem file in 
+a *search data block. 
+The search number, the "1" in the example above, relates the search variables to the 
+*search data block. Any number of searches can be defined producing a set of nested 
+one dimensional search loops, but if more than two nested searches are required, it 
+is usually best to use optimization rather than searches. 
+Search Objective 
+If a search variable, like srch-I, is used in the problem file, then there must be acorre- 
+sponding *search data block in the file. A data block corresponding to the above ex- 
+ample might look like 
+*search 1 vary alpha until alt=30000 on segment 3,trajectory 1 
+~ 1 0 ~ 0 . 5  xhkl0.0 
+xesk5.0 
+dx=l. 0 
+tol=O .001 
+xrefd.0 fref=10000 
+maxitr=20 
+prink1 
+integ=O 
+The first line defines the search objective; in this case, the angle of attack in the guid- 
+ance policy is varied until the final altitude on segment 3 of trajectory 1 is equal to 
+30,000 ft. The next two lines give the search control parameters, for example, the 
+angle of attack is varied between 0.5" and 10.0" with an initial estimate of 5.0". 
+Parabolic search methods are used as shown in Section 2.6.2. These methods vary 
+a search variable x until a search functionflx) is equal to a value, a minimum, or a 
+4-76 

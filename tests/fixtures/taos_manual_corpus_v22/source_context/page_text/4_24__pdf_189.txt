@@ -1,0 +1,42 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.6. *Inertial Data Block 
+aligns the coordinate system with the geodetic horizon system located at a geodetic 
+latitude of 28.8' N, a longitude of 81.SoW, an altitude of 550 ft, and at a time of 100 
+seconds. The time is the same used for computing all trajectories; alignment time is 
+required to account for the effects of earth rotation on the inertial system. 
+The variables long, la?, and alt are used to change the position of a platform aligned 
+to local geodetic horizon coordinates, and the variables long, la?, and rcm are used 
+to change the position of a platform aligned to local geocentric coordinates. For geo- 
+detic alignment, the alt variable is optional and has a default value of zero (sea level). 
+Body, Wind, and Velocity Alignment 
+The inertial coordinate system can be aligned with the body axis system with 
+*inertial platform body 
+The body attitude information is not available at the beginning of the first segment 
+of a trajectory because the guidance scheme that determines these axes has not been 
+executed. Therefore, the inertial coordinate system should not be aligned with either 
+the body or wind coordinate system on the first segment of a trajectory. 
+An initial dummy segment with a final condition of tseg>O can be used to calculate 
+the body attitude from the trajectory initial conditions. Then, the inertial platform can 
+be aligned with the body, wind, or velocity coordinate system at the start of the se- 
+cond segment. 
+The inertial platform is located at the vehicle's center of mass when aligning with the 
+body, wind, or velocity coordinate systems. An alignment time can still be given, 
+which aligns the platform as though the current position and velocity existed at the 
+specified time. 
+ECFC Alignment 
+If the platform is aligned with the earth-centered, earth-fured coordinate system 
+(ECFC), the axes are parallel to the ECFC unit vectors and the platform is located 
+at the vehicle's center of mass. The orientation of the unit vectors defining the inertial 
+platform axes can be changed by entering east and down vectors. Only two unit vec- 
+tors need to be defined; the remaining vector is calculated to give a right-handed 
+coordinate system. The x, y, and z components of these vectors are given in the ECFC 
+system with the variables eastx, easty, eastz, downx, downy, and downz. If only one 
+of the vectors is given, the default value is used for the other one. For example, the 
+data block 
+*inertial ecfc eastx=0.7071 easty=0.7071 eastz=0.0 
+downx=O . 0 
+downy=O. 0 
+downz=-l 
+twists the east and north inertial vectors 45'. 
+4-24 

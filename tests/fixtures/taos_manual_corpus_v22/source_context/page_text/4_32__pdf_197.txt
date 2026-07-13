@@ -1,0 +1,38 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.12. *When Data Block 
+has the same effect as the equal sign because the segment will end when the variable 
+is equal to the value. The difference occurs at the beginning of a segment. 
+When a segment starts executing, it checks the final conditions for immediate ter- 
+mination. If any of the final conditions are satisfied initially, they cause an immediate 
+transfer to another segment. As a result the final condition mach>3 is much different 
+from mach=3. A mach>3 final condition terminates the segment immediately if the 
+Mach number is greater than 3.0, whereas the mach=3 final condition only termi- 
+nates the segment immediately if Mach is exactly equal to 3.0. In practice use of 
+greater than and less than is more common than the equal sign. 
+Ending Trajectories 
+So far, all of the examples have shown segment transfers using the goto keyword. 
+When the end of a trajectory is reached, there is no segment to transfer to, so the stop 
+keyword is used as follows: 
+*when time=65 stop 
+This data block ends the trajectory when the time is equal to 65 seconds. Calculations 
+proceed until a segment final condition with stop is encountered. 
+Multiple Final Conditions 
+Segments can have any number of final conditions. The first condition encountered, 
+while computing the trajectory, is executed. This allows complex branching in the 
+trajectory depending on what happens as shown in the following example: 
+. 
+*when tmark>25 goto 6 
+*when alphat>5 goto 11 
+If the “mark” time becomes equal to 25 seconds before the total angle of attackreach- 
+es 5 O ,  then segment 6 is executed next; otherwise, segment 11 is executed next. 
+If two final conditions are immediately satisfied at the beginning of a segment, the 
+first one listed is executed. 
+It is good practice to have at least one final condition on a time variable. For example, 
+*when gamgd<O goto 4 
+*when tseg>1000 goto 10 
+normally ends the segment when the flight path angle becomes zero. But if there is 
+a problem and the flight path angle never reaches zero, the segment still ends after 
+1000 seconds. This prevents infinite loops. 
+4-32 
+.. 

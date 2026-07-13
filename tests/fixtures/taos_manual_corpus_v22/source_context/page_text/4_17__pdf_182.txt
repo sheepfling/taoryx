@@ -1,0 +1,42 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.4. *Fly Data Block 
+Finally, check the value of dtguid in the *integ data block. It controls the rate at which 
+the flight path is corrected from the actual flight conditions to the desired flight 
+conditions. It acts as a time constant or gain, and if it is too large or too small, the flight 
+path does not correct to the desired conditions. 
+The following set of vy data blocks demonstrates use of the flight conditions guid- 
+ance rules: 
+*fly g m g d  = 0 
+*fly mach = 0.80 
+*fly bankgd = 0 
+*fly betae = 0 
+AU four data blocks have been input specifying two control variables directly, 
+bankgd and betae, and two control variables indirectly, alpha and power. TAOS 
+solves for values of alpha and power that result in a zero flight path angle (level 
+flight) and a 0.8 Mach number. The last two vy data blocks are optional because 
+these variables default to zero, but they have been included in this example for clarity. 
+Special Guidance Rules 
+The guidance rules Vd-mux, intercept,propnav, downria, and upria are special cases. 
+The Vd-mux guidance rule solves for the angle of attack that maximizes the lift-to- 
+drag ratio. It does not require a value, so it is used as follows: 
+*fly l/d-max 
+The intercept guidance rule places the vehicle on an intercept trajectory with another 
+vehicle. Its value is set to the trajectory number of the target vehicle, for example, 
+*fly intercept = 3 
+says to intercept vehicle or trajectory number 3. The vehicle's trajectory will be im- 
+mediately pointed towards the estimated intercept point using a predictive guidance 
+method (Section 2.5.2). 
+Similarly the propnav guidance rule is used to intercept another trajectory with pro- 
+portional navigation (Section 2.5.2). Again the guidance rule value is set to the trajec- 
+tory number of the target vehicle. For example, 
+*fly propnav = 2 
+uses proportional navigation to intercept trajectory number 2. The value of dtguid, 
+given in the *integ data block, is used for the proportional navigation constant. 
+The intercept and proportional navigation guidance rules require two free control 
+variables: one control for yaw and one control for pitch. These two special guidance 
+rules are equivalent to two normal guidance rules. When they are used, a maximum 
+of three vy data blocks can be input. 
+The downria and upria guidance rules orient the body x axis along the range insensi- 
+tive axis. If the velocity is incremented in the direction of the range insensitive axis, 
+4- 17 

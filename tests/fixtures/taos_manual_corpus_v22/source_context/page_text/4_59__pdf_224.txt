@@ -1,0 +1,30 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.4. *Egs Data Block 
+Data is automatically written to the database file for each trajectory defined in the 
+problem, so no trajectory numbers are given. The units and output format of each 
+variable can be set with the *units/&t data block (Section 4.4.13). 
+TAOS overwrites the *egs database files without warning each time it runs. This au- 
+tomatically updates the files so they contain the latest trajectory information for a 
+problem. If this is not desirable, then the filename must be changed between runs or 
+the database files can be renamed before each new run. 
+Radar and relative vehicle output variables, those starting with rad or rely must con- 
+tain a subscript enclosed in square brackets. The subscript gives the radar station 
+number or the trajectory number for the relative vehicle calculations. For example, 
+the variable radmg[2] is used to output the radar range of each trajectory from radar 
+station number 2, and the variable reZveZ[4] is used to output the closing velocity of 
+trajectory number 4 relative to the other trajectories. 
+If surveys have been defined (Section 4.4.11), the survey loops form different data 
+levels in the EGS database file so EGS can be used to plot the trajectory data as afunc- 
+tion of the survey variables. In Figure 4-8 the variable gama is a survey loop variable, 
+and a set of trajectories is computed for each value it takes on. 
+Summary variables (Section 4.4.10) are not written to the standard EGS database 
+file. If summary variables have been defined, they can be written to an EGS database 
+file with 
+*egs summary file-dbf 
+The summary keyword and the filename are required; no output or summary variable 
+names are given. This form of the *egs data block, with the summary keyword and 
+a filename, requires at least one survey loop and at least one summary variable. All 
+summary variables are written to the EGS database file as a function of the survey 
+variables. 
+4-59 

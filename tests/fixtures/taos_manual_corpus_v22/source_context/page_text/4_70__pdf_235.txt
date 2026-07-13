@@ -1,0 +1,44 @@
+4. Problem Files 
+4.4. Problem Data BIockr 
+4.4.6. *Optimize Data Block 
+The end of the optimization loop is at the end of the segment given in the objective 
+function definition. At this point in the trajectory, all other trajectories and segments 
+referenced in constraints must have been computed. TAOS must be able to inspect 
+the trajectory up to this point and retrieve values for all of the constraint variables. 
+If the optimization loop involves more than one trajectory and integ = 0, then prob- 
+lems can occur. The optimization loop must be set up carefully so that all values re- 
+quired by the objective function and constraints can be properly calculated. It is often 
+more practical to use integ = I even though it is less efficient. 
+Test runs can be made with maxitr = 0 to check the optimization loop definition. The 
+effect of changing values of the optimization parameters can quickly be determined 
+with a few test runs. This method can also be used to verify that the starting trajectory 
+is reasonable. 
+Troubleshooting - Segment Final Conditions 
+If you are using an optimization parameter to control the length of a segment, it is 
+best to use a segment final condition based on a time variable. For example, 
+*when tseg > opta-3 
+goto 5 
+lets the optimization procedure determine when to end the segment. Final conditions 
+with time variables work better than other variables, such as altitude, because time 
+is a strictly increasing variable. 
+When final conditions are optimized, only one final condition on time should be 
+used. If more than one final condition is used, the optimization procedure becomes 
+confused when sometimes one final condition is hit and other times a different condi- 
+tion is hit. Optimization constraints can be used to satisfy additional requirements at 
+the end of a segment. 
+Troubleshooting - Starting Trajectory 
+The optimization procedure tends to be sensitive to the starting trajectory, that is, the 
+initial estimates of the parameters. Optimization problems with alarge number of pa- 
+rameters tend to be more sensitive to initial estimates than those with a small number 
+of parameters. If an optimization loop fails to converge or gives a poor solution, then 
+one should try different values for the initial estimates. Sometimes small changes 
+to the initial estimate cause the optimization procedure to begin working properly. 
+A solution from optimization should not be trusted completely because the procedure 
+sometimes converges to a local minimum instead of a global minimum. A good way 
+to check the validity of an optimization solution is to rerun the problem with a differ- 
+ent starting trajectory. If it results in the same solution, then a global minimum has 
+probably been found. 
+Troubleshooting - Numerical Derivatives 
+Numerical derivatives are required by the optimization procedure at each iteration. 
+As mentioned previously, these are calculated with forward or central differences by 
+4-70 

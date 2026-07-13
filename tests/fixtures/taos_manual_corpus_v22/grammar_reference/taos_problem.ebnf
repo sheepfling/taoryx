@@ -1,0 +1,25 @@
+(* Structural grammar for the TAOS problem-file fixtures. *)
+problem-file       = "(" , identifier , ")" , { problem-block | trajectory } , "*end" ;
+trajectory         = "*trajectory" , integer , title , "start" , "on" , integer ,
+                     { trajectory-block } , segment , { segment } ;
+segment            = "*segment" , integer , [ title ] , { segment-block } ;
+problem-block      = atmosphere-block | earth-block | optimize-block | survey-block
+                   | summarize-block | egs-block | title-block | file-block
+                   | print-block | radar-block | search-block | units-block | wind-block ;
+trajectory-block   = define-block | downrange-block | file-block | iip-block
+                   | initial-block | print-block | tangent-block ;
+segment-block      = aero-block | constants-block | cg-block | fly-block
+                   | increment-block | inertial-block | integration-block
+                   | limits-block | propulsion-block | rail-block | reset-block
+                   | when-block ;
+when-block         = "*when" , relationship , ( "goto" , integer | "stop" ) ;
+initial-block      = "*initial" , ( coordinate-kind , { assignment }
+                   | "from" , "trajectory" , integer , [ "," ] , "segment" , integer ) ;
+optimize-block     = "*optimize" , loop-letter , "for" , variable , "=" , ( "min" | "max" ),
+                     "on" , "segment" , integer , [ "," ] , "trajectory" , integer ,
+                     { constraint | assignment } ;
+assignment         = variable , ( "=" | "<" | ">" ) , value ;
+relationship       = variable , ( "=" | "<" | ">" ) , value ;
+value              = number | identifier | table-reference | indexed-variable | parameter-reference | "*" ;
+table-reference    = "(" , identifier , ")" ;
+parameter-reference = ( "surv-" | "srch-" | "opt" , loop-letter , "-" ) , integer ;

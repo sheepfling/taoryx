@@ -1,0 +1,82 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+4.3.1. *Define Data Block 
++ 
+- 
+The following data block defines a user-defined variable, stag-heat, with this equa- 
+tion: 
+Add 
+sin(x) 
+Sine of x (deg) 
+Subtract 
+cos(x) 
+Cosine of x (deg) 
+*define stag-heat 
+rnose = 1.0 / 12.0; 
+stag-heat 
+= (17600.0/sqrt(rnose))*sqrt(rho/0.0023769) 
+* (ve1/26000.0) ^3.15; 
+* 
+. 
+/ 
+A nose radius of 1 inch is converted to feet and saved in a temporary variable called 
+rnose. Temporary variables are only used within the user-defined variable calcula- 
+tion. If a variable name is not a standard output variable or a previously input user- 
+defmed variable, it is assumed to be a temporary variable. Temporary variables must 
+be defined before they can be used. 
+The only thing unusual about the equation for stagnation heating rate is the use of 
+for raising a value to a power. This symbol is used in TAOS rather than thepow func- 
+tion in C or the ** operator in Fortran. 
+The equation for stagnation heating rate requires two lines. Statements continue until 
+a semicolon is reached; the semicolon is required at the end of each statement just 
+like in the C language. 
+Multiply 
+M ( X )  
+Tangent of x (deg) 
+Divide 
+asin(x) 
+sin-' of x where x E [-1,13 
+Math Operations and Functions 
+Table 4-9 contains a list of operators and functions that can be used in equations for 
+user-defined variables. All of the standard mathematical operators are available, and 
+they have the same precedence as in C and Fortran. Many standard functions are also 
+provided; again these are defined in TAOS as they are in the C language. 
+A 
+> 
+Table 6 9 .  User-Defined Variable Math Operations and Functions. 
+Exponentiation 
+acos(x) 
+c0s-l of x where x E [-1,1] 
+Greater than 
+atan(x) 
+tan-* of x in range [-n/2~/2] 
+< 
+>= 
+Less than 
+atan2(x) 
+t a d  of x in range [-lt;rc] 
+Greater than or equal to sinh(x) 
+Hyperbolic sine of x (deg) 
+<= - 
+- 
+Less than or equal to 
+Equal to 
+tanh(x) 
+Hyperbolic tangent of x (deg) 
+cosh(x) 
+Hyperbolic cosine of x (deg) 
+!= 
+&& 
+Not equal to 
+exp(x) 
+Exponential function eX 
+Logicaland 
+log(x) 
+Natural logarithm of x 
+~~ 
+~ 
+I II 
+I Logical or 
+I loglO(x) I Base 10 logarithm of x 
+I 
+4-36 

@@ -1,0 +1,6 @@
+(example-cx)
+  table cx(alt,mach) extrap sref=5.30
+    alt = 0, 10000
+    mach = 5, 10, 15, 20
+    cx = 0.030, 0.027, 0.025, 0.024 # Values for alt=0
+         0.035, 0.031, 0.029, 0.028 # Values for alt=10000

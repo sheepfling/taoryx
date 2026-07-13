@@ -1,0 +1,54 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+4.3.1. *Define Data Block 
+~ 
+Ceil(X) 
+floor(x) 
+I 
+I 
+I sqrtfx) 
+I Square root of x 
+1 
+Smallest integer not less than x 
+Largest integer not greater than x 
+abs(x) 
+table(id) 
+Absolute value of x 
+Lookup value from a table where 
+id is the table name 
+The table function is special in that it is used to retrieve a value from a table in the 
+table file. The function parameter, id, is the table identification name (Section 3.4), 
+and the table must be of type output. For example, 
+*define special 
+special = (rho/0.0023769)*table(special~tbl); 
+references the output table special-tbl. A possible use of output tables is for aerody- 
+namic heating analysis. Output tables containing heat transfer rates could be interpo- 
+lated to get the heat transfer rates experienced in a trajectory, and then this value 
+could be limited by a trajectory optimization constraint. 
+If-then statements can be used to control how a user-defined variable is calculated. 
+For example, 
+*define nx-max 
+nx-max = max (nx) ; 
+if (nx-max < 0) nx-max = 0; 
+calculates the maximum axial g loading. The ifstatement, written in standard C syn- 
+tax, limits m-rn to positive values. The relationship of the ifstatement is always 
+enclosed in parentheses. If the relationship evaluates as true, then the statement fol- 
+lowing the relationship is executed. 
+More than one statement can be executed as a result of the if statement by enclosing 
+them in curly brackets as follows: 
+*define new-var 
+new-var = 0; 
+if (time > 20) 
+{ 
+ratio = pres / 2116.2; 
+new-var = ratio * table(tb1,id); 
+1 
+The C language uses curly brackets to group together parts of the if-then statement; 
+the keywords then and endifare not used as in Fortran. 
+Curly brackets are also required for an if-then-eke statement as shown in the follow- 
+ing example: 
+*define var 
+if (mach > 1.0) 
+x = 1 + mach*mach; 
+var = sqrt (x) * table(outx1; 
+4-37 

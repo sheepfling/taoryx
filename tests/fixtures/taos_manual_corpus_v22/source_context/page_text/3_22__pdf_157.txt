@@ -1,0 +1,50 @@
+3. Table Files 
+3.5. Full Tables 
+3.5.8. Skewed Tabulated Data 
+3.5.8. Skewed Tabulated Data 
+So far all sets of tabulated values have had a dependent value for every combination 
+of independent values. The independent values form a matrix and values of the de- 
+pendent variable are given for each combination. This is shown on the left side of 
+Figure 3-6 for a function of two independent variables. The matrix of independent 
+values forms a square for functions of two independent variables or a cube for func- 
+tions of three independent variables, so these tables are called square tables. 
+Square Table 
+Skewed Table 
+X 
+X 
+Figure 3-6. Square and Skewed Tabulated Data. 
+However, sets of tabulated data are often not complete. The right side of Figure 3-6 
+shows a function defined at different x values for 21, z2, and 23. Not only are the val- 
+ues different, but the number of points in each curve is also different. In TAOS tabu- 
+lated sets of data like this are called skewed. They can only be input using the full 
+table format; skewed tables are not allowed in the simple table format. 
+The following example shows how skewed sets of tabulated data are input: 
+add cxo(alt,mach) 
+alt = 0, 50000 
+mach = 
+3, 
+5, 
+7, 
+9 
+cxo = .020, .021, .019, -018, 
+, 
+-021, .022, .021, -020 
+# Values for alt = 0 
+# Values for alt = 50000 
+alt = 100000, 150000 
+mach = 
+7, 
+10, 
+15 
+cxo = -024, .023, -021, 
+# Values for alt = 100000 
+-027, .025, .024 
+# Values for alt = 150000 
+The tabulated data is broken into smaller sets that are square in nature. In this exam- 
+ple, values for the same Mach numbers are available at altitudes of 0 and 50,000 ft, 
+so this part of the table is input first. Values for a different set of Mach numbers are 
+available at altitudes of 100,000 and 150,000 ft, so these are input next. It is similar 
+to entering two separate tables: one for the low altitudes and one for the high alti- 
+tudes. 
+Another way to enter this table is to break it down even further as follows: 
+3 -22 

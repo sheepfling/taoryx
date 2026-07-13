@@ -1,0 +1,77 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.1. *Atmos Data Block 
+Type 
+0 
+4.4.1. *Atmos Data Block 
+Atmosphere 
+Type 
+Atmosphere 
+None 
+11 
+6O"NorthJuly 
+An atmosphere model, defining temperature, pressure, density, speed of sound, and 
+viscosity as a function of altitude, is required to integrate the equations of motion 
+(Section 2.3.1). TAOS contains 20 standard model atmospheres, listed in Table 4-14, 
+and has two user-defined model atmospheres. The default is the 1976 U.S. standard 
+atmosphere. 
+The atmosphere models extend to an altitude of 1000 km; however, above an altitude 
+of 146 km, all of the models are the same as the 1976 U.S. standard atmosphere. Be- 
+low sea level, temperature is extrapolated based on the temperature gradient at sea 
+level, and pressure is held constant at the sea level value. Other atmospheric proper- 
+ties are computed from the temperature and pressure. 
+Atmospheres are selected by entering the atmosphere number following the *ams 
+keyword. For example 
+*atmos 20 
+selects the Kwajalein mean annual atmosphere model. 
+1 
+2 
+The selected atmosphere model applies to all trajectories in a problem; different tra- 
+jectories cannot use different atmosphere models. The 1976 U.S. standard atmo- 
+sphere is commonly used, so aspecial keyword standardcan be used instead of enter- 
+ing the number one. Similarly, the special keyword none can be used instead of atmo- 
+sphere type zero. 
+1976 U.S. Standard 
+' 
+12 
+75"NorthJanuary 
+15" North Annual 
+13 
+75" North January (Cold) 
+3 
+4 
+30" North January 
+14 
+75" North January (Warm) 
+30" North July 
+15 
+75" North July 
+5 
+6 
+45" North January 
+16 
+Tonopah Winter 
+45" North July 
+17 
+Tonopah Spring 
+I 7 
+I 45" North SpringFaU 
+I 18 
+I Tonopah S&r 
+8 
+9 
+60" North January 
+19 
+TonopahFall 
+60" North January (Cold) 
+20 
+Kwaialein Mean Annual 
+110 
+)60"NorrhJanuary(Warm) I 
+I 
+User-Defined Atmosphere 
+The first type of user-defined atmosphere requires tabulated values for all atmo- 
+sphere properties as a function of altitude. The input format is best illustrated with 
+the following example: 
+4-50 
+, 

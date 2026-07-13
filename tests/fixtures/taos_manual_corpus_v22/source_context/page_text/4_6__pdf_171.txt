@@ -1,0 +1,9 @@
+4. Problem Files 
+4.1. File Format 
++define alt-km 
+alt-km = alt / 3280.84; 
+# Altitude in km 
+# Convert units of altitude 
+defrnes a new variable called alt-km that is the vehicle’s altitude in kilometers rather 
+than feet. Comments have been used to document what this data block does. 
+4-6 

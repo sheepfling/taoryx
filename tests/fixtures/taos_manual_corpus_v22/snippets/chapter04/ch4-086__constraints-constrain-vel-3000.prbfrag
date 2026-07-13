@@ -1,0 +1,3 @@
+constrain vel=3000
+constrain gamgd=-80
+constrain qmin<0

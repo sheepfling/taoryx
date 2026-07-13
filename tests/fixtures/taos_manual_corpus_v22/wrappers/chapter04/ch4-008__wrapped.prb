@@ -1,0 +1,9 @@
+(corpus-ch4-008)
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=0 gama=0 psi=90 time=0 wt=1
+  *segment 1 test
+    *aero ca=0.0215 cn=0.118 sref=5.437
+    *when time>1 stop
+
+*end

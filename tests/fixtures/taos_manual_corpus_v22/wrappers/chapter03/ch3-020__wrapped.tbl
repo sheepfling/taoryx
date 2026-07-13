@@ -1,0 +1,9 @@
+(corpus-ch3-020)
+  table output
+  start
+    mult factor(type,mach)
+      type = 0, 1
+      mach = 0.0, 0.999, 1.000, 25.0
+      factor = 0.5, 0.5, 1.0, 1.0, # Values for type=0
+               1.0, 1.0, 2.0, 2.0  # Values for type=1
+  end

@@ -1,0 +1,50 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.4. *Fly Data Block 
+it changes the time to impact but does not change the range. The downria guidance 
+rule solves for the range insensitive axis that reduces the flight time, and the upria 
+guidance rule solves for the axis that increases flight time (Section 2.5.3). 
+The range insensitive axis solution procedure uses the initial impact point (TIP) to de- 
+termine the vehicle’s range. The guidance rule value, generally zero, is used as the 
+impact altitude. For example, 
+*fly downria = 100000 
+solves for the range insensitive axis using an “impact” altitude of 100,000 ft. 
+The downria and upria guidance rules are similar to the intercept guidance rules in 
+that they require two free control variables: one control for yaw and one control for 
+pitch. These special guidance rules are equivalent to two normal guidance rules. 
+Rate Guidance 
+So far all examples have shown guidance rules that specify body-attitude angles or 
+flight conditions. Body-attitude rates and flight condition rates can also be specified 
+by adding the suffix dt to the end of the variable name (dt stands for dot or the fust 
+derivative with respect to time). For example, angle of attack rate is given by alphadt. 
+The data blocks 
+*fly g m g d  = 0 
+*fly psigddt = 5.0 
+*fly betae = 0 
+*fly powerdt = 1000 
+request level flight (gamgd = U), a heading rate of 5 deg/sec (psigddt = 3, 
+no sideslip 
+(betae = U), and a power setting rate of 1000 unitdsec (powerdt = 1000). If power 
+setting is proportional to thrust in the propulsion tables, this produces a level acceler- 
+ating turn. Angle of attack and geocentric bank angle are varied to turn at the re- 
+quested heading rate while maintaining level flight. 
+Guidance .Tables 
+If constant values or rates do not represent the desired trajectory, values can be inter- 
+polated from a table that is a function of a state variable as follows: 
+*fly alpha vrs tseg interp-2 
+0.0 
+0.0 
+5.0 
+1.0 
+6.0 
+2 .o 
+5.0 
+3.0 
+0.0 
+4.0 
+This data block says to interpolate angle of attack from the table as a function of the 
+segment time. The vrs keyword separating the guidance variable and the state vari- 
+able is required. Guidance tables can be functions of the same state variables as tables 
+(Table 3-2). 
+4- 18 
+I 

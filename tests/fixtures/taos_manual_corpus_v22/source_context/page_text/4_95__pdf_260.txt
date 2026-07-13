@@ -1,0 +1,99 @@
+ventry 
+15000 
+15000 
+15000 
+15000 
+16000 
+16000 
+16000 
+16000 
+17000 
+17000 
+17000 
+17000 
+18000 
+18000 
+18000 
+18000 
+gentry 
+-35.000 
+-30.000 
+-25.000 
+-20.000 
+-35.000 
+-30.000 
+-25.000 
+-20.000 
+-35.000 
+-30.000 
+-25.000 
+-20.000 
+-35.000 
+-30.000 
+-25.000 
+-20.000 
+m
+a
+s
+ 
+34.481 
+31.951 
+28.690 
+25.567 
+37.581 
+34.986 
+31.498 
+27.428 
+41.352 
+37.914 
+34.284 
+29.700 
+45.204 
+41.533 
+36.976 
+31.966 
+max_q 
+129020 
+117570 
+105508 
+93019 
+147262 
+133858 
+119649 
+104853 
+166764 
+151231 
+134723 
+117416 
+187562 
+169742 
+150720 
+130690 
+The trajectory data is plotted with EGS in Figures 4-14 through 4-17. The fust two 
+figures show four trajectories for different initial flight path angles and aconstant ini- 
+tial velocity. The last two figures show the summary variables plotted as a function 
+- 
+of the survey variables. 
+4. Pmblem Files 
+4.5. Examples 
+4.5.1. Ballistic Reentry 
+Sandia National 
+Laboratories 
+(TAOS - Version 96.01 
+Trajectory Analysis & Cptimization software 
+.......................................................................................... 
+Ballistic reentry trajectories 
+Problem (ballistic) I 
+1976 US Standard Atmowhere I 
+Non-rotating WGS-84 Earth 
+Summary Variables: 
+0 
+20 
+40 
+60 
+80 
+100 
+120 
+140 
+Range (nm) 
+Figure 614. Altitude versus Range for Example Ballistic Trajectories. 

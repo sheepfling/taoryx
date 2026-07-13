@@ -1,0 +1,39 @@
+3. Table Files 
+3.5. Full Tables 
+3.5.3. Tabulated Data Values 
+3.5.3. Tabulated Data Values 
+Values for math operations can be linearly interpolated from a table that is a function 
+of up to five independent variables. The tables are given in the same format as shown 
+previously for simple tables. The table dependent variable name is given first, fol- 
+lowed by a list of independent variables enclosed in parentheses. A list of values is 
+given for each independent variable defining amatrix. Then values for the dependent 
+variable are given for each combination of independent values. 
+The simplest table is a function of one variable. For example, 
+add cdh(a1t) 
+alt = 
+0, 50000, 100000, 150000, 200000 
+cdh = 0.0, 0.002, 
+0.006, 
+0.011, 
+0.042 
+defines a value called cdh that is a function of altitude. The value interpolated from 
+the table for cdh is added (because of the add operation) to the current table value. 
+The name cdh must be unique, that is, it cannot be a state variable or a user-defined 
+variable. It is only an identification name; it is not available as a storage variable so 
+it cannot be referenced by subsequent math operations. 
+In the next example, the table value is multiplied by afactor obtained from a tabulated 
+function of Mach number and a user-defined variable called type. 
+mult factor(type,mach) 
+type = 0, 1 
+mach = 0.0, 0.999, 1.000, 25.0 
+factor = 0.5, 0.5, 1.0, 1.0, 
+1.0, 1.0, 2.0, 2.0 
+# Values for type = 0 
+# Values for type = 1 
+The value of type is set in the problem file, for example, in the *aero or *prop data 
+block. If type is set to zero, then the table value is multiplied by 0.5 for subsonic Mach 
+numbers and 1.0 for supersonic Mach numbers. If type is set to one, these multiplica- 
+tive factors are doubled. 
+Tabulated functions of more than two variables are input using the same pattern as 
+shown previously for simple tables (Section 3.4). Another method, called skewed 
+tabulated data, is available as shown in Section 3.5.8 

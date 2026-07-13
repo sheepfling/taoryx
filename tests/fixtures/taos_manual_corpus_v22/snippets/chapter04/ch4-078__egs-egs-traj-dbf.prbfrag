@@ -1,0 +1,3 @@
+*egs traj.dbf
+  time alt range vel mach long latgd gamgd
+  psigd dynprs alpha nx ny nz ntotal

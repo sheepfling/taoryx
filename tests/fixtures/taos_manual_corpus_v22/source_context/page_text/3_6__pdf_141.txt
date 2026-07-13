@@ -1,0 +1,46 @@
+3. Table Files 
+3.3. Table File Formal 
+3.3. Table File Format 
+Table files are text files that can be created with a text editor or word processor. On 
+UNIX the standard vi editor can be used, or on a Silicon Graphics workstation, the 
+jut editor can be used. Table files can also be created with other software, such as 
+Aero20 and Rocket.21 
+Values 
+Table data is read line by line and is not column dependent. Information must be giv- 
+en in the correct order so TAOS knows how to interpret it. Lines can be any number 
+of characters in length and blank lines are ignored. Names and values in the file can 
+have up to 72 characters so they are essentially unlimited in length. 
+Names and values are separated with white-space characters (such as space, tab, or 
+carriage-return), commas, equal signs, parentheses, colons, greater than signs, and 
+less than signs. Because these special characters are used as delimiters to separate 
+names and values, they cannot be imbedded within a name or value. For example, 
+the value 30,000 is not correct because the comma is a delimiter that separates values; 
+30,000 is interpreted as two values: 30 and 0. The correct way to input this value is 
+30000. 
+Input values are not column dependent (they are free-field), so indentation can be 
+used to make the table file easier to understand. Many examples are given in this re- 
+port using indentation to make it easier to see how the values relate to each other. This 
+style is encouraged because it reduces input errors. 
+Values can be input with or without a decimal point. All values are interpreted as real 
+numbers; no distinction is made for integers. Values can also be input in scientific 
+notation, that is, e-format. For example, the number 2000 can be input as “2000,” 
+“2000.0” or “2.0e3.” 
+TAOS converts all characters to lower case before interpreting them as names or val- 
+ues so upper and lower case letters are equivalent. Use of lower-case characters is 
+recommended for improved readability. 
+Comments 
+Comments start with the special character # and continue to the end of the line. They 
+can be placed anywhere in the file except within aname or value. The following lines 
+show examples of valid comments: 
+# 
+the entire line is used for comments 
+0.2 
+0.3 
+0.4 
+0.5 
+# Mach numbers 
+In the first line, the special # symbol is in the first column. Everything after the # 
+symbol is treated as a comment and ignored by TAOS, so the entire line becomes a 
+comment. In the second example, the comment does not begin until after the four val- 
+ues. From the # symbol, to the end of the line is treated as a comment. 
+3-6 

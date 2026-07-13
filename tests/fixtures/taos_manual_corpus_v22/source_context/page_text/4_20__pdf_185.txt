@@ -1,0 +1,65 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.5. *Increment Data Block 
+4.2.5. *Increment Data Block 
+Normally values for a vehicle’s state and time are continuous across trajectory seg- 
+ments; however, the vehicle’s state and time can be instantaneously changed forming 
+a discontinuity by including an *increment data block. This is most often used for 
+weight changes, for example, dropping a weapon or missile staging. The data block 
+instantaneously reduces weight 325 lb (if default units are used). 
+The *increment data block is identical to the *reset data block (Section 4.2.11), ex- 
+cept that *reset sets a time or state variable to an input value, whereas *increment 
+adds the input value to the current value of the time or state variable. The *increment 
+data block increments or delta’s the time or state variable plus or minus from its cur- 
+rent value. 
+If both *reset and *increment data blocks are present in a segment, values are reset 
+first and then incremented. Multiple *reset and *increment data blocks can be given 
+in a segment; they are executed in the order given. 
+The variables that can be changed with the *increment data block are listed in Table 
+4-5. Position and velocity variables are maintained in many different coordinate sys- 
+tems so they have been grouped in Table 4-5 in consistent sets. Sets of position and 
+velocity variables in *increment data blocks must be in the same coordinate system. 
+For example, if the velocity xecicdt is incremented, then values for yecicdt and ze- 
+cicdt can also be changed. But values for velocity in other coordinate systems, for 
+example, vel cannot be changed. This restriction applies to all of the position and ve- 
+locity variables in Table 4-5. 
+Table 4 5 .  *Increment Variables. 
+*increment 
+wt=-325 
+~~~ 
+Variable I 
+Description 
+alt 
+long 
+latgd 
+rcm 
+long 
+l a w  
+xecfc 
+yecfc 
+ZecfC 
+xecic 
+yecic 
+ZeciC 
+dxb 
+&b 
+dYb 
+Altitude 
+Longitude 
+Geodetic latitude 
+Distance from eartb center 
+Longitude 
+Geocentric latitude 
+Earth centered fixed x coordinate 
+Earth centered fixed y coordinate 
+Earth centered fixed z coordinate 
+Earth centered inertial x coordinate 
+Earth centered inertial fixed y coordinate 
+Earth centered inertial fixed z coordinate 
+Position increment along body x axis 
+Position increment along body y axis 
+Position increment along body z axis 
+Velocity 
+Geocentric flight path angle 
+Geocentric heading angle 
+4-20 

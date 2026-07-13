@@ -1,0 +1,7 @@
+(corpus-ch3-019)
+  table output
+  start
+    add cdh(alt)
+      alt = 0, 50000, 100000, 150000, 200000
+      cdh = 0.0, 0.002, 0.006, 0.011, 0.042
+  end

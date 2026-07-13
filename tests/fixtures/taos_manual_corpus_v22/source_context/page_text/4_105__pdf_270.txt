@@ -1,0 +1,46 @@
+4. Problem Files 
+4.5. Examples 
+4.5.3. Air-hunched Intercept 
+4.5.3. Air-Launched Intercept 
+This example simulates an &-launched interceptor flying against a single-stage 
+ballistic missile target. The interceptor is a two-stage missile with a kill vehicle de- 
+signed to hit the target just after its boost phase. In this simulation, all interceptor ma- 
+neuvers are made while the two stages are firing; the kill vehicle coasts ballistically 
+to intercept the target. The terminal guidance system on the kill vehicle is not simu- 
+lated. The goals are to determine the interceptor standoff range or launch point and 
+the velocity at intercept. 
+The target is launched at time zero. It is rail-launched for simplicity and flies ballisti- 
+cally. The interceptor is launched 25 seconds later and intercept is assumed to occur 
+90 seconds after target launch; thus, the interceptor flies 65 seconds. Angle of attack 
+is used to steer the interceptor towards the target and it is assumed that a control sys- 
+tem, such as thrust vector control, is capable of generating these angles of attack. 
+The table files are not listed because they are lengthy and do not help to understand 
+the problem. Thrust and mass flow data for both stages of the interceptor and for the 
+target are included in the tables. The interceptor requires drag and lift tables because 
+it maneuvers with angle of attack. The target only requires drag tables because it flies 
+ballis tically. 
+Problem File 
+A listing of the problem file follows: 
+(intercept) 
+*title 
+Ballistic Missile Intercept 
+*atmos standard 
+*earth wgs-84 omega=O 
+*trajectory 1 
+Interceptor start on 1 
+*define alt-km 
+*define rng-km 
+alt-km = alV3280.84; 
+rng-km = range*1.852; 
+*dwn/crs long=0.0 latgd=0.0 azm=90.0 
+*initial geodetic 
+long=opta-13 
+lat=O.O 
+psi=-90.0 
+time=25.0 
+range=O . 0 
+gama=O. 0 
+alt=35000.0 
+vel=73 0.0 
+~t=1965.0 
+*print time east alt vel gamgd alpha dynprs 

@@ -1,0 +1,47 @@
+3. Table Files 
+3.4. Simple Tables 
+but they can be changed with the *units/fmt data block in the problem file as shown 
+in Section 4.4.13). Another example is 
+table mdot(time,motor) no-extrap 
+units=lb/hr 
+which defines a table for mass flow rate that is a function of time and a user-defined 
+variable called motor, does not allow extrapolation, and has units of Ib&. 
+Independent Variable Values 
+The table definition information is designed to be put on one line. This line is fol- 
+lowed by values for the independent variables. The variable name is given first, fol- 
+lowed by a list of values; for example, 
+mach = 0.2, 0.4, 0.6, 0.8, 0.9 
+alpha = 0, 2, 4 
+Any number of values can be input. The number of values is limited only by the 
+amount of memory available in the computer. Values for independent variables must 
+be strictly increasing or decreasing, and duplicate values are not allowed. 
+Values can be entered with or without decimal points; they are all treated as real num- 
+bers. Values can also be entered in scientific notation (e-format) as follows: 
+time = O., 
+1.0e1, 2.0e1, 6.0e1, 7.0e1, 9.0e1, 
+2e02, 4e02, 6e02 
+Spaces or commas are usually used to separate values because they provide the most 
+distinctive separation for the reader. Values do not have to be all on one line; they can 
+be continued as shown above. 
+When a table is a function of more than one independent variable, values for these 
+variables need to be given in the same order as listed in the function definition. For 
+example, 
+table cx(alt,mach) extrap sref5.30 
+# CORRECT: 
+alt = 0, 10000 
+# Altitudes first 
+mach = 5, 10, 15, 20 
+# then Mach numbers 
+is correct because altitude is given before Mach number in both the function defini- 
+tion and in the list of values. An error is generated if the Mach number values are giv- 
+en first: 
+table cx(alt,mach) extrap srefS.30 ’ #  INCORRECT: Altitude 
+mach = 5, 10, 15, 20 
+# is first in definition 
+alt = 0, 10000 
+# but Mach values given 
+# first 
+Dependent Variable Values 
+After all independent values have been given, the dependent values are listed. For 
+tables with a single independent variable, there is a one to one correspondence be- 
+3- ll 

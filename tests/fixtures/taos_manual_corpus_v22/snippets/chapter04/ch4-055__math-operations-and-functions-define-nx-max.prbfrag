@@ -1,0 +1,3 @@
+*define nx-max
+  nx-max = max(nx);
+  if (nx-max < 0) nx-max = 0;

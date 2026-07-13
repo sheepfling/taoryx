@@ -1,0 +1,44 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.2. *Define Data Block 
+4.4.2. *Define Data Block 
+TAOS always computes a standard set of variables for each trajectory. Additional 
+variables can be defined within atrajectory definition that are functions of these stan- 
+dard variables (Section 4.3.1). These user-defined variables are defined only within 
+a trajectory. Ea quantity of interest is a function of variables from more than one tra- 
+jectory, it must be defined outside of the trajectory defmitions. Then, trajectory num- 
+bers can be used to reference values from different trajectories. 
+The difference between *define data blocks within a trajectory definition and those 
+outside of a trajectory definition is that *define data blocks within a trajectory are re- 
+stricted to be functions of that trajectory’s output variables, and data blocks outside 
+a trajectory are not restricted to be functions of a single trajectory. *Define data 
+blocks outside of trajectory definitions can be used to compute relative values 
+comparing two or more trajectories. 
+User-defined variables are input the same way regardless of whether the *define data 
+block is within a trajectory definition or not. A unique name is given followed by 
+equations that show how to compute the new variable. User-defined variables that 
+are defined outside of trajectory definitions cannot be integral variables; this type of 
+user-defined variable is only allowed within a trajectory definition. 
+The equations defining how to compute the user-defined variable are given in a sim- 
+plified C language which is similar to Fortran. For example, 
+*define del-alt 
+del-alt = (alt[ll - alt[21) / 3280.84; 
+computes the difference in altitude between trajectory numbers 1 and 2 in kilometers. 
+The name of the new variable is del-ult. It is given following the *define keyword, 
+and it must also appear on the left side of an equation somewhere in the definition. 
+In this example, with one equation, del-ult must be the variable on the left side of the 
+equal sign. 
+The values and variables on the right side of the equal sign must all be standard output 
+variables, previously input user-defined variables, temporary variables, or 
+constants. In this case, alf is a standard output variable and 3280.84 is a constant. 
+Since this data block is located outside of the trajectory definitions in the problem 
+fde, trajectory numbers are required to fully specify the variables. Trajectory num- 
+bers are enclosed in square brackets so they look like subscripts. 
+Table 4-9 in Section 4.3.1 contains a list of operators and functions that can be used 
+in equations for user-defined variables. All of the standard mathematical operators 
+are available, and they have the same precedence as in C and Fortran. Many standard 
+functions are also provided; again these are defined in TAOS as they are in the C lan- 
+guage. 
+The table function shown in Table 4-9 cannot be used in *define data blocks outside 
+of a trajectory definition. Tables are functions of the state of a vehicle or trajectory 
+4-52 

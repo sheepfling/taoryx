@@ -1,0 +1,43 @@
+{
+  "source_monospace_blocks_reviewed": 455,
+  "status_counts": {
+    "automatic_match": 439,
+    "manual_match": 15,
+    "not_a_snippet": 1
+  },
+  "low_lexical_score_blocks": 16,
+  "uncaptured_blocks": 0,
+  "source_page_corrections": {
+    "ch3-007": {
+      "manual_pages": [
+        "3-11"
+      ],
+      "source_pdf_pages": [
+        146
+      ],
+      "reason": "direct final-pass review of source page 3-11"
+    },
+    "ch4-051": {
+      "manual_pages": [
+        "4-7",
+        "4-8"
+      ],
+      "source_pdf_pages": [
+        172,
+        173
+      ],
+      "reason": "direct final-pass review; listing continues across pages 4-7 and 4-8"
+    },
+    "ch4-057": {
+      "manual_pages": [
+        "4-37",
+        "4-38"
+      ],
+      "source_pdf_pages": [
+        202,
+        203
+      ],
+      "reason": "direct final-pass review; listing continues across pages 4-37 and 4-38"
+    }
+  }
+}

@@ -1,0 +1,2 @@
+*define alt-km                         # Altitude in km
+  alt-km = alt / 3280.84;              # Convert units of altitude

@@ -1,0 +1,1856 @@
+[
+  {
+    "id": "ch3-001",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-001__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-002",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch3-003",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-003__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-004",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-004__minimal-one-dimensional-simple-thrust-table.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-005",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-005__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-006",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-006__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-007",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-007__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-008",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-008__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-009",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-009__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-010",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-010__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-011",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-011__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-012",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-012__complete-simple-thrust-table.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-013",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-013__complete-two-dimensional-simple-cx-table.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-014",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-014__complete-three-dimensional-simple-ca-table.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-015",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-015__complete-full-thrust-table-with-interpolation-and-operations.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-016",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-016__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-017",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-017__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-018",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-018__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-019",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-019__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-020",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-020__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-021",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-021__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-022",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-022__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [
+      {
+        "severity": "error",
+        "code": "missing-interpolation-data",
+        "message": "Operation 'add' in table 'corpus-ch3-022' calls 'factor' without tabulated data.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-022__wrapped.tbl",
+          "line": 8,
+          "column": 1
+        }
+      }
+    ],
+    "error_count": 1,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-023",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-023__full-table-using-user-defined-variables.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-024",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch3-025",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch3-026",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-026__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-027",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-027__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-028",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-028__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-029",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-029__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": false,
+    "diagnostics": [
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'cxo' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-029__wrapped.tbl",
+          "line": 7,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'cxo' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-029__wrapped.tbl",
+          "line": 12,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-029' has 0 dependent values; expected 8.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-029__wrapped.tbl",
+          "line": 7,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-029' has 0 dependent values; expected 6.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-029__wrapped.tbl",
+          "line": 12,
+          "column": 1
+        }
+      }
+    ],
+    "error_count": 4,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-030",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-030__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": false,
+    "diagnostics": [
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'cxo' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-030__wrapped.tbl",
+          "line": 7,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'cxo' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-030__wrapped.tbl",
+          "line": 11,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'cxo' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-030__wrapped.tbl",
+          "line": 15,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'cxo' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-030__wrapped.tbl",
+          "line": 19,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-030' has 0 dependent values; expected 4.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-030__wrapped.tbl",
+          "line": 7,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-030' has 0 dependent values; expected 4.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-030__wrapped.tbl",
+          "line": 11,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-030' has 0 dependent values; expected 3.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-030__wrapped.tbl",
+          "line": 15,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-030' has 0 dependent values; expected 3.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-030__wrapped.tbl",
+          "line": 19,
+          "column": 1
+        }
+      }
+    ],
+    "error_count": 8,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-031",
+    "attempted": true,
+    "target": "wrappers/chapter03/ch3-031__wrapped.tbl",
+    "structure_count": 1,
+    "executable_complete": false,
+    "diagnostics": [
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'ca' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 7,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'ca' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 10,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'ca' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 13,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'ca' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 16,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "empty-table-assignment",
+        "message": "Table assignment 'ca' has no numeric values.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 19,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-031' has 0 dependent values; expected 5.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 7,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-031' has 0 dependent values; expected 4.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 10,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-031' has 0 dependent values; expected 3.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 13,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-031' has 0 dependent values; expected 4.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 16,
+          "column": 1
+        }
+      },
+      {
+        "severity": "error",
+        "code": "full-table-cardinality",
+        "message": "Interpolation group in table 'corpus-ch3-031' has 0 dependent values; expected 3.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter03/ch3-031__wrapped.tbl",
+          "line": 19,
+          "column": 1
+        }
+      }
+    ],
+    "error_count": 10,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-032",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-032__recruit-motor-thrust-example.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-033",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-033__stmi-full-format-ca-example.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-034",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-034__stmi-simple-format-ca-example.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch3-035",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-035__orbus-mass-flow-example-with-duplicate-source-abscissa.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [
+      {
+        "severity": "warning",
+        "code": "duplicate-independent-value",
+        "message": "Independent variable 'tmark' in table 'orbus-mdt' contains a duplicate abscissa. The source manual says duplicates are not allowed; this fixture preserves the printed example.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/snippets/chapter03/ch3-035__orbus-mass-flow-example-with-duplicate-source-abscissa.tbl",
+          "line": 6,
+          "column": 1
+        }
+      }
+    ],
+    "error_count": 0,
+    "warning_count": 1
+  },
+  {
+    "id": "ch3-036",
+    "attempted": true,
+    "target": "snippets/chapter03/ch3-036__abbreviated-reentry-ca-table-with-source-ellipsis.tblfrag",
+    "structure_count": 1,
+    "executable_complete": false,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-001",
+    "attempted": true,
+    "target": "snippets/chapter04/ch4-001__complete-problem-file-example-pullout.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-002",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-002__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-003",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-003__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-004",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-004__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-005",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-005__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-006",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-006__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-007",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-007__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-008",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-008__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-009",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-009__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-010",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-010__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-011",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-011__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-012",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-012__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-013",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-013__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-014",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-014__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-015",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-015__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-016",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-016__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-017",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-017__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-018",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-018__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-019",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-019__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-020",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-020__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-021",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-021__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-022",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-022__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-023",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-023__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-024",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-024__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-025",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-025__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-026",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-026__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-027",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-027__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-028",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-028__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-029",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-029__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-030",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-030__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-031",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-031__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-032",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-032__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-033",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-033__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-034",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-034__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-035",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-035__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-036",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-036__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-037",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-037__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-038",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-038__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-039",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-039__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-040",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-040__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-041",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-041__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-042",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-042__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-043",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-043__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-044",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-044__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-045",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-045__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-046",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-046__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-047",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-047__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-048",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-048__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-049",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-049__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-050",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-050__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-051",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-051__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-052",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-052__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-053",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-053__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-054",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-054__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-055",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-055__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [
+      {
+        "severity": "error",
+        "code": "invalid-expression",
+        "message": "Unexpected token ')' at column 2.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter04/ch4-055__wrapped.prb",
+          "line": 5,
+          "column": 18
+        }
+      }
+    ],
+    "error_count": 1,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-056",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-056__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [
+      {
+        "severity": "error",
+        "code": "invalid-expression",
+        "message": "Unexpected token ')' at column 3.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter04/ch4-056__wrapped.prb",
+          "line": 5,
+          "column": 16
+        }
+      }
+    ],
+    "error_count": 1,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-057",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-057__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [
+      {
+        "severity": "error",
+        "code": "invalid-expression",
+        "message": "Unexpected token ')' at column 4.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter04/ch4-057__wrapped.prb",
+          "line": 4,
+          "column": 16
+        }
+      }
+    ],
+    "error_count": 1,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-058",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-058__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [
+      {
+        "severity": "error",
+        "code": "invalid-expression",
+        "message": "Unexpected token ')' at column 5.",
+        "location": {
+          "path": "/mnt/data/taos-ch3-ch4-snippet-corpus-v22/wrappers/chapter04/ch4-058__wrapped.prb",
+          "line": 4,
+          "column": 31
+        }
+      }
+    ],
+    "error_count": 1,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-059",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-059__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-060",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-060__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-061",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-062",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-062__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-063",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-063__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-064",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-064__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-065",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-065__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-066",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-066__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-067",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-068",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-068__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-069",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-069__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-070",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-071",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-071__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-072",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-072__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-073",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-073__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-074",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-074__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-075",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-075__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-076",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-076__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-077",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-077__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-078",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-078__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-079",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-080",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-080__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-081",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-081__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-082",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-083",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-083__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-084",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-084__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-085",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-085__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-086",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-086__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-087",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-087__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-088",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-088__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-089",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-089__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-090",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-090__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-091",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-091__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-092",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-092__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-093",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-093__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-094",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-094__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-095",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-095__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-096",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-096__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-097",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-097__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-098",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-098__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-099",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-100",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-100__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-101",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-101__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-102",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-102__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-103",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-103__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-104",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-104__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-105",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-105__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-106",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-107",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-107__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-108",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-108__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-109",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-109__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-110",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-110__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-111",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-111__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-112",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-112__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-113",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-113__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-114",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-114__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-115",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-115__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-116",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-116__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-117",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-117__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-118",
+    "attempted": true,
+    "target": "wrappers/chapter04/ch4-118__wrapped.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-119",
+    "attempted": true,
+    "target": "snippets/chapter04/ch4-119__complete-table-file-example-ca-ex-1.tbl",
+    "structure_count": 1,
+    "executable_complete": true,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-120",
+    "attempted": true,
+    "target": "snippets/chapter04/ch4-120__complete-problem-file-example-ballistic.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-121",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-122",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-123",
+    "attempted": true,
+    "target": "snippets/chapter04/ch4-123__complete-problem-file-example-rocket.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-124",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-125",
+    "attempted": true,
+    "target": "snippets/chapter04/ch4-125__complete-problem-file-example-intercept.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-126",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  },
+  {
+    "id": "ch4-127",
+    "attempted": true,
+    "target": "snippets/chapter04/ch4-127__complete-problem-file-example-intercept.prb",
+    "structure_count": 1,
+    "executable_complete": null,
+    "diagnostics": [],
+    "error_count": 0,
+    "warning_count": 0
+  },
+  {
+    "id": "ch4-128",
+    "attempted": false,
+    "reason": "not an input-language artifact"
+  }
+]

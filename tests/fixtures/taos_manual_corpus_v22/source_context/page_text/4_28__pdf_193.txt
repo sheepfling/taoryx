@@ -1,0 +1,29 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.9. *Prop Data Block 
+Another example, 
+*prop 
+thrust=(thr-recruits) 
+mdot(mdt-recruits) 
+nrecruitsz2 
+illustrates the use of tables to compute the thrust and mass flow rate. In this case the 
+thr-recruits table is used for thrust and the mdt-recruits table is used for mass flow 
+rate. 
+The tables in this example require a value for the user-defmed variable, nrecruits, 
+representing the number of motors. Like other data blocks that allow tables to be spe- 
+cified, values can be given for user-defmed variables. Once a value has been given 
+for auser-defined variable, it remains set at that value unless changed in a subsequent 
+data block. This means that values for user-defmed variables do not have to be re- 
+peated within each segment if they do not change. 
+Units for thrust and mass flow rate can be specified in the tables, so they are not given 
+here. If units are given both places, the units in the *prop data block override those 
+given in the tables. 
+Some jet engines have thrust vector control, which can be used to improve takeoff, 
+landing, and turning performance. The data block 
+*prop thrust=(thr-flOOx) mdot=(mdt-flOOx) 
+epl=lO .O 
+sets the thrust vector angle to 10". The thrust vector angles in this version of TAOS 
+can be constant or computed with a table; they must be known before the flight path 
+is computed. In future versions of TAOS, they will be control variables so they can 
+be varied to meet the desired flight conditions. 
+4-28 

@@ -1,0 +1,12 @@
+(corpus-ch4-051)
+*trajectory 1 vehicle start on 1
+  *segment 1 Rail Launch
+    *integ dtprnt=0.10 dt=0.01
+    *aero ca=(stage1-ca) cn=(stage1-cn)
+    *prop thrust=(thrust1) mdot=(mdot1)
+    *prop thrust=(t-recruits) mdot=(m-recruits)
+    *rail launch cfstat=0.15 cfslid=0.01
+    *when plength=25.0 goto 3
+  *segment 3 synthetic target
+    *when time>1 stop
+*end

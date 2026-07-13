@@ -1,0 +1,1 @@
+constrain vel on segment 11 = vel[3] on segment 4, ref=1000

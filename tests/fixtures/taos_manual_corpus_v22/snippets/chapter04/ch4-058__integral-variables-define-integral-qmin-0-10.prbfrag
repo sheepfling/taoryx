@@ -1,0 +1,6 @@
+*define integral qmin=-0.10
+  if (dynprs > 100 || vel < 1000) {
+    qmin = 0.0;
+  } else {
+    qmin = (100.0 - dynprs)^2;
+  }

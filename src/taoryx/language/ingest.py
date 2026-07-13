@@ -8,6 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from taoryx.language.diagnostics import Diagnostic, Severity
+from taoryx.language.lexical import LexicalDocument, lex_text
 from taoryx.language.lossless import LosslessDocument, parse_lossless_bytes
 from taoryx.language.models import ProblemDocument, TableDocument
 from taoryx.language.problem_parser import parse_problem_text
@@ -33,6 +34,7 @@ class IngestedDocument(BaseModel):
 
     kind: FileKind
     source: LosslessDocument
+    lexical: LexicalDocument
     document: ProblemDocument | TableDocument
     diagnostics: tuple[Diagnostic, ...] = ()
 
@@ -58,6 +60,7 @@ def ingest_text(
     available_tables: set[str] | None = None,
 ) -> IngestedDocument:
     source = parse_lossless_bytes(text.encode("utf-8"), source_path=source_path)
+    lexical = lex_text(text, source_path=source_path)
     if kind is FileKind.PROBLEM:
         document = parse_problem_text(text, source_path)
         diagnostics = validate_problem(document, available_tables=available_tables)
@@ -67,6 +70,7 @@ def ingest_text(
     return IngestedDocument(
         kind=kind,
         source=source,
+        lexical=lexical,
         document=document,
         diagnostics=tuple(diagnostics),
     )
@@ -82,6 +86,7 @@ def ingest_file(
     data = source_path.read_bytes()
     text = data.decode(encoding, errors="surrogateescape")
     source = parse_lossless_bytes(data, source_path=str(source_path), encoding=encoding)
+    lexical = lex_text(text, source_path=str(source_path))
     kind = kind_for_path(source_path)
     if kind is FileKind.PROBLEM:
         document = parse_problem_text(text, str(source_path))
@@ -89,4 +94,4 @@ def ingest_file(
     else:
         document = parse_table_text(text, str(source_path))
         diagnostics = validate_table_file(document)
-    return IngestedDocument(kind=kind, source=source, document=document, diagnostics=tuple(diagnostics))
+    return IngestedDocument(kind=kind, source=source, lexical=lexical, document=document, diagnostics=tuple(diagnostics))

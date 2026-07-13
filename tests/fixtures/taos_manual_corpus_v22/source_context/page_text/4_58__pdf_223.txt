@@ -1,0 +1,96 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.4. *Egs Data Block 
+4.4.4. *Egs Data Block 
+The Engineering Graphics System (EGS) is available on the Silicon Graphics 
+workstations in the Aerospace Systems Development Center at S a ~ ~ d i a . ~  
+This soft- 
+ware is designed to interactively plot sets of analysis data, such as trajectory data. The 
+data for EGS must be in a special format called the EGS database format, so the *egs 
+data block is available to produce a file containing trajectory variables in this format. 
+It provides a simple interface to EGS, so that highquality plots of the trajectory data 
+can be produced quickly. 
+The *egs data block contains a filename and a list of variable names. The file pro- 
+duced by this data block, an EGS database file, usually has the file type .db$ A data- 
+base file is created for each *egs data block, and any number of *egs data blocks can 
+appear within a problem file. 
+An example of an *egs data block is 
+*egs tra j . dbf 
+time alt range vel mach long latgd gamgd 
+psigd dynprs alpha nx ny nz ntotal 
+where the database filename is traj.dbfand 15 output variables have been listed. Any 
+number of output variables can be listed in the data block. Figure 4-8 contains a list- 
+ing of the first part of the database file created from this example. 
+*EGS DATA FILE 
+*TITLE 
+Example of a ballistic RV trajectory 
+*SmBOLS 
+gama I 
+gama 
+trajectory = Trajectory Number 
+time = Time bec) 
+alt = Altitude (ft) 
+range = Range [nm) 
+vel = Velocity (ftlsec) 
+mach = Mach Number 
+long = Longitude (deg) 
+latgd = Geodetic Latitude (degl 
+g a w d  = Geodetic Flight Path Angle 
+psigd = Oeodetic Heading Angle 
+dynprs = Dynamic Pressure (slugs1 
+alpha = Angle of Attack (deg) 
+nx = Body x-axis Load Factor (9) 
+nY = Body Y-aXlS G's 
+(deg) 
+(deg) 
+(0) 
+nz = Body Z - a x i s  G's 
+ntotal = Total 0's 
+((11 
+(91 
+VARIABLES 
+LEVEL 
+1 gama 
+LEVEL 
+2 
+trajectory 
+LEVEL 
+3 
+time alt range vel mach long 
+latgd gamgd psigd dynprs alpha nx 
+ny nz ntotal 
+-35.000 
+1.00 
+0.000 
+300000.0 
+0.000 
+18000.00 
+19.9642 
+20.00000 
+0.00000 
+-35.000 
+90.000 
+0.829 
+0.000 
+-0.0026 
+0.500 
+294835.2 
+1.196 
+18008.93 
+19.9741 
+20.01991 
+0.00000 
+-35.021 
+90.000 
+1.100 
+0.000 
+-0.0034 
+*TABLE 
+0.0000 
+0.0000 
+0.0026 
+0.0000 
+0.0000 
+0.0034 
+Figure 4-8. Example of EGS Database File. 
+4- 58 

@@ -1,0 +1,42 @@
+4. Problem Files 
+4.1. File Format 
+Survey, Search, and Optimization Parameters 
+One of the powerful features of TAOS is its ability to systematically vary input pa- 
+rameters for tradeoff studies. This is accomplished with surveys, searches, and opti- 
+mization loops. Surveys vary input parameters through a set of known values, and 
+for each value, a trajectory is computed. Searches vary one or two input parameters 
+to achieve certain conditions during the trajectory. For example, the initial flight path 
+angle can be varied until the frnal range equals a desired value. Optimization loops 
+vary a set of input parameters to maximize or minimize a trajectory value subject to 
+some constraints. For example, the angle-of-attack history during a trajectory can 
+be varied such that range is maximized while maintaining an impact velocity above 
+a desired value and maintaining a minimum dynamic pressure. 
+All of these methods change or adjust values of input variables given in the problem 
+file. They can only change numerical values; surveys, searches, and optimization 
+loops cannot be used to change table names or other keywords in a problem file. 
+Numerical values are designated for a survey by setting a variable equal to a special 
+keyword. For example, 
+*initial geodetic 
+time = 20, 
+vel = 2.0e4, 
+wt=surv-l, 
+gama = -24.3 
+has an initial weight that is no longer set to a numerical value. Instead it has been set 
+to the keyword surv-l, which says to set the initial weight to values given in the *sur- 
+vey data block for survey loop number 1 (Section 4.4.11). 
+Similarly, values can be designated for searches with the srch-n keyword where n 
+is the search number (Section 4.4.9). Values are designated for optimization loops 
+with the optr-n keyword, wherexis the optimization loop letter andn is the optimiza- 
+tion parameter number (Section 4.4.6). 
+At this point it is only necessary to know that this capability exists; for more details, 
+see the separate sections on surveys, searches, and optimization. 
+Titles 
+Some data blocks have titles. Titles are special in that the delimiters are ignored. 
+Titles extend from the first nonblank character to the end of the line. Titles are also 
+special in that they are not converted to lowercase; case is preserved as input. 
+Comments 
+Comments, starting with the special#character, can be placed anywhere in a problem 
+file. Comments extend from the ##character to the end of the line. Blank lines are ig- 
+nored, so they can be used to put space between sections of information to make it 
+easier to read. 
+For example, the data block 

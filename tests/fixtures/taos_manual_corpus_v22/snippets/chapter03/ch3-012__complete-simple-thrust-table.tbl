@@ -1,0 +1,4 @@
+(example-thrust)
+  table thrust(time) units=lb no-extrap
+    time   = 0.0, 0.1, 1.0, 2.0, 3.0, 3.4, 3.5
+    thrust = 0, 5100, 4950, 4900, 4840, 4700, 0

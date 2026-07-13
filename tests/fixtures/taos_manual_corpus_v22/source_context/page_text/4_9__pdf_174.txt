@@ -1,0 +1,49 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.1. *Aero Data Block 
+4.2.1. *Aero Data Block 
+The *aero data block is used to define the aerodynamic coefficients. It is optional; 
+if it is not input, all aerodynamic coefficients are set to zero. If more than one *aero 
+data blockis input in a segment, the aerodynamic forces are computed for each *aero 
+data block and then added together. 
+There are three different sets of aerodynamic coefficients that can be input: the axial 
+and normal force coefficients (CA and CN), 
+the lift, drag, and side force coefficients 
+(CL, 
+CD, and CS), 
+and the body x, y, and z force coefficients (CX, 
+Cy, and CZ). The 
+aerodynamic coefficients are defined in Section 2.3.2. 
+Within each *aero data block, a consistent set of aerodynamic coefficients must be 
+input. Coefficients from different sets cannot be mixed. For example, CL and CD are 
+in the same set, so they form a valid set of coefficients, whereas CL and CA are not 
+in the same set, so they cannot be used together. 
+If a segment has more than one *aero block, it is recommended that all of them use 
+the same type of aerodynamic coefficients. If this is done, then all of the output aero- 
+dynamic coefficients are the sum of the coefficients from each *aero block. Other- 
+wise, the forces used to compute the trajectory are correct, but only the CL, CD, 
+and 
+CS output coefficients are correctly totaled. 
+Constant Coefficients 
+Aerodynamic coefficients can be input either as constants or as tables. Constant val- 
+ues are input by giving the coefficient name and its value as follows: 
+*aero 
+ca=0.0215 
+cn=0.118 
+sref=5.437 
+This data block defines the axisymmetric coefficients CA and CN. These values are 
+constant for the duration of the segment. 
+Besides the aerodynamic coefficient values, a value has been given for the reference 
+area SEf. The reference area is used to compute the aerodynamic forces from the co- 
+efficients and it has default units of ft2. It is required when all coefficients are set to 
+constants; when tables are used, the reference area can be given in one of the tables. 
+When a reference area is specified in the *aero data block, it overrides values given 
+in tables. When multiple *aero blocks are given or when aerodynamic tables contain 
+different values of SEf, SM should not be given in the *aero data block. 
+Aerodynamic Tables 
+Aerodynamic coefficients can also be given in tables by setting the coefficient names 
+equal to a table identification name enclosed in parentheses. For example, 
+*aero 
+ca = (ca-clean) 
+cn = (cn-clean) 
+4-9 

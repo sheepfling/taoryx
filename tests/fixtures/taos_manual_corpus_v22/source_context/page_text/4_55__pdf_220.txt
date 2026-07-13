@@ -1,0 +1,56 @@
+4. Problem Files 
+4.4. Problem Data Blocks 
+4.4.3. *Earth Data Block 
+*earth wgs-84 omega=O 
+selects the WGS-84 earth model but sets the earth rotation rate to zero. Nonrotating 
+earth models are often used in conceptual design analysis. 
+Because of the ellipsoidal shape, the WGS-72 and WGS-84 earth models require 
+additional parameters as shown in Table 4-16. The earth’s shape is defined by the 
+equatorial radius and one of the remaining shape parameters: the polarradius, the ec- 
+centricity, or the flatness. If more than one of these parameters is given, the geometry 
+most likely will be inconsistent. 
+Table 4-16. WGS-72 and WGS-84 Earth Model Values. 
+Symbol I Description 
+I WGS-84 
+I WGS-72 
+120925646.3255 
+120925639.7638 
+I 20855486.5953 
+I 20855480.7087 
+ecc 
+I Eccentricity 
+flat 
+Flatness parameter 
+lD98.257223563 
+1D98.26 
+omega 
+Rotation rate (radsec) 
+7.292 115x 1W5 
+7.292115147x1W5 
+g 
+lbm to slug conversion 
+32.1740485 
+32.1740485 
+gm 
+Gravity constant (ft3/sec2) 
+1.40764438125~10~~ 1.40764544069~10~~ 
+j2 
+I Degree 2 zonal harmonic 
+I 1.08262998905~10-~ I 1.08261579002x10-3 
+The gravity model is also modified with the second-degree zonal harmonic coeffi- 
+cient J2 to account for the ellipsoidal shape of the earth. The remaining gravity coeffi- 
+cients are neglected. 
+TSAP Earth Models 
+TSAP and PMASTuse a WGS-72 and WGS-84 earth model containing gravity zon- 
+al harmonic coefficients through degree 4. The second-degree gravitational zonal 
+harmonic J2 accounts for the oblateness of the earth. The remaining zonal harmonics 
+account for additional gravitational variations with respect to latitude. Use of the J3 
+and J4 zonal harmonics are questionable for typical trajectories because they are of 
+similar magnitude to the nonzonal harmonics which vary with longitude and to the 
+gravitational effects of the sun and moon. If J3 and J4 are defined, then the nonzonal 
+harmonic terms should also be defined for consistency. 
+However, the J3 and J4 zonal harmonics have been maintained in the tsap-72 and 
+tsap-84 earth models so results from TAOS can be consistent with those from its pre- 
+decessors TSAP and PMAST. The default values for J3 and J4 are shown in Table 
+4-17, and they are the same values used in TSAP and PMAST. 
+4-55 

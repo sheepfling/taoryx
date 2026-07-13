@@ -1,0 +1,62 @@
+3. Table Files 
+3.4. Simple Tables 
+Mass Flow Units 
+lb/sec 
+slugdsec 
+gkec 
+kg/sec 
+All interpolation and extrapolation is linear, so this should be taken into account 
+when entering values and setting the extrapolation option. The default is to allow ex- 
+trapolation. 
+Mass Flow Units 
+lb/min 
+lb/hr 
+Mass Flow Units 
+slugs/min 
+slugslhr 
+g/min 
+m 
+kg/min 
+kglhr 
+Extrapolation 
+............ ...... I....: ............ 
+.......... 
+.... 
+.... 
+....... ............ ............ ........... 
+- 
+X 
+Figure 3-5. Table 
+No Extrapolation 
+............ j ............ : ............ j ............ : ..... 
+. r-"" 
+.... 
+......... 
+io 
+.... 
+............ ............ : ............. 
+X 
+Extrapolation Option. 
+Table Parameters 
+The extrapolation option may be followed by a variable name and value called the 
+table parameter. This parameter provides some additional information associated 
+with the table. 
+For aerodynamic coefficient tables, the parameter is the reference area, sref. For 
+thrust and mass flow tables, a parameter called units gives the units used in the table. 
+Allowable units for the thrust and mass flow tables are given in Table 3-3. Other table 
+types do not use a table parameter. 
+Table 3-3. Units for Thrust and Mass Flow Tables 
+Thrust Units 
+~ 
+lb 
+n (Newtons) 
+kn (Kilonewtons) 
+Examples 
+An example of a complete table definition line for an axial force coefficient table is 
+table ca(mach,alpha) extrap sref=2.162 
+which defines a table that is a function of Mach number and angle of attack, allows 
+extrapolation, and uses a reference area of 2.162 ft2. (The units of sref default to ft2, 
+3-10 
+. . . . .  
+. .  
+^, .. 

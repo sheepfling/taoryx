@@ -1,0 +1,67 @@
+3. Table Files 
+3.5. Full Tables 
+3.5.8. Skewed Tabulated Data 
+add cxo(alt,mach) 
+alt = 
+0 
+mach = 
+3, 
+5 8  
+7, 
+9 
+cxo = .020, .021, -019, -018, 
+alt = 50000 
+mach = 
+38 
+5 8  
+7, 
+9 
+cxo = .021, .022., .021, -020 
+alt = 100000 
+mach = 
+7, 
+10, 
+15 
+cxo = .024, .023, .021 
+alt = 150000 
+mach = 
+7, 
+10, 
+15 
+cxo = .027, .025, .024 
+In this example, a simple one-dimensional table is given for each altitude. The one- 
+dimensional tables can each have different Mach number values and a different num- 
+ber of Mach numbers. 
+In the general case, one-dimensional tables are given for the last independent vari- 
+able (the right most variable) for each combination of remaining independent vari- 
+ables and values. The sets of data are grouped or nested such that values for the left 
+most independent variable are in the outermost loop. The following three-dimen- 
+sional example helps to clarify this: 
+add ca(alt,mach,alpha) 
+alt=10000, 
+mach=5, alpha=0,2,4,6,8 
+ca = .20 , .21, -23 , .26, .28 
+alt=10000, 
+mach=lO, alpha=0,2,4,6 
+ca = .19, .19, -20, -22 
+alt=10000, 
+mach=15, alpha=0,2,4 
+ca = .18, .19, .21 
+alt=30000, 
+mach=lO, alpha=0,2,4,6 
+ca = .21, .23, -25, -29 
+alt=30000, 
+mach=15, alpha=0,2,4 
+ca = .20, .21, .23 
+# Values for 10,000 
+# start here 
+# Values for 30,000 
+# start here 
+A simple one-dimensional table that is a function of angle of attack is given for each 
+combination of Mach number and altitude, but the number of angles of attack and 
+the angle-of-attack values are different for each table. In this example, all of the in- 
+dependent values for a set of data are given on the same line; values are read free- 
+field, so this format is allowed. 
+Altitude is the left most or fnst independent variable listed, so altitude values must 
+be in the outermost loop. Thus, the Mach number values are nested within the altitude 
+values. This means that the altitude values must be repeated until all Mach numbers 

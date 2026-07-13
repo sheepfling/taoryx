@@ -1,0 +1,6 @@
+start
+  add alpha
+  sin
+  sqr
+  add 1.0
+end

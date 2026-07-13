@@ -1,0 +1,7 @@
+(corpus-ch3-017)
+  table output
+  start
+    add 2.0
+    mult 1.5e-6
+    exp 3
+  end

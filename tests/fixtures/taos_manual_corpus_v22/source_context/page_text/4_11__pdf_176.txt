@@ -1,0 +1,33 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.2. *Constants Data Block 
+4.2.2. *Constants Data Block 
+Tables can be functions of user-defmed variables as shown in Section 3.5.5. Ifuser- 
+defined variables have been referenced in tables, then values for these variables must 
+be provided. These values can be given in the *aero, *prop, *cg, or *constants data 
+blocks. Values only need to be given for the user-defmed variables in tables refer- 
+enced in a segment; if a table is not used in a segment, then values do not have to be 
+provided for its user-defined variables. 
+The *constants data block is optional. It is provided as a convenience, so that values 
+for all user-defmed variables can be grouped together. The *constants data block is 
+only used to provide values for user-defined variables. If the tables are not a function 
+of user-defined variables, a *constants data block should not be input. 
+There are two styles for providing user-defined variable values. One style defines 
+the user-defined variable values in the data block where the table is referenced. For 
+example, an *aero data block that references a table with a user-defined variable also 
+provides a value for that variable. This style uses the *aero, *prop, and *cg data 
+blocks to define values for the user-defined variables. 
+The other style is to provide values for all user-defined variables in the *constants 
+data block. This groups all user-defmed variables together in one place. Some people 
+prefer the first style and others prefer this style, so both are provided. 
+The *constants data block consists of the *constants keyword followed by the user- 
+defined variables set equal to their values. For example, 
+*constants type=3, tmultz1.2, 
+mmult=l. 15 
+sets the user-defined variable type equal to 3.0, tmult equal to 1.2, and mmult equal 
+to 1.15. These variables must be used in the tables supplied with this problem file. 
+Once a value has been given for a user-defined variable, it remains set at that value 
+unless changed in a subsequent data block. This means that values for user-defined 
+variables do not have to be repeated within each segment if they do not change. How- 
+ever, it is good practice to provide values in each segment to avoid input errors. 
+4- 11 

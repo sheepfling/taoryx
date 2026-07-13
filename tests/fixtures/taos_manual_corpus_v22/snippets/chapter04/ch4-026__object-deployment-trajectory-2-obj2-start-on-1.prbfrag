@@ -1,0 +1,12 @@
+*trajectory 2 Obj2 start on 1
+
+  *initial from trajectory 1, segment 6
+
+  *segment 1 deployment
+    *reset wt=50
+    *increment velibx=5
+    *increment dxb=0.5 dyb=3.2 dzb=0.35
+    *fly pitchi=*
+    *fly yawi=*
+    *fly rolli=*
+    *when tseg>0 goto 2

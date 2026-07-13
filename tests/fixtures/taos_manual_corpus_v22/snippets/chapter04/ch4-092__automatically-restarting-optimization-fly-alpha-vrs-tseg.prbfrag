@@ -1,0 +1,10 @@
+*fly alpha vrs tseg
+  opta-1    0
+  opta-2   20
+  opta-3   40
+  opta-4   60
+  opta-5   80
+  opta-6  100
+  opta-7  opta-8
+
+*when tseg>opta-8 stop

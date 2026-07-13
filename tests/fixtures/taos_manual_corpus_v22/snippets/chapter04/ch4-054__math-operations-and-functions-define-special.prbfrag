@@ -1,0 +1,2 @@
+*define special
+  special = (rho/0.0023769)*table(special-tbl);

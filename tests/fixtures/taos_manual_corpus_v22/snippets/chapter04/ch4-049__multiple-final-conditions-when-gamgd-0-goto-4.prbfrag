@@ -1,0 +1,2 @@
+*when gamgd<0 goto 4
+*when tseg>1000 goto 10

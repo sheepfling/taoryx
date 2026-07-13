@@ -1,0 +1,21 @@
+4. Problem Files 
+4.2. Segment Data Blocks 
+4.2.N. *Reset Data Block 
+4.2.11. *Reset Data Block 
+The *reset data block works the same way as the *increment data block (Section 
+4.2.5) except that variables are set to the input value instead of incremented by the 
+input value. The rules for resetting variables are the same as those for incrementing 
+variables. Variables that can be reset are given in Table 4-5. 
+?)lpical uses of the *reset data block include resetting the variable tmurk with 
+*reset tmark=O 
+which is used to mark an event during the trajectory. For example, rocket motor thrust 
+in the propulsion tables is often made a function of tmurk rather than time or tseg. This 
+allows the motor bum time to extend across several segments and allows motor igni- 
+tion at any point in the trajectory. The value of tmark just needs to be reset to zero 
+at motor ignition. Other similar variables are grmurk, plmark, andfiel. 
+Another common use of the *reset data block is to set the weight to a known value 
+after missile staging, for example, 
+*reset wt=1100 
+sets the weight to 1100 lb regardless of what has happened previously in the trajecto- 
+ry. 
+4-30 

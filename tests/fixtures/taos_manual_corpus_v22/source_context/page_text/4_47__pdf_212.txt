@@ -1,0 +1,22 @@
+4. Problem Files 
+4.3. Trajectory Data Blocks 
+4.3.7. *Tangent Data Block 
+4.3.7. Tangent Data Block 
+The origin of the tangent plane coordinate system is fixed to the earth and its location 
+is given in geodetic coordinates. The x and y axes are tangent to the earth's surface 
+and the z axis points upward. The x axis is oriented along a heading or azimuth mea- 
+sured clockwise from north (Section 2.1.11). 
+Output variables, listed in the appendix, are calculated giving the position, velocity, 
+and acceleration in tangent plane coordinates. In addition, the initial impact point 
+range and azimuth are measured from the origin of the tangent plane coordinate sys- 
+tem. 
+The *tangent data block is used to provide the location and orientation of the tangent 
+plane coordinate system. For example, 
+*tangent latgd=21.982 long=-159.759 
+alk87.2 azm=140 
+positions the origin at a latitude of 21.982"N, a longitude of 159.759"W, and an alti- 
+tude of 87.2 ft above sea level. The coordinate system is oriented so the x axis points 
+along a 140" azimuth or heading (approximately southeast). 
+The *tungent data block is optional. The origin of the tangent plane coordinate sys- 
+tem defaults to a point on the earth's surface directly below the vehicle's initial posi- 
+tion. In its default orientation, the x axis points north. 

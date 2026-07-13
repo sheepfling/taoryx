@@ -1,0 +1,41 @@
+4. Problem Files 
+4.2. Segment Dora Blocks 
+4.2.7. *Integ Data Block 
+4.2.7. *Integ Data Block 
+Trajectories are computed by integrating the equations of motion with a 4th-order 
+fixed step size Runge-Kuttanumericalintegration method. The integration step size, 
+which controls the accuracy of the calculations, is fmed for each segment of the tra- 
+jectory. It needs to be small enough to capture the effects of changing aerodynamic 
+and propulsive forces, but large enough so that computation time is not excessive. 
+The default step size of 0.10 seconds can be changed with the *integ data block. For 
+example, 
+*integ dk0.25 
+says to use a 0.25 second integration step size. Typical step sizes range from 0.01 to 
+0.5 seconds. The minimum integration step size is 1 x 10-6 seconds. 
+Output variables are printed at the beginning and end of each segment and at even 
+increments of the print interval within the segment. Besides controlling the printout, 
+the print interval also controls the amount of memory required for the trajectory be- 
+cause all trajectory output variables are saved in memory at the printout times. Thus, 
+small print intervals increase memory requirements and vice versa. The print inter- 
+val, dtprnt, defaults to 1.0 second. The data block 
+*integ dtprnt=0.5 
+dk0.05 
+changes the print interval to 0.5 seconds and the integration step size to 0.05 seconds. 
+Guidance Time Constant 
+Some guidance rules, such as those in Table 4-4, specify the control variables indi- 
+rectly with a desired flight condition. If the actual flight conditions are different from 
+the desired conditions, the control variables are adjusted such that the trajectory cor- 
+rects to the desired conditions (Section2.5.1). The rate of this correction is controlled 
+by the guidance time constant, dtguid. 
+If dtguid is small, large corrections are made in an effort to quickly achieve the de- 
+sired flight conditions. If dtguid is large, small corrections are made to gradually 
+achieve the desired conditions. So dtguid acts somewhat like a time constant with 
+small values giving oscillations that may or may not damp to the desired conditions, 
+and large values giving exponential convergence to the desired flight conditions. 
+In the following data block, dtguid has been changed to 5 seconds: 
+*integ dtprnt=l.O dk0.20 dtguid=5.0 
+A value of 5 seconds is considered large. It causes small corrections to be made to 
+the flight path in order to meet the requested flight conditions. These corrections may 
+be too small to achieve the desired conditions. Experimentation is required to get the 
+desired results, and the default value of 1 second works well for most guidance rules. 
+4-25 
