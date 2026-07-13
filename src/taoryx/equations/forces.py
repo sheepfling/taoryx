@@ -159,3 +159,10 @@ def normal_specific_load_magnitude(
     _, ny, nz, _ = specific_load_components(specific_load_vector, body_axes)
     return math.sqrt(ny * ny + nz * nz)
 ####
+
+
+def full_table_thrust(vacuum_thrust: float, ambient_pressure: float, nozzle_exit_area: float) -> float:
+    """Return thrust as vacuum thrust minus ambient pressure times nozzle exit area."""
+
+    return vacuum_thrust - ambient_pressure * nozzle_exit_area
+####

@@ -156,6 +156,13 @@ def ecfc_to_ecic_acceleration(force: CartesianVector3, mass: float, rotation_ang
 ####
 
 
+def initial_ecic_rotation(rotation_rate_radians_per_second: float, time_seconds: float, reference_time_seconds: float, initial_rotation_radians: float) -> float:
+    """Return the initial ECIC rotation angle."""
+
+    return ecic_rotation_angle(initial_rotation_radians, rotation_rate_radians_per_second, time_seconds, reference_time_seconds)
+####
+
+
 def wind_corrected_velocity(vehicle_velocity: CartesianVector3, wind_velocity: CartesianVector3) -> CartesianVector3:
     """Return the wind-corrected air-relative velocity vector."""
 

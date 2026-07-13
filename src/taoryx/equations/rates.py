@@ -220,6 +220,123 @@ def ground_speed_magnitude_from_ecfc(
 ####
 
 
+def rail_constrained_acceleration_components(
+    rail_acceleration_magnitude: float,
+    body_axes: tuple[CartesianVector3, CartesianVector3, CartesianVector3],
+) -> CartesianVector3:
+    """Return ECFC acceleration components constrained to the rail axis."""
+
+    x_axis, y_axis, z_axis = body_axes
+    return CartesianVector3(
+        rail_acceleration_magnitude * x_axis.x,
+        rail_acceleration_magnitude * x_axis.y,
+        rail_acceleration_magnitude * x_axis.z,
+    )
+####
+
+
+def rail_acceleration_magnitude(total_acceleration: CartesianVector3, body_axes: tuple[CartesianVector3, CartesianVector3, CartesianVector3], friction_acceleration: float) -> float:
+    """Return the acceleration magnitude along the rail."""
+
+    x_axis, _, _ = body_axes
+    return total_acceleration.x * x_axis.x + total_acceleration.y * x_axis.y + total_acceleration.z * x_axis.z - friction_acceleration
+####
+
+
+def rail_friction_acceleration(friction_coefficient: float, normal_acceleration: float) -> float:
+    """Return the acceleration loss caused by rail friction."""
+
+    return friction_coefficient * normal_acceleration
+####
+
+
+def rail_normal_acceleration(total_acceleration: CartesianVector3, body_axes: tuple[CartesianVector3, CartesianVector3, CartesianVector3]) -> float:
+    """Return the acceleration normal to the rail."""
+
+    _, y_axis, z_axis = body_axes
+    y_component = total_acceleration.x * y_axis.x + total_acceleration.y * y_axis.y + total_acceleration.z * y_axis.z
+    z_component = total_acceleration.x * z_axis.x + total_acceleration.y * z_axis.y + total_acceleration.z * z_axis.z
+    return math.sqrt(y_component * y_component + z_component * z_component)
+####
+
+
+def dynamic_pressure_definition(air_density: float, air_relative_speed: float) -> float:
+    """Return the dynamic-pressure definition used for rates."""
+
+    return 0.5 * air_density * air_relative_speed * air_relative_speed
+####
+
+
+def dynamic_pressure_second_derivative(
+    air_density: float,
+    air_density_rate: float,
+    air_density_second_rate: float,
+    air_relative_speed: float,
+    air_relative_speed_rate: float,
+    air_acceleration_magnitude: float,
+) -> float:
+    """Return the TAOS approximation for the dynamic-pressure second derivative."""
+
+    return (
+        0.5 * air_density_second_rate * air_relative_speed * air_relative_speed
+        + 2.0 * air_density_rate * air_relative_speed * air_relative_speed_rate
+        + air_density * air_acceleration_magnitude * air_acceleration_magnitude
+    )
+####
+
+
+def atmospheric_density_rate(altitude_rate: float, density_gradient: float) -> float:
+    """Return the atmospheric-density rate."""
+
+    return altitude_rate * density_gradient
+####
+
+
+def atmospheric_density_second_rate(altitude_acceleration: float, density_gradient: float) -> float:
+    """Return the atmospheric-density second rate."""
+
+    return altitude_acceleration * density_gradient
+####
+
+
+def mach_number_definition(air_relative_speed: float, speed_of_sound: float) -> float:
+    """Return the Mach-number definition."""
+
+    return air_relative_speed / speed_of_sound
+####
+
+
+def mach_number_rate(
+    air_relative_speed: float,
+    air_relative_speed_rate: float,
+    speed_of_sound: float,
+    speed_of_sound_rate: float,
+) -> float:
+    """Return the Mach-number rate."""
+
+    return (air_relative_speed_rate * speed_of_sound - air_relative_speed * speed_of_sound_rate) / (speed_of_sound * speed_of_sound)
+####
+
+
+def speed_of_sound_rate(altitude_rate: float, altitude_derivative: float) -> float:
+    """Return the speed-of-sound rate."""
+
+    return altitude_rate * altitude_derivative
+####
+
+
+def rail_launch_acceleration_components(rail_acceleration_magnitude: float, body_axes: tuple[CartesianVector3, CartesianVector3, CartesianVector3]) -> CartesianVector3:
+    """Return the ECFC acceleration components required to keep the vehicle on the rail."""
+
+    x_axis, _, _ = body_axes
+    return CartesianVector3(
+        rail_acceleration_magnitude * x_axis.x,
+        rail_acceleration_magnitude * x_axis.y,
+        rail_acceleration_magnitude * x_axis.z,
+    )
+####
+
+
 def _dot(left: CartesianVector3, right: CartesianVector3) -> float:
     return left.x * right.x + left.y * right.y + left.z * right.z
 ####

@@ -44,7 +44,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus repository structural validation",
       "validation_suite": "tools/check_manifest.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Force and moment equations share one source number"
     },
     {
@@ -64,7 +64,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus repository structural validation",
       "validation_suite": "tools/check_manifest.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Point-mass force equation"
     },
     {
@@ -2444,7 +2444,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Rail-constrained ECFC acceleration components"
     },
     {
@@ -2464,7 +2464,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Acceleration magnitude along the rail"
     },
     {
@@ -2484,7 +2484,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Acceleration loss from rail friction"
     },
     {
@@ -2504,7 +2504,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Acceleration normal to the rail"
     },
     {
@@ -2884,7 +2884,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Dynamic-pressure definition used for rates"
     },
     {
@@ -2904,7 +2904,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Approximated dynamic-pressure second derivative"
     },
     {
@@ -2924,7 +2924,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Atmospheric-density rate"
     },
     {
@@ -2944,7 +2944,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Approximated atmospheric-density second derivative"
     },
     {
@@ -2964,7 +2964,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Mach-number definition"
     },
     {
@@ -2984,7 +2984,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Mach-number rate"
     },
     {
@@ -3004,7 +3004,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Speed-of-sound rate"
     },
     {
@@ -6384,7 +6384,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus repository structural validation",
       "validation_suite": "tools/check_manifest.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Vacuum thrust minus ambient pressure times nozzle exit area"
     },
     {
@@ -6404,7 +6404,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus Chapter 4 structural validation",
       "validation_suite": "tools/check_chapter04.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Stagnation-point heat-transfer approximation"
     },
     {
@@ -6424,7 +6424,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus Chapter 4 structural validation",
       "validation_suite": "tools/check_chapter04.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Minimum-dynamic-pressure integral derivative when constraint is satisfied"
     },
     {
@@ -6444,7 +6444,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus Chapter 4 structural validation",
       "validation_suite": "tools/check_chapter04.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Minimum-dynamic-pressure integral derivative when constraint is violated"
     },
     {
@@ -6464,7 +6464,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus Chapter 4 structural validation",
       "validation_suite": "tools/check_chapter04.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Rotation between ECFC and ECIC coordinate systems"
     },
     {
@@ -6484,7 +6484,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus Chapter 4 structural validation",
       "validation_suite": "tools/check_chapter04.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Path-constraint integral when minimum dynamic pressure is violated"
     },
     {
@@ -6504,7 +6504,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus Chapter 4 structural validation",
       "validation_suite": "tools/check_chapter04.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Path-constraint integral otherwise"
     },
     {
@@ -6524,7 +6524,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus Chapter 4 structural validation",
       "validation_suite": "tools/check_chapter04.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Forward-difference numerical derivative"
     },
     {
@@ -6544,7 +6544,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus Chapter 4 structural validation",
       "validation_suite": "tools/check_chapter04.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Central-difference numerical derivative"
     }
   ]

@@ -23,7 +23,7 @@ def test_default_registry_loads_canonical_equation_catalog() -> None:
 
     last = registry.get("4-8")
     assert last.latex_label == "eq:optimization-central-difference"
-    assert last.is_implemented is False
+    assert last.is_implemented is True
 ####
 
 
@@ -95,11 +95,11 @@ def test_registry_reports_implementation_progress() -> None:
     summary = implementation_summary(registry)
 
     assert summary["total"] == 326
-    assert summary[EquationImplementationStatus.IMPLEMENTED.value] == 304
-    assert summary[EquationImplementationStatus.NOT_IMPLEMENTED.value] == 22
+    assert summary[EquationImplementationStatus.IMPLEMENTED.value] == 326
+    assert summary[EquationImplementationStatus.NOT_IMPLEMENTED.value] == 0
     assert summary[EquationImplementationStatus.PARTIAL.value] == 0
     assert summary[EquationImplementationStatus.UNKNOWN.value] == 0
-    assert summary["implemented_ratio_numerator"] == 304
+    assert summary["implemented_ratio_numerator"] == 326
     assert summary["implemented_ratio_denominator"] == 326
 ####
 
@@ -158,6 +158,28 @@ def test_selected_equations_are_marked_implemented() -> None:
         "2-313",
         "2-314",
         "2-315",
+        "1-1",
+        "1-2",
+        "3-1",
+        "4-1",
+        "4-2",
+        "4-3",
+        "4-4",
+        "4-5",
+        "4-6",
+        "4-7",
+        "4-8",
+        "2-119",
+        "2-120",
+        "2-121",
+        "2-122",
+        "2-141",
+        "2-142",
+        "2-143",
+        "2-144",
+        "2-145",
+        "2-146",
+        "2-147",
     }
 
     assert all(registry.get(identifier).is_implemented for identifier in implemented_ids)
@@ -187,5 +209,5 @@ def test_selected_equations_are_marked_implemented() -> None:
     assert registry.get("2-123").is_implemented
     assert registry.get("2-152").is_implemented
     assert registry.get("2-140").is_implemented
-    assert not registry.get("2-141").is_implemented
+    assert registry.get("2-141").is_implemented
 ####

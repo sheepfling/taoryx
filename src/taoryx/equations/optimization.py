@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 from .guidance import Matrix
@@ -112,4 +113,56 @@ def maximum_altitude_constraint(value: float) -> bool:
     """Return whether the strict maximum-altitude constraint is satisfied."""
 
     return value < 0.0
+####
+
+
+def optimization_forward_difference(function_plus: float, function_zero: float, delta_x: float) -> float:
+    """Return the forward-difference numerical derivative."""
+
+    return (function_plus - function_zero) / delta_x
+####
+
+
+def optimization_central_difference(function_plus: float, function_minus: float, delta_x: float) -> float:
+    """Return the central-difference numerical derivative."""
+
+    return (function_plus - function_minus) / (2.0 * delta_x)
+####
+
+
+def qmin_satisfied() -> float:
+    """Return the minimum-dynamic-pressure integral derivative when satisfied."""
+
+    return 0.0
+####
+
+
+def qmin_violated(minimum_pressure: float, dynamic_pressure: float) -> float:
+    """Return the minimum-dynamic-pressure integral derivative when violated."""
+
+    return (minimum_pressure - dynamic_pressure) * (minimum_pressure - dynamic_pressure)
+####
+
+
+def stagnation_heating(nose_radius: float, air_density: float, sea_level_density: float, vehicle_speed: float, satellite_speed: float = 26000.0) -> float:
+    """Return the stagnation-point heat-transfer approximation."""
+
+    return (17600.0 / math.sqrt(nose_radius)) * math.sqrt(air_density / sea_level_density) * (vehicle_speed / satellite_speed) ** 3.15
+####
+
+
+def optimization_qmin_satisfied(minimum_pressure: float, dynamic_pressure: float, velocity: float) -> float:
+    """Return the *optimize qmin derivative when satisfied."""
+
+    if dynamic_pressure > minimum_pressure or velocity < 1000.0:
+        return 0.0
+    ####
+    return (minimum_pressure - dynamic_pressure) * (minimum_pressure - dynamic_pressure)
+####
+
+
+def optimization_qmin_violated(minimum_pressure: float, dynamic_pressure: float) -> float:
+    """Return the *optimize qmin derivative when violated."""
+
+    return (minimum_pressure - dynamic_pressure) * (minimum_pressure - dynamic_pressure)
 ####
