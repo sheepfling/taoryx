@@ -25,7 +25,10 @@ DISPLAY_ENVIRONMENTS = {
 }
 
 IMPLEMENTED_EQUATION_IDS = {
+    *[f"2-{number}" for number in range(1, 7)],
     *[f"2-{number}" for number in range(7, 50)],
+    *[f"2-{number}" for number in range(50, 62)],
+    *[f"2-{number}" for number in range(93, 97)],
     *[f"2-{number}" for number in range(246, 251)],
 }
 
