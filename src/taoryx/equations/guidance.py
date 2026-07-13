@@ -18,6 +18,14 @@ class Matrix3x3:
 ####
 
 
+@dataclass(frozen=True, slots=True)
+class Matrix:
+    """Dense matrix with row vectors stored explicitly."""
+
+    rows: tuple[tuple[float, ...], ...]
+####
+
+
 def _dot(left: CartesianVector3, right: CartesianVector3) -> float:
     return left.x * right.x + left.y * right.y + left.z * right.z
 ####
@@ -45,6 +53,40 @@ def _norm(vector: CartesianVector3) -> float:
 
 def _matrix_vector_product(matrix: Matrix3x3, vector: CartesianVector3) -> CartesianVector3:
     return CartesianVector3(_dot(matrix.row0, vector), _dot(matrix.row1, vector), _dot(matrix.row2, vector))
+####
+
+
+def _gaussian_elimination(matrix: Matrix, vector: tuple[float, ...]) -> tuple[float, ...]:
+    size = len(matrix.rows)
+    if size == 0:
+        return ()
+    ####
+    augmented = [list(row) + [value] for row, value in zip(matrix.rows, vector, strict=True)]
+    for pivot_index in range(size):
+        pivot_row = max(range(pivot_index, size), key=lambda index: abs(augmented[index][pivot_index]))
+        if math.isclose(augmented[pivot_row][pivot_index], 0.0, abs_tol=1e-15):
+            raise ValueError("linear system is singular")
+        ####
+        if pivot_row != pivot_index:
+            augmented[pivot_index], augmented[pivot_row] = augmented[pivot_row], augmented[pivot_index]
+        ####
+        pivot = augmented[pivot_index][pivot_index]
+        for column in range(pivot_index, size + 1):
+            augmented[pivot_index][column] /= pivot
+        ####
+        for row_index in range(size):
+            if row_index == pivot_index:
+                continue
+            ####
+            factor = augmented[row_index][pivot_index]
+            if factor == 0.0:
+                continue
+            ####
+            for column in range(pivot_index, size + 1):
+                augmented[row_index][column] -= factor * augmented[pivot_index][column]
+            ####
+    ####
+    return tuple(row[-1] for row in augmented)
 ####
 
 
@@ -85,6 +127,139 @@ def iip_aerodynamic_acceleration_from_drag_coefficient(
 
     scale = drag_coefficient * dynamic_pressure * reference_area * gravity_acceleration / weight
     return _scale(wind_velocity_unit_vector, scale)
+####
+
+
+def parabolic_guidance_state(time_seconds: float, coefficient_a: float, coefficient_b: float, coefficient_c: float) -> float:
+    """Return the parabolic guidance state."""
+
+    return coefficient_a * time_seconds * time_seconds + coefficient_b * time_seconds + coefficient_c
+####
+
+
+def parabolic_guidance_rate(time_seconds: float, coefficient_a: float, coefficient_b: float) -> float:
+    """Return the parabolic guidance rate."""
+
+    return 2.0 * coefficient_a * time_seconds + coefficient_b
+####
+
+
+def parabolic_guidance_coefficient_a(
+    current_value: float,
+    desired_value: float,
+    desired_rate: float,
+    guidance_interval_seconds: float,
+) -> float:
+    """Return the parabolic transition coefficient a."""
+
+    if guidance_interval_seconds == 0.0:
+        raise ValueError("guidance interval must be nonzero")
+    ####
+    return (current_value - desired_value + desired_rate * guidance_interval_seconds) / (
+        guidance_interval_seconds * guidance_interval_seconds
+    )
+####
+
+
+def parabolic_guidance_coefficient_b(
+    current_time_seconds: float,
+    coefficient_a: float,
+    desired_rate: float,
+    guidance_interval_seconds: float,
+) -> float:
+    """Return the parabolic transition coefficient b."""
+
+    return desired_rate - 2.0 * coefficient_a * (current_time_seconds + guidance_interval_seconds)
+####
+
+
+def cubic_guidance_state(
+    time_seconds: float,
+    coefficient_a: float,
+    coefficient_b: float,
+    coefficient_c: float,
+    coefficient_d: float,
+) -> float:
+    """Return the cubic guidance state."""
+
+    return (
+        coefficient_a * time_seconds * time_seconds * time_seconds
+        + coefficient_b * time_seconds * time_seconds
+        + coefficient_c * time_seconds
+        + coefficient_d
+    )
+####
+
+
+def cubic_guidance_acceleration(time_seconds: float, coefficient_a: float, coefficient_b: float) -> float:
+    """Return the cubic guidance acceleration."""
+
+    return 6.0 * coefficient_a * time_seconds + 2.0 * coefficient_b
+####
+
+
+def cubic_guidance_coefficient_b(
+    current_time_seconds: float,
+    guidance_interval_seconds: float,
+    current_value: float,
+    desired_value: float,
+    current_rate: float,
+    desired_rate: float,
+) -> float:
+    """Return the printed cubic transition coefficient b."""
+
+    t1 = current_time_seconds
+    t2 = current_time_seconds + guidance_interval_seconds
+    numerator = (
+        (current_value - desired_value) * (t2 * t2 - t1 * t1)
+        + current_rate * (t2 - t1) * (t2 * t2 - t1 * t1)
+        + (desired_rate - current_rate) * ((2.0 / 3.0) * t1**3 - t1 * t1 * t2 + (1.0 / 3.0) * t2**3)
+    )
+    denominator = 2.0 * (t2 - t1) * ((2.0 / 3.0) * t1**3 - t1 * t1 * t2 + (1.0 / 3.0) * t2**3) - (
+        t2 * t2 - t1 * t1
+    ) * (t1 * t1 - 2.0 * t1 * t2 + t2 * t2)
+    if denominator == 0.0:
+        raise ValueError("guidance interval produces a singular cubic fit")
+    ####
+    return numerator / denominator
+####
+
+
+def cubic_guidance_coefficient_a(
+    current_time_seconds: float,
+    guidance_interval_seconds: float,
+    current_rate: float,
+    desired_rate: float,
+    coefficient_b: float,
+) -> float:
+    """Return the printed cubic transition coefficient a."""
+
+    t1 = current_time_seconds
+    t2 = current_time_seconds + guidance_interval_seconds
+    denominator = 3.0 * (t2 * t2 - t1 * t1)
+    if denominator == 0.0:
+        raise ValueError("guidance interval produces a singular cubic fit")
+    ####
+    return (desired_rate - current_rate - 2.0 * coefficient_b * (t2 - t1)) / denominator
+####
+
+
+def guidance_newton_update(
+    current_values: tuple[float, ...],
+    residual: tuple[float, ...],
+    jacobian: Matrix,
+) -> tuple[float, ...]:
+    """Return the multidimensional Newton-Raphson update."""
+
+    correction = _gaussian_elimination(jacobian, tuple(-value for value in residual))
+    return tuple(current + delta for current, delta in zip(current_values, correction, strict=True))
+####
+
+
+def guidance_gaussian_system(residual: tuple[float, ...], jacobian: Matrix) -> tuple[float, ...]:
+    """Return the Gaussian-elimination solution for the Newton system."""
+
+    return _gaussian_elimination(jacobian, tuple(-value for value in residual))
 ####
 
 

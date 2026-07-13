@@ -5,9 +5,8 @@ import csv
 import subprocess
 from pathlib import Path
 
-from PIL import Image, ImageDraw
-
 import fitz
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 LISTING_MAP: dict[str, str] = {

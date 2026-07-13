@@ -9,9 +9,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from rapidfuzz import fuzz, process
-
 import fitz
+from rapidfuzz import fuzz, process
 
 ROOT = Path(__file__).resolve().parents[1]
 JSON_REPORT = ROOT / "qa" / "source_text_fidelity.json"
