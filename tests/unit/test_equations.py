@@ -95,11 +95,11 @@ def test_registry_reports_implementation_progress() -> None:
     summary = implementation_summary(registry)
 
     assert summary["total"] == 326
-    assert summary[EquationImplementationStatus.IMPLEMENTED.value] == 128
-    assert summary[EquationImplementationStatus.NOT_IMPLEMENTED.value] == 198
+    assert summary[EquationImplementationStatus.IMPLEMENTED.value] == 151
+    assert summary[EquationImplementationStatus.NOT_IMPLEMENTED.value] == 175
     assert summary[EquationImplementationStatus.PARTIAL.value] == 0
     assert summary[EquationImplementationStatus.UNKNOWN.value] == 0
-    assert summary["implemented_ratio_numerator"] == 128
+    assert summary["implemented_ratio_numerator"] == 151
     assert summary["implemented_ratio_denominator"] == 326
 ####
 
@@ -130,4 +130,8 @@ def test_selected_equations_are_marked_implemented() -> None:
     assert registry.get("2-196").is_implemented
     assert registry.get("2-200").is_implemented
     assert not registry.get("2-201").is_implemented
+    assert registry.get("2-123").is_implemented
+    assert registry.get("2-152").is_implemented
+    assert registry.get("2-140").is_implemented
+    assert not registry.get("2-141").is_implemented
 ####
