@@ -37,3 +37,16 @@ def test_initial_requires_weight_or_mass_for_direct_state() -> None:
     document = parse_problem_text("(demo)\n*trajectory 1 vehicle start on 1\n*initial geodetic\nalt=100\n*end\n")
 
     assert any(diagnostic.code == "missing-initial-mass" for diagnostic in document.diagnostics)
+
+
+def test_initial_assignment_form_defaults_to_geodetic() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*initial alt=100 lat=0 long=0 wt=1\n"
+        "*end\n"
+    )
+
+    block = document.problems[0].trajectories[0].blocks[0]
+    assert isinstance(block, InitialBlock)
+    assert not document.diagnostics

@@ -84,6 +84,31 @@ The current typed problem-body coverage includes:
   input, mutually exclusive `wt`/`mass` and `vel`/`mach`, and both the
   authoritative `from segment N, trajectory M` framing and retained legacy
   ordering.
+- `*define` simple assignments, C-style `if`/`else` controls with braced
+  assignment bodies, integral headers with initial values, and recovery for
+  unmatched or unclosed braces.
+- `*fly` guidance-table continuation rows as typed independent/value points,
+  with row-level source locations and recovery for malformed rows.
+- documented direct/condition guidance variables and `interp-1` through
+  `interp-3` are checked explicitly; unknown guidance vocabulary is preserved
+  with a diagnostic.
+- `*units/fmt` unit tokens are checked against the manual's allowable-unit
+  table, format-only records are represented with an absent unit, and unknown
+  units remain represented with diagnostics.
+- `*rail` headers validate the documented `cfstat` and `cfslid` parameters;
+  unknown rail parameters are preserved with diagnostics.
+- `*integ` validates `dt`, `dtprnt`, and `dtguid`; `*reset` and `*increment`
+  validate the documented state-variable vocabulary, including deployment
+  variable `velibx`.
+- `*aero` preserves arbitrary user-defined assignments but diagnoses mixing
+  the documented coefficient families CA/CN, CL/CD/CS, and CX/CY/CZ.
+- `*prop` preserves arbitrary user-defined assignments while validating the
+  fixed `thr_units` and `mdt_units` controls against the manual's propulsion
+  unit tables.
+- multiline `*title` bodies as title text rather than ignored block lines.
+- full-table `if` operations with the manual-required `then` keyword and a
+  single `<`, `>`, or `=` relationship; compound or incomplete conditions are
+  diagnosed while their nested operation remains recoverable.
 
 The parser still deliberately retains some documented complex bodies as raw statements while
 their typed contracts are being reconstructed. The next evidence-backed slices are the remaining

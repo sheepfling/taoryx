@@ -20,6 +20,11 @@ OPT_REFERENCE_RE = re.compile(r"\bopt([a-e])-(\d+)\b", re.IGNORECASE)
 SURVEY_REFERENCE_RE = re.compile(r"\bsurv-(\d+)\b", re.IGNORECASE)
 SEARCH_REFERENCE_RE = re.compile(r"\bsrch-(\d+)\b", re.IGNORECASE)
 INDEXED_VARIABLE_RE = re.compile(r"\b[A-Za-z_][A-Za-z0-9_./-]*\[(\d+)\]")
+RELATIONSHIP_RE = re.compile(
+    r"^\s*(?:[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?|[A-Za-z_][A-Za-z0-9_./-]*)"
+    r"\s*(?:<|>|=)\s*"
+    r"(?:[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?|[A-Za-z_][A-Za-z0-9_./-]*)\s*$"
+)
 
 TABLE_OPERATIONS_WITH_OPERAND = {
     "add",
@@ -410,7 +415,8 @@ class _TableTokenParser:
                 possible_next = self.tokens[following_position + 1] if following_position + 1 < len(self.tokens) else None
                 if (
                     possible.value.lower() in TABLE_OPERATIONS
-                    or possible.value.startswith(".")
+                    or possible.value == "."
+                    or possible.value.lower() == "etc."
                     or (possible_next is not None and possible_next.value in {"=", ":"})
                 ):
                     self.position = following_position
@@ -419,7 +425,7 @@ class _TableTokenParser:
                 self.position = following_position
                 continue
             ####
-            if self._looks_like_assignment() or self._looks_like_operation() or token.value.lower() == "end" or token.value.startswith("."):
+            if self._looks_like_assignment() or self._looks_like_operation() or token.value.lower() == "end" or token.value == "." or token.value.lower() == "etc.":
                 break
             ####
             if NUMBER_RE.match(token.value):
@@ -501,7 +507,28 @@ class _TableTokenParser:
                     )
                 )
             ####
-            self.accept("then")
+            condition_text = " ".join(condition_tokens)
+            if not RELATIONSHIP_RE.fullmatch(condition_text):
+                self.issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="invalid-if-condition",
+                        message="Full-table if conditions must contain one simple relation: value <|>|= value.",
+                        line=line,
+                        column=token.column,
+                    )
+                )
+            ####
+            if self.accept("then") is None:
+                self.issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="missing-if-then",
+                        message="Full-table if operation requires the 'then' keyword.",
+                        line=line,
+                        column=token.column,
+                    )
+                )
             nested = self.parse_operation()
             if nested is None:
                 self.issues.append(
@@ -515,7 +542,7 @@ class _TableTokenParser:
                 )
                 return TableOperation(operator=operator, line=line, condition=" ".join(condition_tokens), label=label)
             ####
-            return TableOperation(operator=operator, line=line, condition=" ".join(condition_tokens), label=label, nested=nested)
+            return TableOperation(operator=operator, line=line, condition=condition_text, label=label, nested=nested)
         ####
         if operator in TABLE_OPERATIONS_WITH_OPERAND:
             call = self.parse_table_call()

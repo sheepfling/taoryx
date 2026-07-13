@@ -15,6 +15,10 @@ from taoryx.language.table_parser import parse_table_text
 
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "tests" / "fixtures" / "taos_manual_corpus_v22"
+# This fragment intentionally omits the tabulated data required to validate the
+# ``factor`` call.  Keep the exception explicit so new parser diagnostics do
+# not silently become accepted corpus behavior.
+EXPECTED_WRAPPER_ERRORS = {"ch3-022": 1}
 ####
 
 
@@ -82,6 +86,12 @@ def main() -> int:
         raise SystemExit("Missing ch3-002 lexical sentinel.")
     if top_level_errors:
         raise SystemExit(f"Top-level corpus parser errors: {', '.join(top_level_errors)}")
+    observed_wrapper_errors = {entry_id: count for entry_id, count in wrapper_errors.items() if count}
+    if observed_wrapper_errors != EXPECTED_WRAPPER_ERRORS:
+        raise SystemExit(
+            "Unexpected manual corpus wrapper diagnostics: "
+            f"expected {dict(EXPECTED_WRAPPER_ERRORS)!r}, observed {observed_wrapper_errors!r}."
+        )
     print(
         f"TAOS snippet corpus validation passed: {len(entries)} raw displays, "
         f"{len(wrapper_errors)} wrappers, {parser_exceptions} parser exceptions, "

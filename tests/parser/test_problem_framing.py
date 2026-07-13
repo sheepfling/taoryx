@@ -29,6 +29,21 @@ def test_define_assignment_can_span_lines_until_semicolon() -> None:
     assert assignment.name == "value"
 
 
+def test_optimize_constraints_accept_signed_numeric_endpoints() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*segment 1\n"
+        "*optimize a for vel=max on segment 1, trajectory 1\n"
+        "constrain gamgd=-80\n"
+        "*end\n"
+    )
+
+    block = document.problems[0].blocks[0]
+    assert block.constraints[0].right.text == "-80"
+    assert not document.diagnostics
+
+
 def test_define_control_statement_is_typed_and_preserved() -> None:
     document = parse_problem_text("(demo)\n*define x\nif (alt > 100) then value = 1;\nelse value = 0;\n*end\n")
 
@@ -36,6 +51,90 @@ def test_define_control_statement_is_typed_and_preserved() -> None:
     assert [control.kind for control in block.control_statements] == ["if", "else"]
     assert block.control_statements[0].assignment is not None
     assert not [diagnostic for diagnostic in document.diagnostics if diagnostic.severity == "error"]
+
+
+def test_define_if_control_accepts_documented_c_style_assignment() -> None:
+    document = parse_problem_text("(demo)\n*define x\nif (alt > 100) value = 1;\n*end\n")
+
+    control = document.problems[0].blocks[0].control_statements[0]
+    assert control.kind == "if"
+    assert control.assignment is not None
+    assert control.assignment.name == "value"
+    assert not [diagnostic for diagnostic in document.diagnostics if diagnostic.severity == "error"]
+
+
+def test_define_braced_if_else_preserves_typed_branches() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*define var\n"
+        "if (mach > 1.0) {\n"
+        "  x = 1 + mach*mach;\n"
+        "  var = sqrt(x);\n"
+        "} else {\n"
+        "  var = 0;\n"
+        "}\n"
+        "*end\n"
+    )
+
+    control = document.problems[0].blocks[0].control_statements[0]
+    assert [assignment.name for assignment in control.body] == ["x", "var"]
+    assert [assignment.name for assignment in control.else_body] == ["var"]
+    assert not [diagnostic for diagnostic in document.diagnostics if diagnostic.severity == "error"]
+
+
+def test_define_unclosed_brace_is_diagnosed_and_recovered() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*define var\n"
+        "if (mach > 1.0) {\n"
+        "  var = mach;\n"
+        "*end\n"
+    )
+
+    assert any(diagnostic.code == "unclosed-define-brace" for diagnostic in document.diagnostics)
+    assert any(record.code == "unclosed-define-brace" for record in document.recovered_records)
+    assert document.problems[0].ended
+
+
+def test_define_integral_header_is_typed_and_scope_checked() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*define integral qmin=-0.10\n"
+        "qmin = 0.0;\n"
+        "*segment 1\n"
+        "*end\n"
+    )
+
+    block = document.problems[0].trajectories[0].blocks[0]
+    assert block.integral is True
+    assert block.variable == "qmin"
+    assert block.initial_value is not None
+    assert not [diagnostic for diagnostic in document.diagnostics if diagnostic.severity == "error"]
+
+    invalid = parse_problem_text("(demo)\n*define integral qmin=-0.10\nqmin = 0.0;\n*end\n")
+    assert any(diagnostic.code == "invalid-integral-define-scope" for diagnostic in invalid.diagnostics)
+
+
+def test_incomplete_define_statement_is_diagnosed_at_end_of_file() -> None:
+    document = parse_problem_text("(demo)\n*define value\nvalue = alt + 1\n*end\n")
+
+    assert any(diagnostic.code == "incomplete-define-statement" for diagnostic in document.diagnostics)
+    assert any(record.code == "incomplete-define-statement" for record in document.recovered_records)
+
+
+def test_undocumented_header_only_block_body_is_preserved_and_diagnosed() -> None:
+    document = parse_problem_text("(demo)\n*earth wgs-84\nunexpected text\n*end\n")
+
+    assert any(diagnostic.code == "invalid-block-body" for diagnostic in document.diagnostics)
+    assert any(record.code == "invalid-block-body" and record.text == "unexpected text" for record in document.recovered_records)
+
+
+def test_title_continuation_lines_remain_title_text() -> None:
+    document = parse_problem_text("(demo)\n*title first line\n  second line\n*end\n")
+
+    assert document.problems[0].blocks[0].title == "first line\nsecond line"
+    assert not document.diagnostics
 
 
 def test_define_statements_preserve_source_order() -> None:
@@ -221,6 +320,56 @@ def test_fly_block_parses_documented_guidance_forms() -> None:
     assert not document.diagnostics
 
 
+def test_fly_guidance_table_rows_are_typed_and_source_located() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*segment 1\n"
+        "*fly alpha vrs tseg interp-2\n"
+        "  opta-1 0.0\n"
+        "  opta-2 opta-3\n"
+        "*end\n"
+    )
+
+    block = document.problems[0].trajectories[0].segments[0].blocks[0]
+    assert len(block.points) == 2
+    assert block.points[0].location.line == 5
+    assert block.points[1].location.line == 6
+    assert not document.diagnostics
+
+
+def test_fly_guidance_table_row_errors_are_recovered() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*segment 1\n"
+        "*fly alpha vrs tseg\n"
+        "  0.0\n"
+        "  1.0 2.0 3.0\n"
+        "*end\n"
+    )
+
+    assert [diagnostic.code for diagnostic in document.diagnostics].count("invalid-fly-data") == 2
+    assert len([record for record in document.recovered_records if record.code == "invalid-fly-data"]) == 2
+
+
+def test_fly_rejects_undocumented_variables_and_interpolation_methods() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*segment 1\n"
+        "*fly not-a-guidance-variable=1\n"
+        "*fly alpha vrs tseg interp-9\n"
+        "0 1\n"
+        "*end\n"
+    )
+
+    codes = [diagnostic.code for diagnostic in document.diagnostics]
+    assert "unsupported-fly-variable" in codes
+    assert "unsupported-fly-interpolation" in codes
+    assert not any(record.code == "orphan-line" for record in document.recovered_records)
+
+
 def test_fly_and_rail_malformed_forms_are_recovered() -> None:
     document = parse_problem_text(
         "(demo)\n"
@@ -235,6 +384,68 @@ def test_fly_and_rail_malformed_forms_are_recovered() -> None:
     assert "invalid-fly-statement" in codes
     assert "invalid-rail-header" in codes
     assert len(document.recovered_records) >= 2
+
+
+def test_rail_rejects_undocumented_parameters() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*segment 1\n"
+        "*rail launch cfstat=0.1 cfslid=0.02 friction=0.3\n"
+        "*end\n"
+    )
+
+    assert any(diagnostic.code == "unsupported-block-parameter" for diagnostic in document.diagnostics)
+    assert len(document.recovered_records) == 1
+
+
+def test_integration_and_reset_increment_vocabularies_are_checked() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*segment 1\n"
+        "*integ dt=0.1 dtprnt=1.0 dtguid=5.0 mystery=2\n"
+        "*reset wt=100 mystery=1\n"
+        "*increment velibx=5 dxb=0.1\n"
+        "*end\n"
+    )
+
+    unsupported = [diagnostic for diagnostic in document.diagnostics if diagnostic.code == "unsupported-block-parameter"]
+    assert len(unsupported) == 2
+    assert not any(diagnostic.code == "unsupported-block-parameter" and "velibx" in diagnostic.message for diagnostic in document.diagnostics)
+
+
+def test_aero_rejects_mixed_documented_coefficient_sets() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*segment 1\n"
+        "*aero ca=0.1 cn=0.2 cl=0.3 flaps=25\n"
+        "*end\n"
+    )
+
+    assert any(diagnostic.code == "inconsistent-aero-coefficients" for diagnostic in document.diagnostics)
+    assert any(record.code == "inconsistent-aero-coefficients" for record in document.recovered_records)
+
+
+def test_propulsion_unit_controls_use_their_documented_unit_tables() -> None:
+    valid = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*segment 1\n"
+        "*prop thrust=250 thr_units=kn mdot=120 mdt_units=kg/sec nrecruits=2\n"
+        "*end\n"
+    )
+    assert not [diagnostic for diagnostic in valid.diagnostics if diagnostic.severity.value == "error"]
+
+    invalid = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*segment 1\n"
+        "*prop thrust=250 thr_units=psi mdot=120 mdt_units=kg\n"
+        "*end\n"
+    )
+    assert [diagnostic.code for diagnostic in invalid.diagnostics].count("unsupported-propulsion-unit") == 2
 
 
 def test_optimize_constraints_and_controls_are_typed() -> None:
@@ -426,7 +637,7 @@ def test_units_format_block_parses_inline_and_continuation_settings() -> None:
         ("alt", "km", "f.3"),
         ("vel", "m/sec", "f.2"),
         ("range", "km", None),
-        ("mach", "e.5", None),
+        ("mach", None, "e.5"),
     ]
     assert not document.diagnostics
 
@@ -438,6 +649,12 @@ def test_units_format_block_recovers_malformed_setting() -> None:
     assert "invalid-units-format" in codes
     assert "invalid-units-format-setting" in codes
     assert len(document.recovered_records) >= 2
+
+
+def test_units_format_rejects_units_outside_the_manual_table() -> None:
+    document = parse_problem_text("(demo)\n*units/fmt alt parsec\n*end\n")
+
+    assert any(diagnostic.code == "unsupported-unit" for diagnostic in document.diagnostics)
 
 
 def test_atmosphere_and_earth_headers_and_user_rows_are_typed() -> None:

@@ -67,3 +67,33 @@ def test_full_table_recovers_multiple_operation_errors() -> None:
     assert "missing-full-table-end" in codes
     assert len(document.recovered_records) >= 3
     assert not document.executable_complete
+
+
+def test_full_table_if_requires_simple_relation_and_then() -> None:
+    document = parse_table_text(
+        "(broken) table output\n"
+        "start\n"
+        "if (mach > 5 && alt < 50000) add value\n"
+        "end\n"
+    )
+
+    codes = [diagnostic.code for diagnostic in document.diagnostics]
+    assert "invalid-if-condition" in codes
+    assert "missing-if-then" in codes
+    assert document.tables[0].operations[0].nested is not None
+
+
+def test_skewed_manual_groups_accept_leading_decimal_values() -> None:
+    document = parse_table_text(
+        "(skewed)\n"
+        "table output\n"
+        "start\n"
+        "add cxo(alt,mach)\n"
+        "alt=0,50000\n"
+        "mach=3,5,7,9\n"
+        "cxo=.020,.021,.019,.018\n"
+        "     .021,.022,.021,.020\n"
+        "end\n"
+    )
+
+    assert not [diagnostic for diagnostic in document.diagnostics if diagnostic.severity.value == "error"]

@@ -37,6 +37,8 @@ class DefineControlStatement(BaseModel):
     condition: ExpressionType | None = None
     assignment: Assignment | None = None
     nested: "DefineControlStatement | None" = None
+    body: list[Assignment] = Field(default_factory=list)
+    else_body: list[Assignment] = Field(default_factory=list)
 ####
 
 
@@ -79,6 +81,8 @@ class TitleBlock(BlockBase):
 class DefineBlock(BlockBase):
     keyword: Literal["define"] = "define"
     variable: str | None = None
+    integral: bool = False
+    initial_value: ExpressionType | None = None
     control_statements: list[DefineControlStatement] = Field(default_factory=list)
     typed_statements: list[DefineAssignmentStatement | DefineControlStatement] = Field(default_factory=list)
 ####
@@ -207,7 +211,7 @@ class UnitsFormatBlock(BlockBase):
 
 class UnitFormatSetting(BaseModel):
     variable: str
-    unit: str
+    unit: str | None = None
     format: str | None = None
     location: SourceLocation
 ####
@@ -264,6 +268,13 @@ class FlyBlock(BlockBase):
     value: ExpressionType | None = None
     reference: str | None = None
     interpolation: str | None = None
+    points: list["FlyPoint"] = Field(default_factory=list)
+
+
+class FlyPoint(BaseModel):
+    independent: ExpressionType
+    value: ExpressionType
+    location: SourceLocation
 ####
 
 

@@ -6,7 +6,9 @@ from typing import Any
 
 from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
 from taoryx.language.expressions import (
+    BinaryExpression,
     ExpressionSyntaxError,
+    NameExpression,
     TableReferenceExpression,
     parse_expression,
 )
@@ -29,6 +31,7 @@ from taoryx.language.models import (
     EgsBlock,
     FileBlock,
     FlyBlock,
+    FlyPoint,
     IipBlock,
     IncrementBlock,
     InertialBlock,
@@ -69,9 +72,12 @@ _BLOCK_RE = re.compile(r"^\s*\*(?P<keyword>[A-Za-z0-9_/]+)\b(?P<header>.*)$")
 _PROBLEM_RE = re.compile(r"^\s*\((?P<name>[^()]+)\)\s*$")
 _ASSIGN_RE = re.compile(r"(?P<name>[A-Za-z_][A-Za-z0-9_./-]*(?:\[\d+\])?)\s*(?P<op>\+=|-=|\*=|/=|<=|>=|==|!=|=|<|>)\s*(?P<value>\([^()]+\)|\*|[^\s,;]+)")
 _STATEMENT_ASSIGN_RE = re.compile(r"^\s*(?P<name>[A-Za-z_][A-Za-z0-9_./-]*(?:\[\d+\])?)\s*(?P<op>\+=|-=|\*=|/=|<=|>=|==|!=|=|<|>)\s*(?P<value>.+?)\s*;?\s*$")
-_IF_ASSIGN_RE = re.compile(r"^\s*if\s*(?:\((?P<parenthesized>.+?)\)|(?P<condition>.+?))\s+then\s+(?P<assignment>.+?)\s*;?\s*$", re.IGNORECASE)
+_IF_ASSIGN_RE = re.compile(r"^\s*if\s*(?:\((?P<parenthesized>.+?)\)|(?P<condition>.+?))\s+(?:then\s+)?(?P<assignment>.+?)\s*;?\s*$", re.IGNORECASE)
 _ELSE_ASSIGN_RE = re.compile(r"^\s*else\s+(?P<assignment>.+?)\s*;?\s*$", re.IGNORECASE)
 _ELSE_IF_RE = re.compile(r"^\s*else\s+(?P<statement>if\b.+)$", re.IGNORECASE)
+_IF_BRACE_RE = re.compile(r"^\s*if\s*\((?P<condition>.+?)\)\s*\{\s*$", re.IGNORECASE)
+_ELSE_BRACE_RE = re.compile(r"^\s*\}\s*else\s*\{\s*$", re.IGNORECASE)
+_CLOSE_BRACE_RE = re.compile(r"^\s*\}\s*$")
 _LIMIT_RE = re.compile(r"(?P<variable>[A-Za-z_][A-Za-z0-9_.-]*)\s*(?P<operator>[<>])\s*(?P<value>[^\s,]+)")
 _FLY_ASSIGN_RE = re.compile(r"^\s*(?P<variable>[A-Za-z_][A-Za-z0-9_./-]*)\s*=\s*(?P<value>.+?)\s*$", re.IGNORECASE)
 _FLY_VRS_RE = re.compile(
@@ -79,7 +85,7 @@ _FLY_VRS_RE = re.compile(
     re.IGNORECASE,
 )
 _OPTIMIZE_ENDPOINT_RE = re.compile(
-    r"^(?P<text>[A-Za-z_][A-Za-z0-9_.-]*(?:\[\d+\])?|(?:\d+(?:\.\d*)?|\.\d+)(?:[EeDd][+-]?\d+)?|\*)"
+    r"^(?P<text>[A-Za-z_][A-Za-z0-9_.-]*(?:\[\d+\])?|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[EeDd][+-]?\d+)?|\*)"
     r"(?:\s+on\s+segment\s+(?P<segment>\d+)(?:\s*,?\s*trajectory\s+(?P<trajectory>\d+))?)?\s*$",
     re.IGNORECASE,
 )
@@ -89,6 +95,19 @@ _SURVEY_SETTING_RE = re.compile(r"(?P<name>lo|hi|inc|vals)\s*=\s*(?P<values>.*?)
 _SURVEY_NUMBER_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[EeDd][+-]?\d+)?$")
 _SEARCH_CONTROL_NAMES = {"xlo", "xhi", "xest", "dx", "tol", "xref", "fref", "maxitr", "integ", "print"}
 _RADAR_PARAMETER_NAMES = {"alt", "long", "latgd", "diste", "distn", "distd", "reqtr", "rpolr", "flat", "ecc"}
+_RAIL_PARAMETER_NAMES = {"cfstat", "cfslid"}
+_INTEGRATION_PARAMETER_NAMES = {"dt", "dtprnt", "dtguid"}
+_RESET_INCREMENT_VARIABLE_NAMES = {
+    "alt", "long", "latgd", "rcm", "latgc", "xecfc", "yecfc", "zecfc", "xecic", "yecic", "zecic",
+    "dxb", "dyb", "dzb", "vel", "gamgc", "psigc", "gamgd", "psigd", "xecfcdt", "yecfcdt", "zecfcdt",
+    "xecicdt", "yecicdt", "zecicdt", "wt", "mass", "fuel", "time", "tseg", "tmark", "range", "grseg",
+    "grmark", "plength", "plseg", "plmark", "iip_beta", "velibx",
+}
+_AERO_COEFFICIENT_SETS = (
+    {"ca", "cn"},
+    {"cl", "cd", "cs"},
+    {"cx", "cy", "cz"},
+)
 _FORMAT_RE = re.compile(r"^[ef]\.\d+$", re.IGNORECASE)
 _ATMOS_STANDARD_MODELS = {"none", "standard", *{str(number) for number in range(21)}}
 _EARTH_MODELS = {"spherical", "wgs-72", "wgs-84", "tsap-72", "tsap-84", "wgs-84-full", "gem-t1-full"}
@@ -106,6 +125,62 @@ _INITIAL_VARIABLES = {
     "ecfc": {"x", "y", "z", "xdt", "ydt", "zdt", "mach", "wt", "mass", "time", "range", "path", "t_0", "t_epoch", "omega_0"},
     "ecic": {"x", "y", "z", "xdt", "ydt", "zdt", "mach", "wt", "mass", "time", "range", "path", "t_0", "t_epoch", "omega_0"},
 }
+_FLY_DIRECT_VARIABLES = {
+    "alpha",
+    "alphat",
+    "bankgc",
+    "bankgd",
+    "beta",
+    "betae",
+    "phi",
+    "pitchgc",
+    "pitchgd",
+    "pitchi",
+    "rollgc",
+    "rollgd",
+    "rolli",
+    "yawgc",
+    "yawgd",
+    "yawi",
+    "power",
+}
+_FLY_CONDITION_VARIABLES = {
+    "alt",
+    "cl",
+    "cs",
+    "downria",
+    "dynprs",
+    "gamgc",
+    "gamgd",
+    "intercept",
+    "l/d",
+    "mach",
+    "nx",
+    "ny",
+    "nz",
+    "propnav",
+    "psigc",
+    "psigd",
+    "thrust",
+    "upria",
+    "vel",
+}
+_FLY_VARIABLES = _FLY_DIRECT_VARIABLES | _FLY_CONDITION_VARIABLES
+_DOCUMENTED_UNITS = {
+    "ft", "in", "mi", "nm", "m", "km", "sec", "min", "hr", "deg", "rad",
+    "ft/sec", "ft/min", "ft/hr", "in/sec", "in/min", "in/hr", "mi/sec", "mi/min", "mi/hr", "knots",
+    "m/sec", "m/min", "m/hr", "km/sec", "km/min", "km/hr", "deg/sec", "deg/min", "deg/hr",
+    "rad/sec", "rad/min", "rad/hr", "rev/sec", "rpm",
+    "ft/sec2", "ft/min2", "ft/hr2", "in/sec2", "in/min2", "in/hr2", "mi/sec2", "mi/min2", "mi/hr2", "nm/hr2",
+    "m/sec2", "m/min2", "m/hr2", "km/sec2", "km/min2", "km/hr2", "deg/sec2", "deg/min2", "deg/hr2",
+    "rad/sec2", "rad/min2", "rad/hr2", "rev/sec2", "rev/min2", "rev/hr2",
+    "lb", "slugs", "gm", "kg", "lb/sec", "lb/min", "lb/hr", "slugs/sec", "slugs/min", "slugs/hr",
+    "g/sec", "g/min", "g/hr", "kg/sec", "kg/min", "kg/hr", "lbf", "n", "kn",
+    "lbf/ft2", "psi", "pascal", "kpascal", "1/in", "1/ft", "1/m", "g", "ft2/sec", "m2/sec",
+    "lb/ft3", "lb/m3", "g/cm3", "kg/m3",
+}
+_PROP_THRUST_UNITS = {"lb", "n", "kn"}
+_PROP_MASS_FLOW_UNITS = {"lb/sec", "lb/min", "lb/hr", "slugs/sec", "slugs/min", "slugs/hr", "g/sec", "g/min", "g/hr", "kg/sec", "kg/min", "kg/hr"}
 
 
 def _location(path: str, line: int, column: int = 1) -> SourceLocation:
@@ -155,6 +230,8 @@ def _assignments(text: str, path: str, line: int, diagnostics: list[Diagnostic])
 
 
 def _define_control(text: str, path: str, line: int, diagnostics: list[Diagnostic]) -> DefineControlStatement | None:
+    if _IF_BRACE_RE.fullmatch(text) or _ELSE_BRACE_RE.fullmatch(text) or _CLOSE_BRACE_RE.fullmatch(text):
+        return None
     if match := _ELSE_IF_RE.fullmatch(text):
         nested = _define_control(match.group("statement"), path, line, diagnostics)
         return DefineControlStatement(kind="else", nested=nested, location=_location(path, line))
@@ -167,6 +244,16 @@ def _define_control(text: str, path: str, line: int, diagnostics: list[Diagnosti
             assignments = [] if nested else _assignments(body_text, path, line, diagnostics)
         except ExpressionSyntaxError as exc:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-define-control", message=str(exc), location=_location(path, line)))
+            return None
+        if nested is None and not assignments:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="invalid-define-control",
+                    message=f"Expected an assignment after *define if condition: {text.strip()!r}.",
+                    location=_location(path, line),
+                )
+            )
             return None
         return DefineControlStatement(kind="if", condition=condition, assignment=assignments[0] if assignments else None, nested=nested, location=_location(path, line))
     if match := _ELSE_ASSIGN_RE.fullmatch(text):
@@ -429,6 +516,16 @@ def _validate_initial_assignments(block: InitialBlock, path: str, line: int, dia
 
 def _parse_fly(header: str, path: str, line: int, diagnostics: list[Diagnostic]) -> dict[str, Any]:
     if match := _FLY_ASSIGN_RE.fullmatch(header):
+        variable = match.group("variable").casefold()
+        if variable not in _FLY_VARIABLES and not any(variable == base + "dt" for base in _FLY_VARIABLES):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-fly-variable",
+                    message=f"Guidance variable {match.group('variable')!r} is not documented by the TAOS manual.",
+                    location=_location(path, line),
+                )
+            )
         try:
             value = _parse_value(match.group("value"))
         except ExpressionSyntaxError as exc:
@@ -437,6 +534,25 @@ def _parse_fly(header: str, path: str, line: int, diagnostics: list[Diagnostic])
         ####
         return {"guidance_variable": match.group("variable"), "value": value}
     if match := _FLY_VRS_RE.fullmatch(header):
+        variable = match.group("variable").casefold()
+        if variable not in _FLY_DIRECT_VARIABLES:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-fly-variable",
+                    message=f"Guidance-table variable {match.group('variable')!r} is not a documented direct guidance variable.",
+                    location=_location(path, line),
+                )
+            )
+        if match.group("interpolation") and match.group("interpolation").casefold() not in {"interp-1", "interp-2", "interp-3"}:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-fly-interpolation",
+                    message="Guidance-table interpolation must be interp-1, interp-2, or interp-3.",
+                    location=_location(path, line),
+                )
+            )
         return {
             "guidance_variable": match.group("variable"),
             "reference": match.group("reference"),
@@ -562,6 +678,40 @@ def _validate_optimize_controls(assignments: list[Assignment], path: str, line: 
             )
         )
     ####
+
+
+def _validate_propulsion_units(block: PropulsionBlock, diagnostics: list[Diagnostic]) -> None:
+    for assignment in block.assignments:
+        name = assignment.name.casefold()
+        allowed = _PROP_THRUST_UNITS if name == "thr_units" else _PROP_MASS_FLOW_UNITS if name == "mdt_units" else None
+        if allowed is None:
+            continue
+        ####
+        value = _unit_expression_name(assignment.value)
+        if not isinstance(value, str) or value.casefold() not in allowed:
+            category = "thrust" if name == "thr_units" else "mass-flow"
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-propulsion-unit",
+                    message=f"{assignment.name} must name a documented {category} unit.",
+                    location=assignment.location,
+                )
+            )
+    ####
+####
+
+
+def _unit_expression_name(value: Any) -> str | None:
+    if isinstance(value, NameExpression):
+        return value.name
+    if isinstance(value, BinaryExpression) and value.operator == "/":
+        left = _unit_expression_name(value.left)
+        right = _unit_expression_name(value.right)
+        if left is not None and right is not None:
+            return f"{left}/{right}"
+    ####
+    return None
 ####
 
 
@@ -602,9 +752,19 @@ def _parse_units_format_settings(text: str, path: str, line: int, diagnostics: l
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-units-format-setting", message="Expected variable and unit in *units/fmt setting.", location=_location(path, line)))
             break
         ####
-        variable, unit = tokens[index], tokens[index + 1]
+        variable, second = tokens[index], tokens[index + 1]
         index += 2
-        format_value = None
+        unit = None if _FORMAT_RE.fullmatch(second) else second
+        format_value = second if unit is None else None
+        if unit is not None and unit.casefold() not in _DOCUMENTED_UNITS:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-unit",
+                    message=f"Unit {unit!r} is not listed in the TAOS manual's allowable units.",
+                    location=_location(path, line),
+                )
+            )
         if index < len(tokens) and _FORMAT_RE.fullmatch(tokens[index]):
             format_value = tokens[index]
             index += 1
@@ -705,7 +865,25 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
     elif keyword == "title":
         extra["title"] = header.strip()
     elif keyword == "define":
-        extra["variable"] = words[0] if words else None
+        integral_match = re.fullmatch(r"\s*integral\s+([A-Za-z_][A-Za-z0-9_.-]*)\s*=\s*(.+?)\s*", header, re.IGNORECASE)
+        if integral_match:
+            extra["integral"] = True
+            extra["variable"] = integral_match.group(1)
+            try:
+                extra["initial_value"] = _parse_value(integral_match.group(2))
+            except ExpressionSyntaxError as exc:
+                diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-define-integral-value", message=str(exc), location=_location(path, line)))
+            if scope != "trajectory":
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="invalid-integral-define-scope",
+                        message="Integral *define blocks are documented only inside a trajectory.",
+                        location=_location(path, line),
+                    )
+                )
+        else:
+            extra["variable"] = words[0] if words else None
     elif keyword in {"egs", "file"}:
         if keyword == "egs" and words and words[0].casefold() == "summary":
             extra["summary"] = True
@@ -764,7 +942,7 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-rail-header", message="Expected '*rail launch ...' or '*rail sled ...'.", location=_location(path, line)))
         else:
             assignment_header = header[len(words[0]) :].strip()
-            _validate_named_header("rail", assignment_header, common["assignments"], None, path, line, diagnostics)
+            _validate_named_header("rail", assignment_header, common["assignments"], _RAIL_PARAMETER_NAMES, path, line, diagnostics)
     elif keyword == "initial":
         coordinate = words[0].casefold() if words and words[0].casefold() in {"geodetic", "geocentric", "ecfc", "ecic"} else None
         copied = re.fullmatch(r"\s*from\s+segment\s+(\d+)\s*,?\s*trajectory\s+(\d+)\s*", header, re.IGNORECASE)
@@ -777,7 +955,7 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
             extra["mode"] = "from"
             extra["source_trajectory"] = int(legacy_copied.group(1))
             extra["source_segment"] = int(legacy_copied.group(2))
-        elif words and coordinate is None:
+        elif words and coordinate is None and not re.match(r"[A-Za-z_][A-Za-z0-9_.-]*\s*(?:=|<|>)", header):
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-initial-header", message="Expected a coordinate system or 'from segment N, trajectory M'.", location=_location(path, line)))
         else:
             extra["mode"] = coordinate
@@ -789,8 +967,12 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
         _validate_named_header(keyword, header, common["assignments"], {"iip_beta", "iip_alt"}, path, line, diagnostics)
     elif keyword == "tangent":
         _validate_named_header(keyword, header, common["assignments"], {"latgd", "long", "alt", "azm"}, path, line, diagnostics)
-    elif keyword in {"aero", "constants", "cg", "integ", "prop", "reset", "increment"}:
+    elif keyword in {"aero", "constants", "cg", "prop"}:
         _validate_named_header(keyword, header, common["assignments"], None, path, line, diagnostics)
+    elif keyword == "integ":
+        _validate_named_header(keyword, header, common["assignments"], _INTEGRATION_PARAMETER_NAMES, path, line, diagnostics)
+    elif keyword in {"reset", "increment"}:
+        _validate_named_header(keyword, header, common["assignments"], _RESET_INCREMENT_VARIABLE_NAMES, path, line, diagnostics)
     elif keyword == "limits":
         extra["limits"] = _parse_limits(header, path, line, diagnostics)
     elif keyword == "units/fmt":
@@ -862,6 +1044,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
     problem_closed = False
     pending_define = ""
     pending_define_line = 0
+    define_brace_stack: list[tuple[DefineControlStatement, bool]] = []
     pending_optimize = ""
     pending_optimize_line = 0
     pending_search = ""
@@ -870,6 +1053,40 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
 
     def recover(raw_line: str, code: str, line_number: int) -> None:
         document.recovered_records.append(RecoveredRecord(text=raw_line.strip(), code=code, location=_location(path, line_number)))
+    ####
+
+    def flush_unclosed_define_braces(line_number: int) -> None:
+        if not define_brace_stack:
+            return
+        ####
+        document.diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="unclosed-define-brace",
+                message=f"*define ended with {len(define_brace_stack)} unclosed braced control block(s).",
+                location=_location(path, line_number),
+            )
+        )
+        recover("{", "unclosed-define-brace", line_number)
+        define_brace_stack.clear()
+    ####
+
+    def flush_pending_define(line_number: int) -> None:
+        nonlocal pending_define, pending_define_line
+        if not pending_define:
+            return
+        ####
+        document.diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="incomplete-define-statement",
+                message="*define input ended before a semicolon terminated the statement; source text was preserved.",
+                location=_location(path, pending_define_line or line_number),
+            )
+        )
+        recover(pending_define, "incomplete-define-statement", pending_define_line or line_number)
+        pending_define = ""
+        pending_define_line = 0
     ####
 
     def flush_pending_optimize() -> None:
@@ -908,6 +1125,10 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
         ####
         problem_match = _PROBLEM_RE.match(line)
         if problem_match:
+            if isinstance(current_block, DefineBlock):
+                flush_pending_define(number)
+                flush_unclosed_define_braces(number)
+            ####
             current_problem = Problem(name=problem_match.group("name").strip(), location=_location(path, number))
             document.problems.append(current_problem)
             current_trajectory = None
@@ -915,10 +1136,15 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
             current_block = None
             problem_closed = False
             pending_define = ""
+            define_brace_stack.clear()
             continue
         ####
         block_match = _BLOCK_RE.match(line)
         if block_match:
+            if isinstance(current_block, DefineBlock):
+                flush_pending_define(number)
+                flush_unclosed_define_braces(number)
+            ####
             flush_pending_optimize()
             flush_pending_search()
             keyword = block_match.group("keyword").lower()
@@ -938,6 +1164,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 current_trajectory = None
                 current_segment = None
                 pending_define = ""
+                define_brace_stack.clear()
                 continue
             ####
             if current_problem is None:
@@ -1008,7 +1235,8 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 ####
             current_block = block
             pending_define = ""
-            pending_define_line = number
+            pending_define_line = 0
+            define_brace_stack.clear()
             if isinstance(block, SearchBlock) and block.objective is not None and block.objective.operator is None:
                 search_header = re.fullmatch(r"\s*\d+\s+vary\s+.+?\s+until\s+(.+)\s*", block.header, re.IGNORECASE)
                 if search_header:
@@ -1052,7 +1280,61 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
         if current_block is not None:
             current_block.statements.append(RawStatement(text=line.strip(), location=_location(path, number)))
             if isinstance(current_block, DefineBlock):
-                pending_define = f"{pending_define} {line.strip()}".strip()
+                stripped = line.strip()
+                if match := _IF_BRACE_RE.fullmatch(stripped):
+                    try:
+                        condition = parse_expression(match.group("condition").strip())
+                    except ExpressionSyntaxError as exc:
+                        document.diagnostics.append(
+                            Diagnostic(
+                                severity=Severity.ERROR,
+                                code="invalid-define-control",
+                                message=str(exc),
+                                location=_location(path, number),
+                            )
+                        )
+                        recover(line, "invalid-define-control", number)
+                    else:
+                        control = DefineControlStatement(kind="if", condition=condition, location=_location(path, number))
+                        current_block.typed_statements.append(control)
+                        current_block.control_statements.append(control)
+                        define_brace_stack.append((control, False))
+                    pending_define = ""
+                    continue
+                if _ELSE_BRACE_RE.fullmatch(stripped):
+                    if not define_brace_stack:
+                        document.diagnostics.append(
+                            Diagnostic(
+                                severity=Severity.ERROR,
+                                code="unmatched-define-brace",
+                                message="'*define else' has no open braced if statement.",
+                                location=_location(path, number),
+                            )
+                        )
+                        recover(line, "unmatched-define-brace", number)
+                    else:
+                        control, _ = define_brace_stack[-1]
+                        define_brace_stack[-1] = (control, True)
+                    pending_define = ""
+                    continue
+                if _CLOSE_BRACE_RE.fullmatch(stripped):
+                    if not define_brace_stack:
+                        document.diagnostics.append(
+                            Diagnostic(
+                                severity=Severity.ERROR,
+                                code="unmatched-define-brace",
+                                message="'*define' contains a closing brace without an open control block.",
+                                location=_location(path, number),
+                            )
+                        )
+                        recover(line, "unmatched-define-brace", number)
+                    else:
+                        define_brace_stack.pop()
+                    pending_define = ""
+                    continue
+                if not pending_define:
+                    pending_define_line = number
+                pending_define = f"{pending_define} {stripped}".strip()
                 if ";" in pending_define:
                     statements = pending_define.split(";")
                     pending_define = statements.pop()
@@ -1060,11 +1342,26 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                         typed = _define_statement(statement_text, path, pending_define_line or number, document.diagnostics)
                         if typed is None:
                             continue
-                        current_block.typed_statements.append(typed)
-                        if isinstance(typed, DefineControlStatement):
-                            current_block.control_statements.append(typed)
+                        if define_brace_stack:
+                            control, in_else = define_brace_stack[-1]
+                            if isinstance(typed, DefineAssignmentStatement):
+                                (control.else_body if in_else else control.body).append(typed.assignment)
+                            else:
+                                document.diagnostics.append(
+                                    Diagnostic(
+                                        severity=Severity.ERROR,
+                                        code="unsupported-nested-define-control",
+                                        message="Nested *define controls inside braces are not yet represented.",
+                                        location=_location(path, pending_define_line or number),
+                                    )
+                                )
+                                recover(statement_text, "unsupported-nested-define-control", pending_define_line or number)
                         else:
-                            current_block.assignments.append(typed.assignment)
+                            current_block.typed_statements.append(typed)
+                            if isinstance(typed, DefineControlStatement):
+                                current_block.control_statements.append(typed)
+                            else:
+                                current_block.assignments.append(typed.assignment)
             elif isinstance(current_block, OptimizeBlock):
                 stripped = line.strip()
                 if pending_optimize and not stripped.startswith("="):
@@ -1169,6 +1466,40 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     _validate_wind(current_block.assignments, path, number, document.diagnostics)
                     if len(document.diagnostics) > before:
                         recover(line, document.diagnostics[-1].code, number)
+            elif isinstance(current_block, FlyBlock):
+                if current_block.reference is None:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="invalid-fly-body",
+                            message="Only a '*fly variable vrs state-variable' form may contain continuation rows.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "invalid-fly-body", number)
+                else:
+                    fields = _free_fields(line.strip())
+                    if len(fields) != 2:
+                        document.diagnostics.append(
+                            Diagnostic(
+                                severity=Severity.ERROR,
+                                code="invalid-fly-data",
+                                message="A guidance-table row requires exactly an independent value and a guidance value.",
+                                location=_location(path, number),
+                            )
+                        )
+                        recover(line, "invalid-fly-data", number)
+                    else:
+                        try:
+                            independent = _parse_value(fields[0])
+                            value = _parse_value(fields[1])
+                        except ExpressionSyntaxError as exc:
+                            document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-fly-data", message=str(exc), location=_location(path, number)))
+                            recover(line, "invalid-fly-data", number)
+                        else:
+                            current_block.points.append(FlyPoint(independent=independent, value=value, location=_location(path, number)))
+            elif isinstance(current_block, TitleBlock):
+                current_block.title += "\n" + line.strip()
             elif isinstance(current_block, SummarizeBlock):
                 before = len(document.diagnostics)
                 operation = _parse_summary_operation(line.strip(), path, number, document.diagnostics)
@@ -1192,6 +1523,16 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 if isinstance(current_block, InitialBlock) and not assignments:
                     document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-initial-assignment", message="Expected an assignment in an *initial block.", location=_location(path, number)))
                     recover(line, "invalid-initial-assignment", number)
+                elif not assignments:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="invalid-block-body",
+                            message=f"Line is not a documented body assignment for '*{current_block.keyword}'.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "invalid-block-body", number)
                 current_block.assignments.extend(assignments)
         elif current_problem is not None and current_problem.blocks and isinstance(current_problem.blocks[-1], TitleBlock):
             current_problem.blocks[-1].title += "\n" + line.strip()
@@ -1200,10 +1541,29 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
             recover(line, "orphan-line", number)
         ####
     ####
+    flush_pending_define(len(lines) or 1)
     flush_pending_optimize()
     flush_pending_search()
     for problem in document.problems:
         for block in problem.blocks + [child for trajectory in problem.trajectories for child in trajectory.blocks] + [child for trajectory in problem.trajectories for segment in trajectory.segments for child in segment.blocks]:
+            if isinstance(block, AeroBlock):
+                coefficient_names = {assignment.name.casefold() for assignment in block.assignments}
+                present_sets = [coefficient_set & coefficient_names for coefficient_set in _AERO_COEFFICIENT_SETS if coefficient_set & coefficient_names]
+                if len(present_sets) > 1:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="inconsistent-aero-coefficients",
+                            message="An *aero block cannot mix coefficient sets CA/CN, CL/CD/CS, and CX/CY/CZ.",
+                            location=block.location,
+                        )
+                    )
+                    recover(block.header or "*aero", "inconsistent-aero-coefficients", block.location.line)
+            if isinstance(block, PropulsionBlock):
+                before = len(document.diagnostics)
+                _validate_propulsion_units(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover(block.header or "*prop", diagnostic.code, diagnostic.location.line)
             if isinstance(block, WindBlock) and block.coordinate_system is not None and len(block.assignments) != 3:
                 document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-wind-components", message="A '*wind' block requires exactly windd plus either windv/windh or winde/windn.", location=block.location))
                 recover(block.header or "*wind", "invalid-wind-components", block.location.line)
