@@ -1,26 +1,84 @@
+from __future__ import annotations
+
 import pytest
 
-from taoryx.equations import Equation, EquationRegistry
+from taoryx.equations import Equation, EquationRegistry, load_equation_registry, registry
 
 
-def test_registry_returns_registered_equation() -> None:
+def test_default_registry_loads_canonical_equation_catalog() -> None:
+    assert len(registry) == 326
+
+    first = registry.get("1-1")
+    assert first.latex_label == "eq:force-equation"
+    assert first.section == "Trajectory Simulation"
+    assert first.source_manual_page == "1-2"
+    assert registry.get_by_label("eq:force-equation") is first
+
+    last = registry.get("4-8")
+    assert last.latex_label == "eq:optimization-central-difference"
+    assert last.is_implemented is False
+####
+
+
+def test_registry_rejects_duplicate_identifier_and_label() -> None:
     registry = EquationRegistry()
-    equation = Equation("EQ-001", "gravity_force", "F = m * g")
+    first = Equation(
+        identifier="1-1",
+        latex_label="eq:force-equation",
+        section="Trajectory Simulation",
+        source_manual_page="1-2",
+        source_pdf_page=19,
+        source_pdf_sha256="sha",
+        reconstructed_page="1-1",
+        reconstructed_section="Trajectory Simulation",
+        tex_file="manual/chapters/01_introduction.tex",
+        tex_line_start=38,
+        tex_line_end=44,
+        tex_label_line=43,
+        latex_snippet_sha256="snippet",
+        transcription_status="visually_verified",
+        verification_scope="test",
+        validation_suite="tests/unit/test_equations.py",
+        code_implementation_status="not yet mapped to an executable mathematics implementation",
+        notes="",
+    )
+    second = Equation(
+        identifier="1-2",
+        latex_label="eq:force-equation",
+        section="Trajectory Simulation",
+        source_manual_page="1-2",
+        source_pdf_page=19,
+        source_pdf_sha256="sha",
+        reconstructed_page="1-2",
+        reconstructed_section="Trajectory Simulation",
+        tex_file="manual/chapters/01_introduction.tex",
+        tex_line_start=58,
+        tex_line_end=61,
+        tex_label_line=60,
+        latex_snippet_sha256="snippet2",
+        transcription_status="visually_verified",
+        verification_scope="test",
+        validation_suite="tests/unit/test_equations.py",
+        code_implementation_status="not yet mapped to an executable mathematics implementation",
+        notes="",
+    )
 
-    registry.register(equation)
-
-    assert registry.get("EQ-001") == equation
-
-
-def test_registry_rejects_duplicate_identifier() -> None:
-    registry = EquationRegistry()
-    equation = Equation("EQ-001", "gravity_force", "F = m * g")
-    registry.register(equation)
+    registry.register(first)
 
     with pytest.raises(ValueError, match="already registered"):
-        registry.register(equation)
+        registry.register(first)
+
+    with pytest.raises(ValueError, match="label already registered"):
+        registry.register(second)
+####
 
 
-def test_registry_reports_unknown_identifier() -> None:
-    with pytest.raises(KeyError, match="unknown equation"):
-        EquationRegistry().get("EQ-999")
+def test_load_equation_registry_round_trips_provenance_csv() -> None:
+    loaded = load_equation_registry()
+
+    assert loaded.get("2-1").tex_file == "manual/chapters/chapter02/01_02_ecic.tex"
+    assert loaded.get("2-1").tex_label_line == 14
+    assert loaded.get_by_label("eq:earth-rotation-rate").identifier == "2-2"
+    assert loaded.all()[0].identifier == "1-1"
+    assert loaded.all()[-1].identifier == "4-8"
+####

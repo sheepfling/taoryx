@@ -1,5 +1,5 @@
 """Equation metadata and registry primitives."""
 
-from .registry import Equation, EquationRegistry, registry
+from .registry import Equation, EquationRegistry, load_equation_registry, registry
 
-__all__ = ["Equation", "EquationRegistry", "registry"]
+__all__ = ["Equation", "EquationRegistry", "load_equation_registry", "registry"]

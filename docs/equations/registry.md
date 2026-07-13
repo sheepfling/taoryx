@@ -1,13 +1,17 @@
 # Equation registry
 
-The registry gives every equation a stable identifier so prose, examples, and
-tests can refer to the same definition. Identifiers should not be reused when
-an equation is corrected; record a replacement or superseding entry instead.
+The canonical equation catalog is loaded from
+`metadata/equations_provenance.csv` and exposed by
+`src/taoryx/equations/registry.py`.
 
-| ID | Name | Status | Notes |
+The registry is keyed by the TAOS equation number, such as `1-1` or `4-8`,
+and also exposes lookups by LaTeX label.
+
+| ID | LaTeX label | Section | Notes |
 | --- | --- | --- | --- |
-| EQ-001 | `gravity_force` | scaffold | Illustrative registry entry; confirm against the manual before treating as historical TAOS content. |
+| `1-1` | `eq:force-equation` | Trajectory Simulation | Force and moment equations share one source number |
+| `1-2` | `eq:point-mass-force` | Trajectory Simulation | Point-mass force equation |
 
-The machine-readable starting point is
-`src/taoryx/equations/registry.py`. The Markdown table is intentionally kept
-human-readable for manual editing and review.
+The source of truth remains the provenance CSV rather than this summary
+document. Keep this page brief and update it only when the registry contract
+changes.
