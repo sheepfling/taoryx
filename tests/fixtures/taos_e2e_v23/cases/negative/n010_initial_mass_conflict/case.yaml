@@ -1,0 +1,20 @@
+id: n010_initial_mass_conflict
+title: Both mass and weight supplied
+kind: negative
+path: cases/negative/n010_initial_mass_conflict
+problem_file: input/n010_initial_mass_conflict.prb
+table_files: []
+features:
+- initial_semantics
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- conflicting-initial-mass
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

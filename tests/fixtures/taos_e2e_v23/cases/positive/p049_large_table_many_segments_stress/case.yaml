@@ -1,0 +1,33 @@
+id: p049_large_table_many_segments_stress
+title: Large table and twenty-segment execution stress case
+kind: positive
+path: cases/positive/p049_large_table_many_segments_stress
+problem_file: input/p049_large_table_many_segments_stress.prb
+table_files:
+- input/stress-thrust.tbl
+features:
+- large_table
+- many_segments
+- stress
+- segment_transition_chain
+grammar_productions:
+- simple_table
+- segment_block
+- when_goto_chain
+runtime_tier: stress
+static_expectation: pass
+expected_diagnostics: []
+output_file: stress.dat
+oracles:
+- type: output_exists
+- type: no_nan
+- type: final_approx
+  column: time
+  value: 10
+  atol: 1.0e-08
+notes:
+- This case is excluded from the default runtime tier and enabled with TAOS_RUN_STRESS=1.
+source_sections:
+- '3.4'
+- '4.2'
+- 4.2.12

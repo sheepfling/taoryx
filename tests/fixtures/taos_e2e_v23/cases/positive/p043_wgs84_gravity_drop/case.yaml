@@ -1,0 +1,34 @@
+id: p043_wgs84_gravity_drop
+title: WGS-84 gravity-only vertical drop
+kind: positive
+path: cases/positive/p043_wgs84_gravity_drop
+problem_file: input/p043_wgs84_gravity_drop.prb
+table_files: []
+features:
+- wgs84_earth
+- gravity_model
+- ballistic_drop
+grammar_productions:
+- earth_block
+- initial_geodetic
+- fixed_step_integration
+runtime_tier: invariant
+static_expectation: pass
+expected_diagnostics: []
+output_file: gravity.dat
+oracles:
+- type: series_monotonic
+  column: alt
+  direction: decreasing
+  strict: false
+  atol: 1.0e-08
+- type: series_monotonic
+  column: vel
+  direction: increasing
+  strict: false
+  atol: 1.0e-08
+- type: no_nan
+notes: []
+source_sections:
+- 2.3.4
+- 4.4.3

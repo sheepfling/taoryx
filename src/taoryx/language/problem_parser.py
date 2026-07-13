@@ -206,6 +206,37 @@ _DOCUMENTED_UNITS = {
     "lbf/ft2", "psi", "pascal", "kpascal", "1/in", "1/ft", "1/m", "g", "ft2/sec", "m2/sec",
     "lb/ft3", "lb/m3", "g/cm3", "kg/m3",
 }
+_UNIT_DIMENSIONS = {
+    **{unit: "length" for unit in {"ft", "in", "mi", "nm", "m", "km"}},
+    **{unit: "time" for unit in {"sec", "min", "hr"}},
+    **{unit: "angle" for unit in {"deg", "rad"}},
+    **{unit: "speed" for unit in {"ft/sec", "ft/min", "ft/hr", "in/sec", "in/min", "in/hr", "mi/sec", "mi/min", "mi/hr", "knots", "m/sec", "m/min", "m/hr", "km/sec", "km/min", "km/hr"}},
+    **{unit: "angular_rate" for unit in {"deg/sec", "deg/min", "deg/hr", "rad/sec", "rad/min", "rad/hr", "rev/sec", "rpm"}},
+    **{unit: "acceleration" for unit in {"ft/sec2", "ft/min2", "ft/hr2", "in/sec2", "in/min2", "in/hr2", "mi/sec2", "mi/min2", "mi/hr2", "nm/hr2", "m/sec2", "m/min2", "m/hr2", "km/sec2", "km/min2", "km/hr2", "deg/sec2", "deg/min2", "deg/hr2", "rad/sec2", "rad/min2", "rad/hr2", "rev/sec2", "rev/min2", "rev/hr2", "g"}},
+    **{unit: "mass" for unit in {"lb", "slugs", "gm", "kg"}},
+    **{unit: "mass_rate" for unit in {"lb/sec", "lb/min", "lb/hr", "slugs/sec", "slugs/min", "slugs/hr", "g/sec", "g/min", "g/hr", "kg/sec", "kg/min", "kg/hr"}},
+    **{unit: "force" for unit in {"lbf", "n", "kn"}},
+    **{unit: "pressure" for unit in {"lbf/ft2", "psi", "pascal", "kpascal"}},
+    **{unit: "inverse_length" for unit in {"1/in", "1/ft", "1/m"}},
+    **{unit: "kinematic_viscosity" for unit in {"ft2/sec", "m2/sec"}},
+    **{unit: "density" for unit in {"lb/ft3", "lb/m3", "g/cm3", "kg/m3"}},
+}
+_VARIABLE_DIMENSIONS = {
+    **{name: "length" for name in {"alt", "range", "rcm", "grmark", "grseg", "plength", "plmark", "plseg"}},
+    **{name: "speed" for name in {"altdt", "latgcdt", "latgddt", "longdt", "rcmdt", "vel", "vair", "vgr"}},
+    **{name: "time" for name in {"time", "tmark", "tseg"}},
+    **{name: "angle" for name in {"alpha", "alphat", "bankgc", "bankgd", "beta", "betae", "gamgc", "gamgd", "latgc", "latgd", "long", "phi", "pitchgc", "pitchgd", "pitchi", "psigc", "psigd", "rollgc", "rollgd", "rolli", "yawgc", "yawgd", "yawi", "ep1", "ep2"}},
+    **{name: "angular_rate" for name in {"longdt"}},
+    **{name: "acceleration" for name in {"nx", "ny", "nz"}},
+    **{name: "mass" for name in {"mass", "wt"}},
+    **{name: "force" for name in {"thrust"}},
+    **{name: "pressure" for name in {"pres", "dynprs"}},
+    **{name: "density" for name in {"rho"}},
+    **{name: "temperature" for name in {"temp"}},
+    **{name: "kinematic_viscosity" for name in {"nu"}},
+    **{name: "dimensionless" for name in {"mach", "cg", "power", "segment"}},
+    "sref": "area",
+}
 _PROP_THRUST_UNITS = {"lb", "n", "kn"}
 _PROP_MASS_FLOW_UNITS = {"lb/sec", "lb/min", "lb/hr", "slugs/sec", "slugs/min", "slugs/hr", "g/sec", "g/min", "g/hr", "kg/sec", "kg/min", "kg/hr"}
 _DOCUMENTED_DEFINE_FUNCTIONS = {
@@ -1393,6 +1424,26 @@ def _validate_fly_blocks(trajectory: Trajectory, diagnostics: list[Diagnostic]) 
             ####
         ####
     ####
+
+
+def _validate_inertial_blocks(trajectory: Trajectory, diagnostics: list[Diagnostic]) -> None:
+    """Reject alignments that require attitude before the first segment runs."""
+    if not trajectory.segments:
+        return
+    ####
+    first_segment = trajectory.segments[0]
+    for block in first_segment.blocks:
+        if not isinstance(block, InertialBlock) or block.alignment not in {"body", "wind", "velocity"}:
+            continue
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="inertial-body-first-segment",
+                message=f"Inertial platform alignment {block.alignment!r} requires a preceding segment because attitude is unavailable at the start of the first segment.",
+                location=block.location,
+            )
+        )
+    ####
 ####
 
 
@@ -1780,6 +1831,24 @@ def _parse_units_format_settings(text: str, path: str, line: int, diagnostics: l
                     location=_location(path, line),
                 )
             )
+        elif unit is not None:
+            variable_dimension = _VARIABLE_DIMENSIONS.get(variable.casefold().split("[", 1)[0])
+            unit_dimension = _UNIT_DIMENSIONS.get(unit.casefold())
+            compatible = (
+                variable_dimension is None
+                or unit_dimension is None
+                or variable_dimension == unit_dimension
+                or variable_dimension == "area" and unit_dimension == "length"
+            )
+            if not compatible:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="incompatible-unit-dimension",
+                        message=f"Unit {unit!r} is dimensionally incompatible with variable {variable!r}; source text was preserved.",
+                        location=_location(path, line),
+                    )
+                )
         if index < len(tokens) and _FORMAT_RE.fullmatch(tokens[index]):
             format_value = tokens[index]
             index += 1
@@ -1797,11 +1866,14 @@ def _parse_atmos_body(block: AtmosBlock, text: str, path: str, line: int, diagno
     expected = ["alt", "temp", "pres", "rho", "sndspd", "visc"] if block.model == "user" else ["alt", "pres", "rho"]
     tokens = text.split()
     if not block.columns:
-        if len(tokens) != len(expected) or {token.casefold() for token in tokens} != set(expected):
-            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-atmos-columns", message=f"Expected atmosphere columns {expected!r}.", location=_location(path, line)))
+        normalized = [token.casefold() for token in tokens]
+        valid_user_nu = block.model == "user" and len(normalized) == 6 and set(normalized) == {"alt", "temp", "pres", "rho", "sndspd", "nu"}
+        if len(tokens) != len(expected) or (set(normalized) != set(expected) and not valid_user_nu):
+            expected_text = "alt, temp, pres, rho, sndspd, and either visc or nu" if block.model == "user" else ", ".join(expected)
+            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-atmos-columns", message=f"Expected atmosphere columns {expected_text}.", location=_location(path, line)))
             return
         ####
-        block.columns.extend(token.casefold() for token in tokens)
+        block.columns.extend(normalized)
         return
     ####
     if len(tokens) != len(block.columns):
@@ -2618,7 +2690,14 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 # acquiring false segment semantics.
                 scope = "trajectory" if current_trajectory is not None else "problem"
                 current_segment = None
-            elif keyword in {"file", "print"}:
+            elif keyword == "file":
+                # File blocks are trajectory-scoped before the first segment
+                # and problem-scoped outside trajectory definitions. A
+                # completed segment must not leak stale segment semantics.
+                scope = "trajectory" if current_trajectory is not None and current_segment is None else "problem"
+            elif keyword == "print":
+                # Preserve the established segment-level compatibility form
+                # for *print; *file has a distinct manual-level boundary.
                 scope = "segment" if current_segment is not None else "trajectory" if current_trajectory is not None else "problem"
             elif keyword in SUPPORTED_SEGMENT_BLOCKS:
                 # Segment blocks never change meaning based on the current
@@ -2630,6 +2709,31 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 scope = "trajectory" if keyword == "inertial" and current_trajectory is not None and current_segment is None else "segment"
             else:
                 scope = "segment" if current_segment is not None else "trajectory" if current_trajectory is not None else "problem"
+            ####
+            dual_scope_after_segment = (
+                current_trajectory is not None
+                and current_trajectory.segments
+                and (
+                    keyword == "file"
+                    or keyword in {"define", "print"} and current_segment is None
+                )
+            )
+            if dual_scope_after_segment:
+                # These keywords are documented at both problem and trajectory
+                # scope. Once a trajectory has segments, the line alone does
+                # not establish whether the author is continuing that
+                # trajectory or beginning the problem-level tail. Retain the
+                # established trajectory attachment, but make the ambiguity
+                # explicit instead of silently claiming problem-level meaning.
+                document.diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.WARNING,
+                        code="ambiguous-dual-scope-block",
+                        message=f"*{keyword} is documented at both problem and trajectory scope after a completed segment; trajectory scope was retained without inferring problem-level semantics.",
+                        location=_location(path, number),
+                    )
+                )
+                recover(line, "ambiguous-dual-scope-block", number)
             ####
             diagnostic_start = len(document.diagnostics)
             block = _make_block(keyword, header, scope, path, number, document.diagnostics, source_text=original)
@@ -3147,6 +3251,10 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 recover_diagnostic(diagnostic)
             before = len(document.diagnostics)
             _validate_fly_blocks(trajectory, document.diagnostics)
+            for diagnostic in document.diagnostics[before:]:
+                recover_diagnostic(diagnostic)
+            before = len(document.diagnostics)
+            _validate_inertial_blocks(trajectory, document.diagnostics)
             for diagnostic in document.diagnostics[before:]:
                 recover_diagnostic(diagnostic)
             for segment in trajectory.segments:

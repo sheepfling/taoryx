@@ -1,0 +1,39 @@
+id: p016_rail_stage_branch
+title: Rail launch, staging, reset, increment, and branch trajectory
+kind: positive
+path: cases/positive/p016_rail_stage_branch
+problem_file: input/p016_rail_stage_branch.prb
+table_files:
+- input/rail-thrust.tbl
+- input/zero-mdot.tbl
+features:
+- rail_launch
+- multiple_segments
+- reset
+- increment
+- trajectory_inheritance
+- branching
+grammar_productions:
+- rail_block
+- reset_block
+- increment_block
+- initial_from_trajectory
+runtime_tier: smoke
+static_expectation: pass
+expected_diagnostics: []
+output_file: parent.dat
+oracles:
+- type: series_monotonic
+  column: plength
+  direction: increasing
+  strict: false
+- type: contains_step_change
+  column: wt
+  minimum_jump: 400
+- type: no_nan
+notes: []
+source_sections:
+- 4.2.5
+- 4.2.10
+- 4.2.11
+- 4.3.5

@@ -1,0 +1,29 @@
+id: p032_manual_ballistic_reentry
+title: Manual Section 4.5.1 ballistic reentry
+kind: positive
+path: cases/positive/p032_manual_ballistic_reentry
+problem_file: input/p032_manual_ballistic_reentry.prb
+table_files:
+- input/manual.tbl
+features:
+- manual_fixture
+- survey
+- summarize
+- egs
+- reentry
+grammar_productions:
+- manual_complete_problem
+- manual_complete_table
+runtime_tier: historical
+static_expectation: pass
+expected_diagnostics: []
+output_file: null
+oracles:
+- type: clean_exit
+- type: output_exists
+  path: ex1.dbf
+notes:
+- Historical numeric outputs should be compared to the transcribed manual printout
+  only when TAOS 96.0 or a verified compatible implementation is available.
+source_sections:
+- 4.5.1

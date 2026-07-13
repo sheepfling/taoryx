@@ -1,0 +1,41 @@
+id: p009_piecewise_full_thrust
+title: Full-table if/goto piecewise thrust profile
+kind: positive
+path: cases/positive/p009_piecewise_full_thrust
+problem_file: input/p009_piecewise_full_thrust.prb
+table_files:
+- input/piecewise.tbl
+features:
+- full_table
+- if_then
+- goto
+- labels
+- piecewise_forcing
+grammar_productions:
+- full_table
+- if_operation
+- goto_operation
+- labelled_operation
+runtime_tier: analytic
+static_expectation: pass
+expected_diagnostics: []
+output_file: piecewise.dat
+oracles:
+- type: value_before_after
+  column: thrust
+  split_time: 2.0
+  before: 100.0
+  after: 20.0
+  atol: 1.0e-08
+- type: final_approx
+  column: xecfcdt
+  value: 26.0
+  atol: 0.05
+- type: final_approx
+  column: xecfc
+  value: 20925735.3255
+  atol: 0.1
+notes: []
+source_sections:
+- 3.5.6
+- 3.5.7

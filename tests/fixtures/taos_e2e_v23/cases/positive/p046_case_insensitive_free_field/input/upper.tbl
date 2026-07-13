@@ -1,0 +1,4 @@
+(UPPER-THRUST)
+TABLE THRUST(TIME) NO-EXTRAP UNITS=LB
+TIME=0.0E0, 1.0E0
+THRUST=1.0E1, 1.0E1 # comments are case-insensitive too

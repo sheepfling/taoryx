@@ -1,0 +1,13 @@
+(operation-gauntlet)
+*title Full-table operation gauntlet
+*atmos none
+*earth spherical gm=0 omega=0
+*trajectory 1 vehicle start on 1
+  *initial ecfc x=20925646.3255 y=0 z=0 xdt=0 ydt=0 zdt=0 time=0 mass=1
+  *define gauntlet
+    gauntlet = table(operation-gauntlet);
+  *file operations.dat time gauntlet
+  *segment 1 evaluate
+    *integ dtprnt=0.5 dt=0.1
+    *when time=1 stop
+*end

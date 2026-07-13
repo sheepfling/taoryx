@@ -35,6 +35,12 @@ RELATIONSHIP_RE = re.compile(
     r"(?:[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?|[A-Za-z_][A-Za-z0-9_./-]*)\s*$"
 )
 
+
+def _is_operation_label(value: str) -> bool:
+    """Return whether a label uses the manual's name-or-value vocabulary."""
+    return IDENTIFIER_RE.fullmatch(value) is not None or NUMBER_RE.fullmatch(value) is not None
+####
+
 TABLE_OPERATIONS_WITH_OPERAND = {
     "add",
     "sub",
@@ -106,8 +112,8 @@ MASS_FLOW_UNITS = {
 }
 LIMITED_STATE_VARIABLES = {
     "alt", "altdt", "dynprs", "gamgc", "gamgd", "latgc", "latgd",
-    "long", "mass", "pres", "psigc", "rcm", "rcmdt", "rho", "temp",
-    "time", "vel", "wt",
+    "long", "mass", "nu", "pres", "psigc", "rcm", "rcmdt", "rho", "sndspd", "temp",
+    "time", "tmark", "vel", "wt",
 }
 LIMITED_STATE_TABLE_TYPES = {"cg", "windv", "windh", "winde", "windn", "windd"}
 PROBLEM_LEVEL_BLOCKS = {
@@ -559,7 +565,7 @@ class _TableTokenParser:
         label: str | None = None
         if self.peek() is not None and self.peek().value == ":":
             label = token.value
-            if IDENTIFIER_RE.fullmatch(label) is None:
+            if not _is_operation_label(label):
                 self.issues.append(
                     ParseIssue(
                         severity="error",
@@ -709,8 +715,13 @@ class _TableTokenParser:
                 )
             ####
             if operator in {"csto", "goto"}:
-                pattern = r"[A-Za-z_][A-Za-z0-9_.-]*" if operator == "csto" else IDENTIFIER_RE.pattern
-                if not isinstance(operand, str) or re.fullmatch(pattern, operand) is None:
+                valid_operand = (
+                    isinstance(operand, str)
+                    and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.-]*", operand) is not None
+                    if operator == "csto"
+                    else isinstance(operand, str) and _is_operation_label(operand)
+                )
+                if not valid_operand:
                     self.issues.append(
                         ParseIssue(
                             severity="error",
@@ -1091,12 +1102,13 @@ def _semantic_validate_table(table: TaosTable, issues: list[ParseIssue]) -> None
     ####
     if table.table_type.casefold() in LIMITED_STATE_TABLE_TYPES:
         for variable in table.independent_variables:
-            if variable.casefold() not in LIMITED_STATE_VARIABLES:
+            normalized = variable.casefold()
+            if normalized in DOCUMENTED_STATE_VARIABLES and normalized not in LIMITED_STATE_VARIABLES:
                 issues.append(
                     ParseIssue(
                         severity="error",
                         code="unsupported-limited-state-variable",
-                        message=f"Table type {table.table_type!r} may not depend on state variable {variable!r}; the manual permits only limited-state variables.",
+                        message=f"Table type {table.table_type!r} may not depend on non-limited state variable {variable!r}; user-defined variables remain permitted.",
                         line=table.header_line,
                     )
                 )

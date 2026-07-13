@@ -1,0 +1,20 @@
+id: n009_inconsistent_fly_set
+title: Inconsistent body-attitude angle set
+kind: negative
+path: cases/negative/n009_inconsistent_fly_set
+problem_file: input/n009_inconsistent_fly_set.prb
+table_files: []
+features:
+- guidance_semantics
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- inconsistent-guidance-angle-set
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

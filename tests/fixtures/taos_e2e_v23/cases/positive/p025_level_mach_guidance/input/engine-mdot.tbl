@@ -1,0 +1,4 @@
+(engine-mdot)
+table mdot(power) no-extrap units=lb/sec
+power=0,1
+mdot=0,0

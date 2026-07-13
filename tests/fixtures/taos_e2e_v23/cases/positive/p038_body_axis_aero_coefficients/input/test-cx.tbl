@@ -1,0 +1,4 @@
+(test-cx)
+table cx(mach) no-extrap sref=20
+mach=0,2
+cx=-0.10,-0.10

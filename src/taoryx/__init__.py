@@ -14,14 +14,18 @@ from . import (
     geodesy,
     gravity,
     guidance,
+    iip,
     language,
     linalg,
     numeric,
+    optimization,
+    outputs,
     radar,
+    runtime,
     searches,
     simulation,
     state_rates,
     tables,
 )
 
-__all__ = ["__version__", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "language", "linalg", "numeric", "radar", "searches", "simulation", "state_rates", "tables"]
+__all__ = ["__version__", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "numeric", "optimization", "outputs", "radar", "runtime", "searches", "simulation", "state_rates", "tables"]

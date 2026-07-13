@@ -1,0 +1,4 @@
+(target-mdot)
+table mdot(tmark) units=lb/sec
+tmark=0,100
+mdot=5,5

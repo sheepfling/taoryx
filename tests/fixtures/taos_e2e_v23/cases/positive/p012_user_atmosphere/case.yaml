@@ -1,0 +1,33 @@
+id: p012_user_atmosphere
+title: Complete user-defined atmosphere at a tabulated altitude
+kind: positive
+path: cases/positive/p012_user_atmosphere
+problem_file: input/p012_user_atmosphere.prb
+table_files: []
+features:
+- user_atmosphere
+- atmosphere_columns
+- exact_grid_point
+grammar_productions:
+- atmos_user_block
+- atmosphere_data_rows
+runtime_tier: analytic
+static_expectation: pass
+expected_diagnostics: []
+output_file: atmosphere.dat
+oracles:
+- type: series_constant_value
+  column: temp
+  value: 483.03
+  atol: 0.01
+- type: series_constant_value
+  column: pres
+  value: 1455.3
+  atol: 0.01
+- type: series_constant_value
+  column: rho
+  value: 0.001756
+  atol: 1.0e-08
+notes: []
+source_sections:
+- 4.4.1

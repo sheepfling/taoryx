@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from taoryx.integration import RK4Integrator, rk4_step
+from taoryx.integration import RK4Integrator, rk4_step, rkf45_step
 from taoryx.simulation import SimulationState
 
 
@@ -52,3 +52,15 @@ def test_rk4_integrator_adapter_and_validation() -> None:
     with pytest.raises(ValueError, match="finite"):
         rk4_step(lambda _: (float("nan"),), state, 0.1)
 ####
+
+
+def test_rkf45_step_adapts_and_preserves_state_frame() -> None:
+    state = SimulationState(0.0, (1.0,), "iip")
+    result = rkf45_step(lambda current: (current.values[0],), state, 0.5, 1e-10, 1e-8)
+
+    assert result.state.frame == "iip"
+    assert result.state.time == pytest.approx(result.accepted_step)
+    assert 0.0 < result.accepted_step <= 0.5
+    assert result.state.values[0] == pytest.approx(math.exp(result.accepted_step), rel=1e-6)
+    assert result.error_norm <= 1.0
+    assert result.next_step > 0.0

@@ -1,0 +1,4 @@
+(thrust1)
+table thrust(tmark) units=lb
+tmark=0,100
+thrust=10000,10000

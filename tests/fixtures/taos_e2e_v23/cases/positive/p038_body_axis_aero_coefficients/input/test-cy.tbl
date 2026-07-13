@@ -1,0 +1,4 @@
+(test-cy)
+table cy(mach) no-extrap sref=20
+mach=0,2
+cy=0.01,0.01

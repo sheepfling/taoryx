@@ -1,0 +1,20 @@
+id: n005_missing_table_reference
+title: Unresolved table reference
+kind: negative
+path: cases/negative/n005_missing_table_reference
+problem_file: input/n005_missing_table_reference.prb
+table_files: []
+features:
+- missing_table
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- external-table-reference
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

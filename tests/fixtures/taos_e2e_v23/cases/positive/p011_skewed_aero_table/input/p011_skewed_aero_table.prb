@@ -1,0 +1,15 @@
+(skewed-aero)
+*title Skewed aerodynamic interpolation
+*atmos standard
+*earth wgs-84 omega=0
+*trajectory 1 glider start on 1
+  *initial geodetic long=0 lat=0 psi=90 time=0 alt=50000 vel=3000 gama=-5 wt=1000
+  *file skewed.dat time alt mach alphat ca
+  *segment 1 glide
+    *integ dtprnt=0.5 dt=0.05
+    *aero ca=(skew-ca)
+    *fly alphat=5
+    *fly phi=0
+    *fly bankgd=0
+    *when time=20 stop
+*end

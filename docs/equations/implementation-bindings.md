@@ -33,6 +33,13 @@ that every downstream algorithm depending on it is complete.
 | `TAOS-ALG-DYN-001` | 2-97 through 2-106 | `taoryx.dynamics.earth_fixed_derivatives` | `tests/unit/test_dynamics.py` |
 | `TAOS-ALG-DYN-002` | 2-107 through 2-113 | `taoryx.dynamics.assemble_state_derivatives` | `tests/unit/test_dynamics.py` |
 | `TAOS-ALG-DYN-003` | 2-114 through 2-118 | `taoryx.integration.rk4_step`, `taoryx.integration.RK4Integrator` | `tests/unit/test_integration.py` |
+| `TAOS-ALG-IIP-002` | Fehlberg adaptive Runge-Kutta | `taoryx.integration.rkf45_step` | `tests/unit/test_integration.py` |
+| `TAOS-ALG-IIP-003` | IIP propagation to impact altitude | `taoryx.iip.initial_impact_point` | `tests/unit/test_iip.py` |
+| `TAOS-ALG-OPT-001` | Chapter 4 optimization problem definition | `taoryx.optimization.build_optimization_problem` | `tests/unit/test_optimization.py` |
+| `TAOS-ALG-OPT-002` | Chapter 4 Han-Powell/RQP optimization loop | `taoryx.optimization.han_powell_rqp` | `tests/unit/test_optimization.py` |
+| `TAOS-ALG-OPT-003` | Chapter 4 path-constraint violation integral | `taoryx.optimization.path_violation_integral` | `tests/unit/test_optimization.py` |
+| `TAOS-ALG-OPT-005` | Chapter 4 control-history redistribution | `taoryx.optimization.redistribute_control_history` | `tests/unit/test_optimization.py` |
+| `TAOS-ALG-OUT-001` | Chapter 4 demand-driven output evaluation | `taoryx.outputs.build_output_evaluation_plan` | `tests/unit/test_outputs.py` |
 | `TAOS-ALG-DYN-004` | 2-119 through 2-122 | `taoryx.dynamics.apply_rail_constraint` | `tests/unit/test_dynamics.py` |
 | `TAOS-ALG-DYN-005` | 2-123 through 2-128 | `taoryx.state_rates.longitude_and_geocentric_latitude_rates` | `tests/unit/test_state_rates.py` |
 | `TAOS-ALG-DYN-006` | 2-129 through 2-137 | `taoryx.state_rates.geodetic_latitude_and_altitude_rates` | `tests/unit/test_state_rates.py` |
@@ -60,18 +67,53 @@ that every downstream algorithm depending on it is complete.
 | `TAOS-ALG-GRAV-004` | 2-212 through 2-217 | `taoryx.gravity.gravity_acceleration_full` | `tests/unit/test_gravity.py` |
 | `TAOS-ALG-GRAV-005` | 2-218 through 2-220 | `taoryx.gravity.gravity_acceleration_j2` | `tests/unit/test_gravity.py` |
 | `TAOS-ALG-GEO-001` | 2-221 through 2-231 | `taoryx.geodesy.sodano_inverse` | `tests/unit/test_geodesy.py` |
+| `TAOS-ALG-GEO-002` | 2-232 through 2-234 | `taoryx.geodesy.downrange_crossrange` | `tests/unit/test_geodesy.py` |
 | `TAOS-ALG-GEO-003` | 2-235 through 2-245 | `taoryx.geodesy.sodano_direct` | `tests/unit/test_geodesy.py` |
 | `TAOS-ALG-SEARCH-003` | 2-301 through 2-305 | `taoryx.searches.parabolic_root` | `tests/unit/test_searches.py` |
 | `TAOS-ALG-SEARCH-005` | 2-308 | `taoryx.searches.parabolic_minimize` | `tests/unit/test_searches.py` |
 | `TAOS-ALG-AERO-001` | 2-271 through 2-272 | `taoryx.aerodynamics.aerodynamic_performance_metrics` | `tests/unit/test_aerodynamics.py` |
 | `TAOS-ALG-AERO-002` | section 2.4.5 | `taoryx.aerodynamics.maximum_lift_to_drag` | `tests/unit/test_aerodynamics.py` |
 | `TAOS-ALG-GUID-003` | 2-273 through 2-276 | `taoryx.guidance.parabolic_guidance_correction` | `tests/unit/test_guidance.py` |
+| `TAOS-ALG-GUID-001` | Chapter 2.5.1 control-set classification | `taoryx.guidance.classify_guidance_rules` | `tests/unit/test_guidance.py` |
+| `TAOS-ALG-GUID-002` | Chapter 2.5.1 guidance loop | `taoryx.guidance.solve_guidance` | `tests/unit/test_guidance.py` |
 | `TAOS-ALG-GUID-004` | 2-277 through 2-280 | `taoryx.guidance.cubic_guidance_correction` | `tests/unit/test_guidance.py` |
 | `TAOS-ALG-GUID-005` | 2-281 through 2-283 | `taoryx.numeric.newton_system` | `tests/unit/test_guidance.py` |
 | `TAOS-ALG-GUID-006` | 2-284 through 2-286 | `taoryx.guidance.predictive_intercept` | `tests/unit/test_guidance.py` |
 | `TAOS-ALG-GUID-007` | 2-287 through 2-297 | `taoryx.guidance.proportional_navigation` | `tests/unit/test_radar.py` |
+| `TAOS-ALG-GUID-008` | Chapter 2.5.3 range-insensitive axis | `taoryx.guidance.range_insensitive_axis` | `tests/unit/test_guidance.py` |
+| `TAOS-ALG-GUID-009` | Chapter 2.5.4 flight-path limits | `taoryx.guidance.apply_flight_path_limits` | `tests/unit/test_guidance.py` |
+| `TAOS-ALG-IIP-001` | 2-266 through 2-270 | `taoryx.iip.iip_derivatives` | `tests/unit/test_iip.py` |
+| `TAOS-ALG-IIP-002` | Fehlberg adaptive Runge-Kutta | `taoryx.integration.rkf45_step` | `tests/unit/test_integration.py` |
 | `TAOS-ALG-RADAR-001` | 2-246 through 2-261 | `taoryx.radar.radar_observations` | `tests/unit/test_radar.py` |
 | `TAOS-ALG-REL-001` | 2-262 through 2-265 | `taoryx.radar.relative_vehicle_observations` | `tests/unit/test_radar.py` |
+| `TAOS-ALG-TABLE-003` | Chapter 3 full-table operations | `taoryx.tables.evaluate_full_table` | `tests/unit/test_tables.py` |
+| `TAOS-ALG-TABLE-004` | Chapter 3 operand resolution | `taoryx.tables.resolve_table_operand` | `tests/unit/test_tables.py` |
+| `TAOS-ALG-TABLE-005` | Chapter 3 math-operation dispatch | `taoryx.tables.apply_table_operation` | `tests/unit/test_tables.py` |
+| `TAOS-ALG-TABLE-006` | Chapter 3 storage variables | `taoryx.tables.TableEvaluationContext` | `tests/unit/test_tables.py` |
+| `TAOS-ALG-TABLE-007` | Chapter 3 if/goto control flow | `taoryx.tables.evaluate_full_table` | `tests/unit/test_tables.py` |
+| `TAOS-ALG-TABLE-008` | Chapter 3 skewed tabulated data | `taoryx.tables.interpolate_skewed` | `tests/unit/test_tables.py` |
+| `TAOS-ALG-TABLE-009` | Chapter 3 multiple-table accumulation | `taoryx.tables.accumulate_table_values` | `tests/unit/test_tables.py` |
+| `TAOS-ALG-EXEC-001` | Chapter 2.6 trajectory calculation workflow | `taoryx.runtime.engine.run_taos` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-EXEC-002` | Chapter 2.6 runtime vehicle graph | `taoryx.runtime.runtime_model.build_runtime_problem` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-EXEC-003` | Chapter 2.6 synchronized trajectory execution | `taoryx.runtime.engine.compute_trajectories` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-EXEC-004` | Chapter 2.6 time-step boundary selection | `taoryx.runtime.engine.get_next_time_step` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-EXEC-005` | Chapter 2.6 active vehicle integration | `taoryx.runtime.engine.integrate_active_vehicles` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-EXEC-006` | Chapter 2.6 segment final-condition refinement | `taoryx.runtime.events.refine_segment_final_condition` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-EXEC-007` | Chapter 2.6 search/restart dispatch | `taoryx.runtime.engine.dispatch_search_and_restart` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-EXEC-008` | Chapter 2.6 dependent vehicle activation | `taoryx.runtime.engine.activate_dependent_vehicles` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-EXEC-009` | Chapter 2.6.1 derivative pipeline | `taoryx.runtime.engine.compute_derivatives` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-001` | Chapter 4 *Define Data Blocks | `taoryx.runtime.expressions.evaluate_definition_program` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-002` | Chapter 4 trajectory integral definitions | `taoryx.runtime.expressions.integral_variable_derivatives` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-003` | Chapter 4 *Initial Data Block | `taoryx.runtime.initialization.resolve_initial_state` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-004` | Chapter 4 *Increment and *Reset blocks | `taoryx.runtime.events.apply_state_discontinuity` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-005` | Chapter 4 *When Data Block | `taoryx.runtime.events.evaluate_when_conditions` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-006` | Chapter 4 *Fly Data Block | `taoryx.runtime.guidance.resolve_fly_rules` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-007` | Chapter 4 *Survey Data Block | `taoryx.runtime.surveys.generate_survey_cases` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-008` | Chapter 4 *Search Data Block | `taoryx.runtime.search_runtime.execute_search_loops` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-009` | Chapter 4 *Summarize Data Block | `taoryx.runtime.summaries.evaluate_summary` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-010` | Chapter 4 *Optimize Data Block | `taoryx.runtime.optimization_runtime.resolve_optimize_block` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-011` | Chapter 4 *Units/Fmt Data Block | `taoryx.runtime.units.resolve_units_and_formats` | `tests/unit/test_runtime_algorithms.py` |
+| `TAOS-ALG-PRB-012` | Chapter 4 *Wind Data Block | `taoryx.runtime.environment_runtime.evaluate_wind` | `tests/unit/test_runtime_algorithms.py` |
 
 The implementation follows the manual's passive transformation convention:
 the basis vectors express the child frame in parent-frame components. Forward

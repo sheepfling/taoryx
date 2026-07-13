@@ -1,0 +1,30 @@
+id: p022_optimize_linear_boundary
+title: Optimization of a linear objective to a parameter bound
+kind: positive
+path: cases/positive/p022_optimize_linear_boundary
+problem_file: input/p022_optimize_linear_boundary.prb
+table_files: []
+features:
+- optimization
+- optimization_parameter
+- bound_solution
+grammar_productions:
+- optimize_block
+- optimization_parameter
+runtime_tier: analytic
+static_expectation: pass
+expected_diagnostics: []
+output_file: optimize.dat
+oracles:
+- type: final_approx
+  column: xecfcdt
+  value: 100
+  atol: 0.1
+- type: final_approx
+  column: xecfc
+  value: 20926646.3255
+  atol: 1.0
+notes: []
+source_sections:
+- 2.6.3
+- 4.4.6

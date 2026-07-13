@@ -1,0 +1,44 @@
+id: p002_constant_thrust_table
+title: Analytic constant thrust with fixed mass
+kind: positive
+path: cases/positive/p002_constant_thrust_table
+problem_file: input/p002_constant_thrust_table.prb
+table_files:
+- input/constant-thrust.tbl
+- input/zero-mdot.tbl
+features:
+- simple_tables
+- thrust_table
+- mass_flow_table
+- inertial_platform_ecfc
+- direct_euler_guidance
+grammar_productions:
+- simple_table
+- prop_block
+- inertial_block
+- fly_block
+runtime_tier: analytic
+static_expectation: pass
+expected_diagnostics: []
+output_file: thrust.dat
+oracles:
+- type: final_approx
+  column: xecfcdt
+  value: 10.0
+  atol: 0.002
+- type: final_approx
+  column: xecfc
+  value: 20925671.3255
+  atol: 0.002
+- type: series_constant
+  column: mass
+  atol: 1.0e-08
+- type: series_constant_value
+  column: thrust
+  value: 20.0
+  atol: 1.0e-08
+notes: []
+source_sections:
+- '3.4'
+- 4.2.6
+- 4.2.9

@@ -1,0 +1,4 @@
+(test-cl)
+table cl(alpha) no-extrap sref=20
+alpha=-10,0,5,10
+cl=-0.4,0,0.3,0.6

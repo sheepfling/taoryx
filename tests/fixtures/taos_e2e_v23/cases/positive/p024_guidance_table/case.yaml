@@ -1,0 +1,34 @@
+id: p024_guidance_table
+title: Time-based guidance table with circular interpolation
+kind: positive
+path: cases/positive/p024_guidance_table
+problem_file: input/p024_guidance_table.prb
+table_files: []
+features:
+- guidance_table
+- interp_2
+- integration_step_alignment
+- direct_attitude
+grammar_productions:
+- fly_table
+- guidance_interpolation
+runtime_tier: invariant
+static_expectation: pass
+expected_diagnostics: []
+output_file: guidance.dat
+oracles:
+- type: contains_times
+  values:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  atol: 1.0e-08
+- type: final_approx
+  column: alpha
+  value: 0
+  atol: 1.0e-05
+notes: []
+source_sections:
+- 4.2.4

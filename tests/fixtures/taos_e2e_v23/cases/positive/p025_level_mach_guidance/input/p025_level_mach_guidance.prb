@@ -1,0 +1,17 @@
+(level-mach)
+*title Indirect guidance
+*atmos standard
+*earth spherical omega=0
+*trajectory 1 aircraft start on 1
+  *initial geodetic alt=10000 long=0 lat=0 vel=600 gama=0 psi=90 time=0 mass=100
+  *file level.dat time alt mach gamgd alpha power cl cd thrust
+  *segment 1 cruise
+    *integ dtprnt=0.5 dt=0.05 dtguid=5
+    *aero cl=(aircraft-cl) cd=(aircraft-cd)
+    *prop thrust=(engine-thrust) mdot=(engine-mdot)
+    *fly gamgd=0
+    *fly mach=0.55
+    *fly bankgd=0
+    *fly betae=0
+    *when time=20 stop
+*end

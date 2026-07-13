@@ -1,0 +1,42 @@
+id: p038_body_axis_aero_coefficients
+title: Complete body-axis aerodynamic coefficient set
+kind: positive
+path: cases/positive/p038_body_axis_aero_coefficients
+problem_file: input/p038_body_axis_aero_coefficients.prb
+table_files:
+- input/test-cx.tbl
+- input/test-cy.tbl
+- input/test-cz.tbl
+features:
+- cx_table
+- cy_table
+- cz_table
+- body_axis_aerodynamics
+- complete_aero_set
+grammar_productions:
+- aero_block
+- simple_table
+- cx_cy_cz_coefficient_set
+runtime_tier: invariant
+static_expectation: pass
+expected_diagnostics: []
+output_file: body-axis.dat
+oracles:
+- type: series_constant_value
+  column: cx
+  value: -0.1
+  atol: 1.0e-08
+- type: series_constant_value
+  column: cy
+  value: 0.01
+  atol: 1.0e-08
+- type: series_constant_value
+  column: cz
+  value: -0.02
+  atol: 1.0e-08
+- type: no_nan
+notes: []
+source_sections:
+- 2.3.2
+- '3.1'
+- 4.2.1

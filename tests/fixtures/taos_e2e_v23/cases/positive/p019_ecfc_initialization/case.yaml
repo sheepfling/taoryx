@@ -1,0 +1,21 @@
+id: p019_ecfc_initialization
+title: Equivalent ECFC initialization representation
+kind: positive
+path: cases/positive/p019_ecfc_initialization
+problem_file: input/p019_ecfc_initialization.prb
+table_files: []
+features:
+- ecfc_initial_conditions
+- coordinate_transform
+grammar_productions:
+- initial_ecfc
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: coordinate.dat
+oracles:
+- type: no_nan
+notes: []
+source_sections:
+- 2.1.1
+- 4.3.5

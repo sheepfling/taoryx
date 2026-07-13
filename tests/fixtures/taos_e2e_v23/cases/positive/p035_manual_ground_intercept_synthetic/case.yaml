@@ -1,0 +1,28 @@
+id: p035_manual_ground_intercept_synthetic
+title: Manual ground-launched-intercept.prb with synthetic stand-in tables
+kind: positive
+path: cases/positive/p035_manual_ground_intercept_synthetic
+problem_file: input/p035_manual_ground_intercept_synthetic.prb
+table_files:
+- input/synthetic-001.tbl
+- input/synthetic-002.tbl
+- input/synthetic-003.tbl
+- input/synthetic-004.tbl
+features:
+- manual_fixture
+- synthetic_dependency_closure
+- full_application_smoke
+grammar_productions:
+- manual_complete_problem
+- synthetic_tables
+runtime_tier: exploratory
+static_expectation: pass
+expected_diagnostics: []
+output_file: null
+oracles:
+- type: clean_exit
+notes:
+- "The tables are deliberately generic stand-ins. This case tests grammar, linking,\
+  \ execution plumbing, and failure reporting\u2014not the historical trajectory."
+source_sections:
+- 4.5.4

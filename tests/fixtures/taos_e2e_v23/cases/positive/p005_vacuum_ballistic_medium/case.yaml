@@ -1,0 +1,35 @@
+id: p005_vacuum_ballistic_medium
+title: Vacuum spherical-earth ballistic trajectory dt=1.0
+kind: positive
+path: cases/positive/p005_vacuum_ballistic_medium
+problem_file: input/p005_vacuum_ballistic_medium.prb
+table_files: []
+features:
+- spherical_gravity
+- vacuum_atmosphere
+- runge_kutta
+- geodetic_initial_conditions
+grammar_productions:
+- earth_block
+- initial_geodetic
+- integ_block
+- when_block
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: ballistic.dat
+oracles:
+- type: series_monotonic
+  column: alt
+  direction: increasing
+  strict: true
+- type: series_monotonic
+  column: vel
+  direction: decreasing
+  strict: true
+- type: no_nan
+notes: []
+source_sections:
+- 2.2.1
+- 2.3.4
+- 4.4.3

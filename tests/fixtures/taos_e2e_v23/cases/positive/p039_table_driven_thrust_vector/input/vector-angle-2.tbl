@@ -1,0 +1,4 @@
+(vector-angle-2)
+table tvec2(time) no-extrap
+time=0,3
+tvec2=90,90

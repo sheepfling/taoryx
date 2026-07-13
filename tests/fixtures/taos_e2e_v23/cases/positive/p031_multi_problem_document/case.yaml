@@ -1,0 +1,22 @@
+id: p031_multi_problem_document
+title: Two independent problems in one problem file
+kind: positive
+path: cases/positive/p031_multi_problem_document
+problem_file: input/p031_multi_problem_document.prb
+table_files: []
+features:
+- multiple_problems_per_file
+- sequential_execution
+grammar_productions:
+- problem_document
+- problem_repetition
+runtime_tier: smoke
+static_expectation: pass
+expected_diagnostics: []
+output_file: one.dat
+oracles:
+- type: output_exists
+notes: []
+source_sections:
+- '4.0'
+- '4.1'

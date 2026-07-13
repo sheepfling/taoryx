@@ -1,0 +1,10 @@
+(bad-fly)
+*atmos none
+*earth spherical gm=0 omega=0
+*trajectory 1 v start on 1
+*initial ecfc x=20925646.3255 y=0 z=0 xdt=0 ydt=0 zdt=0 mass=1
+*segment 1 s
+*fly alphat=5
+*fly betae=5
+*when time=1 stop
+*end

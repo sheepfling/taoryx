@@ -1,0 +1,27 @@
+id: p011_skewed_aero_table
+title: Three-dimensional skewed aerodynamic table
+kind: positive
+path: cases/positive/p011_skewed_aero_table
+problem_file: input/p011_skewed_aero_table.prb
+table_files:
+- input/skewed.tbl
+features:
+- skewed_table
+- three_dimensional_interpolation
+- direct_angle_guidance
+grammar_productions:
+- full_table
+- skewed_assignment_groups
+- fly_block
+runtime_tier: smoke
+static_expectation: pass
+expected_diagnostics: []
+output_file: skewed.dat
+oracles:
+- type: no_nan
+- type: series_nonnegative
+  column: ca
+notes: []
+source_sections:
+- 3.5.8
+- 4.2.1

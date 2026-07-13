@@ -1,0 +1,25 @@
+id: p008_reentry_full_table_equivalent
+title: Ballistic reentry with equivalent full aerodynamic table
+kind: positive
+path: cases/positive/p008_reentry_full_table_equivalent
+problem_file: input/p008_reentry_full_table_equivalent.prb
+table_files:
+- input/aero.tbl
+features:
+- full_table
+- tabulated_operation
+- simple_full_equivalence
+grammar_productions:
+- full_table
+- table_operation
+- tabulated_data
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: reentry.dat
+oracles:
+- type: no_nan
+notes: []
+source_sections:
+- '3.5'
+- 3.5.3

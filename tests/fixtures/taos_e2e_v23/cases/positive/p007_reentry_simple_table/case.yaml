@@ -1,0 +1,36 @@
+id: p007_reentry_simple_table
+title: Ballistic reentry with simple aerodynamic table
+kind: positive
+path: cases/positive/p007_reentry_simple_table
+problem_file: input/p007_reentry_simple_table.prb
+table_files:
+- input/aero.tbl
+features:
+- standard_atmosphere
+- wgs84
+- simple_aero_table
+- impact_final_condition
+grammar_productions:
+- simple_table
+- aero_block
+- when_block
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: reentry.dat
+oracles:
+- type: series_monotonic
+  column: alt
+  direction: decreasing
+  strict: true
+- type: series_nonnegative
+  column: dynprs
+- type: max_interior
+  column: dynprs
+- type: no_nan
+notes: []
+source_sections:
+- 2.3.1
+- 2.3.2
+- '3.4'
+- 4.5.1

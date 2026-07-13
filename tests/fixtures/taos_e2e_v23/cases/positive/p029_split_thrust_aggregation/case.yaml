@@ -1,0 +1,24 @@
+id: p029_split_thrust_aggregation
+title: Two prop blocks whose forces sum
+kind: positive
+path: cases/positive/p029_split_thrust_aggregation
+problem_file: input/p029_split_thrust_aggregation.prb
+table_files: []
+features:
+- multiple_prop_blocks
+- force_aggregation
+grammar_productions:
+- prop_block_repetition
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: thrust.dat
+oracles:
+- type: series_constant_value
+  column: thrust
+  value: 20
+  atol: 1.0e-08
+notes: []
+source_sections:
+- 2.3.3
+- 4.2.9

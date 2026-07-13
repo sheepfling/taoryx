@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from taoryx.catalog import load_catalog
+from tools.check_algorithm_bindings import audit
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = ROOT / "tests" / "fixtures" / "algorithm_catalog" / "minimal.json"
@@ -35,4 +36,11 @@ def test_catalog_rejects_dependency_cycles(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="cycle"):
         load_catalog(path)
+####
+
+
+def test_restored_catalog_has_a_binding_for_every_algorithm() -> None:
+    count, missing = audit()
+    assert count == 107
+    assert missing == ()
 ####

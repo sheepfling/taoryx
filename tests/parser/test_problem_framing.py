@@ -832,6 +832,19 @@ def test_title_continuation_lines_remain_title_text() -> None:
     document = parse_problem_text("(demo)\n*title first line\n  second line\n*end\n")
 
     assert document.problems[0].blocks[0].title == "first line\nsecond line"
+
+
+def test_title_preserves_delimiters_but_treats_hash_as_comment_boundary() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*title Flight, Case: A # editorial note\n"
+        "*end\n"
+    )
+
+    title = document.problems[0].blocks[0]
+    assert title.title == "Flight, Case: A"
+    assert title.source_text == "*title Flight, Case: A # editorial note"
+    assert not document.diagnostics
     assert not document.diagnostics
 
 
@@ -1491,6 +1504,23 @@ def test_optimize_constraint_recovery_continues_to_controls() -> None:
     assert any(record.code == "invalid-optimize-constraint" for record in document.recovered_records)
 
 
+def test_multiline_optimize_constraint_is_typed_once() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*optimize a for vel=max on segment 1, trajectory 1\n"
+        "constrain vel on segment 1\n"
+        "  = 3000\n"
+        "*end\n"
+    )
+
+    block = document.problems[0].blocks[0]
+    assert not document.diagnostics
+    assert len(block.constraints) == 1
+    assert block.constraints[0].left.text == "vel"
+    assert block.constraints[0].right.text == "3000"
+    ####
+
+
 def test_optimize_header_and_control_diagnostics_preserve_source() -> None:
     document = parse_problem_text(
         "(demo)\n"
@@ -1544,6 +1574,22 @@ def test_inertial_block_rejects_ambiguous_alignment_text() -> None:
 
     assert any(diagnostic.code == "invalid-inertial-header" for diagnostic in document.diagnostics)
     assert any(record.code == "invalid-inertial-header" for record in document.recovered_records)
+
+
+def test_inertial_body_alignment_is_rejected_on_first_segment() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*initial ecfc x=1 y=0 z=0 xdt=0 ydt=0 zdt=0 time=0 mass=1\n"
+        "*segment 1\n"
+        "*inertial body\n"
+        "*when time=1 stop\n"
+        "*end\n"
+    )
+
+    diagnostic = next(item for item in document.diagnostics if item.code == "inertial-body-first-segment")
+    assert diagnostic.location.line == 5
+    assert any(record.code == diagnostic.code and record.location.line == 5 for record in document.recovered_records)
 
 
 def test_survey_block_parses_incremental_and_explicit_values() -> None:
@@ -1701,7 +1747,9 @@ def test_define_after_segment_attaches_at_trajectory_scope() -> None:
     trajectory = document.problems[0].trajectories[0]
     assert [block.keyword for block in trajectory.blocks if block.keyword != "initial"] == ["define"]
     assert [block.keyword for block in trajectory.segments[0].blocks] == ["when"]
-    assert not document.diagnostics
+    assert [item.code for item in document.diagnostics] == ["ambiguous-dual-scope-block"]
+    assert document.diagnostics[0].severity.value == "warning"
+    assert document.recovered_records[0].code == "ambiguous-dual-scope-block"
 
 
 def test_search_block_parses_objective_continuation_and_controls() -> None:
@@ -1886,7 +1934,7 @@ def test_fixed_vocabulary_continuation_rejects_unknown_parameters_with_recovery(
         "(demo)\n"
         "*trajectory 1 vehicle start on 1\n"
         "*dwn/crs\n"
-        "  latgd=10 mystery=4\n"
+        "  latgd=10 mystery=4 another=9\n"
         "*segment 1\n"
         "*inertial geocentric\n"
         "  long=95 mystery=4\n"
@@ -1894,7 +1942,8 @@ def test_fixed_vocabulary_continuation_rejects_unknown_parameters_with_recovery(
     )
 
     unsupported = [diagnostic for diagnostic in document.diagnostics if diagnostic.code == "unsupported-block-parameter"]
-    assert len(unsupported) == 2
+    assert len(unsupported) == 3
+    assert len({diagnostic.location.column for diagnostic in unsupported}) == 3
     assert {record.location.line for record in document.recovered_records if record.code == "unsupported-block-parameter"} == {4, 7}
     ####
 
@@ -1970,6 +2019,14 @@ def test_units_format_rejects_units_outside_the_manual_table() -> None:
     assert any(diagnostic.code == "unsupported-unit" for diagnostic in document.diagnostics)
 
 
+def test_units_format_rejects_dimensionally_incompatible_units() -> None:
+    document = parse_problem_text("(demo)\n*units/fmt alt sec\n*end\n")
+
+    diagnostic = next(item for item in document.diagnostics if item.code == "incompatible-unit-dimension")
+    assert diagnostic.location.line == 2
+    assert any(record.code == diagnostic.code for record in document.recovered_records)
+
+
 def test_units_format_rejects_malformed_variable_names_with_recovery() -> None:
     document = parse_problem_text("(demo)\n*units/fmt bad$name km f.2\n*end\n")
 
@@ -1993,6 +2050,20 @@ def test_atmosphere_and_earth_headers_and_user_rows_are_typed() -> None:
     assert atmos.rows[0][0] == 0.0
     assert earth.model == "wgs-84"
     assert earth.assignments[0].name == "omega"
+    assert not document.diagnostics
+
+
+def test_user_atmosphere_accepts_documented_kinematic_viscosity_column() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*atmos user\n"
+        "alt temp pres rho sndspd nu\n"
+        "0 518.67 2116.22 0.0023769 1116.45 0.000157\n"
+        "*end\n"
+    )
+
+    atmos = document.problems[0].blocks[0]
+    assert atmos.columns[-1] == "nu"
     assert not document.diagnostics
 
 

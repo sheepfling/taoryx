@@ -23,15 +23,16 @@ claim of TAOS 96.0 runtime compatibility.
 
 ## Promotion rule
 
-The ignored `INBOX/taos-algorithm-catalog-v1` bundle is reviewed and validated
-as a unit. Once its schema and source relationships are accepted, the canonical
-YAML and generated views can be promoted into tracked `metadata/` paths. Until
-then, implementation code may consume it through an explicit path, but no
-runtime default should depend on an ignored inbox file.
+The reviewed catalog is promoted under `metadata/algorithm_catalog/`. The
+ignored `INBOX/taos-algorithm-catalog-v1` bundle remains an intake copy and is
+not a runtime dependency. `algorithm_status.csv` is generated from the tracked
+JSON catalog and the implementation ledger by
+`tools/generate_algorithm_status.py`.
 
 ## Implementation status
 
 The catalog's `cataloged` status means the work item has provenance, steps, and
-test ideas. It does not mean the target function is implemented. Completion
-requires a real `taoryx` binding, focused tests, provenance links, and the
-repository validation gates.
+test ideas. `algorithm_status.csv` separately records whether a documented
+typed binding exists; `typed_binding` still does not claim full historical
+runtime semantics. Completion of a runtime algorithm requires its lowering,
+execution behavior, focused tests, provenance links, and repository gates.

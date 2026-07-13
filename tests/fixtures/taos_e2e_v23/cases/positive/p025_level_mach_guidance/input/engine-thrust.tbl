@@ -1,0 +1,4 @@
+(engine-thrust)
+table thrust(power) no-extrap units=lb
+power=0,1
+thrust=0,3000

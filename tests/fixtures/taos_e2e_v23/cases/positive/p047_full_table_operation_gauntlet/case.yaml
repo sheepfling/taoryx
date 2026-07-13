@@ -1,0 +1,35 @@
+id: p047_full_table_operation_gauntlet
+title: Full-table accumulator, storage, flow-control, logarithmic, power, and trigonometric
+  operations
+kind: positive
+path: cases/positive/p047_full_table_operation_gauntlet
+problem_file: input/p047_full_table_operation_gauntlet.prb
+table_files:
+- input/operation-gauntlet.tbl
+features:
+- all_table_math_operations
+- full_table_control_flow
+- output_table
+- storage_variable
+grammar_productions:
+- full_table
+- table_operation_sequence
+- if_operation
+- goto_operation
+- output_table_lookup
+runtime_tier: exploratory
+static_expectation: pass
+expected_diagnostics: []
+output_file: operations.dat
+oracles:
+- type: series_constant_value
+  column: gauntlet
+  value: 42
+  atol: 1.0e-08
+- type: no_nan
+notes:
+- This is a deliberate operation-coverage program. Runtime execution is opt-in until
+  every full-table operation is implemented by the target engine.
+source_sections:
+- '3.5'
+- 4.3.1

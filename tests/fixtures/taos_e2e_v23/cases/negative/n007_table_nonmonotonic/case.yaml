@@ -1,0 +1,21 @@
+id: n007_table_nonmonotonic
+title: Nonmonotonic independent variable
+kind: negative
+path: cases/negative/n007_table_nonmonotonic
+problem_file: input/n007_table_nonmonotonic.prb
+table_files:
+- input/bad.tbl
+features:
+- table_nonmonotonic
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- nonmonotonic-independent-values
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

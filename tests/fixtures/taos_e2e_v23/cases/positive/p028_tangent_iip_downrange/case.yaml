@@ -1,0 +1,32 @@
+id: p028_tangent_iip_downrange
+title: Tangent plane, downrange/crossrange, and IIP outputs
+kind: positive
+path: cases/positive/p028_tangent_iip_downrange
+problem_file: input/p028_tangent_iip_downrange.prb
+table_files: []
+features:
+- tangent_plane
+- downrange_crossrange
+- initial_impact_point
+- iip_outputs
+grammar_productions:
+- tangent_block
+- dwn_crs_block
+- iip_block
+runtime_tier: smoke
+static_expectation: pass
+expected_diagnostics: []
+output_file: iip.dat
+oracles:
+- type: series_nonnegative
+  column: iip_rng
+- type: series_positive
+  column: iip_time
+- type: no_nan
+notes: []
+source_sections:
+- 2.4.1
+- 2.4.4
+- 4.3.2
+- 4.3.4
+- 4.3.7

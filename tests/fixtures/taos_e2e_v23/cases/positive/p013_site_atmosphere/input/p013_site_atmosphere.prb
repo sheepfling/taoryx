@@ -1,0 +1,17 @@
+(site-atmos)
+*title Site atmosphere
+*atmos site
+  alt pres rho
+  0 2115.0 0.00223
+  10000 1485.0 0.00166
+  20000 830.0 0.00105
+  30000 627.0 0.00089
+  40000 241.0 0.00058
+*earth spherical gm=0 omega=0
+*trajectory 1 probe start on 1
+  *initial geodetic alt=20000 long=0 lat=0 vel=0 gama=0 psi=0 time=0 mass=1
+  *file atmosphere.dat time alt temp pres rho sndspd nu
+  *segment 1 sample
+    *integ dtprnt=0.5 dt=0.1
+    *when time=1 stop
+*end

@@ -1,0 +1,4 @@
+(test-cz)
+table cz(mach) no-extrap sref=20
+mach=0,2
+cz=-0.02,-0.02

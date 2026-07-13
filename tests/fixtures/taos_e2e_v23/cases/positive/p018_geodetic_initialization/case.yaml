@@ -1,0 +1,21 @@
+id: p018_geodetic_initialization
+title: Geodetic initialization representation
+kind: positive
+path: cases/positive/p018_geodetic_initialization
+problem_file: input/p018_geodetic_initialization.prb
+table_files: []
+features:
+- geodetic_initial_conditions
+- coordinate_transform
+grammar_productions:
+- initial_geodetic
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: coordinate.dat
+oracles:
+- type: no_nan
+notes: []
+source_sections:
+- 2.1.6
+- 4.3.5

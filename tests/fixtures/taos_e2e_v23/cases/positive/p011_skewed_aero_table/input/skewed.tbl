@@ -1,0 +1,17 @@
+(skew-ca)
+table ca sref=10
+start
+add ca-data(alt,mach,alphat)
+alt=0 mach=0 alphat=0,5,10
+ca-data=0.10,0.11,0.14
+alt=0 mach=5 alphat=0,5,10
+ca-data=0.08,0.09,0.12
+alt=50000 mach=2 alphat=0,5,10,15
+ca-data=0.09,0.10,0.13,0.18
+alt=50000 mach=8 alphat=0,5,10
+ca-data=0.06,0.07,0.10
+alt=100000 mach=5 alphat=0,10
+ca-data=0.07,0.11
+alt=100000 mach=15 alphat=0,10
+ca-data=0.05,0.09
+end

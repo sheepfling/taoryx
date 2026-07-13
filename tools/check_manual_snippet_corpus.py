@@ -16,8 +16,17 @@ from taoryx.language.grammar_contracts import (
 )
 from taoryx.language.lexical import lex_text
 from taoryx.language.lossless import parse_lossless_bytes
+from taoryx.language.problem_fragments import parse_optimize_body_fragment, parse_problem_fragment
 from taoryx.language.problem_parser import parse_problem_text
-from taoryx.language.table_parser import parse_table_text
+from taoryx.language.table_parser import (
+    parse_simple_table_body_fragment,
+    parse_skewed_assignment_groups_fragment,
+    parse_table_assignment_fragment,
+    parse_table_body_fragment,
+    parse_table_header_fragment,
+    parse_table_operation_fragment,
+    parse_table_text,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "tests" / "fixtures" / "taos_manual_corpus_v22"
@@ -29,10 +38,12 @@ CORPUS = ROOT / "tests" / "fixtures" / "taos_manual_corpus_v22"
 # a deliberately fragmentary trajectory wrapper without ``*initial``; and
 # ``ch4-080`` is the documented ``*egs summary`` form without its prerequisite
 # survey/summary blocks; ``ch4-017`` and ``ch4-026`` show the documented
-# wildcard guidance examples in a trajectory's first segment. Keep all
+# wildcard guidance examples in a trajectory's first segment; and ``ch4-029``
+# shows body inertial alignment in a synthetic first segment even though the
+# manual says it requires a preceding segment. Keep all
 # exceptions explicit so new parser diagnostics do not silently become
 # accepted corpus behavior.
-EXPECTED_WRAPPER_ERRORS = {"ch3-011": 1, "ch3-022": 1, "ch4-005": 1, "ch4-016": 1, "ch4-017": 3, "ch4-026": 3, "ch4-051": 1, "ch4-080": 2}
+EXPECTED_WRAPPER_ERRORS = {"ch3-011": 1, "ch3-022": 1, "ch4-005": 1, "ch4-016": 1, "ch4-017": 3, "ch4-026": 3, "ch4-029": 1, "ch4-051": 1, "ch4-080": 2}
 ####
 
 
@@ -50,6 +61,36 @@ def _parse(language: str, text: str, path: str) -> Any:
     if language in {"tbl", "tbl_lexical"}:
         return parse_table_text(text, path)
     return parse_problem_text(text, path)
+####
+
+
+def _parse_fragment(entry: dict[str, Any], text: str, path: str) -> Any | None:
+    """Dispatch a manifest fragment through its evidence-declared route."""
+
+    entrypoint = entry.get("recommended_entrypoint")
+    if entrypoint == "tokenize_table":
+        return lex_text(text, source_path=path)
+    if entrypoint == "parse_table_header":
+        return parse_table_header_fragment(text, path)
+    if entrypoint == "parse_table_assignment":
+        return parse_table_assignment_fragment(text, path)
+    if entrypoint == "parse_simple_table_body":
+        return parse_simple_table_body_fragment(text, path)
+    if entrypoint == "parse_full_table_body":
+        return parse_table_body_fragment(text, path)
+    if entrypoint in {"parse_labelled_operation", "parse_table_operation"}:
+        return parse_table_operation_fragment(text, path)
+    if entrypoint == "parse_skewed_assignment_groups":
+        return parse_skewed_assignment_groups_fragment(text, path)
+    if entrypoint == "parse_problem_block":
+        if entry.get("artifact_kind") == "optimize_body_fragment":
+            return parse_optimize_body_fragment(text, path)
+        return parse_problem_fragment(text, scope="problem", path=path)
+    if entrypoint == "parse_trajectory_block":
+        return parse_problem_fragment(text, scope="trajectory", path=path)
+    if entrypoint == "parse_segment_block":
+        return parse_problem_fragment(text, scope="segment", path=path)
+    return None
 ####
 
 
@@ -92,6 +133,7 @@ def main() -> int:
     parser_exceptions = 0
     top_level_errors: list[str] = []
     wrapper_errors = Counter()
+    direct_fragments_checked = 0
     observed_table_types: set[str] = set()
     observed_table_operations: set[str] = set()
     observed_problem_blocks: set[str] = set()
@@ -106,6 +148,21 @@ def main() -> int:
         raw_bytes = raw_path.read_bytes()
         if parse_lossless_bytes(raw_bytes, source_path=str(raw_path)).render_bytes() != raw_bytes:
             raise SystemExit(f"Lossless round-trip failed: {entry['id']}")
+        ####
+        if entry["parse_mode"] == "fragment":
+            try:
+                fragment = _parse_fragment(entry, raw_path.read_text(encoding="utf-8"), str(raw_path))
+                if fragment is None:
+                    raise SystemExit(f"No direct fragment route for {entry['id']}: {entry.get('recommended_entrypoint')}")
+                if _errors(getattr(fragment, "diagnostics", [])):
+                    codes = [item.code for item in _errors(fragment.diagnostics)]
+                    raise SystemExit(f"Direct fragment diagnostics for {entry['id']}: {codes}")
+                direct_fragments_checked += 1
+            except SystemExit:
+                raise
+            except Exception as exc:  # pragma: no cover - the check is specifically an exception guard.
+                parser_exceptions += 1
+                raise SystemExit(f"Direct fragment parser exception for {entry['id']}: {exc}") from exc
         ####
         wrapper_path = entry.get("wrapper_path")
         if wrapper_path:
@@ -181,6 +238,7 @@ def main() -> int:
         f"TAOS snippet corpus validation passed: {len(entries)} raw displays, "
         f"{len(wrapper_errors)} wrappers, {parser_exceptions} parser exceptions, "
         f"{sum(wrapper_errors.values())} wrapper diagnostics retained as evidence; "
+        f"checked {direct_fragments_checked} direct fragments; "
         f"observed {len(observed_table_types)} table types, {len(observed_table_operations)} operations, "
         f"and {len(observed_problem_blocks | observed_trajectory_blocks | observed_segment_blocks)} problem-block forms."
     )

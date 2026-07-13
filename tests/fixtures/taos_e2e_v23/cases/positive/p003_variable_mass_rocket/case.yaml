@@ -1,0 +1,42 @@
+id: p003_variable_mass_rocket
+title: Constant thrust with linearly decreasing mass
+kind: positive
+path: cases/positive/p003_variable_mass_rocket
+problem_file: input/p003_variable_mass_rocket.prb
+table_files:
+- input/constant-thrust.tbl
+- input/burn-mdot.tbl
+features:
+- variable_mass
+- mass_flow_units
+- fuel_output
+- thrust_output
+grammar_productions:
+- simple_table
+- prop_block
+- units_parameter
+runtime_tier: invariant
+static_expectation: pass
+expected_diagnostics: []
+output_file: variable-mass.dat
+oracles:
+- type: series_monotonic
+  column: mass
+  direction: decreasing
+  strict: true
+- type: series_monotonic
+  column: fuel
+  direction: increasing
+  strict: false
+- type: series_monotonic
+  column: xecfcdt
+  direction: increasing
+  strict: true
+- type: final_between
+  column: mass
+  low: 4.9
+  high: 5.1
+notes: []
+source_sections:
+- 2.2.1
+- 4.2.9

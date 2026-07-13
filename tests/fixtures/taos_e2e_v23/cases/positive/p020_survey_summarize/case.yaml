@@ -1,0 +1,26 @@
+id: p020_survey_summarize
+title: Survey values with summary reduction
+kind: positive
+path: cases/positive/p020_survey_summarize
+problem_file: input/p020_survey_summarize.prb
+table_files: []
+features:
+- survey
+- summarize
+- parameter_placeholder
+- multiple_runs
+grammar_productions:
+- survey_block
+- summarize_block
+- survey_parameter
+runtime_tier: smoke
+static_expectation: pass
+expected_diagnostics: []
+output_file: survey.dat
+oracles:
+- type: output_exists
+- type: no_nan
+notes: []
+source_sections:
+- 4.4.10
+- 4.4.11

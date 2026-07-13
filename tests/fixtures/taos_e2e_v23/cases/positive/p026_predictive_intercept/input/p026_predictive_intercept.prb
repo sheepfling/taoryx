@@ -1,0 +1,20 @@
+(p026_predictive_intercept)
+*title Two vehicle intercept intercept
+*atmos none
+*earth spherical gm=0 omega=0
+*trajectory 1 interceptor start on 1
+  *initial ecfc x=20925646.3255 y=0 z=0 xdt=0 ydt=0 zdt=0 time=0 mass=5
+  *file interceptor.dat time xecfc yecfc relrng[2] relvel[2] yawi pitchi
+  *segment 1 chase
+    *integ dtprnt=0.25 dt=0.025 dtguid=3
+    *inertial ecfc
+    *prop thrust=(interceptor-thrust) mdot=(zero-mdot)
+    *fly intercept=2
+    *when time=20 stop
+*trajectory 2 target start on 1
+  *initial ecfc x=20925646.3255 y=1000 z=0 xdt=0 ydt=10 zdt=0 time=0 mass=1
+  *file target.dat time xecfc yecfc
+  *segment 1 coast
+    *integ dtprnt=0.25 dt=0.025
+    *when time=20 stop
+*end

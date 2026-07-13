@@ -1,0 +1,14 @@
+(tangent-iip)
+*title Tangent plane and IIP
+*atmos standard
+*earth wgs-84 omega=0
+*trajectory 1 rv start on 1
+  *dwn/crs latgd=0 long=0 azm=90
+  *tangent latgd=0 long=0 alt=0 azm=90
+  *iip iip_beta=550 iip_alt=0
+  *initial geodetic long=0 lat=0 psi=90 time=0 alt=200000 vel=12000 gama=-20 wt=500
+  *file iip.dat time east north dwnrng crsrng xtp ytp ztp iip_rng iip_azm iip_time iip_long iip_latgd
+  *segment 1 ballistic
+    *integ dtprnt=2 dt=0.2
+    *when time=20 stop
+*end

@@ -1,0 +1,22 @@
+id: p042_ecic_initialization
+title: ECIC initialization equivalent to geodetic and ECFC at zero earth rotation
+kind: positive
+path: cases/positive/p042_ecic_initialization
+problem_file: input/p042_ecic_initialization.prb
+table_files: []
+features:
+- ecic_initial_conditions
+- coordinate_initialization_equivalence
+grammar_productions:
+- initial_ecic
+- earth_block
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: coordinate.dat
+oracles:
+- type: no_nan
+notes: []
+source_sections:
+- 2.1.2
+- 4.3.5

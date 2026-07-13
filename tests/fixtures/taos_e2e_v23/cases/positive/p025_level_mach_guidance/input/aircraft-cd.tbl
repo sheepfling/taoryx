@@ -1,0 +1,4 @@
+(aircraft-cd)
+table cd(alpha) no-extrap sref=100
+alpha=-10,0,5,10,15
+cd=0.08,0.02,0.025,0.04,0.07

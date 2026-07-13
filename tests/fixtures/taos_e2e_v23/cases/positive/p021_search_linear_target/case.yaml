@@ -1,0 +1,30 @@
+id: p021_search_linear_target
+title: One-dimensional search with analytic linear target
+kind: positive
+path: cases/positive/p021_search_linear_target
+problem_file: input/p021_search_linear_target.prb
+table_files: []
+features:
+- search
+- search_parameter
+- root_finding
+grammar_productions:
+- search_block
+- search_parameter
+runtime_tier: analytic
+static_expectation: pass
+expected_diagnostics: []
+output_file: search.dat
+oracles:
+- type: final_approx
+  column: xecfc
+  value: 20926646.3255
+  atol: 0.05
+- type: final_approx
+  column: xecfcdt
+  value: 100
+  atol: 0.01
+notes: []
+source_sections:
+- 2.6.2
+- 4.4.9

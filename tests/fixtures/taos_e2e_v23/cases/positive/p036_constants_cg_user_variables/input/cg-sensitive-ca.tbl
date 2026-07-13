@@ -1,0 +1,5 @@
+(cg-sensitive-ca)
+table ca(cg,mach) no-extrap sref=10
+cg=0.4,0.8
+mach=0,2
+ca=0.10,0.12,0.20,0.22

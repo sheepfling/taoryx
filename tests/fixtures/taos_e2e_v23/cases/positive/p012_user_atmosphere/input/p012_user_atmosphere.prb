@@ -1,0 +1,18 @@
+  (user-atmos)
+  *title User atmosphere
+      *atmos user
+alt temp pres rho sndspd nu
+0 518.67 2116.22 0.0023769 1116.45 0.000157
+5000 500.84 1760.0 0.002048 1097.0 0.000164
+10000 483.03 1455.3 0.001756 1077.4 0.000171
+15000 465.22 1194.0 0.001497 1057.4 0.000179
+20000 447.42 972.5 0.001267 1036.9 0.000188
+
+  *earth spherical gm=0 omega=0
+  *trajectory 1 probe start on 1
+    *initial geodetic alt=10000 long=0 lat=0 vel=0 gama=0 psi=0 time=0 mass=1
+    *file atmosphere.dat time alt temp pres rho sndspd nu
+    *segment 1 sample
+      *integ dtprnt=0.5 dt=0.1
+      *when time=1 stop
+  *end

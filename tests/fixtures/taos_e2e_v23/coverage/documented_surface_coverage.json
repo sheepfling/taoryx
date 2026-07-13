@@ -1,0 +1,1077 @@
+{
+  "manual_basis": "TAOS User's Manual, Chapters 3 and 4",
+  "block_scopes": [
+    {
+      "scope": "segment",
+      "name": "aero",
+      "covered": true,
+      "cases": [
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent",
+        "p011_skewed_aero_table",
+        "p025_level_mach_guidance",
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p036_constants_cg_user_variables",
+        "p037_wind_axis_aero_coefficients",
+        "p038_body_axis_aero_coefficients",
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "constants",
+      "covered": true,
+      "cases": [
+        "p036_constants_cg_user_variables"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "cg",
+      "covered": true,
+      "cases": [
+        "p034_manual_air_intercept_synthetic",
+        "p036_constants_cg_user_variables"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "fly",
+      "covered": true,
+      "cases": [
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p009_piecewise_full_thrust",
+        "p011_skewed_aero_table",
+        "p024_guidance_table",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p036_constants_cg_user_variables",
+        "p037_wind_axis_aero_coefficients",
+        "p038_body_axis_aero_coefficients",
+        "p039_table_driven_thrust_vector",
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent",
+        "p046_case_insensitive_free_field"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "increment",
+      "covered": true,
+      "cases": [
+        "p016_rail_stage_branch",
+        "p033_manual_ballistic_rocket_synthetic"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "inertial",
+      "covered": true,
+      "cases": [
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p009_piecewise_full_thrust",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p039_table_driven_thrust_vector",
+        "p046_case_insensitive_free_field"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "integ",
+      "covered": true,
+      "cases": [
+        "p001_linear_ecfc_zero_force",
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p004_vacuum_ballistic_coarse",
+        "p005_vacuum_ballistic_medium",
+        "p006_vacuum_ballistic_fine",
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent",
+        "p009_piecewise_full_thrust",
+        "p010_output_define_full_table",
+        "p011_skewed_aero_table",
+        "p012_user_atmosphere",
+        "p013_site_atmosphere",
+        "p014_zero_wind",
+        "p015_crosswind",
+        "p016_rail_stage_branch",
+        "p017_radar_relative",
+        "p018_geodetic_initialization",
+        "p019_ecfc_initialization",
+        "p020_survey_summarize",
+        "p021_search_linear_target",
+        "p022_optimize_linear_boundary",
+        "p023_units_format",
+        "p024_guidance_table",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p028_tangent_iip_downrange",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p031_multi_problem_document",
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p036_constants_cg_user_variables",
+        "p037_wind_axis_aero_coefficients",
+        "p038_body_axis_aero_coefficients",
+        "p039_table_driven_thrust_vector",
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables",
+        "p042_ecic_initialization",
+        "p043_wgs84_gravity_drop",
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent",
+        "p046_case_insensitive_free_field",
+        "p047_full_table_operation_gauntlet",
+        "p048_problem_level_outputs_and_egs",
+        "p049_large_table_many_segments_stress"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "limits",
+      "covered": true,
+      "cases": [
+        "p035_manual_ground_intercept_synthetic"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "prop",
+      "covered": true,
+      "cases": [
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p009_piecewise_full_thrust",
+        "p016_rail_stage_branch",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p039_table_driven_thrust_vector",
+        "p046_case_insensitive_free_field",
+        "p049_large_table_many_segments_stress"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "rail",
+      "covered": true,
+      "cases": [
+        "p016_rail_stage_branch",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "reset",
+      "covered": true,
+      "cases": [
+        "p016_rail_stage_branch",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic"
+      ]
+    },
+    {
+      "scope": "segment",
+      "name": "when",
+      "covered": true,
+      "cases": [
+        "p001_linear_ecfc_zero_force",
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p004_vacuum_ballistic_coarse",
+        "p005_vacuum_ballistic_medium",
+        "p006_vacuum_ballistic_fine",
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent",
+        "p009_piecewise_full_thrust",
+        "p010_output_define_full_table",
+        "p011_skewed_aero_table",
+        "p012_user_atmosphere",
+        "p013_site_atmosphere",
+        "p014_zero_wind",
+        "p015_crosswind",
+        "p016_rail_stage_branch",
+        "p017_radar_relative",
+        "p018_geodetic_initialization",
+        "p019_ecfc_initialization",
+        "p020_survey_summarize",
+        "p021_search_linear_target",
+        "p022_optimize_linear_boundary",
+        "p023_units_format",
+        "p024_guidance_table",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p028_tangent_iip_downrange",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p031_multi_problem_document",
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p036_constants_cg_user_variables",
+        "p037_wind_axis_aero_coefficients",
+        "p038_body_axis_aero_coefficients",
+        "p039_table_driven_thrust_vector",
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables",
+        "p042_ecic_initialization",
+        "p043_wgs84_gravity_drop",
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent",
+        "p046_case_insensitive_free_field",
+        "p047_full_table_operation_gauntlet",
+        "p048_problem_level_outputs_and_egs",
+        "p049_large_table_many_segments_stress"
+      ]
+    },
+    {
+      "scope": "trajectory",
+      "name": "define",
+      "covered": true,
+      "cases": [
+        "p010_output_define_full_table",
+        "p034_manual_air_intercept_synthetic",
+        "p047_full_table_operation_gauntlet",
+        "p048_problem_level_outputs_and_egs"
+      ]
+    },
+    {
+      "scope": "trajectory",
+      "name": "dwn/crs",
+      "covered": true,
+      "cases": [
+        "p028_tangent_iip_downrange",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic"
+      ]
+    },
+    {
+      "scope": "trajectory",
+      "name": "file",
+      "covered": true,
+      "cases": [
+        "p001_linear_ecfc_zero_force",
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p004_vacuum_ballistic_coarse",
+        "p005_vacuum_ballistic_medium",
+        "p006_vacuum_ballistic_fine",
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent",
+        "p009_piecewise_full_thrust",
+        "p010_output_define_full_table",
+        "p011_skewed_aero_table",
+        "p012_user_atmosphere",
+        "p013_site_atmosphere",
+        "p014_zero_wind",
+        "p015_crosswind",
+        "p016_rail_stage_branch",
+        "p017_radar_relative",
+        "p018_geodetic_initialization",
+        "p019_ecfc_initialization",
+        "p020_survey_summarize",
+        "p021_search_linear_target",
+        "p022_optimize_linear_boundary",
+        "p023_units_format",
+        "p024_guidance_table",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p028_tangent_iip_downrange",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p031_multi_problem_document",
+        "p036_constants_cg_user_variables",
+        "p037_wind_axis_aero_coefficients",
+        "p038_body_axis_aero_coefficients",
+        "p039_table_driven_thrust_vector",
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables",
+        "p042_ecic_initialization",
+        "p043_wgs84_gravity_drop",
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent",
+        "p046_case_insensitive_free_field",
+        "p047_full_table_operation_gauntlet",
+        "p048_problem_level_outputs_and_egs",
+        "p049_large_table_many_segments_stress"
+      ]
+    },
+    {
+      "scope": "trajectory",
+      "name": "iip",
+      "covered": true,
+      "cases": [
+        "p028_tangent_iip_downrange"
+      ]
+    },
+    {
+      "scope": "trajectory",
+      "name": "initial",
+      "covered": true,
+      "cases": [
+        "p001_linear_ecfc_zero_force",
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p004_vacuum_ballistic_coarse",
+        "p005_vacuum_ballistic_medium",
+        "p006_vacuum_ballistic_fine",
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent",
+        "p009_piecewise_full_thrust",
+        "p010_output_define_full_table",
+        "p011_skewed_aero_table",
+        "p012_user_atmosphere",
+        "p013_site_atmosphere",
+        "p014_zero_wind",
+        "p015_crosswind",
+        "p016_rail_stage_branch",
+        "p017_radar_relative",
+        "p018_geodetic_initialization",
+        "p019_ecfc_initialization",
+        "p020_survey_summarize",
+        "p021_search_linear_target",
+        "p022_optimize_linear_boundary",
+        "p023_units_format",
+        "p024_guidance_table",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p028_tangent_iip_downrange",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p031_multi_problem_document",
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p036_constants_cg_user_variables",
+        "p037_wind_axis_aero_coefficients",
+        "p038_body_axis_aero_coefficients",
+        "p039_table_driven_thrust_vector",
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables",
+        "p042_ecic_initialization",
+        "p043_wgs84_gravity_drop",
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent",
+        "p046_case_insensitive_free_field",
+        "p047_full_table_operation_gauntlet",
+        "p048_problem_level_outputs_and_egs",
+        "p049_large_table_many_segments_stress"
+      ]
+    },
+    {
+      "scope": "trajectory",
+      "name": "print",
+      "covered": true,
+      "cases": [
+        "p001_linear_ecfc_zero_force",
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p048_problem_level_outputs_and_egs"
+      ]
+    },
+    {
+      "scope": "trajectory",
+      "name": "tangent",
+      "covered": true,
+      "cases": [
+        "p028_tangent_iip_downrange"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "atmos",
+      "covered": true,
+      "cases": [
+        "p001_linear_ecfc_zero_force",
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p004_vacuum_ballistic_coarse",
+        "p005_vacuum_ballistic_medium",
+        "p006_vacuum_ballistic_fine",
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent",
+        "p009_piecewise_full_thrust",
+        "p010_output_define_full_table",
+        "p011_skewed_aero_table",
+        "p012_user_atmosphere",
+        "p013_site_atmosphere",
+        "p014_zero_wind",
+        "p015_crosswind",
+        "p016_rail_stage_branch",
+        "p017_radar_relative",
+        "p018_geodetic_initialization",
+        "p019_ecfc_initialization",
+        "p020_survey_summarize",
+        "p021_search_linear_target",
+        "p022_optimize_linear_boundary",
+        "p023_units_format",
+        "p024_guidance_table",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p028_tangent_iip_downrange",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p031_multi_problem_document",
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p036_constants_cg_user_variables",
+        "p037_wind_axis_aero_coefficients",
+        "p038_body_axis_aero_coefficients",
+        "p039_table_driven_thrust_vector",
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables",
+        "p042_ecic_initialization",
+        "p043_wgs84_gravity_drop",
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent",
+        "p046_case_insensitive_free_field",
+        "p047_full_table_operation_gauntlet",
+        "p048_problem_level_outputs_and_egs",
+        "p049_large_table_many_segments_stress"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "define",
+      "covered": true,
+      "cases": [
+        "p048_problem_level_outputs_and_egs"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "earth",
+      "covered": true,
+      "cases": [
+        "p001_linear_ecfc_zero_force",
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p004_vacuum_ballistic_coarse",
+        "p005_vacuum_ballistic_medium",
+        "p006_vacuum_ballistic_fine",
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent",
+        "p009_piecewise_full_thrust",
+        "p010_output_define_full_table",
+        "p011_skewed_aero_table",
+        "p012_user_atmosphere",
+        "p013_site_atmosphere",
+        "p014_zero_wind",
+        "p015_crosswind",
+        "p016_rail_stage_branch",
+        "p017_radar_relative",
+        "p018_geodetic_initialization",
+        "p019_ecfc_initialization",
+        "p020_survey_summarize",
+        "p021_search_linear_target",
+        "p022_optimize_linear_boundary",
+        "p023_units_format",
+        "p024_guidance_table",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p028_tangent_iip_downrange",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p031_multi_problem_document",
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p036_constants_cg_user_variables",
+        "p037_wind_axis_aero_coefficients",
+        "p038_body_axis_aero_coefficients",
+        "p039_table_driven_thrust_vector",
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables",
+        "p042_ecic_initialization",
+        "p043_wgs84_gravity_drop",
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent",
+        "p046_case_insensitive_free_field",
+        "p047_full_table_operation_gauntlet",
+        "p048_problem_level_outputs_and_egs",
+        "p049_large_table_many_segments_stress"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "egs",
+      "covered": true,
+      "cases": [
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p048_problem_level_outputs_and_egs"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "file",
+      "covered": true,
+      "cases": [
+        "p017_radar_relative",
+        "p048_problem_level_outputs_and_egs"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "optimize",
+      "covered": true,
+      "cases": [
+        "p022_optimize_linear_boundary",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "print",
+      "covered": true,
+      "cases": [
+        "p048_problem_level_outputs_and_egs"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "radar",
+      "covered": true,
+      "cases": [
+        "p017_radar_relative"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "search",
+      "covered": true,
+      "cases": [
+        "p021_search_linear_target"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "summarize",
+      "covered": true,
+      "cases": [
+        "p020_survey_summarize",
+        "p032_manual_ballistic_reentry"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "survey",
+      "covered": true,
+      "cases": [
+        "p020_survey_summarize",
+        "p032_manual_ballistic_reentry"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "title",
+      "covered": true,
+      "cases": [
+        "p001_linear_ecfc_zero_force",
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p004_vacuum_ballistic_coarse",
+        "p005_vacuum_ballistic_medium",
+        "p006_vacuum_ballistic_fine",
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent",
+        "p009_piecewise_full_thrust",
+        "p010_output_define_full_table",
+        "p011_skewed_aero_table",
+        "p012_user_atmosphere",
+        "p013_site_atmosphere",
+        "p014_zero_wind",
+        "p015_crosswind",
+        "p016_rail_stage_branch",
+        "p017_radar_relative",
+        "p018_geodetic_initialization",
+        "p019_ecfc_initialization",
+        "p020_survey_summarize",
+        "p021_search_linear_target",
+        "p022_optimize_linear_boundary",
+        "p023_units_format",
+        "p024_guidance_table",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p028_tangent_iip_downrange",
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent",
+        "p031_multi_problem_document",
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p036_constants_cg_user_variables",
+        "p037_wind_axis_aero_coefficients",
+        "p038_body_axis_aero_coefficients",
+        "p039_table_driven_thrust_vector",
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables",
+        "p042_ecic_initialization",
+        "p043_wgs84_gravity_drop",
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent",
+        "p046_case_insensitive_free_field",
+        "p047_full_table_operation_gauntlet",
+        "p048_problem_level_outputs_and_egs",
+        "p049_large_table_many_segments_stress"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "units/fmt",
+      "covered": true,
+      "cases": [
+        "p023_units_format"
+      ]
+    },
+    {
+      "scope": "problem",
+      "name": "wind",
+      "covered": true,
+      "cases": [
+        "p015_crosswind",
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables"
+      ]
+    }
+  ],
+  "table_types": [
+    {
+      "name": "ca",
+      "covered": true,
+      "cases": [
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent",
+        "p011_skewed_aero_table",
+        "p032_manual_ballistic_reentry",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic",
+        "p036_constants_cg_user_variables"
+      ]
+    },
+    {
+      "name": "cn",
+      "covered": true,
+      "cases": [
+        "p034_manual_air_intercept_synthetic",
+        "p035_manual_ground_intercept_synthetic"
+      ]
+    },
+    {
+      "name": "cl",
+      "covered": true,
+      "cases": [
+        "p025_level_mach_guidance",
+        "p037_wind_axis_aero_coefficients"
+      ]
+    },
+    {
+      "name": "cd",
+      "covered": true,
+      "cases": [
+        "p025_level_mach_guidance",
+        "p037_wind_axis_aero_coefficients"
+      ]
+    },
+    {
+      "name": "cs",
+      "covered": true,
+      "cases": [
+        "p037_wind_axis_aero_coefficients"
+      ]
+    },
+    {
+      "name": "cx",
+      "covered": true,
+      "cases": [
+        "p038_body_axis_aero_coefficients"
+      ]
+    },
+    {
+      "name": "cy",
+      "covered": true,
+      "cases": [
+        "p038_body_axis_aero_coefficients"
+      ]
+    },
+    {
+      "name": "cz",
+      "covered": true,
+      "cases": [
+        "p038_body_axis_aero_coefficients"
+      ]
+    },
+    {
+      "name": "thrust",
+      "covered": true,
+      "cases": [
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p009_piecewise_full_thrust",
+        "p016_rail_stage_branch",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p039_table_driven_thrust_vector",
+        "p046_case_insensitive_free_field",
+        "p049_large_table_many_segments_stress"
+      ]
+    },
+    {
+      "name": "tvec1",
+      "covered": true,
+      "cases": [
+        "p039_table_driven_thrust_vector"
+      ]
+    },
+    {
+      "name": "tvec2",
+      "covered": true,
+      "cases": [
+        "p039_table_driven_thrust_vector"
+      ]
+    },
+    {
+      "name": "mdot",
+      "covered": true,
+      "cases": [
+        "p002_constant_thrust_table",
+        "p003_variable_mass_rocket",
+        "p016_rail_stage_branch",
+        "p025_level_mach_guidance",
+        "p026_predictive_intercept",
+        "p027_proportional_navigation",
+        "p033_manual_ballistic_rocket_synthetic",
+        "p034_manual_air_intercept_synthetic",
+        "p039_table_driven_thrust_vector"
+      ]
+    },
+    {
+      "name": "cg",
+      "covered": true,
+      "cases": [
+        "p036_constants_cg_user_variables"
+      ]
+    },
+    {
+      "name": "windv",
+      "covered": true,
+      "cases": [
+        "p015_crosswind",
+        "p040_wind_speed_heading_tables"
+      ]
+    },
+    {
+      "name": "windh",
+      "covered": true,
+      "cases": [
+        "p040_wind_speed_heading_tables"
+      ]
+    },
+    {
+      "name": "winde",
+      "covered": true,
+      "cases": [
+        "p041_wind_component_tables"
+      ]
+    },
+    {
+      "name": "windn",
+      "covered": true,
+      "cases": [
+        "p041_wind_component_tables"
+      ]
+    },
+    {
+      "name": "windd",
+      "covered": true,
+      "cases": [
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables"
+      ]
+    },
+    {
+      "name": "output",
+      "covered": true,
+      "cases": [
+        "p010_output_define_full_table",
+        "p047_full_table_operation_gauntlet"
+      ]
+    }
+  ],
+  "table_operations": [
+    {
+      "name": "add",
+      "covered": true,
+      "cases": [
+        "p008_reentry_full_table_equivalent",
+        "p009_piecewise_full_thrust",
+        "p010_output_define_full_table",
+        "p011_skewed_aero_table",
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "sub",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "mult",
+      "covered": true,
+      "cases": [
+        "p010_output_define_full_table",
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "div",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "idiv",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "exp",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "iexp",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "max",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "min",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "set",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "abs",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "neg",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "sqr",
+      "covered": true,
+      "cases": [
+        "p010_output_define_full_table",
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "sqrt",
+      "covered": true,
+      "cases": [
+        "p010_output_define_full_table",
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "ln",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "log",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "e",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "sin",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "cos",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "tan",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "asin",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "acos",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "atan",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "zero",
+      "covered": true,
+      "cases": [
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "csto",
+      "covered": true,
+      "cases": [
+        "p010_output_define_full_table",
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "if",
+      "covered": true,
+      "cases": [
+        "p009_piecewise_full_thrust",
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "goto",
+      "covered": true,
+      "cases": [
+        "p009_piecewise_full_thrust",
+        "p047_full_table_operation_gauntlet"
+      ]
+    },
+    {
+      "name": "end",
+      "covered": true,
+      "cases": [
+        "p008_reentry_full_table_equivalent",
+        "p009_piecewise_full_thrust",
+        "p010_output_define_full_table",
+        "p011_skewed_aero_table",
+        "p047_full_table_operation_gauntlet"
+      ]
+    }
+  ],
+  "summary": {
+    "block_scopes_covered": 33,
+    "block_scopes_total": 33,
+    "table_types_covered": 19,
+    "table_types_total": 19,
+    "table_operations_covered": 28,
+    "table_operations_total": 28
+  },
+  "ambiguous_scope_contract": {
+    "description": "Problem-level define/file/print after trajectory definitions are counted from the manifest contract; the parser retains the physical attachment and emits ambiguous-dual-scope-block.",
+    "covered_by_manifest_contract": [
+      "problem_define_block",
+      "problem_file_block",
+      "problem_print_block"
+    ]
+  }
+}

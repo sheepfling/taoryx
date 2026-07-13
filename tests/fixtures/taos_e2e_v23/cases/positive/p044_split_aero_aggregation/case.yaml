@@ -1,0 +1,22 @@
+id: p044_split_aero_aggregation
+title: Two aerodynamic blocks aggregate to the total force
+kind: positive
+path: cases/positive/p044_split_aero_aggregation
+problem_file: input/p044_split_aero_aggregation.prb
+table_files: []
+features:
+- multiple_aero_blocks
+- aero_force_aggregation
+grammar_productions:
+- aero_block
+- multiple_aero_blocks
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: aero-aggregation.dat
+oracles:
+- type: no_nan
+notes: []
+source_sections:
+- 2.3.2
+- 4.2.1

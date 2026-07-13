@@ -1,0 +1,3591 @@
+[
+  {
+    "equation": "1-1",
+    "section": "Trajectory Simulation",
+    "manual_page": "1-2",
+    "pdf_page": 19,
+    "algorithm_ids": [],
+    "mapping_status": "documentation_only",
+    "notes": "documentation_only: six-degree-of-freedom context, not a TAOS point-mass runtime algorithm"
+  },
+  {
+    "equation": "1-2",
+    "section": "Trajectory Simulation",
+    "manual_page": "1-2",
+    "pdf_page": 19,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "primary point-mass force equation"
+  },
+  {
+    "equation": "2-1",
+    "section": "ECIC Coordinate System",
+    "manual_page": "2-7",
+    "pdf_page": 36,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Earth rotation angle"
+  },
+  {
+    "equation": "2-2",
+    "section": "ECIC Coordinate System",
+    "manual_page": "2-7",
+    "pdf_page": 36,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Earth rotation rate"
+  },
+  {
+    "equation": "2-3",
+    "section": "ECIC Coordinate System",
+    "manual_page": "2-7",
+    "pdf_page": 36,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECIC position components"
+  },
+  {
+    "equation": "2-4",
+    "section": "ECIC Coordinate System",
+    "manual_page": "2-7",
+    "pdf_page": 36,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECIC velocity components"
+  },
+  {
+    "equation": "2-5",
+    "section": "ECIC Coordinate System",
+    "manual_page": "2-7",
+    "pdf_page": 36,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECIC acceleration components"
+  },
+  {
+    "equation": "2-6",
+    "section": "Local Geocentric Horizon",
+    "manual_page": "2-8",
+    "pdf_page": 37,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geocentric horizon unit vectors"
+  },
+  {
+    "equation": "2-7",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-9",
+    "pdf_page": 38,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric position components in ECFC coordinates"
+  },
+  {
+    "equation": "2-8",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-10",
+    "pdf_page": 39,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Longitude from ECFC position"
+  },
+  {
+    "equation": "2-9",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-10",
+    "pdf_page": 39,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric latitude from ECFC position"
+  },
+  {
+    "equation": "2-10",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-11",
+    "pdf_page": 40,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geocentric north velocity component"
+  },
+  {
+    "equation": "2-11",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-11",
+    "pdf_page": 40,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geocentric east velocity component"
+  },
+  {
+    "equation": "2-12",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-11",
+    "pdf_page": 40,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geocentric down velocity component"
+  },
+  {
+    "equation": "2-13",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-11",
+    "pdf_page": 40,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric vertical flight-path angle"
+  },
+  {
+    "equation": "2-14",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-11",
+    "pdf_page": 40,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric heading angle"
+  },
+  {
+    "equation": "2-15",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-11",
+    "pdf_page": 40,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric-to-ECFC x velocity transformation"
+  },
+  {
+    "equation": "2-16",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-11",
+    "pdf_page": 40,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric-to-ECFC y velocity transformation"
+  },
+  {
+    "equation": "2-17",
+    "section": "Geocentric Coordinate System",
+    "manual_page": "2-11",
+    "pdf_page": 40,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric-to-ECFC z velocity transformation"
+  },
+  {
+    "equation": "2-18",
+    "section": "Local Geodetic Horizon",
+    "manual_page": "2-12",
+    "pdf_page": 41,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ellipsoid radius eccentricity and flattening relation"
+  },
+  {
+    "equation": "2-19",
+    "section": "Local Geodetic Horizon",
+    "manual_page": "2-13",
+    "pdf_page": 42,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-008"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geodetic north unit vector"
+  },
+  {
+    "equation": "2-20",
+    "section": "Local Geodetic Horizon",
+    "manual_page": "2-13",
+    "pdf_page": 42,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-008"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geodetic east unit vector"
+  },
+  {
+    "equation": "2-21",
+    "section": "Local Geodetic Horizon",
+    "manual_page": "2-13",
+    "pdf_page": 42,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-008"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geodetic down unit vector"
+  },
+  {
+    "equation": "2-22",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-14",
+    "pdf_page": 43,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ellipsoid surface equation"
+  },
+  {
+    "equation": "2-23",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-14",
+    "pdf_page": 43,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ellipsoid meridional section equation"
+  },
+  {
+    "equation": "2-24",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-15",
+    "pdf_page": 44,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic latitude from surface-normal slope"
+  },
+  {
+    "equation": "2-25",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-15",
+    "pdf_page": 44,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ellipsoid surface coordinate ratio"
+  },
+  {
+    "equation": "2-26",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-15",
+    "pdf_page": 44,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ellipsoid surface x coordinate"
+  },
+  {
+    "equation": "2-27",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-15",
+    "pdf_page": 44,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Surface x coordinate in terms of normal radius"
+  },
+  {
+    "equation": "2-28",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-15",
+    "pdf_page": 44,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Prime vertical radius of curvature"
+  },
+  {
+    "equation": "2-29",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-15",
+    "pdf_page": 44,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ellipsoid surface z coordinate"
+  },
+  {
+    "equation": "2-30",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-16",
+    "pdf_page": 45,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-010"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic position ECFC x component"
+  },
+  {
+    "equation": "2-31",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-16",
+    "pdf_page": 45,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-010"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic position ECFC y component"
+  },
+  {
+    "equation": "2-32",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-16",
+    "pdf_page": 45,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-010"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic position ECFC z component"
+  },
+  {
+    "equation": "2-33",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-16",
+    "pdf_page": 45,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-010"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Equatorial projection of geodetic position"
+  },
+  {
+    "equation": "2-34",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-16",
+    "pdf_page": 45,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Surface-normal z-axis intercept"
+  },
+  {
+    "equation": "2-35",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-17",
+    "pdf_page": 46,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Initial spherical estimate of geodetic latitude"
+  },
+  {
+    "equation": "2-36",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-17",
+    "pdf_page": 46,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Initial z-axis intercept estimate"
+  },
+  {
+    "equation": "2-37",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-17",
+    "pdf_page": 46,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Iteration shifted z coordinate"
+  },
+  {
+    "equation": "2-38",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-17",
+    "pdf_page": 46,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Iteration radius and altitude relation"
+  },
+  {
+    "equation": "2-39",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-17",
+    "pdf_page": 46,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Iteration geodetic latitude relation"
+  },
+  {
+    "equation": "2-40",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-17",
+    "pdf_page": 46,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Iteration normal radius"
+  },
+  {
+    "equation": "2-41",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-17",
+    "pdf_page": 46,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Iteration z-axis intercept update"
+  },
+  {
+    "equation": "2-42",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-18",
+    "pdf_page": 47,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-012"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geodetic north velocity component"
+  },
+  {
+    "equation": "2-43",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-18",
+    "pdf_page": 47,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-012"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geodetic east velocity component"
+  },
+  {
+    "equation": "2-44",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-18",
+    "pdf_page": 47,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-012"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Local geodetic down velocity component"
+  },
+  {
+    "equation": "2-45",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-18",
+    "pdf_page": 47,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-012"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic vertical flight-path angle"
+  },
+  {
+    "equation": "2-46",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-18",
+    "pdf_page": 47,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-012"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic heading angle"
+  },
+  {
+    "equation": "2-47",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-18",
+    "pdf_page": 47,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-013"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic-to-ECFC x velocity transformation"
+  },
+  {
+    "equation": "2-48",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-18",
+    "pdf_page": 47,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-013"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic-to-ECFC y velocity transformation"
+  },
+  {
+    "equation": "2-49",
+    "section": "Geodetic Coordinate System",
+    "manual_page": "2-18",
+    "pdf_page": 47,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-013"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic-to-ECFC z velocity transformation"
+  },
+  {
+    "equation": "2-50",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-20",
+    "pdf_page": 49,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-014"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic Euler rotation matrix"
+  },
+  {
+    "equation": "2-51",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-20",
+    "pdf_page": 49,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-014"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Body x unit vector from geodetic Euler angles"
+  },
+  {
+    "equation": "2-52",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-20",
+    "pdf_page": 49,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-014"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Body y unit vector from geodetic Euler angles"
+  },
+  {
+    "equation": "2-53",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-20",
+    "pdf_page": 49,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-014"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Body z unit vector from geodetic Euler angles"
+  },
+  {
+    "equation": "2-54",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-21",
+    "pdf_page": 50,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-015"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Cosine of geodetic Euler yaw angle"
+  },
+  {
+    "equation": "2-55",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-21",
+    "pdf_page": 50,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-015"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sine of geodetic Euler yaw angle"
+  },
+  {
+    "equation": "2-56",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-21",
+    "pdf_page": 50,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-015"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic Euler pitch relation"
+  },
+  {
+    "equation": "2-57",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-21",
+    "pdf_page": 50,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-015"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic Euler roll relation"
+  },
+  {
+    "equation": "2-58",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-21",
+    "pdf_page": 50,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-015"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Intermediate y axis for Euler-angle recovery"
+  },
+  {
+    "equation": "2-59",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-21",
+    "pdf_page": 50,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-015"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Linear system for intermediate x axis"
+  },
+  {
+    "equation": "2-60",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-21",
+    "pdf_page": 50,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-015"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Explicit intermediate x axis"
+  },
+  {
+    "equation": "2-61",
+    "section": "Body-Fixed Cartesian Coordinate System",
+    "manual_page": "2-22",
+    "pdf_page": 51,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-015"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Vertical-body Euler-angle singularity convention"
+  },
+  {
+    "equation": "2-62",
+    "section": "Velocity Cartesian Coordinate Systems",
+    "manual_page": "2-24",
+    "pdf_page": 53,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-016"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Wind-corrected velocity"
+  },
+  {
+    "equation": "2-63",
+    "section": "Velocity Cartesian Coordinate Systems",
+    "manual_page": "2-24",
+    "pdf_page": 53,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-016"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Wind-relative velocity x unit vector"
+  },
+  {
+    "equation": "2-64",
+    "section": "Velocity Cartesian Coordinate Systems",
+    "manual_page": "2-25",
+    "pdf_page": 54,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-016"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Wind-relative velocity y unit vector"
+  },
+  {
+    "equation": "2-65",
+    "section": "Velocity Cartesian Coordinate Systems",
+    "manual_page": "2-25",
+    "pdf_page": 54,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-016"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Wind-relative velocity z unit vector"
+  },
+  {
+    "equation": "2-66",
+    "section": "Velocity Cartesian Coordinate Systems",
+    "manual_page": "2-25",
+    "pdf_page": 54,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-016"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Earth-relative velocity x unit vector"
+  },
+  {
+    "equation": "2-67",
+    "section": "Velocity Cartesian Coordinate Systems",
+    "manual_page": "2-25",
+    "pdf_page": 54,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-016"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic-to-velocity transformation matrix"
+  },
+  {
+    "equation": "2-68",
+    "section": "Velocity Cartesian Coordinate Systems",
+    "manual_page": "2-25",
+    "pdf_page": 54,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-016"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity x unit vector from geodetic flight-path angles"
+  },
+  {
+    "equation": "2-69",
+    "section": "Velocity Cartesian Coordinate Systems",
+    "manual_page": "2-25",
+    "pdf_page": 54,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-016"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity y unit vector from geodetic heading"
+  },
+  {
+    "equation": "2-70",
+    "section": "Velocity Cartesian Coordinate Systems",
+    "manual_page": "2-25",
+    "pdf_page": 54,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-016"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity z unit vector from geodetic flight-path angles"
+  },
+  {
+    "equation": "2-71",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-26",
+    "pdf_page": 55,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Wind unit vectors from bank angle"
+  },
+  {
+    "equation": "2-72",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-27",
+    "pdf_page": 56,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Wind-to-body aerodynamic rotation matrix"
+  },
+  {
+    "equation": "2-73",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-27",
+    "pdf_page": 56,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Body x unit vector from angle of attack and Euler sideslip"
+  },
+  {
+    "equation": "2-74",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-27",
+    "pdf_page": 56,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Body y unit vector from Euler sideslip"
+  },
+  {
+    "equation": "2-75",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-27",
+    "pdf_page": 56,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Body z unit vector from angle of attack and Euler sideslip"
+  },
+  {
+    "equation": "2-76",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-27",
+    "pdf_page": 56,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Angle of attack projection definition"
+  },
+  {
+    "equation": "2-77",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-27",
+    "pdf_page": 56,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sideslip projection definition"
+  },
+  {
+    "equation": "2-78",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-29",
+    "pdf_page": 58,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sideslip definition at ninety-degree angle of attack"
+  },
+  {
+    "equation": "2-79",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-29",
+    "pdf_page": 58,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Total angle of attack definition"
+  },
+  {
+    "equation": "2-80",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-29",
+    "pdf_page": 58,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Windward meridian definition"
+  },
+  {
+    "equation": "2-81",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-30",
+    "pdf_page": 59,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Total angle of attack from alpha and Euler sideslip"
+  },
+  {
+    "equation": "2-82",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-30",
+    "pdf_page": 59,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Windward meridian from alpha and Euler sideslip"
+  },
+  {
+    "equation": "2-83",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-30",
+    "pdf_page": 59,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sideslip from alpha and Euler sideslip"
+  },
+  {
+    "equation": "2-84",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-30",
+    "pdf_page": 59,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Total angle of attack from alpha and sideslip"
+  },
+  {
+    "equation": "2-85",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-30",
+    "pdf_page": 59,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Windward meridian from alpha and sideslip"
+  },
+  {
+    "equation": "2-86",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-30",
+    "pdf_page": 59,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Euler sideslip from alpha and sideslip"
+  },
+  {
+    "equation": "2-87",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-30",
+    "pdf_page": 59,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Angle of attack from total angle and windward meridian"
+  },
+  {
+    "equation": "2-88",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-30",
+    "pdf_page": 59,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sideslip from total angle and windward meridian"
+  },
+  {
+    "equation": "2-89",
+    "section": "Wind Cartesian Coordinate System",
+    "manual_page": "2-30",
+    "pdf_page": 59,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-017"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Euler sideslip from total angle and windward meridian"
+  },
+  {
+    "equation": "2-90",
+    "section": "Tangent Plane Cartesian Coordinate System",
+    "manual_page": "2-33",
+    "pdf_page": 62,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-019"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Tangent-plane x unit vector"
+  },
+  {
+    "equation": "2-91",
+    "section": "Tangent Plane Cartesian Coordinate System",
+    "manual_page": "2-33",
+    "pdf_page": 62,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-019"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Tangent-plane y unit vector"
+  },
+  {
+    "equation": "2-92",
+    "section": "Tangent Plane Cartesian Coordinate System",
+    "manual_page": "2-33",
+    "pdf_page": 62,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-019"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Tangent-plane z unit vector"
+  },
+  {
+    "equation": "2-93",
+    "section": "Coordinate Transformations",
+    "manual_page": "2-35",
+    "pdf_page": 64,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-020"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECFC-to-body projection of propulsive force"
+  },
+  {
+    "equation": "2-94",
+    "section": "Coordinate Transformations",
+    "manual_page": "2-35",
+    "pdf_page": 64,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-020"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Inverse body-to-ECFC force transformation"
+  },
+  {
+    "equation": "2-95",
+    "section": "Coordinate Transformations",
+    "manual_page": "2-35",
+    "pdf_page": 64,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-020"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Transpose form of body-to-ECFC force transformation"
+  },
+  {
+    "equation": "2-96",
+    "section": "Coordinate Transformations",
+    "manual_page": "2-35",
+    "pdf_page": 64,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-020"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Column-vector form of body-to-ECFC force transformation"
+  },
+  {
+    "equation": "2-97",
+    "section": "Equations of Motion",
+    "manual_page": "2-36",
+    "pdf_page": 65,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Newton second law for a point mass"
+  },
+  {
+    "equation": "2-98",
+    "section": "Equations of Motion",
+    "manual_page": "2-36",
+    "pdf_page": 65,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Inertial acceleration as the second position derivative"
+  },
+  {
+    "equation": "2-99",
+    "section": "Equations of Motion",
+    "manual_page": "2-36",
+    "pdf_page": 65,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Transport theorem with earth-fixed inner derivative"
+  },
+  {
+    "equation": "2-100",
+    "section": "Equations of Motion",
+    "manual_page": "2-36",
+    "pdf_page": 65,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Transport theorem evaluated in the rotating frame"
+  },
+  {
+    "equation": "2-101",
+    "section": "Equations of Motion",
+    "manual_page": "2-36",
+    "pdf_page": 65,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Expanded inertial acceleration"
+  },
+  {
+    "equation": "2-102",
+    "section": "Equations of Motion",
+    "manual_page": "2-36",
+    "pdf_page": 65,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Earth-relative velocity and acceleration definitions"
+  },
+  {
+    "equation": "2-103",
+    "section": "Equations of Motion",
+    "manual_page": "2-37",
+    "pdf_page": 66,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Grouped inertial acceleration terms"
+  },
+  {
+    "equation": "2-104",
+    "section": "Equations of Motion",
+    "manual_page": "2-37",
+    "pdf_page": 66,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Inertial and earth-fixed acceleration relationship"
+  },
+  {
+    "equation": "2-105",
+    "section": "Equations of Motion",
+    "manual_page": "2-37",
+    "pdf_page": 66,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Earth-fixed rotating-earth equation of motion"
+  },
+  {
+    "equation": "2-106",
+    "section": "Equations of Motion",
+    "manual_page": "2-37",
+    "pdf_page": 66,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "First-order equations of motion"
+  },
+  {
+    "equation": "2-107",
+    "section": "Numerical Integration",
+    "manual_page": "2-38",
+    "pdf_page": 67,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Six-component ECFC state vector"
+  },
+  {
+    "equation": "2-108",
+    "section": "Numerical Integration",
+    "manual_page": "2-38",
+    "pdf_page": 67,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "State derivative vector"
+  },
+  {
+    "equation": "2-109",
+    "section": "Numerical Integration",
+    "manual_page": "2-38",
+    "pdf_page": 67,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECFC x acceleration component"
+  },
+  {
+    "equation": "2-110",
+    "section": "Numerical Integration",
+    "manual_page": "2-38",
+    "pdf_page": 67,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECFC y acceleration component"
+  },
+  {
+    "equation": "2-111",
+    "section": "Numerical Integration",
+    "manual_page": "2-38",
+    "pdf_page": 67,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECFC z acceleration component"
+  },
+  {
+    "equation": "2-112",
+    "section": "Numerical Integration",
+    "manual_page": "2-38",
+    "pdf_page": 67,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Earth spin-rate magnitude"
+  },
+  {
+    "equation": "2-113",
+    "section": "Numerical Integration",
+    "manual_page": "2-39",
+    "pdf_page": 68,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Augmented integration state and derivative vectors"
+  },
+  {
+    "equation": "2-114",
+    "section": "Numerical Integration",
+    "manual_page": "2-40",
+    "pdf_page": 69,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Fourth-order Runge-Kutta update"
+  },
+  {
+    "equation": "2-115",
+    "section": "Numerical Integration",
+    "manual_page": "2-40",
+    "pdf_page": 69,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Runge-Kutta first derivative evaluation"
+  },
+  {
+    "equation": "2-116",
+    "section": "Numerical Integration",
+    "manual_page": "2-40",
+    "pdf_page": 69,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Runge-Kutta second derivative evaluation"
+  },
+  {
+    "equation": "2-117",
+    "section": "Numerical Integration",
+    "manual_page": "2-40",
+    "pdf_page": 69,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Runge-Kutta third derivative evaluation"
+  },
+  {
+    "equation": "2-118",
+    "section": "Numerical Integration",
+    "manual_page": "2-40",
+    "pdf_page": 69,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Runge-Kutta fourth derivative evaluation"
+  },
+  {
+    "equation": "2-119",
+    "section": "Rail Launches and Sled Tests",
+    "manual_page": "2-41",
+    "pdf_page": 70,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Rail-constrained ECFC acceleration components"
+  },
+  {
+    "equation": "2-120",
+    "section": "Rail Launches and Sled Tests",
+    "manual_page": "2-41",
+    "pdf_page": 70,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Acceleration magnitude along the rail"
+  },
+  {
+    "equation": "2-121",
+    "section": "Rail Launches and Sled Tests",
+    "manual_page": "2-41",
+    "pdf_page": 70,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Acceleration loss from rail friction"
+  },
+  {
+    "equation": "2-122",
+    "section": "Rail Launches and Sled Tests",
+    "manual_page": "2-41",
+    "pdf_page": 70,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Acceleration normal to the rail"
+  },
+  {
+    "equation": "2-123",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-42",
+    "pdf_page": 71,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sine of longitude"
+  },
+  {
+    "equation": "2-124",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-42",
+    "pdf_page": 71,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Cosine of longitude"
+  },
+  {
+    "equation": "2-125",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-42",
+    "pdf_page": 71,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Longitude inverse-tangent definition"
+  },
+  {
+    "equation": "2-126",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-42",
+    "pdf_page": 71,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Longitude rate in ECFC components"
+  },
+  {
+    "equation": "2-127",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-42",
+    "pdf_page": 71,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Longitude rate in unit-vector form"
+  },
+  {
+    "equation": "2-128",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric latitude rate"
+  },
+  {
+    "equation": "2-129",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Starting identity for geodetic latitude rate"
+  },
+  {
+    "equation": "2-130",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Differentiated geodetic latitude identity"
+  },
+  {
+    "equation": "2-131",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "General geodetic latitude-rate solution"
+  },
+  {
+    "equation": "2-132",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Equatorial projection definition for rate derivation"
+  },
+  {
+    "equation": "2-133",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Equatorial projection rate"
+  },
+  {
+    "equation": "2-134",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECFC z-position rate"
+  },
+  {
+    "equation": "2-135",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Altitude rate"
+  },
+  {
+    "equation": "2-136",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic latitude rate using the ellipsoid normal radius"
+  },
+  {
+    "equation": "2-137",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-43",
+    "pdf_page": 72,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Final geodetic latitude-rate expression"
+  },
+  {
+    "equation": "2-138",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-44",
+    "pdf_page": 73,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Altitude acceleration"
+  },
+  {
+    "equation": "2-139",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-44",
+    "pdf_page": 73,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Derivative definition for the geodetic down unit vector"
+  },
+  {
+    "equation": "2-140",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-44",
+    "pdf_page": 73,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Expanded geodetic down-unit-vector derivative"
+  },
+  {
+    "equation": "2-141",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-44",
+    "pdf_page": 73,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-008"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Dynamic-pressure definition used for rates"
+  },
+  {
+    "equation": "2-142",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-44",
+    "pdf_page": 73,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-008"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Approximated dynamic-pressure second derivative"
+  },
+  {
+    "equation": "2-143",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-44",
+    "pdf_page": 73,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-008"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Atmospheric-density rate"
+  },
+  {
+    "equation": "2-144",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-44",
+    "pdf_page": 73,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-008"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Approximated atmospheric-density second derivative"
+  },
+  {
+    "equation": "2-145",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-45",
+    "pdf_page": 74,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Mach-number definition"
+  },
+  {
+    "equation": "2-146",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-45",
+    "pdf_page": 74,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Mach-number rate"
+  },
+  {
+    "equation": "2-147",
+    "section": "Longitude Latitude and Altitude Rates",
+    "manual_page": "2-45",
+    "pdf_page": 74,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-009"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Speed-of-sound rate"
+  },
+  {
+    "equation": "2-148",
+    "section": "Ground Speed and Range",
+    "manual_page": "2-46",
+    "pdf_page": 75,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-010"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ground-speed vector definition"
+  },
+  {
+    "equation": "2-149",
+    "section": "Ground Speed and Range",
+    "manual_page": "2-46",
+    "pdf_page": 75,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-010"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Surface-point relative velocity as an altitude-vector derivative"
+  },
+  {
+    "equation": "2-150",
+    "section": "Ground Speed and Range",
+    "manual_page": "2-46",
+    "pdf_page": 75,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-010"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Expanded surface-point relative velocity"
+  },
+  {
+    "equation": "2-151",
+    "section": "Ground Speed and Range",
+    "manual_page": "2-46",
+    "pdf_page": 75,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-010"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ground-speed vector in geodetic components"
+  },
+  {
+    "equation": "2-152",
+    "section": "Ground Speed and Range",
+    "manual_page": "2-46",
+    "pdf_page": 75,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-010"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ground-speed vector from flight-path angles"
+  },
+  {
+    "equation": "2-153",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-47",
+    "pdf_page": 76,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity-frame angular-velocity sum"
+  },
+  {
+    "equation": "2-154",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-47",
+    "pdf_page": 76,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECFC-to-geodetic angular velocity"
+  },
+  {
+    "equation": "2-155",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-47",
+    "pdf_page": 76,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic-to-velocity angular velocity"
+  },
+  {
+    "equation": "2-156",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-47",
+    "pdf_page": 76,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Expanded velocity-frame angular velocity"
+  },
+  {
+    "equation": "2-157",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-47",
+    "pdf_page": 76,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity-frame angular velocity y component"
+  },
+  {
+    "equation": "2-158",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-47",
+    "pdf_page": 76,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Heading term orthogonality"
+  },
+  {
+    "equation": "2-159",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-48",
+    "pdf_page": 77,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Simplified velocity-frame y angular-rate component"
+  },
+  {
+    "equation": "2-160",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-48",
+    "pdf_page": 77,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity-frame angular velocity z component"
+  },
+  {
+    "equation": "2-161",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-48",
+    "pdf_page": 77,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Simplified velocity-frame z angular-rate component"
+  },
+  {
+    "equation": "2-162",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-48",
+    "pdf_page": 77,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Earth-fixed acceleration from velocity-frame differentiation"
+  },
+  {
+    "equation": "2-163",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-48",
+    "pdf_page": 77,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Speed rate from acceleration"
+  },
+  {
+    "equation": "2-164",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-48",
+    "pdf_page": 77,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity-frame angular-velocity cross product"
+  },
+  {
+    "equation": "2-165",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-48",
+    "pdf_page": 77,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Acceleration decomposition in velocity coordinates"
+  },
+  {
+    "equation": "2-166",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-48",
+    "pdf_page": 77,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity-frame y acceleration component"
+  },
+  {
+    "equation": "2-167",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-48",
+    "pdf_page": 77,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity-frame z angular-rate component from acceleration"
+  },
+  {
+    "equation": "2-168",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-49",
+    "pdf_page": 78,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity-frame z acceleration component"
+  },
+  {
+    "equation": "2-169",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-49",
+    "pdf_page": 78,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Velocity-frame y angular-rate component from acceleration"
+  },
+  {
+    "equation": "2-170",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-49",
+    "pdf_page": 78,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic vertical flight-path-angle rate"
+  },
+  {
+    "equation": "2-171",
+    "section": "Flight Path Angle Rates",
+    "manual_page": "2-49",
+    "pdf_page": 78,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-011"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geodetic heading rate"
+  },
+  {
+    "equation": "2-172",
+    "section": "Specific Load Factors",
+    "manual_page": "2-50",
+    "pdf_page": 79,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-012"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Specific-load vector from inertial and gravity acceleration"
+  },
+  {
+    "equation": "2-173",
+    "section": "Specific Load Factors",
+    "manual_page": "2-50",
+    "pdf_page": 79,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-012"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Specific-load vector from aerodynamic and propulsive forces"
+  },
+  {
+    "equation": "2-174",
+    "section": "Specific Load Factors",
+    "manual_page": "2-50",
+    "pdf_page": 79,
+    "algorithm_ids": [
+      "TAOS-ALG-DYN-012"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Normal specific-load magnitude"
+  },
+  {
+    "equation": "2-175",
+    "section": "Contributions to Acceleration",
+    "manual_page": "2-51",
+    "pdf_page": 80,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Vehicle acceleration with force, Coriolis, and centrifugal contributions"
+  },
+  {
+    "equation": "2-176",
+    "section": "Atmosphere Model",
+    "manual_page": "2-52",
+    "pdf_page": 81,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Aerostatic pressure relation"
+  },
+  {
+    "equation": "2-177",
+    "section": "Atmosphere Model",
+    "manual_page": "2-52",
+    "pdf_page": 81,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Perfect-gas law"
+  },
+  {
+    "equation": "2-178",
+    "section": "Atmosphere Model",
+    "manual_page": "2-52",
+    "pdf_page": 81,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Constant molecular-temperature gradient within a layer"
+  },
+  {
+    "equation": "2-179",
+    "section": "Atmosphere Model",
+    "manual_page": "2-53",
+    "pdf_page": 82,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Molecular temperature definition"
+  },
+  {
+    "equation": "2-180",
+    "section": "Atmosphere Model",
+    "manual_page": "2-53",
+    "pdf_page": 82,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geopotential altitude integral"
+  },
+  {
+    "equation": "2-181",
+    "section": "Atmosphere Model",
+    "manual_page": "2-53",
+    "pdf_page": 82,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Inverse-square gravity model for atmosphere calculations"
+  },
+  {
+    "equation": "2-182",
+    "section": "Atmosphere Model",
+    "manual_page": "2-53",
+    "pdf_page": 82,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Closed-form geopotential altitude"
+  },
+  {
+    "equation": "2-183",
+    "section": "Atmosphere Model",
+    "manual_page": "2-53",
+    "pdf_page": 82,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Lambert sea-level gravity equation"
+  },
+  {
+    "equation": "2-184",
+    "section": "Atmosphere Model",
+    "manual_page": "2-53",
+    "pdf_page": 82,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Effective earth radius for geopotential calculations"
+  },
+  {
+    "equation": "2-185",
+    "section": "Atmosphere Model",
+    "manual_page": "2-54",
+    "pdf_page": 83,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Molecular temperature within an atmosphere layer"
+  },
+  {
+    "equation": "2-186",
+    "section": "Atmosphere Model",
+    "manual_page": "2-54",
+    "pdf_page": 83,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Molecular weight within an atmosphere layer"
+  },
+  {
+    "equation": "2-187",
+    "section": "Atmosphere Model",
+    "manual_page": "2-54",
+    "pdf_page": 83,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Atmospheric temperature from molecular temperature"
+  },
+  {
+    "equation": "2-188",
+    "section": "Atmosphere Model",
+    "manual_page": "2-54",
+    "pdf_page": 83,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Aerostatic relation in geopotential altitude"
+  },
+  {
+    "equation": "2-189",
+    "section": "Atmosphere Model",
+    "manual_page": "2-54",
+    "pdf_page": 83,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Pressure in terms of molecular temperature"
+  },
+  {
+    "equation": "2-190",
+    "section": "Atmosphere Model",
+    "manual_page": "2-54",
+    "pdf_page": 83,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Separable pressure differential equation"
+  },
+  {
+    "equation": "2-191",
+    "section": "Atmosphere Model",
+    "manual_page": "2-54",
+    "pdf_page": 83,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Pressure in an isothermal atmosphere layer"
+  },
+  {
+    "equation": "2-192",
+    "section": "Atmosphere Model",
+    "manual_page": "2-54",
+    "pdf_page": 83,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Pressure in a nonisothermal atmosphere layer"
+  },
+  {
+    "equation": "2-193",
+    "section": "Atmosphere Model",
+    "manual_page": "2-55",
+    "pdf_page": 84,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Atmospheric density"
+  },
+  {
+    "equation": "2-194",
+    "section": "Atmosphere Model",
+    "manual_page": "2-55",
+    "pdf_page": 84,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Speed of sound"
+  },
+  {
+    "equation": "2-195",
+    "section": "Atmosphere Model",
+    "manual_page": "2-55",
+    "pdf_page": 84,
+    "algorithm_ids": [
+      "TAOS-ALG-ENV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Kinematic viscosity from Sutherland formula"
+  },
+  {
+    "equation": "2-196",
+    "section": "Aerodynamic Forces",
+    "manual_page": "2-56",
+    "pdf_page": 85,
+    "algorithm_ids": [
+      "TAOS-ALG-FORCE-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Body-frame windward-meridian unit vector"
+  },
+  {
+    "equation": "2-197",
+    "section": "Aerodynamic Forces",
+    "manual_page": "2-56",
+    "pdf_page": 85,
+    "algorithm_ids": [
+      "TAOS-ALG-FORCE-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Aerodynamic force from axial and normal coefficients"
+  },
+  {
+    "equation": "2-198",
+    "section": "Aerodynamic Forces",
+    "manual_page": "2-57",
+    "pdf_page": 86,
+    "algorithm_ids": [
+      "TAOS-ALG-FORCE-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Aerodynamic force from lift drag and side-force coefficients"
+  },
+  {
+    "equation": "2-199",
+    "section": "Aerodynamic Forces",
+    "manual_page": "2-57",
+    "pdf_page": 86,
+    "algorithm_ids": [
+      "TAOS-ALG-FORCE-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Aerodynamic force from body-axis coefficients"
+  },
+  {
+    "equation": "2-200",
+    "section": "Propulsive Forces",
+    "manual_page": "2-59",
+    "pdf_page": 88,
+    "algorithm_ids": [
+      "TAOS-ALG-FORCE-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Body-frame propulsive force vector"
+  },
+  {
+    "equation": "2-201",
+    "section": "Gravity Model",
+    "manual_page": "2-60",
+    "pdf_page": 89,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Gravity acceleration as geopotential gradient"
+  },
+  {
+    "equation": "2-202",
+    "section": "Gravity Model",
+    "manual_page": "2-60",
+    "pdf_page": 89,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Full spherical-harmonic geopotential expansion"
+  },
+  {
+    "equation": "2-203",
+    "section": "Gravity Model",
+    "manual_page": "2-60",
+    "pdf_page": 89,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Point-mass geopotential term"
+  },
+  {
+    "equation": "2-204",
+    "section": "Gravity Model",
+    "manual_page": "2-60",
+    "pdf_page": 89,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Zonal geopotential using C coefficients"
+  },
+  {
+    "equation": "2-205",
+    "section": "Gravity Model",
+    "manual_page": "2-61",
+    "pdf_page": 90,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Zonal geopotential using J coefficients"
+  },
+  {
+    "equation": "2-206",
+    "section": "Gravity Model",
+    "manual_page": "2-61",
+    "pdf_page": 90,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Associated Legendre function definition"
+  },
+  {
+    "equation": "2-207",
+    "section": "Gravity Model",
+    "manual_page": "2-61",
+    "pdf_page": 90,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Order-zero Legendre function definition"
+  },
+  {
+    "equation": "2-208",
+    "section": "Gravity Model",
+    "manual_page": "2-61",
+    "pdf_page": 90,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Legendre derivative notation"
+  },
+  {
+    "equation": "2-209",
+    "section": "Gravity Model",
+    "manual_page": "2-61",
+    "pdf_page": 90,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "First four order-zero Legendre functions"
+  },
+  {
+    "equation": "2-210",
+    "section": "Gravity Model",
+    "manual_page": "2-61",
+    "pdf_page": 90,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Normalized Legendre function"
+  },
+  {
+    "equation": "2-211",
+    "section": "Gravity Model",
+    "manual_page": "2-62",
+    "pdf_page": 91,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Normalized spherical-harmonic coefficient"
+  },
+  {
+    "equation": "2-212",
+    "section": "Gravity Model",
+    "manual_page": "2-62",
+    "pdf_page": 91,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric north gravity component from the geopotential"
+  },
+  {
+    "equation": "2-213",
+    "section": "Gravity Model",
+    "manual_page": "2-62",
+    "pdf_page": 91,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric east gravity component from the geopotential"
+  },
+  {
+    "equation": "2-214",
+    "section": "Gravity Model",
+    "manual_page": "2-62",
+    "pdf_page": 91,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Geocentric inward gravity component from the geopotential"
+  },
+  {
+    "equation": "2-215",
+    "section": "Gravity Model",
+    "manual_page": "2-62",
+    "pdf_page": 91,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Full spherical-harmonic geocentric north acceleration"
+  },
+  {
+    "equation": "2-216",
+    "section": "Gravity Model",
+    "manual_page": "2-62",
+    "pdf_page": 91,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Full spherical-harmonic geocentric east acceleration"
+  },
+  {
+    "equation": "2-217",
+    "section": "Gravity Model",
+    "manual_page": "2-62",
+    "pdf_page": 91,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Full spherical-harmonic geocentric inward acceleration"
+  },
+  {
+    "equation": "2-218",
+    "section": "Gravity Model",
+    "manual_page": "2-63",
+    "pdf_page": 92,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "J2-only geocentric north acceleration"
+  },
+  {
+    "equation": "2-219",
+    "section": "Gravity Model",
+    "manual_page": "2-63",
+    "pdf_page": 92,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "J2-only geocentric east acceleration"
+  },
+  {
+    "equation": "2-220",
+    "section": "Gravity Model",
+    "manual_page": "2-63",
+    "pdf_page": 92,
+    "algorithm_ids": [
+      "TAOS-ALG-GRAV-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "J2-only geocentric inward acceleration"
+  },
+  {
+    "equation": "2-221",
+    "section": "Ranges and Distances",
+    "manual_page": "2-67",
+    "pdf_page": 96,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sodano inverse ellipsoidal surface distance"
+  },
+  {
+    "equation": "2-222",
+    "section": "Ranges and Distances",
+    "manual_page": "2-67",
+    "pdf_page": 96,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sodano auxiliary central angle"
+  },
+  {
+    "equation": "2-223",
+    "section": "Ranges and Distances",
+    "manual_page": "2-67",
+    "pdf_page": 96,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sodano inverse auxiliary m"
+  },
+  {
+    "equation": "2-224",
+    "section": "Ranges and Distances",
+    "manual_page": "2-67",
+    "pdf_page": 96,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Reduced latitude beta1"
+  },
+  {
+    "equation": "2-225",
+    "section": "Ranges and Distances",
+    "manual_page": "2-67",
+    "pdf_page": 96,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Reduced latitude beta2"
+  },
+  {
+    "equation": "2-226",
+    "section": "Ranges and Distances",
+    "manual_page": "2-67",
+    "pdf_page": 96,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sodano forward azimuth"
+  },
+  {
+    "equation": "2-227",
+    "section": "Ranges and Distances",
+    "manual_page": "2-67",
+    "pdf_page": 96,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sodano backward azimuth"
+  },
+  {
+    "equation": "2-228",
+    "section": "Ranges and Distances",
+    "manual_page": "2-68",
+    "pdf_page": 97,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Corrected longitude difference for Sodano inverse method"
+  },
+  {
+    "equation": "2-229",
+    "section": "Ranges and Distances",
+    "manual_page": "2-68",
+    "pdf_page": 97,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Reduced-latitude difference series"
+  },
+  {
+    "equation": "2-230",
+    "section": "Ranges and Distances",
+    "manual_page": "2-68",
+    "pdf_page": 97,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Alternative reduced-latitude difference relation"
+  },
+  {
+    "equation": "2-231",
+    "section": "Ranges and Distances",
+    "manual_page": "2-68",
+    "pdf_page": 97,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Third flattening parameter n"
+  },
+  {
+    "equation": "2-232",
+    "section": "Ranges and Distances",
+    "manual_page": "2-68",
+    "pdf_page": 97,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Downrange and crossrange perpendicularity condition"
+  },
+  {
+    "equation": "2-233",
+    "section": "Ranges and Distances",
+    "manual_page": "2-69",
+    "pdf_page": 98,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Newton-Raphson update used for downrange solution"
+  },
+  {
+    "equation": "2-234",
+    "section": "Ranges and Distances",
+    "manual_page": "2-69",
+    "pdf_page": 98,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Downrange error function"
+  },
+  {
+    "equation": "2-235",
+    "section": "Ranges and Distances",
+    "manual_page": "2-69",
+    "pdf_page": 98,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sodano direct angular-distance correction"
+  },
+  {
+    "equation": "2-236",
+    "section": "Ranges and Distances",
+    "manual_page": "2-69",
+    "pdf_page": 98,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sodano direct auxiliary m"
+  },
+  {
+    "equation": "2-237",
+    "section": "Ranges and Distances",
+    "manual_page": "2-69",
+    "pdf_page": 98,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Sodano direct auxiliary n"
+  },
+  {
+    "equation": "2-238",
+    "section": "Ranges and Distances",
+    "manual_page": "2-69",
+    "pdf_page": 98,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Normalized surface distance xi"
+  },
+  {
+    "equation": "2-239",
+    "section": "Ranges and Distances",
+    "manual_page": "2-69",
+    "pdf_page": 98,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Printed Sodano eccentricity factor e prime"
+  },
+  {
+    "equation": "2-240",
+    "section": "Ranges and Distances",
+    "manual_page": "2-70",
+    "pdf_page": 99,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Direct-method geodetic latitude"
+  },
+  {
+    "equation": "2-241",
+    "section": "Ranges and Distances",
+    "manual_page": "2-70",
+    "pdf_page": 99,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Direct-method sine of reduced latitude beta2"
+  },
+  {
+    "equation": "2-242",
+    "section": "Ranges and Distances",
+    "manual_page": "2-70",
+    "pdf_page": 99,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Direct-method cosine of reduced latitude beta2"
+  },
+  {
+    "equation": "2-243",
+    "section": "Ranges and Distances",
+    "manual_page": "2-70",
+    "pdf_page": 99,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Direct-method longitude"
+  },
+  {
+    "equation": "2-244",
+    "section": "Ranges and Distances",
+    "manual_page": "2-70",
+    "pdf_page": 99,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Direct-method longitude correction l"
+  },
+  {
+    "equation": "2-245",
+    "section": "Ranges and Distances",
+    "manual_page": "2-70",
+    "pdf_page": 99,
+    "algorithm_ids": [
+      "TAOS-ALG-GEO-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Direct-method backward azimuth"
+  },
+  {
+    "equation": "2-246",
+    "section": "Radar Observations",
+    "manual_page": "2-71",
+    "pdf_page": 100,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Vehicle position relative to radar station"
+  },
+  {
+    "equation": "2-247",
+    "section": "Radar Observations",
+    "manual_page": "2-71",
+    "pdf_page": 100,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar line-of-sight unit vector"
+  },
+  {
+    "equation": "2-248",
+    "section": "Radar Observations",
+    "manual_page": "2-71",
+    "pdf_page": 100,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar azimuth angle"
+  },
+  {
+    "equation": "2-249",
+    "section": "Radar Observations",
+    "manual_page": "2-71",
+    "pdf_page": 100,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar elevation angle"
+  },
+  {
+    "equation": "2-250",
+    "section": "Radar Observations",
+    "manual_page": "2-72",
+    "pdf_page": 101,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar range rate"
+  },
+  {
+    "equation": "2-251",
+    "section": "Radar Observations",
+    "manual_page": "2-72",
+    "pdf_page": 101,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar range acceleration"
+  },
+  {
+    "equation": "2-252",
+    "section": "Radar Observations",
+    "manual_page": "2-72",
+    "pdf_page": 101,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar line-of-sight unit-vector rate"
+  },
+  {
+    "equation": "2-253",
+    "section": "Radar Observations",
+    "manual_page": "2-72",
+    "pdf_page": 101,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar line-of-sight unit-vector acceleration"
+  },
+  {
+    "equation": "2-254",
+    "section": "Radar Observations",
+    "manual_page": "2-72",
+    "pdf_page": 101,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar azimuth rate"
+  },
+  {
+    "equation": "2-255",
+    "section": "Radar Observations",
+    "manual_page": "2-72",
+    "pdf_page": 101,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar azimuth acceleration"
+  },
+  {
+    "equation": "2-256",
+    "section": "Radar Observations",
+    "manual_page": "2-72",
+    "pdf_page": 101,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar elevation rate"
+  },
+  {
+    "equation": "2-257",
+    "section": "Radar Observations",
+    "manual_page": "2-72",
+    "pdf_page": 101,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar elevation acceleration"
+  },
+  {
+    "equation": "2-258",
+    "section": "Radar Observations",
+    "manual_page": "2-73",
+    "pdf_page": 102,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar aspect-angle sine"
+  },
+  {
+    "equation": "2-259",
+    "section": "Radar Observations",
+    "manual_page": "2-73",
+    "pdf_page": 102,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar aspect-angle cosine"
+  },
+  {
+    "equation": "2-260",
+    "section": "Radar Observations",
+    "manual_page": "2-73",
+    "pdf_page": 102,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar meridional-angle sine"
+  },
+  {
+    "equation": "2-261",
+    "section": "Radar Observations",
+    "manual_page": "2-73",
+    "pdf_page": 102,
+    "algorithm_ids": [
+      "TAOS-ALG-RADAR-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Radar meridional-angle cosine"
+  },
+  {
+    "equation": "2-262",
+    "section": "Relative Vehicle Calculations",
+    "manual_page": "2-74",
+    "pdf_page": 103,
+    "algorithm_ids": [
+      "TAOS-ALG-REL-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Relative position of the ith vehicle"
+  },
+  {
+    "equation": "2-263",
+    "section": "Relative Vehicle Calculations",
+    "manual_page": "2-74",
+    "pdf_page": 103,
+    "algorithm_ids": [
+      "TAOS-ALG-REL-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Relative line-of-sight unit vector"
+  },
+  {
+    "equation": "2-264",
+    "section": "Relative Vehicle Calculations",
+    "manual_page": "2-74",
+    "pdf_page": 103,
+    "algorithm_ids": [
+      "TAOS-ALG-REL-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Relative vehicle azimuth"
+  },
+  {
+    "equation": "2-265",
+    "section": "Relative Vehicle Calculations",
+    "manual_page": "2-74",
+    "pdf_page": 103,
+    "algorithm_ids": [
+      "TAOS-ALG-REL-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Relative vehicle elevation"
+  },
+  {
+    "equation": "2-266",
+    "section": "Initial Impact Point Calculations",
+    "manual_page": "2-75",
+    "pdf_page": 104,
+    "algorithm_ids": [
+      "TAOS-ALG-IIP-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "IIP aerodynamic acceleration from drag coefficient and ballistic coefficient"
+  },
+  {
+    "equation": "2-267",
+    "section": "Initial Impact Point Calculations",
+    "manual_page": "2-75",
+    "pdf_page": 104,
+    "algorithm_ids": [
+      "TAOS-ALG-IIP-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "IIP aerodynamic acceleration using ballistic coefficient"
+  },
+  {
+    "equation": "2-268",
+    "section": "Initial Impact Point Calculations",
+    "manual_page": "2-75",
+    "pdf_page": 104,
+    "algorithm_ids": [
+      "TAOS-ALG-IIP-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "IIP aerodynamic acceleration using dynamic pressure"
+  },
+  {
+    "equation": "2-269",
+    "section": "Initial Impact Point Calculations",
+    "manual_page": "2-75",
+    "pdf_page": 104,
+    "algorithm_ids": [
+      "TAOS-ALG-IIP-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "IIP air-relative velocity unit vector"
+  },
+  {
+    "equation": "2-270",
+    "section": "Initial Impact Point Calculations",
+    "manual_page": "2-75",
+    "pdf_page": 104,
+    "algorithm_ids": [
+      "TAOS-ALG-IIP-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "IIP aerodynamic acceleration vector form"
+  },
+  {
+    "equation": "2-271",
+    "section": "Aerodynamic Variables",
+    "manual_page": "2-77",
+    "pdf_page": 106,
+    "algorithm_ids": [
+      "TAOS-ALG-AERO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Ballistic coefficient"
+  },
+  {
+    "equation": "2-272",
+    "section": "Aerodynamic Variables",
+    "manual_page": "2-77",
+    "pdf_page": 106,
+    "algorithm_ids": [
+      "TAOS-ALG-AERO-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Lift-to-drag ratio"
+  },
+  {
+    "equation": "2-273",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-82",
+    "pdf_page": 111,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Parabolic desired-state transition"
+  },
+  {
+    "equation": "2-274",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-82",
+    "pdf_page": 111,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Derivative of parabolic desired-state transition"
+  },
+  {
+    "equation": "2-275",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-83",
+    "pdf_page": 112,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Parabolic transition coefficient a"
+  },
+  {
+    "equation": "2-276",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-83",
+    "pdf_page": 112,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Parabolic transition coefficient b"
+  },
+  {
+    "equation": "2-277",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-83",
+    "pdf_page": 112,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Cubic desired-state transition"
+  },
+  {
+    "equation": "2-278",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-83",
+    "pdf_page": 112,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Second derivative of cubic transition"
+  },
+  {
+    "equation": "2-279",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-83",
+    "pdf_page": 112,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Cubic transition coefficient b"
+  },
+  {
+    "equation": "2-280",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-84",
+    "pdf_page": 113,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Cubic transition coefficient a"
+  },
+  {
+    "equation": "2-281",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-84",
+    "pdf_page": 113,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Multidimensional Newton-Raphson update"
+  },
+  {
+    "equation": "2-282",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-84",
+    "pdf_page": 113,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Guidance residual Jacobian matrix"
+  },
+  {
+    "equation": "2-283",
+    "section": "Control Variable Solution Process",
+    "manual_page": "2-84",
+    "pdf_page": 113,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Gaussian-elimination linear system"
+  },
+  {
+    "equation": "2-284",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-85",
+    "pdf_page": 114,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Nonaccelerating intercept position equality"
+  },
+  {
+    "equation": "2-285",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-85",
+    "pdf_page": 114,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Estimated time to intercept"
+  },
+  {
+    "equation": "2-286",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-85",
+    "pdf_page": 114,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-006"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Predicted intercept point"
+  },
+  {
+    "equation": "2-287",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-87",
+    "pdf_page": 116,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Line-of-sight yaw angle"
+  },
+  {
+    "equation": "2-288",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-87",
+    "pdf_page": 116,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Line-of-sight pitch angle"
+  },
+  {
+    "equation": "2-289",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-87",
+    "pdf_page": 116,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Line-of-sight yaw rate"
+  },
+  {
+    "equation": "2-290",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-87",
+    "pdf_page": 116,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Line-of-sight pitch rate"
+  },
+  {
+    "equation": "2-291",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-87",
+    "pdf_page": 116,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Proportional-navigation yaw acceleration"
+  },
+  {
+    "equation": "2-292",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-87",
+    "pdf_page": 116,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Proportional-navigation pitch acceleration"
+  },
+  {
+    "equation": "2-293",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-87",
+    "pdf_page": 116,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Closure velocity"
+  },
+  {
+    "equation": "2-294",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-87",
+    "pdf_page": 116,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "First printed line-of-sight rotation matrix"
+  },
+  {
+    "equation": "2-295",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-87",
+    "pdf_page": 116,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Second printed line-of-sight rotation matrix"
+  },
+  {
+    "equation": "2-296",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-88",
+    "pdf_page": 117,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Transposed line-of-sight to ECFC acceleration matrix"
+  },
+  {
+    "equation": "2-297",
+    "section": "Intercepts and Proportional Navigation",
+    "manual_page": "2-88",
+    "pdf_page": 117,
+    "algorithm_ids": [
+      "TAOS-ALG-GUID-007"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Commanded ECFC acceleration components"
+  },
+  {
+    "equation": "2-298",
+    "section": "Search Methods",
+    "manual_page": "2-98",
+    "pdf_page": 127,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Newton-Raphson local linearization"
+  },
+  {
+    "equation": "2-299",
+    "section": "Search Methods",
+    "manual_page": "2-98",
+    "pdf_page": 127,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Newton-Raphson root update"
+  },
+  {
+    "equation": "2-300",
+    "section": "Search Methods",
+    "manual_page": "2-99",
+    "pdf_page": 128,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Secant root estimate"
+  },
+  {
+    "equation": "2-301",
+    "section": "Search Methods",
+    "manual_page": "2-99",
+    "pdf_page": 128,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Parabolic search polynomial"
+  },
+  {
+    "equation": "2-302",
+    "section": "Search Methods",
+    "manual_page": "2-100",
+    "pdf_page": 129,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Parabolic interpolation coefficient b"
+  },
+  {
+    "equation": "2-303",
+    "section": "Search Methods",
+    "manual_page": "2-100",
+    "pdf_page": 129,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Parabolic interpolation coefficient a"
+  },
+  {
+    "equation": "2-304",
+    "section": "Search Methods",
+    "manual_page": "2-100",
+    "pdf_page": 129,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Parabolic interpolation coefficient c"
+  },
+  {
+    "equation": "2-305",
+    "section": "Search Methods",
+    "manual_page": "2-100",
+    "pdf_page": 129,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Roots of the fitted parabola"
+  },
+  {
+    "equation": "2-306",
+    "section": "Search Methods",
+    "manual_page": "2-101",
+    "pdf_page": 130,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "First golden-section interior point"
+  },
+  {
+    "equation": "2-307",
+    "section": "Search Methods",
+    "manual_page": "2-101",
+    "pdf_page": 130,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Second golden-section interior point"
+  },
+  {
+    "equation": "2-308",
+    "section": "Search Methods",
+    "manual_page": "2-101",
+    "pdf_page": 130,
+    "algorithm_ids": [
+      "TAOS-ALG-SEARCH-005"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Stationary point of a parabola"
+  },
+  {
+    "equation": "2-309",
+    "section": "Optimization",
+    "manual_page": "2-102",
+    "pdf_page": 131,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "General nonlinear programming problem"
+  },
+  {
+    "equation": "2-310",
+    "section": "Optimization",
+    "manual_page": "2-102",
+    "pdf_page": 131,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Active-set equality-constrained problem"
+  },
+  {
+    "equation": "2-311",
+    "section": "Optimization",
+    "manual_page": "2-102",
+    "pdf_page": 131,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Quadratic approximation to the objective"
+  },
+  {
+    "equation": "2-312",
+    "section": "Optimization",
+    "manual_page": "2-102",
+    "pdf_page": 131,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Linearized constraints"
+  },
+  {
+    "equation": "2-313",
+    "section": "Optimization",
+    "manual_page": "2-103",
+    "pdf_page": 132,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Variable-metric quadratic subproblem"
+  },
+  {
+    "equation": "2-314",
+    "section": "Optimization",
+    "manual_page": "2-104",
+    "pdf_page": 133,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Path-integrated maximum-altitude violation"
+  },
+  {
+    "equation": "2-315",
+    "section": "Optimization",
+    "manual_page": "2-104",
+    "pdf_page": 133,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "Printed maximum-altitude optimization constraint"
+  },
+  {
+    "equation": "3-1",
+    "section": "Full Tables",
+    "manual_page": "3-13",
+    "pdf_page": 148,
+    "algorithm_ids": [
+      "TAOS-ALG-TABLE-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "full-table vacuum-thrust example expression"
+  },
+  {
+    "equation": "4-1",
+    "section": "Trajectory *Define data block",
+    "manual_page": "4-35",
+    "pdf_page": 200,
+    "algorithm_ids": [
+      "TAOS-ALG-PRB-001"
+    ],
+    "mapping_status": "mapped",
+    "notes": "trajectory-level define expression example"
+  },
+  {
+    "equation": "4-2",
+    "section": "Trajectory *Define data block",
+    "manual_page": "4-38",
+    "pdf_page": 203,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-003",
+      "TAOS-ALG-PRB-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "path-integral constraint branch"
+  },
+  {
+    "equation": "4-3",
+    "section": "Trajectory *Define data block",
+    "manual_page": "4-38",
+    "pdf_page": 203,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-003",
+      "TAOS-ALG-PRB-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "path-integral constraint branch"
+  },
+  {
+    "equation": "4-4",
+    "section": "*Initial data block",
+    "manual_page": "4-44",
+    "pdf_page": 209,
+    "algorithm_ids": [
+      "TAOS-ALG-COORD-001",
+      "TAOS-ALG-PRB-003"
+    ],
+    "mapping_status": "mapped",
+    "notes": "ECIC/ECFC initialization rotation"
+  },
+  {
+    "equation": "4-5",
+    "section": "*Optimize data block",
+    "manual_page": "4-64",
+    "pdf_page": 229,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-003",
+      "TAOS-ALG-PRB-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "optimization path-constraint integral branch"
+  },
+  {
+    "equation": "4-6",
+    "section": "*Optimize data block",
+    "manual_page": "4-64",
+    "pdf_page": 229,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-003",
+      "TAOS-ALG-PRB-002"
+    ],
+    "mapping_status": "mapped",
+    "notes": "optimization path-constraint integral branch"
+  },
+  {
+    "equation": "4-7",
+    "section": "*Optimize data block",
+    "manual_page": "4-67",
+    "pdf_page": 232,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "forward-difference derivative"
+  },
+  {
+    "equation": "4-8",
+    "section": "*Optimize data block",
+    "manual_page": "4-67",
+    "pdf_page": 232,
+    "algorithm_ids": [
+      "TAOS-ALG-OPT-004"
+    ],
+    "mapping_status": "mapped",
+    "notes": "central-difference derivative"
+  }
+]

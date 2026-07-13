@@ -1,0 +1,37 @@
+(operation-gauntlet)
+table output
+start
+  set 2
+  add 3
+  sub 1
+  mult 4
+  div 2
+  idiv 10
+  exp 2
+  iexp 2
+  sqrt
+  abs
+  neg
+  neg
+  ln
+  e
+  log
+  set 0.5
+  asin
+  sin
+  acos
+  cos
+  atan
+  tan
+  sqr
+  sqrt
+  min -100
+  max 100
+  csto saved
+  set saved
+  if (time > -1) then add 1
+  goto done
+  ignored: add 999
+  done: zero
+  add 42
+end

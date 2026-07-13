@@ -1,0 +1,43 @@
+id: p025_level_mach_guidance
+title: Indirect level-flight and constant-Mach guidance
+kind: positive
+path: cases/positive/p025_level_mach_guidance
+problem_file: input/p025_level_mach_guidance.prb
+table_files:
+- input/aircraft-cl.tbl
+- input/aircraft-cd.tbl
+- input/engine-thrust.tbl
+- input/engine-mdot.tbl
+features:
+- indirect_guidance
+- constant_mach
+- level_flight
+- free_alpha
+- free_power
+grammar_productions:
+- fly_condition
+- guidance_newton_loop
+- aero_tables
+- power_table
+runtime_tier: invariant
+static_expectation: pass
+expected_diagnostics: []
+output_file: level.dat
+oracles:
+- type: final_between
+  column: gamgd
+  low: -0.5
+  high: 0.5
+- type: final_between
+  column: mach
+  low: 0.53
+  high: 0.57
+- type: series_between
+  column: power
+  low: 0
+  high: 1
+- type: no_nan
+notes: []
+source_sections:
+- 2.5.1
+- 4.2.4

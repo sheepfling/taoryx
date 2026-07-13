@@ -1,0 +1,16 @@
+(split-aero)
+*title Aerodynamic force aggregation equivalence
+*atmos standard
+*earth spherical gm=0 omega=0
+*trajectory 1 vehicle start on 1
+  *initial geodetic alt=10000 long=0 lat=0 vel=1000 gama=0 psi=90 time=0 mass=20
+  *file aero-aggregation.dat time alt vel xecfc yecfc zecfc ca cn
+  *segment 1 coast
+    *integ dtprnt=0.25 dt=0.025
+    *aero ca=0.10 cn=0 sref=10
+    *aero ca=0.10 cn=0 sref=10
+    *fly alpha=0
+    *fly betae=0
+    *fly bankgd=0
+    *when time=3 stop
+*end

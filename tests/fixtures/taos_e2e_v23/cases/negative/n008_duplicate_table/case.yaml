@@ -1,0 +1,22 @@
+id: n008_duplicate_table
+title: Duplicate table name
+kind: negative
+path: cases/negative/n008_duplicate_table
+problem_file: input/n008_duplicate_table.prb
+table_files:
+- input/dup-one.tbl
+- input/dup-two.tbl
+features:
+- duplicate_table
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- duplicate-table
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

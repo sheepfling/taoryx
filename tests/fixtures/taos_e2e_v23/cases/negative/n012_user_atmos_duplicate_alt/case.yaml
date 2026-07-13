@@ -1,0 +1,20 @@
+id: n012_user_atmos_duplicate_alt
+title: Duplicate user-atmosphere altitude
+kind: negative
+path: cases/negative/n012_user_atmos_duplicate_alt
+problem_file: input/n012_user_atmos_duplicate_alt.prb
+table_files: []
+features:
+- atmosphere_semantics
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- atmosphere-altitude-not-strict
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

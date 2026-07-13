@@ -1,0 +1,50 @@
+id: p001_linear_ecfc_zero_force
+title: Analytic ECFC constant-velocity propagation
+kind: positive
+path: cases/positive/p001_linear_ecfc_zero_force
+problem_file: input/p001_linear_ecfc_zero_force.prb
+table_files: []
+features:
+- ecfc_initial_conditions
+- zero_gravity
+- zero_rotation
+- trajectory_file_output
+- fixed_step_integration
+grammar_productions:
+- problem
+- earth_block
+- atmos_block
+- trajectory
+- initial_ecfc
+- integ_block
+- when_block
+- file_block
+runtime_tier: analytic
+static_expectation: pass
+expected_diagnostics: []
+output_file: linear.dat
+oracles:
+- type: final_approx
+  column: time
+  value: 10.0
+  atol: 1.0e-09
+- type: final_approx
+  column: xecfc
+  value: 20925746.3255
+  atol: 1.0e-05
+- type: final_approx
+  column: yecfc
+  value: 80.0
+  atol: 1.0e-05
+- type: final_approx
+  column: zecfc
+  value: -40.0
+  atol: 1.0e-05
+- type: series_constant
+  column: mass
+  atol: 1.0e-10
+notes: []
+source_sections:
+- 2.2.1
+- 4.3.3
+- 4.3.5

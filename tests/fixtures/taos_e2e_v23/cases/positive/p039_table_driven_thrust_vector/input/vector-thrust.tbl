@@ -1,0 +1,4 @@
+(vector-thrust)
+table thrust(time) no-extrap units=lb
+time=0,3
+thrust=100,100

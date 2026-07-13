@@ -1,0 +1,13 @@
+(p005_vacuum_ballistic_medium)
+*title Vacuum ballistic convergence case
+*atmos none
+*earth spherical omega=0
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    alt=0 long=0 lat=0 vel=8000 gama=90 psi=90 time=0 mass=10
+  *file ballistic.dat
+    time alt rcm vel xecfc yecfc zecfc
+  *segment 1 ascent
+    *integ dtprnt=10 dt=1.0
+    *when time=200 stop
+*end

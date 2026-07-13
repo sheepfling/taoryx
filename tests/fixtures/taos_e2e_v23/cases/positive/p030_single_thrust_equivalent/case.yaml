@@ -1,0 +1,24 @@
+id: p030_single_thrust_equivalent
+title: Single prop block equivalent to summed blocks
+kind: positive
+path: cases/positive/p030_single_thrust_equivalent
+problem_file: input/p030_single_thrust_equivalent.prb
+table_files: []
+features:
+- single_prop_block
+- force_aggregation_equivalence
+grammar_productions:
+- prop_block
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: thrust.dat
+oracles:
+- type: series_constant_value
+  column: thrust
+  value: 20
+  atol: 1.0e-08
+notes: []
+source_sections:
+- 2.3.3
+- 4.2.9

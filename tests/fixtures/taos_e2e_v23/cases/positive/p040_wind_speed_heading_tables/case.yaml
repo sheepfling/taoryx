@@ -1,0 +1,29 @@
+id: p040_wind_speed_heading_tables
+title: Wind speed, heading, and down-component tables
+kind: positive
+path: cases/positive/p040_wind_speed_heading_tables
+problem_file: input/p040_wind_speed_heading_tables.prb
+table_files:
+- input/wind-speed.tbl
+- input/wind-heading.tbl
+- input/wind-down.tbl
+features:
+- windv_table
+- windh_table
+- windd_table
+- wind_speed_heading_representation
+grammar_productions:
+- wind_block
+- windv_table
+- windh_table
+- windd_table
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: wind-representation.dat
+oracles:
+- type: no_nan
+notes: []
+source_sections:
+- '3.1'
+- 4.4.14

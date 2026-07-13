@@ -17,7 +17,8 @@ This repository is ready to become a live Codex codebase. The documentation reco
 
 ### Explicitly not complete
 
-- The parser is not yet a full lossless grammar and semantic implementation for every complex block body.
+- The parser does not assign typed runtime semantics to every complex block body; unsupported or
+  ambiguous bodies are source-preserved and diagnosed under the evidence-bounded grammar contract.
 - The 326 equations are not all implemented as executable Python functions and do not each have an independent unit test.
 - No runtime-equivalence claim has been established against TAOS 96.0.
 - The manual remains a semantic edition rather than a complete word-for-word diplomatic transcription outside the completed fidelity tranches.

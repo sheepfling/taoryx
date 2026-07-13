@@ -1,0 +1,20 @@
+id: n002_bad_goto
+title: Goto undefined segment
+kind: negative
+path: cases/negative/n002_bad_goto
+problem_file: input/n002_bad_goto.prb
+table_files: []
+features:
+- bad_goto
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- unknown-goto-segment
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

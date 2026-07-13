@@ -1,0 +1,33 @@
+id: p013_site_atmosphere
+title: Site-measured pressure/density atmosphere
+kind: positive
+path: cases/positive/p013_site_atmosphere
+problem_file: input/p013_site_atmosphere.prb
+table_files: []
+features:
+- site_atmosphere
+- exponential_interpolation
+- derived_temperature
+grammar_productions:
+- atmos_site_block
+- atmosphere_data_rows
+runtime_tier: analytic
+static_expectation: pass
+expected_diagnostics: []
+output_file: atmosphere.dat
+oracles:
+- type: series_constant_value
+  column: pres
+  value: 830.0
+  atol: 0.01
+- type: series_constant_value
+  column: rho
+  value: 0.00105
+  atol: 1.0e-08
+- type: series_positive
+  column: temp
+- type: series_positive
+  column: sndspd
+notes: []
+source_sections:
+- 4.4.1

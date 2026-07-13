@@ -12,6 +12,7 @@ authors = [{name = "taoryx contributors"}]
 dependencies = ["pydantic>=2.8", "PyYAML>=6.0"]
 
 [project.scripts]
+taoryx = "taoryx.runtime.cli:main"
 taoryx-validate = "taoryx.language.cli:main"
 
 [project.optional-dependencies]
@@ -39,6 +40,13 @@ where = ["src"]
 pythonpath = ["src"]
 testpaths = ["tests"]
 addopts = ["--strict-markers"]
+markers = [
+  "runtime: requires a historical or separately verified TAOS executable",
+  "historical: exploratory or historically sourced runtime cases",
+  "stress: intentionally large or long-running runtime cases",
+  "negative_runtime: malformed inputs for executable-level rejection checks",
+  "metamorphic: compares multiple TAOS executions",
+]
 
 [tool.ruff]
 target-version = "py312"

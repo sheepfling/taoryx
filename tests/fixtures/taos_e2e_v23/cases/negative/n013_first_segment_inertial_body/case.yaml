@@ -1,0 +1,20 @@
+id: n013_first_segment_inertial_body
+title: Body-aligned inertial platform on first segment
+kind: negative
+path: cases/negative/n013_first_segment_inertial_body
+problem_file: input/n013_first_segment_inertial_body.prb
+table_files: []
+features:
+- execution_order_semantics
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- inertial-body-first-segment
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

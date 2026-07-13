@@ -1,0 +1,42 @@
+id: p037_wind_axis_aero_coefficients
+title: Complete lift, drag, and side-force coefficient set
+kind: positive
+path: cases/positive/p037_wind_axis_aero_coefficients
+problem_file: input/p037_wind_axis_aero_coefficients.prb
+table_files:
+- input/test-cl.tbl
+- input/test-cd.tbl
+- input/test-cs.tbl
+features:
+- cl_table
+- cd_table
+- cs_table
+- wind_axis_aerodynamics
+- complete_aero_set
+grammar_productions:
+- aero_block
+- simple_table
+- cl_cd_cs_coefficient_set
+runtime_tier: invariant
+static_expectation: pass
+expected_diagnostics: []
+output_file: wind-axis.dat
+oracles:
+- type: series_constant_value
+  column: cl
+  value: 0.3
+  atol: 1.0e-08
+- type: series_constant_value
+  column: cd
+  value: 0.03
+  atol: 1.0e-08
+- type: series_constant_value
+  column: cs
+  value: 0.01
+  atol: 1.0e-08
+- type: no_nan
+notes: []
+source_sections:
+- 2.3.2
+- '3.1'
+- 4.2.1

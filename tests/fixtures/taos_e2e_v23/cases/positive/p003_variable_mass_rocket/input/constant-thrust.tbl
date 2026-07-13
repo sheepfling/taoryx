@@ -1,0 +1,4 @@
+(constant-thrust)
+table thrust(time) no-extrap units=lb
+time = 0, 5
+thrust = 100, 100

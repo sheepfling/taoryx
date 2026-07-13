@@ -1,0 +1,44 @@
+id: p039_table_driven_thrust_vector
+title: Table-driven thrust magnitude, mass flow, and both thrust-vector angles
+kind: positive
+path: cases/positive/p039_table_driven_thrust_vector
+problem_file: input/p039_table_driven_thrust_vector.prb
+table_files:
+- input/vector-thrust.tbl
+- input/zero-mdot.tbl
+- input/vector-angle-1.tbl
+- input/vector-angle-2.tbl
+features:
+- tvec1_table
+- tvec2_table
+- thrust_vectoring
+- propulsion_table_set
+grammar_productions:
+- prop_block
+- thrust_table
+- tvec1_table
+- tvec2_table
+- mdot_table
+runtime_tier: invariant
+static_expectation: pass
+expected_diagnostics: []
+output_file: thrust-vector.dat
+oracles:
+- type: series_constant_value
+  column: thrust
+  value: 100
+  atol: 1.0e-08
+- type: series_constant_value
+  column: ep1
+  value: 10
+  atol: 1.0e-08
+- type: series_constant_value
+  column: ep2
+  value: 90
+  atol: 1.0e-08
+- type: no_nan
+notes: []
+source_sections:
+- 2.3.3
+- '3.1'
+- 4.2.9

@@ -1,0 +1,21 @@
+id: n014_optimize_bad_parameter
+title: Optimization parameter index zero
+kind: negative
+path: cases/negative/n014_optimize_bad_parameter
+problem_file: input/n014_optimize_bad_parameter.prb
+table_files: []
+features:
+- invalid_parameter_index
+- optimization_semantics
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- invalid-parameter-index
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

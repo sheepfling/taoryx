@@ -1,0 +1,30 @@
+id: p046_case_insensitive_free_field
+title: Case-insensitive keywords, comments, commas, and scientific notation
+kind: positive
+path: cases/positive/p046_case_insensitive_free_field
+problem_file: input/p046_case_insensitive_free_field.prb
+table_files:
+- input/upper.tbl
+features:
+- case_insensitivity
+- comments
+- scientific_notation
+- free_field_delimiters
+grammar_productions:
+- lexical_rules
+- simple_table
+- problem_document
+runtime_tier: smoke
+static_expectation: pass
+expected_diagnostics: []
+output_file: lexical.dat
+oracles:
+- type: series_constant_value
+  column: thrust
+  value: 10
+  atol: 1.0e-08
+- type: no_nan
+notes: []
+source_sections:
+- '3.3'
+- '4.1'

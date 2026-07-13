@@ -1,0 +1,14 @@
+(reentry-simple)
+*title Reentry table equivalence case
+*atmos standard
+*earth wgs-84 omega=0
+*trajectory 1 rv start on 1
+  *initial geodetic
+    long=0 lat=0 psi=90 time=0 alt=300000 vel=18000 gama=-25 wt=550
+  *file reentry.dat
+    time alt range vel mach dynprs nx ca
+  *segment 1 ballistic
+    *integ dtprnt=0.5 dt=0.1
+    *aero ca=(reentry-ca)
+    *when alt<0 stop
+*end

@@ -1,0 +1,27 @@
+id: p015_crosswind
+title: Altitude-table crosswind airspeed
+kind: positive
+path: cases/positive/p015_crosswind
+problem_file: input/p015_crosswind.prb
+table_files:
+- input/wind.tbl
+features:
+- wind_table
+- geodetic_wind
+- crosswind
+grammar_productions:
+- wind_block
+- windv_table
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: wind.dat
+oracles:
+- type: series_constant_value
+  column: vair
+  value: 304.1381265
+  atol: 0.05
+notes: []
+source_sections:
+- '3.1'
+- 4.4.14

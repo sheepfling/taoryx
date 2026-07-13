@@ -1,0 +1,10 @@
+(heat-proxy)
+table output
+start
+add vel
+sqr
+csto v2
+add rho
+sqrt
+mult v2
+end

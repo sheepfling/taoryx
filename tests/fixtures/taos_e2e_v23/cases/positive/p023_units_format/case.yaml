@@ -1,0 +1,29 @@
+id: p023_units_format
+title: Metric unit conversion and output formatting
+kind: positive
+path: cases/positive/p023_units_format
+problem_file: input/p023_units_format.prb
+table_files: []
+features:
+- units_fmt
+- metric_conversion
+- fixed_format
+- scientific_format
+grammar_productions:
+- units_fmt_block
+- format_specifier
+runtime_tier: analytic
+static_expectation: pass
+expected_diagnostics: []
+output_file: units.dat
+oracles:
+- type: final_approx
+  column: xecfcdt
+  value: 10.0
+  atol: 0.001
+- type: output_exists
+notes:
+- Because units change globally, the ECFC initial position is supplied in kilometers
+  and velocity in meters per second.
+source_sections:
+- 4.4.13

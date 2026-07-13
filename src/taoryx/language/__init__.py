@@ -13,9 +13,19 @@ from taoryx.language.ingest import FileKind, IngestedDocument, ingest_file, inge
 from taoryx.language.lexical import LexicalDocument, LexicalLine, LexicalToken, TitleTail, TokenKind, lex_line, lex_text, lex_title_tail
 from taoryx.language.lossless import LosslessDocument, LosslessRecord, SourceSpan, parse_lossless_file
 from taoryx.language.models import TableCall
+from taoryx.language.problem_fragments import parse_optimize_body_fragment, parse_problem_fragment
 from taoryx.language.problem_parser import parse_problem_file, parse_problem_text
 from taoryx.language.semantic_validation import validate_problem, validate_table_file
-from taoryx.language.table_parser import parse_table_file, parse_table_text
+from taoryx.language.table_parser import (
+    parse_simple_table_body_fragment,
+    parse_skewed_assignment_groups_fragment,
+    parse_table_assignment_fragment,
+    parse_table_body_fragment,
+    parse_table_file,
+    parse_table_header_fragment,
+    parse_table_operation_fragment,
+    parse_table_text,
+)
 
 __all__ = [
     "Diagnostic",
@@ -25,8 +35,16 @@ __all__ = [
     "Severity",
     "SourceLocation",
     "parse_problem_file",
+    "parse_problem_fragment",
+    "parse_optimize_body_fragment",
     "parse_problem_text",
     "parse_table_file",
+    "parse_table_header_fragment",
+    "parse_table_assignment_fragment",
+    "parse_table_body_fragment",
+    "parse_table_operation_fragment",
+    "parse_simple_table_body_fragment",
+    "parse_skewed_assignment_groups_fragment",
     "parse_table_text",
     "validate_problem",
     "validate_table_file",

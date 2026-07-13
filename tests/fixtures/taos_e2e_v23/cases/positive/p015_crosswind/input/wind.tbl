@@ -1,0 +1,4 @@
+(crosswind-speed)
+table windv(alt) no-extrap
+alt = 0, 20000
+windv = 50, 50

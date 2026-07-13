@@ -1,0 +1,4 @@
+(burn-mdot)
+table mdot(time) no-extrap units=lb/sec
+time = 0, 5
+mdot = 32.1740485, 32.1740485

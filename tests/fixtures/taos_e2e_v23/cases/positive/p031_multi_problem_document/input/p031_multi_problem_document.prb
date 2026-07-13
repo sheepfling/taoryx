@@ -1,0 +1,23 @@
+(problem-one)
+*title First problem
+*atmos none
+*earth spherical gm=0 omega=0
+*trajectory 1 one start on 1
+  *initial ecfc x=20925646.3255 y=0 z=0 xdt=1 ydt=0 zdt=0 time=0 mass=1
+  *file one.dat time xecfc
+  *segment 1 coast
+    *integ dtprnt=1 dt=0.1
+    *when time=2 stop
+*end
+
+(problem-two)
+*title Second problem
+*atmos none
+*earth spherical gm=0 omega=0
+*trajectory 1 two start on 1
+  *initial ecfc x=20925646.3255 y=0 z=0 xdt=2 ydt=0 zdt=0 time=0 mass=1
+  *file two.dat time xecfc
+  *segment 1 coast
+    *integ dtprnt=1 dt=0.1
+    *when time=2 stop
+*end

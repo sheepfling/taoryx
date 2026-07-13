@@ -1,0 +1,4 @@
+(test-cs)
+table cs(alpha) no-extrap sref=20
+alpha=-10,0,5,10
+cs=-0.02,0,0.01,0.02

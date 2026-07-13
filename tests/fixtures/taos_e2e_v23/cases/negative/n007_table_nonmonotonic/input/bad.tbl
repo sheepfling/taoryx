@@ -1,0 +1,4 @@
+(bad-ca)
+table ca(mach) sref=1
+mach=0,2,1
+ca=0.1,0.2,0.3

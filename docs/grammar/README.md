@@ -1,8 +1,9 @@
 # `.tbl` and `.prb` grammar validation
 
 This is the working area for validating the TAOS table and problem languages.
-The grammar is reconstructed from the manual; it is not yet a complete
-lossless grammar for every historical construct.
+The grammar is reconstructed from the manual. Documented constructs are accepted,
+source-preserved, and diagnosed within their evidence-backed boundaries; complex
+bodies may remain raw statements when typed semantics would require unsupported inference.
 
 ## Sources of truth
 
@@ -14,8 +15,16 @@ lossless grammar for every historical construct.
 - `metadata/legacy_grammar_registry.json` — quarantined legacy grammar candidates
 - `tests/fixtures/taos_manual_corpus_v22/` — 164 source-faithful Chapter 3/4
   displays, 149 synthetic wrappers, manifests, and lexical/parser baseline evidence
+- `tests/fixtures/taos_e2e_v23/` — complete application-level `.prb`/`.tbl` cases,
+  metamorphic metadata, and documented-surface coverage; see
+  [`docs/grammar/e2e-suite-v23.md`](e2e-suite-v23.md)
 - `tests/fixtures/grammar_baseline/` — independent positive and negative
   `.tbl`/`.prb` fixtures for syntax acceptance and multi-diagnostic recovery
+
+The manual corpus currently declares 131 fragment displays. The corpus checker dispatches every
+one through its declared direct fragment route, in addition to validating the 149 synthetic
+whole-file wrappers; this keeps excerpt parsing and complete-file validation as separate,
+auditable claims.
 
 ## Validation layers
 
@@ -126,11 +135,35 @@ source-located diagnostics rather than silently replacing the bytes.
 Table definitions, assignments, and full-table operations expose the same original source line
 through `source_text`, including nested operations, so direct `.tbl` parsing does not require a
 separate normalization pass to recover formatting evidence.
+Manual displays classified as operation fragments use `parse_table_operation_fragment`; this
+parses the documented operation sequence without inventing a table header or reporting omitted
+interpolation data as an error. The fragment result retains source text, typed operations,
+source-located diagnostics, and recovery records, while whole-file `parse_table_text` continues
+to enforce table-level completeness and semantic validation.
+Documented full-table bodies use `parse_table_body_fragment`, which treats `start` and `end` as
+body markers, and standalone numeric assignment displays use `parse_table_assignment_fragment`.
+Neither route invents omitted table metadata or performs whole-table cardinality checks.
+Standalone `table ...` declarations use `parse_table_header_fragment`; the typed result contains
+the declared table type, axes, and header options without fabricating an identification name.
+Problem-language displays with an explicit manifest scope use `parse_problem_fragment`; it adds
+only temporary framing needed by the existing block parser, shifts locations back to the raw
+display, and suppresses contextual completion checks whose prerequisites are outside the excerpt.
+Those checks remain observable through `deferred_diagnostics` and
+`deferred_recovered_records`, so context deferral is source-located rather than silently dropped.
+The documented optimize constraint/control displays have an explicit route:
+`parse_optimize_body_fragment` returns only their typed constraints and controls, never the
+synthetic optimize header used internally for parsing. No other continuation-only fragment
+category is currently declared by the reviewed corpus.
 Problem block nodes expose their original header line through `source_text` while retaining a
 normalized `header` for grammar checks; comments and spacing therefore remain available without
 being mistaken for header semantics.
 Problem, trajectory, and segment framing nodes preserve their original header lines in the same
 way, including malformed framing that remains attached for later diagnostics and recovery.
+The dual-scope `*define`, `*file`, and `*print` keywords are retained using the established
+trajectory/problem boundary behavior when they follow completed segments, but receive an
+`ambiguous-dual-scope-block` warning and recovery record: the manual permits these keywords at
+both trajectory and problem scope, so the parser does not silently claim that physical placement
+proves the author's intended scope.
 Problem names are checked as nonempty historical identifiers; malformed names remain attached to
 their problem record with an `invalid-problem-name` diagnostic so later problems are still parsed.
 Trajectory headers require a nonempty title; an empty title is retained with an
@@ -360,10 +393,9 @@ The current typed problem-body coverage includes:
 - full-table interpolation groups likewise check that their independent-value
   assignments follow the order in the table-call argument list.
 
-The parser still deliberately retains some documented complex bodies as raw statements while
-their typed contracts are being reconstructed. The next evidence-backed slices are the remaining
-block-specific variable restrictions. Raw retention in those areas is a supported preservation
-boundary, not an assertion that the runtime semantics have been implemented. A table is not marked
+The parser deliberately retains some documented complex bodies as raw statements rather than
+inventing typed semantics. Raw retention in those areas is the supported preservation boundary,
+not an assertion that runtime semantics have been implemented. A table is not marked
 executable-complete when it contains syntax or semantic errors, even if recovery produced a partial
 AST.
 
@@ -382,4 +414,5 @@ provenance together. Do not silently rewrite established manual examples to fit 
 - turn the EBNF into an executable grammar or generate parser checks from it;
 - add positive and negative grammar fixtures independent of manual examples;
 - model units and defaults explicitly;
-- close complex block-body and lossless-formatting gaps.
+- deepen typed projections, defaults, and runtime semantics without weakening the
+  source-preserving acceptance boundary.

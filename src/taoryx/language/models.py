@@ -417,6 +417,30 @@ class ProblemDocument(BaseModel):
 ####
 
 
+class ProblemFragmentDocument(BaseModel):
+    """A scoped problem-language excerpt without inferred surrounding state."""
+
+    source_text: str
+    scope: Literal["problem", "trajectory", "segment"]
+    blocks: list[AnyBlock] = Field(default_factory=list)
+    diagnostics: list[Diagnostic] = Field(default_factory=list)
+    recovered_records: list[RecoveredRecord] = Field(default_factory=list)
+    deferred_diagnostics: list[Diagnostic] = Field(default_factory=list)
+    deferred_recovered_records: list[RecoveredRecord] = Field(default_factory=list)
+####
+
+
+class OptimizeBodyFragment(BaseModel):
+    """A lossless optimize constraint/control excerpt without its header."""
+
+    source_text: str
+    constraints: list[OptimizeConstraint] = Field(default_factory=list)
+    controls: list[Assignment] = Field(default_factory=list)
+    diagnostics: list[Diagnostic] = Field(default_factory=list)
+    recovered_records: list[RecoveredRecord] = Field(default_factory=list)
+####
+
+
 class TableAssignment(BaseModel):
     name: str
     values: list[float]
@@ -463,4 +487,63 @@ class TableDocument(BaseModel):
     diagnostics: list[Diagnostic] = Field(default_factory=list)
     recovered_records: list[RecoveredRecord] = Field(default_factory=list)
     executable_complete: bool = True
+####
+
+
+class TableOperationFragment(BaseModel):
+    """A lossless parse of operations excerpted from a full-table body.
+
+    Fragments intentionally skip whole-table completeness and interpolation
+    checks.  The surrounding table declaration may be absent from a manual
+    display, so those semantics cannot be inferred from the excerpt alone.
+    """
+
+    source_text: str
+    operations: list[TableOperation] = Field(default_factory=list)
+    diagnostics: list[Diagnostic] = Field(default_factory=list)
+    recovered_records: list[RecoveredRecord] = Field(default_factory=list)
+####
+
+
+class TableAssignmentFragment(BaseModel):
+    """A lossless parse of one or more table assignment statements."""
+
+    source_text: str
+    assignments: list[TableAssignment] = Field(default_factory=list)
+    diagnostics: list[Diagnostic] = Field(default_factory=list)
+    recovered_records: list[RecoveredRecord] = Field(default_factory=list)
+####
+
+
+class TableHeaderFragment(BaseModel):
+    """A lossless parse of a table declaration header excerpt."""
+
+    source_text: str
+    table_type: str | None = None
+    independent_variables: list[str] = Field(default_factory=list)
+    options: dict[str, str | float] = Field(default_factory=dict)
+    diagnostics: list[Diagnostic] = Field(default_factory=list)
+    recovered_records: list[RecoveredRecord] = Field(default_factory=list)
+####
+
+
+class TableSimpleBodyFragment(BaseModel):
+    """A table header and simple-body excerpt without completion semantics."""
+
+    source_text: str
+    header: TableHeaderFragment
+    assignments: list[TableAssignment] = Field(default_factory=list)
+    diagnostics: list[Diagnostic] = Field(default_factory=list)
+    recovered_records: list[RecoveredRecord] = Field(default_factory=list)
+####
+
+
+class TableSkewedFragment(BaseModel):
+    """A skewed-interpolation operation with its source assignment groups."""
+
+    source_text: str
+    operation: TableOperation | None = None
+    assignment_groups: list[list[TableAssignment]] = Field(default_factory=list)
+    diagnostics: list[Diagnostic] = Field(default_factory=list)
+    recovered_records: list[RecoveredRecord] = Field(default_factory=list)
 ####

@@ -1,0 +1,21 @@
+id: n006_table_cardinality
+title: Simple table cardinality mismatch
+kind: negative
+path: cases/negative/n006_table_cardinality
+problem_file: input/n006_table_cardinality.prb
+table_files:
+- input/bad.tbl
+features:
+- table_cardinality
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- simple-table-cardinality
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

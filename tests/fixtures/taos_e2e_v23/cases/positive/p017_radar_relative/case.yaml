@@ -1,0 +1,37 @@
+id: p017_radar_relative
+title: Analytic two-vehicle relative and radar observations
+kind: positive
+path: cases/positive/p017_radar_relative
+problem_file: input/p017_radar_relative.prb
+table_files: []
+features:
+- multiple_vehicles
+- relative_outputs
+- radar_station
+- problem_level_file
+grammar_productions:
+- radar_block
+- indexed_output_variable
+- problem_file_block
+runtime_tier: analytic
+static_expectation: pass
+expected_diagnostics: []
+output_file: observer.dat
+oracles:
+- type: final_approx
+  column: relrng[2]
+  value: 800.0
+  atol: 0.0001
+- type: series_monotonic
+  column: relrng[2]
+  direction: decreasing
+  strict: true
+- type: series_constant_value
+  column: relvel[2]
+  value: 20.0
+  atol: 0.0001
+notes: []
+source_sections:
+- 2.4.2
+- 2.4.3
+- 4.4.8

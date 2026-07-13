@@ -130,6 +130,17 @@ def test_limited_state_tables_reject_undocumented_dependencies() -> None:
     assert any(record.code == "unsupported-limited-state-variable" for record in document.recovered_records)
 
 
+def test_limited_state_tables_accept_user_defined_dependencies() -> None:
+    document = parse_table_text(
+        "(weight-cg) table cg(wt,config) no-extrap\n"
+        "wt=1000,2000\n"
+        "config=1,2\n"
+        "cg=0.40,0.70,0.45,0.75\n"
+    )
+
+    assert not [item for item in document.diagnostics if item.code == "unsupported-limited-state-variable"]
+
+
 def test_tables_cannot_depend_on_their_own_dependent_variable() -> None:
     document = parse_table_text(
         "(broken) table thrust(time,thrust)\n"
@@ -264,6 +275,20 @@ def test_full_table_goto_accepts_value_labels_but_nested_if_is_rejected() -> Non
     )
     assert any(item.code == "invalid-if-operation" for item in invalid.diagnostics)
     assert any(record.code == "invalid-if-operation" for record in invalid.recovered_records)
+
+
+def test_full_table_accepts_signed_numeric_labels_and_goto_destinations() -> None:
+    document = parse_table_text(
+        "(signed-labels) table output\n"
+        "start\n"
+        "-1.5: add value\n"
+        "goto -1.5\n"
+        "end\n"
+    )
+
+    assert not document.diagnostics
+    assert document.tables[0].operations[0].label == "-1.5"
+    assert document.tables[0].operations[1].operand == "-1.5"
 
 
 def test_full_table_rejects_ambiguous_storage_and_control_flow_destinations() -> None:

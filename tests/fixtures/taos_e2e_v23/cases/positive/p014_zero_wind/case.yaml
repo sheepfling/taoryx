@@ -1,0 +1,25 @@
+id: p014_zero_wind
+title: Zero-wind airspeed baseline
+kind: positive
+path: cases/positive/p014_zero_wind
+problem_file: input/p014_zero_wind.prb
+table_files: []
+features:
+- zero_wind
+- airspeed_output
+grammar_productions:
+- wind_default
+- initial_geodetic
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: wind.dat
+oracles:
+- type: series_constant_value
+  column: vair
+  value: 300.0
+  atol: 1.0e-05
+notes: []
+source_sections:
+- 2.1.8
+- 4.4.14

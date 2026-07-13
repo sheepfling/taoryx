@@ -1,0 +1,4 @@
+(wind-down)
+table windd(alt) no-extrap
+alt=0,20000
+windd=5,5

@@ -5,7 +5,16 @@ import math
 import pytest
 
 from taoryx.equations import CartesianVector3
-from taoryx.guidance import cubic_guidance_correction, parabolic_guidance_correction, predictive_intercept
+from taoryx.guidance import (
+    FlightPathLimit,
+    apply_flight_path_limits,
+    classify_guidance_rules,
+    cubic_guidance_correction,
+    parabolic_guidance_correction,
+    predictive_intercept,
+    range_insensitive_axis,
+    solve_guidance,
+)
 from taoryx.numeric import NewtonSystemStatus, newton_system
 
 
@@ -65,3 +74,37 @@ def test_predictive_intercept_returns_time_point_and_line_of_sight_angles() -> N
     assert result.intercept_point == CartesianVector3(0.0, 10.0, 0.0)
     assert result.heading_radians == pytest.approx(math.pi / 2.0)
     assert result.flight_path_angle_radians == pytest.approx(0.0)
+
+
+def test_range_insensitive_axis_prefers_time_sensitivity_over_position_sensitivity() -> None:
+    result = range_insensitive_axis(((1.0, 0.0), (0.0, 0.0), (0.0, 0.0)), (0.0, 1.0))
+
+    assert abs(result.yaw_radians - math.pi / 2.0) < math.radians(1.0)
+    assert result.position_sensitivity_norm < 0.02
+    assert result.time_sensitivity > 0.99
+
+
+def test_flight_path_limits_add_replacement_rules_and_bound_free_controls() -> None:
+    result = apply_flight_path_limits(
+        ("gamgd",),
+        {"alpha": (-10.0, 10.0)},
+        (FlightPathLimit("alpha", lower=-5.0, upper=5.0), FlightPathLimit("mach", upper=2.0, replacement_rule="hold-mach")),
+        {"alpha": 0.0, "mach": 3.0},
+    )
+
+    assert result.bounds == (("alpha", (-5.0, 5.0)),)
+    assert result.rules == ("gamgd", "hold-mach")
+
+
+def test_guidance_control_classification_selects_first_compatible_set() -> None:
+    result = classify_guidance_rules(("alpha",), (("alpha", "beta"), ("alpha", "beta", "gamma")))
+
+    assert result.selected_set == ("alpha", "beta")
+    assert result.free_controls == ("beta",)
+
+
+def test_solve_guidance_delegates_to_bounded_newton_contract() -> None:
+    result = solve_guidance(lambda controls: (controls[0] - 4.0,), (0.0,), ((-10.0, 10.0),), 1e-5, 1e-9)
+
+    assert result.converged
+    assert result.controls == pytest.approx((4.0,))

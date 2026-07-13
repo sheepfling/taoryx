@@ -1,0 +1,4 @@
+(zero-mdot)
+table mdot(tmark) no-extrap units=lb/sec
+tmark=0,10
+mdot=0,0

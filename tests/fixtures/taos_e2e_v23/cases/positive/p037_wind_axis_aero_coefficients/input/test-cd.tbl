@@ -1,0 +1,4 @@
+(test-cd)
+table cd(alpha) no-extrap sref=20
+alpha=-10,0,5,10
+cd=0.08,0.02,0.03,0.06

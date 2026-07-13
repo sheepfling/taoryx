@@ -1,0 +1,29 @@
+id: p027_proportional_navigation
+title: Two-vehicle propnav guidance
+kind: positive
+path: cases/positive/p027_proportional_navigation
+problem_file: input/p027_proportional_navigation.prb
+table_files:
+- input/interceptor-thrust.tbl
+- input/zero-mdot.tbl
+features:
+- multi_vehicle
+- propnav
+- thrust_vectoring_via_body_attitude
+- relative_range
+grammar_productions:
+- fly_special_rule
+- indexed_trajectory_reference
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: interceptor.dat
+oracles:
+- type: relative_range_reduces
+  column: relrng[2]
+  minimum_fraction: 0.1
+- type: no_nan
+notes: []
+source_sections:
+- 2.5.2
+- 4.2.4

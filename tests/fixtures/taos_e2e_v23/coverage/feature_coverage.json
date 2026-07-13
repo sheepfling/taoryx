@@ -1,0 +1,520 @@
+{
+  "aero_force_aggregation": [
+    "p044_split_aero_aggregation",
+    "p045_single_aero_equivalent"
+  ],
+  "airspeed_output": [
+    "p014_zero_wind"
+  ],
+  "all_table_math_operations": [
+    "p047_full_table_operation_gauntlet"
+  ],
+  "atmosphere_columns": [
+    "p012_user_atmosphere"
+  ],
+  "atmosphere_semantics": [
+    "n012_user_atmos_duplicate_alt"
+  ],
+  "bad_goto": [
+    "n002_bad_goto"
+  ],
+  "ballistic_drop": [
+    "p043_wgs84_gravity_drop"
+  ],
+  "body_axis_aerodynamics": [
+    "p038_body_axis_aero_coefficients"
+  ],
+  "bound_solution": [
+    "p022_optimize_linear_boundary"
+  ],
+  "branching": [
+    "p016_rail_stage_branch"
+  ],
+  "case_insensitivity": [
+    "p046_case_insensitive_free_field"
+  ],
+  "cd_table": [
+    "p037_wind_axis_aero_coefficients"
+  ],
+  "cg_dependent_aerodynamics": [
+    "p036_constants_cg_user_variables"
+  ],
+  "cg_table": [
+    "p036_constants_cg_user_variables"
+  ],
+  "cl_table": [
+    "p037_wind_axis_aero_coefficients"
+  ],
+  "comments": [
+    "p046_case_insensitive_free_field"
+  ],
+  "complete_aero_set": [
+    "p037_wind_axis_aero_coefficients",
+    "p038_body_axis_aero_coefficients"
+  ],
+  "constant_mach": [
+    "p025_level_mach_guidance"
+  ],
+  "constants_block": [
+    "p036_constants_cg_user_variables"
+  ],
+  "coordinate_initialization_equivalence": [
+    "p042_ecic_initialization"
+  ],
+  "coordinate_transform": [
+    "p018_geodetic_initialization",
+    "p019_ecfc_initialization"
+  ],
+  "crosswind": [
+    "p015_crosswind"
+  ],
+  "cs_table": [
+    "p037_wind_axis_aero_coefficients"
+  ],
+  "cx_table": [
+    "p038_body_axis_aero_coefficients"
+  ],
+  "cy_table": [
+    "p038_body_axis_aero_coefficients"
+  ],
+  "cz_table": [
+    "p038_body_axis_aero_coefficients"
+  ],
+  "derived_temperature": [
+    "p013_site_atmosphere"
+  ],
+  "direct_angle_guidance": [
+    "p011_skewed_aero_table"
+  ],
+  "direct_attitude": [
+    "p024_guidance_table"
+  ],
+  "direct_euler_guidance": [
+    "p002_constant_thrust_table"
+  ],
+  "downrange_crossrange": [
+    "p028_tangent_iip_downrange"
+  ],
+  "duplicate_segment": [
+    "n004_duplicate_segment"
+  ],
+  "duplicate_table": [
+    "n008_duplicate_table"
+  ],
+  "duplicate_trajectory": [
+    "n003_duplicate_trajectory"
+  ],
+  "ecfc_initial_conditions": [
+    "p001_linear_ecfc_zero_force",
+    "p019_ecfc_initialization"
+  ],
+  "ecic_initial_conditions": [
+    "p042_ecic_initialization"
+  ],
+  "egs": [
+    "p032_manual_ballistic_reentry"
+  ],
+  "egs_output": [
+    "p048_problem_level_outputs_and_egs"
+  ],
+  "exact_grid_point": [
+    "p012_user_atmosphere"
+  ],
+  "execution_order_semantics": [
+    "n013_first_segment_inertial_body"
+  ],
+  "exponential_interpolation": [
+    "p013_site_atmosphere"
+  ],
+  "fixed_format": [
+    "p023_units_format"
+  ],
+  "fixed_step_integration": [
+    "p001_linear_ecfc_zero_force"
+  ],
+  "force_aggregation": [
+    "p029_split_thrust_aggregation"
+  ],
+  "force_aggregation_equivalence": [
+    "p030_single_thrust_equivalent"
+  ],
+  "free_alpha": [
+    "p025_level_mach_guidance"
+  ],
+  "free_field_delimiters": [
+    "p046_case_insensitive_free_field"
+  ],
+  "free_power": [
+    "p025_level_mach_guidance"
+  ],
+  "fuel_output": [
+    "p003_variable_mass_rocket"
+  ],
+  "full_application_smoke": [
+    "p033_manual_ballistic_rocket_synthetic",
+    "p034_manual_air_intercept_synthetic",
+    "p035_manual_ground_intercept_synthetic"
+  ],
+  "full_table": [
+    "p008_reentry_full_table_equivalent",
+    "p009_piecewise_full_thrust"
+  ],
+  "full_table_control_flow": [
+    "p047_full_table_operation_gauntlet"
+  ],
+  "geodetic_initial_conditions": [
+    "p004_vacuum_ballistic_coarse",
+    "p005_vacuum_ballistic_medium",
+    "p006_vacuum_ballistic_fine",
+    "p018_geodetic_initialization"
+  ],
+  "geodetic_wind": [
+    "p015_crosswind"
+  ],
+  "goto": [
+    "p009_piecewise_full_thrust"
+  ],
+  "gravity_model": [
+    "p043_wgs84_gravity_drop"
+  ],
+  "guidance_semantics": [
+    "n009_inconsistent_fly_set"
+  ],
+  "guidance_table": [
+    "p024_guidance_table"
+  ],
+  "if_then": [
+    "p009_piecewise_full_thrust"
+  ],
+  "iip_outputs": [
+    "p028_tangent_iip_downrange"
+  ],
+  "impact_final_condition": [
+    "p007_reentry_simple_table"
+  ],
+  "increment": [
+    "p016_rail_stage_branch"
+  ],
+  "indirect_guidance": [
+    "p025_level_mach_guidance"
+  ],
+  "inertial_platform_ecfc": [
+    "p002_constant_thrust_table"
+  ],
+  "initial_impact_point": [
+    "p028_tangent_iip_downrange"
+  ],
+  "initial_semantics": [
+    "n010_initial_mass_conflict"
+  ],
+  "integration_step_alignment": [
+    "p024_guidance_table"
+  ],
+  "intercept": [
+    "p026_predictive_intercept"
+  ],
+  "interp_2": [
+    "p024_guidance_table"
+  ],
+  "invalid_parameter_index": [
+    "n014_optimize_bad_parameter"
+  ],
+  "labels": [
+    "p009_piecewise_full_thrust"
+  ],
+  "large_table": [
+    "p049_large_table_many_segments_stress"
+  ],
+  "level_flight": [
+    "p025_level_mach_guidance"
+  ],
+  "manual_fixture": [
+    "p032_manual_ballistic_reentry",
+    "p033_manual_ballistic_rocket_synthetic",
+    "p034_manual_air_intercept_synthetic",
+    "p035_manual_ground_intercept_synthetic"
+  ],
+  "many_segments": [
+    "p049_large_table_many_segments_stress"
+  ],
+  "mass_flow_table": [
+    "p002_constant_thrust_table"
+  ],
+  "mass_flow_units": [
+    "p003_variable_mass_rocket"
+  ],
+  "math_operations": [
+    "p010_output_define_full_table"
+  ],
+  "metric_conversion": [
+    "p023_units_format"
+  ],
+  "missing_end": [
+    "n001_missing_end"
+  ],
+  "missing_table": [
+    "n005_missing_table_reference"
+  ],
+  "multi_vehicle": [
+    "p026_predictive_intercept",
+    "p027_proportional_navigation"
+  ],
+  "multi_vehicle_output": [
+    "p048_problem_level_outputs_and_egs"
+  ],
+  "multiple_aero_blocks": [
+    "p044_split_aero_aggregation"
+  ],
+  "multiple_problems_per_file": [
+    "p031_multi_problem_document"
+  ],
+  "multiple_prop_blocks": [
+    "p029_split_thrust_aggregation"
+  ],
+  "multiple_runs": [
+    "p020_survey_summarize"
+  ],
+  "multiple_segments": [
+    "p016_rail_stage_branch"
+  ],
+  "multiple_vehicles": [
+    "p017_radar_relative"
+  ],
+  "optimization": [
+    "p022_optimize_linear_boundary"
+  ],
+  "optimization_parameter": [
+    "p022_optimize_linear_boundary"
+  ],
+  "optimization_semantics": [
+    "n014_optimize_bad_parameter"
+  ],
+  "output_table": [
+    "p010_output_define_full_table",
+    "p047_full_table_operation_gauntlet"
+  ],
+  "parameter_placeholder": [
+    "p020_survey_summarize"
+  ],
+  "piecewise_forcing": [
+    "p009_piecewise_full_thrust"
+  ],
+  "problem_define": [
+    "p048_problem_level_outputs_and_egs"
+  ],
+  "problem_file_output": [
+    "p048_problem_level_outputs_and_egs"
+  ],
+  "problem_level_file": [
+    "p017_radar_relative"
+  ],
+  "propnav": [
+    "p027_proportional_navigation"
+  ],
+  "propulsion_table_set": [
+    "p039_table_driven_thrust_vector"
+  ],
+  "radar_station": [
+    "p017_radar_relative"
+  ],
+  "rail_launch": [
+    "p016_rail_stage_branch"
+  ],
+  "reentry": [
+    "p032_manual_ballistic_reentry"
+  ],
+  "relative_outputs": [
+    "p017_radar_relative"
+  ],
+  "relative_range": [
+    "p026_predictive_intercept",
+    "p027_proportional_navigation"
+  ],
+  "reset": [
+    "p016_rail_stage_branch"
+  ],
+  "root_finding": [
+    "p021_search_linear_target"
+  ],
+  "runge_kutta": [
+    "p004_vacuum_ballistic_coarse",
+    "p005_vacuum_ballistic_medium",
+    "p006_vacuum_ballistic_fine"
+  ],
+  "scientific_format": [
+    "p023_units_format"
+  ],
+  "scientific_notation": [
+    "p046_case_insensitive_free_field"
+  ],
+  "search": [
+    "p021_search_linear_target"
+  ],
+  "search_parameter": [
+    "p021_search_linear_target"
+  ],
+  "segment_transition_chain": [
+    "p049_large_table_many_segments_stress"
+  ],
+  "sequential_execution": [
+    "p031_multi_problem_document"
+  ],
+  "simple_aero_table": [
+    "p007_reentry_simple_table"
+  ],
+  "simple_full_equivalence": [
+    "p008_reentry_full_table_equivalent"
+  ],
+  "simple_tables": [
+    "p002_constant_thrust_table"
+  ],
+  "single_aero_block": [
+    "p045_single_aero_equivalent"
+  ],
+  "single_prop_block": [
+    "p030_single_thrust_equivalent"
+  ],
+  "site_atmosphere": [
+    "p013_site_atmosphere"
+  ],
+  "skewed_table": [
+    "p011_skewed_aero_table"
+  ],
+  "spherical_gravity": [
+    "p004_vacuum_ballistic_coarse",
+    "p005_vacuum_ballistic_medium",
+    "p006_vacuum_ballistic_fine"
+  ],
+  "standard_atmosphere": [
+    "p007_reentry_simple_table"
+  ],
+  "storage_variable": [
+    "p010_output_define_full_table",
+    "p047_full_table_operation_gauntlet"
+  ],
+  "stress": [
+    "p049_large_table_many_segments_stress"
+  ],
+  "summarize": [
+    "p020_survey_summarize",
+    "p032_manual_ballistic_reentry"
+  ],
+  "survey": [
+    "p020_survey_summarize",
+    "p032_manual_ballistic_reentry"
+  ],
+  "synthetic_dependency_closure": [
+    "p033_manual_ballistic_rocket_synthetic",
+    "p034_manual_air_intercept_synthetic",
+    "p035_manual_ground_intercept_synthetic"
+  ],
+  "table_cardinality": [
+    "n006_table_cardinality"
+  ],
+  "table_function": [
+    "p010_output_define_full_table"
+  ],
+  "table_nonmonotonic": [
+    "n007_table_nonmonotonic"
+  ],
+  "tabulated_operation": [
+    "p008_reentry_full_table_equivalent"
+  ],
+  "tangent_plane": [
+    "p028_tangent_iip_downrange"
+  ],
+  "three_dimensional_interpolation": [
+    "p011_skewed_aero_table"
+  ],
+  "thrust_output": [
+    "p003_variable_mass_rocket"
+  ],
+  "thrust_table": [
+    "p002_constant_thrust_table"
+  ],
+  "thrust_vectoring": [
+    "p039_table_driven_thrust_vector"
+  ],
+  "thrust_vectoring_via_body_attitude": [
+    "p026_predictive_intercept",
+    "p027_proportional_navigation"
+  ],
+  "trajectory_define": [
+    "p010_output_define_full_table"
+  ],
+  "trajectory_file_output": [
+    "p001_linear_ecfc_zero_force"
+  ],
+  "trajectory_inheritance": [
+    "p016_rail_stage_branch"
+  ],
+  "tvec1_table": [
+    "p039_table_driven_thrust_vector"
+  ],
+  "tvec2_table": [
+    "p039_table_driven_thrust_vector"
+  ],
+  "units_fmt": [
+    "p023_units_format"
+  ],
+  "units_semantics": [
+    "n011_invalid_units_dimension"
+  ],
+  "user_atmosphere": [
+    "p012_user_atmosphere"
+  ],
+  "user_defined_table_variable": [
+    "p036_constants_cg_user_variables"
+  ],
+  "vacuum_atmosphere": [
+    "p004_vacuum_ballistic_coarse",
+    "p005_vacuum_ballistic_medium",
+    "p006_vacuum_ballistic_fine"
+  ],
+  "variable_mass": [
+    "p003_variable_mass_rocket"
+  ],
+  "wgs84": [
+    "p007_reentry_simple_table"
+  ],
+  "wgs84_earth": [
+    "p043_wgs84_gravity_drop"
+  ],
+  "wind_axis_aerodynamics": [
+    "p037_wind_axis_aero_coefficients"
+  ],
+  "wind_component_representation": [
+    "p041_wind_component_tables"
+  ],
+  "wind_speed_heading_representation": [
+    "p040_wind_speed_heading_tables"
+  ],
+  "wind_table": [
+    "p015_crosswind"
+  ],
+  "windd_table": [
+    "p040_wind_speed_heading_tables",
+    "p041_wind_component_tables"
+  ],
+  "winde_table": [
+    "p041_wind_component_tables"
+  ],
+  "windh_table": [
+    "p040_wind_speed_heading_tables"
+  ],
+  "windn_table": [
+    "p041_wind_component_tables"
+  ],
+  "windv_table": [
+    "p040_wind_speed_heading_tables"
+  ],
+  "zero_gravity": [
+    "p001_linear_ecfc_zero_force"
+  ],
+  "zero_rotation": [
+    "p001_linear_ecfc_zero_force"
+  ],
+  "zero_wind": [
+    "p014_zero_wind"
+  ]
+}

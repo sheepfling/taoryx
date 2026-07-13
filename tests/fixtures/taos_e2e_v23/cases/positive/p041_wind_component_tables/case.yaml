@@ -1,0 +1,29 @@
+id: p041_wind_component_tables
+title: Equivalent east, north, and down wind-component tables
+kind: positive
+path: cases/positive/p041_wind_component_tables
+problem_file: input/p041_wind_component_tables.prb
+table_files:
+- input/wind-east.tbl
+- input/wind-north.tbl
+- input/wind-down.tbl
+features:
+- winde_table
+- windn_table
+- windd_table
+- wind_component_representation
+grammar_productions:
+- wind_block
+- winde_table
+- windn_table
+- windd_table
+runtime_tier: metamorphic
+static_expectation: pass
+expected_diagnostics: []
+output_file: wind-representation.dat
+oracles:
+- type: no_nan
+notes: []
+source_sections:
+- '3.1'
+- 4.4.14

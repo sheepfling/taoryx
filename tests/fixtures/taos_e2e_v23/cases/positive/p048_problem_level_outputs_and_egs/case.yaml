@@ -1,0 +1,31 @@
+id: p048_problem_level_outputs_and_egs
+title: Problem-level define, column output, and EGS output across two trajectories
+kind: positive
+path: cases/positive/p048_problem_level_outputs_and_egs
+problem_file: input/p048_problem_level_outputs_and_egs.prb
+table_files: []
+features:
+- problem_define
+- problem_file_output
+- egs_output
+- multi_vehicle_output
+grammar_productions:
+- problem_define_block
+- problem_file_block
+- problem_print_block
+- egs_block
+- indexed_output_variables
+runtime_tier: smoke
+static_expectation: pass
+expected_diagnostics: []
+output_file: compare.dat
+oracles:
+- type: output_exists
+- type: output_exists
+  path: trajectories.dbf
+- type: no_nan
+notes: []
+source_sections:
+- 4.4.2
+- 4.4.4
+- 4.4.5

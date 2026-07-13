@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from .equations import (
@@ -22,6 +23,7 @@ from .equations import (
     proportional_navigation_pitch_acceleration,
     proportional_navigation_yaw_acceleration,
 )
+from .numeric import Function, NewtonSystemResult
 
 
 def parabolic_guidance_correction(
@@ -62,6 +64,149 @@ class ProportionalNavigationResult:
     yaw_acceleration: float
     pitch_acceleration: float
     ecfc_acceleration: CartesianVector3
+####
+
+
+@dataclass(frozen=True, slots=True)
+class RangeInsensitiveAxisResult:
+    """Body-axis delta-v direction selected from IIP sensitivities."""
+
+    yaw_radians: float
+    pitch_radians: float
+    delta_v: float
+    position_sensitivity_norm: float
+    time_sensitivity: float
+####
+
+
+@dataclass(frozen=True, slots=True)
+class GuidanceControlClassification:
+    """Selected direct-control set and remaining free controls."""
+
+    selected_set: tuple[str, ...]
+    direct_controls: tuple[str, ...]
+    free_controls: tuple[str, ...]
+####
+
+
+def classify_guidance_rules(
+    direct_controls: Sequence[str],
+    control_sets: Sequence[Sequence[str]],
+) -> GuidanceControlClassification:
+    """Evaluate TAOS-ALG-GUID-001's lowest-numbered compatible control set."""
+
+    direct = tuple(dict.fromkeys(name.casefold() for name in direct_controls))
+    normalized_sets = tuple(tuple(name.casefold() for name in control_set) for control_set in control_sets)
+    selected = next((control_set for control_set in normalized_sets if set(direct).issubset(control_set)), None)
+    if selected is None:
+        raise ValueError("direct guidance controls are inconsistent with all control sets")
+    return GuidanceControlClassification(selected, direct, tuple(name for name in selected if name not in direct))
+####
+
+
+def solve_guidance(
+    residual_function: Function,
+    initial_controls: Sequence[float],
+    control_bounds: Sequence[tuple[float, float]],
+    increments: Sequence[float] | float,
+    residual_tolerance: float,
+    *,
+    max_iterations: int = 100,
+    ) -> NewtonSystemResult:
+    """Evaluate TAOS-ALG-GUID-002 through the typed Newton guidance contract."""
+
+    from .numeric import newton_system
+
+    return newton_system(
+        residual_function,
+        initial_controls,
+        control_bounds,
+        increments,
+        residual_tolerance,
+        max_iterations=max_iterations,
+    )
+####
+
+
+def range_insensitive_axis(
+    position_sensitivity: Sequence[tuple[float, float]],
+    time_sensitivity: tuple[float, float],
+    *,
+    delta_v: float = 10.0,
+) -> RangeInsensitiveAxisResult:
+    """Evaluate TAOS-ALG-GUID-008 from IIP position/time sensitivities."""
+
+    raw_jacobian = tuple(tuple(float(value) for value in row) for row in position_sensitivity)
+    time_gradient = tuple(float(value) for value in time_sensitivity)
+    if len(time_gradient) != 2 or not raw_jacobian or any(len(row) != 2 for row in raw_jacobian):
+        raise ValueError("position and time sensitivities must have two control columns")
+    jacobian = tuple((row[0], row[1]) for row in raw_jacobian)
+    if delta_v <= 0.0 or not math.isfinite(delta_v):
+        raise ValueError("delta_v must be positive and finite")
+    candidates = tuple(2.0 * math.pi * index / 720.0 for index in range(720))
+    best = min(
+        candidates,
+        key=lambda angle: (
+            _sensitivity_norm(jacobian, (math.cos(angle), math.sin(angle)))
+            / max(abs(time_gradient[0] * math.cos(angle) + time_gradient[1] * math.sin(angle)), 1e-15),
+            -abs(time_gradient[0] * math.cos(angle) + time_gradient[1] * math.sin(angle)),
+        ),
+    )
+    direction = (math.cos(best), math.sin(best))
+    return RangeInsensitiveAxisResult(
+        math.atan2(direction[1], direction[0]),
+        0.0,
+        delta_v,
+        _sensitivity_norm(jacobian, direction),
+        time_gradient[0] * direction[0] + time_gradient[1] * direction[1],
+    )
+####
+
+
+@dataclass(frozen=True, slots=True)
+class FlightPathLimit:
+    """One named flight-condition limit and optional replacement rule."""
+
+    variable: str
+    lower: float | None = None
+    upper: float | None = None
+    replacement_rule: str | None = None
+####
+
+
+@dataclass(frozen=True, slots=True)
+class FlightPathLimitResult:
+    """Effective bounds and rules after applying active flight limits."""
+
+    bounds: tuple[tuple[str, tuple[float | None, float | None]], ...]
+    rules: tuple[str, ...]
+####
+
+
+def apply_flight_path_limits(
+    active_rules: Sequence[str],
+    free_control_bounds: Mapping[str, tuple[float | None, float | None]],
+    limits: Sequence[FlightPathLimit],
+    current_values: Mapping[str, float],
+) -> FlightPathLimitResult:
+    """Evaluate TAOS-ALG-GUID-009's bound/replacement-rule contract."""
+
+    effective = {name.casefold(): bounds for name, bounds in free_control_bounds.items()}
+    rules = list(active_rules)
+    for limit in limits:
+        value = current_values.get(limit.variable)
+        if value is None:
+            raise KeyError(f"missing current value for flight limit {limit.variable}")
+        outside = (limit.lower is not None and value < limit.lower) or (limit.upper is not None and value > limit.upper)
+        if outside and limit.replacement_rule is not None:
+            rules.append(limit.replacement_rule)
+        if limit.variable.casefold() in effective and not outside:
+            lower, upper = effective[limit.variable.casefold()]
+            effective[limit.variable.casefold()] = (
+                limit.lower if lower is None else max(lower, limit.lower) if limit.lower is not None else lower,
+                limit.upper if upper is None else min(upper, limit.upper) if limit.upper is not None else upper,
+            )
+    return FlightPathLimitResult(tuple(sorted(effective.items())), tuple(rules))
 ####
 
 
@@ -167,4 +312,9 @@ def cubic_guidance_correction(
         coefficient_b,
     )
     return cubic_guidance_acceleration(current_time, coefficient_a, coefficient_b)
+####
+
+
+def _sensitivity_norm(jacobian: tuple[tuple[float, float], ...], direction: tuple[float, float]) -> float:
+    return math.sqrt(sum((row[0] * direction[0] + row[1] * direction[1]) ** 2 for row in jacobian))
 ####

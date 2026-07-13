@@ -12,12 +12,32 @@ from taoryx.language.grammar_contracts import (
 from taoryx.language.ingest import FileKind, ingest_text
 from taoryx.language.lexical import lex_text
 from taoryx.language.lossless import parse_lossless_bytes
+from taoryx.language.problem_fragments import parse_optimize_body_fragment, parse_problem_fragment
 from taoryx.language.problem_parser import parse_problem_text
-from taoryx.language.table_parser import parse_table_text
+from taoryx.language.table_parser import (
+    parse_simple_table_body_fragment,
+    parse_skewed_assignment_groups_fragment,
+    parse_table_assignment_fragment,
+    parse_table_body_fragment,
+    parse_table_header_fragment,
+    parse_table_operation_fragment,
+    parse_table_text,
+)
 
 CORPUS = Path(__file__).parents[1] / "fixtures" / "taos_manual_corpus_v22"
 MANIFEST = json.loads((CORPUS / "manifest.json").read_text(encoding="utf-8"))
-EXPECTED_WRAPPER_ERRORS = {"ch3-011": 1, "ch3-022": 1, "ch4-005": 1, "ch4-016": 1, "ch4-017": 3, "ch4-026": 3, "ch4-051": 1, "ch4-080": 2}
+EXPECTED_WRAPPER_ERRORS = {"ch3-011": 1, "ch3-022": 1, "ch4-005": 1, "ch4-016": 1, "ch4-017": 3, "ch4-026": 3, "ch4-029": 1, "ch4-051": 1, "ch4-080": 2}
+EXPECTED_WRAPPER_DIAGNOSTIC_CODES = {
+    "ch3-011": {"independent-assignment-order"},
+    "ch3-022": {"missing-interpolation-data"},
+    "ch4-005": {"invalid-assignment-line"},
+    "ch4-016": {"inconsistent-fly-angle-set"},
+    "ch4-017": {"wildcard-fly-in-first-segment"},
+    "ch4-026": {"wildcard-fly-in-first-segment"},
+    "ch4-029": {"inertial-body-first-segment"},
+    "ch4-051": {"missing-trajectory-initial"},
+    "ch4-080": {"missing-egs-summary-survey", "missing-egs-summary-variable"},
+}
 
 
 def test_corpus_manifest_and_every_raw_display_are_lossless() -> None:
@@ -54,6 +74,145 @@ def test_complete_top_level_corpus_documents_have_no_parser_errors() -> None:
         path = CORPUS / entry["raw_path"]
         parsed = parse_table_text(path.read_text(), str(path)) if entry["language"] == "tbl" else parse_problem_text(path.read_text(), str(path))
         assert not [diagnostic for diagnostic in parsed.diagnostics if diagnostic.severity.value == "error"], entry["id"]
+    ####
+
+
+def test_declared_operation_fragment_uses_fragment_parser_without_false_semantics() -> None:
+    entry = next(item for item in MANIFEST["entries"] if item["id"] == "ch3-022")
+    path = CORPUS / entry["raw_path"]
+    text = path.read_text(encoding="utf-8")
+
+    fragment = parse_table_operation_fragment(text, str(path))
+
+    assert fragment.source_text == text
+    assert [operation.operator for operation in fragment.operations] == ["add", "cos", "sqr", "csto", "add"]
+    assert fragment.operations[-1].operand.name == "factor"
+    assert fragment.operations[-1].operand.arguments == ["ca2", "mach"]
+    assert not fragment.diagnostics
+    assert not fragment.recovered_records
+    ####
+
+
+def test_declared_table_body_fragments_use_the_body_parser() -> None:
+    entries = [item for item in MANIFEST["entries"] if item["recommended_entrypoint"] == "parse_full_table_body"]
+    assert {item["id"] for item in entries} == {"ch3-016", "ch3-028"}
+    for entry in entries:
+        path = CORPUS / entry["raw_path"]
+        fragment = parse_table_body_fragment(path.read_text(encoding="utf-8"), str(path))
+        assert not fragment.diagnostics, entry["id"]
+        assert fragment.operations
+        assert fragment.source_text == path.read_text(encoding="utf-8")
+    ####
+
+
+def test_declared_assignment_fragments_use_the_assignment_parser() -> None:
+    entries = [item for item in MANIFEST["entries"] if item["recommended_entrypoint"] == "parse_table_assignment"]
+    assert {item["id"] for item in entries} == {"ch3-008", "ch3-009"}
+    for entry in entries:
+        path = CORPUS / entry["raw_path"]
+        fragment = parse_table_assignment_fragment(path.read_text(encoding="utf-8"), str(path))
+        assert not fragment.diagnostics, entry["id"]
+        assert fragment.assignments
+        assert fragment.source_text == path.read_text(encoding="utf-8")
+    ####
+
+
+def test_declared_header_fragments_use_the_header_parser() -> None:
+    expected = {
+        "ch3-005": ("ca", ["mach", "alt", "alpha"], {}),
+        "ch3-006": ("ca", ["mach", "alpha"], {"extrapolation": "extrap", "sref": 2.162}),
+        "ch3-007": ("mdot", ["time", "motor"], {"extrapolation": "no-extrap", "units": "lb/hr"}),
+    }
+    for entry_id, (table_type, variables, options) in expected.items():
+        entry = next(item for item in MANIFEST["entries"] if item["id"] == entry_id)
+        path = CORPUS / entry["raw_path"]
+        fragment = parse_table_header_fragment(path.read_text(encoding="utf-8"), str(path))
+        assert fragment.table_type == table_type
+        assert fragment.independent_variables == variables
+        assert fragment.options == options
+        assert not fragment.diagnostics, entry_id
+        assert fragment.source_text == path.read_text(encoding="utf-8")
+    ####
+
+
+def test_declared_simple_table_body_fragments_preserve_incomplete_examples() -> None:
+    entries = [item for item in MANIFEST["entries"] if item["recommended_entrypoint"] == "parse_simple_table_body"]
+    assert {item["id"] for item in entries} == {"ch3-010", "ch3-011"}
+    for entry in entries:
+        path = CORPUS / entry["raw_path"]
+        fragment = parse_simple_table_body_fragment(path.read_text(encoding="utf-8"), str(path))
+        assert fragment.header.table_type == "cx"
+        assert fragment.header.independent_variables == ["alt", "mach"]
+        assert [assignment.name for assignment in fragment.assignments] == ["alt", "mach"] if entry["id"] == "ch3-010" else ["mach", "alt"]
+        assert not fragment.diagnostics, entry["id"]
+        assert fragment.source_text == path.read_text(encoding="utf-8")
+    ####
+
+
+def test_declared_skewed_fragments_preserve_assignment_group_boundaries() -> None:
+    expected_groups = {"ch3-029": 2, "ch3-030": 4, "ch3-031": 5}
+    entries = [item for item in MANIFEST["entries"] if item["recommended_entrypoint"] == "parse_skewed_assignment_groups"]
+    assert {item["id"] for item in entries} == set(expected_groups)
+    for entry in entries:
+        path = CORPUS / entry["raw_path"]
+        fragment = parse_skewed_assignment_groups_fragment(path.read_text(encoding="utf-8"), str(path))
+        assert fragment.operation is not None, entry["id"]
+        assert fragment.operation.operator == "add"
+        assert len(fragment.assignment_groups) == expected_groups[entry["id"]]
+        assert all(group for group in fragment.assignment_groups)
+        assert not fragment.diagnostics, entry["id"]
+        assert fragment.source_text == path.read_text(encoding="utf-8")
+    ####
+
+
+def test_direct_problem_fragments_use_the_declared_scope_without_context_errors() -> None:
+    scopes = {
+        "parse_problem_block": "problem",
+        "parse_trajectory_block": "trajectory",
+        "parse_segment_block": "segment",
+    }
+    entries = []
+    for entry in MANIFEST["entries"]:
+        if entry["parse_mode"] != "fragment" or entry["language"] != "prb":
+            continue
+        if entry["recommended_entrypoint"] not in scopes:
+            continue
+        path = CORPUS / entry["raw_path"]
+        first = next((line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()), "")
+        if first.lstrip().startswith("*"):
+            entries.append((entry, path, scopes[entry["recommended_entrypoint"]]))
+    assert len(entries) == 102
+    for entry, path, scope in entries:
+        fragment = parse_problem_fragment(path.read_text(encoding="utf-8"), scope=scope, path=str(path))
+        assert not fragment.diagnostics, entry["id"]
+        assert fragment.source_text == path.read_text(encoding="utf-8")
+        assert all(record.location.line > 0 for record in fragment.recovered_records), entry["id"]
+        assert all(record.location.line > 0 for record in fragment.deferred_recovered_records), entry["id"]
+    ####
+
+
+def test_scoped_fragment_defers_contextual_semantics_without_discarding_evidence() -> None:
+    entry = next(item for item in MANIFEST["entries"] if item["id"] == "ch4-017")
+    path = CORPUS / entry["raw_path"]
+    fragment = parse_problem_fragment(path.read_text(encoding="utf-8"), scope="segment", path=str(path))
+
+    assert not fragment.diagnostics
+    assert {item.code for item in fragment.deferred_diagnostics} >= {"wildcard-fly-in-first-segment"}
+    assert {item.code for item in fragment.deferred_recovered_records} >= {"wildcard-fly-in-first-segment"}
+    assert all(item.location.line > 0 for item in fragment.deferred_diagnostics)
+    ####
+
+
+def test_optimize_body_fragments_preserve_constraints_and_controls_without_header_semantics() -> None:
+    entries = [item for item in MANIFEST["entries"] if item["artifact_kind"] == "optimize_body_fragment"]
+    assert len(entries) == 8
+    for entry in entries:
+        path = CORPUS / entry["raw_path"]
+        fragment = parse_optimize_body_fragment(path.read_text(encoding="utf-8"), str(path))
+        assert fragment.constraints or fragment.controls, entry["id"]
+        assert not fragment.diagnostics, entry["id"]
+        assert fragment.source_text == path.read_text(encoding="utf-8")
+        assert all(record.location.line > 0 for record in fragment.recovered_records), entry["id"]
     ####
 
 
@@ -132,6 +291,7 @@ def test_manual_corpus_diagnostic_allowlist_is_explicit() -> None:
         errors = [diagnostic for diagnostic in parsed.diagnostics if diagnostic.severity.value == "error"]
         if errors:
             observed[entry["id"]] = len(errors)
+            assert {diagnostic.code for diagnostic in errors} == EXPECTED_WRAPPER_DIAGNOSTIC_CODES[entry["id"]]
     assert observed == EXPECTED_WRAPPER_ERRORS
     ####
 

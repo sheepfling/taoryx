@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+import re
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from itertools import product
+
+from .language.models import TableAssignment, TableCall, TableOperation
 
 
 class ExtrapolationMode(StrEnum):
@@ -30,6 +33,53 @@ class PreparedTable:
     def dimension(self) -> int:
         return len(self.axes)
     ####
+####
+
+
+@dataclass(slots=True)
+class TableEvaluationContext:
+    """Values visible while executing a full-table operation program."""
+
+    values: Mapping[str, float]
+    tables: Mapping[str, PreparedTable]
+    storage: dict[str, float]
+
+    @classmethod
+    def from_values(
+        cls,
+        values: Mapping[str, float],
+        tables: Mapping[str, PreparedTable] | None = None,
+    ) -> "TableEvaluationContext":
+        return cls(values, tables or {}, {})
+####
+
+
+@dataclass(frozen=True, slots=True)
+class FullTableResult:
+    """Value and storage state returned by a full-table evaluation."""
+
+    value: float
+    storage: tuple[tuple[str, float], ...]
+####
+
+
+@dataclass(frozen=True, slots=True)
+class SkewedTableSlice:
+    """One outer-grid slice of a skewed table."""
+
+    outer_coordinates: tuple[float, ...]
+    axis: tuple[float, ...]
+    values: tuple[float, ...]
+####
+
+
+@dataclass(frozen=True, slots=True)
+class PreparedSkewedTable:
+    """Validated grouped representation for Chapter 3 skewed tables."""
+
+    slices: tuple[SkewedTableSlice, ...]
+    outer_axes: tuple[tuple[float, ...], ...]
+    extrapolation: ExtrapolationMode
 ####
 
 
@@ -83,6 +133,274 @@ def interpolate_nd(table: PreparedTable, query: Sequence[float]) -> float:
             flat_index += selected * table.strides[axis_index]
         result += weight * table.values[flat_index]
     return result
+####
+
+
+def evaluate_full_table(
+    operations: Sequence[TableOperation],
+    context: TableEvaluationContext,
+    *,
+    max_steps: int = 10000,
+) -> FullTableResult:
+    """Evaluate TAOS-ALG-TABLE-003 using an accumulator and control flow."""
+
+    if not operations:
+        raise ValueError("full table requires at least one operation")
+    if max_steps <= 0:
+        raise ValueError("max_steps must be positive")
+    labels = {operation.label.casefold(): index for index, operation in enumerate(operations) if operation.label}
+    accumulator = 0.0
+    index = 0
+    steps = 0
+    while index < len(operations):
+        if steps >= max_steps:
+            raise RuntimeError("full-table control flow exceeded max_steps")
+        operation = operations[index]
+        steps += 1
+        operator = operation.operator.casefold()
+        if operator == "end":
+            break
+        if operator == "goto":
+            if not isinstance(operation.operand, str) or operation.operand.casefold() not in labels:
+                raise ValueError("goto target is undefined")
+            index = labels[operation.operand.casefold()]
+            continue
+        if operator == "if":
+            if operation.condition is None:
+                raise ValueError("if operation requires a condition")
+            if _evaluate_condition(operation.condition, context, accumulator) and operation.nested is not None:
+                accumulator = _apply_operation(operation.nested, accumulator, context)
+            index += 1
+            continue
+        accumulator = _apply_operation(operation, accumulator, context)
+        index += 1
+    else:
+        raise ValueError("full table must terminate with an end operation")
+    return FullTableResult(accumulator, tuple(sorted(context.storage.items())))
+####
+
+
+def resolve_table_operand(
+    operand: str | float | TableCall,
+    context: TableEvaluationContext,
+    *,
+    assignments: Sequence[TableAssignment] = (),
+) -> float:
+    """Evaluate TAOS-ALG-TABLE-004 operands in the current context."""
+
+    if isinstance(operand, (int, float)):
+        return float(operand)
+    if isinstance(operand, TableCall):
+        table = context.tables.get(operand.name.casefold())
+        if table is None:
+            table = _inline_table(operand, assignments)
+        query = tuple(_resolve_name(argument, context) for argument in operand.arguments)
+        return interpolate_nd(table, query)
+    return _resolve_name(operand, context)
+####
+
+
+def apply_table_operation(
+    accumulator: float,
+    operator: str,
+    operand: float | None = None,
+) -> float:
+    """Evaluate TAOS-ALG-TABLE-005's arithmetic operation dispatch."""
+
+    name = operator.casefold()
+    if name == "add":
+        return accumulator + _require_operand(operand, name)
+    if name == "sub":
+        return accumulator - _require_operand(operand, name)
+    if name == "mult":
+        return accumulator * _require_operand(operand, name)
+    if name == "div":
+        divisor = _require_operand(operand, name)
+        if divisor == 0.0:
+            raise ZeroDivisionError("full-table div operand is zero")
+        return accumulator / divisor
+    if name == "idiv":
+        if accumulator == 0.0:
+            raise ZeroDivisionError("full-table idiv accumulator is zero")
+        return _require_operand(operand, name) / accumulator
+    if name == "exp":
+        return accumulator ** _require_operand(operand, name)
+    if name == "iexp":
+        return _require_operand(operand, name) ** accumulator
+    if name == "max":
+        return min(accumulator, _require_operand(operand, name))
+    if name == "min":
+        return max(accumulator, _require_operand(operand, name))
+    if name == "set":
+        return _require_operand(operand, name)
+    if name == "abs":
+        return abs(accumulator)
+    if name == "neg":
+        return -accumulator
+    if name == "sqr":
+        return accumulator * accumulator
+    if name == "sqrt":
+        return math.sqrt(accumulator)
+    if name == "ln":
+        return math.log(accumulator)
+    if name == "log":
+        return math.log10(accumulator)
+    if name == "e":
+        return math.exp(accumulator)
+    if name == "sin":
+        return math.sin(math.radians(accumulator))
+    if name == "cos":
+        return math.cos(math.radians(accumulator))
+    if name == "tan":
+        return math.tan(math.radians(accumulator))
+    if name == "asin":
+        return math.degrees(math.asin(accumulator))
+    if name == "acos":
+        return math.degrees(math.acos(accumulator))
+    if name == "atan":
+        return math.degrees(math.atan(accumulator))
+    if name == "zero":
+        return 0.0
+    raise ValueError(f"unsupported full-table operation: {operator}")
+####
+
+
+def accumulate_table_values(values: Sequence[float]) -> float:
+    """Evaluate TAOS-ALG-TABLE-009 by summing active table values."""
+
+    normalized = tuple(float(value) for value in values)
+    if any(not math.isfinite(value) for value in normalized):
+        raise ValueError("table values must be finite")
+    return math.fsum(normalized)
+####
+
+
+def prepare_skewed_table(
+    slices: Sequence[SkewedTableSlice],
+    *,
+    extrapolation: ExtrapolationMode = ExtrapolationMode.LINEAR,
+) -> PreparedSkewedTable:
+    """Prepare grouped skewed data for TAOS-ALG-TABLE-008."""
+
+    normalized = tuple(
+        SkewedTableSlice(
+            tuple(float(value) for value in item.outer_coordinates),
+            tuple(float(value) for value in item.axis),
+            tuple(float(value) for value in item.values),
+        )
+        for item in slices
+    )
+    if not normalized:
+        raise ValueError("skewed table requires at least one slice")
+    outer_dimension = len(normalized[0].outer_coordinates)
+    expected = math.prod(len({item.outer_coordinates[index] for item in normalized}) for index in range(outer_dimension))
+    if outer_dimension < 1 or len(normalized) != expected:
+        raise ValueError("skewed table slices must form a complete outer grid")
+    if len({item.outer_coordinates for item in normalized}) != len(normalized):
+        raise ValueError("skewed table outer coordinates must be unique")
+    for item in normalized:
+        if len(item.outer_coordinates) != outer_dimension:
+            raise ValueError("skewed table outer dimensions must match")
+        if len(item.axis) != len(item.values) or len(item.axis) < 1:
+            raise ValueError("skewed table slice axis and values must have equal nonzero length")
+        if any(not math.isfinite(value) for value in item.outer_coordinates + item.axis + item.values):
+            raise ValueError("skewed table values must be finite")
+        if len(item.axis) > 1 and not all(left < right for left, right in zip(item.axis, item.axis[1:], strict=False)):
+            raise ValueError("skewed table slice axes must be strictly ascending")
+        ####
+    ####
+    outer_axes = tuple(tuple(sorted({item.outer_coordinates[index] for item in normalized})) for index in range(outer_dimension))
+    if not isinstance(extrapolation, ExtrapolationMode):
+        raise ValueError("unsupported table extrapolation mode")
+    return PreparedSkewedTable(normalized, outer_axes, extrapolation)
+####
+
+
+def interpolate_skewed(table: PreparedSkewedTable, query: Sequence[float]) -> float:
+    """Interpolate TAOS-ALG-TABLE-008 grouped skewed tabulated data."""
+
+    point = tuple(float(value) for value in query)
+    if len(point) != len(table.outer_axes) + 1 or any(not math.isfinite(value) for value in point):
+        raise ValueError("skewed query dimension must match the table")
+    outer_values: list[float] = []
+    for coordinates in _outer_grid(table.outer_axes):
+        item = next(slice_ for slice_ in table.slices if slice_.outer_coordinates == coordinates)
+        inner = prepare_table((item.axis,), item.values, extrapolation=table.extrapolation)
+        outer_values.append(interpolate_nd(inner, (point[-1],)))
+    outer_table = prepare_table(table.outer_axes, outer_values, extrapolation=table.extrapolation)
+    return interpolate_nd(outer_table, point[:-1])
+####
+
+
+def _apply_operation(operation: TableOperation, accumulator: float, context: TableEvaluationContext) -> float:
+    operator = operation.operator.casefold()
+    if operator == "csto":
+        if not isinstance(operation.operand, str):
+            raise ValueError("csto requires a storage name")
+        context.storage[operation.operand.casefold()] = accumulator
+        return 0.0
+    operand = None if operation.operand is None else resolve_table_operand(operation.operand, context, assignments=operation.assignments)
+    return apply_table_operation(accumulator, operator, operand)
+####
+
+
+def _resolve_name(name: str, context: TableEvaluationContext) -> float:
+    key = name.casefold()
+    if key in context.storage:
+        return context.storage[key]
+    for source_name, value in context.values.items():
+        if source_name.casefold() == key:
+            return float(value)
+    raise KeyError(f"undefined table operand: {name}")
+####
+
+
+def _require_operand(operand: float | None, operator: str) -> float:
+    if operand is None:
+        raise ValueError(f"{operator} requires an operand")
+    return operand
+####
+
+
+def _evaluate_condition(condition: str, context: TableEvaluationContext, accumulator: float) -> bool:
+    match = re.fullmatch(r"\s*(\S+)\s*(<=|>=|==|!=|<|>)\s*(\S+)\s*", condition)
+    if match is None:
+        raise ValueError(f"unsupported table condition: {condition}")
+    left = accumulator if match.group(1).casefold() in {"value", "table"} else _resolve_name(match.group(1), context)
+    right = float(match.group(3)) if _is_number(match.group(3)) else _resolve_name(match.group(3), context)
+    return {
+        "<": left < right,
+        "<=": left <= right,
+        "==": left == right,
+        "!=": left != right,
+        ">=": left >= right,
+        ">": left > right,
+    }[match.group(2)]
+####
+
+
+def _is_number(value: str) -> bool:
+    try:
+        float(value)
+    except ValueError:
+        return False
+    return True
+####
+
+
+def _outer_grid(axes: tuple[tuple[float, ...], ...]) -> tuple[tuple[float, ...], ...]:
+    return tuple(tuple(values) for values in product(*axes))
+####
+
+
+def _inline_table(operand: TableCall, assignments: Sequence[TableAssignment]) -> PreparedTable:
+    rows = tuple(assignments)
+    names = tuple(operand.arguments) + (operand.name,)
+    by_name = {row.name.casefold(): tuple(float(value) for value in row.values) for row in rows}
+    missing = [name for name in names if name.casefold() not in by_name]
+    if missing:
+        raise ValueError(f"inline table is missing assignments: {missing}")
+    return prepare_table(tuple(by_name[name.casefold()] for name in operand.arguments), by_name[operand.name.casefold()])
 ####
 
 

@@ -1,0 +1,124 @@
+groups:
+- id: m001_dt_convergence
+  title: Fourth-order integration refinement trend
+  cases:
+  - p004_vacuum_ballistic_coarse
+  - p005_vacuum_ballistic_medium
+  - p006_vacuum_ballistic_fine
+  comparison: convergence
+  columns:
+  - alt
+  atol: 0.0
+  rtol: 0.0
+  notes:
+  - The final fine-step result is used as the reference; coarse-to-medium error should
+    decrease.
+- id: m002_simple_full_table_equivalence
+  title: Simple and full tables produce the same trajectory
+  cases:
+  - p007_reentry_simple_table
+  - p008_reentry_full_table_equivalent
+  comparison: allclose
+  columns:
+  - time
+  - alt
+  - vel
+  - mach
+  - dynprs
+  - ca
+  atol: 1.0e-08
+  rtol: 1.0e-08
+- id: m003_wind_effect
+  title: Crosswind increases airspeed while ground speed is unchanged
+  cases:
+  - p014_zero_wind
+  - p015_crosswind
+  comparison: crosswind_increases_airspeed
+  columns:
+  - vair
+  - vel
+- id: m004_coordinate_initialization_equivalence
+  title: Geodetic and ECFC representations describe the same state
+  cases:
+  - p018_geodetic_initialization
+  - p019_ecfc_initialization
+  comparison: allclose
+  columns:
+  - time
+  - xecfc
+  - yecfc
+  - zecfc
+  - xecfcdt
+  - yecfcdt
+  - zecfcdt
+  atol: 1.0e-05
+  rtol: 1.0e-10
+- id: m005_prop_aggregation_equivalence
+  title: Two propulsive force blocks equal one summed block
+  cases:
+  - p029_split_thrust_aggregation
+  - p030_single_thrust_equivalent
+  comparison: allclose
+  columns:
+  - time
+  - xecfc
+  - xecfcdt
+  - thrust
+  atol: 1.0e-08
+  rtol: 1.0e-08
+- id: m006_guidance_intercept_methods
+  title: Predictive and proportional navigation both reduce relative range
+  cases:
+  - p026_predictive_intercept
+  - p027_proportional_navigation
+  comparison: both_reduce_relative_range
+  columns:
+  - relrng[2]
+- id: m007_wind_representation_equivalence
+  title: Speed-heading and east-north wind representations are equivalent
+  cases:
+  - p040_wind_speed_heading_tables
+  - p041_wind_component_tables
+  comparison: allclose
+  columns:
+  - time
+  - vel
+  - vair
+  - mach
+  atol: 1.0e-08
+  rtol: 1.0e-08
+  notes:
+  - A 50 ft/s wind from the east with 5 ft/s downward component is represented both
+    ways.
+- id: m008_ecic_coordinate_initialization_equivalence
+  title: Geodetic, ECFC, and ECIC initialization are equivalent when omega is zero
+  cases:
+  - p018_geodetic_initialization
+  - p019_ecfc_initialization
+  - p042_ecic_initialization
+  comparison: allclose
+  columns:
+  - time
+  - xecfc
+  - yecfc
+  - zecfc
+  - xecfcdt
+  - yecfcdt
+  - zecfcdt
+  atol: 1.0e-05
+  rtol: 1.0e-10
+- id: m009_aerodynamic_aggregation_equivalence
+  title: Two aerodynamic blocks equal one block with summed coefficients
+  cases:
+  - p044_split_aero_aggregation
+  - p045_single_aero_equivalent
+  comparison: allclose
+  columns:
+  - time
+  - alt
+  - vel
+  - xecfc
+  - yecfc
+  - zecfc
+  atol: 1.0e-08
+  rtol: 1.0e-08

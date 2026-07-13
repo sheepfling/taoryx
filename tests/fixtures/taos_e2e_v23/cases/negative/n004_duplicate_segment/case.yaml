@@ -1,0 +1,20 @@
+id: n004_duplicate_segment
+title: Duplicate segment number
+kind: negative
+path: cases/negative/n004_duplicate_segment
+problem_file: input/n004_duplicate_segment.prb
+table_files: []
+features:
+- duplicate_segment
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- duplicate-segment
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

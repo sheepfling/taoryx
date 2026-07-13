@@ -1,0 +1,380 @@
+packages:
+- package: taos_math
+  modules:
+  - module: aerodynamics
+    algorithm_ids:
+    - TAOS-ALG-AERO-001
+    - TAOS-ALG-AERO-002
+    - TAOS-ALG-FORCE-001
+    - TAOS-ALG-FORCE-002
+    - TAOS-ALG-FORCE-003
+    - TAOS-ALG-FORCE-004
+    symbols:
+    - aerodynamic_performance_metrics
+    - maximum_lift_to_drag
+    - force_from_axial_normal_coefficients
+    - force_from_wind_coefficients
+    - force_from_body_coefficients
+    - evaluate_aerodynamic_forces
+- package: taos_math
+  modules:
+  - module: atmosphere
+    algorithm_ids:
+    - TAOS-ALG-ENV-002
+    - TAOS-ALG-ENV-003
+    - TAOS-ALG-ENV-004
+    - TAOS-ALG-ENV-005
+    symbols:
+    - prepare_atmosphere_model
+    - geopotential_altitude
+    - atmosphere_properties
+    - high_altitude_atmosphere
+- package: taos_math
+  modules:
+  - module: attitude
+    algorithm_ids:
+    - TAOS-ALG-COORD-014
+    - TAOS-ALG-COORD-015
+    - TAOS-ALG-COORD-017
+    symbols:
+    - euler_angles_to_body_basis
+    - body_basis_to_euler_angles
+    - resolve_aerodynamic_attitude
+- package: taos_math
+  modules:
+  - module: coordinates
+    algorithm_ids:
+    - TAOS-ALG-COORD-001
+    - TAOS-ALG-COORD-002
+    - TAOS-ALG-COORD-003
+    - TAOS-ALG-COORD-004
+    - TAOS-ALG-COORD-005
+    - TAOS-ALG-COORD-006
+    - TAOS-ALG-COORD-008
+    - TAOS-ALG-COORD-010
+    - TAOS-ALG-COORD-011
+    - TAOS-ALG-COORD-012
+    - TAOS-ALG-COORD-013
+    - TAOS-ALG-COORD-016
+    - TAOS-ALG-COORD-018
+    - TAOS-ALG-COORD-019
+    symbols:
+    - ecic_coords
+    - geocentric_unit_vectors
+    - geocentric_position_to_ecfc
+    - ecfc_position_to_geocentric
+    - ecfc_velocity_to_geocentric
+    - geocentric_velocity_to_ecfc
+    - geodetic_unit_vectors
+    - geodetic_position_to_ecfc
+    - ecfc_position_to_geodetic
+    - ecfc_velocity_to_geodetic
+    - geodetic_velocity_to_ecfc
+    - velocity_frames
+    - inertial_platform_coordinates
+    - tangent_plane_coordinates
+- package: taos_math
+  modules:
+  - module: dynamics
+    algorithm_ids:
+    - TAOS-ALG-DYN-001
+    - TAOS-ALG-DYN-002
+    - TAOS-ALG-DYN-004
+    - TAOS-ALG-DYN-012
+    - TAOS-ALG-ENV-001
+    symbols:
+    - earth_fixed_derivatives
+    - assemble_state_derivatives
+    - apply_rail_constraint
+    - specific_load_factors
+    - combine_acceleration_contributions
+- package: taos_math
+  modules:
+  - module: earth
+    algorithm_ids:
+    - TAOS-ALG-COORD-007
+    - TAOS-ALG-COORD-009
+    symbols:
+    - resolve_ellipsoid_parameters
+    - ellipsoidal_surface_geometry
+- package: taos_math
+  modules:
+  - module: geodesy
+    algorithm_ids:
+    - TAOS-ALG-GEO-001
+    - TAOS-ALG-GEO-002
+    - TAOS-ALG-GEO-003
+    symbols:
+    - sodano_inverse
+    - downrange_crossrange
+    - sodano_direct
+- package: taos_math
+  modules:
+  - module: gravity
+    algorithm_ids:
+    - TAOS-ALG-GRAV-001
+    - TAOS-ALG-GRAV-002
+    - TAOS-ALG-GRAV-003
+    - TAOS-ALG-GRAV-004
+    - TAOS-ALG-GRAV-005
+    symbols:
+    - geopotential
+    - associated_legendre
+    - harmonic_normalization_factor
+    - gravity_acceleration_full
+    - gravity_acceleration_j2
+- package: taos_math
+  modules:
+  - module: guidance
+    algorithm_ids:
+    - TAOS-ALG-GUID-001
+    - TAOS-ALG-GUID-002
+    - TAOS-ALG-GUID-003
+    - TAOS-ALG-GUID-004
+    - TAOS-ALG-GUID-006
+    - TAOS-ALG-GUID-007
+    - TAOS-ALG-GUID-008
+    - TAOS-ALG-GUID-009
+    symbols:
+    - classify_guidance_rules
+    - solve_guidance
+    - parabolic_guidance_correction
+    - cubic_guidance_correction
+    - predictive_intercept
+    - proportional_navigation
+    - range_insensitive_axis
+    - apply_flight_path_limits
+- package: taos_math
+  modules:
+  - module: iip
+    algorithm_ids:
+    - TAOS-ALG-IIP-001
+    - TAOS-ALG-IIP-003
+    symbols:
+    - iip_derivatives
+    - initial_impact_point
+- package: taos_math
+  modules:
+  - module: integration
+    algorithm_ids:
+    - TAOS-ALG-DYN-003
+    - TAOS-ALG-IIP-002
+    symbols:
+    - rk4_step
+    - rkf45_step
+- package: taos_math
+  modules:
+  - module: linalg
+    algorithm_ids:
+    - TAOS-ALG-COORD-020
+    symbols:
+    - transform_vector
+- package: taos_math
+  modules:
+  - module: numeric
+    algorithm_ids:
+    - TAOS-ALG-GUID-005
+    - TAOS-ALG-OPT-004
+    symbols:
+    - newton_system
+    - finite_difference_jacobian
+- package: taos_math
+  modules:
+  - module: optimization
+    algorithm_ids:
+    - TAOS-ALG-OPT-001
+    - TAOS-ALG-OPT-002
+    - TAOS-ALG-OPT-003
+    - TAOS-ALG-OPT-005
+    symbols:
+    - build_optimization_problem
+    - han_powell_rqp
+    - path_violation_integral
+    - redistribute_control_history
+- package: taos_math
+  modules:
+  - module: propulsion
+    algorithm_ids:
+    - TAOS-ALG-FORCE-005
+    symbols:
+    - evaluate_propulsive_forces
+- package: taos_math
+  modules:
+  - module: radar
+    algorithm_ids:
+    - TAOS-ALG-RADAR-001
+    symbols:
+    - radar_observations
+- package: taos_math
+  modules:
+  - module: relative_motion
+    algorithm_ids:
+    - TAOS-ALG-REL-001
+    symbols:
+    - relative_vehicle_observations
+- package: taos_math
+  modules:
+  - module: searches
+    algorithm_ids:
+    - TAOS-ALG-SEARCH-001
+    - TAOS-ALG-SEARCH-002
+    - TAOS-ALG-SEARCH-003
+    - TAOS-ALG-SEARCH-004
+    - TAOS-ALG-SEARCH-005
+    symbols:
+    - newton_root
+    - secant_bracketed_root
+    - parabolic_root
+    - golden_section_minimize
+    - parabolic_minimize
+- package: taos_math
+  modules:
+  - module: state_rates
+    algorithm_ids:
+    - TAOS-ALG-DYN-005
+    - TAOS-ALG-DYN-006
+    - TAOS-ALG-DYN-007
+    - TAOS-ALG-DYN-008
+    - TAOS-ALG-DYN-009
+    - TAOS-ALG-DYN-010
+    - TAOS-ALG-DYN-011
+    symbols:
+    - longitude_and_geocentric_latitude_rates
+    - geodetic_latitude_and_altitude_rates
+    - altitude_acceleration
+    - dynamic_pressure_derivatives
+    - mach_rate
+    - ground_speed
+    - flight_path_angle_rates
+- package: taos_runtime
+  modules:
+  - module: engine
+    algorithm_ids:
+    - TAOS-ALG-EXEC-001
+    - TAOS-ALG-EXEC-003
+    - TAOS-ALG-EXEC-004
+    - TAOS-ALG-EXEC-005
+    - TAOS-ALG-EXEC-007
+    - TAOS-ALG-EXEC-008
+    - TAOS-ALG-EXEC-009
+    symbols:
+    - run_taos
+    - compute_trajectories
+    - get_next_time_step
+    - integrate_active_vehicles
+    - dispatch_search_and_restart
+    - activate_dependent_vehicles
+    - compute_derivatives
+- package: taos_runtime
+  modules:
+  - module: environment_runtime
+    algorithm_ids:
+    - TAOS-ALG-PRB-012
+    symbols:
+    - evaluate_wind
+- package: taos_runtime
+  modules:
+  - module: events
+    algorithm_ids:
+    - TAOS-ALG-EXEC-006
+    - TAOS-ALG-PRB-004
+    - TAOS-ALG-PRB-005
+    symbols:
+    - refine_segment_final_condition
+    - apply_state_discontinuity
+    - evaluate_when_conditions
+- package: taos_runtime
+  modules:
+  - module: expressions
+    algorithm_ids:
+    - TAOS-ALG-PRB-001
+    - TAOS-ALG-PRB-002
+    symbols:
+    - evaluate_definition_program
+    - integral_variable_derivatives
+- package: taos_runtime
+  modules:
+  - module: guidance
+    algorithm_ids:
+    - TAOS-ALG-PRB-006
+    symbols:
+    - resolve_fly_rules
+- package: taos_runtime
+  modules:
+  - module: initialization
+    algorithm_ids:
+    - TAOS-ALG-PRB-003
+    symbols:
+    - resolve_initial_state
+- package: taos_runtime
+  modules:
+  - module: optimization_runtime
+    algorithm_ids:
+    - TAOS-ALG-PRB-010
+    symbols:
+    - resolve_optimize_block
+- package: taos_runtime
+  modules:
+  - module: outputs
+    algorithm_ids:
+    - TAOS-ALG-OUT-001
+    symbols:
+    - build_output_evaluation_plan
+- package: taos_runtime
+  modules:
+  - module: runtime_model
+    algorithm_ids:
+    - TAOS-ALG-EXEC-002
+    symbols:
+    - build_runtime_problem
+- package: taos_runtime
+  modules:
+  - module: search_runtime
+    algorithm_ids:
+    - TAOS-ALG-PRB-008
+    symbols:
+    - execute_search_loops
+- package: taos_runtime
+  modules:
+  - module: summaries
+    algorithm_ids:
+    - TAOS-ALG-PRB-009
+    symbols:
+    - evaluate_summary
+- package: taos_runtime
+  modules:
+  - module: surveys
+    algorithm_ids:
+    - TAOS-ALG-PRB-007
+    symbols:
+    - generate_survey_cases
+- package: taos_runtime
+  modules:
+  - module: tables
+    algorithm_ids:
+    - TAOS-ALG-TABLE-001
+    - TAOS-ALG-TABLE-002
+    - TAOS-ALG-TABLE-003
+    - TAOS-ALG-TABLE-004
+    - TAOS-ALG-TABLE-005
+    - TAOS-ALG-TABLE-006
+    - TAOS-ALG-TABLE-007
+    - TAOS-ALG-TABLE-008
+    - TAOS-ALG-TABLE-009
+    symbols:
+    - prepare_table
+    - interpolate_nd
+    - evaluate_full_table
+    - resolve_table_operand
+    - apply_table_operation
+    - clear_and_store
+    - execute_table_control_flow
+    - interpolate_skewed
+    - evaluate_table_references
+- package: taos_runtime
+  modules:
+  - module: units
+    algorithm_ids:
+    - TAOS-ALG-PRB-011
+    symbols:
+    - resolve_units_and_formats

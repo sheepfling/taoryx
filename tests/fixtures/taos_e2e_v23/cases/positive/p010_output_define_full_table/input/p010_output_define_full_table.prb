@@ -1,0 +1,13 @@
+(output-table)
+*title Output-table and define integration
+*atmos standard
+*earth wgs-84 omega=0
+*trajectory 1 rv start on 1
+  *define heat-proxy-value
+    heat-proxy-value = table(heat-proxy);
+  *initial geodetic long=0 lat=0 psi=90 time=0 alt=120000 vel=8000 gama=-10 wt=500
+  *file heat.dat time alt vel rho heat-proxy-value
+  *segment 1 coast
+    *integ dtprnt=1 dt=0.1
+    *when time=10 stop
+*end

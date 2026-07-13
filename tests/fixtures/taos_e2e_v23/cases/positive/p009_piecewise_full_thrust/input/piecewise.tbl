@@ -1,0 +1,8 @@
+(piecewise-thrust-table)
+table thrust units=lb
+start
+if (time < 2.0) then goto boost
+add 20
+goto done
+boost: add 100
+done: end

@@ -1,0 +1,36 @@
+id: p036_constants_cg_user_variables
+title: User-defined constants, center-of-gravity table, and cg-dependent aerodynamics
+kind: positive
+path: cases/positive/p036_constants_cg_user_variables
+problem_file: input/p036_constants_cg_user_variables.prb
+table_files:
+- input/weight-cg.tbl
+- input/cg-sensitive-ca.tbl
+features:
+- constants_block
+- cg_table
+- user_defined_table_variable
+- cg_dependent_aerodynamics
+grammar_productions:
+- constants_block
+- cg_block
+- cg_table
+- multidimensional_simple_table
+runtime_tier: invariant
+static_expectation: pass
+expected_diagnostics: []
+output_file: cg.dat
+oracles:
+- type: series_between
+  column: cg
+  low: 0.4
+  high: 0.8
+- type: series_positive
+  column: ca
+- type: no_nan
+notes: []
+source_sections:
+- '3.1'
+- 3.5.5
+- 4.2.2
+- 4.2.3

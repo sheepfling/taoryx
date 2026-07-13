@@ -1,0 +1,43 @@
+id: p034_manual_air_intercept_synthetic
+title: Manual air-launched-intercept.prb with synthetic stand-in tables
+kind: positive
+path: cases/positive/p034_manual_air_intercept_synthetic
+problem_file: input/p034_manual_air_intercept_synthetic.prb
+table_files:
+- input/synthetic-001.tbl
+- input/synthetic-002.tbl
+- input/synthetic-003.tbl
+- input/synthetic-004.tbl
+- input/synthetic-005.tbl
+- input/synthetic-006.tbl
+- input/synthetic-007.tbl
+- input/synthetic-008.tbl
+- input/synthetic-009.tbl
+- input/synthetic-010.tbl
+- input/synthetic-011.tbl
+- input/synthetic-012.tbl
+- input/synthetic-013.tbl
+- input/synthetic-014.tbl
+- input/synthetic-015.tbl
+- input/synthetic-016.tbl
+- input/synthetic-017.tbl
+- input/synthetic-018.tbl
+- input/synthetic-019.tbl
+features:
+- manual_fixture
+- synthetic_dependency_closure
+- full_application_smoke
+grammar_productions:
+- manual_complete_problem
+- synthetic_tables
+runtime_tier: exploratory
+static_expectation: pass
+expected_diagnostics: []
+output_file: null
+oracles:
+- type: clean_exit
+notes:
+- "The tables are deliberately generic stand-ins. This case tests grammar, linking,\
+  \ execution plumbing, and failure reporting\u2014not the historical trajectory."
+source_sections:
+- 4.5.3

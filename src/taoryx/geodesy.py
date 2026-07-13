@@ -29,6 +29,8 @@ from .equations import (
     sodano_reduced_latitude,
     sodano_third_flattening,
 )
+from .equations.ranges import downrange_error_function
+from .searches import RootSearchResult, newton_root
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,6 +49,17 @@ class SodanoDirectResult:
 
     destination: GeodeticCoordinates
     backward_azimuth: Angle
+####
+
+
+@dataclass(frozen=True, slots=True)
+class DownrangeCrossrangeResult:
+    """Projection point and signed surface distances in the reference frame."""
+
+    downrange: Quantity
+    crossrange: Quantity
+    projection: GeodeticCoordinates
+    search: RootSearchResult
 ####
 
 
@@ -141,4 +154,49 @@ def sodano_direct(
     )
     backward = sodano_direct_backward_azimuth(beta1, forward_azimuth.radians, phi)
     return SodanoDirectResult(destination, Angle(backward))
+####
+
+
+def downrange_crossrange(
+    reference: GeodeticCoordinates,
+    reference_azimuth: Angle,
+    vehicle: GeodeticCoordinates,
+    parameters: EllipsoidParameters,
+    *,
+    initial_downrange: Quantity | None = None,
+    derivative_step: Quantity | None = None,
+    distance_tolerance: Quantity | None = None,
+    max_iterations: int = 100,
+) -> DownrangeCrossrangeResult:
+    """Evaluate TAOS-ALG-GEO-002 and equations 2-232 through 2-234.
+
+    Crossrange is positive when the vehicle-to-projection forward azimuth is
+    clockwise from the reference azimuth; the historical equations define the
+    perpendicularity but do not name a signed crossrange axis.
+    """
+
+    unit = parameters.equatorial_radius.unit
+    inverse_to_vehicle = sodano_inverse(reference, vehicle, parameters)
+    initial = (initial_downrange or inverse_to_vehicle.distance).to(unit).value
+    step = (derivative_step or Quantity(max(1.0, 1e-5 * parameters.equatorial_radius.value), unit)).to(unit).value
+    tolerance = (distance_tolerance or Quantity(1e-6, unit)).to(unit).value
+    if initial < 0.0 or step <= 0.0 or tolerance <= 0.0:
+        raise ValueError("downrange search distances and tolerances must be positive")
+    upper = max(2.0 * math.pi * parameters.equatorial_radius.value, initial + step)
+
+    def error(distance: float) -> float:
+        projection = sodano_direct(reference, Quantity(distance, unit), reference_azimuth, parameters)
+        from_projection = sodano_inverse(projection.destination, vehicle, parameters)
+        return downrange_error_function(from_projection.forward_azimuth.radians, projection.backward_azimuth.radians)
+
+    search = newton_root(error, initial, (0.0, upper), step, tolerance, max_iterations=max_iterations)
+    projection = sodano_direct(reference, Quantity(search.root, unit), reference_azimuth, parameters)
+    from_projection = sodano_inverse(projection.destination, vehicle, parameters)
+    sign = 1.0 if math.sin(from_projection.forward_azimuth.radians - reference_azimuth.radians) >= 0.0 else -1.0
+    return DownrangeCrossrangeResult(
+        Quantity(search.root, unit),
+        Quantity(sign * from_projection.distance.to(unit).value, unit),
+        projection.destination,
+        search,
+    )
 ####

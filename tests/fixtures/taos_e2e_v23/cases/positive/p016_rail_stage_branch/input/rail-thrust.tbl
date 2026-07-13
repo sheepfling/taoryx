@@ -1,0 +1,4 @@
+(rail-thrust)
+table thrust(tmark) no-extrap units=lb
+tmark=0,10
+thrust=2000,2000

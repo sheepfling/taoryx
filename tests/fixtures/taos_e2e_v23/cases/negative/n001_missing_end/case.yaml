@@ -1,0 +1,20 @@
+id: n001_missing_end
+title: Missing *end
+kind: negative
+path: cases/negative/n001_missing_end
+problem_file: input/n001_missing_end.prb
+table_files: []
+features:
+- missing_end
+grammar_productions:
+- negative_case
+runtime_tier: none
+static_expectation: error
+expected_diagnostics:
+- missing-end
+output_file: null
+oracles: []
+notes: []
+source_sections:
+- '3'
+- '4'

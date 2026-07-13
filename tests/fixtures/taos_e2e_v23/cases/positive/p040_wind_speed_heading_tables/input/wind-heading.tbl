@@ -1,0 +1,4 @@
+(wind-heading)
+table windh(alt) no-extrap
+alt=0,20000
+windh=90,90

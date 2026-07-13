@@ -1,0 +1,4 @@
+(wind-north)
+table windn(alt) no-extrap
+alt=0,20000
+windn=0,0

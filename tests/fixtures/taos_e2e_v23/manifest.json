@@ -1,0 +1,2663 @@
+{
+  "version": 23,
+  "manual": "Trajectory Analysis and Optimization System (TAOS) User's Manual, Version 96.0, December 1995",
+  "purpose": "Self-contained, end-to-end grammar, semantic, application, analytic, and metamorphic test corpus.",
+  "runtime_boundary": "Runtime tests require TAOS_EXE to point to a historical or compatible TAOS executable. The suite itself does not contain TAOS.",
+  "cases": [
+    {
+      "id": "p001_linear_ecfc_zero_force",
+      "title": "Analytic ECFC constant-velocity propagation",
+      "kind": "positive",
+      "path": "cases/positive/p001_linear_ecfc_zero_force",
+      "problem_file": "input/p001_linear_ecfc_zero_force.prb",
+      "table_files": [],
+      "features": [
+        "ecfc_initial_conditions",
+        "zero_gravity",
+        "zero_rotation",
+        "trajectory_file_output",
+        "fixed_step_integration"
+      ],
+      "grammar_productions": [
+        "problem",
+        "earth_block",
+        "atmos_block",
+        "trajectory",
+        "initial_ecfc",
+        "integ_block",
+        "when_block",
+        "file_block"
+      ],
+      "runtime_tier": "analytic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "linear.dat",
+      "oracles": [
+        {
+          "type": "final_approx",
+          "column": "time",
+          "value": 10.0,
+          "atol": 1e-09
+        },
+        {
+          "type": "final_approx",
+          "column": "xecfc",
+          "value": 20925746.3255,
+          "atol": 1e-05
+        },
+        {
+          "type": "final_approx",
+          "column": "yecfc",
+          "value": 80.0,
+          "atol": 1e-05
+        },
+        {
+          "type": "final_approx",
+          "column": "zecfc",
+          "value": -40.0,
+          "atol": 1e-05
+        },
+        {
+          "type": "series_constant",
+          "column": "mass",
+          "atol": 1e-10
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.2.1",
+        "4.3.3",
+        "4.3.5"
+      ]
+    },
+    {
+      "id": "p002_constant_thrust_table",
+      "title": "Analytic constant thrust with fixed mass",
+      "kind": "positive",
+      "path": "cases/positive/p002_constant_thrust_table",
+      "problem_file": "input/p002_constant_thrust_table.prb",
+      "table_files": [
+        "input/constant-thrust.tbl",
+        "input/zero-mdot.tbl"
+      ],
+      "features": [
+        "simple_tables",
+        "thrust_table",
+        "mass_flow_table",
+        "inertial_platform_ecfc",
+        "direct_euler_guidance"
+      ],
+      "grammar_productions": [
+        "simple_table",
+        "prop_block",
+        "inertial_block",
+        "fly_block"
+      ],
+      "runtime_tier": "analytic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "thrust.dat",
+      "oracles": [
+        {
+          "type": "final_approx",
+          "column": "xecfcdt",
+          "value": 10.0,
+          "atol": 0.002
+        },
+        {
+          "type": "final_approx",
+          "column": "xecfc",
+          "value": 20925671.3255,
+          "atol": 0.002
+        },
+        {
+          "type": "series_constant",
+          "column": "mass",
+          "atol": 1e-08
+        },
+        {
+          "type": "series_constant_value",
+          "column": "thrust",
+          "value": 20.0,
+          "atol": 1e-08
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.4",
+        "4.2.6",
+        "4.2.9"
+      ]
+    },
+    {
+      "id": "p003_variable_mass_rocket",
+      "title": "Constant thrust with linearly decreasing mass",
+      "kind": "positive",
+      "path": "cases/positive/p003_variable_mass_rocket",
+      "problem_file": "input/p003_variable_mass_rocket.prb",
+      "table_files": [
+        "input/constant-thrust.tbl",
+        "input/burn-mdot.tbl"
+      ],
+      "features": [
+        "variable_mass",
+        "mass_flow_units",
+        "fuel_output",
+        "thrust_output"
+      ],
+      "grammar_productions": [
+        "simple_table",
+        "prop_block",
+        "units_parameter"
+      ],
+      "runtime_tier": "invariant",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "variable-mass.dat",
+      "oracles": [
+        {
+          "type": "series_monotonic",
+          "column": "mass",
+          "direction": "decreasing",
+          "strict": true
+        },
+        {
+          "type": "series_monotonic",
+          "column": "fuel",
+          "direction": "increasing",
+          "strict": false
+        },
+        {
+          "type": "series_monotonic",
+          "column": "xecfcdt",
+          "direction": "increasing",
+          "strict": true
+        },
+        {
+          "type": "final_between",
+          "column": "mass",
+          "low": 4.9,
+          "high": 5.1
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.2.1",
+        "4.2.9"
+      ]
+    },
+    {
+      "id": "p004_vacuum_ballistic_coarse",
+      "title": "Vacuum spherical-earth ballistic trajectory dt=2.0",
+      "kind": "positive",
+      "path": "cases/positive/p004_vacuum_ballistic_coarse",
+      "problem_file": "input/p004_vacuum_ballistic_coarse.prb",
+      "table_files": [],
+      "features": [
+        "spherical_gravity",
+        "vacuum_atmosphere",
+        "runge_kutta",
+        "geodetic_initial_conditions"
+      ],
+      "grammar_productions": [
+        "earth_block",
+        "initial_geodetic",
+        "integ_block",
+        "when_block"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "ballistic.dat",
+      "oracles": [
+        {
+          "type": "series_monotonic",
+          "column": "alt",
+          "direction": "increasing",
+          "strict": true
+        },
+        {
+          "type": "series_monotonic",
+          "column": "vel",
+          "direction": "decreasing",
+          "strict": true
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.2.1",
+        "2.3.4",
+        "4.4.3"
+      ]
+    },
+    {
+      "id": "p005_vacuum_ballistic_medium",
+      "title": "Vacuum spherical-earth ballistic trajectory dt=1.0",
+      "kind": "positive",
+      "path": "cases/positive/p005_vacuum_ballistic_medium",
+      "problem_file": "input/p005_vacuum_ballistic_medium.prb",
+      "table_files": [],
+      "features": [
+        "spherical_gravity",
+        "vacuum_atmosphere",
+        "runge_kutta",
+        "geodetic_initial_conditions"
+      ],
+      "grammar_productions": [
+        "earth_block",
+        "initial_geodetic",
+        "integ_block",
+        "when_block"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "ballistic.dat",
+      "oracles": [
+        {
+          "type": "series_monotonic",
+          "column": "alt",
+          "direction": "increasing",
+          "strict": true
+        },
+        {
+          "type": "series_monotonic",
+          "column": "vel",
+          "direction": "decreasing",
+          "strict": true
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.2.1",
+        "2.3.4",
+        "4.4.3"
+      ]
+    },
+    {
+      "id": "p006_vacuum_ballistic_fine",
+      "title": "Vacuum spherical-earth ballistic trajectory dt=0.25",
+      "kind": "positive",
+      "path": "cases/positive/p006_vacuum_ballistic_fine",
+      "problem_file": "input/p006_vacuum_ballistic_fine.prb",
+      "table_files": [],
+      "features": [
+        "spherical_gravity",
+        "vacuum_atmosphere",
+        "runge_kutta",
+        "geodetic_initial_conditions"
+      ],
+      "grammar_productions": [
+        "earth_block",
+        "initial_geodetic",
+        "integ_block",
+        "when_block"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "ballistic.dat",
+      "oracles": [
+        {
+          "type": "series_monotonic",
+          "column": "alt",
+          "direction": "increasing",
+          "strict": true
+        },
+        {
+          "type": "series_monotonic",
+          "column": "vel",
+          "direction": "decreasing",
+          "strict": true
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.2.1",
+        "2.3.4",
+        "4.4.3"
+      ]
+    },
+    {
+      "id": "p007_reentry_simple_table",
+      "title": "Ballistic reentry with simple aerodynamic table",
+      "kind": "positive",
+      "path": "cases/positive/p007_reentry_simple_table",
+      "problem_file": "input/p007_reentry_simple_table.prb",
+      "table_files": [
+        "input/aero.tbl"
+      ],
+      "features": [
+        "standard_atmosphere",
+        "wgs84",
+        "simple_aero_table",
+        "impact_final_condition"
+      ],
+      "grammar_productions": [
+        "simple_table",
+        "aero_block",
+        "when_block"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "reentry.dat",
+      "oracles": [
+        {
+          "type": "series_monotonic",
+          "column": "alt",
+          "direction": "decreasing",
+          "strict": true
+        },
+        {
+          "type": "series_nonnegative",
+          "column": "dynprs"
+        },
+        {
+          "type": "max_interior",
+          "column": "dynprs"
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.3.1",
+        "2.3.2",
+        "3.4",
+        "4.5.1"
+      ]
+    },
+    {
+      "id": "p008_reentry_full_table_equivalent",
+      "title": "Ballistic reentry with equivalent full aerodynamic table",
+      "kind": "positive",
+      "path": "cases/positive/p008_reentry_full_table_equivalent",
+      "problem_file": "input/p008_reentry_full_table_equivalent.prb",
+      "table_files": [
+        "input/aero.tbl"
+      ],
+      "features": [
+        "full_table",
+        "tabulated_operation",
+        "simple_full_equivalence"
+      ],
+      "grammar_productions": [
+        "full_table",
+        "table_operation",
+        "tabulated_data"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "reentry.dat",
+      "oracles": [
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.5",
+        "3.5.3"
+      ]
+    },
+    {
+      "id": "p009_piecewise_full_thrust",
+      "title": "Full-table if/goto piecewise thrust profile",
+      "kind": "positive",
+      "path": "cases/positive/p009_piecewise_full_thrust",
+      "problem_file": "input/p009_piecewise_full_thrust.prb",
+      "table_files": [
+        "input/piecewise.tbl"
+      ],
+      "features": [
+        "full_table",
+        "if_then",
+        "goto",
+        "labels",
+        "piecewise_forcing"
+      ],
+      "grammar_productions": [
+        "full_table",
+        "if_operation",
+        "goto_operation",
+        "labelled_operation"
+      ],
+      "runtime_tier": "analytic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "piecewise.dat",
+      "oracles": [
+        {
+          "type": "value_before_after",
+          "column": "thrust",
+          "split_time": 2.0,
+          "before": 100.0,
+          "after": 20.0,
+          "atol": 1e-08
+        },
+        {
+          "type": "final_approx",
+          "column": "xecfcdt",
+          "value": 26.0,
+          "atol": 0.05
+        },
+        {
+          "type": "final_approx",
+          "column": "xecfc",
+          "value": 20925735.3255,
+          "atol": 0.1
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.5.6",
+        "3.5.7"
+      ]
+    },
+    {
+      "id": "p010_output_define_full_table",
+      "title": "User-defined output variable backed by full output table",
+      "kind": "positive",
+      "path": "cases/positive/p010_output_define_full_table",
+      "problem_file": "input/p010_output_define_full_table.prb",
+      "table_files": [
+        "input/output.tbl"
+      ],
+      "features": [
+        "output_table",
+        "trajectory_define",
+        "table_function",
+        "storage_variable",
+        "math_operations"
+      ],
+      "grammar_productions": [
+        "output_table",
+        "define_block",
+        "table_function",
+        "csto_operation"
+      ],
+      "runtime_tier": "invariant",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "heat.dat",
+      "oracles": [
+        {
+          "type": "series_nonnegative",
+          "column": "heat-proxy-value"
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.1",
+        "3.5.4",
+        "4.3.1"
+      ]
+    },
+    {
+      "id": "p011_skewed_aero_table",
+      "title": "Three-dimensional skewed aerodynamic table",
+      "kind": "positive",
+      "path": "cases/positive/p011_skewed_aero_table",
+      "problem_file": "input/p011_skewed_aero_table.prb",
+      "table_files": [
+        "input/skewed.tbl"
+      ],
+      "features": [
+        "skewed_table",
+        "three_dimensional_interpolation",
+        "direct_angle_guidance"
+      ],
+      "grammar_productions": [
+        "full_table",
+        "skewed_assignment_groups",
+        "fly_block"
+      ],
+      "runtime_tier": "smoke",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "skewed.dat",
+      "oracles": [
+        {
+          "type": "no_nan"
+        },
+        {
+          "type": "series_nonnegative",
+          "column": "ca"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.5.8",
+        "4.2.1"
+      ]
+    },
+    {
+      "id": "p012_user_atmosphere",
+      "title": "Complete user-defined atmosphere at a tabulated altitude",
+      "kind": "positive",
+      "path": "cases/positive/p012_user_atmosphere",
+      "problem_file": "input/p012_user_atmosphere.prb",
+      "table_files": [],
+      "features": [
+        "user_atmosphere",
+        "atmosphere_columns",
+        "exact_grid_point"
+      ],
+      "grammar_productions": [
+        "atmos_user_block",
+        "atmosphere_data_rows"
+      ],
+      "runtime_tier": "analytic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "atmosphere.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "temp",
+          "value": 483.03,
+          "atol": 0.01
+        },
+        {
+          "type": "series_constant_value",
+          "column": "pres",
+          "value": 1455.3,
+          "atol": 0.01
+        },
+        {
+          "type": "series_constant_value",
+          "column": "rho",
+          "value": 0.001756,
+          "atol": 1e-08
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "4.4.1"
+      ]
+    },
+    {
+      "id": "p013_site_atmosphere",
+      "title": "Site-measured pressure/density atmosphere",
+      "kind": "positive",
+      "path": "cases/positive/p013_site_atmosphere",
+      "problem_file": "input/p013_site_atmosphere.prb",
+      "table_files": [],
+      "features": [
+        "site_atmosphere",
+        "exponential_interpolation",
+        "derived_temperature"
+      ],
+      "grammar_productions": [
+        "atmos_site_block",
+        "atmosphere_data_rows"
+      ],
+      "runtime_tier": "analytic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "atmosphere.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "pres",
+          "value": 830.0,
+          "atol": 0.01
+        },
+        {
+          "type": "series_constant_value",
+          "column": "rho",
+          "value": 0.00105,
+          "atol": 1e-08
+        },
+        {
+          "type": "series_positive",
+          "column": "temp"
+        },
+        {
+          "type": "series_positive",
+          "column": "sndspd"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "4.4.1"
+      ]
+    },
+    {
+      "id": "p014_zero_wind",
+      "title": "Zero-wind airspeed baseline",
+      "kind": "positive",
+      "path": "cases/positive/p014_zero_wind",
+      "problem_file": "input/p014_zero_wind.prb",
+      "table_files": [],
+      "features": [
+        "zero_wind",
+        "airspeed_output"
+      ],
+      "grammar_productions": [
+        "wind_default",
+        "initial_geodetic"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "wind.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "vair",
+          "value": 300.0,
+          "atol": 1e-05
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.1.8",
+        "4.4.14"
+      ]
+    },
+    {
+      "id": "p015_crosswind",
+      "title": "Altitude-table crosswind airspeed",
+      "kind": "positive",
+      "path": "cases/positive/p015_crosswind",
+      "problem_file": "input/p015_crosswind.prb",
+      "table_files": [
+        "input/wind.tbl"
+      ],
+      "features": [
+        "wind_table",
+        "geodetic_wind",
+        "crosswind"
+      ],
+      "grammar_productions": [
+        "wind_block",
+        "windv_table"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "wind.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "vair",
+          "value": 304.1381265,
+          "atol": 0.05
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.1",
+        "4.4.14"
+      ]
+    },
+    {
+      "id": "p016_rail_stage_branch",
+      "title": "Rail launch, staging, reset, increment, and branch trajectory",
+      "kind": "positive",
+      "path": "cases/positive/p016_rail_stage_branch",
+      "problem_file": "input/p016_rail_stage_branch.prb",
+      "table_files": [
+        "input/rail-thrust.tbl",
+        "input/zero-mdot.tbl"
+      ],
+      "features": [
+        "rail_launch",
+        "multiple_segments",
+        "reset",
+        "increment",
+        "trajectory_inheritance",
+        "branching"
+      ],
+      "grammar_productions": [
+        "rail_block",
+        "reset_block",
+        "increment_block",
+        "initial_from_trajectory"
+      ],
+      "runtime_tier": "smoke",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "parent.dat",
+      "oracles": [
+        {
+          "type": "series_monotonic",
+          "column": "plength",
+          "direction": "increasing",
+          "strict": false
+        },
+        {
+          "type": "contains_step_change",
+          "column": "wt",
+          "minimum_jump": 400
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "4.2.5",
+        "4.2.10",
+        "4.2.11",
+        "4.3.5"
+      ]
+    },
+    {
+      "id": "p017_radar_relative",
+      "title": "Analytic two-vehicle relative and radar observations",
+      "kind": "positive",
+      "path": "cases/positive/p017_radar_relative",
+      "problem_file": "input/p017_radar_relative.prb",
+      "table_files": [],
+      "features": [
+        "multiple_vehicles",
+        "relative_outputs",
+        "radar_station",
+        "problem_level_file"
+      ],
+      "grammar_productions": [
+        "radar_block",
+        "indexed_output_variable",
+        "problem_file_block"
+      ],
+      "runtime_tier": "analytic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "observer.dat",
+      "oracles": [
+        {
+          "type": "final_approx",
+          "column": "relrng[2]",
+          "value": 800.0,
+          "atol": 0.0001
+        },
+        {
+          "type": "series_monotonic",
+          "column": "relrng[2]",
+          "direction": "decreasing",
+          "strict": true
+        },
+        {
+          "type": "series_constant_value",
+          "column": "relvel[2]",
+          "value": 20.0,
+          "atol": 0.0001
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.4.2",
+        "2.4.3",
+        "4.4.8"
+      ]
+    },
+    {
+      "id": "p018_geodetic_initialization",
+      "title": "Geodetic initialization representation",
+      "kind": "positive",
+      "path": "cases/positive/p018_geodetic_initialization",
+      "problem_file": "input/p018_geodetic_initialization.prb",
+      "table_files": [],
+      "features": [
+        "geodetic_initial_conditions",
+        "coordinate_transform"
+      ],
+      "grammar_productions": [
+        "initial_geodetic"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "coordinate.dat",
+      "oracles": [
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.1.6",
+        "4.3.5"
+      ]
+    },
+    {
+      "id": "p019_ecfc_initialization",
+      "title": "Equivalent ECFC initialization representation",
+      "kind": "positive",
+      "path": "cases/positive/p019_ecfc_initialization",
+      "problem_file": "input/p019_ecfc_initialization.prb",
+      "table_files": [],
+      "features": [
+        "ecfc_initial_conditions",
+        "coordinate_transform"
+      ],
+      "grammar_productions": [
+        "initial_ecfc"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "coordinate.dat",
+      "oracles": [
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.1.1",
+        "4.3.5"
+      ]
+    },
+    {
+      "id": "p020_survey_summarize",
+      "title": "Survey values with summary reduction",
+      "kind": "positive",
+      "path": "cases/positive/p020_survey_summarize",
+      "problem_file": "input/p020_survey_summarize.prb",
+      "table_files": [],
+      "features": [
+        "survey",
+        "summarize",
+        "parameter_placeholder",
+        "multiple_runs"
+      ],
+      "grammar_productions": [
+        "survey_block",
+        "summarize_block",
+        "survey_parameter"
+      ],
+      "runtime_tier": "smoke",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "survey.dat",
+      "oracles": [
+        {
+          "type": "output_exists"
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "4.4.10",
+        "4.4.11"
+      ]
+    },
+    {
+      "id": "p021_search_linear_target",
+      "title": "One-dimensional search with analytic linear target",
+      "kind": "positive",
+      "path": "cases/positive/p021_search_linear_target",
+      "problem_file": "input/p021_search_linear_target.prb",
+      "table_files": [],
+      "features": [
+        "search",
+        "search_parameter",
+        "root_finding"
+      ],
+      "grammar_productions": [
+        "search_block",
+        "search_parameter"
+      ],
+      "runtime_tier": "analytic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "search.dat",
+      "oracles": [
+        {
+          "type": "final_approx",
+          "column": "xecfc",
+          "value": 20926646.3255,
+          "atol": 0.05
+        },
+        {
+          "type": "final_approx",
+          "column": "xecfcdt",
+          "value": 100,
+          "atol": 0.01
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.6.2",
+        "4.4.9"
+      ]
+    },
+    {
+      "id": "p022_optimize_linear_boundary",
+      "title": "Optimization of a linear objective to a parameter bound",
+      "kind": "positive",
+      "path": "cases/positive/p022_optimize_linear_boundary",
+      "problem_file": "input/p022_optimize_linear_boundary.prb",
+      "table_files": [],
+      "features": [
+        "optimization",
+        "optimization_parameter",
+        "bound_solution"
+      ],
+      "grammar_productions": [
+        "optimize_block",
+        "optimization_parameter"
+      ],
+      "runtime_tier": "analytic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "optimize.dat",
+      "oracles": [
+        {
+          "type": "final_approx",
+          "column": "xecfcdt",
+          "value": 100,
+          "atol": 0.1
+        },
+        {
+          "type": "final_approx",
+          "column": "xecfc",
+          "value": 20926646.3255,
+          "atol": 1.0
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.6.3",
+        "4.4.6"
+      ]
+    },
+    {
+      "id": "p023_units_format",
+      "title": "Metric unit conversion and output formatting",
+      "kind": "positive",
+      "path": "cases/positive/p023_units_format",
+      "problem_file": "input/p023_units_format.prb",
+      "table_files": [],
+      "features": [
+        "units_fmt",
+        "metric_conversion",
+        "fixed_format",
+        "scientific_format"
+      ],
+      "grammar_productions": [
+        "units_fmt_block",
+        "format_specifier"
+      ],
+      "runtime_tier": "analytic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "units.dat",
+      "oracles": [
+        {
+          "type": "final_approx",
+          "column": "xecfcdt",
+          "value": 10.0,
+          "atol": 0.001
+        },
+        {
+          "type": "output_exists"
+        }
+      ],
+      "notes": [
+        "Because units change globally, the ECFC initial position is supplied in kilometers and velocity in meters per second."
+      ],
+      "source_sections": [
+        "4.4.13"
+      ]
+    },
+    {
+      "id": "p024_guidance_table",
+      "title": "Time-based guidance table with circular interpolation",
+      "kind": "positive",
+      "path": "cases/positive/p024_guidance_table",
+      "problem_file": "input/p024_guidance_table.prb",
+      "table_files": [],
+      "features": [
+        "guidance_table",
+        "interp_2",
+        "integration_step_alignment",
+        "direct_attitude"
+      ],
+      "grammar_productions": [
+        "fly_table",
+        "guidance_interpolation"
+      ],
+      "runtime_tier": "invariant",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "guidance.dat",
+      "oracles": [
+        {
+          "type": "contains_times",
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "atol": 1e-08
+        },
+        {
+          "type": "final_approx",
+          "column": "alpha",
+          "value": 0,
+          "atol": 1e-05
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "4.2.4"
+      ]
+    },
+    {
+      "id": "p025_level_mach_guidance",
+      "title": "Indirect level-flight and constant-Mach guidance",
+      "kind": "positive",
+      "path": "cases/positive/p025_level_mach_guidance",
+      "problem_file": "input/p025_level_mach_guidance.prb",
+      "table_files": [
+        "input/aircraft-cl.tbl",
+        "input/aircraft-cd.tbl",
+        "input/engine-thrust.tbl",
+        "input/engine-mdot.tbl"
+      ],
+      "features": [
+        "indirect_guidance",
+        "constant_mach",
+        "level_flight",
+        "free_alpha",
+        "free_power"
+      ],
+      "grammar_productions": [
+        "fly_condition",
+        "guidance_newton_loop",
+        "aero_tables",
+        "power_table"
+      ],
+      "runtime_tier": "invariant",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "level.dat",
+      "oracles": [
+        {
+          "type": "final_between",
+          "column": "gamgd",
+          "low": -0.5,
+          "high": 0.5
+        },
+        {
+          "type": "final_between",
+          "column": "mach",
+          "low": 0.53,
+          "high": 0.57
+        },
+        {
+          "type": "series_between",
+          "column": "power",
+          "low": 0,
+          "high": 1
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.5.1",
+        "4.2.4"
+      ]
+    },
+    {
+      "id": "p026_predictive_intercept",
+      "title": "Two-vehicle intercept guidance",
+      "kind": "positive",
+      "path": "cases/positive/p026_predictive_intercept",
+      "problem_file": "input/p026_predictive_intercept.prb",
+      "table_files": [
+        "input/interceptor-thrust.tbl",
+        "input/zero-mdot.tbl"
+      ],
+      "features": [
+        "multi_vehicle",
+        "intercept",
+        "thrust_vectoring_via_body_attitude",
+        "relative_range"
+      ],
+      "grammar_productions": [
+        "fly_special_rule",
+        "indexed_trajectory_reference"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "interceptor.dat",
+      "oracles": [
+        {
+          "type": "relative_range_reduces",
+          "column": "relrng[2]",
+          "minimum_fraction": 0.1
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.5.2",
+        "4.2.4"
+      ]
+    },
+    {
+      "id": "p027_proportional_navigation",
+      "title": "Two-vehicle propnav guidance",
+      "kind": "positive",
+      "path": "cases/positive/p027_proportional_navigation",
+      "problem_file": "input/p027_proportional_navigation.prb",
+      "table_files": [
+        "input/interceptor-thrust.tbl",
+        "input/zero-mdot.tbl"
+      ],
+      "features": [
+        "multi_vehicle",
+        "propnav",
+        "thrust_vectoring_via_body_attitude",
+        "relative_range"
+      ],
+      "grammar_productions": [
+        "fly_special_rule",
+        "indexed_trajectory_reference"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "interceptor.dat",
+      "oracles": [
+        {
+          "type": "relative_range_reduces",
+          "column": "relrng[2]",
+          "minimum_fraction": 0.1
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.5.2",
+        "4.2.4"
+      ]
+    },
+    {
+      "id": "p028_tangent_iip_downrange",
+      "title": "Tangent plane, downrange/crossrange, and IIP outputs",
+      "kind": "positive",
+      "path": "cases/positive/p028_tangent_iip_downrange",
+      "problem_file": "input/p028_tangent_iip_downrange.prb",
+      "table_files": [],
+      "features": [
+        "tangent_plane",
+        "downrange_crossrange",
+        "initial_impact_point",
+        "iip_outputs"
+      ],
+      "grammar_productions": [
+        "tangent_block",
+        "dwn_crs_block",
+        "iip_block"
+      ],
+      "runtime_tier": "smoke",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "iip.dat",
+      "oracles": [
+        {
+          "type": "series_nonnegative",
+          "column": "iip_rng"
+        },
+        {
+          "type": "series_positive",
+          "column": "iip_time"
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.4.1",
+        "2.4.4",
+        "4.3.2",
+        "4.3.4",
+        "4.3.7"
+      ]
+    },
+    {
+      "id": "p029_split_thrust_aggregation",
+      "title": "Two prop blocks whose forces sum",
+      "kind": "positive",
+      "path": "cases/positive/p029_split_thrust_aggregation",
+      "problem_file": "input/p029_split_thrust_aggregation.prb",
+      "table_files": [],
+      "features": [
+        "multiple_prop_blocks",
+        "force_aggregation"
+      ],
+      "grammar_productions": [
+        "prop_block_repetition"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "thrust.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "thrust",
+          "value": 20,
+          "atol": 1e-08
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.3.3",
+        "4.2.9"
+      ]
+    },
+    {
+      "id": "p030_single_thrust_equivalent",
+      "title": "Single prop block equivalent to summed blocks",
+      "kind": "positive",
+      "path": "cases/positive/p030_single_thrust_equivalent",
+      "problem_file": "input/p030_single_thrust_equivalent.prb",
+      "table_files": [],
+      "features": [
+        "single_prop_block",
+        "force_aggregation_equivalence"
+      ],
+      "grammar_productions": [
+        "prop_block"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "thrust.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "thrust",
+          "value": 20,
+          "atol": 1e-08
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.3.3",
+        "4.2.9"
+      ]
+    },
+    {
+      "id": "p031_multi_problem_document",
+      "title": "Two independent problems in one problem file",
+      "kind": "positive",
+      "path": "cases/positive/p031_multi_problem_document",
+      "problem_file": "input/p031_multi_problem_document.prb",
+      "table_files": [],
+      "features": [
+        "multiple_problems_per_file",
+        "sequential_execution"
+      ],
+      "grammar_productions": [
+        "problem_document",
+        "problem_repetition"
+      ],
+      "runtime_tier": "smoke",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "one.dat",
+      "oracles": [
+        {
+          "type": "output_exists"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "4.0",
+        "4.1"
+      ]
+    },
+    {
+      "id": "p032_manual_ballistic_reentry",
+      "title": "Manual Section 4.5.1 ballistic reentry",
+      "kind": "positive",
+      "path": "cases/positive/p032_manual_ballistic_reentry",
+      "problem_file": "input/p032_manual_ballistic_reentry.prb",
+      "table_files": [
+        "input/manual.tbl"
+      ],
+      "features": [
+        "manual_fixture",
+        "survey",
+        "summarize",
+        "egs",
+        "reentry"
+      ],
+      "grammar_productions": [
+        "manual_complete_problem",
+        "manual_complete_table"
+      ],
+      "runtime_tier": "historical",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": null,
+      "oracles": [
+        {
+          "type": "clean_exit"
+        },
+        {
+          "type": "output_exists",
+          "path": "ex1.dbf"
+        }
+      ],
+      "notes": [
+        "Historical numeric outputs should be compared to the transcribed manual printout only when TAOS 96.0 or a verified compatible implementation is available."
+      ],
+      "source_sections": [
+        "4.5.1"
+      ]
+    },
+    {
+      "id": "p033_manual_ballistic_rocket_synthetic",
+      "title": "Manual ballistic-rocket.prb with synthetic stand-in tables",
+      "kind": "positive",
+      "path": "cases/positive/p033_manual_ballistic_rocket_synthetic",
+      "problem_file": "input/p033_manual_ballistic_rocket_synthetic.prb",
+      "table_files": [
+        "input/synthetic-001.tbl",
+        "input/synthetic-002.tbl",
+        "input/synthetic-003.tbl",
+        "input/synthetic-004.tbl",
+        "input/synthetic-005.tbl",
+        "input/synthetic-006.tbl",
+        "input/synthetic-007.tbl",
+        "input/synthetic-008.tbl",
+        "input/synthetic-009.tbl",
+        "input/synthetic-010.tbl",
+        "input/synthetic-011.tbl",
+        "input/synthetic-012.tbl",
+        "input/synthetic-013.tbl"
+      ],
+      "features": [
+        "manual_fixture",
+        "synthetic_dependency_closure",
+        "full_application_smoke"
+      ],
+      "grammar_productions": [
+        "manual_complete_problem",
+        "synthetic_tables"
+      ],
+      "runtime_tier": "exploratory",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": null,
+      "oracles": [
+        {
+          "type": "clean_exit"
+        }
+      ],
+      "notes": [
+        "The tables are deliberately generic stand-ins. This case tests grammar, linking, execution plumbing, and failure reporting\u2014not the historical trajectory."
+      ],
+      "source_sections": [
+        "4.5.2"
+      ]
+    },
+    {
+      "id": "p034_manual_air_intercept_synthetic",
+      "title": "Manual air-launched-intercept.prb with synthetic stand-in tables",
+      "kind": "positive",
+      "path": "cases/positive/p034_manual_air_intercept_synthetic",
+      "problem_file": "input/p034_manual_air_intercept_synthetic.prb",
+      "table_files": [
+        "input/synthetic-001.tbl",
+        "input/synthetic-002.tbl",
+        "input/synthetic-003.tbl",
+        "input/synthetic-004.tbl",
+        "input/synthetic-005.tbl",
+        "input/synthetic-006.tbl",
+        "input/synthetic-007.tbl",
+        "input/synthetic-008.tbl",
+        "input/synthetic-009.tbl",
+        "input/synthetic-010.tbl",
+        "input/synthetic-011.tbl",
+        "input/synthetic-012.tbl",
+        "input/synthetic-013.tbl",
+        "input/synthetic-014.tbl",
+        "input/synthetic-015.tbl",
+        "input/synthetic-016.tbl",
+        "input/synthetic-017.tbl",
+        "input/synthetic-018.tbl",
+        "input/synthetic-019.tbl"
+      ],
+      "features": [
+        "manual_fixture",
+        "synthetic_dependency_closure",
+        "full_application_smoke"
+      ],
+      "grammar_productions": [
+        "manual_complete_problem",
+        "synthetic_tables"
+      ],
+      "runtime_tier": "exploratory",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": null,
+      "oracles": [
+        {
+          "type": "clean_exit"
+        }
+      ],
+      "notes": [
+        "The tables are deliberately generic stand-ins. This case tests grammar, linking, execution plumbing, and failure reporting\u2014not the historical trajectory."
+      ],
+      "source_sections": [
+        "4.5.3"
+      ]
+    },
+    {
+      "id": "p035_manual_ground_intercept_synthetic",
+      "title": "Manual ground-launched-intercept.prb with synthetic stand-in tables",
+      "kind": "positive",
+      "path": "cases/positive/p035_manual_ground_intercept_synthetic",
+      "problem_file": "input/p035_manual_ground_intercept_synthetic.prb",
+      "table_files": [
+        "input/synthetic-001.tbl",
+        "input/synthetic-002.tbl",
+        "input/synthetic-003.tbl",
+        "input/synthetic-004.tbl"
+      ],
+      "features": [
+        "manual_fixture",
+        "synthetic_dependency_closure",
+        "full_application_smoke"
+      ],
+      "grammar_productions": [
+        "manual_complete_problem",
+        "synthetic_tables"
+      ],
+      "runtime_tier": "exploratory",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": null,
+      "oracles": [
+        {
+          "type": "clean_exit"
+        }
+      ],
+      "notes": [
+        "The tables are deliberately generic stand-ins. This case tests grammar, linking, execution plumbing, and failure reporting\u2014not the historical trajectory."
+      ],
+      "source_sections": [
+        "4.5.4"
+      ]
+    },
+    {
+      "id": "p036_constants_cg_user_variables",
+      "title": "User-defined constants, center-of-gravity table, and cg-dependent aerodynamics",
+      "kind": "positive",
+      "path": "cases/positive/p036_constants_cg_user_variables",
+      "problem_file": "input/p036_constants_cg_user_variables.prb",
+      "table_files": [
+        "input/weight-cg.tbl",
+        "input/cg-sensitive-ca.tbl"
+      ],
+      "features": [
+        "constants_block",
+        "cg_table",
+        "user_defined_table_variable",
+        "cg_dependent_aerodynamics"
+      ],
+      "grammar_productions": [
+        "constants_block",
+        "cg_block",
+        "cg_table",
+        "multidimensional_simple_table"
+      ],
+      "runtime_tier": "invariant",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "cg.dat",
+      "oracles": [
+        {
+          "type": "series_between",
+          "column": "cg",
+          "low": 0.4,
+          "high": 0.8
+        },
+        {
+          "type": "series_positive",
+          "column": "ca"
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.1",
+        "3.5.5",
+        "4.2.2",
+        "4.2.3"
+      ]
+    },
+    {
+      "id": "p037_wind_axis_aero_coefficients",
+      "title": "Complete lift, drag, and side-force coefficient set",
+      "kind": "positive",
+      "path": "cases/positive/p037_wind_axis_aero_coefficients",
+      "problem_file": "input/p037_wind_axis_aero_coefficients.prb",
+      "table_files": [
+        "input/test-cl.tbl",
+        "input/test-cd.tbl",
+        "input/test-cs.tbl"
+      ],
+      "features": [
+        "cl_table",
+        "cd_table",
+        "cs_table",
+        "wind_axis_aerodynamics",
+        "complete_aero_set"
+      ],
+      "grammar_productions": [
+        "aero_block",
+        "simple_table",
+        "cl_cd_cs_coefficient_set"
+      ],
+      "runtime_tier": "invariant",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "wind-axis.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "cl",
+          "value": 0.3,
+          "atol": 1e-08
+        },
+        {
+          "type": "series_constant_value",
+          "column": "cd",
+          "value": 0.03,
+          "atol": 1e-08
+        },
+        {
+          "type": "series_constant_value",
+          "column": "cs",
+          "value": 0.01,
+          "atol": 1e-08
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.3.2",
+        "3.1",
+        "4.2.1"
+      ]
+    },
+    {
+      "id": "p038_body_axis_aero_coefficients",
+      "title": "Complete body-axis aerodynamic coefficient set",
+      "kind": "positive",
+      "path": "cases/positive/p038_body_axis_aero_coefficients",
+      "problem_file": "input/p038_body_axis_aero_coefficients.prb",
+      "table_files": [
+        "input/test-cx.tbl",
+        "input/test-cy.tbl",
+        "input/test-cz.tbl"
+      ],
+      "features": [
+        "cx_table",
+        "cy_table",
+        "cz_table",
+        "body_axis_aerodynamics",
+        "complete_aero_set"
+      ],
+      "grammar_productions": [
+        "aero_block",
+        "simple_table",
+        "cx_cy_cz_coefficient_set"
+      ],
+      "runtime_tier": "invariant",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "body-axis.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "cx",
+          "value": -0.1,
+          "atol": 1e-08
+        },
+        {
+          "type": "series_constant_value",
+          "column": "cy",
+          "value": 0.01,
+          "atol": 1e-08
+        },
+        {
+          "type": "series_constant_value",
+          "column": "cz",
+          "value": -0.02,
+          "atol": 1e-08
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.3.2",
+        "3.1",
+        "4.2.1"
+      ]
+    },
+    {
+      "id": "p039_table_driven_thrust_vector",
+      "title": "Table-driven thrust magnitude, mass flow, and both thrust-vector angles",
+      "kind": "positive",
+      "path": "cases/positive/p039_table_driven_thrust_vector",
+      "problem_file": "input/p039_table_driven_thrust_vector.prb",
+      "table_files": [
+        "input/vector-thrust.tbl",
+        "input/zero-mdot.tbl",
+        "input/vector-angle-1.tbl",
+        "input/vector-angle-2.tbl"
+      ],
+      "features": [
+        "tvec1_table",
+        "tvec2_table",
+        "thrust_vectoring",
+        "propulsion_table_set"
+      ],
+      "grammar_productions": [
+        "prop_block",
+        "thrust_table",
+        "tvec1_table",
+        "tvec2_table",
+        "mdot_table"
+      ],
+      "runtime_tier": "invariant",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "thrust-vector.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "thrust",
+          "value": 100,
+          "atol": 1e-08
+        },
+        {
+          "type": "series_constant_value",
+          "column": "ep1",
+          "value": 10,
+          "atol": 1e-08
+        },
+        {
+          "type": "series_constant_value",
+          "column": "ep2",
+          "value": 90,
+          "atol": 1e-08
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.3.3",
+        "3.1",
+        "4.2.9"
+      ]
+    },
+    {
+      "id": "p040_wind_speed_heading_tables",
+      "title": "Wind speed, heading, and down-component tables",
+      "kind": "positive",
+      "path": "cases/positive/p040_wind_speed_heading_tables",
+      "problem_file": "input/p040_wind_speed_heading_tables.prb",
+      "table_files": [
+        "input/wind-speed.tbl",
+        "input/wind-heading.tbl",
+        "input/wind-down.tbl"
+      ],
+      "features": [
+        "windv_table",
+        "windh_table",
+        "windd_table",
+        "wind_speed_heading_representation"
+      ],
+      "grammar_productions": [
+        "wind_block",
+        "windv_table",
+        "windh_table",
+        "windd_table"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "wind-representation.dat",
+      "oracles": [
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.1",
+        "4.4.14"
+      ]
+    },
+    {
+      "id": "p041_wind_component_tables",
+      "title": "Equivalent east, north, and down wind-component tables",
+      "kind": "positive",
+      "path": "cases/positive/p041_wind_component_tables",
+      "problem_file": "input/p041_wind_component_tables.prb",
+      "table_files": [
+        "input/wind-east.tbl",
+        "input/wind-north.tbl",
+        "input/wind-down.tbl"
+      ],
+      "features": [
+        "winde_table",
+        "windn_table",
+        "windd_table",
+        "wind_component_representation"
+      ],
+      "grammar_productions": [
+        "wind_block",
+        "winde_table",
+        "windn_table",
+        "windd_table"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "wind-representation.dat",
+      "oracles": [
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.1",
+        "4.4.14"
+      ]
+    },
+    {
+      "id": "p042_ecic_initialization",
+      "title": "ECIC initialization equivalent to geodetic and ECFC at zero earth rotation",
+      "kind": "positive",
+      "path": "cases/positive/p042_ecic_initialization",
+      "problem_file": "input/p042_ecic_initialization.prb",
+      "table_files": [],
+      "features": [
+        "ecic_initial_conditions",
+        "coordinate_initialization_equivalence"
+      ],
+      "grammar_productions": [
+        "initial_ecic",
+        "earth_block"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "coordinate.dat",
+      "oracles": [
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.1.2",
+        "4.3.5"
+      ]
+    },
+    {
+      "id": "p043_wgs84_gravity_drop",
+      "title": "WGS-84 gravity-only vertical drop",
+      "kind": "positive",
+      "path": "cases/positive/p043_wgs84_gravity_drop",
+      "problem_file": "input/p043_wgs84_gravity_drop.prb",
+      "table_files": [],
+      "features": [
+        "wgs84_earth",
+        "gravity_model",
+        "ballistic_drop"
+      ],
+      "grammar_productions": [
+        "earth_block",
+        "initial_geodetic",
+        "fixed_step_integration"
+      ],
+      "runtime_tier": "invariant",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "gravity.dat",
+      "oracles": [
+        {
+          "type": "series_monotonic",
+          "column": "alt",
+          "direction": "decreasing",
+          "strict": false,
+          "atol": 1e-08
+        },
+        {
+          "type": "series_monotonic",
+          "column": "vel",
+          "direction": "increasing",
+          "strict": false,
+          "atol": 1e-08
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.3.4",
+        "4.4.3"
+      ]
+    },
+    {
+      "id": "p044_split_aero_aggregation",
+      "title": "Two aerodynamic blocks aggregate to the total force",
+      "kind": "positive",
+      "path": "cases/positive/p044_split_aero_aggregation",
+      "problem_file": "input/p044_split_aero_aggregation.prb",
+      "table_files": [],
+      "features": [
+        "multiple_aero_blocks",
+        "aero_force_aggregation"
+      ],
+      "grammar_productions": [
+        "aero_block",
+        "multiple_aero_blocks"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "aero-aggregation.dat",
+      "oracles": [
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.3.2",
+        "4.2.1"
+      ]
+    },
+    {
+      "id": "p045_single_aero_equivalent",
+      "title": "Single aerodynamic block equivalent to the summed split blocks",
+      "kind": "positive",
+      "path": "cases/positive/p045_single_aero_equivalent",
+      "problem_file": "input/p045_single_aero_equivalent.prb",
+      "table_files": [],
+      "features": [
+        "single_aero_block",
+        "aero_force_aggregation"
+      ],
+      "grammar_productions": [
+        "aero_block"
+      ],
+      "runtime_tier": "metamorphic",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "aero-aggregation.dat",
+      "oracles": [
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "2.3.2",
+        "4.2.1"
+      ]
+    },
+    {
+      "id": "p046_case_insensitive_free_field",
+      "title": "Case-insensitive keywords, comments, commas, and scientific notation",
+      "kind": "positive",
+      "path": "cases/positive/p046_case_insensitive_free_field",
+      "problem_file": "input/p046_case_insensitive_free_field.prb",
+      "table_files": [
+        "input/upper.tbl"
+      ],
+      "features": [
+        "case_insensitivity",
+        "comments",
+        "scientific_notation",
+        "free_field_delimiters"
+      ],
+      "grammar_productions": [
+        "lexical_rules",
+        "simple_table",
+        "problem_document"
+      ],
+      "runtime_tier": "smoke",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "lexical.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "thrust",
+          "value": 10,
+          "atol": 1e-08
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "3.3",
+        "4.1"
+      ]
+    },
+    {
+      "id": "p047_full_table_operation_gauntlet",
+      "title": "Full-table accumulator, storage, flow-control, logarithmic, power, and trigonometric operations",
+      "kind": "positive",
+      "path": "cases/positive/p047_full_table_operation_gauntlet",
+      "problem_file": "input/p047_full_table_operation_gauntlet.prb",
+      "table_files": [
+        "input/operation-gauntlet.tbl"
+      ],
+      "features": [
+        "all_table_math_operations",
+        "full_table_control_flow",
+        "output_table",
+        "storage_variable"
+      ],
+      "grammar_productions": [
+        "full_table",
+        "table_operation_sequence",
+        "if_operation",
+        "goto_operation",
+        "output_table_lookup"
+      ],
+      "runtime_tier": "exploratory",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "operations.dat",
+      "oracles": [
+        {
+          "type": "series_constant_value",
+          "column": "gauntlet",
+          "value": 42,
+          "atol": 1e-08
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [
+        "This is a deliberate operation-coverage program. Runtime execution is opt-in until every full-table operation is implemented by the target engine."
+      ],
+      "source_sections": [
+        "3.5",
+        "4.3.1"
+      ]
+    },
+    {
+      "id": "p048_problem_level_outputs_and_egs",
+      "title": "Problem-level define, column output, and EGS output across two trajectories",
+      "kind": "positive",
+      "path": "cases/positive/p048_problem_level_outputs_and_egs",
+      "problem_file": "input/p048_problem_level_outputs_and_egs.prb",
+      "table_files": [],
+      "features": [
+        "problem_define",
+        "problem_file_output",
+        "egs_output",
+        "multi_vehicle_output"
+      ],
+      "grammar_productions": [
+        "problem_define_block",
+        "problem_file_block",
+        "problem_print_block",
+        "egs_block",
+        "indexed_output_variables"
+      ],
+      "runtime_tier": "smoke",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "compare.dat",
+      "oracles": [
+        {
+          "type": "output_exists"
+        },
+        {
+          "type": "output_exists",
+          "path": "trajectories.dbf"
+        },
+        {
+          "type": "no_nan"
+        }
+      ],
+      "notes": [],
+      "source_sections": [
+        "4.4.2",
+        "4.4.4",
+        "4.4.5"
+      ]
+    },
+    {
+      "id": "p049_large_table_many_segments_stress",
+      "title": "Large table and twenty-segment execution stress case",
+      "kind": "positive",
+      "path": "cases/positive/p049_large_table_many_segments_stress",
+      "problem_file": "input/p049_large_table_many_segments_stress.prb",
+      "table_files": [
+        "input/stress-thrust.tbl"
+      ],
+      "features": [
+        "large_table",
+        "many_segments",
+        "stress",
+        "segment_transition_chain"
+      ],
+      "grammar_productions": [
+        "simple_table",
+        "segment_block",
+        "when_goto_chain"
+      ],
+      "runtime_tier": "stress",
+      "static_expectation": "pass",
+      "expected_diagnostics": [],
+      "output_file": "stress.dat",
+      "oracles": [
+        {
+          "type": "output_exists"
+        },
+        {
+          "type": "no_nan"
+        },
+        {
+          "type": "final_approx",
+          "column": "time",
+          "value": 10,
+          "atol": 1e-08
+        }
+      ],
+      "notes": [
+        "This case is excluded from the default runtime tier and enabled with TAOS_RUN_STRESS=1."
+      ],
+      "source_sections": [
+        "3.4",
+        "4.2",
+        "4.2.12"
+      ]
+    },
+    {
+      "id": "n001_missing_end",
+      "title": "Missing *end",
+      "kind": "negative",
+      "path": "cases/negative/n001_missing_end",
+      "problem_file": "input/n001_missing_end.prb",
+      "table_files": [],
+      "features": [
+        "missing_end"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "missing-end"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n002_bad_goto",
+      "title": "Goto undefined segment",
+      "kind": "negative",
+      "path": "cases/negative/n002_bad_goto",
+      "problem_file": "input/n002_bad_goto.prb",
+      "table_files": [],
+      "features": [
+        "bad_goto"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "unknown-goto-segment"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n003_duplicate_trajectory",
+      "title": "Duplicate trajectory number",
+      "kind": "negative",
+      "path": "cases/negative/n003_duplicate_trajectory",
+      "problem_file": "input/n003_duplicate_trajectory.prb",
+      "table_files": [],
+      "features": [
+        "duplicate_trajectory"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "duplicate-trajectory"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n004_duplicate_segment",
+      "title": "Duplicate segment number",
+      "kind": "negative",
+      "path": "cases/negative/n004_duplicate_segment",
+      "problem_file": "input/n004_duplicate_segment.prb",
+      "table_files": [],
+      "features": [
+        "duplicate_segment"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "duplicate-segment"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n005_missing_table_reference",
+      "title": "Unresolved table reference",
+      "kind": "negative",
+      "path": "cases/negative/n005_missing_table_reference",
+      "problem_file": "input/n005_missing_table_reference.prb",
+      "table_files": [],
+      "features": [
+        "missing_table"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "external-table-reference"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n006_table_cardinality",
+      "title": "Simple table cardinality mismatch",
+      "kind": "negative",
+      "path": "cases/negative/n006_table_cardinality",
+      "problem_file": "input/n006_table_cardinality.prb",
+      "table_files": [
+        "input/bad.tbl"
+      ],
+      "features": [
+        "table_cardinality"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "simple-table-cardinality"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n007_table_nonmonotonic",
+      "title": "Nonmonotonic independent variable",
+      "kind": "negative",
+      "path": "cases/negative/n007_table_nonmonotonic",
+      "problem_file": "input/n007_table_nonmonotonic.prb",
+      "table_files": [
+        "input/bad.tbl"
+      ],
+      "features": [
+        "table_nonmonotonic"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "nonmonotonic-independent-values"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n008_duplicate_table",
+      "title": "Duplicate table name",
+      "kind": "negative",
+      "path": "cases/negative/n008_duplicate_table",
+      "problem_file": "input/n008_duplicate_table.prb",
+      "table_files": [
+        "input/dup-one.tbl",
+        "input/dup-two.tbl"
+      ],
+      "features": [
+        "duplicate_table"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "duplicate-table"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n009_inconsistent_fly_set",
+      "title": "Inconsistent body-attitude angle set",
+      "kind": "negative",
+      "path": "cases/negative/n009_inconsistent_fly_set",
+      "problem_file": "input/n009_inconsistent_fly_set.prb",
+      "table_files": [],
+      "features": [
+        "guidance_semantics"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "inconsistent-guidance-angle-set"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n010_initial_mass_conflict",
+      "title": "Both mass and weight supplied",
+      "kind": "negative",
+      "path": "cases/negative/n010_initial_mass_conflict",
+      "problem_file": "input/n010_initial_mass_conflict.prb",
+      "table_files": [],
+      "features": [
+        "initial_semantics"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "conflicting-initial-mass"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n011_invalid_units_dimension",
+      "title": "Dimensionally invalid unit conversion",
+      "kind": "negative",
+      "path": "cases/negative/n011_invalid_units_dimension",
+      "problem_file": "input/n011_invalid_units_dimension.prb",
+      "table_files": [],
+      "features": [
+        "units_semantics"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "incompatible-unit-dimension"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n012_user_atmos_duplicate_alt",
+      "title": "Duplicate user-atmosphere altitude",
+      "kind": "negative",
+      "path": "cases/negative/n012_user_atmos_duplicate_alt",
+      "problem_file": "input/n012_user_atmos_duplicate_alt.prb",
+      "table_files": [],
+      "features": [
+        "atmosphere_semantics"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "atmosphere-altitude-not-strict"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n013_first_segment_inertial_body",
+      "title": "Body-aligned inertial platform on first segment",
+      "kind": "negative",
+      "path": "cases/negative/n013_first_segment_inertial_body",
+      "problem_file": "input/n013_first_segment_inertial_body.prb",
+      "table_files": [],
+      "features": [
+        "execution_order_semantics"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "inertial-body-first-segment"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    },
+    {
+      "id": "n014_optimize_bad_parameter",
+      "title": "Optimization parameter index zero",
+      "kind": "negative",
+      "path": "cases/negative/n014_optimize_bad_parameter",
+      "problem_file": "input/n014_optimize_bad_parameter.prb",
+      "table_files": [],
+      "features": [
+        "invalid_parameter_index",
+        "optimization_semantics"
+      ],
+      "grammar_productions": [
+        "negative_case"
+      ],
+      "runtime_tier": "none",
+      "static_expectation": "error",
+      "expected_diagnostics": [
+        "invalid-parameter-index"
+      ],
+      "output_file": null,
+      "oracles": [],
+      "notes": [],
+      "source_sections": [
+        "3",
+        "4"
+      ]
+    }
+  ],
+  "metamorphic_groups": [
+    {
+      "id": "m001_dt_convergence",
+      "title": "Fourth-order integration refinement trend",
+      "cases": [
+        "p004_vacuum_ballistic_coarse",
+        "p005_vacuum_ballistic_medium",
+        "p006_vacuum_ballistic_fine"
+      ],
+      "comparison": "convergence",
+      "columns": [
+        "alt"
+      ],
+      "atol": 0.0,
+      "rtol": 0.0,
+      "notes": [
+        "The final fine-step result is used as the reference; coarse-to-medium error should decrease."
+      ]
+    },
+    {
+      "id": "m002_simple_full_table_equivalence",
+      "title": "Simple and full tables produce the same trajectory",
+      "cases": [
+        "p007_reentry_simple_table",
+        "p008_reentry_full_table_equivalent"
+      ],
+      "comparison": "allclose",
+      "columns": [
+        "time",
+        "alt",
+        "vel",
+        "mach",
+        "dynprs",
+        "ca"
+      ],
+      "atol": 1e-08,
+      "rtol": 1e-08
+    },
+    {
+      "id": "m003_wind_effect",
+      "title": "Crosswind increases airspeed while ground speed is unchanged",
+      "cases": [
+        "p014_zero_wind",
+        "p015_crosswind"
+      ],
+      "comparison": "crosswind_increases_airspeed",
+      "columns": [
+        "vair",
+        "vel"
+      ]
+    },
+    {
+      "id": "m004_coordinate_initialization_equivalence",
+      "title": "Geodetic and ECFC representations describe the same state",
+      "cases": [
+        "p018_geodetic_initialization",
+        "p019_ecfc_initialization"
+      ],
+      "comparison": "allclose",
+      "columns": [
+        "time",
+        "xecfc",
+        "yecfc",
+        "zecfc",
+        "xecfcdt",
+        "yecfcdt",
+        "zecfcdt"
+      ],
+      "atol": 1e-05,
+      "rtol": 1e-10
+    },
+    {
+      "id": "m005_prop_aggregation_equivalence",
+      "title": "Two propulsive force blocks equal one summed block",
+      "cases": [
+        "p029_split_thrust_aggregation",
+        "p030_single_thrust_equivalent"
+      ],
+      "comparison": "allclose",
+      "columns": [
+        "time",
+        "xecfc",
+        "xecfcdt",
+        "thrust"
+      ],
+      "atol": 1e-08,
+      "rtol": 1e-08
+    },
+    {
+      "id": "m006_guidance_intercept_methods",
+      "title": "Predictive and proportional navigation both reduce relative range",
+      "cases": [
+        "p026_predictive_intercept",
+        "p027_proportional_navigation"
+      ],
+      "comparison": "both_reduce_relative_range",
+      "columns": [
+        "relrng[2]"
+      ]
+    },
+    {
+      "id": "m007_wind_representation_equivalence",
+      "title": "Speed-heading and east-north wind representations are equivalent",
+      "cases": [
+        "p040_wind_speed_heading_tables",
+        "p041_wind_component_tables"
+      ],
+      "comparison": "allclose",
+      "columns": [
+        "time",
+        "vel",
+        "vair",
+        "mach"
+      ],
+      "atol": 1e-08,
+      "rtol": 1e-08,
+      "notes": [
+        "A 50 ft/s wind from the east with 5 ft/s downward component is represented both ways."
+      ]
+    },
+    {
+      "id": "m008_ecic_coordinate_initialization_equivalence",
+      "title": "Geodetic, ECFC, and ECIC initialization are equivalent when omega is zero",
+      "cases": [
+        "p018_geodetic_initialization",
+        "p019_ecfc_initialization",
+        "p042_ecic_initialization"
+      ],
+      "comparison": "allclose",
+      "columns": [
+        "time",
+        "xecfc",
+        "yecfc",
+        "zecfc",
+        "xecfcdt",
+        "yecfcdt",
+        "zecfcdt"
+      ],
+      "atol": 1e-05,
+      "rtol": 1e-10
+    },
+    {
+      "id": "m009_aerodynamic_aggregation_equivalence",
+      "title": "Two aerodynamic blocks equal one block with summed coefficients",
+      "cases": [
+        "p044_split_aero_aggregation",
+        "p045_single_aero_equivalent"
+      ],
+      "comparison": "allclose",
+      "columns": [
+        "time",
+        "alt",
+        "vel",
+        "xecfc",
+        "yecfc",
+        "zecfc"
+      ],
+      "atol": 1e-08,
+      "rtol": 1e-08
+    }
+  ]
+}

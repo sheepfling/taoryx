@@ -86,6 +86,13 @@ def manual_corpus() -> None:
 ####
 
 
+def e2e() -> None:
+    """Validate the checked-in application-level corpus without a TAOS executable."""
+    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime"])
+    run([project_python(), "-m", "tools.build_e2e_documented_coverage"])
+####
+
+
 def legacy_audit() -> None:
     run(tool_script("audit_legacy_inbox.py", "--verify-fixtures"))
 ####
@@ -153,6 +160,7 @@ def check() -> None:
     lint()
     typecheck()
     test()
+    e2e()
     manual_corpus()
     manual()
 ####
@@ -168,6 +176,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "legacy-audit": legacy_audit,
     "legacy-close-check": legacy_close_check,
     "test": test,
+    "e2e": e2e,
     "manual": manual,
     "equation-audit": equation_audit,
     "handoff": handoff,

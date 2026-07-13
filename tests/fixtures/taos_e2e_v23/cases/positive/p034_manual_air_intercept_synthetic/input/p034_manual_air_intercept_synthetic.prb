@@ -1,0 +1,160 @@
+(p034_manual_air_intercept_synthetic)
+
+*title Ballistic Missile Intercept
+
+*atmos standard
+*earth wgs-84 omega=0
+
+# Interceptor trajectory
+*trajectory 1 Interceptor start on 1
+
+  *define alt-km
+    alt-km = alt/3280.84;
+  *define rng-km
+    rng-km = range*1.852;
+
+  *dwn/crs long=0.0 latgd=0.0 azm=90.0
+
+  *initial geodetic
+    long=opta-13 lat=0.0 psi=-90.0
+    time=25.0 range=0.0 gama=0.0
+    alt=35000.0 vel=730.0 wt=1965.0
+
+  *print time east alt vel gamgd alpha dynprs
+
+  *segment 1 Drop for 2 sec
+    *integ dtprnt=0.50 dt=0.10
+    *cg cg=134.0
+    *aero ca=(stage1-ca-off) cn=(stage1-cn)
+    *when tseg=2 goto 2
+
+  *segment 2 1st stage burn
+    *integ dtprnt=0.5 dt=0.10
+    *cg cg=119.8
+    *aero ca=(stage1-ca-on) cn=(stage1-cn)
+    *prop thrust=(thrust1) mdot=(mdot1)
+    *fly alpha vrs tseg
+      opta-1 0.0
+      opta-2 1.25
+      opta-3 2.50
+      opta-4 3.75
+      opta-5 5.00
+    *when tseg=5.0 goto 3
+    *when alt<0 goto 8
+
+  *segment 3 Coast
+    *integ dtprnt=0.5 dt=0.10
+    *cg cg=105.7
+    *aero ca=(stage1-ca-off) cn=(stage1-cn)
+    *when tseg=0.25 goto 4
+    *when alt<0 goto 8
+
+  *segment 4 Stage and coast
+    *integ dtprnt=0.5 dt=0.10
+    *reset wt=368.0
+    *cg cg=61.6
+    *aero ca=(stage2_ca_off) cn=(stage2_cn)
+    *when tseg=0.25 goto 5
+    *when alt<0 goto 8
+
+  *segment 5 2nd stage burn
+    *integ dtprnt=0.5 dt=0.10
+    *cg cg=57.2
+    *aero ca=(stage2_ca_on) cn=(stage2_cn)
+    *prop thrust=(thrust2) mdot=(mdot2)
+    *fly alpha vrs tseg
+      opta-6  0.0
+      opta-7  2.0
+      opta-8  4.0
+      opta-9  6.0
+      opta-10 8.0
+      opta-11 10.0
+      opta-12 13.1
+    *when tseg=13.1 goto 6
+    *when alt<0 goto 8
+
+  *segment 6 Coast and stage
+    *integ dtprnt=0.5 dt=0.10
+    *cg cg=52.8
+    *aero ca=(stage2_ca_off) cn=(stage2_cn)
+    *when tseg=0.50 goto 7
+    *when alt<0 goto 8
+
+  *segment 7 Separate kill vehicle and coast
+    *integ dtprnt=0.5 dt=0.10
+    *reset wt=80.0
+    *cg cg=32.3
+    *aero ca=(payload-ca) cn=(payload-cn)
+    *when time=80 goto 8
+    *when alt<0 goto 8
+
+  *segment 8 Remove shroud and coast
+    *integ dtprnt=0.5 dt=0.10
+    *reset wt=70.0
+    *cg cg=18.0
+    *aero ca=(kkv-ca) cn=(kkv-cn)
+    *when time=90 stop
+    *when alt<0 stop
+
+# Target trajectory
+*trajectory 2 Target start on 21
+
+  *define alt-km
+    alt-km = alt/3280.84;
+  *define rng-km
+    rng-km = range*1.852;
+
+  *dwn/crs long=0.0 latgd=0.0 azm=90.0
+
+  *initial geodetic
+    long=0.0 lat=0.0 psi=90.0
+    time=0.0 range=0.0 gama=79.0
+    alt=0.0 vel=0.0 wt=13000.0
+
+  *print time east alt vel gamgd alpha dynprs
+
+  *segment 21 Launch
+    *integ dtprnt=1.0 dt=0.01
+    *aero ca=(target-ca-on) cn=(target-cn)
+    *prop thrust=(target-thrust) mdot=(target-mdot)
+    *rail launch cfstat=0.15 cfslid=0.01
+    *when plength>1000.0 goto 22
+
+  *segment 22 1st stage burn
+    *integ dtprnt=1.0 dt=0.10
+    *aero ca=(target-ca-on) cn=(target-cn)
+    *prop thrust=(target-thrust) mdot=(target-mdot)
+    *when time>75.0 goto 23
+
+  *segment 23 Coast to intercept time
+    *integ dtprnt=2.0 dt=0.10
+    *aero ca=(target-ca) cn=(target-cn)
+    *when time>90.0 goto 24
+
+  *segment 24 Coast to impact
+    *integ dtprnt=2.0 dt=0.10
+    *aero ca=(target-ca) cn=(target-cn)
+    *when alt<0 stop
+
+*optimize a for vel=max on segment 8, trajectory 1
+  constrain alt[1] on segment 8 = alt[2] on segment 23
+  constrain long[1] on segment 8 = long[2] on segment 23
+  fref=10000 maxitr=60 integ=0
+
+  par-1=9.9   lo-1=-10.0  hi-1=10.0
+  par-2=9.9   lo-2=-10.0  hi-2=10.0
+  par-3=9.9   lo-3=-10.0  hi-3=10.0
+  par-4=8.4   lo-4=-10.0  hi-4=10.0
+  par-5=3.7   lo-5=-10.0  hi-5=10.0
+  par-6=3.7   lo-6=-10.0  hi-6=10.0
+  par-7=-0.5  lo-7=-10.0  hi-7=10.0
+  par-8=-2.0  lo-8=-10.0  hi-8=10.0
+  par-9=-4.2  lo-9=-10.0  hi-9=10.0
+  par-10=-5.0 lo-10=-10.0 hi-10=10.0
+  par-11=-6.5 lo-11=-10.0 hi-11=10.0
+  par-12=-8.3 lo-12=-10.0 hi-12=10.0
+  par-13=3.50 lo-13=1.0   hi-13=6.0
+
+*egs ex3.dbf time alt east alt-km rng-km vel
+
+*end

@@ -1,0 +1,4 @@
+(vector-angle-1)
+table tvec1(time) no-extrap
+time=0,3
+tvec1=10,10

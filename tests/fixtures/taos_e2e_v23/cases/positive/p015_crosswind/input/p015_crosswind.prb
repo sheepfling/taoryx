@@ -1,0 +1,12 @@
+(crosswind)
+*title Wind metamorphic case
+*atmos standard
+*earth spherical gm=0 omega=0
+*wind geodetic windv=(crosswind-speed) windh=0 windd=0
+*trajectory 1 aircraft start on 1
+  *initial geodetic alt=10000 long=0 lat=0 vel=300 gama=0 psi=90 time=0 mass=10
+  *file wind.dat time vel vair mach
+  *segment 1 coast
+    *integ dtprnt=1 dt=0.1
+    *when time=5 stop
+*end
