@@ -2004,7 +2004,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Newton second law for a point mass"
     },
     {
@@ -2024,7 +2024,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Inertial acceleration as the second position derivative"
     },
     {
@@ -2044,7 +2044,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Transport theorem with earth-fixed inner derivative"
     },
     {
@@ -2064,7 +2064,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Transport theorem evaluated in the rotating frame"
     },
     {
@@ -2084,7 +2084,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Expanded inertial acceleration"
     },
     {
@@ -2104,7 +2104,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Earth-relative velocity and acceleration definitions"
     },
     {
@@ -2124,7 +2124,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Grouped inertial acceleration terms"
     },
     {
@@ -2144,7 +2144,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Inertial and earth-fixed acceleration relationship"
     },
     {
@@ -2164,7 +2164,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Earth-fixed rotating-earth equation of motion"
     },
     {
@@ -2184,7 +2184,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "First-order equations of motion"
     },
     {
