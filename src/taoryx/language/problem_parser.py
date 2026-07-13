@@ -10,6 +10,11 @@ from taoryx.language.expressions import (
     TableReferenceExpression,
     parse_expression,
 )
+from taoryx.language.grammar_contracts import (
+    SUPPORTED_PROBLEM_BLOCKS,
+    SUPPORTED_SEGMENT_BLOCKS,
+    SUPPORTED_TRAJECTORY_BLOCKS,
+)
 from taoryx.language.models import (
     AeroBlock,
     Assignment,
@@ -52,6 +57,7 @@ from taoryx.language.models import (
 _BLOCK_RE = re.compile(r"^\s*\*(?P<keyword>[A-Za-z0-9_/]+)\b(?P<header>.*)$")
 _PROBLEM_RE = re.compile(r"^\s*\((?P<name>[^()]+)\)\s*$")
 _ASSIGN_RE = re.compile(r"(?P<name>[A-Za-z_][A-Za-z0-9_./-]*(?:\[\d+\])?)\s*(?P<op><=|>=|==|!=|=|<|>)\s*(?P<value>\([^()]+\)|\*|[^\s,;]+)")
+_FREE_FIELD_SPLIT_RE = re.compile(r"[\s,=():<>]+")
 
 
 def _location(path: str, line: int, column: int = 1) -> SourceLocation:
@@ -83,9 +89,14 @@ def _assignments(text: str, path: str, line: int, diagnostics: list[Diagnostic])
 ####
 
 
+def _free_fields(text: str) -> list[str]:
+    return [field for field in _FREE_FIELD_SPLIT_RE.split(text.strip()) if field]
+####
+
+
 def _make_block(keyword: str, header: str, scope: str, path: str, line: int, diagnostics: list[Diagnostic]):
     common: dict[str, Any] = {"scope": scope, "location": _location(path, line), "header": header.strip(), "assignments": _assignments(header, path, line, diagnostics)}
-    words = header.strip().split()
+    words = _free_fields(header)
     mapping = {
         "atmos": AtmosBlock,
         "earth": EarthBlock,
@@ -184,6 +195,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
     current_trajectory: Trajectory | None = None
     current_segment: Segment | None = None
     current_block = None
+    problem_closed = False
     lines = text.splitlines()
     for number, original in enumerate(lines, start=1):
         line = original.split("#", 1)[0].rstrip()
@@ -197,6 +209,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
             current_trajectory = None
             current_segment = None
             current_block = None
+            problem_closed = False
             continue
         ####
         block_match = _BLOCK_RE.match(line)
@@ -204,14 +217,25 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
             keyword = block_match.group("keyword").lower()
             header = block_match.group("header").strip()
             if keyword == "end":
-                if current_problem is not None:
+                if current_problem is None:
+                    document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="end-before-problem", message="'*end' appears before a problem name.", location=_location(path, number)))
+                elif problem_closed:
+                    document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="duplicate-end", message="A problem cannot contain more than one '*end'.", location=_location(path, number)))
+                else:
                     current_problem.ended = True
+                    problem_closed = True
                 ####
                 current_block = None
+                current_trajectory = None
+                current_segment = None
                 continue
             ####
             if current_problem is None:
                 document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="block-before-problem", message=f"Block '*{keyword}' appears before a problem name.", location=_location(path, number)))
+                continue
+            ####
+            if problem_closed:
+                document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="block-after-end", message=f"Block '*{keyword}' appears after '*end'.", location=_location(path, number)))
                 continue
             ####
             if keyword == "trajectory":
@@ -241,8 +265,8 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 current_block = None
                 continue
             ####
-            problem_keywords = {"atmos", "earth", "egs", "optimize", "radar", "search", "summarize", "survey", "title", "units/fmt", "wind"}
-            trajectory_keywords = {"dwn/crs", "iip", "initial", "tangent"}
+            problem_keywords = SUPPORTED_PROBLEM_BLOCKS - {"define", "file", "print"}
+            trajectory_keywords = SUPPORTED_TRAJECTORY_BLOCKS - {"define", "file", "print"}
             if keyword in problem_keywords:
                 scope = "problem"
                 current_segment = None
@@ -251,6 +275,8 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 scope = "trajectory"
                 current_segment = None
             elif keyword in {"define", "file", "print"}:
+                scope = "segment" if current_segment is not None else "trajectory" if current_trajectory is not None else "problem"
+            elif keyword in SUPPORTED_SEGMENT_BLOCKS:
                 scope = "segment" if current_segment is not None else "trajectory" if current_trajectory is not None else "problem"
             else:
                 scope = "segment" if current_segment is not None else "trajectory" if current_trajectory is not None else "problem"

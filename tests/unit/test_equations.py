@@ -2,7 +2,14 @@ from __future__ import annotations
 
 import pytest
 
-from taoryx.equations import Equation, EquationRegistry, load_equation_registry, registry
+from taoryx.equations import (
+    Equation,
+    EquationImplementationStatus,
+    EquationRegistry,
+    implementation_summary,
+    load_equation_registry,
+    registry,
+)
 
 
 def test_default_registry_loads_canonical_equation_catalog() -> None:
@@ -81,4 +88,17 @@ def test_load_equation_registry_round_trips_provenance_csv() -> None:
     assert loaded.get_by_label("eq:earth-rotation-rate").identifier == "2-2"
     assert loaded.all()[0].identifier == "1-1"
     assert loaded.all()[-1].identifier == "4-8"
+####
+
+
+def test_registry_reports_implementation_progress() -> None:
+    summary = implementation_summary(registry)
+
+    assert summary["total"] == 326
+    assert summary[EquationImplementationStatus.IMPLEMENTED.value] == 0
+    assert summary[EquationImplementationStatus.NOT_IMPLEMENTED.value] == 326
+    assert summary[EquationImplementationStatus.PARTIAL.value] == 0
+    assert summary[EquationImplementationStatus.UNKNOWN.value] == 0
+    assert summary["implemented_ratio_numerator"] == 0
+    assert summary["implemented_ratio_denominator"] == 326
 ####

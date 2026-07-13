@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -43,7 +44,35 @@ class Equation:
     def is_implemented(self) -> bool:
         """Return whether the registry marks this equation as executable."""
 
-        return self.code_implementation_status.startswith("implemented")
+        return self.implementation_status is EquationImplementationStatus.IMPLEMENTED
+    ####
+
+    @property
+    def implementation_status(self) -> EquationImplementationStatus:
+        """Return the normalized implementation stage for this equation."""
+
+        return EquationImplementationStatus.from_prose(self.code_implementation_status)
+    ####
+
+
+class EquationImplementationStatus(StrEnum):
+    """Normalized implementation state for registry reporting."""
+
+    IMPLEMENTED = "implemented"
+    NOT_IMPLEMENTED = "not_implemented"
+    PARTIAL = "partial"
+    UNKNOWN = "unknown"
+
+    @classmethod
+    def from_prose(cls, value: str) -> EquationImplementationStatus:
+        normalized = value.casefold()
+        if normalized.startswith("implemented"):
+            return cls.IMPLEMENTED
+        if normalized.startswith("not yet mapped"):
+            return cls.NOT_IMPLEMENTED
+        if normalized.startswith("partially implemented") or normalized.startswith("partial"):
+            return cls.PARTIAL
+        return cls.UNKNOWN
     ####
 
 
@@ -132,6 +161,20 @@ def load_equation_registry(provenance_path: Path = DEFAULT_PROVENANCE_PATH) -> E
         ####
     ####
     return registry
+####
+
+
+def implementation_summary(registry: EquationRegistry) -> dict[str, int]:
+    """Return a compact implementation-progress summary for the registry."""
+
+    counts = {status.value: 0 for status in EquationImplementationStatus}
+    for equation in registry.all():
+        counts[equation.implementation_status.value] += 1
+    ####
+    counts["total"] = len(registry)
+    counts["implemented_ratio_numerator"] = counts[EquationImplementationStatus.IMPLEMENTED.value]
+    counts["implemented_ratio_denominator"] = counts["total"]
+    return counts
 ####
 
 

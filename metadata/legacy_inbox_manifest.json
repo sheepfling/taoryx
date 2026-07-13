@@ -1,0 +1,3514 @@
+{
+  "format": "taoryx-legacy-inbox-manifest",
+  "schema_version": "1",
+  "source": "INBOX/taos_legacy_preservation_intial_work_maybe_faulty",
+  "entries": [
+    {
+      "path": ".DS_Store",
+      "size": 6148,
+      "sha256": "c2f90a58a82c02adfa8f0bfca00797640778f775c2959ba3565b194b84f928d9",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "README.md",
+      "size": 2570,
+      "sha256": "7caff577200a6516a2750b7e48caa2ac2b6ceab05d21c14edd9449715e93e400",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "RELEASE_NOTES.md",
+      "size": 4774,
+      "sha256": "243cb2bf7ba78dc317233fc4e7a79efbcd27cefe5121298c3801a04fea301708",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "SHA256SUMS.txt",
+      "size": 36956,
+      "sha256": "960647a717203d7f20ce8797bc456f39996be856737760206f4573d1ebbca56e",
+      "disposition": "discard-generated",
+      "rationale": "Release output or transient verification artifact."
+    },
+    {
+      "path": "VERIFICATION.md",
+      "size": 4519,
+      "sha256": "1d0e9d1d1d9f0774355eaa44bc884d9a18526e694f7003ed28030c76e8dc1c71",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/.DS_Store",
+      "size": 8196,
+      "sha256": "2d850c780cc2e340037fc3bfbe690df8712057927d383366a354fad5f5b5ab37",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/.pytest_cache/.gitignore",
+      "size": 37,
+      "sha256": "3ed731b65d06150c138e2dadb0be0697550888a6b47eb8c45ecc9adba8b8e9bd",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/.pytest_cache/CACHEDIR.TAG",
+      "size": 191,
+      "sha256": "37dc88ef9a0abeddbe81053a6dd8fdfb13afb613045ea1eb4a5c815a74a3bde4",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/.pytest_cache/README.md",
+      "size": 302,
+      "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/.pytest_cache/v/cache/nodeids",
+      "size": 33560,
+      "sha256": "e89386a6faf9ad90024603090d9e1fb302b466b8ca7ed3159d774d9b3ca86cb9",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/COVERAGE_PLAN.md",
+      "size": 57398,
+      "sha256": "209004a048f3eaf2e017c16870ce43f3f480cb91b8b0067fdb272cdfd5414e96",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/EVIDENCE_INDEX.md",
+      "size": 24011,
+      "sha256": "9c821b9898831dc7624c3959131356954f602cfb26231bbaf257086d24d5b0ec",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/GRAMMAR_NOTES.md",
+      "size": 25291,
+      "sha256": "537382d56e7992617ba5424ec1594fc961e0367c7e07879297b0625c2d6e6191",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/GRAMMAR_PROFILE.md",
+      "size": 8777,
+      "sha256": "3290254f497b659e6c7ee98b5a9099958dfc43c098fb5762d79fcfbb92d51fcc",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_A_COMPLETION.md",
+      "size": 1409,
+      "sha256": "c5a35a20a5cc34f112e7d0dd57da6ba676d409d526259514ab807b1f2ee50568",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PLAN.md",
+      "size": 3214,
+      "sha256": "c82c37f22f32807c74c800493ab374b939b6b014f1490de778ca4eb742503bc9",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V06.md",
+      "size": 1027,
+      "sha256": "df66f25113130667f065a2cf1ded46eba9c79378e9b9e364b99d2757b1da1a17",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V07.md",
+      "size": 1171,
+      "sha256": "23f35f6dc251e2ce11173be852bf348aaabc3f0d593f03f9228522b982db0bed",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V08.md",
+      "size": 1102,
+      "sha256": "3dc804673da10100c6a11ce46a1c0ef0818bf9a7fafc7e5956371ab886b7512e",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V09.md",
+      "size": 1148,
+      "sha256": "8ef16583a30dbca618e4404bb788d954f98d2a1d389c4576bedf2bbb07d9bc79",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V10.md",
+      "size": 1160,
+      "sha256": "1bb436b4fecafc9d71b74974d9cd766dd2495fa49ea1c87bbad0a6da05a7bf09",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V11.md",
+      "size": 1615,
+      "sha256": "6f7d97ca7ae9433221b684009d408a4da622eed41e377d04aa98f47557d6db4e",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V12.md",
+      "size": 2630,
+      "sha256": "211907d9543be0b704b2a54fd881254cc904096b775165d3fce728311a652255",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V13.md",
+      "size": 2426,
+      "sha256": "b886e4687ea55d7563a222bf5ef844a7dd27675cdd3e2917e8fa1b5df46a5508",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V14.md",
+      "size": 3726,
+      "sha256": "da5bcfe4272ac0ba3fcf602a35fade48263c6c26e9592953651de55f040ff4f1",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V15.md",
+      "size": 979,
+      "sha256": "dbe763e460c28b1d896d1c24a6aa9302fb795bccdadecc0689e362720ed7722f",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V16.md",
+      "size": 1024,
+      "sha256": "998b9b3a97051d59770459bc73c48eaa8221ad0768a97a993a2fc02b013efe44",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V17.md",
+      "size": 2059,
+      "sha256": "076d279f08df64679d75de912ead3b785c7f108bea72b2bc093e0639d853d3f0",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V18.md",
+      "size": 1593,
+      "sha256": "10c635de4426b80d3fcb83b5f98cdb9fe172fc793aa7dc458472400b97dfd116",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V19.md",
+      "size": 1480,
+      "sha256": "3dfd4a08ac8e487818bc15077bfeea8af277e9608fd2518c1fbbb1d4d9c8dda8",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V20.md",
+      "size": 1699,
+      "sha256": "262c88afbf0ebcdbfc7de4b88f74c89b9720c71f603d6cd49e0f00154df0fb5a",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V21.md",
+      "size": 4701,
+      "sha256": "ad1d0a0ac8d308198c459e589deac11ec3bff4667417b6766a6a8646c412540b",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V22.md",
+      "size": 5302,
+      "sha256": "7eee94eef74fb4d86246f71c3a7415053aac7eab77bae4c6f1a356557d286e59",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V23.md",
+      "size": 6818,
+      "sha256": "7e859bd581991bc25f984c250a4c83f1445c203fa40b54ad7b58b21d20449e32",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V24.md",
+      "size": 1973,
+      "sha256": "ff9c9385ef9892d0a0c26545bf7de3610f45ba9952bb7a54e8938955ffbd22fe",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V25.md",
+      "size": 3553,
+      "sha256": "262806ba4fc77bb8ca977ee351c7dc22c3bfbd340bd3322f60fd3243b84156a8",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V26.md",
+      "size": 3839,
+      "sha256": "2190c00967e46584ed4f4225a092b6134ffd8cc11a0820cd50d909339ed16af5",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V27.md",
+      "size": 6110,
+      "sha256": "ae9f01c4c65b497c0caa086bdb29f8a2fa404541c6e64683f959bbd7ddee7f27",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V28.md",
+      "size": 2177,
+      "sha256": "67068adeff017f6f9911d429d504fe9a001f225aa60e0b52bb00912955910a5e",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_PROGRESS_V29.md",
+      "size": 4528,
+      "sha256": "44b42fd0554dcb9cda458e14ec32ac7c9c8f0c45e0e7cf9a58a65b3947c342b9",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/PHASE_B_TRANSCRIPTION.md",
+      "size": 2165,
+      "sha256": "0633440cb01b22e1beb6200774ba7f49c6aa4fa52f0d7bc12b9cf2f6e4bfc1da",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/README.md",
+      "size": 34992,
+      "sha256": "08cfd1bcbe064c2f93a2c28afa6c46aa0d3c3a3b084b035fe1cb4c2f6ff0b8b3",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/RELEASE_NOTES.md",
+      "size": 4774,
+      "sha256": "243cb2bf7ba78dc317233fc4e7a79efbcd27cefe5121298c3801a04fea301708",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/VERIFICATION.md",
+      "size": 4519,
+      "sha256": "1d0e9d1d1d9f0774355eaa44bc884d9a18526e694f7003ed28030c76e8dc1c71",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/dist/taos_legacy-0.29.0-py3-none-any.whl",
+      "size": 204751,
+      "sha256": "15c48b7b49636c3e8e664cf28fede0b2967498b363111f5ed4f5d8e3cc17ece6",
+      "disposition": "discard-generated",
+      "rationale": "Release output or transient verification artifact."
+    },
+    {
+      "path": "toolkit/examples/aero.tbl",
+      "size": 79,
+      "sha256": "3a43ad0556ea382e98796c8fc62344561910f63380372e50639f4bf835d7e2e0",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/example.prb",
+      "size": 276,
+      "sha256": "22e1b7a96b2cc09871743a0a2bcb208065e42f70e17278496cd094631527907f",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_aero_constants.analysis.json",
+      "size": 30731,
+      "sha256": "5efbeee128842086d51c14edf2905f42d100b1997f8a6d5d6b805341cf239813",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_aero_constants.catalog.json",
+      "size": 1480,
+      "sha256": "da05ae78835155ca9f3639051b2b887e74e0df514bbc94e0bcba35a1cd2159d3",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_aero_constants.prb",
+      "size": 358,
+      "sha256": "c6b2cfa4542d4186229ebf86cc12705e9cd84841e728eecda776fe6b79111fd7",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_cg.analysis.json",
+      "size": 7192,
+      "sha256": "830e75cc0b7299d815b4d2dbb43a479e834f1d4ebf9cde7c4950d6ff8a3f199f",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_cg.catalog.json",
+      "size": 592,
+      "sha256": "3b648cace1827209ee88e8387658c281efd4af635acd6f4ce3d70020f3f31e4c",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_cg.prb",
+      "size": 195,
+      "sha256": "928de456d5d2ad294514cd744127f797749f44495f94af61d69f711e579479e2",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_file_optimize.prb",
+      "size": 906,
+      "sha256": "2d7b8d38b32d430a05fb49e3ca603d36349001b3577f6edbe314aad08db29641",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_file_output.analysis.json",
+      "size": 30227,
+      "sha256": "491d884c9bae3d552f0ef8626a0b03e6f6eaba3f7012f295001c3e8454e3826b",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_file_output.catalog.json",
+      "size": 2212,
+      "sha256": "a47838bdece3738f42f4f805b2d43a08487a85f8c76ec2d44ca93793a2853099",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_fly.analysis.json",
+      "size": 28455,
+      "sha256": "c77529adee4aa5e5cd66d274d10d8164cd9d180df1f215e8d78bcf893cdd25f5",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_fly.catalog.json",
+      "size": 13395,
+      "sha256": "46a3110c44abc2491b73e8d00fc3f0f300d15c55434d1a0137fc786292cff993",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_fly.prb",
+      "size": 654,
+      "sha256": "577a8e63924f70d9005bd7ff1e313e0745de56853d5a876c6e408a4cda588301",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_free_field.analysis.json",
+      "size": 17696,
+      "sha256": "3ef152a2c68d951d0e642773ff9f25cf1c71054c02c7433f4069d999dd925950",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_free_field.prb",
+      "size": 245,
+      "sha256": "dd0bd8ded6fcdd06164ee7c29e6cc3b5a7b1f0975035b4491d8a2746b6e055ac",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_increment.analysis.json",
+      "size": 27182,
+      "sha256": "0a61c6f96d2dc264462db8595de273a5562c1e9d6a543bb340bee94bc9297850",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_increment.catalog.json",
+      "size": 8665,
+      "sha256": "d526a0d096222e7b08499c17e91dc6e44500ae06096ef1db37953c0edda9d7d5",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_increment.prb",
+      "size": 338,
+      "sha256": "fbbad50d29ae11f2d4b85740bed7b6450f52da17e6409886f9e263f03cd70f5e",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_inertial_integ_limits.analysis.json",
+      "size": 35283,
+      "sha256": "5adfc8417d403a50155ee3bdb3359a18b41c0b7dabdc760a7fb82f8291f8d0fe",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_inertial_integ_limits.catalog.json",
+      "size": 22635,
+      "sha256": "dfcd59cabb9b675f8ba40f3e648f3a999257c4a947d6adc44cae5313a049f0e6",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_inertial_integ_limits.prb",
+      "size": 343,
+      "sha256": "2e7e8b3a491bec7cc841ee3b2820635085bf7d2d43912850744afa212c576878",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_integ.prb",
+      "size": 232,
+      "sha256": "7e1d9b20233ca578d7431324ccd5e57d482aa281a2eedeaaf2c1edca6eca0ed0",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_optimize.analysis.json",
+      "size": 19527,
+      "sha256": "b83deed055c85a1ab182c4d10df3b64d8c84e86013f93471db34a65e47c4341f",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_optimize.catalog.json",
+      "size": 4299,
+      "sha256": "7b55841c220027f09d2f4693137bcacb0721e5020b486388d31db4122895d321",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_print_output.analysis.json",
+      "size": 31541,
+      "sha256": "11fd975d7104d96536b5978a84587829705225d4b67bc5c4ee8a4b9e90bad492",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_print_output.catalog.json",
+      "size": 2091,
+      "sha256": "9f12874791391a9c663a5d4ac36426847e94876a55f18d2b6111b595707195e7",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_print_output.prb",
+      "size": 558,
+      "sha256": "697b56178d9824bf0e02646225d4d990555ed191cbb683069294700653fb1e5c",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_print_radar_search.prb",
+      "size": 891,
+      "sha256": "83932259d4e54f654c3feceb51af661e329efeec4a087c5dcf4daa40f8155936",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_catalog.analysis.json",
+      "size": 14285,
+      "sha256": "c301356b66cbb5326d6edebfd878023512ff411eeac052ff7e10b6830a6af8e4",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_catalog.catalog.json",
+      "size": 9401,
+      "sha256": "99931c3d9ce6f713d2853f1ce45705ed46f57a9de867dcd4950d4e6953dcf296",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_catalog.prb",
+      "size": 584,
+      "sha256": "9676e5a2aa4104e32a4f3073b368794acbbe8d516faec9966dca7dc6cf0507f3",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_core.analysis.json",
+      "size": 17362,
+      "sha256": "e27defb15dff4be24656db185de7b26ea2fe3ce5d24078a3c186690efd2c4d9b",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_core.catalog.json",
+      "size": 54117,
+      "sha256": "92ada16c6a2c35c176ca653e9a8d96ea169dcd28b8c7a257b1dd5477ebf5f1db",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_core.prb",
+      "size": 826,
+      "sha256": "c31fe714777b1fec27c1d665cedcacc62d1dec7ea71c28d99aef97093da74a8c",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_details.analysis.json",
+      "size": 21992,
+      "sha256": "9955ab6ccb7d7efc9c8be04d3866105e92ab6ca907e589ad1b070c894b0cfb7e",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_details.catalog.json",
+      "size": 18447,
+      "sha256": "aaf30d4018b7adc1c77573db24cb36751f500e3eeb03351c57cd17b992e58473",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_details.prb",
+      "size": 1136,
+      "sha256": "f247fee86390873434c5a92511fc2cfa3ed98e7d14acc11d1eb7614f1e095b50",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_problem_framing.prb",
+      "size": 176,
+      "sha256": "6c26a8833423c06332e3f126af4729afbdb53ab36ca3fa4f50e271a05f96a592",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_prop.analysis.json",
+      "size": 15030,
+      "sha256": "c2a8e1287fbca65b440da26baf11d7cf3c5be62fd6b6c79b164a26dbed484266",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_prop.catalog.json",
+      "size": 2540,
+      "sha256": "99154867cd39f5c8228d2e71c3929802dbe75cb8b46800736b62d04f93c092a2",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_prop.prb",
+      "size": 328,
+      "sha256": "29cf4916bf04ea72e225c81e6c18e0acb8a99f0d62694d072954465eab126dd1",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_radar.analysis.json",
+      "size": 4584,
+      "sha256": "72de4b08796dffc802e56a748a4737741f2d6b725ac0a75981d25f0e88d1728e",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_radar.catalog.json",
+      "size": 1407,
+      "sha256": "129740deb9c6c40917e92a79af8b461fa3b661cd4c4ee6bf706752e807ecc2a4",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_rail_reset_when.analysis.json",
+      "size": 41944,
+      "sha256": "6aa3aab744acac72441f3a94b440d2a747c3de009957ab7f4ecf43c99a671715",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_rail_reset_when.catalog.json",
+      "size": 13278,
+      "sha256": "44c20213b8ff7e479a60ec5cc6651adf0e8bbc85ce27aa2e1ffb46d75b7f19b6",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_rail_reset_when.prb",
+      "size": 415,
+      "sha256": "5fd7f50f2be63cb5f4fa03ae0c76bbd01f2d02290ba971827c48c08b31c2fccb",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_search.analysis.json",
+      "size": 8189,
+      "sha256": "1a9815a14d8575d4cad827d1ef22576ad61b62dafddf3f91b1783277166f8c83",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_search.catalog.json",
+      "size": 1243,
+      "sha256": "c845b6b5a4e26dfa9050d300c51bb46c11eff81597263fcf755c637064177444",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_segment_hierarchy.prb",
+      "size": 257,
+      "sha256": "bd675800730ee450664ba0ebf68900c2c72bc43c8c9ba281ef5c86f46f53c520",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_trajectory_catalog.analysis.json",
+      "size": 21367,
+      "sha256": "d552f19c59a8e64d13a5db00d8fe14d9be33a2fcdddbb27e141850309ed49f78",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_trajectory_catalog.catalog.json",
+      "size": 5757,
+      "sha256": "ede9016aef7f4a75ed95412734e7d46428ff06e1ba0d30d2f886925b1be7b215",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_trajectory_catalog.prb",
+      "size": 464,
+      "sha256": "83ff0b2f74d444c98a5bcbc81a44e80cf885065ea21810a0b11695ac90967650",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_trajectory_details.analysis.json",
+      "size": 22218,
+      "sha256": "2ec964d9058d70e095a8cbd53bd1a48c3c2d865edaf84334ffe47c6a8051d9d4",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_trajectory_details.catalog.json",
+      "size": 4337,
+      "sha256": "cc655ba6ee0cad27197aa573733a83e266970164aad58b47bb414ecc0fbc3388",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/manual/taos96_trajectory_details.prb",
+      "size": 593,
+      "sha256": "420bb9a81d55b115624585397fb2fef8f4592b413c959fd4a77281e57eca77f0",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/profile_example.prb",
+      "size": 127,
+      "sha256": "5a1fa5bc3a9f0efcc30750ffb8f6e18cd04996c2d25e340341db2232b4a10db0",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/profiles/field_observed.example.json",
+      "size": 1867,
+      "sha256": "ddf939a5228872612a3934ea1439ba149121f3c0c5c14c7471af879a2be06e32",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_radar.analysis.json",
+      "size": 7246,
+      "sha256": "68065f117fafde6c1db09b21b14083015fc34e88979024097de62893b89ee65d",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_radar.catalog.json",
+      "size": 1087,
+      "sha256": "18d33e78a06ba6714e3ef3e0f6405579fd63f46bb9a159e673342eb107ace16b",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_radar_search_baseline.prb",
+      "size": 425,
+      "sha256": "0800540942b8b83b10136448f1704c22a36e49706efc18c7bda821fa04ad6705",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_search.analysis.json",
+      "size": 5218,
+      "sha256": "12700b8a04685b5e215c236aa0738a6196a8e32397f989597cbaf05a1d15e247",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_search.catalog.json",
+      "size": 918,
+      "sha256": "d87c4bc37d8e73c3fdd8a23d711ed1d31e896ea95dfc2e64c767e6b9bf907225",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_segment_control_baseline.prb",
+      "size": 421,
+      "sha256": "d23935f2d9ba1127a453ec685ae047b831068d99c7c7b2b16db63188e5b8250c",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_summarize.analysis.json",
+      "size": 4865,
+      "sha256": "3a3632ff874603bd82353d2e5746bceabe00f863bd9631d2daf14eb1e41a86f8",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_summarize.catalog.json",
+      "size": 1326,
+      "sha256": "fad73c6f5b88baf30469a9dd879188b9a08ffb323f0bc2bf930a2845beea45e4",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_summarize_survey_baseline.prb",
+      "size": 453,
+      "sha256": "ac497701bccdff38ca7bdfed23fcc0b5763cc2260cf38567e96ce8ac697fe93d",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_survey.analysis.json",
+      "size": 7767,
+      "sha256": "1887bc925bb969eb3996f76be48c638d3d67eb0dd6f61978e8a8cdbfbd6460fe",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/examples/structural/taos96_survey.catalog.json",
+      "size": 1995,
+      "sha256": "59206db7675df2f7a836c4f5a05b12ed470351e5bb47efcbf37235e8e70dff35",
+      "disposition": "archive-research",
+      "rationale": "Candidate fixture retained as research; not a verified TAOS fixture."
+    },
+    {
+      "path": "toolkit/grammar/taos96_aero_constants.ebnf",
+      "size": 3776,
+      "sha256": "786a796e9fed5ddbfad34f790d92b5a57150dcad58fe4b34e0d8e4804e4d117e",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_atmos.ebnf",
+      "size": 990,
+      "sha256": "12b0474ddabdb5f9ed842baeb3a228166eadc65b6255e6a56a1556d35f731e08",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_cg.ebnf",
+      "size": 1543,
+      "sha256": "baa418e7761df0e7ea6cb00716a14143f433fa0f95341bc23ae43a74d9703e26",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_earth.ebnf",
+      "size": 968,
+      "sha256": "89f55415099051e20d964a41af40e6da23e08356f5cfaf5bb1d857515ded9e9f",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_egs.ebnf",
+      "size": 659,
+      "sha256": "0fb1de9860a14f517c44a5d376ec9488f323453676e674aa3336191829a8616c",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_file_output.ebnf",
+      "size": 1690,
+      "sha256": "0623cd7eb0a12676a026b9c22632f3b8c20af16276c5eff484ac46b6df767c8e",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_fly.ebnf",
+      "size": 3391,
+      "sha256": "c31e440697c96247739592eec3f811c7f74fb337533c3b8e577e1392f7a00be4",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_free_field.ebnf",
+      "size": 4001,
+      "sha256": "ee797fa8cd979b86e48b8fbb61d12eb45dc49825fc84b07dd8579e79c258dd68",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_hierarchy.ebnf",
+      "size": 697,
+      "sha256": "de235325d6fc77b19b454187c98fe024548f28835b1d987b291b9b27dfccf8be",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_increment.ebnf",
+      "size": 2653,
+      "sha256": "6c4fcf85baeee7b725fa13fd3c76ca13b54cae9237ff35fbde9569c2a4392ced",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_inertial.ebnf",
+      "size": 1525,
+      "sha256": "5a8ef769919f06280daa288c1493d0662487f0bec6829fb99261bd5e2d1407a8",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_integ.ebnf",
+      "size": 722,
+      "sha256": "ec654e33cd01184b31d2bdb86c38364dac469d83285f2a485402664c18526d22",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_limits.ebnf",
+      "size": 766,
+      "sha256": "e89ed718a513689aeefd5f81cb3f5723df4a3972249e6fbdd14b18aedb3c20e7",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_optimize.ebnf",
+      "size": 1919,
+      "sha256": "59f323674d1136f366859e8d64ec2c7c00ee041f2902a252f9f04750e52a3f08",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_print_output.ebnf",
+      "size": 1370,
+      "sha256": "3dca88ae393fee71c664a0c89eaec18dc3ed8a840a8986925d71e24823445e16",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_problem_catalog.ebnf",
+      "size": 2515,
+      "sha256": "0c49d1a581379739a944803cc980401aa99a720d3ce291cf669859326d6d51a1",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_problem_define.ebnf",
+      "size": 760,
+      "sha256": "cc9d8e1159648b7a1e3b62f9d92f27c12d2488f5fd4c6175b89e9c433c536e12",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_problem_details.ebnf",
+      "size": 1848,
+      "sha256": "e8ec579bc7e254d638e779cbcb9c91a353faf52f06209637e4b980bab383f0a4",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_problem_framing.ebnf",
+      "size": 691,
+      "sha256": "1726884eec8b3a911faf3e8e0d3dad645ff373c478c831cb51915b425be32f3d",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_prop.ebnf",
+      "size": 1077,
+      "sha256": "7b7cf457b4723442782097d6ceb5f720501c3cea294e50f73352181c01d46593",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_radar.ebnf",
+      "size": 1020,
+      "sha256": "13f7c98a94197095813003a9cff1a632ce345a024b570b38dbae87f98bb4bdf4",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_rail.ebnf",
+      "size": 568,
+      "sha256": "e7ae1e7161ded44ecdcee79bcad5ae2ef5a0013f0bb789858d6b09ba35548f75",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_reset.ebnf",
+      "size": 744,
+      "sha256": "f077253e5c98c88c79d741a506466ff56c5e41b9c8fc227c177b3c38103aa3f1",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_search.ebnf",
+      "size": 1215,
+      "sha256": "7ac0831948d20a276a6705c0508d9c2fc1d7fcacac218a3277a626f1f2940cc6",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_summarize.ebnf",
+      "size": 877,
+      "sha256": "1cb24bfdc833d6cb4f27f503a1889e2ca373aa18da86a9f79b927559bd967b70",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_survey.ebnf",
+      "size": 1138,
+      "sha256": "cd484598187b66e17469d84ccdb99f841674496e873b09241d114e370b6c1f95",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_trajectory.ebnf",
+      "size": 2606,
+      "sha256": "145301e6f17ba616d5b9253c29b889892a0d6564a03a1caee6fb1196467fb2bf",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_trajectory_details.ebnf",
+      "size": 4130,
+      "sha256": "250987cab7b2c73964bf5255abab250aa627ec73a51da30d78937f07e91a755f",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/grammar/taos96_when.ebnf",
+      "size": 789,
+      "sha256": "22ea6a8a5ca0d0644198defd373882727463a9c7f65ba443c77c189c8174908e",
+      "disposition": "archive-research",
+      "rationale": "Candidate grammar fragment retained as research; canonical claims live in taoryx contracts."
+    },
+    {
+      "path": "toolkit/pyproject.toml",
+      "size": 515,
+      "sha256": "10f42412feab797d423cb6a6578fa9c84610a7589500c1581460cbed9b3991ab",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/resources/SOURCES.md",
+      "size": 1203,
+      "sha256": "55392de5ba07b38d4b5bee44c3a8ed8d887ce3527b88c5f50b6b2f4817a30509",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/resources/download_resources.py",
+      "size": 1134,
+      "sha256": "e996b26a66fd537d258cd66c992d11c4557ac69aed680ea6da241c929b7b912e",
+      "disposition": "archive-research",
+      "rationale": "Unclassified legacy artifact retained in the hashed research archive."
+    },
+    {
+      "path": "toolkit/resources/manifest.json",
+      "size": 1803,
+      "sha256": "fcdf033fb89ca9671fbc24481e860f6d359fb5d160e7675595ad92c03ea00db4",
+      "disposition": "archive-research",
+      "rationale": "Project metadata or notes retained as research provenance."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/ledger.json",
+      "size": 116760,
+      "sha256": "f1c33775d5a364df0149c65662a6ea054a6a1db6d6478f9d123d367c9d4515a2",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_12_cg.md",
+      "size": 1177,
+      "sha256": "b6dfbc586e12083431752dbf1647644ace7c77e4a3197ec44af9ccea432ee50e",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_14_p4_19_fly.md",
+      "size": 3855,
+      "sha256": "0c4a8531827a9c0b9cd82b20ad8f9eaabb40b8b1229e12bed71792c016d208e0",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_20_p4_21_increment.md",
+      "size": 2513,
+      "sha256": "b67c1fb10c89dd883d5b0260c509f329f533a1c4bbe8919d936e811b1675d085",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_22_p4_24_inertial.md",
+      "size": 2323,
+      "sha256": "c3619301ac0286e08d1a6edd6bbff581b95b82aeae5b715545a2c5569cbb5d5a",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_24_p4_25_integ.md",
+      "size": 1531,
+      "sha256": "9d134c13e40c207b7241775a028d76f8c3d0af4454dce89e495f8dd16d902e75",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_25_p4_26_limits.md",
+      "size": 1575,
+      "sha256": "a0e3a70d20150c34cbb4407ffbf6d3cc63eec5c88c9a08480662a7a3b81c382b",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_27_p4_28_prop.md",
+      "size": 1984,
+      "sha256": "1604dc424cf04a1948c036b6ca6cb80a08a404d054bceeff7ac59911ce6e97b3",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_29_p4_32_rail_reset_when.md",
+      "size": 2073,
+      "sha256": "d8fef9bd8057905bf114aa8ba48c2502323b1e6166020e62528ab6b976e7390a",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_29_rail.md",
+      "size": 903,
+      "sha256": "5991435828bae4c987bde7336ea6e4e0f1ba876905b3b7db646d269c7afdaede",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_30_reset.md",
+      "size": 834,
+      "sha256": "113232893161627885d86fdd0bd384dfc765d722fd43ae165fc274828131abbf",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_31_p4_32_when.md",
+      "size": 1174,
+      "sha256": "d66b37f647a26e5920dce64f58c4a3068a9e15f2cbe7a8d6d126fb72585ee5fb",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_33_p4_47_trajectory.md",
+      "size": 2723,
+      "sha256": "2e8fa052127085178553401b8e026bd8bc4c8904b67839c40ce948360d4e9a6b",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_38_p4_48_trajectory_details_problem_catalog.md",
+      "size": 1300,
+      "sha256": "67aa00e9a083659e6cd6030b16ad85132e06cbec0fe0535df20a50aaae4a9d08",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_39_p4_48_trajectory_details_problem_catalog.md",
+      "size": 2303,
+      "sha256": "0bc2a8c8d279435691208aca4659ddae9e40273fb247d7565cbc0032a6700cf0",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_45_p4_72_print_radar_search.md",
+      "size": 1744,
+      "sha256": "45f6b6f21543618f9d7913717e6e78c8137b381539fa50c85bf61a68743cb5e1",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_49_p4_58_problem_details.md",
+      "size": 2018,
+      "sha256": "6934f0d60fc8c49b535ba5bf8bec7c191ae782732500f262d7a36748ceed4a2b",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_4_p4_6.md",
+      "size": 1840,
+      "sha256": "a10f8e40077d21617da7957e27ffc15f0f12ba4114728fdd58936bf3d3610745",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_50_p4_59_problem_core.md",
+      "size": 2180,
+      "sha256": "74ee6c1c2d10b67ce53c19d0a89c85eba8b82da91f9459a7bc08cc707675b987",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_59_p4_71_file_optimize.md",
+      "size": 2662,
+      "sha256": "ad0f8e7e6eb19eef0d6b9f55afbd8f6bc43d91932fb50570de04a941587f3674",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_p4_72_p4_73_onward_print_radar_search.md",
+      "size": 1693,
+      "sha256": "58c5d67d75666f681baa0bbe7c0628a87d68ed240785133608594b00f50c8f7c",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/notes/taos96_summarize_survey_baseline.md",
+      "size": 1557,
+      "sha256": "8f7c5106f998ffdbfd4866f80b97b709ffee51863a1e2f8aec79390a43599ef9",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/resources/manual_evidence/transcriptions/taos96_problem_framing.md",
+      "size": 1646,
+      "sha256": "79858391cd280e5786ef8f246f7e924122757a11254298da30a3633306393045",
+      "disposition": "archive-research",
+      "rationale": "Evidence ledger or page note retained through the hashed inbox archive."
+    },
+    {
+      "path": "toolkit/schemas/taos-aero-constants-catalog.schema.json",
+      "size": 3541,
+      "sha256": "46aa2f39991907da8d44826a4ff5688e566ad247d2ee3443660a825d4361b70b",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-canonical-optimization.schema.json",
+      "size": 16896,
+      "sha256": "2c660d1659e80f5c62941711220c7b4942f7f8a199130620d5b78992aae91fd9",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-canonical-output-request.schema.json",
+      "size": 9725,
+      "sha256": "18bb8afd2c448ddeaca2b946789f879410cf4c37adc677ac53035ca65888ed2c",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-canonical-problem.schema.json",
+      "size": 33824,
+      "sha256": "832f6139006bf0cbb2e62cee501b35727add97ad0c64e15041a13af4f7e7fd87",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-canonical-summary.schema.json",
+      "size": 1722,
+      "sha256": "ec75177ab4f92a44283758c95654962598f6fec61a536b7e5a44f5ad9d1bc07f",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-canonical-survey.schema.json",
+      "size": 9512,
+      "sha256": "8641ba9f46df524fe5857ae9962b3d2922c18e1da388ea87b72ce7e7a7f29c94",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-cg-catalog.schema.json",
+      "size": 2007,
+      "sha256": "f4e7767fcaf17d892d49c9f75232cee241f9eff99935fe5e98093fd70661495d",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-data-block-catalog-entry.schema.json",
+      "size": 959,
+      "sha256": "5b9d882ee2a34c325d3ea150d95ff117a183e8d796be1234efe1572a3d6544dc",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-evidence-ledger.schema.json",
+      "size": 4640,
+      "sha256": "c4259c4387d01412929bdcecefb3137c939e108e21dfc59537a7193492367c81",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-file-output-analysis.schema.json",
+      "size": 20000,
+      "sha256": "73c35fb57b11fdca9160272857d9642fb5a0c5717017a09b2b5fa65c1daf53a2",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-file-output-catalog.schema.json",
+      "size": 3887,
+      "sha256": "e77f7a70862c5f38fad13e9a29542fc69947f30a4ecd06c58ded501867961a71",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-fly-analysis.schema.json",
+      "size": 14310,
+      "sha256": "d53afbf174201a7379d92db20f440cda4fce61958218d67531aab61e3b69c2aa",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-fly-catalog.schema.json",
+      "size": 6065,
+      "sha256": "063ce0a192539109862b9bf2a419679cd37f8f99667f45efe6a6acd9cce7bdf7",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-free-field-analysis.schema.json",
+      "size": 7770,
+      "sha256": "187aafd1fe83a20b977dc353385d5de3f1670f197d50182a09cc9d5abf009a21",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-grammar-profile-bundle.schema.json",
+      "size": 16838,
+      "sha256": "6201543ea4fcd0139b8c6a803e0d902dee9b207970260e6d00c8037c3b3cb3b8",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-grammar-profile.schema.json",
+      "size": 15830,
+      "sha256": "71969e9d827cbb0ea898f35d01c5757758d325c21b4a5d7b2fa0c8e48eff57e1",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-increment-analysis.schema.json",
+      "size": 15161,
+      "sha256": "bc0223f7b9eccb18bad937b6895371b40c85d3ccf76c8b0378c51082421fab9c",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-increment-catalog.schema.json",
+      "size": 4741,
+      "sha256": "de2dd1050c645db43b87e6114e9f97cabedd3aaf35784ea3df357bb02ce6f807",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-inertial-analysis.schema.json",
+      "size": 15388,
+      "sha256": "83d9caacfa76cdf26aa3fb1b22c8bf419ae2a242d051476d1013537297b7f1cb",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-inertial-catalog.schema.json",
+      "size": 5957,
+      "sha256": "31f56ac54caaa6ab81e23e20aab2d74d25a81dcd15925a4585c5b6078b18680a",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-integ-analysis.schema.json",
+      "size": 13992,
+      "sha256": "4651cbda5a654cf3557e922daf3804157075c193758d1904d575c4fe1c9a0065",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-integ-catalog.schema.json",
+      "size": 4971,
+      "sha256": "92959a1f3d9de1eb7536b534f2c53520923c441ca1cddee94d2e107f08260341",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-legacy-ir.schema.json",
+      "size": 22299,
+      "sha256": "a097a8c60d9f77ec42a2384b3a46bcd7be622df54193576a8e9f04408afb1f26",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-legacy-workspace.schema.json",
+      "size": 25201,
+      "sha256": "d39feffbcc643bf54064799b2a2eafd9da37db7f1ced4a89167a8acf7f8ceb38",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-limits-analysis.schema.json",
+      "size": 13278,
+      "sha256": "29176cc0987ba9a8915b9f934e7239ce6cf29f26ca58fb82879305d077fb90d7",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-limits-catalog.schema.json",
+      "size": 4276,
+      "sha256": "9dd69d13c87fb226a7adb4ef15a75b9ff0e2ef2a3ea1457b00f6e06a8eaf4758",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-numeric-table-candidate.schema.json",
+      "size": 2392,
+      "sha256": "0566ec714fb6a74e0facbeb86dc4d2bcb70d52fcb23c43e9bd117d7b4aaa099b",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-optimization-analysis.schema.json",
+      "size": 36375,
+      "sha256": "279aa3365ffecedfbd34540c23189c45b17f348cff84a8bb2a8f7c2552f88f77",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-optimization-catalog.schema.json",
+      "size": 6098,
+      "sha256": "53b078751def713a4304e938802816bd474c07060375e0d4b5920e08d7bb5e15",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-prb-grammar-observation.schema.json",
+      "size": 6285,
+      "sha256": "d8c734bb172bfe4678f8f75c3b9576877b999ffad142caef269412a205f5ac97",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-print-output-analysis.schema.json",
+      "size": 20390,
+      "sha256": "2537a82fd27773865ef6881cc8e54add83b02a08e26bf32eec8b1f3802571b1c",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-print-output-catalog.schema.json",
+      "size": 3903,
+      "sha256": "40689830bf24a0b1157c3c5f86607d35fb899d7a14bbc34f0b2984ed10df42d2",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-problem-data-analysis.schema.json",
+      "size": 6287,
+      "sha256": "a024bf3e059593f595f654351b97776d56c4f35334dd4e84f28c9f4ec0abcf96",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-problem-data-catalog.schema.json",
+      "size": 5937,
+      "sha256": "52fe58dcd01e35ab2dd3276e1bc9c6508febe61f90f3a0c8a5aebbe9dd69c7b4",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-problem-details-analysis.schema.json",
+      "size": 27509,
+      "sha256": "f1aadb519f67a2b33cf20b365722f2e085be3cadf45ef3b9bc65edb822d4cea4",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-problem-details-catalog.schema.json",
+      "size": 8388,
+      "sha256": "7aa8a7ed7f7430c887e8e89c91a0c9d22366e8b928c6801a0abed351ced351e9",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-problem-framing.schema.json",
+      "size": 4890,
+      "sha256": "aff39453b6779ca523cde127ca1e51f66cb4f27bd5c62469324b3bd5a73f11d4",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-problem-hierarchy.schema.json",
+      "size": 3633,
+      "sha256": "7b82ae149116820027af0c6650f4535c5fa73efd2dac011798ee2690e7f5ced4",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-profile-audit.schema.json",
+      "size": 2974,
+      "sha256": "9f5560884fe6304745745314ecb860086085a7e93a4ad568b907dea8fb6b2349",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-profile-validation.schema.json",
+      "size": 11939,
+      "sha256": "22e0fe3bbcd6c84ebd24c76f98bd4e3bc91ba9668153fff3bd8fbf8a1a0c079b",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-prop-analysis.schema.json",
+      "size": 20400,
+      "sha256": "14305ac074746ef45ccff5b76e19c56d25da4662cfa2a86ad5b378be93301358",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-prop-catalog.schema.json",
+      "size": 4809,
+      "sha256": "bf6edd80fbd776b97071bea2494950393a1ef15a2c71952a49cb1eef7a2f3b58",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-radar-analysis.schema.json",
+      "size": 10155,
+      "sha256": "a5fb8c5836ba647d0b0c13298144eb43ccad4d34ef0d6bb84d646979041268b4",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-radar-catalog.schema.json",
+      "size": 2032,
+      "sha256": "cf4b2ef9111e97952ffe3498d687149fd353ea420d1508225ab4099c1d248927",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-rail-analysis.schema.json",
+      "size": 11812,
+      "sha256": "3e9f0cdb998dd6dc68ab76e834af78596fb3a09f208dc814ab14be177cb1caf4",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-rail-catalog.schema.json",
+      "size": 3229,
+      "sha256": "49ac73e871942f4a7b02f684cb3a0ab5dccb8720815949beeb6a556866ff893e",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-reset-analysis.schema.json",
+      "size": 14378,
+      "sha256": "b59a3a4621cdaeb08aa759c8794837c6da8f0826f245dbeff985fe4f5465dcb7",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-reset-catalog.schema.json",
+      "size": 4638,
+      "sha256": "9a06e3326a99f7a783702951a1008aa17cf9feb64b43a006901c648127938089",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-search-analysis.schema.json",
+      "size": 19150,
+      "sha256": "ada2c52ab1ec4bc1c17e822e86abd875a0fbece6eac0a0674452e6b19456a1cc",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-search-catalog.schema.json",
+      "size": 1828,
+      "sha256": "ea51281c6cf8ded43ae84fd0065238f58a6e2cf53ca70a87a74bc6aecffa2398",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-segment-control-analysis.schema.json",
+      "size": 40163,
+      "sha256": "a67c004e5918c0fb030d32576be538178448f28f61cf1a0cdeca87322fd92648",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-segment-control-catalog.schema.json",
+      "size": 18135,
+      "sha256": "7c21b3744e8901149320a0fe92966f1127a80ee9159c78219848502d28444981",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-segment-data-analysis.schema.json",
+      "size": 25223,
+      "sha256": "23720fbe24deb3ad38d163f480579e2904c2ee6042b28fa771d0c4edd6cd43d0",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-segment-flow-analysis.schema.json",
+      "size": 45918,
+      "sha256": "fc874bff0ca8721ce4866cba29d0d90924b97350e667f3a2470dae9376a66495",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-segment-flow-catalog.schema.json",
+      "size": 12491,
+      "sha256": "7a3ef5c4dc193c0b9dadee5bbde0a022d4635627ef62f75d502b9f4165cab724",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-summarize-analysis.schema.json",
+      "size": 10374,
+      "sha256": "1623cb629774ed9b80ba6af9244d939569ed5738119531ee9637801c3b8d4b75",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-summarize-catalog.schema.json",
+      "size": 2323,
+      "sha256": "0d7cfc4ccd37db0e2a02d7c2988379565265f538144453215ba56b0e8847e40b",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-survey-analysis.schema.json",
+      "size": 22811,
+      "sha256": "bac0f6d5c9f2c349dc7b6e5f15833195a26974d514c34ed46530222562954bd5",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-survey-catalog.schema.json",
+      "size": 2577,
+      "sha256": "155a6b42509f51ad8616e01ff9cc05ef51eae835cd8713f64809bdac190b6ede",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-symbol-index.schema.json",
+      "size": 5133,
+      "sha256": "1af841d27bb63ef13473ab94c9d4dbb443eddf22cc5cc5d902c2b441a93f3191",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-trajectory-analysis.schema.json",
+      "size": 25700,
+      "sha256": "c53a6ff1524a15b369d31d3382b0c7c5f2b5450834ea7c84cd05c0afd2ba41db",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-trajectory-catalog.schema.json",
+      "size": 3530,
+      "sha256": "69b7cc794d144a8fe21e049f645a3ab9b0ca288e85168868562cac51e03a50b1",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-trajectory-details-analysis.schema.json",
+      "size": 25341,
+      "sha256": "dc0b3ef8c33f26cc18567c69adab0a2b5f47d7627bbad77b380cf733e75fcce4",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-trajectory-details-catalog.schema.json",
+      "size": 3275,
+      "sha256": "c517971aec0c0f7c900242ed9351ffa0f976b60669063b69a6c86669899a9a7c",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-transcription-task.schema.json",
+      "size": 1148,
+      "sha256": "065eb776e8b82510862621c86a4fb36d895cc068b99c34644c7b32d2d36608c8",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-when-analysis.schema.json",
+      "size": 18243,
+      "sha256": "1b9624e555f2848b143d3a7119f28d0fbd6992b97244af0ebb8a55f586157146",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/schemas/taos-when-catalog.schema.json",
+      "size": 2558,
+      "sha256": "9db3084c598d55cd7fafd82a874fe064953e719cdf4de4e3647ec1f395e7c479",
+      "disposition": "archive-research",
+      "rationale": "Candidate structural schema retained as research; not a canonical taoryx model."
+    },
+    {
+      "path": "toolkit/scripts/generate_schemas.py",
+      "size": 7366,
+      "sha256": "e201212fcff08845301c99be56d96b498ef246bb9b06aba2064d7cf5c9d853c7",
+      "disposition": "archive-research",
+      "rationale": "Unclassified legacy artifact retained in the hashed research archive."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__init__.py",
+      "size": 3377,
+      "sha256": "0877f41557a1247e25cf0e99f6a5040fdbf868ff53521ece3b0b917714bb3912",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/__init__.cpython-312.pyc",
+      "size": 2851,
+      "sha256": "b7badefaf886635607fc234f18a213c89fc9c2d719ca863161371d19e72a0f2e",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/block_values.cpython-312.pyc",
+      "size": 5925,
+      "sha256": "3d9c23af538daba54f61b117a007093d229fea934c3e67a74bd45cd07f3e534b",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/catalog.cpython-312.pyc",
+      "size": 14566,
+      "sha256": "5e505f11b23bc868979654b4e75921b135a1960960728c050629017d0d9a8730",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/cli.cpython-312.pyc",
+      "size": 51702,
+      "sha256": "5a182a9a0d3ea121277f1f0642a9c07bcf53965efd51c6d8a66d73476d1297bf",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/dependencies.cpython-312.pyc",
+      "size": 7900,
+      "sha256": "3289d6b6d68ea2b3a62831797fe23120a5bac102e52ff98d9f21438b2d1e6327",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/evidence.cpython-312.pyc",
+      "size": 5077,
+      "sha256": "21063a716f565ea38b4ce5e52351e9d267d0c0d6469798bb737f131d79717462",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/expressions.cpython-312.pyc",
+      "size": 10475,
+      "sha256": "5db47a9b2ca8b06cd3f8ca93df0f482c8e07a2e9c12640ab64b492a6e665c442",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/fly.cpython-312.pyc",
+      "size": 39784,
+      "sha256": "87f88a1fee38fd39d53f6a452da0aef53ae7a8812f2dd7d338ed34d45812412a",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/framing.cpython-312.pyc",
+      "size": 10965,
+      "sha256": "1c4d64a3a534b0694828b186e86a46c24e0b9e984dc05af05e70a8775338912a",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/increment.cpython-312.pyc",
+      "size": 31583,
+      "sha256": "a9268f13f513a95bef0aca7963147655a32c9447804a3b7cd509c309d5f369b5",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/inertial.cpython-312.pyc",
+      "size": 33432,
+      "sha256": "030532d090854c3601da075837a47b8a4e1e17c7284a1225ea27e578391add56",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/integration.cpython-312.pyc",
+      "size": 23394,
+      "sha256": "bc5dcdbdc5f4493c9aa4d076068820283c9177c742aa039a720c7574c585a5dd",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/lexical.cpython-312.pyc",
+      "size": 15971,
+      "sha256": "bf9ec8c1852a4961c8ad07451214ac537a3c11926c7362451edda1da78f9c4c7",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/limits.cpython-312.pyc",
+      "size": 22977,
+      "sha256": "b94252126e25e5c2de5e0f0f74ab92237b768b525e34b4e67ccc9e15bc8efc86",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/manual_archive.cpython-312.pyc",
+      "size": 5115,
+      "sha256": "421564cc8866319fee22aaf28184b6f528c0034f7765b3251083e738f20da4ec",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/manual_map.cpython-312.pyc",
+      "size": 2169,
+      "sha256": "7fc7ce4cc5a226c40706691c5605073b4306c2ea4eb4033430f9a56aa3da4579",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/models.cpython-312.pyc",
+      "size": 7967,
+      "sha256": "927608aeeceb9b8b4ec25bf6a89335e9502f0ad7cd8ce6463e9cde326a32ed47",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/optimization.cpython-312.pyc",
+      "size": 59507,
+      "sha256": "49d8b6fe3d6498c2465490bef7cc5cdb3960f625126730db1fa0ee6413b4b49f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/output_file.cpython-312.pyc",
+      "size": 30124,
+      "sha256": "7cf7c4a48a3a904a58c0a80972ea202a29d9872d466e95c91d535227383d1fa5",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/parser.cpython-312.pyc",
+      "size": 14334,
+      "sha256": "db98becec5276b059578d6d03fe2145567cddf034aaa742690f425788792f273",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/prb.cpython-312.pyc",
+      "size": 13903,
+      "sha256": "fafe691fa7f837338705f5b944f76f41784c2dbf71a5f200cbe90ae3698160ad",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/print_output.cpython-312.pyc",
+      "size": 14609,
+      "sha256": "8a777ba748df87dd649a2d27b72df3e99986f6add45d1512eb1c607a8fe6e714",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/problem_catalog.cpython-312.pyc",
+      "size": 19863,
+      "sha256": "7cca3852c0f9ed3f96384c7b916000ca808eb9a12d03c39a6c85983a523879c9",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/problem_details.cpython-312.pyc",
+      "size": 69126,
+      "sha256": "08b57a1d4585a984b0ad57f06f7e56b569c5661b15f268be467c4a15f975a774",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/profile_audit.cpython-312.pyc",
+      "size": 8234,
+      "sha256": "8fdf528b003f3ecdfcacce620f91a0bdcfddcf140cc5a11ceeeab08261441765",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/profiles.cpython-312.pyc",
+      "size": 105226,
+      "sha256": "86b9ec1e5b8bbee3697c923652d54743b2767cc40788d0dffd80916484a5c2fe",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/propulsion.cpython-312.pyc",
+      "size": 33914,
+      "sha256": "e0be8a90b6610690b054aac5da0024a4df14ca1f9b8de232bdb0162b1b2f83c4",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/radar.cpython-312.pyc",
+      "size": 17596,
+      "sha256": "b2f0febf2fe028edd7e23544e9f112476cd8ffba3e5559e0b7c41a4d859d68d4",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/rail.cpython-312.pyc",
+      "size": 20281,
+      "sha256": "f984fe6f37a06bc114e28877bcd09a03eb469d8f312c0fb84bb5aea677a6d68f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/reset.cpython-312.pyc",
+      "size": 23227,
+      "sha256": "87d3decc7ee038181819852e56f7ccc2fdbc83218a6bc6c964466a6666fed020",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/search.cpython-312.pyc",
+      "size": 15804,
+      "sha256": "b45798473e6f3b7eb6d60191b7a1e462393e00de257707deb29bb10a72b79c3a",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/segment_controls.cpython-312.pyc",
+      "size": 6305,
+      "sha256": "d439e70387245620b35789f21078d9422c34c112a48a0cc50c0b29ed6193b24e",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/segment_data.cpython-312.pyc",
+      "size": 46068,
+      "sha256": "56799fd4fb2a20edf387efe63d36217ba00916359478dc4e830f38b975640a33",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/segment_flow.cpython-312.pyc",
+      "size": 5386,
+      "sha256": "8d301376f6658da296fd71eb0796437f138c6500aea9998882dc5b3c26802cda",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/semantic.cpython-312.pyc",
+      "size": 9704,
+      "sha256": "6eef416c4b40af090c4a7d9d3e7f81c9f3bf0c7bb4aaf732fb9f2318fe726091",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/structure.cpython-312.pyc",
+      "size": 4256,
+      "sha256": "5b42243026c58cbf10bd71cec46da8bd26b7748d864a22b6c2fcfc18ccadb37e",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/summarize.cpython-312.pyc",
+      "size": 16626,
+      "sha256": "1d31f9e3d3c2f2d5ab40e0b39b850678338ea325878de06b58b8739ea69a9d5a",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/survey.cpython-312.pyc",
+      "size": 31148,
+      "sha256": "723896fa02cd023f1c9ea61c6282ab0e6c55f542cc24b6e7379ff22e6a8594ec",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/tables.cpython-312.pyc",
+      "size": 6431,
+      "sha256": "84b007f9e2e2218e25843812694b912222aafb18b10630fde547e238497b79a7",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/trajectory.cpython-312.pyc",
+      "size": 50255,
+      "sha256": "d8d53e988b8fa4ce4b708cb661c1a27b6840611d65c1d695285da198fbfc6fb0",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/trajectory_details.cpython-312.pyc",
+      "size": 52341,
+      "sha256": "a37f7ed8c4a4013b9ed8ae75d07f92c18029deac10a99d39ef2ec695ea83d3fa",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/transcription.cpython-312.pyc",
+      "size": 2212,
+      "sha256": "9d3c7d8250fa320886babfe27093bf5146a54919df1ed9ce6ce0d0eb6c23ffa8",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/validation.cpython-312.pyc",
+      "size": 2803,
+      "sha256": "d2e7575f841c6093a76e2852312aae8f10dd086de248607705172397535d72f8",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/when.cpython-312.pyc",
+      "size": 29569,
+      "sha256": "0c182de410ab0f8a9b902d6a7657b5565787211412fc13dd402a2dd7c11a82b5",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/workspace.cpython-312.pyc",
+      "size": 5130,
+      "sha256": "4a59015694e4818516d1ccc22dab6b2cd44df0dd2b6ca1e74688b5b153094be8",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/__pycache__/writer.cpython-312.pyc",
+      "size": 1056,
+      "sha256": "43091b9436ba62ec85198dddfc4cda4ac24efb8742ed09d3bda6099cf690fcb1",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/block_values.py",
+      "size": 3998,
+      "sha256": "c6d0b50a228492004535f135fb93a229268155be32d6ea6d4158daad04d96f62",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/catalog.py",
+      "size": 18197,
+      "sha256": "1b65d8119026ace1f5cce327b9bf8839b64bade408dd79f0120e5466c1cc01cb",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/cli.py",
+      "size": 41600,
+      "sha256": "8f9b5997b329a021c89645b02ef0c2d0b340e7cb14fb1d95a58824ed3f7f4d8c",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/dependencies.py",
+      "size": 7165,
+      "sha256": "ed7916fb5a67c7da831f695d62fba6a76a1cf092eb3728dd998eb53878672977",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/evidence.py",
+      "size": 3335,
+      "sha256": "7955e82318dd1d2628a4539f6e7f50938df52d30a575ab33131f44eb72b374fe",
+      "disposition": "archive-research",
+      "rationale": "Useful preservation or evidence concept has been selectively ported."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/expressions.py",
+      "size": 6804,
+      "sha256": "1a68491de28e98062f45cd1c7a98e522513a6a2d22af9d516d68ce52fe550ee0",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/fly.py",
+      "size": 41331,
+      "sha256": "84096b5761e0d7501b048e82c6b3527c1bd3b208cac32e7cd3313d77074a014b",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/framing.py",
+      "size": 11325,
+      "sha256": "97a44199a8d0495bff67649087800e4fc4994547ecc18b99506c9c8469389b07",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/increment.py",
+      "size": 34373,
+      "sha256": "f023bad46a0f33e184ed05924478ab9818efd0d05bd70a2acca6a991368e09a8",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/inertial.py",
+      "size": 37803,
+      "sha256": "6dcdc0345b7ced1f4c4d05f3d0bba4c4b1578646498a0d0ba41d721d77156243",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/integration.py",
+      "size": 24097,
+      "sha256": "d10b9a5eda237ea2f72b5e5a7c9b7444d32977f69b9039c449b22e8da959f714",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/lexical.py",
+      "size": 14662,
+      "sha256": "ec920d9fd746a6e6dc266c849a89e013100164b640f77834befe38aae18f00d2",
+      "disposition": "archive-research",
+      "rationale": "Useful preservation or evidence concept has been selectively ported."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/limits.py",
+      "size": 23401,
+      "sha256": "b90a39e5ee6ce763f05281b327d9773de06d997ff83f45fa597d5fc8c278d37a",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/manual_archive.py",
+      "size": 3136,
+      "sha256": "3926ce23fa5486d95bb6c8897025924b74282d01786416d7e8aa3e8be6ad5d58",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/manual_map.py",
+      "size": 3005,
+      "sha256": "516640d511d926bfd410113a36a06f2a1a94963eeaf9dcbd968da9243c1f5793",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/models.py",
+      "size": 4359,
+      "sha256": "340f8500b6c24708f95965109f43baeea24f94d0ae5ce2e9cb269c5948720e2c",
+      "disposition": "archive-research",
+      "rationale": "Useful preservation or evidence concept has been selectively ported."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/optimization.py",
+      "size": 64570,
+      "sha256": "365f2c689e8d7ea1e05b63c1743e57c6c50118c0fc394a6412f93e77361dda0b",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/optimize.py",
+      "size": 1700,
+      "sha256": "297a50b66b24c5ca95ac2733c6ab074d9940d12d923979ceff4135edf769847e",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/output_file.py",
+      "size": 31911,
+      "sha256": "7cf276eb620a75b3e1072f9a6986460d07e96571640add9db7614d991882fcb6",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/output_files.py",
+      "size": 1154,
+      "sha256": "6a7c2edbe15df318f5511472ab1ef02da71bc1549ff9cf2959495b35a1883520",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/parser.py",
+      "size": 11198,
+      "sha256": "9a5febc70914f0d8eb480decbd2bc3b47a8c47b0392ff9854201086699772e3e",
+      "disposition": "archive-research",
+      "rationale": "Useful preservation or evidence concept has been selectively ported."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/prb.py",
+      "size": 11954,
+      "sha256": "e343d4f5e7b3a2a2445774cb160ce2b2ddaf27a4f6fbd38bd79d00be7836aa4b",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/print_output.py",
+      "size": 15453,
+      "sha256": "a045da507ec3f86f1418b70dd56d0c703af7229e568675ae9bc0f1359d3acdf7",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/problem_catalog.py",
+      "size": 20709,
+      "sha256": "08c680c4836ace9d9d0dd89b3f6d2f95f86da5d732b6948b010e69659c877b82",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/problem_details.py",
+      "size": 66455,
+      "sha256": "e49b65c0991350aaee6f4acf9b0d314389c3ad4b687f4f8ee4e7d3402449926e",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/profile_audit.py",
+      "size": 7898,
+      "sha256": "ecff677c98114dd653f787481c554b77baced6efe3713637380330c4c8400068",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/profiles.py",
+      "size": 129492,
+      "sha256": "e6cb8f040196e85629df5d98c95d82f1e7d96b172098c75c881743013b56d0ae",
+      "disposition": "archive-research",
+      "rationale": "Useful preservation or evidence concept has been selectively ported."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/propulsion.py",
+      "size": 33266,
+      "sha256": "a84d74e484a9566d2fd1bc9b35c2948307ca0cf1e8a81cde2a53c654defc372d",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/radar.py",
+      "size": 16786,
+      "sha256": "94da18273bfee9e45a83882f337da11cbb9c49a050047c7d179e51225e87518e",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/rail.py",
+      "size": 21247,
+      "sha256": "2907c572327a850867fd9686553b248dac1dfc2cd6b6f551502820fd13bcb808",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/reset.py",
+      "size": 22935,
+      "sha256": "4fa3662f4e188cea0ee4f177bd8fb18deb5084cc64010761316c07c6a0196308",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/search.py",
+      "size": 14755,
+      "sha256": "59cdabef84975ed44de723397b773d35ca0d160242c587854230de024bf10fd2",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/segment_controls.py",
+      "size": 4693,
+      "sha256": "dc49b2a8c4aa92fb6ec7b12d761b984c2ecd1e1ead485dd350807fed1f9442da",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/segment_data.py",
+      "size": 48454,
+      "sha256": "8ee207fdcf3ba25c1f320dc425d4cee132206a325aa7c2ecd71554a220086e81",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/segment_flow.py",
+      "size": 3780,
+      "sha256": "2082b6b979325876adcc2ae981926f471c424dcf51fb7cbb4528195b6a27da60",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/semantic.py",
+      "size": 6091,
+      "sha256": "f3c20f6f57959eca6292d776f2700ef228b88d96110f9fa85665fc82e0cdbf1d",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/structure.py",
+      "size": 2885,
+      "sha256": "dd9fc2575fa25f81f3f034f49e4e7d05039bbc1aaff2f5cbb2d01eaa158524c9",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/summarize.py",
+      "size": 15577,
+      "sha256": "f8d247bc18f60d7fa5f4067ef640d412102264873ac78abce775235fbdae834b",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/survey.py",
+      "size": 29393,
+      "sha256": "5f3713bd8c1ff51e5a50141799471704354e885b3d67c06ca7917ae8e01fbb49",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/tables.py",
+      "size": 4394,
+      "sha256": "e6fb5677b50d0f248fd7de35e7391732c0b29a0bb35560ffd9e7d6f3e07f4874",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/trajectory.py",
+      "size": 55348,
+      "sha256": "90dd6379c18587699502eae9f92f96fdacc81bda9ba3277abb82ad5d7fb61089",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/trajectory_details.py",
+      "size": 53970,
+      "sha256": "1033870d4b2a9719c9d604cf65b7ff5edf87cfeb91c70360432c1f134105d979",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/transcription.py",
+      "size": 1301,
+      "sha256": "22e1ad8df1f27c8ba378d86bd2b069ac8b783d856713c462d4e4bf4dc428b22f",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/validation.py",
+      "size": 2167,
+      "sha256": "758429e9f057c850b5acfaea22a8f89c79367e94e78b8c06aad7b2135fd267fe",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/when.py",
+      "size": 31756,
+      "sha256": "71f3faff831e7287a631d86528312948e69059edd541f52d0877370cc0f18510",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/workspace.py",
+      "size": 3762,
+      "sha256": "84d66827d795d8ef88a06b76423ba54fe4aa48b64eac1ff78599c4425abdd1db",
+      "disposition": "archive-research",
+      "rationale": "Legacy analyzer or model retained as research; not canonical runtime code."
+    },
+    {
+      "path": "toolkit/src/taos_legacy/writer.py",
+      "size": 469,
+      "sha256": "38d23396cbf6a81bb42e78d5b3e9f10799d276042a1901c15a76513642ee2777",
+      "disposition": "archive-research",
+      "rationale": "Useful preservation or evidence concept has been selectively ported."
+    },
+    {
+      "path": "toolkit/tests/.DS_Store",
+      "size": 6148,
+      "sha256": "ea076ee3678a795acf9de610871f63a3b1e1cb72d4a14f5dd92d93c8e38a09ef",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_aero_constants_profile.cpython-312-pytest-8.4.2.pyc",
+      "size": 8546,
+      "sha256": "ed1f79779ec7cd42ee303bb36c2b55a35528c80c00f7c50fbcb8aa49f5df7079",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_aero_constants_profile.cpython-312-pytest-9.1.1.pyc",
+      "size": 8546,
+      "sha256": "ed1f79779ec7cd42ee303bb36c2b55a35528c80c00f7c50fbcb8aa49f5df7079",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_block_profiles.cpython-312-pytest-8.4.2.pyc",
+      "size": 5109,
+      "sha256": "f1135dfb803ad6b2c9205bd43b4e976e0426d083fecba6ff1e3f1dba1b587fa0",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_block_profiles.cpython-312-pytest-9.1.1.pyc",
+      "size": 5109,
+      "sha256": "f1135dfb803ad6b2c9205bd43b4e976e0426d083fecba6ff1e3f1dba1b587fa0",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_catalog.cpython-312-pytest-8.4.2.pyc",
+      "size": 10449,
+      "sha256": "e7a2adfcf733122f47b5647ffe85639e374839edee9da6cb618b056ef1c410ba",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_catalog.cpython-312-pytest-9.1.1.pyc",
+      "size": 10449,
+      "sha256": "e7a2adfcf733122f47b5647ffe85639e374839edee9da6cb618b056ef1c410ba",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_cg.cpython-312-pytest-8.4.2.pyc",
+      "size": 52209,
+      "sha256": "07516df76c1049899dc3870ba3039426a4e262743cd74d5fa917fb2ce5cefd2f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_cg.cpython-312-pytest-9.1.1.pyc",
+      "size": 52209,
+      "sha256": "07516df76c1049899dc3870ba3039426a4e262743cd74d5fa917fb2ce5cefd2f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_cg_profile.cpython-312-pytest-8.4.2.pyc",
+      "size": 6095,
+      "sha256": "cc39a267ef849b766bcc24b12ea96f80c4b97899a551550bc71fc67c6d84ea0b",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_cg_profile.cpython-312-pytest-9.1.1.pyc",
+      "size": 6095,
+      "sha256": "cc39a267ef849b766bcc24b12ea96f80c4b97899a551550bc71fc67c6d84ea0b",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_dependencies.cpython-312-pytest-8.4.2.pyc",
+      "size": 5736,
+      "sha256": "26947f36711bef4488ab49ef9203dd81f053396e1c3355afd0fd4660ffa4bce7",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_dependencies.cpython-312-pytest-9.1.1.pyc",
+      "size": 5736,
+      "sha256": "26947f36711bef4488ab49ef9203dd81f053396e1c3355afd0fd4660ffa4bce7",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_evidence.cpython-312-pytest-8.4.2.pyc",
+      "size": 6831,
+      "sha256": "6220696e6930f34522187d3068aef0738148d79ce7af361c32933547aaa45f1d",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_evidence.cpython-312-pytest-9.1.1.pyc",
+      "size": 6831,
+      "sha256": "6220696e6930f34522187d3068aef0738148d79ce7af361c32933547aaa45f1d",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_expressions.cpython-312-pytest-8.4.2.pyc",
+      "size": 14569,
+      "sha256": "7730a4489c54a22f84b19f5838fc4fd8fd7895f4db03fcadf9d0f4d24c6712e8",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_expressions.cpython-312-pytest-9.1.1.pyc",
+      "size": 14569,
+      "sha256": "b7a4030f074bcc4b13196cb74165344954863d9d6dcd857b03f7405bcc3803f7",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_file_optimize_profiles.cpython-312-pytest-8.4.2.pyc",
+      "size": 10437,
+      "sha256": "0f2b65003df36fb54df16ec9d58fc4fefe0f1dc20f17ea03af0457444b8b1ffd",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_file_optimize_profiles.cpython-312-pytest-9.1.1.pyc",
+      "size": 10437,
+      "sha256": "0f2b65003df36fb54df16ec9d58fc4fefe0f1dc20f17ea03af0457444b8b1ffd",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_fly.cpython-312-pytest-8.4.2.pyc",
+      "size": 74321,
+      "sha256": "6d1aa2b72c092bf1abab02019d1966e15a02cd56bed82ea40a982eac40935ffe",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_fly.cpython-312-pytest-9.1.1.pyc",
+      "size": 74321,
+      "sha256": "6d1aa2b72c092bf1abab02019d1966e15a02cd56bed82ea40a982eac40935ffe",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_fly_profile.cpython-312-pytest-8.4.2.pyc",
+      "size": 6105,
+      "sha256": "485698e04fa833f49df43999216ef84176640944e4c83a716dfb8d0664c45a5f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_fly_profile.cpython-312-pytest-9.1.1.pyc",
+      "size": 6105,
+      "sha256": "485698e04fa833f49df43999216ef84176640944e4c83a716dfb8d0664c45a5f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_framing.cpython-312-pytest-8.4.2.pyc",
+      "size": 20277,
+      "sha256": "3d84dc9a6b5c01c8245d9ab3df0a7120fe4351c36ada31338ce5aabbb895f3e0",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_framing.cpython-312-pytest-9.1.1.pyc",
+      "size": 20277,
+      "sha256": "3d84dc9a6b5c01c8245d9ab3df0a7120fe4351c36ada31338ce5aabbb895f3e0",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_hierarchy_profile.cpython-312-pytest-8.4.2.pyc",
+      "size": 6019,
+      "sha256": "a6ef0e4cf959e4eda57838ac309c7eb85773e5b1727f6b88047afffc4dec64bf",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_hierarchy_profile.cpython-312-pytest-9.1.1.pyc",
+      "size": 6019,
+      "sha256": "a6ef0e4cf959e4eda57838ac309c7eb85773e5b1727f6b88047afffc4dec64bf",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_if_actions.cpython-312-pytest-8.4.2.pyc",
+      "size": 8185,
+      "sha256": "1a76c7bd0c1a4400d6f1ec7bb3c163cd88f37e50938f6a629f622eba33b657c3",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_if_actions.cpython-312-pytest-9.1.1.pyc",
+      "size": 8185,
+      "sha256": "1a76c7bd0c1a4400d6f1ec7bb3c163cd88f37e50938f6a629f622eba33b657c3",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_increment.cpython-312-pytest-8.4.2.pyc",
+      "size": 57972,
+      "sha256": "ee15cc504d0c63c71282ecdc93010570f50f114f4bd4789ce7def5b08e27bfec",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_increment.cpython-312-pytest-9.1.1.pyc",
+      "size": 57972,
+      "sha256": "ee15cc504d0c63c71282ecdc93010570f50f114f4bd4789ce7def5b08e27bfec",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_increment_profile.cpython-312-pytest-8.4.2.pyc",
+      "size": 6170,
+      "sha256": "ba4d8f88a3a76bbbe9cef6df033fc69fe8ed26193786abfd60b142d7179b6c6d",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_increment_profile.cpython-312-pytest-9.1.1.pyc",
+      "size": 6170,
+      "sha256": "ba4d8f88a3a76bbbe9cef6df033fc69fe8ed26193786abfd60b142d7179b6c6d",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_inertial.cpython-312-pytest-8.4.2.pyc",
+      "size": 44462,
+      "sha256": "54e9cca544ca50070af17dd5692d136de1a4552b64c85eb588a895124eb0c224",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_inertial.cpython-312-pytest-9.1.1.pyc",
+      "size": 44462,
+      "sha256": "36476e7b05b77d74c3d62325b9496d4a88c7fce53325bc50a5ac2e558df1f59e",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_integration.cpython-312-pytest-8.4.2.pyc",
+      "size": 37632,
+      "sha256": "2254f96695d42baa09b01858370f025752adb1470d340a5f6a7bd0b9484731a2",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_integration.cpython-312-pytest-9.1.1.pyc",
+      "size": 37632,
+      "sha256": "2254f96695d42baa09b01858370f025752adb1470d340a5f6a7bd0b9484731a2",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_lexical.cpython-312-pytest-8.4.2.pyc",
+      "size": 42208,
+      "sha256": "5b5ae935ddde22bd5442def18998a9cd6cf0d8730c57315e8bdc4385fb72eef2",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_lexical.cpython-312-pytest-9.1.1.pyc",
+      "size": 42208,
+      "sha256": "5b5ae935ddde22bd5442def18998a9cd6cf0d8730c57315e8bdc4385fb72eef2",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_limits.cpython-312-pytest-8.4.2.pyc",
+      "size": 27917,
+      "sha256": "b371ae00364a872c08af9b0b4c36b584dd10707411d7b1f99733acb4e2f13d2d",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_limits.cpython-312-pytest-9.1.1.pyc",
+      "size": 27917,
+      "sha256": "b371ae00364a872c08af9b0b4c36b584dd10707411d7b1f99733acb4e2f13d2d",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_manual_archive.cpython-312-pytest-8.4.2.pyc",
+      "size": 2665,
+      "sha256": "d6d127abe7ee84eb8e4c06c96b6a8db994cff0a9c8f087ac7c2ff7e5366b1c6f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_manual_archive.cpython-312-pytest-9.1.1.pyc",
+      "size": 2665,
+      "sha256": "d6d127abe7ee84eb8e4c06c96b6a8db994cff0a9c8f087ac7c2ff7e5366b1c6f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_manual_map.cpython-312-pytest-8.4.2.pyc",
+      "size": 3794,
+      "sha256": "74f26befc8a0f917cc8269324a9bc90611a2b69dcc9e905ae9b8eec44ab36374",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_manual_map.cpython-312-pytest-9.1.1.pyc",
+      "size": 3794,
+      "sha256": "74f26befc8a0f917cc8269324a9bc90611a2b69dcc9e905ae9b8eec44ab36374",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_optimization.cpython-312-pytest-8.4.2.pyc",
+      "size": 47249,
+      "sha256": "92a8ae02225d7e811f4dc75cf07313ec097d925a2c29d849a367f2cd8b533e72",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_optimization.cpython-312-pytest-9.1.1.pyc",
+      "size": 47249,
+      "sha256": "92a8ae02225d7e811f4dc75cf07313ec097d925a2c29d849a367f2cd8b533e72",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_output_file.cpython-312-pytest-8.4.2.pyc",
+      "size": 40631,
+      "sha256": "8eaa11a1b5be4a8402b4741ce18dd67b1dceb1026e19188e9658e67291fa9242",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_output_file.cpython-312-pytest-9.1.1.pyc",
+      "size": 40631,
+      "sha256": "8eaa11a1b5be4a8402b4741ce18dd67b1dceb1026e19188e9658e67291fa9242",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_parser.cpython-312-pytest-8.4.2.pyc",
+      "size": 5073,
+      "sha256": "5f53612c124890f31e37481ab5338c582d36408d9bbc228a4c30ee5f6e49e409",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_parser.cpython-312-pytest-9.1.1.pyc",
+      "size": 5073,
+      "sha256": "125105b4c24b5debcf0249838ad107b8a86c431d954e047721834cfd4132e384",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_prb.cpython-312-pytest-8.4.2.pyc",
+      "size": 8615,
+      "sha256": "e04a1529e94049fa90019e643d05863c0030c5b66caba5836b86d16469c3e993",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_prb.cpython-312-pytest-9.1.1.pyc",
+      "size": 8615,
+      "sha256": "e04a1529e94049fa90019e643d05863c0030c5b66caba5836b86d16469c3e993",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_print_output.cpython-312-pytest-8.4.2.pyc",
+      "size": 31316,
+      "sha256": "698cb92297a1f86fe30d91913bd81b965c1de02ba9353aee16f477639d4c4936",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_print_output.cpython-312-pytest-9.1.1.pyc",
+      "size": 31316,
+      "sha256": "698cb92297a1f86fe30d91913bd81b965c1de02ba9353aee16f477639d4c4936",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_problem_catalog.cpython-312-pytest-8.4.2.pyc",
+      "size": 35332,
+      "sha256": "9fc7905448c0d0d8169cb06ade082bc6a921dfd40c1250ab3a39784b392fd883",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_problem_catalog.cpython-312-pytest-9.1.1.pyc",
+      "size": 35332,
+      "sha256": "9fc7905448c0d0d8169cb06ade082bc6a921dfd40c1250ab3a39784b392fd883",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_problem_details.cpython-312-pytest-8.4.2.pyc",
+      "size": 48567,
+      "sha256": "c074d4bc795d662d85fbb36fe3e0ce810325382342d0233863d4bca4ad7dcac9",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_problem_details.cpython-312-pytest-9.1.1.pyc",
+      "size": 48567,
+      "sha256": "c074d4bc795d662d85fbb36fe3e0ce810325382342d0233863d4bca4ad7dcac9",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_profile_arguments.cpython-312-pytest-8.4.2.pyc",
+      "size": 13702,
+      "sha256": "4bd2f116ce022733d1d72d4c1d6cc91c2941179022f2f032acb90134de2398ab",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_profile_arguments.cpython-312-pytest-9.1.1.pyc",
+      "size": 13702,
+      "sha256": "4bd2f116ce022733d1d72d4c1d6cc91c2941179022f2f032acb90134de2398ab",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_profile_audit.cpython-312-pytest-8.4.2.pyc",
+      "size": 8979,
+      "sha256": "39df586dba428fef3594deea9896f3b03051aa90273ae56a7c64c3cc1ee5f829",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_profile_audit.cpython-312-pytest-9.1.1.pyc",
+      "size": 8979,
+      "sha256": "39df586dba428fef3594deea9896f3b03051aa90273ae56a7c64c3cc1ee5f829",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_profile_inheritance.cpython-312-pytest-8.4.2.pyc",
+      "size": 19580,
+      "sha256": "9601d5a7cadc1cf4d56a7f57d17a9b0ed54f8848ec197b5a4d93ebed3e7033a0",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_profile_inheritance.cpython-312-pytest-9.1.1.pyc",
+      "size": 19580,
+      "sha256": "9601d5a7cadc1cf4d56a7f57d17a9b0ed54f8848ec197b5a4d93ebed3e7033a0",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_profiles.cpython-312-pytest-8.4.2.pyc",
+      "size": 7400,
+      "sha256": "01916aab9eb6de09e185ed9e1850e8e5e1d371db8533cf70dd5756cb40e07aa8",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_profiles.cpython-312-pytest-9.1.1.pyc",
+      "size": 7400,
+      "sha256": "01916aab9eb6de09e185ed9e1850e8e5e1d371db8533cf70dd5756cb40e07aa8",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_prop_profile.cpython-312-pytest-8.4.2.pyc",
+      "size": 7204,
+      "sha256": "598e2764e375e745e28c9a90b7e31372d2a61356664546a02adcd3f02b004324",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_prop_profile.cpython-312-pytest-9.1.1.pyc",
+      "size": 7204,
+      "sha256": "598e2764e375e745e28c9a90b7e31372d2a61356664546a02adcd3f02b004324",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_propulsion.cpython-312-pytest-8.4.2.pyc",
+      "size": 61055,
+      "sha256": "9c7bd14b0af3ba4b70c3fad02acc1eecf0357e126eaf36a873c578f3eddfe364",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_propulsion.cpython-312-pytest-9.1.1.pyc",
+      "size": 61055,
+      "sha256": "9c7bd14b0af3ba4b70c3fad02acc1eecf0357e126eaf36a873c578f3eddfe364",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_radar.cpython-312-pytest-8.4.2.pyc",
+      "size": 20393,
+      "sha256": "6f3caf070ee75bd8ddee19ff028d0af8f2c3b6c2ab89bf128bb26bd92bb6a5f2",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_radar.cpython-312-pytest-9.1.1.pyc",
+      "size": 20393,
+      "sha256": "6f3caf070ee75bd8ddee19ff028d0af8f2c3b6c2ab89bf128bb26bd92bb6a5f2",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_rail.cpython-312-pytest-8.4.2.pyc",
+      "size": 22340,
+      "sha256": "e7539816b714b33edc6dbe337ebb7c63fcbb62b36238222093e6310fe160ff96",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_rail.cpython-312-pytest-9.1.1.pyc",
+      "size": 22340,
+      "sha256": "e7539816b714b33edc6dbe337ebb7c63fcbb62b36238222093e6310fe160ff96",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_reset.cpython-312-pytest-8.4.2.pyc",
+      "size": 28221,
+      "sha256": "61ca9c888809b8b67ab5602fc2840b441987d3af9c5c1b77eba1109cdb25a966",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_reset.cpython-312-pytest-9.1.1.pyc",
+      "size": 28221,
+      "sha256": "61ca9c888809b8b67ab5602fc2840b441987d3af9c5c1b77eba1109cdb25a966",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_search.cpython-312-pytest-8.4.2.pyc",
+      "size": 19541,
+      "sha256": "57b5afe8badfe9284ed768edec8c56f62e0d37871de7e7db4f6cc1beb40d82fe",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_search.cpython-312-pytest-9.1.1.pyc",
+      "size": 19541,
+      "sha256": "57b5afe8badfe9284ed768edec8c56f62e0d37871de7e7db4f6cc1beb40d82fe",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_control_profiles.cpython-312-pytest-8.4.2.pyc",
+      "size": 9665,
+      "sha256": "bcacdc4546e30061342eaebf3265a056ec90a05beae9c61640f3dee6107f08fd",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_control_profiles.cpython-312-pytest-9.1.1.pyc",
+      "size": 9665,
+      "sha256": "bcacdc4546e30061342eaebf3265a056ec90a05beae9c61640f3dee6107f08fd",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_controls.cpython-312-pytest-8.4.2.pyc",
+      "size": 18750,
+      "sha256": "cfd6e21d6b3007a274222b009854c37548d1bde55f3494b71b768b41c3e950c8",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_controls.cpython-312-pytest-9.1.1.pyc",
+      "size": 18750,
+      "sha256": "cfd6e21d6b3007a274222b009854c37548d1bde55f3494b71b768b41c3e950c8",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_data.cpython-312-pytest-8.4.2.pyc",
+      "size": 70471,
+      "sha256": "4f7ebf1a3e8a3eacacf8ce9f3be9a51d8e3a24b3e2ede482fd49228487967441",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_data.cpython-312-pytest-9.1.1.pyc",
+      "size": 70471,
+      "sha256": "4f7ebf1a3e8a3eacacf8ce9f3be9a51d8e3a24b3e2ede482fd49228487967441",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_flow.cpython-312-pytest-8.4.2.pyc",
+      "size": 17934,
+      "sha256": "8fbd575eb5de8af801ba55d72b2ea71406e1e1c5e0f3c63bc81269ddbb45e532",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_flow.cpython-312-pytest-9.1.1.pyc",
+      "size": 17934,
+      "sha256": "8fbd575eb5de8af801ba55d72b2ea71406e1e1c5e0f3c63bc81269ddbb45e532",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_flow_profiles.cpython-312-pytest-8.4.2.pyc",
+      "size": 7417,
+      "sha256": "4863c0ce2988a33adea2bbb07ca465019d8a1f388d09e492e9b9cf5933470d40",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_segment_flow_profiles.cpython-312-pytest-9.1.1.pyc",
+      "size": 7417,
+      "sha256": "4863c0ce2988a33adea2bbb07ca465019d8a1f388d09e492e9b9cf5933470d40",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_structure.cpython-312-pytest-8.4.2.pyc",
+      "size": 4628,
+      "sha256": "4caacf813c90f6715d7c80cdd0a15e04a2e8f47045c4d59c5a3ca0e888bf30af",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_structure.cpython-312-pytest-9.1.1.pyc",
+      "size": 4628,
+      "sha256": "4caacf813c90f6715d7c80cdd0a15e04a2e8f47045c4d59c5a3ca0e888bf30af",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_summarize.cpython-312-pytest-8.4.2.pyc",
+      "size": 25141,
+      "sha256": "9f48af48c3f68fd506704b2bc888d679d5f26f5c9947610c037ea6767159702d",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_summarize.cpython-312-pytest-9.1.1.pyc",
+      "size": 25141,
+      "sha256": "9f48af48c3f68fd506704b2bc888d679d5f26f5c9947610c037ea6767159702d",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_survey.cpython-312-pytest-8.4.2.pyc",
+      "size": 29753,
+      "sha256": "7676511dd2747539fbb4972918ab09ebcec00c36a66276acc48d10f03afe033e",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_survey.cpython-312-pytest-9.1.1.pyc",
+      "size": 29753,
+      "sha256": "7676511dd2747539fbb4972918ab09ebcec00c36a66276acc48d10f03afe033e",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_tables.cpython-312-pytest-8.4.2.pyc",
+      "size": 10933,
+      "sha256": "911dab3affe7bc3c39cefcd632602261e66ec2a86e84bdb50da6df3479ffb400",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_tables.cpython-312-pytest-9.1.1.pyc",
+      "size": 10933,
+      "sha256": "911dab3affe7bc3c39cefcd632602261e66ec2a86e84bdb50da6df3479ffb400",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_trajectory.cpython-312-pytest-8.4.2.pyc",
+      "size": 64245,
+      "sha256": "ba3eb4b1a41293ed3b43e003639839fa9318d093fba8b3bf4ed35ea93f4350f4",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_trajectory.cpython-312-pytest-9.1.1.pyc",
+      "size": 64245,
+      "sha256": "ba3eb4b1a41293ed3b43e003639839fa9318d093fba8b3bf4ed35ea93f4350f4",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_trajectory_details.cpython-312-pytest-8.4.2.pyc",
+      "size": 54173,
+      "sha256": "0a6401cc6f2967377b3aec928bc7b1dd643bde0ed1f55fa91938b23c41a40378",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_trajectory_details.cpython-312-pytest-9.1.1.pyc",
+      "size": 54173,
+      "sha256": "0a6401cc6f2967377b3aec928bc7b1dd643bde0ed1f55fa91938b23c41a40378",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_trajectory_details_profile.cpython-312-pytest-8.4.2.pyc",
+      "size": 7635,
+      "sha256": "33eb27edef646e2bda2c4e2e9a5d38539b5e657776e5cbd320796a016bf9a24e",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_trajectory_details_profile.cpython-312-pytest-9.1.1.pyc",
+      "size": 7635,
+      "sha256": "33eb27edef646e2bda2c4e2e9a5d38539b5e657776e5cbd320796a016bf9a24e",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_trajectory_profile.cpython-312-pytest-8.4.2.pyc",
+      "size": 10608,
+      "sha256": "d7be0dd8302f707a6e3f744744d90f6f8bc902d056e782649e40d356d74c1b9a",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_trajectory_profile.cpython-312-pytest-9.1.1.pyc",
+      "size": 10608,
+      "sha256": "d7be0dd8302f707a6e3f744744d90f6f8bc902d056e782649e40d356d74c1b9a",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_transcription.cpython-312-pytest-8.4.2.pyc",
+      "size": 4204,
+      "sha256": "251a4aa8909b0cf6c14e305f94f6cb7cef28a9e4c1b59cfd27d331c4904af72f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_transcription.cpython-312-pytest-9.1.1.pyc",
+      "size": 4204,
+      "sha256": "251a4aa8909b0cf6c14e305f94f6cb7cef28a9e4c1b59cfd27d331c4904af72f",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_validation.cpython-312-pytest-8.4.2.pyc",
+      "size": 4042,
+      "sha256": "e6868a476aa163726134fd462580bb649735e4344d0c28975b2f6bba56b42512",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_validation.cpython-312-pytest-9.1.1.pyc",
+      "size": 4042,
+      "sha256": "e6868a476aa163726134fd462580bb649735e4344d0c28975b2f6bba56b42512",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_when.cpython-312-pytest-8.4.2.pyc",
+      "size": 34799,
+      "sha256": "b62d66ba980a721820fd289caded4e3e3aeb22b1ad88cfd8219d8177e4038972",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_when.cpython-312-pytest-9.1.1.pyc",
+      "size": 34799,
+      "sha256": "093882f96a9ca3551a69b806e8a497fb0482ae2487981ed47ffd1f68d1f29d98",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_workspace.cpython-312-pytest-8.4.2.pyc",
+      "size": 6139,
+      "sha256": "8683abc3492a981bbc0abeeffdb65485b4a06b5f0426129f1d8ec967f81e3568",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/__pycache__/test_workspace.cpython-312-pytest-9.1.1.pyc",
+      "size": 6139,
+      "sha256": "8683abc3492a981bbc0abeeffdb65485b4a06b5f0426129f1d8ec967f81e3568",
+      "disposition": "discard-generated",
+      "rationale": "Local filesystem or test cache artifact."
+    },
+    {
+      "path": "toolkit/tests/test_aero_constants_profile.py",
+      "size": 1977,
+      "sha256": "68b42e748033f62e96f3206049e79a27e727ecc12e4b08d7dd0a9e24d5f9d3c7",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_block_profiles.py",
+      "size": 2017,
+      "sha256": "ad22954efe94efd7861719c6eca7bf9d7295289d1bd86ef0f062dbdfccd4496d",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_catalog.py",
+      "size": 2675,
+      "sha256": "9961e6432ecb0d922fbfd4438496d711f78ce2fd096fc7804708ac32084314aa",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_cg.py",
+      "size": 9085,
+      "sha256": "dc1e4e8e2369491b940ba6aa431c07fee7647b300b1cd9200ed048c9d06e8409",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_cg_profile.py",
+      "size": 1531,
+      "sha256": "24ed222da3ac48805578e90795f92110105dfd0b7ac6634a5e9bdb690dabd026",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_dependencies.py",
+      "size": 1393,
+      "sha256": "bf4e6412bb7159b53959d5028ba185d8bd9b3799f521f0b69a50aad3635ca441",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_evidence.py",
+      "size": 2847,
+      "sha256": "e248ff6bbdc0e7a109c96ebedffd42edd61c59cdbb9edf7ec0a177e14a464deb",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_expressions.py",
+      "size": 1791,
+      "sha256": "40acc14bfdb7d4cd564854a1517ed1ea7a72ad303a821474ed2425ea1a69a399",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_file_optimize_profiles.py",
+      "size": 2463,
+      "sha256": "63c5dafb260a9bdafbb179fc041b93f9a7b62773c4e6b8688579469f78a4b3ce",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_fly.py",
+      "size": 14875,
+      "sha256": "c655e756eb52973aea611271a075ae59e02d74a3183f6d7f3799ff3471405fe7",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_fly_profile.py",
+      "size": 1542,
+      "sha256": "aa69a3cf29da0a7ccae16f7345c78df13e4eed3531579acbecd57ed67fbcda26",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_framing.py",
+      "size": 3975,
+      "sha256": "0a9e5f4c0e251a21fd98c3b93d2ffc49794093d0274ffc1822a773d30e7be1ab",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_hierarchy_profile.py",
+      "size": 1451,
+      "sha256": "0b747f6bf5dd6ff52ba6eed8bd49196d674784a5d9c956c39ff1c082ead4960e",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_if_actions.py",
+      "size": 1031,
+      "sha256": "fce99fddb538e058d00fc0883967cd59aa666ffc3fbc6cd126e6f38ab7950caf",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_increment.py",
+      "size": 12267,
+      "sha256": "8fa8b5a6ba6603262a029a7c06c22b0fce7fea6f62f7abda0b9060e658eb7d8f",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_increment_profile.py",
+      "size": 1601,
+      "sha256": "90befb1595555716d7f400ebee868b38d894a4e516a27502e4c213702d659dc5",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_inertial.py",
+      "size": 8567,
+      "sha256": "daeed5ca017b4943968be02c5f07a5f7630943b6e423bf44de55dc556f2b52cd",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_integration.py",
+      "size": 7108,
+      "sha256": "17e12a247f361e97787a379ffa15a6fa6972718b13f4ed4d913c63c371a2e314",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_lexical.py",
+      "size": 7850,
+      "sha256": "e39a87a1f2bb667a912e5e32ecfef4b20c0e160be2703ed7e5a9f1d09941b5a0",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_limits.py",
+      "size": 5698,
+      "sha256": "58cd839d1d76f1d43f2f79da53c00687fbbc07d9586c864be6657950b97ef017",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_manual_archive.py",
+      "size": 457,
+      "sha256": "2a2a9ffce8a23d2290cf64c8d9ef9de41b86f8967641ca2fee1af1016c14b522",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_manual_map.py",
+      "size": 422,
+      "sha256": "af359607cbabeac4ba9008fa7e56fc3276aeb37e74eaba12653f5ed486dac315",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_optimization.py",
+      "size": 9060,
+      "sha256": "8ee7f8d601fafc171024aa78bddb50ec6d41614963e092b0d2c86a34e091bbeb",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_output_file.py",
+      "size": 9303,
+      "sha256": "c028b00dde6d3a99159ac4e8be838ae121a342ff63a2af13a246ea98a887881a",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_parser.py",
+      "size": 1199,
+      "sha256": "8743a164b4b47a3823b2466959f8bffc4ff60c4f061bd0aba551e18cc2852739",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_prb.py",
+      "size": 1772,
+      "sha256": "d7da098dc43622640ae1c7026173451d0e2c4eee0b708802781aeeb15a5b76df",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_print_output.py",
+      "size": 6837,
+      "sha256": "16936111b5790493f77e8fc2ddbe1bdf0c8dbac6640d379434f0a296b4d2be38",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_problem_catalog.py",
+      "size": 8200,
+      "sha256": "569c2637032b3b2fbdbc1c99a570080243f51ed1878602c7014b7a6764d27b04",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_problem_details.py",
+      "size": 9363,
+      "sha256": "1c2a3262551d1cfc7a9bf6e8084259e4d80a2e11b2dc173d7c2b8ddfee371a9a",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_profile_arguments.py",
+      "size": 7098,
+      "sha256": "129c6bdd8bb2369e8ee2aef99124ce8b4a9dd51a5ff2afe20b4c4ef1af3d1bdd",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_profile_audit.py",
+      "size": 4408,
+      "sha256": "55443a0ab045748215474fabfb290ae343267402541d14982f908de333229e59",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_profile_inheritance.py",
+      "size": 9039,
+      "sha256": "856e3ea70aa546fdd20b145f4de29eaa6886741916eb40ba0849efa52c29858f",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_profiles.py",
+      "size": 3131,
+      "sha256": "3ff657d97b60fb27907ec0a51215e3e1923687edd5fa0044d49e936c9f7202ed",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_prop_profile.py",
+      "size": 2281,
+      "sha256": "e17654eaa263cf3dc6d79f4188b87eda778fa05996a4a70a791b59eabb3e3fb0",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_propulsion.py",
+      "size": 10982,
+      "sha256": "7b2b94e0e322d68a78b0dcf94d9633aefc5633aab5ee4b655688363f4d3599d7",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_radar.py",
+      "size": 5299,
+      "sha256": "aec7ed765d8e499aa3236f42f89f1501d460e6697f5db00430b39f820953e5ef",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_rail.py",
+      "size": 4152,
+      "sha256": "3761638e8cd41eabb0f348b9db1d05289cff2e49b6413a6c239ace3105530f8b",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_reset.py",
+      "size": 5491,
+      "sha256": "988247aba6088f6a4fe66f610cb14934d6419b848db81afa855e368ae02b3283",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_search.py",
+      "size": 4768,
+      "sha256": "1b22542f4a014924c7ba55aa0e5cb8e8c797d21f9b08319c96bddd567aa00012",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_segment_control_profiles.py",
+      "size": 2916,
+      "sha256": "e12ed542e3d4291e5208dc215fa5260b8e9bf1deb3d32aa4159945b378ed0411",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_segment_controls.py",
+      "size": 3779,
+      "sha256": "2af4031245c6c1c3de91aba0be2cd9935cb7a0b0cc0ae97fda3e44637b54c290",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_segment_data.py",
+      "size": 15958,
+      "sha256": "d9e612433fea570e15d6860251116ad24dbe5f2946c04a09cdee172e39ec82ed",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_segment_flow.py",
+      "size": 2293,
+      "sha256": "589825124145863a6e298d01634569c9f7f18133fd118cb711111311dec7f37f",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_segment_flow_profiles.py",
+      "size": 2029,
+      "sha256": "cb9a5732ea5811ae0154475081686f4131bff701c6c51ad12597f7764505954f",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_structure.py",
+      "size": 999,
+      "sha256": "ca01d39f9e6fb9ee4a006d5babf0ab90024261d11f8dce17c32e20ee34346893",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_summarize.py",
+      "size": 6367,
+      "sha256": "0a012960f7da032575a071374225666980a23b643a94ae98c7206ca6ebbe3be2",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_survey.py",
+      "size": 7556,
+      "sha256": "ace1fc89b8a1d9cdbe4a50c8d15be73df1399bfe137201ffac730ae129e9a013",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_tables.py",
+      "size": 1431,
+      "sha256": "b7985d4154a4aa1baed90adb7f92a4478bad49ffbba440aa16f9981db06cded1",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_trajectory.py",
+      "size": 15572,
+      "sha256": "ba805f5ee7f261a864ce1f3abb5b2f17a31c759fbc30ca425d5bfb152d4d5d80",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_trajectory_details.py",
+      "size": 10782,
+      "sha256": "d75dfd1399f00136ff4cacc28e350b793f9e5642843bb4dcea60709752233d13",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_trajectory_details_profile.py",
+      "size": 3462,
+      "sha256": "24c6b8b454fdf2dda528cef95fa53e1ad676967921e84c714cafed16d187aa1b",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_trajectory_profile.py",
+      "size": 2414,
+      "sha256": "1847d555595b943cebd4a0eb01731d61c15ee89db37493925b81b4b18856bdc6",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_transcription.py",
+      "size": 492,
+      "sha256": "622dd1df8b15732e57ecb5239175ac724b49d18f08d0a716b7b056bbd6ea5e1d",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_validation.py",
+      "size": 1067,
+      "sha256": "87844b2086dd292877a7327d2621dc4840c7763b32e3d16b2d196dbe320ad356",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_when.py",
+      "size": 7593,
+      "sha256": "de98cdc0c7aef1b4ccd9794c2342371c459f6e09c8fb3bd46755d5ea59ff14b9",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    },
+    {
+      "path": "toolkit/tests/test_workspace.py",
+      "size": 1287,
+      "sha256": "e4065a53aad1b62673f20491334556b20eea2d0cf54e5d9c279a398ebcf4dd98",
+      "disposition": "archive-research",
+      "rationale": "Legacy regression behavior retained as research; canonical tests are ported selectively."
+    }
+  ]
+}

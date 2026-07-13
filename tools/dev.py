@@ -79,6 +79,16 @@ def grammar() -> None:
 ####
 
 
+def legacy_audit() -> None:
+    run(tool_script("audit_legacy_inbox.py", "--verify-fixtures"))
+####
+
+
+def legacy_close_check() -> None:
+    run(tool_script("check_legacy_closure.py"))
+####
+
+
 def manual() -> None:
     run(["latexmk", "manual/manual.tex"])
     run(tool_script("normalize_pdf.py", "build/manual.pdf"))
@@ -147,6 +157,8 @@ TASKS: dict[str, Callable[[], None]] = {
     "lint": lint,
     "typecheck": typecheck,
     "grammar": grammar,
+    "legacy-audit": legacy_audit,
+    "legacy-close-check": legacy_close_check,
     "test": test,
     "manual": manual,
     "equation-audit": equation_audit,
