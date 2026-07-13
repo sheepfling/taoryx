@@ -4484,7 +4484,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Sodano inverse ellipsoidal surface distance"
     },
     {
@@ -4504,7 +4504,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Sodano auxiliary central angle"
     },
     {
@@ -4524,7 +4524,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Sodano inverse auxiliary m"
     },
     {
@@ -4544,7 +4544,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Reduced latitude beta1"
     },
     {
@@ -4564,7 +4564,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Reduced latitude beta2"
     },
     {
@@ -4584,7 +4584,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Sodano forward azimuth"
     },
     {
@@ -4604,7 +4604,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Sodano backward azimuth"
     },
     {
@@ -4624,7 +4624,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Corrected longitude difference for Sodano inverse method"
     },
     {
@@ -4644,7 +4644,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Reduced-latitude difference series"
     },
     {
@@ -4664,7 +4664,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Alternative reduced-latitude difference relation"
     },
     {
@@ -4684,7 +4684,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Third flattening parameter n"
     },
     {
@@ -4704,7 +4704,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Downrange and crossrange perpendicularity condition"
     },
     {
@@ -4724,7 +4724,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Newton-Raphson update used for downrange solution"
     },
     {
@@ -4744,7 +4744,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Downrange error function"
     },
     {
@@ -4764,7 +4764,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Sodano direct angular-distance correction"
     },
     {
@@ -4784,7 +4784,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Sodano direct auxiliary m"
     },
     {
@@ -4804,7 +4804,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Sodano direct auxiliary n"
     },
     {
@@ -4824,7 +4824,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Normalized surface distance xi"
     },
     {
@@ -4844,7 +4844,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Printed Sodano eccentricity factor e prime"
     },
     {
@@ -4864,7 +4864,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Direct-method geodetic latitude"
     },
     {
@@ -4884,7 +4884,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Direct-method sine of reduced latitude beta2"
     },
     {
@@ -4904,7 +4904,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Direct-method cosine of reduced latitude beta2"
     },
     {
@@ -4924,7 +4924,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Direct-method longitude"
     },
     {
@@ -4944,7 +4944,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Direct-method longitude correction l"
     },
     {
@@ -4964,7 +4964,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Direct-method backward azimuth"
     },
     {
