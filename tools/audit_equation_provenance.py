@@ -24,6 +24,11 @@ DISPLAY_ENVIRONMENTS = {
     "multline*",
 }
 
+IMPLEMENTED_EQUATION_IDS = {
+    *[f"2-{number}" for number in range(7, 50)],
+    *[f"2-{number}" for number in range(246, 251)],
+}
+
 
 @dataclass(frozen=True)
 class SourceLocation:
@@ -305,6 +310,14 @@ def validation_scope(equation: str) -> tuple[str, str]:
 ####
 
 
+def implementation_status(equation: str) -> str:
+    if equation in IMPLEMENTED_EQUATION_IDS:
+        return "implemented"
+    ####
+    return "not yet mapped to an executable mathematics implementation"
+####
+
+
 def load_metadata() -> list[dict[str, str]]:
     with (ROOT / "metadata" / "equations.csv").open(
         newline="",
@@ -396,7 +409,7 @@ def load_cached_records() -> tuple[list[EquationRecord], dict[str, Any]]:
             transcription_status=row["transcription_status"],
             verification_scope=row["verification_scope"],
             validation_suite=row["validation_suite"],
-            code_implementation_status=row["code_implementation_status"],
+            code_implementation_status=implementation_status(row["equation"]),
             notes=row["notes"],
         )
         for row in rows
@@ -493,7 +506,7 @@ def build_records(
                 transcription_status=row["status"],
                 verification_scope=scope,
                 validation_suite=suite,
-                code_implementation_status="not yet mapped to an executable mathematics implementation",
+                code_implementation_status=implementation_status(equation),
                 notes=row["notes"],
             )
         )
