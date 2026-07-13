@@ -1,0 +1,33 @@
+\subsection{\problemblock{*Reset} Data Block}\label{sec:block-reset}
+
+The \problemblock{*reset} data block is very similar to the
+\problemblock{*increment} data block described in \cref{sec:block-increment}.
+However, instead of incrementing time or state variables, the
+\problemblock{*reset} block sets them equal to input values. All of the input
+restrictions discussed for \problemblock{*increment} apply to
+\problemblock{*reset}. The variables that can be reset are listed in
+\cref{tab:increment-variables}.
+
+A typical use of the block is to reset \statevar{tmark}:
+
+\begin{lstlisting}[style=taosmanual]
+*reset tmark=0
+\end{lstlisting}
+
+This marks an event during the trajectory. Rocket-motor thrust in propulsion tables
+is often made a function of \statevar{tmark} rather than absolute
+\statevar{time} or segment time \statevar{tseg}. This allows the motor burn to
+extend across several segments and permits motor ignition at any point in the
+trajectory. The value of \statevar{tmark} need only be reset to zero at motor
+ignition. Other similar variables are \statevar{grmark}, \statevar{plmark}, and
+\statevar{fuel}.
+
+Another common use is to set the weight to a known value after missile staging. For
+example,
+
+\begin{lstlisting}[style=taosmanual]
+*reset wt=1100
+\end{lstlisting}
+
+sets the weight to 1100~lb regardless of what has happened previously in the
+trajectory.

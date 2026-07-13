@@ -1,0 +1,73 @@
+\section{Trajectory Data Blocks}\label{sec:trajectory-data-blocks}
+
+Trajectory data blocks contain information associated with an entire trajectory.
+Segment data blocks, discussed in \cref{sec:segment-data-blocks}, are one kind of
+trajectory data block. The remaining trajectory-level blocks are listed in
+\cref{tab:trajectory-data-blocks}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Trajectory data blocks.}
+  \label{tab:trajectory-data-blocks}
+  \begin{tabularx}{0.82\linewidth}{@{}>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Data block & Description \\
+    \midrule
+    *define   & Defines user-defined output variables \\
+    *dwn/crs  & Defines a downrange/crossrange reference \\
+    *file     & Creates a column-oriented output file \\
+    *iip      & Defines initial-impact-point variables \\
+    *initial  & Defines initial conditions \\
+    *print    & Selects printout variables \\
+    *segment  & Defines a segment (\cref{sec:segment-data-blocks}) \\
+    *tangent  & Defines the tangent-plane coordinate system \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+A trajectory begins with the \problemblock{*trajectory} keyword, a trajectory
+number, a trajectory name, the keywords \texttt{start on}, and a segment number.
+For example,
+
+\begin{lstlisting}[style=taosmanual]
+*trajectory 2 target start on 31
+\end{lstlisting}
+
+begins trajectory 2 for a vehicle called \texttt{target} on segment 31. Every item
+following \problemblock{*trajectory} is required.
+
+Trajectory information continues until another \problemblock{*trajectory} keyword
+or a keyword unique to the problem level is encountered. Some keywords, including
+\problemblock{*file} and \problemblock{*print}, are valid both inside and outside a
+trajectory definition, so they do not terminate the trajectory. Only keywords that
+are unique to the problem level, such as \problemblock{*trajectory},
+\problemblock{*search}, and \problemblock{*units/fmt}, end a trajectory definition
+(\cref{sec:problem-data-blocks}).
+
+Every trajectory definition must contain an \problemblock{*initial} block giving the
+initial conditions and at least one \problemblock{*segment} block. It normally also
+contains at least one \problemblock{*print} block so that trajectory results are
+written to the printout file. The following outline illustrates the organization:
+
+\begin{lstlisting}[style=taosmanual]
+*trajectory 1 missile start on 1
+  *initial ...
+  *print ...
+
+  *segment 1 First segment definition
+    ...
+  *segment 2 Second segment definition
+    ...
+
+*trajectory 2 target ...
+\end{lstlisting}
+
+Indentation shows the hierarchy. Trajectory 1 extends from the first
+\problemblock{*trajectory} keyword to the second. Between those keywords, initial
+conditions are given in the \problemblock{*initial} block, printout variables are
+listed in the \problemblock{*print} block, and segments are defined in the
+\problemblock{*segment} blocks. Each \problemblock{*segment} block contains the
+additional blocks described in \cref{sec:segment-data-blocks}, which tell TAOS how
+to calculate the segment.
+
+The following subsections give the details of each trajectory data block.

@@ -1,0 +1,67 @@
+% Source PDF page 64; manual page 2-35.
+\subsection{Coordinate Transformations}\label{sec:coordinate-transformations}
+
+TAOS performs coordinate transformations with unit vectors rather than explicitly
+stored transformation matrices because the unit-vector form is efficient to program.
+The two methods are mathematically identical, and the unit-vector notation makes
+clear that conversion of a vector from one system to another is a sequence of dot
+products.
+
+Every TAOS coordinate-system unit vector is expressed in ECFC coordinates. To
+convert a vector from ECFC to another system, the vector is projected onto the unit
+vectors of the destination system. For example, the propulsive-force vector is
+converted from ECFC to body coordinates by
+\begin{equation}
+  \begin{aligned}
+  \sum\vec F_{\mathrm{prop},b}
+  &=
+  \begin{bmatrix}
+    \hat x_b\mathbin{\cdot}\sum\vec F_{\mathrm{prop},\oplus}\\[0.25em]
+    \hat y_b\mathbin{\cdot}\sum\vec F_{\mathrm{prop},\oplus}\\[0.25em]
+    \hat z_b\mathbin{\cdot}\sum\vec F_{\mathrm{prop},\oplus}
+  \end{bmatrix}\\
+  &=
+  \begin{bmatrix}
+    \hat x_b^{T}\\[0.2em]
+    \hat y_b^{T}\\[0.2em]
+    \hat z_b^{T}
+  \end{bmatrix}
+  \sum\vec F_{\mathrm{prop},\oplus}
+  =\TaosTransform{b}{\oplus}\sum\vec F_{\mathrm{prop},\oplus}.
+  \end{aligned}
+  \label{eq:ecfc-to-body-force-transformation}
+\end{equation}
+The rows of $\TaosTransform{b}{\oplus}$ are the body unit-vector components in
+ECFC coordinates.
+
+Reversing the transformation gives
+\begin{equation}
+  \sum\vec F_{\mathrm{prop},\oplus}
+  =\TaosTransform{\oplus}{b}\sum\vec F_{\mathrm{prop},b}
+  =\TaosTransform{b}{\oplus}^{-1}
+    \sum\vec F_{\mathrm{prop},b},
+  \label{eq:body-to-ecfc-force-transformation}
+\end{equation}
+\begin{equation}
+  \sum\vec F_{\mathrm{prop},\oplus}
+  =
+  \begin{bmatrix}
+    \hat x_b^{T}\\[0.2em]
+    \hat y_b^{T}\\[0.2em]
+    \hat z_b^{T}
+  \end{bmatrix}^{T}
+  \sum\vec F_{\mathrm{prop},b},
+  \label{eq:body-to-ecfc-force-transformation-transpose}
+\end{equation}
+\begin{equation}
+  \sum\vec F_{\mathrm{prop},\oplus}
+  =
+  \begin{bmatrix}
+    \hat x_b&\hat y_b&\hat z_b
+  \end{bmatrix}
+  \sum\vec F_{\mathrm{prop},b}.
+  \label{eq:body-to-ecfc-force-transformation-columns}
+\end{equation}
+The inverse simplifies to the transpose because the transformation is orthogonal.
+TAOS handles transformations involving its other coordinate systems in the same
+way.

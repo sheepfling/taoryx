@@ -1,0 +1,15 @@
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small]
+  \draw[->] (-0.3,0) -- (8,0) node[right] {longitude};
+  \draw[->] (0,-0.3) -- (0,4.3) node[above] {latitude};
+  \coordinate (R) at (1,0.8);
+  \coordinate (P) at (5.4,2.5);
+  \coordinate (V) at (6.7,3.35);
+  \fill (R) circle (1.5pt) node[below left] {Reference point};
+  \fill (V) circle (1.5pt) node[above right] {Vehicle};
+  \draw[thick,->] (R) -- ($(R)!1.35!(P)$) node[pos=0.55,below] {downrange};
+  \draw[thick] (P) -- (V) node[midway,above left] {crossrange};
+  \draw[dashed] (R) -- ++(0,2.0);
+  \draw[->] ($(R)+(0,0.65)$) arc[start angle=90,end angle=24,radius=0.65];
+  \node at (1.55,1.42) {reference azimuth};
+  \draw ($(P)+(-0.18,0.1)$) -- ++(0.17,0.3) -- ++(0.3,-0.17);
+\end{tikzpicture}

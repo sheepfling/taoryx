@@ -1,0 +1,48 @@
+\subsection{\problemblock{*File} Data Block}\label{sec:trajectory-block-file}
+
+The trajectory-level \problemblock{*file} block creates a file containing columns
+of trajectory information. Each selected output variable is written as a column of
+numbers separated by at least one space. Column headings appear once at the
+beginning, and the columns are continuous thereafter. This format is well suited for
+import into plotting programs, spreadsheets, or other analysis software because it
+contains no page headings or page breaks; at most, the initial column-heading line
+must be removed.
+
+\begin{lstlisting}[style=taosmanual]
+*file traj.dat
+  time alt long latgd range vel
+\end{lstlisting}
+
+writes the selected trajectory variables to \texttt{traj.dat}. The beginning of such
+a file is shown in \cref{fig:trajectory-output-file-example}.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.93\linewidth}
+    \lstinputlisting[style=taosmanual,basicstyle=\ttfamily\scriptsize]{examples/chapter04/trajectory-output-example.txt}
+  \end{minipage}
+  \caption{Trajectory output file example.}
+  \label{fig:trajectory-output-file-example}
+\end{figure}
+
+The filename must be valid for the operating system. If a file already exists, TAOS
+overwrites it without warning and the previous data are lost. This is normally
+acceptable because the file is intended to contain the most recent trajectory run.
+
+Any standard output variable or user-defined output variable may be written. A
+user-defined variable referenced in a \problemblock{*file} block must have been
+defined earlier. Units and output format are controlled by
+\problemblock{*units/fmt}.
+
+Each output line is limited to 400 characters, which limits the list to approximately
+30 variables. In practice, 12 or fewer is recommended because some screen editors
+and printers handle only about 130 characters per line.
+
+Radar and relative-vehicle variables, whose names begin with \texttt{rad} or
+\texttt{rel}, require a square-bracket subscript. For example,
+\statevar{radrng[2]} is the current trajectory's range from radar station 2, and
+\statevar{relvel[4]} is the closing velocity of trajectory 4 relative to the current
+trajectory.
+
+Any number of trajectory-level \problemblock{*file} blocks can be included. A
+separate output file is created for each block.

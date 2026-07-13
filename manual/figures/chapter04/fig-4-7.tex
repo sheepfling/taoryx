@@ -1,0 +1,15 @@
+\begin{tikzpicture}[font=\small,node distance=1.4mm]
+  \node[draw,minimum width=7.4cm,minimum height=0.55cm] (id) {\texttt{(problem-id)}};
+  \node[draw,below=of id,minimum width=7.4cm,minimum height=0.55cm] (p1) {Problem data blocks};
+  \node[draw,below=of p1,minimum width=7.4cm,minimum height=0.55cm] (t1) {Trajectory 1 data blocks};
+  \node[draw,below=of t1,minimum width=6.5cm,minimum height=0.48cm] (s11) {Segment data blocks};
+  \node[draw,below=of s11,minimum width=6.5cm,minimum height=0.48cm] (s12) {Segment data blocks};
+  \node[draw,below=of s12,minimum width=7.4cm,minimum height=0.55cm] (t2) {Trajectory 2 data blocks};
+  \node[draw,below=of t2,minimum width=6.5cm,minimum height=0.48cm] (s21) {Segment data blocks};
+  \node[draw,below=of s21,minimum width=6.5cm,minimum height=0.48cm] (s22) {Segment data blocks};
+  \node[draw,below=of s22,minimum width=7.4cm,minimum height=0.55cm] (p2) {Problem data blocks};
+  \node[draw,below=of p2,minimum width=7.4cm,minimum height=0.55cm] (end) {\texttt{*end}};
+  \draw[decorate,decoration={brace,amplitude=5pt},thick]
+    ($(id.north east)+(0.25,0)$) -- node[right=7pt]{Problem file}
+    ($(end.south east)+(0.25,0)$);
+\end{tikzpicture}

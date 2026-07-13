@@ -1,0 +1,38 @@
+\subsection{\problemblock{*Constants} Data Block}\label{sec:block-constants}
+
+Tables can be functions of user-defined variables as shown in
+\cref{sec:table-user-defined-variables}. If user-defined variables have been referenced
+in tables, values for those variables must be provided. They can be given in
+\problemblock{*aero}, \problemblock{*prop}, \problemblock{*cg}, or
+\problemblock{*constants} data blocks. Values are required only for variables used
+by tables referenced in the current segment; variables belonging only to unused
+tables need not be supplied.
+
+The \problemblock{*constants} data block is optional. It is provided as a
+convenience so that values for all user-defined variables can be grouped together.
+The block is used only to provide such values. If the selected tables are not
+functions of user-defined variables, a \problemblock{*constants} block should not
+be input.
+
+There are two styles for supplying these values. One style puts each value in the
+data block where the associated table is referenced. For example, an
+\problemblock{*aero} block that names a table containing a user-defined variable
+also gives that variable's value. This style uses the \problemblock{*aero},
+\problemblock{*prop}, and \problemblock{*cg} blocks. The other style places all
+user-defined values in a single \problemblock{*constants} block. This groups them
+in one place. Both styles are supported.
+
+The keyword is followed by assignments. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*constants type=3, tmult=1.2,
+           mmult=1.15
+\end{lstlisting}
+
+sets \texttt{type} equal to 3.0, \texttt{tmult} equal to 1.2, and \texttt{mmult}
+equal to 1.15. These variables must occur in the tables supplied with the problem.
+Once a value has been given for a user-defined variable, it remains set until changed
+in a subsequent data block. Values therefore need not be repeated in every segment
+when they do not change; nevertheless, repeating them in each segment is good
+practice because it makes the intended configuration explicit and helps avoid input
+errors.

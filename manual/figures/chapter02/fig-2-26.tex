@@ -1,0 +1,20 @@
+\begin{tikzpicture}[>=Latex,x=1.05cm,y=1.05cm,line cap=round]
+  \draw[->] (0,0) -- (8.7,0);
+  \draw[->] (0,-0.25) -- (0,3.3);
+  \draw[line width=0.9pt]
+    plot[smooth] coordinates {(0,2.75) (0.8,2.0) (2.0,1.28) (3.6,0.82) (5.5,0.42) (7.7,0.04)};
+  \draw (0,0.05) -- (8.1,0.05);
+  \fill (0,2.75) circle (2pt);
+  \fill (7.7,0.05) circle (2pt);
+  \draw[<->] (0,-0.45) -- node[fill=white,inner sep=1pt] {$\Delta t_{\mathrm{guid}}$} (7.7,-0.45);
+  \draw (0,-0.18) -- (0,-0.62);
+  \draw (7.7,-0.18) -- (7.7,-0.62);
+  \node[left] at (0,2.75) {$\gamma_{gd}$};
+  \node[left] at (0,0.05) {$\gamma_{gd}'$};
+  \node[below] at (0,-0.62) {$t$};
+  \node[below] at (7.7,-0.62) {$t+\Delta t_{\mathrm{guid}}$};
+  \node[above right,align=center] at (0.15,2.72) {Current\\state};
+  \node[above left,align=center] at (7.62,0.2) {Desired\\state};
+  \draw[->] (4.85,2.15) -- (4.15,0.67);
+  \node[above,align=center] at (4.85,2.15) {Parabolic function\\of time};
+\end{tikzpicture}

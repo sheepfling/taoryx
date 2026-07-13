@@ -1,0 +1,127 @@
+% Source PDF pages 120--124; manual pages 2-91--2-95.
+\section{Trajectory Calculations}\label{sec:trajectory-calculations}
+
+The preceding sections describe the individual calculations used by TAOS. This
+section shows how those pieces are organized into the complete trajectory
+calculation and identifies the source-code modules that implement the workflow.
+The program-module context is summarized in \cref{tab:taos-program-modules}.
+
+\taossubhead{Main Program}
+
+Execution begins in the \texttt{main} function in the \texttt{main} module. The
+program first separates the command-line arguments into lists of table files and
+problem files, as outlined in \cref{fig:main-program-flow}. A loop then processes
+each problem file. For every file, TAOS creates the corresponding printout file,
+although that file remains empty until the trajectory calculations for the problem
+have finished.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-31}
+  \caption{Main program flowchart.}
+  \label{fig:main-program-flow}
+\end{figure}
+
+When the first problem file is processed, all table files are read and retained in
+memory for use by that problem and every later problem file. A problem file may
+contain more than one problem, so a second loop reads each problem into an
+in-memory data structure.
+
+The top level of that structure is a linked list with one entry for each vehicle or
+trajectory. Each vehicle record contains its input trajectory definition, linked
+segment definitions, and linked output-variable histories, as illustrated in
+\cref{fig:vehicle-data-structure}. The actual program structure includes more
+records and links than the figure shows; the figure identifies only the principal
+relationships.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-32}
+  \caption{Vehicle data structure.}
+  \label{fig:vehicle-data-structure}
+\end{figure}
+
+Dynamic allocation and linked lists avoid fixed array limits on the number of
+vehicles, segments, output values, or trajectory duration. In practice, the available
+memory and processing time provide the limits.
+
+After the problem data are read, TAOS computes all trajectories and then writes the
+trajectory data to the printout and other requested output files. Because trajectory
+output is not emitted until all trajectories have been calculated, a premature program
+termination can leave the output files empty. When a survey is defined, the complete
+trajectory calculation is repeated for every combination of survey values.
+
+\taossubhead{Trajectory Calculation Loop}
+
+The \texttt{compute\_trajectories} function in the \texttt{path} module expands the
+``compute trajectories'' step of \cref{fig:main-program-flow}. Its logic is shown in
+\cref{fig:trajectory-calculation-flow}.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-33}
+  \caption{Trajectory calculation flowchart.}
+  \label{fig:trajectory-calculation-flow}
+\end{figure}
+
+The calculation begins by locating the starting vehicle, defined as the vehicle with
+the minimum initial time. A trajectory may be initialized from directly specified
+initial conditions or from a state on an existing trajectory, but at least one trajectory
+must have direct initial conditions so that a starting trajectory exists.
+
+TAOS maintains an active/inactive status for every trajectory. A trajectory is active
+when it has been initialized and is currently being integrated. It is inactive before
+initialization and after completion.
+
+After the starting trajectories are initialized, TAOS chooses the smallest integration
+step requested by any active vehicle. The step is shortened when necessary to land
+exactly on a print time or on a time value appearing in a guidance-rule table. All
+active trajectories are synchronized and advanced with the same step
+$\Delta t$. The step selection is implemented by
+\texttt{get\_next\_time\_step} in the \texttt{path} module.
+
+Each active vehicle is integrated separately. The vehicles are not assembled into one
+large system of differential equations. The fourth-order Runge--Kutta procedure in
+\texttt{integration\_step} advances one vehicle through the selected time step, using
+the method described in \cref{sec:numerical-integration}.
+
+\taossubhead{Segment Final Conditions}
+
+After every integration step, \texttt{check\_final\_conditions} in the \texttt{path}
+module tests the final conditions for each active segment. If a final-condition
+boundary was crossed, TAOS repeats the last step while varying $\Delta t$ until the
+condition is met within a small tolerance. The resulting one-dimensional search uses
+the secant method described in \cref{sec:search-methods}.
+
+More than one segment can appear to end within the same integration step. If the
+final conditions occur at exactly the same time, the segments end simultaneously.
+If they occur at different times, the step is repeatedly halved until only one final
+condition is crossed; TAOS then applies the secant search to that condition.
+
+\taossubhead{Search and Optimization Loops}
+
+Search and optimization loops vary one or more problem inputs to meet a trajectory
+goal. The goal is normally a simple expression, often an output variable, evaluated
+at the end of a segment. TAOS permits search and optimization objective functions
+only at segment boundaries.
+
+At each segment end, \texttt{search\_function\_hit} in the \texttt{search} module
+determines whether a search or optimization function is associated with that point.
+When one is found, TAOS modifies the designated input parameters according to the
+selected algorithm and restarts the affected trajectories. The one-dimensional search
+methods are described in \cref{sec:search-methods}; the optimization method is
+described in \cref{sec:optimization}.
+
+A restart begins immediately before the earliest modified input parameter. Portions
+of the trajectories that precede every modified value remain valid and are not
+recomputed. This reduces the calculation required by nested searches and
+optimization loops.
+
+\taossubhead{Multiple Trajectories}
+
+When a segment ends, its trajectory either continues with another segment or is
+marked complete. During segment initialization, \texttt{add\_new\_vehicles} in the
+\texttt{path} module examines inactive trajectories. Any trajectory whose initial
+state depends on the segment that has just been reached is initialized and added to
+the active list. The calculation loop ends only after every trajectory has been marked
+complete.

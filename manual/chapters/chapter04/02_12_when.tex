@@ -1,0 +1,114 @@
+\subsection{\problemblock{*When} Data Block}\label{sec:block-when}
+
+Segment initial conditions are obtained from the trajectory initial conditions or from
+the final conditions of the previous segment. Segments are flown according to the
+guidance rules given in the \problemblock{*fly} or \problemblock{*rail} data
+blocks and they continue until a final condition is met. At that point, the segment
+ends, and if there is another segment in the trajectory, it is started.
+
+The \problemblock{*when} data block is used to provide a segment final condition.
+It also tells TAOS what to do next, that is, whether to transfer to another segment or
+to end the trajectory. Each segment must have at least one
+\problemblock{*when} data block giving a final condition; otherwise, the segment
+never terminates.
+
+An example of a segment final condition is
+
+\begin{lstlisting}[style=taosmanual]
+*when alt<200000 goto 4
+\end{lstlisting}
+
+which reads ``end the current segment when altitude becomes less than
+\SI{200000}{\foot} and then start executing segment number 4.'' The variable name,
+in this case \statevar{alt}, can be any valid output-variable name including
+user-defined output variables. A list of output variables is given in the Appendix.
+
+Final conditions can also compare two output variables, for example,
+
+\begin{lstlisting}[style=taosmanual]
+*when alpha=alpha_l/d goto 2
+\end{lstlisting}
+
+ends the segment when the angle of attack equals the angle of attack for maximum
+lift-to-drag ratio.
+
+\taossubhead{Values from Other Trajectories}
+
+Output variables from other trajectories can be referenced by using subscripts, for
+example,
+
+\begin{lstlisting}[style=taosmanual]
+*when mach[3]>4 goto 21
+\end{lstlisting}
+
+says to end the segment when the Mach number on trajectory 3 becomes greater
+than 4.0. Subscripts are always enclosed in square brackets.
+
+When final conditions are used to compare two variables, subscripts can be used on
+both variables to compare values from different trajectories. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*when east[2]=east[1] goto 7
+\end{lstlisting}
+
+ends the segment when the two trajectories have the same east position.
+
+\taossubhead{Final Condition Relationships}
+
+The relationship in a \problemblock{*when} data block can be greater than, less
+than, or equal to. Since all values are continuous real numbers, using the greater-than
+or less-than relationship often has the same effect as the equal sign because the
+segment will end when the variable is equal to the value. The difference occurs at
+the beginning of a segment.
+
+When a segment starts executing, it checks the final conditions for immediate
+termination. If any of the final conditions are satisfied initially, they cause an
+immediate transfer to another segment. As a result the final condition
+\texttt{mach>3} is much different from \texttt{mach=3}. A \texttt{mach>3} final
+condition terminates the segment immediately if the Mach number is greater than
+3.0, whereas the \texttt{mach=3} final condition only terminates the segment
+immediately if Mach is exactly equal to 3.0. In practice use of greater-than and
+less-than is more common than the equal sign.
+
+\taossubhead{Ending Trajectories}
+
+So far, all of the examples have shown segment transfers using the \texttt{goto}
+keyword. When the end of a trajectory is reached, there is no segment to transfer to,
+so the \texttt{stop} keyword is used as follows:
+
+\begin{lstlisting}[style=taosmanual]
+*when time=65 stop
+\end{lstlisting}
+
+This data block ends the trajectory when the time is equal to 65 seconds.
+Calculations proceed until a segment final condition with \texttt{stop} is
+encountered.
+
+\taossubhead{Multiple Final Conditions}
+
+Segments can have any number of final conditions. The first condition encountered,
+while computing the trajectory, is executed. This allows complex branching in the
+trajectory depending on what happens as shown in the following example:
+
+\begin{lstlisting}[style=taosmanual]
+*when tmark>25 goto 6
+*when alphat>5 goto 11
+\end{lstlisting}
+
+If the ``mark'' time becomes equal to 25 seconds before the total angle of attack
+reaches $5^{\circ}$, then segment 6 is executed next; otherwise, segment 11 is
+executed next.
+
+If two final conditions are immediately satisfied at the beginning of a segment, the
+first one listed is executed.
+
+It is good practice to have at least one final condition on a time variable. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*when gamgd<0 goto 4
+*when tseg>1000 goto 10
+\end{lstlisting}
+
+normally ends the segment when the flight-path angle becomes zero. But if there is
+a problem and the flight-path angle never reaches zero, the segment still ends after
+1000 seconds. This prevents infinite loops.

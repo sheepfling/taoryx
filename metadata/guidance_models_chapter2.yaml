@@ -1,0 +1,63 @@
+chapter: 2
+section: 2.5
+name: Guidance Rules
+source:
+  manual_pages: [2-78, 2-79, 2-80, 2-81, 2-82, 2-83, 2-84, 2-85, 2-86, 2-87, 2-88, 2-89, 2-90]
+  pdf_pages: [107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119]
+  numbered_equations: [2-273, 2-297]
+  numbered_figures: [2-25, 2-30]
+  numbered_tables: [2-2, 2-3]
+control_system:
+  number_of_controls: 4
+  attitude_controls: 3
+  propulsion_controls: 1
+  propulsion_control: power_setting
+  body_attitude_sets: 9
+  direct_rule_policy: direct controls must belong to one consistent attitude set
+  set_selection: lowest-numbered compatible set
+  free_control_defaults: zero
+solution_process:
+  name: guidance_loop
+  module: derivs
+  method: multidimensional_Newton_Raphson
+  residual: desired_solution_variable_minus_computed_solution_variable
+  linear_solver: Gaussian_elimination
+  initial_guess:
+    first_trajectory_point: midpoint_of_control_bounds
+    later_points: previous_point_solution
+  transition_models:
+    single_derivative:
+      order: 2
+      function: parab_guidance_correction
+      time_constant: dtguid
+    double_derivative:
+      order: 3
+      function: cubic_guidance_correction
+      time_constant: dtguid
+intercepts:
+  optimization:
+    approach: constrain_final_state_to_target
+  predictive:
+    target_model: nonaccelerating
+    implementation_function: intercept
+    output: desired_geodetic_flight_path_angles
+  proportional_navigation:
+    implementation_function: prop_nav
+    navigation_constant_symbol: N_prime
+    typical_navigation_constant_range: [2, 5]
+    commanded_components: [yaw_normal_acceleration, pitch_normal_acceleration]
+    line_of_sight_acceleration_component: zero
+range_insensitive_axis:
+  implementation_function: range_insensitive_axis
+  delta_v_magnitude_ft_per_s: 10
+  aerodynamic_forces_in_iip_search: disabled
+  solutions:
+    up: increases_time_to_impact
+    down: decreases_time_to_impact
+flight_path_limits:
+  specified_control: limit_ignored
+  free_control: limit_used_as_Newton_Raphson_bound
+  defaults_degrees:
+    angle_of_attack_and_sideslip: [-30, 30]
+    other_angles: [-180, 180]
+  flight_condition_limit: replaces_guidance_rule_associated_with_highest_priority_control

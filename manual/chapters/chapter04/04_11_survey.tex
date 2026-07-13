@@ -1,0 +1,77 @@
+\subsection{\problemblock{*Survey} Data Block}\label{sec:block-survey}
+
+The purpose of a survey is to change one or more input parameters and determine the
+effect on the trajectories. This is a tradeoff or sensitivity study. Trajectories are
+computed for every value of each survey variable.
+
+As described in \cref{sec:problem-file-format}, any numerical value in a problem
+file can be varied by replacing it with a survey placeholder. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*initial alt=surv-1 lat=0 long=0 wt=1200
+\end{lstlisting}
+
+sets initial altitude equal to survey 1. The keyword \texttt{surv-1} is a placeholder;
+the actual value comes from the corresponding \texttt{*survey 1} block. Survey
+numbers relate placeholders and blocks: \texttt{surv-1} corresponds to
+\texttt{*survey 1}, \texttt{surv-2} to \texttt{*survey 2}, and so on.
+
+The placeholders determine which numerical locations are modified. The survey
+blocks determine the values assigned to them. In the preceding example there must
+be a \texttt{*survey 1} block that supplies initial-altitude values. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*survey 1 alt0 lo=40000 hi=80000 inc=20000
+\end{lstlisting}
+
+runs three cases with initial altitude equal to 40,000, 60,000, and 80,000~ft. TAOS
+substitutes the survey value everywhere the matching \texttt{surv-n} keyword appears,
+so several input values can be changed together by one survey.
+
+\taossubhead{Survey Numbers and Names}
+
+A block begins with the \problemblock{*survey} keyword and the survey number.
+Numbers are normally sequential beginning with one. Any number of survey loops may
+be defined. They form nested loops: the lowest-numbered survey is innermost and the
+highest-numbered survey is outermost.
+
+A survey-variable name follows the number. It must not duplicate an output-variable
+name. The name is used in EGS database files and in summary output to identify the
+quantity being surveyed. In the example above, the database contains trajectories
+associated with \texttt{alt0=40000}, another set associated with
+\texttt{alt0=60000}, and so forth.
+
+\taossubhead{Low, High, and Increment Survey Values}
+
+Survey values can be assigned in two ways. In the incremental form, \statevar{lo}
+provides the starting value. A set of trajectories is always run first at that value. After
+the case is complete, \statevar{inc} is added. If the increment is zero, only the low
+case is run.
+
+After incrementing, TAOS compares the value with \statevar{hi}. If it exceeds the
+high value, the survey value is set exactly equal to the high value and that case is
+marked as the last. This process continues until the high case has been calculated.
+
+\taossubhead{Specific Survey Values}
+
+The second method enters the desired values directly:
+
+\begin{lstlisting}[style=taosmanual]
+*survey 1 alt0 vals=30000,60000,75000
+\end{lstlisting}
+
+This runs three cases with initial altitude set to 30,000, 60,000, and 75,000~ft and is
+useful when the values do not follow a regular increment.
+
+Both methods may be combined:
+
+\begin{lstlisting}[style=taosmanual]
+*survey 1 alt0 lo=40000 hi=80000 inc=20000
+  vals=35000,45000
+\end{lstlisting}
+
+The survey then contains 35,000, 40,000, 45,000, 60,000, and 80,000. Values from
+\statevar{lo}, \statevar{hi}, and \statevar{inc} are combined with the explicit
+\statevar{vals} entries. The extra values are inserted in the survey in order from lowest to highest
+value, so the first trajectory set uses \texttt{alt0=35000}, the second
+\texttt{alt0=40000}, and so on.

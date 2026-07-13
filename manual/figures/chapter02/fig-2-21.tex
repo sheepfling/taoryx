@@ -1,0 +1,16 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,scale=0.92]
+  \coordinate (r) at (-3.2,0);
+  \coordinate (v) at (2.9,1.25);
+  \node[left,align=center] at (r) {radar\\station};
+  \fill (v) circle (2.2pt) node[right] {vehicle};
+  \draw[->,thick] (r)--(-2.1,1.15) node[above] {$\hat x_r$};
+  \draw[->,thick] (r)--(2.7,-0.95) node[right] {$\hat y_r$};
+  \draw[->,thick] (r)--(-3.2,-1.45) node[below] {$\hat z_r$};
+  \draw[->,very thick] (r)--(v) node[pos=0.72,above] {$\Delta\vec r_r$};
+  \draw[thin] (r)--(2.9,0.35)--(v);
+  \draw[->] (-2.25,0.25) arc[start angle=18,end angle=42,radius=0.9]
+    node[midway,above] {$\alpha_r$};
+  \draw[->] (2.15,0.55) arc[start angle=0,end angle=48,radius=0.55]
+    node[midway,right] {$\epsilon_r$};
+  \draw (2.58,0.35)--(2.58,0.65)--(2.88,0.65);
+\end{tikzpicture}

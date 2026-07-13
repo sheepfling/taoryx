@@ -1,0 +1,26 @@
+\begin{tikzpicture}[scale=0.90,>=Latex,line cap=round,line join=round]
+  \coordinate (O) at (0,0);
+  \coordinate (Q) at (0,-1.38);
+  \coordinate (S) at (2.25,1.05);
+  \coordinate (P) at (3.15,2.10);
+  \coordinate (E) at (3.15,0);
+  \draw[line width=0.95pt] (O) ellipse [x radius=3.10,y radius=2.05];
+  \draw[->,line width=0.9pt] (O) -- (-2.65,-1.55) node[below left] {$\hat{x}_{\oplus}$};
+  \draw[->,line width=0.9pt] (O) -- (4.20,0) node[right] {$\hat{y}_{\oplus}$};
+  \draw[->,line width=0.9pt] (O) -- (0,2.85) node[above] {$\hat{z}_{\oplus}$};
+  \draw[->,line width=1pt] (O) -- (P) node[midway,above left] {$\vec r$};
+  \draw[line width=0.9pt] (Q) -- (P);
+  \fill (Q) circle (1.3pt) node[below] {$Q$};
+  \fill (S) circle (1.3pt) node[above left] {$S$};
+  \fill (P) circle (1.5pt) node[above right] {$P$};
+  \draw[dashed] (P) -- (E);
+  \draw[line width=0.75pt] (O) -- (E);
+  \draw[<->] (3.52,0) -- (3.52,2.10) node[midway,right] {$\vec r\cdot\hat z_{\oplus}$};
+  \draw[<->] (0,-1.70) -- (0,-0.05) node[midway,left] {$z_i$};
+  \node[align=left,right] at (3.35,-0.85) {$\tilde{x}=$ projection of $\vec r$ onto\\the equatorial plane};
+  \draw[->] (0.70,-0.23) arc[start angle=-18,end angle=-142,radius=0.72];
+  \node at (-0.05,-0.70) {$\lambda$};
+  \draw[->] (1.25,0) arc[start angle=0,end angle=35,radius=1.25];
+  \node at (1.50,0.52) {$\delta_{gd}$};
+  \draw ($(S)+(-0.12,-0.15)$) -- ++(0.17,-0.16) -- ++(0.17,0.17);
+\end{tikzpicture}

@@ -1,0 +1,89 @@
+% Source PDF page 36; manual page 2-7.
+\subsection{Earth-Centered, Inertial, Cartesian (ECIC) Coordinate System}\label{sec:ecic}
+
+The center of the earth is assumed to be nonaccelerating, so an inertial coordinate
+system can be defined with the earth's center as its origin. The inertial $z$ axis,
+$\hat{z}_{I}$, is aligned with the earth's spin axis $\hat{z}_{\oplus}$ and is
+therefore fixed with respect to the earth.
+
+The $x$ and $y$ axes of the ECIC and ECFC systems are related by a rotation about
+the common $z$ axis through the angle
+\begin{equation}
+  \Omega = \Omega_{0}
+    + \left\lVert {}_{I}\vec{\omega}_{\oplus} \right\rVert (t-t_{0}),
+  \label{eq:ecic-rotation-angle}
+\end{equation}
+where
+\begin{equation}
+  \left\lVert {}_{I}\vec{\omega}_{\oplus} \right\rVert
+    = {}_{I}\vec{\omega}_{\oplus}\cdot\hat{z}_{\oplus}
+    = \text{earth's rotation rate}.
+  \label{eq:earth-rotation-rate}
+\end{equation}
+The spin axis is aligned with the ECIC and ECFC $z$ axes. The quantity $\Omega_0$
+is the initial rotation angle between the two systems at time $t_0$. The initial angle,
+time, and earth rotation rate are input values described in
+\cref{sec:block-initial,sec:block-earth}.
+
+Output variables giving position, velocity, and acceleration components in ECIC
+coordinates are computed by the function \texttt{ecic\_coords}.
+
+\taossubhead{Position}
+\begin{equation}
+\begin{aligned}
+  \statevar{xecic}\quad
+  \vec{r}\cdot\hat{x}_{I}
+    &= \vec{r}\cdot
+       (\hat{x}_{\oplus}\cos\Omega-\hat{y}_{\oplus}\sin\Omega),\\
+  \statevar{yecic}\quad
+  \vec{r}\cdot\hat{y}_{I}
+    &= \vec{r}\cdot
+       (\hat{x}_{\oplus}\sin\Omega+\hat{y}_{\oplus}\cos\Omega),\\
+  \statevar{zecic}\quad
+  \vec{r}\cdot\hat{z}_{I}
+    &= \vec{r}\cdot\hat{z}_{\oplus}.
+\end{aligned}
+\label{eq:ecic-position-components}
+\end{equation}
+
+\taossubhead{Velocity}
+\begin{equation}
+\begin{aligned}
+  \statevar{xecicdt}\quad
+  \vec{V}_{I}\cdot\hat{x}_{I}
+    &= \vec{V}_{\oplus}\cdot
+       (\hat{x}_{\oplus}\cos\Omega-\hat{y}_{\oplus}\sin\Omega) \\
+    &\quad - \left\lVert{}_{I}\vec{\omega}_{\oplus}\right\rVert
+       \vec{r}\cdot
+       (\hat{x}_{\oplus}\sin\Omega+\hat{y}_{\oplus}\cos\Omega),\\[0.4em]
+  \statevar{yecicdt}\quad
+  \vec{V}_{I}\cdot\hat{y}_{I}
+    &= \vec{V}_{\oplus}\cdot
+       (\hat{x}_{\oplus}\sin\Omega+\hat{y}_{\oplus}\cos\Omega) \\
+    &\quad + \left\lVert{}_{I}\vec{\omega}_{\oplus}\right\rVert
+       \vec{r}\cdot
+       (\hat{x}_{\oplus}\cos\Omega-\hat{y}_{\oplus}\sin\Omega),\\[0.4em]
+  \statevar{zecicdt}\quad
+  \vec{V}_{I}\cdot\hat{z}_{I}
+    &= \vec{V}_{\oplus}\cdot\hat{z}_{\oplus}.
+\end{aligned}
+\label{eq:ecic-velocity-components}
+\end{equation}
+
+\taossubhead{Acceleration}
+\begin{equation}
+\begin{aligned}
+  \statevar{xecicdt2}\quad
+  \vec{a}_{I}\cdot\hat{x}_{I}
+    &= \frac{\vec{F}\cdot
+       (\hat{x}_{\oplus}\cos\Omega-\hat{y}_{\oplus}\sin\Omega)}{m},\\
+  \statevar{yecicdt2}\quad
+  \vec{a}_{I}\cdot\hat{y}_{I}
+    &= \frac{\vec{F}\cdot
+       (\hat{x}_{\oplus}\sin\Omega+\hat{y}_{\oplus}\cos\Omega)}{m},\\
+  \statevar{zecicdt2}\quad
+  \vec{a}_{I}\cdot\hat{z}_{I}
+    &= \frac{\vec{F}\cdot\hat{z}_{\oplus}}{m}.
+\end{aligned}
+\label{eq:ecic-acceleration-components}
+\end{equation}

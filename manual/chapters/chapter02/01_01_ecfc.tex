@@ -1,0 +1,57 @@
+% Source PDF pages 34--35; manual pages 2-5--2-6.
+\subsection{Earth-Centered and Fixed, Cartesian (ECFC) Coordinate System}\label{sec:ecfc}
+
+An earth-centered and fixed, Cartesian coordinate system is used for the equations
+of motion and is therefore the primary coordinate system in TAOS. Its origin is at
+the center of the earth. The $x$ and $y$ axes are in the equatorial plane, and the
+$z$ axis points through the north pole, as shown in
+\cref{fig:ecfc-coordinate-system}. The earth spins about the $z$ axis. The $x$ axis
+is aligned with the Greenwich meridian ($\lambda=0^{\circ}$), and the $y$ axis is
+aligned with the $90^{\circ}$ east meridian. Unit vectors
+$\hat{x}_{\oplus}$, $\hat{y}_{\oplus}$, and $\hat{z}_{\oplus}$ are parallel to
+these axes.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.58\linewidth}{!}{\input{manual/figures/chapter02/fig-2-1}}
+  \caption{The ECFC Coordinate System.}
+  \label{fig:ecfc-coordinate-system}
+\end{figure}
+
+The following output variables give position, velocity, and acceleration components
+in ECFC coordinates.
+
+\taossubhead{Position}
+\noindent\begin{tabularx}{\textwidth}{@{}>{\ttfamily}l>{$\displaystyle}l<{$}X@{}}
+  xecfc & \vec{r}\cdot\hat{x}_{\oplus} &
+    Component of the position vector in the ECFC $x$ direction. The position
+    vector extends from the earth's center to the vehicle's center of mass. \\
+  yecfc & \vec{r}\cdot\hat{y}_{\oplus} &
+    Component of the position vector in the ECFC $y$ direction. \\
+  zecfc & \vec{r}\cdot\hat{z}_{\oplus} &
+    Component of the position vector in the ECFC $z$ direction. \\
+\end{tabularx}
+
+\taossubhead{Velocity}
+\noindent\begin{tabularx}{\textwidth}{@{}>{\ttfamily}l>{$\displaystyle}l<{$}X@{}}
+  xecfcdt & \vec{V}_{\oplus}\cdot\hat{x}_{\oplus} &
+    Component of earth-relative velocity in the ECFC $x$ direction. \\
+  yecfcdt & \vec{V}_{\oplus}\cdot\hat{y}_{\oplus} &
+    Component of earth-relative velocity in the ECFC $y$ direction. \\
+  zecfcdt & \vec{V}_{\oplus}\cdot\hat{z}_{\oplus} &
+    Component of earth-relative velocity in the ECFC $z$ direction. \\
+\end{tabularx}
+
+\taossubhead{Acceleration}
+\noindent\begin{tabularx}{\textwidth}{@{}>{\ttfamily}l>{$\displaystyle}l<{$}X@{}}
+  xecfcdt2 & \vec{a}_{\oplus}\cdot\hat{x}_{\oplus} &
+    Component of earth-relative acceleration in the ECFC $x$ direction. \\
+  yecfcdt2 & \vec{a}_{\oplus}\cdot\hat{y}_{\oplus} &
+    Component of earth-relative acceleration in the ECFC $y$ direction. \\
+  zecfcdt2 & \vec{a}_{\oplus}\cdot\hat{z}_{\oplus} &
+    Component of earth-relative acceleration in the ECFC $z$ direction. \\
+\end{tabularx}
+
+Because the equations of motion are written in ECFC coordinates, these quantities
+are obtained directly from numerical integration, as described in
+\cref{sec:numerical-integration}.

@@ -1,0 +1,52 @@
+\subsection{\problemblock{*Wind} Data Block}\label{sec:block-wind}
+
+Atmospheric wind relative to the earth's surface is defined with a
+\problemblock{*wind} block. If no block is supplied, all wind velocities are zero.
+Wind is divided into a vertical component and a horizontal component. Horizontal
+wind may be specified by speed and heading or by east and north components, and
+either the local geocentric or local geodetic horizon system may be selected.
+
+Wind heading is the direction \emph{from which} the wind blows, measured
+clockwise from north as shown in \cref{fig:wind-heading-direction}. Thus a heading
+of $180^\circ$ means wind from the south, moving north. The east component is
+positive for wind from the east, moving west, and the vertical component is positive
+for downward air motion toward the ground.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter04/fig-4-13.tex}
+  \caption{Wind horizontal-component direction.}
+  \label{fig:wind-heading-direction}
+\end{figure}
+
+The block begins with \problemblock{*wind}, followed by \texttt{geocentric} or
+\texttt{geodetic}. Three variables and values are then selected from one of the two
+consistent sets in \cref{tab:wind-data-block-variables}. The speed/heading set and
+the east/north component set cannot be mixed.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Wind data-block variables.}
+  \label{tab:wind-data-block-variables}
+  \begin{tabularx}{0.94\linewidth}{@{}>{\ttfamily}lX>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Variable & Description & \normalfont Variable & Description \\
+    \midrule
+    windv & Total horizontal wind speed & winde & East wind component \\
+    windh & Horizontal wind heading & windn & North wind component \\
+    windd & Downward wind component & windd & Downward wind component \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Wind values may be constants or table identifiers in parentheses. TAOS uses the
+parentheses to distinguish a table name from a constant, so a profile that varies with
+altitude, time, or another permitted state variable can be entered through tables.
+
+\begin{lstlisting}[style=taosmanual]
+*wind geodetic windv=(winds) windh=90 windd=0
+\end{lstlisting}
+
+This interpolates horizontal speed from table \tableid{winds}, specifies wind from
+the east, assigns no vertical component, and defines the components in the local
+geodetic horizon coordinate system.

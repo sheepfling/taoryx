@@ -1,0 +1,67 @@
+chapter: 2
+section: 2.2
+name: Equations of Motion
+source:
+  manual_pages: [2-36, 2-37, 2-38, 2-39, 2-40, 2-41, 2-42, 2-43, 2-44, 2-45, 2-46, 2-47, 2-48, 2-49, 2-50]
+  pdf_pages: [65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+  numbered_equations: [2-97, 2-174]
+frames:
+  inertial: I
+  earth_fixed: ecfc
+  geocentric: gc
+  geodetic: gd
+  body: b
+  velocity: V
+primary_model:
+  inertial_equation: a_I = sum(F) / m
+  earth_fixed_equation:
+    terms:
+      force_acceleration: sum(F) / m
+      coriolis: -2 omega_I_earth cross V_earth
+      centrifugal: -omega_I_earth cross (omega_I_earth cross r)
+    assumptions:
+      - Earth spin rate is constant.
+      - Earth spin vector is aligned with the ECFC z axis.
+state_vector:
+  base_components: [x_ecfc, y_ecfc, z_ecfc, xdot_ecfc, ydot_ecfc, zdot_ecfc]
+  augmented_components: [mass, path_length, ground_range]
+  optional_components: user_defined_integral_variables
+numerical_integration:
+  method: fixed_step_runge_kutta_4
+  derivative_evaluations_per_step: 4
+  accuracy_control: integration_step_size
+rail_and_sled_model:
+  rail_axis: body_x
+  friction:
+    static_velocity_threshold_ft_per_s: 0.001
+    acceleration_loss: mu_f_times_normal_acceleration
+  launch_rail_constraint: forward_only
+  sled_constraint: bidirectional
+rate_models:
+  longitude:
+    singular_condition: zero equatorial projection of position
+    fallback: zero
+  geodetic_latitude:
+    singular_condition: zero denominator in equation 2-137
+    fallback: geocentric latitude rate
+  dynamic_pressure:
+    approximation:
+      - Terms involving the second derivative of air-relative velocity are neglected.
+      - The second altitude derivative of density is neglected.
+      - Air-relative acceleration magnitude is approximated by earth-fixed acceleration magnitude.
+  mach:
+    approximation:
+      - Air-relative acceleration magnitude is approximated by earth-fixed acceleration magnitude.
+ground_range:
+  derivative: ground_speed
+  surface_reference: point directly below vehicle on the geodetic normal
+flight_path_rates:
+  derived_from:
+    - angular velocity of velocity frame relative to ECFC
+    - acceleration components in the velocity frame
+  singular_geometry: heading rate expression contains cos(gamma_gd) in the denominator
+specific_load:
+  inertial_definition: a_sp = a_I - a_grav
+  force_definition: a_sp = (sum(F_aero) + sum(F_prop)) / m
+  components: [nx, ny, nz, ntotal]
+  normal_component: sqrt(ny^2 + nz^2)

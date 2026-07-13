@@ -1,0 +1,41 @@
+chapter: 2
+section: 2.6.2
+name: Search Methods
+source:
+  manual_pages: [2-98, 2-99, 2-100, 2-101]
+  pdf_pages: [127, 128, 129, 130]
+  numbered_equations: [2-298, 2-308]
+  numbered_figures: [2-35, 2-38]
+root_search_assumptions:
+  bounded_interval: [x_lo, x_hi]
+  root_count: one
+  function_behavior: reasonably_well_behaved
+methods:
+  Newton_Raphson:
+    purpose: root
+    derivative: forward_difference
+    update_equation: 2-299
+    termination: absolute_residual_within_tolerance
+  secant:
+    purpose: bracketed_root
+    equation: 2-300
+    invariant: endpoint_function_values_have_opposite_signs
+    application: segment_final_condition_time_step_refinement
+  parabolic_root:
+    purpose: root
+    model: quadratic
+    startup_points: [x_minus_delta_x, x_plus_delta_x, linear_root_estimate]
+    coefficient_equations: [2-302, 2-303, 2-304]
+    root_equation: 2-305
+    point_retention: discard_point_farthest_from_best_root_estimate
+  golden_section:
+    purpose: minimum
+    derivative_required: false
+    ratio: (sqrt(5)-1)/2
+    interior_point_equations: [2-306, 2-307]
+    termination: interval_width_within_tolerance
+  parabolic_minimization:
+    purpose: minimum
+    model: quadratic
+    stationary_point_equation: 2-308
+    termination: predicted_and_actual_function_values_agree_within_tolerance

@@ -1,0 +1,33 @@
+(ballistic)
+
+*title Ballistic reentry trajectories
+
+*atmos standard
+*earth wgs-84 omega=0
+
+*trajectory 1 RV start on 1
+
+  *initial geodetic
+    long=0.0 lat=0.0 psi=90.0 time=0.0
+    alt=300000 vel=surv-2 gama=surv-1 wt=550.0
+
+  *print time alt range vel dynprs nx
+
+  *segment 1 Ballistic
+    *integ dtprnt=0.50 dt=0.10
+    *aero ca=(ca-ex-1)
+    *when alt<0 stop
+
+*survey 1 gentry vals=-20,-25,-30,-35
+*survey 2 ventry lo=15000 hi=18000 inc=1000
+
+*summarize max-q
+  add max(dynprs[1])
+
+*summarize max-g
+  add min(nx[1])
+  neg
+
+*egs ex1.dbf time alt range vel dynprs nx
+
+*end

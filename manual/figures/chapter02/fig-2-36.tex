@@ -1,0 +1,22 @@
+\begin{tikzpicture}[>=Latex,x=1.0cm,y=0.9cm,line cap=round]
+  \draw[->] (0,0)--(7.6,0);
+  \draw (0,-1.15)--(0,3.55);
+  \draw (7,-1.15)--(7,3.55);
+  \draw[line width=0.9pt]
+    plot[smooth] coordinates {(0,3.2) (1.35,2.9) (2.55,2.1) (3.45,0.45) (4.1,-0.75) (5.45,-1.15) (7,-1.45)};
+  \draw[line width=0.75pt] (0,3.2)--(7,-1.45);
+  \coordinate (xnew) at (4.82,0);
+  \coordinate (fx) at (4.10,-0.75);
+  \draw[densely dashed] (xnew)--(4.82,1.15);
+  \draw[densely dashed] (fx)--(4.10,0);
+  \node[align=center] at (4.72,1.45) {new\\$x_{hi}$};
+  \draw[->] (5.25,2.05)--(6.65,2.05);
+  \node[above,align=center] at (5.95,2.08) {Eliminate this part\\of the search interval};
+  \node[below] at (0,-1.15) {$x_{lo}$};
+  \node[below] at (7,-1.15) {$x_{hi}$};
+  \node[below] at (4.10,-1.15) {$x$};
+  \node[left] at (0,3.2) {$f(x_{lo})$};
+  \node[right] at (6.75,-0.95) {$f(x_{hi})$};
+  \node[left] at (fx) {$f(x)$};
+  \node[left] at (0,0) {$0$};
+\end{tikzpicture}

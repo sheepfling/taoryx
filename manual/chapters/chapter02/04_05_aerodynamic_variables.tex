@@ -1,0 +1,38 @@
+% Source PDF page 106; manual page 2-77.
+\subsection{Aerodynamic Variables}\label{sec:aerodynamic-variables}
+
+The ballistic coefficient is
+\begin{equation}
+  \beta_c
+  =\frac{W}{C_DS_{\mathrm{ref}}}
+  =\frac{mg}{C_DS_{\mathrm{ref}}}.
+  \label{eq:ballistic-coefficient}
+\end{equation}
+It is a useful reentry-vehicle design parameter because it measures resistance to
+aerodynamic deceleration. A vehicle with a low ballistic coefficient, for example
+$500~\mathrm{lbf/ft^2}$, decelerates rapidly and generally experiences less
+aerodynamic heating. A vehicle with a high ballistic coefficient, for example
+$4000~\mathrm{lbf/ft^2}$, retains velocity longer and generally experiences greater
+heating.
+
+The lift-to-drag ratio is
+\begin{equation}
+  \frac{L}{D}
+  =\frac{C_LqS_{\mathrm{ref}}}{C_DqS_{\mathrm{ref}}}
+  =\frac{C_L}{C_D}.
+  \label{eq:lift-to-drag-ratio}
+\end{equation}
+It measures aerodynamic efficiency. An unpowered vehicle obtains its greatest glide
+performance near the angle of attack that maximizes $L/D$, denoted
+$\alpha_{L/D}$.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.54\linewidth}{!}{\input{manual/figures/chapter02/fig-2-24}}
+  \caption{Lift-to-drag ratio.}
+  \label{fig:lift-to-drag-ratio}
+\end{figure}
+
+The function \texttt{maxld} finds $\alpha_{L/D}$ with the golden-section search
+described in \cref{sec:search-methods}. The method is used because it converges
+even when the tabulated $L/D$ function contains discontinuities.

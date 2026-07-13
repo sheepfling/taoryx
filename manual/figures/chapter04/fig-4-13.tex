@@ -1,0 +1,8 @@
+\begin{tikzpicture}[>=Latex,font=\small,scale=0.95]
+  \coordinate (O) at (0,0);
+  \draw[->] (O) -- (0,2.7) node[above]{North};
+  \draw[->] (O) -- (3.2,0) node[right]{East};
+  \draw[->,very thick] (2.5,2.15) -- (0.55,0.45) node[midway,above right]{Wind vector};
+  \draw[->] (0,1.0) arc[start angle=90,end angle=40,radius=1.0];
+  \node at (0.95,1.15) {Heading};
+\end{tikzpicture}

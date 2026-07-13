@@ -1,0 +1,79 @@
+% Source PDF pages 62--63; manual pages 2-33--2-34.
+\subsection{Tangent Plane Cartesian Coordinate System}\label{sec:tangent-plane}
+
+The tangent-plane coordinate system is fixed relative to the earth and tangent to its
+surface. It is useful for range-safety calculations and for approximating a flat-earth
+model.
+
+The origin is specified by a geodetic latitude $\delta_{tp}$, longitude
+$\lambda_{tp}$, and altitude $h_{tp}$ through the \problemblock{*tangent} data
+block described in \cref{sec:block-tangent}. If no origin is supplied, TAOS places
+it on the earth's surface directly below the vehicle's initial position.
+
+The $x$ and $y$ axes lie in the local geodetic horizon plane through the origin. The
+$x$ direction is set by an azimuth $\alpha_{tp}$ measured clockwise from north. The
+$z$ axis points upward, away from the earth's center, and the $y$ axis completes a
+right-handed system. The unit vectors are
+\begin{equation}
+  \begin{aligned}
+  \hat x_{tp}={}&-
+  (\sin\delta_{tp}\cos\lambda_{tp}\cos\alpha_{tp}
+   +\sin\lambda_{tp}\sin\alpha_{tp})\,\hat x_{\oplus}\\
+  &-
+  (\sin\delta_{tp}\sin\lambda_{tp}\cos\alpha_{tp}
+   -\cos\lambda_{tp}\sin\alpha_{tp})\,\hat y_{\oplus}\\
+  &+\cos\delta_{tp}\cos\alpha_{tp}\,\hat z_{\oplus},
+  \end{aligned}
+  \label{eq:tangent-plane-x-unit-vector}
+\end{equation}
+\begin{equation}
+  \begin{aligned}
+  \hat y_{tp}={}&-
+  (\sin\delta_{tp}\cos\lambda_{tp}\sin\alpha_{tp}
+   -\sin\lambda_{tp}\cos\alpha_{tp})\,\hat x_{\oplus}\\
+  &-
+  (\sin\delta_{tp}\sin\lambda_{tp}\sin\alpha_{tp}
+   +\cos\lambda_{tp}\cos\alpha_{tp})\,\hat y_{\oplus}\\
+  &+\cos\delta_{tp}\sin\alpha_{tp}\,\hat z_{\oplus},
+  \end{aligned}
+  \label{eq:tangent-plane-y-unit-vector}
+\end{equation}
+\begin{equation}
+  \hat z_{tp}
+  =\cos\delta_{tp}\cos\lambda_{tp}\,\hat x_{\oplus}
+  +\cos\delta_{tp}\sin\lambda_{tp}\,\hat y_{\oplus}
+  +\sin\delta_{tp}\,\hat z_{\oplus}.
+  \label{eq:tangent-plane-z-unit-vector}
+\end{equation}
+These expressions have the same structure as the local geodetic unit vectors in
+\cref{eq:local-geodetic-x-unit-vector,eq:local-geodetic-y-unit-vector,eq:local-geodetic-z-unit-vector}, except that the horizontal axes have been rotated
+through $\alpha_{tp}$ and the tangent-plane $z$ axis is upward rather than down.
+
+Let
+\[
+  \Delta\vec r_{tp}=\vec r-\vec r_{tp}
+\]
+be the vector from the tangent-plane origin to the vehicle. TAOS computes the
+following output variables in \texttt{tangent\_plane\_coords}; the unit vectors are
+constructed by \texttt{tangent\_plane\_unit\_vectors}.
+
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.26\textwidth}p{0.49\textwidth}@{}}
+  xtp & $\Delta\vec r_{tp}\mathbin{\cdot}\hat x_{tp}$ &
+    Vehicle position component in the tangent-plane $x$ direction.\\
+  ytp & $\Delta\vec r_{tp}\mathbin{\cdot}\hat y_{tp}$ &
+    Vehicle position component in the tangent-plane $y$ direction.\\
+  ztp & $\Delta\vec r_{tp}\mathbin{\cdot}\hat z_{tp}$ &
+    Vehicle position component in the tangent-plane $z$ direction.\\
+  xtpdt & $\vec V_{\oplus}\mathbin{\cdot}\hat x_{tp}$ &
+    Earth-relative velocity component in the tangent-plane $x$ direction.\\
+  ytpdt & $\vec V_{\oplus}\mathbin{\cdot}\hat y_{tp}$ &
+    Earth-relative velocity component in the tangent-plane $y$ direction.\\
+  ztpdt & $\vec V_{\oplus}\mathbin{\cdot}\hat z_{tp}$ &
+    Earth-relative velocity component in the tangent-plane $z$ direction.\\
+  xtpdt2 & $\vec a_{\oplus}\mathbin{\cdot}\hat x_{tp}$ &
+    Earth-relative acceleration component in the tangent-plane $x$ direction.\\
+  ytpdt2 & $\vec a_{\oplus}\mathbin{\cdot}\hat y_{tp}$ &
+    Earth-relative acceleration component in the tangent-plane $y$ direction.\\
+  ztpdt2 & $\vec a_{\oplus}\mathbin{\cdot}\hat z_{tp}$ &
+    Earth-relative acceleration component in the tangent-plane $z$ direction.\\
+\end{longtable}

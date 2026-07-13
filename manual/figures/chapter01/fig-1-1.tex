@@ -1,0 +1,44 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,font=\sffamily\scriptsize]
+  % Reusable schematic rocket.
+  \tikzset{
+    rocket/.pic={
+      \draw[line width=0.75pt] (0,-0.32) -- (0.13,0.20) -- (0,0.55)
+        -- (-0.13,0.20) -- cycle;
+      \draw[line width=0.75pt] (-0.13,0.18) -- (-0.25,-0.18) -- (-0.08,-0.08);
+      \draw[line width=0.75pt] (0.13,0.18) -- (0.25,-0.18) -- (0.08,-0.08);
+      \draw[line width=0.65pt] (-0.10,0.10) -- (0.10,0.10);
+    }
+  }
+
+  % Main vehicle and payload trajectories.
+  \draw[line width=1.15pt] (0.15,0.15)
+    .. controls (0.70,2.55) and (1.45,4.15) .. (2.65,5.15);
+  \draw[line width=1.15pt] (2.85,5.45)
+    .. controls (4.50,6.55) and (7.00,5.20) .. (9.10,1.15);
+  \draw[line width=1.05pt] (4.20,5.55)
+    .. controls (6.05,4.35) and (7.05,2.60) .. (7.35,0.75);
+
+  % Booster trajectory.
+  \draw[line width=1.05pt] (2.35,3.55)
+    .. controls (3.65,4.70) and (4.45,3.10) .. (4.55,1.10);
+
+  % Vehicle icons.
+  \pic[rotate=-18,scale=0.90] at (0.55,1.05) {rocket};
+  \pic[rotate=-38,scale=0.72] at (2.40,4.65) {rocket};
+  \pic[rotate=-40,scale=0.80] at (6.35,3.40) {rocket};
+  \pic[rotate=-43,scale=0.62] at (7.25,4.25) {rocket};
+  \pic[rotate=152,scale=0.68] at (4.05,3.05) {rocket};
+
+  % Labels and event markers.
+  \node[align=right] at (-0.05,0.65) {Rocket\\launch};
+  \node[align=right] at (-0.25,1.65) {1st-stage\\burn};
+  \node[align=right] at (1.10,3.35) {Staging};
+  \node[align=right] at (1.75,4.85) {2nd-stage\\burn};
+  \node[align=center] at (5.10,6.15) {Payload separation};
+  \node[align=left] at (6.00,3.00) {2nd-stage\\trajectory};
+  \node[align=left] at (7.65,4.20) {Payload\\trajectory};
+  \node[align=left] at (4.35,2.75) {Booster\\trajectory};
+  \node at (4.70,0.72) {Impact};
+  \node at (7.40,0.35) {Impact};
+  \node at (8.75,0.72) {Impact};
+\end{tikzpicture}

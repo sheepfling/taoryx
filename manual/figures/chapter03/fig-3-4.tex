@@ -1,0 +1,27 @@
+\begin{tikzpicture}[>=Latex,font=\small]
+  \coordinate (boxsw) at (0,0);
+  \draw[line width=0.9pt] (0,0) -- (0,5.25) -- (4.0,5.25) -- (4.0,0.35)
+    .. controls (3.65,0.15) and (3.35,0.15) .. (3.00,0.35)
+    .. controls (2.65,0.55) and (2.35,0.55) .. (2.00,0.35)
+    .. controls (1.65,0.15) and (1.35,0.15) .. (1.00,0.35)
+    .. controls (0.65,0.55) and (0.35,0.55) .. (0,0.35) -- cycle;
+  \draw[line width=0.9pt] (0,3.45) -- (4.0,3.45);
+  \draw[line width=0.9pt] (0,1.80) -- (4.0,1.80);
+
+  \node[anchor=north west,font=\ttfamily] at (0.15,5.10) {(table-1)};
+  \node[align=center] at (2.0,4.15) {Data defining a\\thrust value};
+  \node[anchor=north west,font=\ttfamily] at (0.15,3.32) {(table-2)};
+  \node[align=center] at (2.0,2.55) {Data defining a\\mass flow value};
+  \node[anchor=north west,font=\ttfamily] at (0.15,1.68) {(table-3)};
+  \node at (2.0,1.05) {etc.};
+
+  \node[align=center] (names) at (-2.0,3.10) {Table\\names};
+  \draw[->,line width=0.8pt] (names.east) -- (0,4.92);
+  \draw[->,line width=0.8pt] (names.east) -- (0,3.20);
+  \draw[->,line width=0.8pt] (names.east) -- (0,1.55);
+
+  \draw[decorate,decoration={brace,amplitude=7pt},line width=0.8pt]
+    (4.45,5.20) -- (4.45,0.35);
+  \node[align=left,anchor=west] at (4.85,2.80)
+    {Table file contains\\one or more tables};
+\end{tikzpicture}

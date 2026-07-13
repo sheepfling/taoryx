@@ -1,0 +1,36 @@
+% Source PDF page 119; manual page 2-90.
+\subsection{Flight Path Limits}\label{sec:flight-path-limits}
+
+In addition to guidance rules, constraints can be imposed on the flight path. These
+limits are usually applied directly to control variables as upper and lower bounds for
+the Newton--Raphson solution, although any guidance rule can also serve as a
+flight-path limit.
+
+\taossubhead{Limits on Specified Control Variables}
+
+A limit applied to a directly specified control variable is ignored. For example, if
+the guidance rule commands a $25^\circ$ angle of attack while a limit specifies
+$15^\circ$, TAOS retains the commanded $25^\circ$ value.
+
+\taossubhead{Limits on Free Control Variables}
+
+A limit on a free control variable is enforced during the Newton--Raphson search.
+Default bounds are $\pm30^\circ$ for angle of attack and sideslip and
+$\pm180^\circ$ for the other attitude angles.
+
+If the guidance solution fails to converge, reducing the free-control limits to a more
+realistic range can help. Aerodynamic tables may not extrapolate smoothly to angles
+as large as $\pm30^\circ$, and narrower bounds can keep the search in a region where
+the table data are better behaved.
+
+\taossubhead{Limits on Flight Conditions}
+
+When a limit is applied to an indirect flight-condition rule, TAOS compares the
+trajectory value with the limit at each integration step. Once the limit is exceeded,
+the limiting rule replaces one of the existing guidance rules.
+
+Each indirect rule has a prioritized list of control variables likely to satisfy it. TAOS
+selects the highest-priority associated control and replaces the guidance rule
+currently using that control with the limiting rule. For example, if a vehicle climbing
+under angle-of-attack guidance reaches an altitude limit, the altitude rule replaces
+the angle-of-attack rule and commands constant altitude at the limiting value.

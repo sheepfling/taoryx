@@ -1,0 +1,39 @@
+table_types:
+  - name: ca
+    description: Axial-force coefficient in body coordinates
+  - name: cn
+    description: Normal-force coefficient in body coordinates
+  - name: cl
+    description: Lift-force coefficient in wind coordinates
+  - name: cd
+    description: Drag-force coefficient in wind coordinates
+  - name: cs
+    description: Side-force coefficient in wind coordinates
+  - name: cx
+    description: Body x-axis force coefficient
+  - name: cy
+    description: Body y-axis force coefficient
+  - name: cz
+    description: Body z-axis force coefficient
+  - name: thrust
+    description: Thrust magnitude
+  - name: tvec1
+    description: Thrust-vector angle 1
+  - name: tvec2
+    description: Thrust-vector angle 2
+  - name: mdot
+    description: Mass flow
+  - name: cg
+    description: Center of gravity
+  - name: windv
+    description: Wind magnitude
+  - name: windh
+    description: Wind direction or heading
+  - name: winde
+    description: Wind component in east direction
+  - name: windn
+    description: Wind component in north direction
+  - name: windd
+    description: Wind component in down direction
+  - name: output
+    description: User-defined output variable

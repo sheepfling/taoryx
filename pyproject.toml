@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taoryx"
+version = "0.1.0.dev0"
+description = "A Python successor to the TAOS 1995 simulation system"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{name = "taoryx contributors"}]
+dependencies = ["pydantic>=2.8", "PyYAML>=6.0"]
+
+[project.scripts]
+taoryx-validate = "taoryx.language.cli:main"
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2",
+  "numpy>=2.0",
+  "Pillow>=10.4",
+  "PyMuPDF>=1.24",
+  "pypdf>=6.0",
+  "pytest>=8.3",
+  "PyYAML>=6.0",
+  "rapidfuzz>=3.9",
+  "reportlab>=4.2",
+  "ruff>=0.9",
+  "mypy>=1.14",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = ["--strict-markers"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 160
+extend-exclude = ["build", "dist", "qa"]
+
+[tool.ruff.lint]
+# The imported handoff contains historical long lines; correctness/import lint
+# is enforced now, while a later cleanup can adopt Ruff's formatter and E501.
+select = ["F", "I"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src/taoryx"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["taoryx.language.*"]
+# The inherited parser foundation has known narrowing/AST-union debt. Keep it
+# isolated while new code is required to pass type checking.
+ignore_errors = true

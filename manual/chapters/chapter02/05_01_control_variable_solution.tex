@@ -1,0 +1,162 @@
+% Source PDF pages 110--113; manual pages 2-81--2-84.
+\subsection{Control Variable Solution Process}\label{sec:control-variable-solution}
+
+TAOS separates guidance rules that directly specify control variables from those
+that do not. It compares the directly specified controls with
+\cref{tab:body-attitude-control-variables} and selects the lowest-numbered set
+that contains them. If no set is consistent with the input, TAOS reports an input
+error. Direct controls are assigned their input values; the remaining controls and
+indirect guidance rules are retained for solution.
+
+The indirect solution is iterative. The procedure, shown in
+\cref{fig:guidance-loop}, is the \emph{guidance loop} and forms part of each
+equations-of-motion derivative evaluation.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-25}
+  \caption{Guidance loop.}
+  \label{fig:guidance-loop}
+\end{figure}
+
+Because acceleration may change instantaneously along the trajectory, each indirect
+guidance rule is associated with the solution variable listed in
+\cref{tab:indirect-guidance-rules}. The rule supplies a desired value, and TAOS
+varies a corresponding control variable until the computed and desired solution
+variables agree. The resulting nonlinear system is solved by a multidimensional
+Newton--Raphson method.
+
+For quantities such as $C_L$ or an axial specific load, the desired solution variable
+is given directly. For altitude and flight-path-angle rules, the input specifies an
+integral or double integral of the solution variable. TAOS converts that command to
+a desired instantaneous acceleration by fitting a second- or third-order transition
+in time.
+
+\taossubhead{Parabolic Transition}
+
+Consider the command to fly at a constant geodetic vertical flight-path angle of
+$5^\circ$. It specifies a desired state $\gamma_{gd}'=5^\circ$ and desired rate
+$\dot\gamma_{gd}'=0$. The prime denotes a desired value. TAOS assumes that
+$\gamma_{gd}$ follows a second-order parabolic transition from its current value to
+the desired state over the user-supplied interval $\Delta t_{\mathrm{guid}}$, as
+shown in \cref{fig:parabolic-guidance-transition}.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-26}
+  \caption{Parabolic transition to a desired state.}
+  \label{fig:parabolic-guidance-transition}
+\end{figure}
+
+The interval $\Delta t_{\mathrm{guid}}$ acts as a time constant. Large values produce
+small corrections and slow convergence to the desired condition. Small values
+produce rapid corrections, but values that are too small can cause oscillation or
+divergence.
+
+The desired acceleration $\dot\gamma_{gd}'$ at the current time is obtained from a
+parabolic curve fitted through the current and desired conditions:
+\begin{equation}
+  \gamma_{gd}'(t)=a t^2+b t+c,
+  \label{eq:parabolic-guidance-state}
+\end{equation}
+whose derivative is
+\begin{equation}
+  \dot\gamma_{gd}'(t)=2at+b.
+  \label{eq:parabolic-guidance-rate}
+\end{equation}
+The coefficients used by TAOS are
+\begin{equation}
+  a=\frac{\gamma_{gd}-\gamma_{gd}'
+    +\dot\gamma_{gd}'\,\Delta t_{\mathrm{guid}}}
+    {\Delta t_{\mathrm{guid}}^2},
+  \label{eq:parabolic-guidance-a}
+\end{equation}
+\begin{equation}
+  b=\dot\gamma_{gd}'-2a\left(t+\Delta t_{\mathrm{guid}}\right).
+  \label{eq:parabolic-guidance-b}
+\end{equation}
+The function \nolinkurl{parab_guidance_correction} in the \texttt{derivs} module
+applies this procedure to single-derivative solution variables such as
+$\dot\gamma_{gd}$, $\dot\psi_{gd}$, and $\lVert\dot{\vec V}\rVert$.
+
+\taossubhead{Cubic Transition}
+
+For double-derivative solution variables such as $\ddot h$, TAOS fits a third-order
+curve with \nolinkurl{cubic_guidance_correction}, as illustrated in
+\cref{fig:cubic-guidance-transition}. Current and desired altitude and altitude rate
+provide four boundary conditions.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-27}
+  \caption{Cubic transition to a desired state.}
+  \label{fig:cubic-guidance-transition}
+\end{figure}
+
+The transition is represented by
+\begin{equation}
+  h'(t)=a t^3+b t^2+c t+d,
+  \label{eq:cubic-guidance-state}
+\end{equation}
+and differentiation twice gives
+\begin{equation}
+  \ddot h'(t)=6at+2b.
+  \label{eq:cubic-guidance-acceleration}
+\end{equation}
+With $t_1=t$ and $t_2=t+\Delta t_{\mathrm{guid}}$, the printed TAOS formulation
+uses
+\begin{equation}
+\begin{aligned}
+ b={}&\Bigl[(h-h')(t_2^2-t_1^2)
+   +\dot h(t_2-t_1)(t_2^2-t_1^2)\\
+ &\quad+(\dot h'-\dot h)
+   \left(\frac{2}{3}t_1^3-t_1^2t_2+\frac{1}{3}t_2^3\right)\Bigr]\\
+ &\Bigg/\Bigl[2(t_2-t_1)
+   \left(\frac{2}{3}t_1^3-t_1^2t_2+\frac{1}{3}t_2^3\right)
+   -(t_2^2-t_1^2)(t_1^2-2t_1t_2+t_2^2)\Bigr],
+\end{aligned}
+\label{eq:cubic-guidance-b}
+\end{equation}
+\begin{equation}
+  a=\frac{\dot h'-\dot h-2b(t_2-t_1)}{3(t_2^2-t_1^2)}.
+  \label{eq:cubic-guidance-a}
+\end{equation}
+
+\taossubhead{Newton--Raphson Solution}
+
+Let the free control variables be collected in $\vec x$, and let the residual vector
+$\vec f$ contain the differences between desired and computed solution variables,
+$f_i=f_i'-f_i$. The multidimensional Newton--Raphson iteration is
+\begin{equation}
+  \vec x_{n+1}=\vec x_n-[J]^{-1}\vec f,
+  \label{eq:guidance-newton-update}
+\end{equation}
+where the source defines the Jacobian as
+\begin{equation}
+  [J]=
+  \begin{bmatrix}
+    \dfrac{\partial f_1}{\partial x_1} &
+    \dfrac{\partial f_2}{\partial x_1} &
+    \dfrac{\partial f_3}{\partial x_1} & \cdots\\[0.9em]
+    \dfrac{\partial f_1}{\partial x_2} &
+    \dfrac{\partial f_2}{\partial x_2} &
+    \dfrac{\partial f_3}{\partial x_2} & \cdots\\[0.9em]
+    \dfrac{\partial f_1}{\partial x_3} &
+    \dfrac{\partial f_2}{\partial x_3} &
+    \dfrac{\partial f_3}{\partial x_3} & \cdots\\
+    \vdots & \vdots & \vdots & \ddots
+  \end{bmatrix}.
+  \label{eq:guidance-jacobian}
+\end{equation}
+The Jacobian and residual are evaluated at $\vec x_n$. Defining
+$\vec z_{n+1}=\vec x_{n+1}-\vec x_n$ yields the linear system
+\begin{equation}
+  [J]\vec z_{n+1}=-\vec f,
+  \label{eq:guidance-gaussian-system}
+\end{equation}
+which TAOS solves by Gaussian elimination rather than explicit matrix inversion.
+
+For the first point in a trajectory, each free-control initial estimate is placed midway
+between its upper and lower limits. At subsequent points, the preceding solution is
+used as the next initial estimate, relying on the usual assumption that controls vary
+smoothly along the trajectory.

@@ -1,0 +1,24 @@
+% Source PDF pages 282--293; manual pages A-1--A-12.
+\chapter*{Appendix}
+\addcontentsline{toc}{chapter}{Appendix}
+\markboth{Appendix}{Appendix}
+\phantomsection\label{app:output-variable-reference}
+
+The variables below are available to table-file expressions described in
+\cref{sec:table-file-format,sec:table-constant-state-values} and to trajectory
+and problem output requests described in
+\cref{sec:trajectory-block-print,sec:problem-block-print}. The units and decimal
+places are the defaults used unless they are changed with the
+\problemblock{*units/fmt} data block in \cref{sec:block-units-fmt}.
+
+\input{manual/backmatter/appendix_output_variables}
+
+\clearpage
+\thispagestyle{plain}
+\null
+\vfill
+\begin{center}
+  \itshape Intentionally Left Blank
+\end{center}
+\vfill
+\null

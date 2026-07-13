@@ -1,0 +1,137 @@
+\subsection{\problemblock{*Summarize} Data Block}\label{sec:block-summarize}
+
+Summary variables are used with surveys to perform tradeoff and sensitivity studies.
+A survey systematically changes one or more input variables and calculates a set of
+trajectories for each combination, as described in \cref{sec:block-survey}. Summary
+variables are calculated after each set of trajectories is complete. When values are
+surveyed, the summary variables can therefore be tabulated as functions of the
+survey variables.
+
+\Cref{fig:summary-variable-printout} shows summary output for a sounding-rocket
+problem run with different payload weights and launch angles. The survey variables
+are launch elevation \texttt{qe} and payload weight \texttt{payload}. The summary
+variables are burnout velocity \texttt{vel-bo}, maximum altitude or apogee
+\texttt{max-alt}, and final range \texttt{range}. Each line represents one trajectory;
+ten trajectories were calculated for five payload weights and two launch angles.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.78\linewidth}
+    \lstinputlisting[style=taosmanual,basicstyle=\ttfamily\scriptsize]{examples/chapter04/summary-printout-example.txt}
+  \end{minipage}
+  \caption{Summary-variable printout.}
+  \label{fig:summary-variable-printout}
+\end{figure}
+
+For each trajectory, or each set of trajectories in a multiple-vehicle problem, a
+summary variable has one value. The value is calculated from commands in a
+\problemblock{*summarize} data block. These commands are math operations of the
+same general form used in full table files.
+
+The first summary variable in the figure is defined by
+
+\begin{lstlisting}[style=taosmanual]
+*summarize vel-bo
+  add vel on segment 3, trajectory 1
+\end{lstlisting}
+
+The name \texttt{vel-bo} follows the data-block keyword and is used as the column
+heading in the summary printout. Summary-variable names need not be unique.
+Summary values are initialized to zero and the operations are then executed. Here the
+velocity at the end of segment 3 in trajectory 1 is added to zero. Only one operation
+is required. This is typical: summary blocks are usually used to retrieve a specific
+trajectory value rather than to perform a long calculation.
+
+The other two summary variables in \cref{fig:summary-variable-printout} are defined
+as
+
+\begin{lstlisting}[style=taosmanual]
+*summarize max-alt
+  add max(alt[1])
+
+*summarize range
+  add last(range) trajectory 1
+\end{lstlisting}
+
+\taossubhead{Max, Min, First, and Last Special Functions}
+
+The \texttt{max} function searches the complete trajectory for the maximum value of
+a variable. The \texttt{last} function retrieves the final value. The corresponding
+\texttt{min} and \texttt{first} functions are also available. Because these functions
+operate on the entire trajectory, they eliminate the need to provide a segment
+number.
+
+TAOS saves trajectory data at the beginning and end of every segment and at every
+print interval. When \texttt{max} or \texttt{min} scans the trajectory, it considers
+only these saved values. It chooses the largest or smallest saved value and uses that
+sample and its two neighbors to fit a parabola and estimate the actual extremum. The
+accuracy therefore depends on the print interval. If the variable changes rapidly, the
+print interval may need to be reduced.
+
+When a special function is not used, segment and trajectory numbers are normally
+required. Segment numbers follow the words \texttt{on segment}; trajectory numbers
+follow \texttt{trajectory}. A trajectory number can alternatively be written as a
+subscript in square brackets, as in \texttt{max(alt[1])}.
+
+\taossubhead{Math Operations}
+
+All preceding examples use \texttt{add}, but the complete set of operations is given
+in \cref{tab:summary-math-operations}. The operations from \texttt{add} through
+\texttt{iexp} require an additional value and operate on both that value and the
+current summary. The additional value can be a trajectory output variable or a
+constant. The operations from \texttt{abs} through \texttt{atan} act only on the
+current summary and require no additional value.
+
+\begin{longtable}{@{}>{\ttfamily}lp{0.29\linewidth}>{\ttfamily}lp{0.32\linewidth}@{}}
+  \caption{Summary-variable math operations.}
+  \label{tab:summary-math-operations}\\
+  \toprule
+  \normalfont Operation & Description & \normalfont Operation & Description \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \normalfont Operation & Description & \normalfont Operation & Description \\
+  \midrule
+  \endhead
+  add  & Add a value to the summary value & sqrt & Square root of summary value \\
+  sub  & Subtract a value from the summary value & ln & Natural logarithm of summary value \\
+  mult & Multiply a value by the summary value & log & Base-10 logarithm of summary value \\
+  div  & Divide the summary value by a supplied value & e & $e$ raised to the summary value \\
+  idiv & Divide a supplied value by the summary value & sin & Sine of summary value in degrees \\
+  exp  & Raise the summary value to a supplied power & cos & Cosine of summary value in degrees \\
+  iexp & Raise a supplied value to the summary-value power & tan & Tangent of summary value in degrees \\
+  abs  & Absolute value of summary value & asin & Inverse sine of summary value in degrees \\
+  neg  & Negate summary value & acos & Inverse cosine of summary value in degrees \\
+  sqr  & Square summary value & atan & Inverse tangent of summary value in degrees \\
+  \bottomrule
+\end{longtable}
+
+A block may contain any number of operations, although most summary variables need
+only one or two. The following three-operation example calculates the difference in
+final range between two trajectories and converts the result from nautical miles to
+kilometers:
+
+\begin{lstlisting}[style=taosmanual]
+*summarize delta-rng
+  add last(range[1])
+  sub last(range[2])
+  mult 1.852
+\end{lstlisting}
+
+The summary starts at zero. The first operation adds the final range of trajectory 1,
+the second subtracts the final range of trajectory 2, and the third converts units.
+
+The preceding example uses \texttt{last}, so no segment numbers are needed. The
+next example retrieves values from within two trajectories:
+
+\begin{lstlisting}[style=taosmanual]
+*summarize delta-alt
+  add alt on segment 4, trajectory 1
+  sub alt on segment 11, trajectory 2
+  div 3280.84
+\end{lstlisting}
+
+It calculates, in kilometers, the difference between altitude at the end of segment 4
+in trajectory 1 and altitude at the end of segment 11 in trajectory 2. Segment numbers
+are required because none of the special functions is used. The trajectory numbers
+are entered with the \texttt{trajectory} keyword to illustrate that form.

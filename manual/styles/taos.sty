@@ -1,0 +1,205 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{manual/styles/taos}[2026/07/11 TAOS manual reconstruction style]
+
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage{microtype}
+\RequirePackage[letterpaper,inner=1.05in,outer=0.85in,top=0.85in,bottom=0.9in,headheight=15pt]{geometry}
+\RequirePackage{amsmath,amssymb,mathtools}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs,longtable,array,tabularx}
+\RequirePackage{siunitx}
+\RequirePackage{xcolor}
+\RequirePackage{listings}
+\RequirePackage{enumitem}
+\RequirePackage{fancyhdr}
+\RequirePackage{caption}
+\RequirePackage{ragged2e}
+\RequirePackage{titlesec}
+\RequirePackage[auto]{chappg}
+\RequirePackage{tikz}
+\RequirePackage{pgfplots}
+\RequirePackage{hyperref}
+\RequirePackage{cleveref}
+\RequirePackage{xparse}
+
+\usetikzlibrary{arrows.meta,calc,decorations.pathreplacing,positioning}
+\pgfplotsset{compat=1.18}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue,
+  pdftitle={Trajectory Analysis and Optimization System (TAOS) User's Manual},
+  pdfauthor={David E. Salguero}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\itshape\nouppercase{\leftmark}}
+\fancyhead[RO]{\small\itshape\nouppercase{\rightmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+\titleformat{\chapter}[hang]
+  {\normalfont\sffamily\bfseries\Huge}
+  {\thechapter.}
+  {0.6em}
+  {}
+\titlespacing*{\chapter}{0pt}{-12pt}{24pt}
+\titleformat{name=\chapter,numberless}[hang]
+  {\normalfont\sffamily\bfseries\Huge}
+  {}
+  {0pt}
+  {}
+\titleformat{\section}
+  {\normalfont\sffamily\bfseries\Large}
+  {\thesection.}
+  {0.55em}
+  {}
+\titleformat{\subsection}
+  {\normalfont\sffamily\bfseries\large}
+  {\thesubsection.}
+  {0.55em}
+  {}
+\titleformat{\subsubsection}
+  {\normalfont\sffamily\bfseries\normalsize}
+  {\thesubsubsection.}
+  {0.55em}
+  {}
+
+
+\makeatletter
+\renewcommand{\@pnumwidth}{2.5em}
+\makeatother
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\renewcommand{\theequation}{\thechapter-\arabic{equation}}
+\renewcommand{\thefigure}{\thechapter-\arabic{figure}}
+\renewcommand{\thetable}{\thechapter-\arabic{table}}
+\setlist{nosep}
+\sisetup{detect-all}
+\DeclareSIUnit{\poundforce}{lbf}
+\DeclareSIUnit{\slug}{slug}
+\DeclareSIUnit{\foot}{ft}
+\captionsetup{font=small,labelfont={bf,it},textfont=it,labelsep=period}
+
+\definecolor{taosgray}{gray}{0.94}
+\definecolor{taosdarkgray}{gray}{0.25}
+
+\lstdefinelanguage{TAOS}{
+  sensitive=false,
+  morecomment=[l]{\#},
+  morekeywords={table,start,end,add,sub,mult,div,idiv,exp,iexp,min,max,set,abs,neg,sqr,sqrt,ln,log,e,sin,cos,tan,asin,acos,atan,zero,csto,if,then,goto,extrap,no-extrap,vary,until,constrain,constraint,on,for,vrs,integral,first,last,interp-1,interp-2,interp-3},
+  morekeywords=[2]{aero,constants,cg,fly,increment,inertial,integ,limits,prop,rail,reset,when,trajectory,define,dwn,crs,file,iip,initial,print,tangent,atmos,earth,egs,optimize,radar,search,summarize,survey,title,units,fmt,wind,segment,end}
+}
+
+\lstdefinestyle{taosboxed}{
+  language=TAOS,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries,
+  keywordstyle=[2]\bfseries,
+  commentstyle=\itshape\color{taosdarkgray},
+  backgroundcolor=\color{taosgray},
+  frame=single,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  captionpos=b,
+  aboveskip=0.8\baselineskip,
+  belowskip=0.8\baselineskip
+}
+
+\lstdefinestyle{taosmanual}{
+  language=TAOS,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\bfseries,
+  keywordstyle=[2]\bfseries,
+  commentstyle=\itshape\color{taosdarkgray},
+  backgroundcolor=\color{white},
+  frame=none,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  xleftmargin=1.5em,
+  aboveskip=0.65\baselineskip,
+  belowskip=0.65\baselineskip
+}
+
+\lstset{style=taosboxed}
+
+\NewDocumentCommand{\coordsystem}{m}{\textsc{#1}}
+\NewDocumentCommand{\statevar}{m}{\texttt{\detokenize{#1}}}
+\NewDocumentCommand{\tabletype}{m}{\texttt{\detokenize{#1}}}
+\NewDocumentCommand{\problemblock}{m}{\texttt{\detokenize{#1}}}
+\NewDocumentCommand{\tableid}{m}{\texttt{(\detokenize{#1})}}
+\NewDocumentCommand{\taosref}{m}{\textsuperscript{#1}}
+\NewDocumentCommand{\limitedstate}{}{\textsuperscript{$\dagger$}}
+\NewDocumentCommand{\manualref}{m}{\textsuperscript{#1}}
+\NewDocumentCommand{\sourcepage}{m}{\marginpar{\scriptsize PDF p.~#1}}
+\NewDocumentCommand{\placeholder}{m}{\par\noindent\fbox{\parbox{0.96\linewidth}{\textbf{Placeholder:} #1}}\par}
+\NewDocumentCommand{\taossubhead}{m}{\par\medskip\noindent{\sffamily\bfseries\large #1}\par\smallskip}
+
+% Reusable Chapter 2 direction-cosine matrices are defined in
+% math/matrices/rotations.tex and loaded by manual.tex.
+
+\NewDocumentEnvironment{taoslisting}{O{} m}{\lstset{caption={#2},#1}\begin{lstlisting}}{\end{lstlisting}}
+
+
+\pdfstringdefDisableCommands{%
+  \def\coordsystem#1{#1}%
+  \def\statevar#1{#1}%
+  \def\tabletype#1{#1}%
+  \def\problemblock#1{#1}%
+  \def\tableid#1{(#1)}%
+}
+
+% Compact backmatter titles and source-faithful index entries.
+\NewDocumentCommand{\taosbackmattertitle}{m}{%
+  \phantomsection
+  \addcontentsline{toc}{chapter}{#1}%
+  \markboth{#1}{#1}%
+  \begin{center}
+    {\sffamily\bfseries\LARGE #1}
+  \end{center}
+  \vspace{0.4\baselineskip}%
+}
+
+\NewDocumentCommand{\taosindexletter}{m}{%
+  \par\addvspace{0.65\baselineskip}%
+  \begin{center}{\sffamily\bfseries\Large #1}\end{center}%
+  \vspace{-0.45\baselineskip}%
+}
+
+\NewDocumentCommand{\taosindexentry}{m m}{%
+  \par\addvspace{0.06\baselineskip}%
+  \noindent\hangindent=1.1em\hangafter=1
+  #1\if\relax\detokenize{#2}\relax\else, #2\fi\par
+}
+
+\NewDocumentCommand{\taosindexsubentry}{m m}{%
+  \par\noindent\leftskip=1.0em\hangindent=1.1em\hangafter=1
+  #1\if\relax\detokenize{#2}\relax\else, #2\fi\par
+}
+
+\NewDocumentCommand{\taosindexvariable}{m m}{%
+  \taosindexentry{\textit{\detokenize{#1}}}{#2}%
+}
+
+\NewDocumentCommand{\taosindexsubvariable}{m m}{%
+  \taosindexsubentry{\textit{\detokenize{#1}}}{#2}%
+}
+
+\NewDocumentCommand{\taosindexsubblock}{m m}{%
+  \taosindexsubentry{\texttt{\detokenize{#1}}}{#2}%
+}

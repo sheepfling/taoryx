@@ -1,0 +1,191 @@
+distribution:
+  source_pdf_pages:
+  - 306
+  - 307
+  source_manual_pages:
+  - Dist-1
+  - Dist-2
+  entry_count: 35
+  total_copies: 60
+  entries:
+  - copies: 1
+    mail_stop: MS 0826
+    recipient: J. K. Cole, 9114
+    group: 1
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0826
+    recipient: D. W. Kuntz, 9114
+    group: 1
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0826
+    recipient: D. L. Potter, 9114
+    group: 1
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0826
+    recipient: T. M. Sterk, 9114
+    group: 1
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0826
+    recipient: L. W. Young, 9114
+    group: 1
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0825
+    recipient: K. V. Chavez, 9115
+    group: 2
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0825
+    recipient: T. M. Jordan-Culler, 9115
+    group: 2
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0825
+    recipient: M. W. Kniskern, 9115
+    group: 2
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0825
+    recipient: A. R. Lopez, 9115
+    group: 2
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0825
+    recipient: W. A. Millard, 9115
+    group: 2
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0825
+    recipient: J. L. Payne, 9115
+    group: 2
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0825
+    recipient: L. R. Rollstin, 9115
+    group: 2
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0825
+    recipient: W. H. Rutledge, 9115
+    group: 2
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0303
+    recipient: D. J. Rigali, 2400
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0303
+    recipient: D. L. Davidson, 2411
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0303
+    recipient: S. A. Kerr, 2411
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0303
+    recipient: J. L. McDowell, 2411
+    group: 3
+    status: visually_verified
+  - copies: 21
+    mail_stop: MS 0303
+    recipient: D. E. Salguero, 2411
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0303
+    recipient: B. R. Sturgis, 2411
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0313
+    recipient: D. L. Keese, 2412
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0309
+    recipient: J. J. Hochrein, 2413
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0312
+    recipient: R. W. Greene, 2414
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0312
+    recipient: W. E. Williamson, 2414
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0303
+    recipient: M. W. Sterk, 2415
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0313
+    recipient: A. C. Bustamante, 2416
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0307
+    recipient: E. W. Reese, 2417
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0309
+    recipient: A. K. Miller, 2418
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0658
+    recipient: R. G. Hay, 2419
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0659
+    recipient: E. J. Schindwolf, 2425
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0105
+    recipient: B. B. Asher, 2435
+    group: 3
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 1174
+    recipient: D. E. Outka, 2526
+    group: 4
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 9018
+    recipient: Central Technical Files, 8523-2
+    group: 5
+    status: visually_verified
+  - copies: 5
+    mail_stop: MS 0899
+    recipient: Technical Library, 13414
+    group: 5
+    status: visually_verified
+  - copies: 1
+    mail_stop: MS 0619
+    recipient: Print Media, 12615
+    group: 5
+    status: visually_verified
+  - copies: 2
+    mail_stop: MS 0100
+    group: 5
+    status: visually_verified
+    recipient_lines:
+    - Document Processing, 7613-2
+    - For DOE/OSTI
+  blank_page:
+    source_pdf_page: 307
+    source_manual_page: Dist-2
+    text: Intentionally Left Blank

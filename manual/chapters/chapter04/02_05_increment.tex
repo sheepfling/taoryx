@@ -1,0 +1,156 @@
+\subsection{\problemblock{*Increment} Data Block}\label{sec:block-increment}
+
+Normally the values for a vehicle's state and time are continuous across trajectory
+segments. The state or time can, however, be changed instantaneously to form a
+discontinuity by including an \problemblock{*increment} data block. This is used
+most often for weight changes, such as dropping a weapon or staging a missile. For
+example,
+
+\begin{lstlisting}[style=taosmanual]
+*increment wt=-325
+\end{lstlisting}
+
+instantaneously reduces the weight by 325~lb when default units are used.
+
+The \problemblock{*increment} block is identical to the
+\problemblock{*reset} block described in \cref{sec:block-reset}, except that
+\problemblock{*reset} sets a time or state variable equal to an input value,
+whereas \problemblock{*increment} adds the input value to the current value. In
+other words, \problemblock{*increment} applies a positive or negative delta to
+the current time or state variable.
+
+If both \problemblock{*reset} and \problemblock{*increment} blocks are
+present in a segment, values are reset first and then incremented. Multiple reset and
+increment blocks can be given; they are executed in the order in which they appear.
+
+The variables that can be changed are listed in \cref{tab:increment-variables}.
+Position and velocity are maintained in several coordinate systems, so the variables
+are grouped into consistent sets. Position or velocity values in one increment block
+must belong to the same coordinate system. For example, if
+\statevar{xecicdt} is incremented, then \statevar{yecicdt} and
+\statevar{zecicdt} may also be changed, but velocity in another representation,
+such as \statevar{vel}, cannot be changed in the same block. This restriction
+applies to every position and velocity set in the table.
+
+\begin{longtable}{@{}>{\ttfamily}lp{0.68\linewidth}@{}}
+  \caption{Variables accepted by \texttt{*increment} and \texttt{*reset}.}
+  \label{tab:increment-variables}\\
+  \toprule
+  \normalfont Variable & Description \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \normalfont Variable & Description \\
+  \midrule
+  \endhead
+  alt       & Altitude \\
+  long      & Longitude (with geodetic latitude and altitude) \\
+  latgd     & Geodetic latitude \\
+  rcm       & Distance from earth center \\
+  long      & Longitude (with geocentric radius and latitude) \\
+  latgc     & Geocentric latitude \\
+  xecfc     & Earth-centered, earth-fixed $x$ coordinate \\
+  yecfc     & Earth-centered, earth-fixed $y$ coordinate \\
+  zecfc     & Earth-centered, earth-fixed $z$ coordinate \\
+  xecic     & Earth-centered inertial $x$ coordinate \\
+  yecic     & Earth-centered inertial $y$ coordinate \\
+  zecic     & Earth-centered inertial $z$ coordinate \\
+  dxb       & Position increment along body $x$ axis \\
+  dyb       & Position increment along body $y$ axis \\
+  dzb       & Position increment along body $z$ axis \\
+  vel       & Velocity \\
+  gamgc     & Geocentric flight-path angle \\
+  psigc     & Geocentric heading angle \\
+  vel       & Velocity \\
+  gamgd     & Geodetic flight-path angle \\
+  psigd     & Geodetic heading angle \\
+  xecfcdt   & Earth-centered, earth-fixed velocity $x$ component \\
+  yecfcdt   & Earth-centered, earth-fixed velocity $y$ component \\
+  zecfcdt   & Earth-centered, earth-fixed velocity $z$ component \\
+  xecicdt   & Earth-centered inertial velocity $x$ component \\
+  yecicdt   & Earth-centered inertial velocity $y$ component \\
+  zecicdt   & Earth-centered inertial velocity $z$ component \\
+  wt        & Weight \\
+  mass      & Mass \\
+  fuel      & Fuel used \\
+  time      & Time \\
+  tseg      & Segment time \\
+  tmark     & Mark time \\
+  range     & Ground range \\
+  grseg     & Segment ground range \\
+  grmark    & Mark ground range \\
+  plength   & Path length \\
+  plseg     & Segment path length \\
+  plmark    & Mark path length \\
+  iip\_beta & Ballistic coefficient for initial-impact-point calculations \\
+  \bottomrule
+\end{longtable}
+
+Weight and mass are similar. If one is given, the other cannot be given because both
+refer to the same state variable. Fuel, on the other hand, may be reset or incremented
+at any time.
+
+The time, range, and path-length variables are independent of one another, so any
+combination is valid. The segment variables \statevar{tseg}, \statevar{grseg}, and
+\statevar{plseg} are automatically reset to zero at the beginning of a segment. The
+increment values are applied after that automatic reset.
+
+A problem with one trajectory can contain a discontinuity in absolute time, so
+\statevar{time} may be reset or incremented. Problems with more than one
+trajectory use time to relate the vehicles to one another; a time discontinuity can
+therefore cause errors. The variable \statevar{time} should not be reset or
+incremented in a multiple-trajectory problem. The relative-time variables
+\statevar{tseg} and \statevar{tmark} do not have this problem.
+
+The mark variables \statevar{tmark}, \statevar{grmark}, and
+\statevar{plmark} are useful for measuring time, range, and path length from an
+intermediate point. At the beginning of a trajectory they correspond to
+\statevar{time}, \statevar{range}, and \statevar{plength}. They can be restarted
+at any segment with \problemblock{*reset} or changed with
+\problemblock{*increment}.
+
+The ballistic coefficient for the initial-impact-point calculation may also be reset or
+incremented at any time. It is used only by the IIP calculation.
+
+\taossubhead{Object Deployment}
+
+The variables \statevar{dxb}, \statevar{dyb}, and \statevar{dzb} are used when an
+object is deployed or a weapon is dropped and one trajectory is initialized from
+another. The deployed object's initial position is usually offset slightly from the
+vehicle center of mass. The three variables give the object's position relative to the
+body coordinate system before deployment.
+
+A deployed object is generally initialized from the beginning of an existing segment.
+For example,
+
+\begin{lstlisting}[style=taosmanual]
+*trajectory 2 Obj2 start on 1
+
+  *initial from trajectory 1, segment 6
+
+  *segment 1 deployment
+    *reset wt=50
+    *increment velibx=5
+    *increment dxb=0.5 dyb=3.2 dzb=0.35
+    *fly pitchi=*
+    *fly yawi=*
+    *fly rolli=*
+    *when tseg>0 goto 2
+\end{lstlisting}
+
+initializes trajectory 2 from the beginning of segment 6 in trajectory 1 and
+represents an object deployment in space. The initial state is copied from trajectory
+1 and can be adjusted with reset and increment blocks in the first segment.
+
+In this example the new object's weight is set to 50~lb, and it is deployed with a
+5~ft/s velocity increment along the body $x$ axis. Its position is adjusted with
+\statevar{dxb}, \statevar{dyb}, and \statevar{dzb} because its center of mass is
+slightly offset from the original vehicle. These three variables always act as position
+increments, so they have the same effect in a reset or increment block.
+
+The guidance rules hold a constant body attitude in inertial space. This ensures that
+the object's body attitude matches the original vehicle's attitude, so the body-axis
+position and velocity increments are applied in the correct directions. The same
+result can be obtained by using the original vehicle's guidance rules in the first
+segment. A final condition of \texttt{tseg>0} ends the deployment segment
+immediately so that other guidance rules can be used for the remaining trajectory.

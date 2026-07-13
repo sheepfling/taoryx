@@ -1,0 +1,223 @@
+% Source PDF pages 48--52; manual pages 2-19--2-23.
+\subsection{Body-Fixed Cartesian Coordinate System}\label{sec:body-fixed}
+
+A body-fixed coordinate system is commonly used to define components of the
+vehicle's aerodynamic and propulsive forces. For example, the aerodynamic
+coefficients $C_A$ and $C_N$ define one force component along the vehicle
+centerline and another normal to it.
+
+The origin of the system is at the vehicle's center of mass. Its $x$ axis is the
+vehicle longitudinal axis, the $y$ axis points toward the right wing, and the $z$
+axis points toward the bottom of the vehicle, as shown in
+\cref{fig:body-fixed-coordinates}. The unit vectors
+$\hat{x}_b$, $\hat{y}_b$, and $\hat{z}_b$ are aligned with these axes.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.58\linewidth}{!}{\input{manual/figures/chapter02/fig-2-8}}
+  \caption{Body-fixed coordinates.}
+  \label{fig:body-fixed-coordinates}
+\end{figure}
+
+The body system is related to the local geodetic horizon system by three geodetic
+Euler angles: yaw $\Psi_{gd}$, pitch $\Theta_{gd}$, and roll $\Phi_{gd}$. The yaw
+and pitch angles are analogous to the horizontal and vertical flight-path angles;
+the difference is that the vehicle longitudinal axis replaces the velocity vector.
+The rotation sequence from the local geodetic horizon system to the body system is
+shown in \cref{fig:geodetic-euler-angles}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.90\linewidth}{!}{\input{manual/figures/chapter02/fig-2-9}}
+  \caption{Geodetic yaw, pitch, and roll angles.}
+  \label{fig:geodetic-euler-angles}
+\end{figure}
+
+The first rotation is a yaw about $\hat{z}_{gd}$, producing a temporary system
+$\hat{x}_1$, $\hat{y}_1$, and $\hat{z}_1$, with
+$\hat{z}_1=\hat{z}_{gd}$. The second rotation is a pitch about $\hat{y}_1$,
+producing $\hat{x}_2$, $\hat{y}_2$, and $\hat{z}_2$, with
+$\hat{y}_2=\hat{y}_1$. The final rotation is a roll about $\hat{x}_2$, and
+$\hat{x}_2=\hat{x}_b$.
+
+The same sequence relates the body system to the local geocentric horizon system
+through the geocentric Euler angles $\Psi_{gc}$, $\Theta_{gc}$, and
+$\Phi_{gc}$, and to the inertial-platform system through the platform Euler angles
+$\Psi_p$, $\Theta_p$, and $\Phi_p$. In those cases the initial system in
+\cref{fig:geodetic-euler-angles} is replaced by the local geocentric or inertial
+platform system. For the geodetic case, the rotations are
+\begin{equation}
+  \begin{bmatrix}
+    \hat{x}_b\\[0.2em]
+    \hat{y}_b\\[0.2em]
+    \hat{z}_b
+  \end{bmatrix}
+  =
+  \TaosRollMatrix{\Phi_{gd}}
+  \TaosPitchMatrix{\Theta_{gd}}
+  \TaosYawMatrix{\Psi_{gd}}
+  \begin{bmatrix}
+    \hat{x}_{gd}\\[0.2em]
+    \hat{y}_{gd}\\[0.2em]
+    \hat{z}_{gd}
+  \end{bmatrix}.
+  \label{eq:body-euler-transformation}
+\end{equation}
+When expanded, \cref{eq:body-euler-transformation} gives
+\begin{equation}
+  \hat{x}_b
+  = \cos\Theta_{gd}\cos\Psi_{gd}\,\hat{x}_{gd}
+  + \cos\Theta_{gd}\sin\Psi_{gd}\,\hat{y}_{gd}
+  - \sin\Theta_{gd}\,\hat{z}_{gd},
+  \label{eq:body-x-from-geodetic-euler}
+\end{equation}
+\begin{equation}
+  \begin{aligned}
+  \hat{y}_b
+  ={}&
+  (\sin\Phi_{gd}\sin\Theta_{gd}\cos\Psi_{gd}
+   -\cos\Phi_{gd}\sin\Psi_{gd})\,\hat{x}_{gd}\\
+  &+(\sin\Phi_{gd}\sin\Theta_{gd}\sin\Psi_{gd}
+   +\cos\Phi_{gd}\cos\Psi_{gd})\,\hat{y}_{gd}\\
+  &+\sin\Phi_{gd}\cos\Theta_{gd}\,\hat{z}_{gd},
+  \end{aligned}
+  \label{eq:body-y-from-geodetic-euler}
+\end{equation}
+\begin{equation}
+  \begin{aligned}
+  \hat{z}_b
+  ={}&
+  (\cos\Phi_{gd}\sin\Theta_{gd}\cos\Psi_{gd}
+   +\sin\Phi_{gd}\sin\Psi_{gd})\,\hat{x}_{gd}\\
+  &+(\cos\Phi_{gd}\sin\Theta_{gd}\sin\Psi_{gd}
+   -\sin\Phi_{gd}\cos\Psi_{gd})\,\hat{y}_{gd}\\
+  &+\cos\Phi_{gd}\cos\Theta_{gd}\,\hat{z}_{gd}.
+  \end{aligned}
+  \label{eq:body-z-from-geodetic-euler}
+\end{equation}
+The function \texttt{euler\_to\_body} computes the body unit vectors from
+geodetic, geocentric, or inertial-platform Euler angles. These equations assume
+that the Euler angles are known. In many guidance problems the body attitude is
+instead specified through aerodynamic angles, which relate the body and wind
+systems as described in \cref{sec:wind-coordinate}.
+
+When the body unit vectors are known from aerodynamic angles, the corresponding
+Euler angles are recovered from the unit vectors. For the geodetic angles,
+\begin{equation}
+  \cos\Psi_{gd}
+  = \frac{\hat{x}_b\mathbin{\cdot}\hat{x}_{gd}}
+  {\sqrt{(\hat{x}_b\mathbin{\cdot}\hat{x}_{gd})^2
+       +(\hat{x}_b\mathbin{\cdot}\hat{y}_{gd})^2}},
+  \label{eq:geodetic-yaw-cosine}
+\end{equation}
+\begin{equation}
+  \sin\Psi_{gd}
+  = \frac{\hat{x}_b\mathbin{\cdot}\hat{y}_{gd}}
+  {\sqrt{(\hat{x}_b\mathbin{\cdot}\hat{x}_{gd})^2
+       +(\hat{x}_b\mathbin{\cdot}\hat{y}_{gd})^2}},
+  \label{eq:geodetic-yaw-sine}
+\end{equation}
+\begin{equation}
+  \cos\left(\Theta_{gd}+\frac{\pi}{2}\right)
+  = \hat{x}_b\mathbin{\cdot}\hat{z}_{gd},
+  \label{eq:geodetic-pitch-from-body-axis}
+\end{equation}
+\begin{equation}
+  \cos\Phi_{gd}=\hat{y}_1\mathbin{\cdot}\hat{y}_b.
+  \label{eq:geodetic-roll-from-body-axis}
+\end{equation}
+The yaw angle is obtained from the projection of $\hat{x}_b$ onto the local
+geodetic horizon plane. The pitch angle is obtained from the projection of
+$\hat{x}_b$ onto $\hat{z}_{gd}$. The roll angle is obtained by projecting
+$\hat{y}_b$ onto the temporary $\hat{y}_1$ axis. This axis is perpendicular to
+$\hat{x}_1$ and $\hat{z}_{gd}$:
+\begin{equation}
+  \hat{y}_1=\hat{z}_{gd}\times\hat{x}_1.
+  \label{eq:temporary-yaw-y-axis}
+\end{equation}
+The temporary $\hat{x}_1$ axis satisfies
+\begin{equation}
+  \begin{bmatrix}
+    \hat{x}_{gd}\\[0.2em]
+    \hat{y}_{gd}\\[0.2em]
+    \hat{z}_{gd}
+  \end{bmatrix}
+  \mathbin{\cdot}\hat{x}_1
+  =
+  \begin{bmatrix}
+    \cos\Psi_{gd}\\[0.2em]
+    \sin\Psi_{gd}\\[0.2em]
+    0
+  \end{bmatrix},
+  \label{eq:temporary-yaw-x-linear-system}
+\end{equation}
+where the unit-vector components form the rows of an orthogonal matrix. Its inverse
+is its transpose, so
+\begin{equation}
+  \hat{x}_1
+  =
+  \begin{bmatrix}
+    \hat{x}_{gd}&\hat{y}_{gd}&\hat{z}_{gd}
+  \end{bmatrix}
+  \begin{bmatrix}
+    \cos\Psi_{gd}\\[0.2em]
+    \sin\Psi_{gd}\\[0.2em]
+    0
+  \end{bmatrix}.
+  \label{eq:temporary-yaw-x-axis}
+\end{equation}
+This method is singular when the body points straight up or down, so that
+$\hat{x}_b$ is aligned with $\hat{z}_{gd}$ and yaw is undefined. TAOS then sets
+\begin{equation}
+  \Psi_{gd}=\Phi_{gd}=0,
+  \qquad
+  \Theta_{gd}=\frac{\pi}{2}
+    (\hat{x}_b\mathbin{\cdot}\hat{z}_{gd}).
+  \label{eq:euler-angle-pole-convention}
+\end{equation}
+The geocentric and inertial-platform Euler angles are calculated by the same
+procedure after substituting the corresponding reference-frame unit vectors. These
+calculations are performed by \texttt{euler\_angles}.
+
+\taossubhead{Euler-angle output variables}
+
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.18\textwidth}p{0.57\textwidth}@{}}
+  yawgc   & $\Psi_{gc}$ & Geocentric Euler yaw angle.\\
+  yawgd   & $\Psi_{gd}$ & Geodetic Euler yaw angle.\\
+  yawi    & $\Psi_i$    & Inertial-platform Euler yaw angle.\\
+  pitchgc & $\Theta_{gc}$ & Geocentric Euler pitch angle.\\
+  pitchgd & $\Theta_{gd}$ & Geodetic Euler pitch angle.\\
+  pitchi  & $\Theta_i$    & Inertial-platform Euler pitch angle.\\
+  rollgc  & $\Phi_{gc}$ & Geocentric Euler roll angle.\\
+  rollgd  & $\Phi_{gd}$ & Geodetic Euler roll angle.\\
+  rolli   & $\Phi_i$    & Inertial-platform Euler roll angle.\\
+\end{longtable}
+
+\taossubhead{Body-coordinate vector components}
+
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.22\textwidth}p{0.53\textwidth}@{}}
+  accebx & $\vec a_{\oplus}\mathbin{\cdot}\hat{x}_b$ &
+    Earth-fixed acceleration component in the body $x$ direction.\\
+  acceby & $\vec a_{\oplus}\mathbin{\cdot}\hat{y}_b$ &
+    Earth-fixed acceleration component in the body $y$ direction.\\
+  accebz & $\vec a_{\oplus}\mathbin{\cdot}\hat{z}_b$ &
+    Earth-fixed acceleration component in the body $z$ direction.\\
+  accibx & $\vec a_I\mathbin{\cdot}\hat{x}_b$ &
+    Inertial acceleration component in the body $x$ direction.\\
+  acciby & $\vec a_I\mathbin{\cdot}\hat{y}_b$ &
+    Inertial acceleration component in the body $y$ direction.\\
+  accibz & $\vec a_I\mathbin{\cdot}\hat{z}_b$ &
+    Inertial acceleration component in the body $z$ direction.\\
+  velebx & $\vec V_{\oplus}\mathbin{\cdot}\hat{x}_b$ &
+    Earth-relative velocity component in the body $x$ direction.\\
+  veleby & $\vec V_{\oplus}\mathbin{\cdot}\hat{y}_b$ &
+    Earth-relative velocity component in the body $y$ direction.\\
+  velebz & $\vec V_{\oplus}\mathbin{\cdot}\hat{z}_b$ &
+    Earth-relative velocity component in the body $z$ direction.\\
+  velibx & $\vec V_I\mathbin{\cdot}\hat{x}_b$ &
+    Inertial velocity component in the body $x$ direction.\\
+  veliby & $\vec V_I\mathbin{\cdot}\hat{y}_b$ &
+    Inertial velocity component in the body $y$ direction.\\
+  velibz & $\vec V_I\mathbin{\cdot}\hat{z}_b$ &
+    Inertial velocity component in the body $z$ direction.\\
+\end{longtable}

@@ -1,0 +1,67 @@
+% Source PDF pages 41--42; manual pages 2-12--2-13.
+\subsection{Local Geodetic Horizon Coordinate System}\label{sec:local-geodetic}
+
+The local geodetic horizon coordinate system is similar to the local geocentric
+horizon system, except that its horizon plane is referenced to an ellipsoid rather
+than to a sphere. The major axes of this ellipsoid of revolution lie in the equatorial
+plane, as shown in \cref{fig:local-geodetic-horizon}. Its shape is controlled by the
+equatorial earth radius $R_{\oplus}$ and any one of three redundant quantities: the
+polar radius $R_p$, eccentricity $e$, or flattening $f$. They are related by
+\begin{equation}
+  R_p = R_{\oplus}\sqrt{1-e^2}=R_{\oplus}(1-f).
+  \label{eq:ellipsoid-parameter-relation}
+\end{equation}
+The eccentricity and flattening must be less than one, and the polar radius must be
+less than the equatorial radius. These parameters normally conform to WGS-72\taosref{5}
+or WGS-84\taosref{6}, but they can be changed through the earth-model input described
+in \cref{sec:block-earth}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.72\linewidth}{!}{\input{manual/figures/chapter02/fig-2-5}}
+  \caption{Local geodetic horizon coordinates.}
+  \label{fig:local-geodetic-horizon}
+\end{figure}
+
+The local geodetic horizon system has its origin at the vehicle's center of mass. Its
+$z$ axis points downward, perpendicular to the ellipsoidal surface. The local horizon
+plane is normal to this $z$ axis and therefore parallel to the plane tangent to the
+earth's surface below the vehicle.
+
+The $x$ and $y$ axes lie in the local horizon plane. The $x$ axis is in the plane
+formed by $\vec{r}$ and $\hat{z}_{\oplus}$ and points north. The $y$ axis is
+perpendicular to the $x$ axis and points east.
+
+The local geodetic and local geocentric systems have the same origin at the vehicle's
+center of mass. Their east vectors are identical, $\hat{y}_{gc}=\hat{y}_{gd}$, while
+the north and down vectors are rotated about the common $y$ axis by
+$\delta_{gd}-\delta_{gc}$.
+
+The geodetic unit vectors are
+\begin{equation}
+  \hat{x}_{gd}
+    = -\sin\delta_{gd}
+       (\cos\lambda\,\hat{x}_{\oplus}
+        +\sin\lambda\,\hat{y}_{\oplus})
+       +\cos\delta_{gd}\,\hat{z}_{\oplus},
+  \label{eq:local-geodetic-x-unit-vector}
+\end{equation}
+\begin{equation}
+  \hat{y}_{gd}
+    = -\sin\lambda\,\hat{x}_{\oplus}
+      +\cos\lambda\,\hat{y}_{\oplus},
+  \label{eq:local-geodetic-y-unit-vector}
+\end{equation}
+\begin{equation}
+  \hat{z}_{gd}
+    = -\cos\delta_{gd}
+       (\cos\lambda\,\hat{x}_{\oplus}
+        +\sin\lambda\,\hat{y}_{\oplus})
+      -\sin\delta_{gd}\,\hat{z}_{\oplus}.
+  \label{eq:local-geodetic-z-unit-vector}
+\end{equation}
+These equations are identical in form to
+\cref{eq:local-geocentric-unit-vectors}, with geodetic latitude replacing
+geocentric latitude. The latitude required by these equations is obtained with the
+iterative method in \cref{sec:geodetic}, and the vectors are computed by
+\texttt{geod\_unit\_vectors}.

@@ -1,0 +1,390 @@
+chapter: 4
+release: v18
+scope: remaining_chapter4_fidelity_queue_batch_3
+source_manual: SAND95-1652
+method:
+  description: Restore source-near wording for the remaining Chapter 4 units, integration, propulsion, earth, atmosphere,
+    radar, and ancillary data-block queue while preserving verified mathematics, numbered objects, semantic labels,
+    and parser fixtures.
+  preserve_source_wording: true
+  preserve_parser_fixtures: true
+  preserve_numbered_objects: true
+  normalize_only:
+  - line-break hyphenation
+  - obvious OCR corruption
+  - canonical TAOS identifiers where the scan is visibly corrupted
+  - typographic quotation marks
+  - cross-references expressed as semantic LaTeX
+sections:
+- id: chapter4.segment.constants
+  title: '*Constants Data Block'
+  section: 4.2.2
+  source_pdf_pages:
+  - 176
+  source_manual_pages:
+  - 4-11
+  tex_file: manual/chapters/chapter04/02_02_constants.tex
+  restored:
+  - optional grouping of user-defined table values
+  - two supported assignment styles
+  - persistence and repetition guidance
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 68.8
+  baseline_bigram_recall_percent: 34.6
+  status: diplomatically_transcribed
+- id: chapter4.segment.cg
+  title: '*Cg Data Block'
+  section: 4.2.3
+  source_pdf_pages:
+  - 177
+  source_manual_pages:
+  - 4-12
+  tex_file: manual/chapters/chapter04/02_03_cg.tex
+  restored:
+  - trimmed-aerodynamic relationship to center of gravity
+  - constant and table-valued center of gravity
+  - units convention and user-defined variables
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 53.6
+  baseline_bigram_recall_percent: 19.7
+  status: diplomatically_transcribed
+- id: chapter4.segment.increment
+  title: '*Increment Data Block'
+  section: 4.2.5
+  source_pdf_pages:
+  - 185
+  - 186
+  - 187
+  source_manual_pages:
+  - 4-20
+  - 4-21
+  - 4-22
+  tex_file: manual/chapters/chapter04/02_05_increment.tex
+  restored:
+  - reset-versus-increment ordering
+  - consistent coordinate-set restrictions
+  - time, range, path, mark, and IIP behavior
+  - complete object-deployment example and rationale
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 42.0
+  baseline_bigram_recall_percent: 17.8
+  status: diplomatically_transcribed
+- id: chapter4.segment.inertial
+  title: '*Inertial Data Block'
+  section: 4.2.6
+  source_pdf_pages:
+  - 188
+  - 189
+  source_manual_pages:
+  - 4-23
+  - 4-24
+  tex_file: manual/chapters/chapter04/02_06_inertial.tex
+  restored:
+  - default platform alignment and relocation
+  - all alignment coordinate-system options
+  - first-segment body/wind restriction and dummy-segment workaround
+  - ECFC east/down vector override
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 40.1
+  baseline_bigram_recall_percent: 20.1
+  status: diplomatically_transcribed
+- id: chapter4.segment.integ
+  title: '*Integ Data Block'
+  section: 4.2.7
+  source_pdf_pages:
+  - 190
+  source_manual_pages:
+  - 4-25
+  tex_file: manual/chapters/chapter04/02_07_integ.tex
+  restored:
+  - fixed-step Runge-Kutta method and step-size limits
+  - print-interval defaults and memory implications
+  - guidance-time-constant behavior, default, and tuning guidance
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 48.1
+  baseline_bigram_recall_percent: 18.6
+  status: diplomatically_transcribed
+- id: chapter4.segment.prop
+  title: '*Prop Data Block'
+  section: 4.2.9
+  source_pdf_pages:
+  - 192
+  - 193
+  source_manual_pages:
+  - 4-27
+  - 4-28
+  tex_file: manual/chapters/chapter04/02_09_prop.tex
+  restored:
+  - summation and zero-default behavior
+  - thrust-vector angle definitions and units
+  - constant, table, and user-variable examples
+  - data-block unit precedence and historical control-variable note
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 30.5
+  baseline_bigram_recall_percent: 12.1
+  status: diplomatically_transcribed
+- id: chapter4.segment.rail
+  title: '*Rail Data Block'
+  section: 4.2.10
+  source_pdf_pages:
+  - 194
+  source_manual_pages:
+  - 4-29
+  tex_file: manual/chapters/chapter04/02_10_rail.tex
+  restored:
+  - rail-versus-sled motion constraints
+  - static/sliding friction threshold
+  - two-segment launch recommendation
+  - forward-only rail behavior and path-length final condition
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 60.2
+  baseline_bigram_recall_percent: 22.4
+  status: diplomatically_transcribed
+- id: chapter4.segment.reset
+  title: '*Reset Data Block'
+  section: 4.2.11
+  source_pdf_pages:
+  - 195
+  source_manual_pages:
+  - 4-30
+  tex_file: manual/chapters/chapter04/02_11_reset.tex
+  restored:
+  - reset semantics and execution order
+  - state-variable and coordinate-set restrictions
+  - time-related cautions and mark-variable usage
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 65.0
+  baseline_bigram_recall_percent: 23.5
+  status: diplomatically_transcribed
+- id: chapter4.trajectory.dwn_crs
+  title: '*Dwn/crs Data Block'
+  section: 4.3.2
+  source_pdf_pages:
+  - 204
+  source_manual_pages:
+  - 4-39
+  tex_file: manual/chapters/chapter04/03_02_dwn_crs.tex
+  restored:
+  - east/north reference-point behavior
+  - downrange/crossrange origin and azimuth
+  - trajectory-relative reference option and defaults
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 67.6
+  baseline_bigram_recall_percent: 25.0
+  status: diplomatically_transcribed
+- id: chapter4.trajectory.file
+  title: '*File Data Block'
+  section: 4.3.3
+  source_pdf_pages:
+  - 205
+  - 206
+  source_manual_pages:
+  - 4-40
+  - 4-41
+  tex_file: manual/chapters/chapter04/03_03_file.tex
+  restored:
+  - column-file format and naming
+  - variable-list, interval, and formatting behavior
+  - radar/relative subscripts and multiple-file rules
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 30.0
+  baseline_bigram_recall_percent: 5.1
+  status: diplomatically_transcribed
+- id: chapter4.trajectory.iip
+  title: '*Iip Data Block'
+  section: 4.3.4
+  source_pdf_pages:
+  - 207
+  source_manual_pages:
+  - 4-42
+  tex_file: manual/chapters/chapter04/03_04_iip.tex
+  restored:
+  - IIP trigger and ballistic-coefficient meaning
+  - impact-altitude behavior and defaults
+  - zero-drag convention, reset behavior, and tangent-plane range/azimuth reference
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 36.8
+  baseline_bigram_recall_percent: 14.3
+  status: diplomatically_transcribed
+- id: chapter4.trajectory.initial
+  title: '*Initial Data Block'
+  section: 4.3.5
+  source_pdf_pages:
+  - 208
+  - 209
+  - 210
+  source_manual_pages:
+  - 4-43
+  - 4-44
+  - 4-45
+  tex_file: manual/chapters/chapter04/03_05_initial.tex
+  restored:
+  - direct coordinate-system initial conditions
+  - required and mutually exclusive values
+  - ECFC/ECIC epoch relationship
+  - initialization from another trajectory and branching semantics
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 23.8
+  baseline_bigram_recall_percent: 10.6
+  status: diplomatically_transcribed
+- id: chapter4.trajectory.print
+  title: '*Print Data Block'
+  section: 4.3.6
+  source_pdf_pages:
+  - 211
+  source_manual_pages:
+  - 4-46
+  tex_file: manual/chapters/chapter04/03_06_print.tex
+  restored:
+  - trajectory-level print-list syntax
+  - interval, formatting, and variable behavior
+  - radar/relative subscript rules
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 34.4
+  baseline_bigram_recall_percent: 11.3
+  status: diplomatically_transcribed
+- id: chapter4.trajectory.tangent
+  title: '*Tangent Data Block'
+  section: 4.3.7
+  source_pdf_pages:
+  - 212
+  source_manual_pages:
+  - 4-47
+  tex_file: manual/chapters/chapter04/03_07_tangent.tex
+  restored:
+  - fixed geodetic tangent-plane origin and axis orientation
+  - tangent-plane output-variable and IIP reference behavior
+  - default origin and north-pointing orientation
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 46.8
+  baseline_bigram_recall_percent: 14.0
+  status: diplomatically_transcribed
+- id: chapter4.problem.atmos
+  title: '*Atmos Data Block'
+  section: 4.4.1
+  source_pdf_pages:
+  - 215
+  - 216
+  source_manual_pages:
+  - 4-50
+  - 4-51
+  tex_file: manual/chapters/chapter04/04_01_atmos.tex
+  restored:
+  - all standard atmosphere selections and aliases
+  - default, high-altitude, and below-sea-level behavior
+  - user-defined atmosphere forms and input restrictions
+  - problem-wide scope
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 59.6
+  baseline_bigram_recall_percent: 28.0
+  status: diplomatically_transcribed
+- id: chapter4.problem.earth
+  title: '*Earth Data Block'
+  section: 4.4.3
+  source_pdf_pages:
+  - 219
+  - 220
+  - 221
+  - 222
+  source_manual_pages:
+  - 4-54
+  - 4-55
+  - 4-56
+  - 4-57
+  tex_file: manual/chapters/chapter04/04_03_earth.tex
+  restored:
+  - earth shape, rotation, and gravity components
+  - spherical, WGS, TSAP-compatible, and full models
+  - geometry consistency and model defaults
+  - nonrotating-model use and omitted third-body gravity
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 35.5
+  baseline_bigram_recall_percent: 13.1
+  status: diplomatically_transcribed
+- id: chapter4.problem.radar
+  title: '*Radar Data Block'
+  section: 4.4.8
+  source_pdf_pages:
+  - 239
+  - 240
+  source_manual_pages:
+  - 4-74
+  - 4-75
+  tex_file: manual/chapters/chapter04/04_08_radar.tex
+  restored:
+  - radar-output trigger and subscript conventions
+  - station number/name and location requirements
+  - local Cartesian offsets and curvature warning
+  - radar-specific earth-shape override
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 34.4
+  baseline_bigram_recall_percent: 11.7
+  status: diplomatically_transcribed
+- id: chapter4.problem.title
+  title: '*Title Data Block'
+  section: 4.4.12
+  source_pdf_pages:
+  - 250
+  source_manual_pages:
+  - 4-85
+  tex_file: manual/chapters/chapter04/04_12_title.tex
+  restored:
+  - multi-line title behavior
+  - printout and EGS usage
+  - termination at the next data-block keyword and asterisk warning
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 62.5
+  baseline_bigram_recall_percent: 32.2
+  status: diplomatically_transcribed
+- id: chapter4.problem.units_fmt
+  title: '*Units/Fmt Data Block'
+  section: 4.4.13
+  source_pdf_pages:
+  - 251
+  - 252
+  - 253
+  source_manual_pages:
+  - 4-86
+  - 4-87
+  - 4-88
+  tex_file: manual/chapters/chapter04/04_13_units_fmt.tex
+  restored:
+  - global input/output unit changes
+  - dimensional-consistency restrictions
+  - complete allowable-unit table and area handling
+  - e/f formats, decimal precision, order dependence, and user-variable limitation
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 44.7
+  baseline_bigram_recall_percent: 15.1
+  status: diplomatically_transcribed
+- id: chapter4.problem.wind
+  title: '*Wind Data Block'
+  section: 4.4.14
+  source_pdf_pages:
+  - 254
+  - 255
+  source_manual_pages:
+  - 4-89
+  - 4-90
+  tex_file: manual/chapters/chapter04/04_14_wind.tex
+  restored:
+  - wind-axis convention and component alternatives
+  - constant and table-valued wind definitions
+  - user-defined variables and persistence
+  - earth-model relationship and zero-wind default
+  audit_rank: remaining_queue
+  baseline_token_recall_percent: 55.6
+  baseline_bigram_recall_percent: 25.8
+  status: diplomatically_transcribed
+fixture_invariance:
+  sha256:
+    examples/chapter03/orbus-mdt.tbl: ded304ae6ff44bbaa6cd9651843f4901ddd8d43a257d9e97375f85697e831683
+    examples/chapter03/recruits-thr.tbl: d11a0109c8af903478c1e35ecd39b3e0fc769ccfaa6f30b22f906de9345ae9a2
+    examples/chapter03/reentry-ca-excerpt.tbl: d078d629f1d240f1d99382e558e49bafdef9ff351b994ca0bd1018b4e0685fe5
+    examples/chapter03/stmi-full.tbl: 900d29157b8eff70f05b5a3091b27bd6391678b080bee7cda72df43cc86ab8f5
+    examples/chapter03/stmi-simple.tbl: 310b74d5a21ecddd058a037f36ef258f1a527ae3c8da120d3bd30aeec4a22fbd
+    examples/chapter04/air-launched-intercept.prb: b2dfa5b409b626b78dd1bb145880d481858338ae5865a4ae106723f348e57de2
+    examples/chapter04/ballistic-reentry.prb: 286817cb104fe1ac04c87d3ddb4833d77e568f1dc4b3771e85a8a7ba87fcb41d
+    examples/chapter04/ballistic-reentry.tbl: df979968363b97e31255bd128b11a5aec44819e26e7739f2de3d5c2804a2352f
+    examples/chapter04/ballistic-rocket.prb: 8592c979fa08f30beb4e9fe9b505737dc558cf58578512a0827395963c9506e6
+    examples/chapter04/ground-launched-intercept.prb: 2cd6ab4ba3c1368528d1f6bff3d9da38a9bc87e36d4754abe42cdca23dd4ca10

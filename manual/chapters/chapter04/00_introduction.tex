@@ -1,0 +1,124 @@
+Table files contain information defining the aerodynamic and propulsive forces acting
+on a vehicle. Problem files contain the remaining information required to compute a
+trajectory, for example a vehicle's initial mass and its flight profile. This
+information is combined to integrate the equations of motion, resulting in a
+trajectory or flight path.
+
+TAOS can integrate several trajectories simultaneously. Each trajectory represents a
+separate vehicle. Information in the table and problem files is used to define the
+flight profile for each trajectory or vehicle.
+
+Each trajectory is divided into segments, where each segment can be described with
+simple guidance rules. 
+\Cref{fig:segmented-flight-paths} shows a maneuvering reentry trajectory. The first
+segment is flown ballistically, the second is a constant-angle-of-attack pullout to
+level flight, the third is a level turn, and the last is flown ballistically to impact.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter04/fig-4-1}
+  \caption{Segmented Flight Paths.}
+  \label{fig:segmented-flight-paths}
+\end{figure}
+
+Input data in the problem file describes how each segment is computed: the vehicle
+configuration, guidance rules, final conditions, and the next segment to execute.
+Segments are joined together continuously to form trajectories.
+
+Problem files have the hierarchical structure shown in
+\cref{fig:problem-file-organization}. A problem file contains one or more problems.
+Each problem contains information defining one or more trajectories, and each
+trajectory definition contains information defining one or more trajectory segments.
+A problem can have any number of trajectories, and each trajectory can have any
+number of segments. The size of a problem is limited only by available memory and
+computer processing speed.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.96\linewidth}{!}{\input{manual/figures/chapter04/fig-4-2}}
+  \caption{Problem File Organization.}
+  \label{fig:problem-file-organization}
+\end{figure}
+
+Each trajectory in a problem is identified by a unique trajectory number and name.
+TAOS uses the trajectory number internally to identify each trajectory. Both the
+trajectory number and name appear in output files. Within a trajectory, each segment
+is identified by a unique segment number. Although a descriptive title may be given
+for a segment, the title is not used to identify it. Segment numbers must be unique
+within a trajectory, but different trajectories may use the same set of segment
+numbers.
+
+The following problem file defines a simple trajectory:
+
+\begin{lstlisting}[style=taosmanual]
+(pullout)
+
+*title  Example of a maneuvering trajectory
+*atmos  standard
+*earth  wgs-84
+
+*trajectory 1 rv start on 1
+
+  *initial geodetic
+    long=0.0       lat=0.0        psi=90.0       time=0.0
+    alt=300000     vel=18000      gama=-30       wt=1000.0
+
+  *print time alt range mach vel gamgd dynprs alpha ca cn
+
+  *segment 1 Ballistic flight
+    *aero ca=(rv-ca) cn=(rv-cn)
+    *when dynprs>1000 goto 2
+
+  *segment 2 Constant alpha pullout to level flight
+    *aero ca=(rv-ca) cn=(rv-cn)
+    *fly alpha=10.0
+    *when gamgd=0 stop
+*end
+\end{lstlisting}
+
+This problem file contains one problem, beginning with \tableid{pullout} and ending
+with \problemblock{*end}. Although a problem file may contain more than one
+problem, it is good practice to place only one problem in each file and run each
+problem as a separate task or process. Then a failure in the first problem cannot
+prevent other problems from running.
+
+\taossubhead{Data Blocks}
+
+Each set of information in the problem file begins with an asterisk and a name, for
+example \problemblock{*title}, \problemblock{*atmos}, or
+\problemblock{*trajectory}. These are special names on which TAOS keys to
+determine what kind of information follows.
+
+For example, information defining trajectory initial conditions follows the
+\problemblock{*initial} keyword:
+
+\begin{lstlisting}[style=taosmanual]
+*initial geodetic
+  long=0.0       lat=0.0        psi=90.0       time=0.0
+  alt=300000     vel=18000      gama=-30       wt=1000.0
+\end{lstlisting}
+
+This set of information---everything from the \problemblock{*initial} keyword to
+the next \problemblock{*print} keyword---is called a data block. This particular one
+is the \problemblock{*initial} data block, and it gives the vehicle's initial state.
+Other blocks in the example include the \problemblock{*title} block, which supplies
+a problem title; the \problemblock{*atmos} block, which selects the 1976 U.S.
+standard atmosphere; and the \problemblock{*earth} block, which selects the WGS-84
+earth model. Each data block has a variety of options.
+
+The example defines one trajectory containing two segments. Indentation is used to
+show the problem-file structure. The \problemblock{*initial},
+\problemblock{*print}, and \problemblock{*segment} blocks are all part of the
+\problemblock{*trajectory} block. The \problemblock{*aero},
+\problemblock{*fly}, and \problemblock{*when} blocks are part of the
+\problemblock{*segment} blocks and may be repeated for each segment. The
+indentation follows the hierarchy shown in \cref{fig:problem-file-organization}.
+
+This chapter is organized the same way as the problem file. Each data block is
+discussed in a separate subsection, and the subsections are grouped according to the
+hierarchy in \cref{fig:problem-file-organization}. 
+\Cref{sec:problem-file-format} gives general information about problem-file format;
+\cref{sec:segment-data-blocks} describes segment data blocks;
+\cref{sec:trajectory-data-blocks} describes trajectory data blocks; and
+\cref{sec:problem-data-blocks} describes problem data blocks. The final section,
+\cref{sec:problem-examples}, contains example problem files.

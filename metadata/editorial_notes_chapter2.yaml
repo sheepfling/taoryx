@@ -1,0 +1,148 @@
+editorial_notes:
+  - id: body_euler_roll_subscripts
+    section: 2.1.7
+    source_pdf_page: 51
+    source_manual_page: 2-22
+    source_issue: The printed output-variable list labels both rollgd and rolli with Phi_gc.
+    reconstruction: The symbols are normalized to Phi_gd and Phi_i, matching the variable names and descriptions.
+    rationale: The source text explicitly identifies geodetic and inertial-platform Euler roll angles.
+  - id: platform_symbol_convention
+    section: 2.1.7
+    source_pdf_pages: [49, 51]
+    source_manual_pages: [2-20, 2-22]
+    source_issue: The frame is denoted with p subscripts in the derivation, while output-variable symbols use i subscripts.
+    reconstruction: Frame-basis vectors retain p; output variables retain i to match the manual's public variable names.
+    rationale: This preserves both the mathematical frame notation and the documented interface.
+  - id: figure_preservation_strategy
+    section: 2.1
+    source_pdf_pages: [48, 53, 55, 56, 57, 58]
+    source_manual_pages: [2-19, 2-24, 2-26, 2-27, 2-28, 2-29]
+    source_issue: The original diagrams are scanned raster artwork.
+    reconstruction: Cleaned source-derived crops are used in the compiled manual; editable TikZ redraw drafts are retained alongside them.
+    rationale: This preserves source fidelity while keeping a path to fully vector artwork.
+  - id: dynamic_pressure_second_derivative_approximation
+    section: 2.2.3
+    source_pdf_page: 73
+    source_manual_page: 2-44
+    source_issue: The prose states that terms involving the second derivative of air-relative velocity and the second altitude derivative of density are neglected; the displayed equation already reflects those omissions.
+    reconstruction: Equation 2-142 is reproduced in its displayed approximated form and the assumptions are stated explicitly in the surrounding prose.
+    rationale: This preserves the implemented TAOS formulation while clarifying the relationship between the displayed equation and the following assumptions.
+  - id: derivative_of_vector_magnitude_notation
+    section: 2.2.3
+    source_pdf_pages: [73, 74]
+    source_manual_pages: [2-44, 2-45]
+    source_issue: The source writes the derivative of air-relative speed using the norm of the vector derivative.
+    reconstruction: The source notation is retained rather than silently replacing it with a projected scalar derivative.
+    rationale: The reconstruction remains traceable to the documented TAOS approximation.
+  - id: atmosphere_model_latitude_convention
+    section: 2.3.1
+    source_pdf_page: 82
+    source_manual_page: 2-53
+    source_issue: Lambert sea-level gravity uses the latitude assigned to the selected atmosphere model rather than the instantaneous trajectory latitude.
+    reconstruction: The historical convention is retained and stated explicitly.
+    rationale: This matches the documented 1976 U.S. standard and 1966 supplemental atmosphere implementations.
+  - id: atmosphere_molecular_weight_gradient_coordinate
+    section: 2.3.1
+    source_pdf_pages: [82, 83]
+    source_manual_pages: [2-53, 2-54]
+    source_issue: The prose says molecular weight is tabulated against geometric altitude h, while equation 2-186 prints dMw/dH.
+    reconstruction: Equation 2-186 is reproduced as printed and the surrounding text preserves both statements.
+    rationale: The reconstruction remains traceable to the source without inventing an undocumented correction.
+  - id: atmosphere_function_name_normalization
+    section: 2.3.1
+    source_pdf_page: 84
+    source_manual_page: 2-55
+    source_issue: Scan extraction corrupts the function names atmos_setup, atmos_properties, and atmos_hi_alt.
+    reconstruction: Function names are normalized to valid C-style identifiers based on the rendered source page.
+    rationale: These names are legible in the page image and consistent with the module naming convention used throughout the manual.
+  - id: section23_figure_preservation_strategy
+    section: 2.3
+    source_pdf_pages: [80, 88]
+    source_manual_pages: [2-51, 2-59]
+    source_issue: Figures 2-16 and 2-17 are scanned raster artwork.
+    reconstruction: Clean source-derived crops are used in the compiled manual and editable TikZ redraw drafts are retained alongside them.
+    rationale: This preserves the historical geometry while enabling a future all-vector release.
+  - id: reynolds_variable_spelling
+    section: 2.3.2
+    source_pdf_page: 85
+    source_manual_page: 2-56
+    source_issue: The source uses the possessive spelling Reynold's number.
+    reconstruction: Prose is normalized to Reynolds number while the TAOS output variable reypft remains unchanged.
+    rationale: The corrected scientific name improves readability without altering the program interface.
+  - id: sodano_central_angle_missing_cosine
+    section: 2.4.1
+    source_pdf_page: 96
+    source_manual_page: 2-67
+    source_issue: Equation 2-222 prints a multiplication dot before the longitude difference and omits the cosine function required by the spherical law of cosines.
+    reconstruction: The term is reconstructed as cos(lambda2 - lambda1).
+    rationale: This is required for dimensional and mathematical consistency with the adjacent Sodano equations.
+  - id: sodano_eprime_internal_inconsistency
+    section: 2.4.1
+    source_pdf_page: 98
+    source_manual_page: 2-69
+    source_issue: Equation 2-239 equates 1/sqrt(1-e^2) with sqrt((R_earth^2 + R_p^2)/R_p^2), which is inconsistent with the ellipsoid eccentricity definition.
+    reconstruction: The equation is reproduced exactly as printed and marked with an editorial note.
+    rationale: The intended correction is not uniquely established by the manual alone.
+  - id: iip_drag_sign
+    section: 2.4.4
+    source_pdf_page: 104
+    source_manual_page: 2-75
+    source_issue: Equations 2-266 through 2-270 place the IIP aerodynamic acceleration in the positive wind-velocity direction, while Section 2.3.2 defines drag in the negative wind-x direction.
+    reconstruction: The positive sign is retained and explicitly documented.
+    rationale: Preserving the printed equations maintains traceability without inventing an undocumented correction.
+  - id: section24_figure_preservation_strategy
+    section: 2.4
+    source_pdf_pages: [95, 97, 100, 101, 102, 103, 106]
+    source_manual_pages: [2-66, 2-68, 2-71, 2-72, 2-73, 2-74, 2-77]
+    source_issue: Figures 2-18 through 2-24 are scanned raster artwork.
+    reconstruction: Clean source-derived crops are used in the compiled manual and editable TikZ redraw drafts are retained alongside them.
+    rationale: This preserves historical geometry while enabling a later all-vector release.
+  - id: section25_los_rotation_angle_labels
+    section: 2.5.2
+    source_pdf_pages: [116, 117]
+    source_manual_pages: [2-87, 2-88]
+    source_issue: The printed rotation matrices associate Lambda_p with an in-plane z-axis rotation and Lambda_y with an x-z-plane y-axis rotation, opposite the prose definitions of line-of-sight yaw and pitch.
+    reconstruction: Equations 2-294 through 2-297 preserve the printed angle placement and explicitly identify the matrices as source forms.
+    rationale: Preserving the printed formulation maintains traceability; a later implementation should verify the intended axis convention independently.
+  - id: section25_split_acceleration_display
+    section: 2.5.2
+    source_pdf_page: 117
+    source_manual_page: 2-88
+    source_issue: Equation numbers 2-296 and 2-297 appear within one visually continuous acceleration-transformation display.
+    reconstruction: Equation 2-296 defines the combined transformation matrix and Equation 2-297 applies it to the LOS acceleration vector.
+    rationale: The split preserves both source numbers while producing two mathematically complete, cross-referenceable equations.
+  - id: section25_figure_reconstruction_strategy
+    section: 2.5
+    source_pdf_pages: [110, 111, 112, 115, 118]
+    source_manual_pages: [2-81, 2-82, 2-83, 2-86, 2-89]
+    source_issue: Figures 2-25 through 2-30 are scanned line artwork.
+    reconstruction: The compiled manual uses editable TikZ redraws; cleaned source crops are archived alongside them for comparison.
+    rationale: These diagrams are sufficiently geometric to reproduce as resolution-independent vector artwork without losing substantive content.
+  - id: section26_newton_reciprocal_derivative_form
+    section: 2.6.2
+    source_pdf_page: 127
+    source_manual_page: 2-98
+    source_issue: Equation 2-299 prints the Newton update using the reciprocal derivative, partial x divided by partial f(x_n).
+    reconstruction: The equation is rendered in the conventional algebraically equivalent form f(x_n) divided by the derivative of f with respect to x.
+    rationale: The normalized form is clearer while preserving the exact numerical update.
+  - id: section26_altitude_integral_differential
+    section: 2.6.3
+    source_pdf_page: 133
+    source_manual_page: 2-104
+    source_issue: Equation 2-314 displays an integral without an explicit differential.
+    reconstruction: An explicit dt is supplied to identify the path variable as a time integral, consistent with the integral-variable definition in Section 4.3.1.
+    rationale: The differential removes ambiguity without changing the documented algorithm.
+  - id: section26_altitude_constraint_strict_inequality
+    section: 2.6.3
+    source_pdf_page: 133
+    source_manual_page: 2-104
+    source_issue: Equation 2-315 constrains a nonnegative accumulated violation variable to be strictly less than zero.
+    reconstruction: The printed strict inequality is preserved and the surrounding prose notes that the initial offset and optimizer convention determine the feasible zero-violation representation.
+    rationale: The manual alone does not establish a unique corrected inequality or initial value.
+  - id: section26_figure_reconstruction_strategy
+    section: 2.6
+    source_pdf_pages: [120, 121, 122, 125, 127, 128, 129, 130, 132]
+    source_manual_pages: [2-91, 2-92, 2-93, 2-96, 2-98, 2-99, 2-100, 2-101, 2-103]
+    source_issue: Figures 2-31 through 2-39 are scanned flowcharts, data-structure diagrams, and search illustrations.
+    reconstruction: The compiled manual uses editable TikZ redraws; source-derived crops are archived for comparison.
+    rationale: The diagrams are geometric and can be reproduced as resolution-independent vector artwork without losing substantive information.

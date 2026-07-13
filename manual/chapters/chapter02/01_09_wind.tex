@@ -1,0 +1,269 @@
+% Source PDF pages 55--60; manual pages 2-26--2-31.
+\subsection{Wind Cartesian Coordinate System}\label{sec:wind-coordinate}
+
+Aerodynamic forces are usually functions of aerodynamic angles such as angle of
+attack and sideslip. The wind coordinate system relates these aerodynamic angles to
+the body-fixed system. Its origin is at the vehicle's center of mass, and its $x$ axis
+is aligned with the air-relative velocity-system axis $\hat x_{V_w}$ and with
+$\vec V_{w\oplus}$.
+
+The wind-system $y$ and $z$ axes are obtained by rotating the corresponding
+velocity-system axes through the geocentric bank angle $\mu_{gc}$ or geodetic bank
+angle $\mu_{gd}$, as shown in \cref{fig:bank-angle-wind-system}. The two bank
+angles differ slightly because the geocentric and geodetic local-horizon systems are
+not identical, but both constructions produce the same wind system.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.76\linewidth}{!}{\input{manual/figures/chapter02/fig-2-11}}
+  \caption{Bank angle and wind coordinate system.}
+  \label{fig:bank-angle-wind-system}
+\end{figure}
+
+The wind unit vectors are
+\begin{equation}
+  \begin{aligned}
+    \hat x_w &= \hat x_V,\\
+    \hat y_w &= \cos\mu\,\hat y_V+\sin\mu\,\hat z_V,\\
+    \hat z_w &= -\sin\mu\,\hat y_V+\cos\mu\,\hat z_V,
+  \end{aligned}
+  \label{eq:wind-unit-vectors}
+\end{equation}
+and are evaluated by \texttt{wind\_unit\_vectors}. The bank angle $\mu$ must be
+referenced to the same system, geocentric or geodetic, as the velocity-system unit
+vectors.
+
+The wind and body systems are related through one of three equivalent pairs of
+aerodynamic angles:
+\begin{itemize}[leftmargin=1.6em]
+  \item angle of attack $\alpha$ and Euler sideslip angle $\beta_E$;
+  \item angle of attack $\alpha$ and sideslip angle $\beta$; or
+  \item total angle of attack $\alpha_T$ and windward meridian $\phi_w$.
+\end{itemize}
+
+\taossubhead{Angle of attack and Euler sideslip angle}
+
+As illustrated in \cref{fig:alpha-betae-definitions}, a rotation about the body
+$-\hat y_b$ axis through the angle of attack $\alpha$, followed by a rotation about
+the wind $\hat z_w$ axis through the Euler sideslip angle $\beta_E$, aligns the
+body and wind axes. This rotational definition is commonly used for aircraft.
+Angle of attack generally lies between $-180^\circ$ and $+180^\circ$, while Euler
+sideslip generally lies between $-90^\circ$ and $+90^\circ$; because both are
+rotation angles, however, the mathematics permits any values.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.78\linewidth}{!}{\input{manual/figures/chapter02/fig-2-12}}
+  \caption{Angle-of-attack and sideslip definitions for forward flight.}
+  \label{fig:alpha-betae-definitions}
+\end{figure}
+
+The body unit vectors are related to the wind unit vectors by
+\begin{equation}
+  \begin{bmatrix}
+    \hat x_b\\[0.2em]
+    \hat y_b\\[0.2em]
+    \hat z_b
+  \end{bmatrix}
+  =
+  \TaosPitchMatrix{\alpha}
+  \TaosEulerSideslipMatrix{\beta_E}
+  \begin{bmatrix}
+    \hat x_w\\[0.2em]
+    \hat y_w\\[0.2em]
+    \hat z_w
+  \end{bmatrix}.
+  \label{eq:wind-to-body-aero-transformation}
+\end{equation}
+Expanding the matrices gives
+\begin{equation}
+  \hat x_b
+  =\cos\alpha\cos\beta_E\,\hat x_w
+  -\cos\alpha\sin\beta_E\,\hat y_w
+  -\sin\alpha\,\hat z_w,
+  \label{eq:body-x-from-aero-angles}
+\end{equation}
+\begin{equation}
+  \hat y_b
+  =\sin\beta_E\,\hat x_w
+  +\cos\beta_E\,\hat y_w,
+  \label{eq:body-y-from-aero-angles}
+\end{equation}
+\begin{equation}
+  \hat z_b
+  =\sin\alpha\cos\beta_E\,\hat x_w
+  -\sin\alpha\sin\beta_E\,\hat y_w
+  +\cos\alpha\,\hat z_w.
+  \label{eq:body-z-from-aero-angles}
+\end{equation}
+
+\taossubhead{Angle of attack and sideslip angle}
+
+The non-Euler sideslip angle $\beta$ is the angle between $\hat x_b$ and the
+projection of $\vec V_{w\oplus}$ onto the $\hat x_b\hat y_b$ plane. With this
+sideslip definition, $\alpha$ is the angle between $\hat x_b$ and the projection of
+$\vec V_{w\oplus}$ onto the $\hat x_b\hat z_b$ plane:
+\begin{equation}
+  \tan\alpha
+  =\frac{\hat x_w\mathbin{\cdot}\hat z_b}
+  {\hat x_w\mathbin{\cdot}\hat x_b},
+  \label{eq:projected-angle-of-attack}
+\end{equation}
+\begin{equation}
+  \tan\beta
+  =\frac{\hat x_w\mathbin{\cdot}\hat y_b}
+  {\hat x_w\mathbin{\cdot}\hat x_b}.
+  \label{eq:projected-sideslip}
+\end{equation}
+These projection-based definitions are common for axisymmetric vehicles such as
+reentry bodies and artillery shells. They are associated naturally with total angle of
+attack and windward meridian. Because the angles are defined by projections rather
+than independent rotations, not every combination of $\alpha$ and $\beta$ is valid.
+
+When $\hat x_w\mathbin{\cdot}\hat x_b>0$, the vehicle is moving in the forward
+direction and both $|\alpha|$ and $|\beta|$ are less than $90^\circ$, as in
+\cref{fig:alpha-betae-definitions}. When
+$\hat x_w\mathbin{\cdot}\hat x_b<0$, the vehicle is moving backward and both
+angles have magnitudes between $90^\circ$ and $180^\circ$, as shown in
+\cref{fig:alpha-beta-backward}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.82\linewidth}{!}{\input{manual/figures/chapter02/fig-2-13}}
+  \caption{Angle-of-attack and sideslip definitions for backward flight.}
+  \label{fig:alpha-beta-backward}
+\end{figure}
+
+When $\hat x_w\mathbin{\cdot}\hat x_b=0$, the wind vector lies in the
+$\hat y_b\hat z_b$ plane. Equations~\eqref{eq:projected-angle-of-attack} and
+\eqref{eq:projected-sideslip} then give $\alpha=\pm90^\circ$ and
+$\beta=\pm90^\circ$ for every vector in that plane and therefore do not uniquely
+define its direction. TAOS uses the special convention illustrated in
+\cref{fig:aero-angles-at-90-alpha}, retaining
+\cref{eq:projected-angle-of-attack} for $\alpha$ and replacing the sideslip
+relation by
+\begin{equation}
+  \tan\beta
+  =\frac{\hat x_w\mathbin{\cdot}\hat y_b}
+  {\hat x_w\mathbin{\cdot}\hat z_b}.
+  \label{eq:projected-sideslip-at-90-alpha}
+\end{equation}
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.66\linewidth}{!}{\input{manual/figures/chapter02/fig-2-14}}
+  \caption{Aerodynamic angles at a $90^\circ$ angle of attack.}
+  \label{fig:aero-angles-at-90-alpha}
+\end{figure}
+
+Because the basic projection definitions are singular in this case, angle of attack
+with sideslip is not recommended for trajectories whose wind vector lies in the
+$\hat y_b\hat z_b$ plane. The pair $\alpha$ and $\beta_E$, or the pair
+$\alpha_T$ and $\phi_w$, is preferable.
+
+\taossubhead{Total angle of attack and windward meridian}
+
+The total angle of attack $\alpha_T$ is the angle between $\hat x_b$ and
+$\hat x_w$. The windward meridian $\phi_w$ is the angle between $\hat z_b$ and
+the projection of $\vec V_{w\oplus}$ onto the $\hat y_b\hat z_b$ plane, as shown
+in \cref{fig:total-alpha-windward-meridian}. Their definitions are
+\begin{equation}
+  \tan\alpha_T
+  =\frac{\sqrt{(\hat x_w\mathbin{\cdot}\hat y_b)^2
+                  +(\hat x_w\mathbin{\cdot}\hat z_b)^2}}
+  {\hat x_w\mathbin{\cdot}\hat x_b},
+  \label{eq:total-angle-of-attack}
+\end{equation}
+\begin{equation}
+  \tan\phi_w
+  =-\frac{\hat x_w\mathbin{\cdot}\hat y_b}
+  {\hat x_w\mathbin{\cdot}\hat z_b}.
+  \label{eq:windward-meridian}
+\end{equation}
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.78\linewidth}{!}{\input{manual/figures/chapter02/fig-2-15}}
+  \caption{Total angle of attack and windward meridian definitions.}
+  \label{fig:total-alpha-windward-meridian}
+\end{figure}
+
+The total angle of attack is nonnegative and ranges from $0^\circ$ to $180^\circ$.
+The windward meridian may take any value but is normally expressed between
+$0^\circ$ and $360^\circ$.
+
+\taossubhead{Aerodynamic-angle relationships}
+
+TAOS guidance rules specify one pair of aerodynamic angles and derive the remaining
+angles from that pair. If $\alpha$ and $\beta_E$ are known, then
+\begin{equation}
+  \tan\alpha_T
+  =\frac{\sqrt{\sin^2\beta_E
+      +\cos^2\beta_E\sin^2\alpha}}
+  {\cos\alpha\cos\beta_E},
+  \label{eq:alpha-betae-to-total-alpha}
+\end{equation}
+\begin{equation}
+  \tan\phi_w
+  =-\frac{\sin\beta_E}
+  {\sin\alpha\cos\beta_E},
+  \label{eq:alpha-betae-to-windward-meridian}
+\end{equation}
+\begin{equation}
+  \tan\beta
+  =\frac{\sin\beta_E}
+  {\cos\alpha\cos\beta_E}.
+  \label{eq:alpha-betae-to-beta}
+\end{equation}
+For the special case $\alpha=\pm90^\circ$, TAOS uses $\beta=-\phi_w$.
+
+If $\alpha$ and $\beta$ are known, then
+\begin{equation}
+  \tan\alpha_T=\sqrt{\tan^2\alpha+\tan^2\beta},
+  \label{eq:alpha-beta-to-total-alpha}
+\end{equation}
+\begin{equation}
+  \tan\phi_w=-\frac{\tan\beta}{\tan\alpha},
+  \label{eq:alpha-beta-to-windward-meridian}
+\end{equation}
+\begin{equation}
+  \sin\beta_E=-\sin\alpha_T\sin\phi_w.
+  \label{eq:alpha-beta-to-euler-sideslip}
+\end{equation}
+For the special case $\alpha=\pm90^\circ$, TAOS uses $\phi_w=-\beta$.
+
+Finally, if $\alpha_T$ and $\phi_w$ are known, then
+\begin{equation}
+  \tan\alpha
+  =\frac{\sin\alpha_T\cos\phi_w}{\cos\alpha_T},
+  \label{eq:total-alpha-phi-to-alpha}
+\end{equation}
+\begin{equation}
+  \tan\beta
+  =-\frac{\sin\alpha_T\sin\phi_w}{\cos\alpha_T},
+  \label{eq:total-alpha-phi-to-beta}
+\end{equation}
+\begin{equation}
+  \sin\beta_E=-\sin\alpha_T\sin\phi_w.
+  \label{eq:total-alpha-phi-to-euler-sideslip}
+\end{equation}
+For the special case $\alpha_T=90^\circ$, TAOS uses $\beta=-\phi_w$.
+
+After all aerodynamic angles have been determined,
+\cref{eq:body-x-from-aero-angles,eq:body-y-from-aero-angles,eq:body-z-from-aero-angles}
+are used to compute the body unit vectors. These calculations are performed by
+\texttt{body\_attitude} in the \texttt{derivs} module. Conversely, when the body
+unit vectors were obtained from Euler angles, \cref{eq:total-angle-of-attack,eq:windward-meridian} provide $\alpha_T$ and $\phi_w$, after which
+\cref{eq:total-alpha-phi-to-alpha,eq:total-alpha-phi-to-beta,eq:total-alpha-phi-to-euler-sideslip} supply the other aerodynamic angles.
+
+\taossubhead{Aerodynamic and bank-angle output variables}
+
+\begin{longtable}{@{}>{\ttfamily}p{0.18\textwidth}p{0.18\textwidth}p{0.56\textwidth}@{}}
+  alpha  & $\alpha$ & Angle of attack.\\
+  alphat & $\alpha_T$ & Total angle of attack.\\
+  bankgc & $\mu_{gc}$ & Geocentric bank angle.\\
+  bankgd & $\mu_{gd}$ & Geodetic bank angle.\\
+  beta   & $\beta$ & Sideslip angle.\\
+  betae  & $\beta_E$ & Euler sideslip angle.\\
+  phi    & $\phi_w$ & Windward meridian angle.\\
+\end{longtable}

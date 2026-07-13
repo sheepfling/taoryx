@@ -1,0 +1,15 @@
+\begin{tikzpicture}[scale=0.88,>=Latex,line cap=round,line join=round]
+  \coordinate (O) at (0,0);
+  \coordinate (P) at (4.15,2.60);
+  \draw[->] (O)--(0,4.25) node[above] {$\hat{z}_{\oplus}$};
+  \draw[->] (O)--(5.35,0) node[right] {Equatorial plane};
+  \draw[line width=0.9pt] (0,3.35) arc[start angle=90,end angle=5,x radius=4.55,y radius=3.35];
+  \draw[->,line width=1pt] (O)--(P) node[midway,above] {$\vec r$};
+  \fill (P) circle (1.6pt) node[right=7pt] {Vehicle};
+  \draw[->,line width=1.1pt] (P)--($(P)+(-1.65,0.88)$) node[above left] {$\hat{x}_{V_w}$};
+  \draw[->,line width=1.1pt] (P)--($(P)+(0.10,-1.20)$) node[below] {$\hat{z}_{V_w}$};
+  \draw[->,line width=1.1pt] (P)--($(P)+(-0.95,-0.28)$) node[below left] {$\hat{y}_{V_w}$};
+  \draw[->,line width=1.1pt] (P)--($(P)+(-1.30,1.15)$) node[above left] {$\vec V_{w\oplus}$};
+  \draw[->,line width=0.9pt] (P)--($(P)+(-0.55,-0.80)$) node[below left] {$\hat{z}_{gd}$};
+  \node[align=left] at (5.55,3.35) {Note: $\hat{y}_{V_w}$ is\\into the page};
+\end{tikzpicture}

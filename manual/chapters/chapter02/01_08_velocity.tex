@@ -1,0 +1,105 @@
+% Source PDF pages 53--54; manual pages 2-24--2-25.
+\subsection{Velocity Cartesian Coordinate Systems}\label{sec:velocity-coordinate}
+
+Intermediate Cartesian systems, called velocity coordinate systems, are used to
+convert from geocentric or geodetic coordinates to the wind coordinate system
+(\cref{sec:wind-coordinate}). One velocity system is referenced to the local
+geocentric horizon system and another to the local geodetic horizon system. They
+are defined identically except for the reference-frame subscripts. The development
+below uses the geodetic system; replacing the $gd$ subscripts with $gc$ gives the
+geocentric form.
+
+The origin of a velocity coordinate system is at the vehicle's center of mass. For
+the air-relative velocity system, the $x$ axis is aligned with the wind-corrected
+velocity vector
+\begin{equation}
+  \vec V_{w\oplus}=\vec V_{\oplus}-\Delta\vec V_{w\oplus},
+  \label{eq:wind-corrected-velocity}
+\end{equation}
+where $\Delta\vec V_{w\oplus}$ is the input wind velocity vector relative to the
+earth's surface, as described in \cref{sec:block-wind}. The vector
+$\vec V_{w\oplus}$ is therefore the vehicle velocity relative to the surrounding air.
+Its magnitude is the output variable \statevar{vair}, or airspeed.
+
+The velocity-system $y$ axis is perpendicular to the plane formed by its $x$ axis
+and the geodetic $\hat z_{gd}$ axis. The $z$ axis is perpendicular to the other two
+and points generally toward the earth, as shown in
+\cref{fig:velocity-coordinate-system}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.72\linewidth}{!}{\input{manual/figures/chapter02/fig-2-10}}
+  \caption{Velocity coordinate system.}
+  \label{fig:velocity-coordinate-system}
+\end{figure}
+
+The function \texttt{wind\_unit\_vectors} computes the air-relative velocity-system
+unit vectors from
+\begin{equation}
+  \hat x_{V_w}=\frac{\vec V_{w\oplus}}
+  {\lVert\vec V_{w\oplus}\rVert},
+  \label{eq:air-relative-velocity-x-axis}
+\end{equation}
+\begin{equation}
+  \hat y_{V_w}
+  =\frac{\hat z_{gd}\times\hat x_{V_w}}
+  {\lVert\hat z_{gd}\times\hat x_{V_w}\rVert},
+  \label{eq:air-relative-velocity-y-axis}
+\end{equation}
+\begin{equation}
+  \hat z_{V_w}
+  =\frac{\hat x_{V_w}\times\hat y_{V_w}}
+  {\lVert\hat x_{V_w}\times\hat y_{V_w}\rVert}.
+  \label{eq:air-relative-velocity-z-axis}
+\end{equation}
+
+A second, analogous velocity system relates the earth-relative velocity vector to
+the geodetic system through the flight-path angles. Its $x$ axis is aligned with
+$\vec V_{\oplus}$ rather than with $\vec V_{w\oplus}$:
+\begin{equation}
+  \hat x_V=\frac{\vec V_{\oplus}}
+  {\lVert\vec V_{\oplus}\rVert}.
+  \label{eq:earth-relative-velocity-x-axis}
+\end{equation}
+The geodetic system is related to this velocity system by a rotation about
+$\hat z_{gd}$ through the heading angle $\psi_{gd}$, followed by a rotation about
+the intermediate $y$ axis through the vertical flight-path angle $\gamma_{gd}$:
+\begin{equation}
+  \begin{bmatrix}
+    \hat x_V\\[0.2em]
+    \hat y_V\\[0.2em]
+    \hat z_V
+  \end{bmatrix}
+  =
+  \TaosPitchMatrix{\gamma_{gd}}
+  \TaosYawMatrix{\psi_{gd}}
+  \begin{bmatrix}
+    \hat x_{gd}\\[0.2em]
+    \hat y_{gd}\\[0.2em]
+    \hat z_{gd}
+  \end{bmatrix}.
+  \label{eq:geodetic-to-velocity-transformation}
+\end{equation}
+Expanding the matrices gives
+\begin{equation}
+  \hat x_V
+  =\cos\gamma_{gd}\cos\psi_{gd}\,\hat x_{gd}
+  +\cos\gamma_{gd}\sin\psi_{gd}\,\hat y_{gd}
+  -\sin\gamma_{gd}\,\hat z_{gd},
+  \label{eq:velocity-x-from-geodetic}
+\end{equation}
+\begin{equation}
+  \hat y_V
+  =-\sin\psi_{gd}\,\hat x_{gd}
+  +\cos\psi_{gd}\,\hat y_{gd},
+  \label{eq:velocity-y-from-geodetic}
+\end{equation}
+\begin{equation}
+  \hat z_V
+  =\sin\gamma_{gd}\cos\psi_{gd}\,\hat x_{gd}
+  +\sin\gamma_{gd}\sin\psi_{gd}\,\hat y_{gd}
+  +\cos\gamma_{gd}\,\hat z_{gd}.
+  \label{eq:velocity-z-from-geodetic}
+\end{equation}
+These relationships are used in the derivation of the flight-path-angle rates in
+\cref{sec:flight-path-rates}.

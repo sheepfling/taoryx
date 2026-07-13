@@ -1,0 +1,74 @@
+\subsection{\problemblock{*Egs} Data Block}\label{sec:block-egs}
+
+The Engineering Graphics System (EGS) is available on the Silicon Graphics
+workstations in the Aerospace Systems Development Center at Sandia.\manualref{4}
+This software is designed to interactively plot sets of analysis data, such as
+trajectory data. The data for EGS must be in a special format called the EGS database
+format, so the \problemblock{*egs} data block is available to produce a file
+containing trajectory variables in this format. It provides a simple interface to EGS,
+so that high-quality plots of the trajectory data can be produced quickly.
+
+The \problemblock{*egs} data block contains a filename and a list of variable names.
+The file produced by this data block, an EGS database file, usually has the file type
+\texttt{.dbf}. A database file is created for each \problemblock{*egs} data block,
+and any number of \problemblock{*egs} data blocks can appear within a problem
+file.
+
+An example of an \problemblock{*egs} data block is
+
+\begin{lstlisting}[style=taosmanual]
+*egs traj.dbf
+  time alt range vel mach long latgd gamgd
+  psigd dynprs alpha nx ny nz ntotal
+\end{lstlisting}
+
+where the database filename is \texttt{traj.dbf} and 15 output variables have been
+listed. Any number of output variables can be listed in the data block.
+\Cref{fig:egs-database-example} contains a listing of the first part of the database
+file created from this example.
+
+\begin{center}
+  \begin{minipage}{0.96\linewidth}
+    \lstinputlisting[style=taosmanual,basicstyle=\ttfamily\scriptsize]{examples/chapter04/egs-database-example.txt}
+    \captionof{figure}{Example of an EGS database file.}
+    \label{fig:egs-database-example}
+  \end{minipage}
+\end{center}
+
+Data is automatically written to the database file for each trajectory defined in the
+problem, so no trajectory numbers are given. The units and output format of each
+variable can be set with the \problemblock{*units/fmt} data block
+(\cref{sec:block-units-fmt}).
+
+TAOS overwrites the \problemblock{*egs} database files without warning each time
+it runs. This automatically updates the files so they contain the latest trajectory
+information for a problem. If this is not desirable, then the filename must be changed
+between runs or the database files can be renamed before each new run.
+
+Radar and relative-vehicle output variables, those starting with \texttt{rad} or
+\texttt{rel}, must contain a subscript enclosed in square brackets. The subscript gives
+the radar station number or the trajectory number for the relative-vehicle
+calculations. For example, the variable \statevar{radrng[2]} is used to output the
+radar range of each trajectory from radar station number 2, and the variable
+\statevar{relvel[4]} is used to output the closing velocity of trajectory number 4
+relative to the other trajectories.
+
+If surveys have been defined (\cref{sec:block-survey}), the survey loops form
+different data levels in the EGS database file so EGS can be used to plot the
+trajectory data as a function of the survey variables. In
+\cref{fig:egs-database-example} the variable \statevar{gama} is a survey-loop
+variable, and a set of trajectories is computed for each value it takes on.
+
+Summary variables (\cref{sec:block-summarize}) are not written to the standard
+EGS database file. If summary variables have been defined, they can be written to
+an EGS database file with
+
+\begin{lstlisting}[style=taosmanual]
+*egs summary file.dbf
+\end{lstlisting}
+
+The \texttt{summary} keyword and the filename are required; no output or summary
+variable names are given. This form of the \problemblock{*egs} data block, with the
+\texttt{summary} keyword and a filename, requires at least one survey loop and at
+least one summary variable. All summary variables are written to the EGS database
+file as a function of the survey variables.

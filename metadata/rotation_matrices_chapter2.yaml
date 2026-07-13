@@ -1,0 +1,18 @@
+rotation_matrix_convention:
+  type: passive_coordinate_transformation
+  handedness: right_handed_frames
+  note: Signs follow the TAOS Chapter 2 coordinate-axis convention and are not generic active rotations.
+latex_macros:
+  - name: TaosRollMatrix
+    axis: x
+    source_equations: [2-50]
+  - name: TaosPitchMatrix
+    axis: y
+    source_equations: [2-50, 2-67, 2-72]
+  - name: TaosYawMatrix
+    axis: z
+    source_equations: [2-50, 2-67]
+  - name: TaosEulerSideslipMatrix
+    axis: z
+    source_equations: [2-72]
+source_file: manual/math/matrices/rotations.tex

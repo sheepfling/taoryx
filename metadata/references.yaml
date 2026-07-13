@@ -1,0 +1,155 @@
+references:
+  source_pdf_pages:
+  - 294
+  - 295
+  source_manual_pages:
+  - Ref-1
+  - Ref-2
+  entry_count: 23
+  entries:
+  - number: 1
+    entry_latex: D. E. Salguero, \emph{Point-Mass Simulation Tool (PMAST) User's Manual}, SAND85-2039, Sandia National
+      Laboratories, Albuquerque, NM, March 1986.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 2
+    entry_latex: D. E. Outka, \emph{User's Manual for the Trajectory Simulation and Analysis Program (TSAP)}, SAND88-3158,
+      Sandia National Laboratories, Albuquerque, NM, July 1990.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 3
+    entry_latex: M. J. D. Powell, A Fast Algorithm for Nonlinearly Constrained Optimization Calculations, \emph{Proceedings
+      of the Biennial Conference on Numerical Analysis, 28 June--1 July 1977}, G. A. Watson, ed., Springer-Verlag,
+      Berlin, Germany, pp. 144--157, 1978.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 4
+    entry_latex: D. E. Salguero, \emph{Engineering Graphics System (EGS) User's Manual}, SAND89-0156, Sandia National
+      Laboratories, Albuquerque, NM, January 1989.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 5
+    entry_latex: T. O. Seppelin, \emph{The Department of Defense World Geodetic System 1972}, World Geodetic System
+      Committee, International Symposium on Problems Related to the Redefinition of North American Geodetic Networks,
+      Fredericton, New Brunswick, Canada, May 1974.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 6
+    entry_latex: \emph{Department of Defense World Geodetic System 1984}, DMA TR 8350.2, Defense Mapping Agency
+      WGS 84 Development Committee, Washington, DC, September 30, 1987.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 7
+    entry_latex: J. L. McDowell, B. E. Schutz, R. E. McKenzie, and B. D. Tapley, \emph{Trajectory Analysis Program
+      Mathematical Specifications (Version 770701)}, TR 77-1, Center for Advanced Study in Orbital Mechanics, Department
+      of Aerospace Engineering and Engineering Mechanics, The University of Texas at Austin, 1977.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 8
+    entry_latex: L. W. Johnson and R. D. Riess, \emph{Numerical Analysis}, 2nd ed., Addison-Wesley, Reading, MA,
+      1982.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 9
+    entry_latex: W. Cheney and D. Kincaid, \emph{Numerical Mathematics and Computing}, Brooks/Cole, Monterey, CA,
+      1980.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 10
+    entry_latex: G. W. Rosborough, Gravitational Effects on Low-Earth Orbiters, \emph{Advances in the Astronautical
+      Sciences}, Vol. 74, pp. 587--610, 1991.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 11
+    entry_latex: 'J. G. Marsh, F. J. Lerch, B. H. Putney, D. C. Christodoulidis, D. E. Smith, T. L. Felsentreger,
+      B. V. Sanchez, S. M. Klosko, E. C. Pavlis, T. V. Martin, J. W. Robbins, R. G. Williamson, O. L. Colombo, D.
+      D. Rowlands, W. F. Eddy, N. L. Chandler, K. E. Rachlin, G. B. Patel, S. Bhati, and D. S. Chinn, A New Gravitational
+      Model for the Earth from Satellite Tracking Data: GEM-T1, \emph{Journal of Geophysical Research}, Vol. 93,
+      pp. 6169--6215, June 1988.'
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 12
+    entry_latex: D. B. Landrum, \emph{Standard Atmosphere Subroutine}, Internal Memorandum RS1555/87/010, Sandia
+      National Laboratories, Albuquerque, NM, January 1987.
+    source_pdf_page: 294
+    source_manual_page: Ref-1
+    status: visually_verified
+  - number: 13
+    entry_latex: \emph{U.S. Standard Atmosphere, 1976}, National Oceanic and Atmospheric Administration, National
+      Aeronautics and Space Administration, and the United States Air Force, U.S. Government Printing Office, Washington,
+      DC, 1976.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 14
+    entry_latex: \emph{U.S. Standard Atmosphere Supplements, 1966}, Environmental Science Services Administration,
+      National Aeronautics and Space Administration, and the United States Air Force, U.S. Government Printing Office,
+      Washington, DC, 1966.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 15
+    entry_latex: \emph{Kwajalein Reference Atmosphere 1979}, AFGL-TR-79-0241, Air Force Geophysical Laboratory,
+      September 1979.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 16
+    entry_latex: E. M. Sodano and T. A. Robinson, \emph{Direct and Inverse Solutions of Geodesics}, Technical Report
+      7 (Revised), U.S. Army Map Service, Washington, DC, pp. 15--27, 1963.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 17
+    entry_latex: P. Zarchan, \emph{Tactical and Strategic Missile Guidance}, 2nd ed., vol. 157, Progress in Astronautics
+      and Aeronautics, American Institute of Aeronautics and Astronautics, Washington, DC, 1994.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 18
+    entry_latex: K. D. Bruns, M. E. Moore, S. L. Stoy, and S. R. Vukelich, \emph{Missile Datcom User's Manual --
+      Rev 4/91}, WL-TR-91-3039, Wright Laboratory, Wright-Patterson Air Force Base, Ohio, April 1991.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 19
+    entry_latex: R. W. Noack and A. R. Lopez, \emph{Inviscid Flow Field Analysis of Complex Reentry Vehicles}, vol.
+      I and II, SAND87-0776, Sandia National Laboratories, Albuquerque, NM, October 1988.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 20
+    entry_latex: K. V. Chavez and D. E. Salguero, \emph{A User's Manual for the Aerodynamic Prediction Software
+      (AERO)}, SAND93-0479, Sandia National Laboratories, Albuquerque, NM, April 1993.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 21
+    entry_latex: D. E. Salguero, \emph{Solid Rocket Motor Performance for Conceptual Design Studies}, SAND89-1181,
+      Sandia National Laboratories, Albuquerque, NM, May 1989.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 22
+    entry_latex: Jia-Yih Chang, \emph{Recursive Quadratic Programming with Best Feasible Point}, PhD Dissertation,
+      The University of Texas at Austin, May 1989.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified
+  - number: 23
+    entry_latex: R. W. Stineman, A Consistently Well-Behaved Method of Interpolation, \emph{Creative Computing},
+      pp. 54--57, July 1980.
+    source_pdf_page: 295
+    source_manual_page: Ref-2
+    status: visually_verified

@@ -1,0 +1,66 @@
+chapter: 2
+section: 2.6
+name: Trajectory Calculations
+source:
+  manual_pages: [2-91, 2-92, 2-93, 2-94, 2-95, 2-96, 2-97]
+  pdf_pages: [120, 121, 122, 123, 124, 125, 126]
+  numbered_figures: [2-31, 2-32, 2-33, 2-34]
+implementation_context:
+  program_modules_table: 2-1
+  main_entry:
+    function: main
+    module: main
+  trajectory_driver:
+    function: compute_trajectories
+    module: path
+  time_step:
+    function: get_next_time_step
+    module: path
+    synchronization: all_active_vehicles_share_one_delta_t
+    reductions:
+      - print_interval_boundary
+      - time_dependent_guidance_table_point
+  integration:
+    function: integration_step
+    module: derivs
+    method: fixed_step_fourth_order_Runge_Kutta
+    vehicle_systems: integrated_separately
+  final_conditions:
+    function: check_final_conditions
+    module: path
+    boundary_refinement: secant_search_on_delta_t
+    multiple_hits:
+      simultaneous: end_together
+      different_times: halve_step_until_one_condition_is_crossed
+  search_dispatch:
+    function: search_function_hit
+    module: search
+    evaluation_location: segment_end
+    restart_policy: restart_immediately_before_earliest_modified_input
+  vehicle_activation:
+    function: add_new_vehicles
+    module: path
+    trigger: starting_state_becomes_available
+state_structure:
+  top_level: linked_list_of_vehicles
+  vehicle_record:
+    - initial_conditions
+    - linked_segment_definitions
+    - linked_output_variable_histories
+  limits: available_memory_and_processing_time
+derivative_pipeline:
+  function: compute_derivs
+  module: derivs
+  order:
+    - coordinate_system_unit_vectors_and_state_conversions
+    - state_rates
+    - gravity_acceleration
+    - atmosphere_properties
+    - wind_airspeed_Mach_dynamic_pressure_and_Reynolds_number
+    - body_attitude_aerodynamic_angles_and_body_basis
+    - aerodynamic_and_propulsive_forces
+    - acceleration_and_state_derivatives
+    - flight_path_rates_and_specific_loads_for_guidance
+    - guidance_loop
+    - rail_or_sled_adjustment
+    - remaining_output_variables

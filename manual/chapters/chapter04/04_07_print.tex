@@ -1,0 +1,61 @@
+\subsection{\problemblock{*Print} Data Block}\label{sec:problem-block-print}
+
+The \problemblock{*print} data block can appear either within a trajectory or within
+a problem (outside of a trajectory definition). The purpose of the
+\problemblock{*print} data block is the same in either case: to write trajectory
+information to the standard output file. The standard output file has the same
+filename as the problem file, but it is of type \texttt{.out} instead of
+\texttt{.prb}. It has page breaks and headings formatted for a standard printer with
+132 characters per line and 60 lines per page.
+
+The difference between \problemblock{*print} data blocks located within a
+trajectory definition and those located outside of a trajectory is that those located
+within a trajectory assume the printed information is for that trajectory. The
+variables printed are assumed to be associated with the trajectory containing the
+\problemblock{*print} data block.
+
+\problemblock{*print} data blocks that are not within a trajectory definition do not
+make this assumption, so trajectory numbers enclosed in brackets are required in
+addition to the variable names. This provides the capability to print variables from
+several trajectories on the same page.
+
+For example,
+
+\begin{lstlisting}[style=taosmanual]
+*print
+  time[1] alt[1] alt[2] range[1] range[2]
+\end{lstlisting}
+
+prints the time from trajectory number 1, the altitude from trajectories 1 and 2, and
+the range from trajectories 1 and 2 as shown in
+\cref{fig:problem-printout-example}. This makes it easy to compare values from
+different trajectories. Data from different trajectories are related by mission time so
+\statevar{alt[1]} and \statevar{alt[2]} refer to the altitudes of trajectories 1 and 2
+at the same instant in time.
+
+\begin{center}
+  \begin{minipage}{0.92\linewidth}
+    \lstinputlisting[style=taosmanual,basicstyle=\ttfamily\scriptsize]{examples/chapter04/problem-printout-example.txt}
+    \captionof{figure}{Trajectory printout example.}
+    \label{fig:problem-printout-example}
+  \end{minipage}
+\end{center}
+
+The printout begins with a page heading, a title, and column headings that are
+repeated on every page. This is followed by the trajectory variables. Any of the
+standard output variables listed in the Appendix can be printed along with any
+user-defined variables. The output format of each variable is controlled with the
+\problemblock{*units/fmt} data block (\cref{sec:block-units-fmt}).
+
+A table of trajectory data is written, with a maximum of 10 output variables, for each
+\problemblock{*print} data block. Any number of \problemblock{*print} data
+blocks can be included within a problem.
+
+Radar and relative-vehicle output variables, those starting with \texttt{rad} or
+\texttt{rel}, must contain an additional subscript enclosed in square brackets. The
+first subscript gives the radar station number or the trajectory number for the
+relative-vehicle calculations, and the second subscript gives the vehicle trajectory
+number. For example, the variable \statevar{radrng[2][1]} is used to print the radar
+range of trajectory number 1 from radar station number 2, and the variable
+\statevar{relvel[4][2]} is used to print the closing velocity of trajectory number 4
+relative to trajectory number 2.

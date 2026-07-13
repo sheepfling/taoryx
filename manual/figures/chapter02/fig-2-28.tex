@@ -1,0 +1,26 @@
+\begin{tikzpicture}[>=Latex,x=0.95cm,y=0.95cm,line cap=round]
+  \coordinate (o) at (0,0);
+  \coordinate (target) at (5.0,4.15);
+  \coordinate (interceptor) at (5.35,1.05);
+  \coordinate (impact) at (7.1,4.15);
+
+  \draw[->,line width=0.75pt] (o) -- (target) node[midway,above left] {$\vec r_2(t)$};
+  \draw[->,line width=0.75pt] (o) -- (interceptor) node[midway,below] {$\vec r_1(t)$};
+  \draw[->,line width=0.75pt] (o) -- (impact) node[midway,above] {$\vec r_i$};
+  \draw[->,line width=0.75pt] (target) -- (impact) node[midway,above] {$\vec V_2$};
+  \draw[->,line width=0.75pt] (interceptor) -- ++(1.45,0.72) node[right] {$\vec V_1$};
+  \draw[->,line width=0.75pt] (interceptor) -- (impact) node[midway,right] {$\Delta\vec r$};
+
+  \fill (o) circle (2.1pt);
+  \fill (target) circle (2.1pt);
+  \fill (interceptor) circle (2.1pt);
+  \fill (impact) circle (2.1pt);
+
+  \draw[->] (o) -- ++(0.8,0);
+  \draw[->] (o) -- ++(0,0.8);
+  \draw[->] (o) -- ++(-0.45,-0.45);
+  \node[left,align=right] at (-0.1,0.55) {ECFC\\system};
+  \node[above left] at (target) {Target};
+  \node[below right] at (interceptor) {Interceptor};
+  \node[right,align=left] at (impact) {Intercept\\point};
+\end{tikzpicture}

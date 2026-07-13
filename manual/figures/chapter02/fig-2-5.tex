@@ -1,0 +1,26 @@
+\begin{tikzpicture}[scale=0.95,>=Latex,line cap=round,line join=round]
+  \coordinate (O) at (0,0);
+  \coordinate (V) at (4.25,2.45);
+  \coordinate (S) at (3.77,2.05);
+  % Ellipsoidal earth section.
+  \draw[line width=0.95pt] (0,0) arc[start angle=180,end angle=0,x radius=3.75,y radius=2.30];
+  \draw[->,line width=0.9pt] (O) -- (7.30,0) node[right,align=left] {Equatorial\\plane};
+  \draw[->,line width=0.9pt] (O) -- (0,3.65) node[above] {$\hat{z}_{\oplus}$};
+  \draw[<->] (-0.40,0) -- (-0.40,2.30) node[midway,left] {$R_p$};
+  \draw[<->] (0,-0.36) -- (3.75,-0.36) node[midway,below] {$R_{\oplus}$};
+  \draw[->,line width=1pt] (O) -- (V) node[midway,above left] {$\vec r$};
+  \fill (V) circle (1.5pt);
+  \fill (S) circle (1.3pt);
+  % Surface normal and tangent plane.
+  \draw[line width=0.9pt] (2.35,0.33) -- (V);
+  \draw[line width=0.9pt] ($(V)+(-1.25,0.95)$) -- ($(V)+(1.20,-0.90)$);
+  \node[align=left,above] at (4.25,3.08) {Geodetic local\\horizon plane};
+  \draw[->,line width=1pt] (V) -- ($(V)+(-0.92,0.68)$) node[above left] {$\hat{x}_{gd}$};
+  \draw[->,line width=1pt] (V) -- ($(V)+(0.25,0.78)$) node[above] {$\hat{y}_{gd}$};
+  \draw[->,line width=1pt] (V) -- ($(V)+(-0.66,-0.53)$) node[below left] {$\hat{z}_{gd}$};
+  \draw[->] (0.92,0) arc[start angle=0,end angle=31,radius=0.92];
+  \node at (0.92,0.34) {$\delta_{gc}$};
+  \draw[->] (2.45,0) arc[start angle=0,end angle=47,radius=0.72];
+  \node at (2.50,0.42) {$\delta_{gd}$};
+  \draw (3.58,1.80) -- ++(0.18,0.18) -- ++(-0.18,0.18);
+\end{tikzpicture}

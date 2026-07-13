@@ -1,0 +1,34 @@
+\subsection{\problemblock{*Dwn/crs} Data Block}\label{sec:block-dwn-crs}
+
+East, north, downrange, and crossrange are defined from a reference point given by
+longitude and geodetic latitude, as shown in
+\cref{fig:downrange-crossrange-definition}. The trajectory is projected onto the
+earth's surface, and the distances are measured along that surface curve as described
+in \cref{sec:ranges-distances}. East is the component of distance traveled along a
+constant latitude, and north is the component traveled along a constant longitude.
+Downrange is the component traveled along a reference azimuth or heading, and
+crossrange is the component traveled perpendicular to that heading.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter04/fig-4-4}
+  \caption{Downrange and crossrange definition.}
+  \label{fig:downrange-crossrange-definition}
+\end{figure}
+
+All of these distances use the same reference point. The reference heading is used
+only by the downrange and crossrange calculations. The reference longitude,
+latitude, and heading default to the beginning of the trajectory given by the initial
+conditions.
+
+If a different reference point is required, or if multiple trajectories need to use the
+same reference point, the values can be given in a \problemblock{*dwn/crs} data
+block. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*dwn/crs latgd=10 long=95 azm=45
+\end{lstlisting}
+
+places the reference point at a latitude of $10^\circ$~N and a longitude of
+$95^\circ$~E. The reference heading or azimuth is $45^\circ$ from north, or
+northeast.

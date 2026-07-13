@@ -1,0 +1,157 @@
+\subsection{\problemblock{*Earth} Data Block}\label{sec:block-earth}
+
+TAOS requires an earth model to generate a trajectory. An earth model consists of
+an earth or planetary shape, a gravity model, and additional parameters such as the
+rotation rate. Four standard families are provided: spherical earth, WGS-72,
+WGS-84, and GEM-T1. If none is suitable, individual parameters can be overridden
+to form a user-defined model.
+
+The earth is represented as an ellipsoid whose equatorial radius is greater than its
+polar radius. Shape is specified by equatorial radius and one of polar radius,
+eccentricity, or flattening; once one of those three is known, the other two can be
+computed. Gravity is specified by the gravity constant $GM$ and either zonal
+harmonics $J_n$ or the full coefficients $C_{n,m}$ and $S_{n,m}$. Rotation rate
+and the pounds-mass-to-slug conversion factor complete the model.
+
+\taossubhead{Spherical Earth Model}
+
+The simplest model is spherical. It requires radius, rotation rate, gravity constant,
+and the lbm-to-slug conversion. Defaults are based on WGS-84 and are listed in
+\cref{tab:spherical-earth-model}. The block
+
+\begin{lstlisting}[style=taosmanual]
+*earth spherical omega=0
+\end{lstlisting}
+
+selects the spherical defaults and then overrides the rotation rate.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Spherical earth model.}
+  \label{tab:spherical-earth-model}
+  \begin{tabularx}{0.76\linewidth}{@{}>{\ttfamily}lXl@{}}
+    \toprule
+    \normalfont Symbol & Description & Default value \\
+    \midrule
+    reqtr & Earth radius (ft) & 20925646.3255 \\
+    omega & Rotation rate (rad/s) & $7.292115\times10^{-5}$ \\
+    gm    & Gravity constant (ft\textsuperscript{3}/s\textsuperscript{2}) & $1.40764438125\times10^{16}$ \\
+    g     & lbm-to-slug conversion & 32.1740485 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\taossubhead{WGS-72 and WGS-84 Earth Models}
+
+The \texttt{wgs-72} and \texttt{wgs-84} models use an ellipsoidal earth. One of
+those keywords must immediately follow \problemblock{*earth}, and any following
+assignments override the defaults. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*earth wgs-84 omega=0
+\end{lstlisting}
+
+selects WGS-84 but makes the earth nonrotating, a simplification often used in
+conceptual-design studies.
+
+Because the model is ellipsoidal, additional parameters are required as shown in
+\cref{tab:wgs-earth-model-values}. Shape is defined by equatorial radius and one
+of polar radius, eccentricity, or flattening. Supplying more than one of the latter
+usually creates redundant and potentially inconsistent geometry.
+
+\begin{table}[htbp]
+  \centering
+  \caption{WGS-72 and WGS-84 earth-model values.}
+  \label{tab:wgs-earth-model-values}
+  \small
+  \begin{tabularx}{0.98\linewidth}{@{}>{\ttfamily}lXll@{}}
+    \toprule
+    \normalfont Symbol & Description & WGS-84 & WGS-72 \\
+    \midrule
+    reqtr & Equatorial radius (ft) & 20925646.3255 & 20925639.7638 \\
+    rpolr & Polar radius (ft) & 20855486.5953 & 20855480.7087 \\
+    ecc & Eccentricity & 0.0818191908426 & 0.0818188106627 \\
+    flat & Flattening parameter & $1/298.257223563$ & $1/298.26$ \\
+    omega & Rotation rate (rad/s) & $7.292115\times10^{-5}$ & $7.292115147\times10^{-5}$ \\
+    g & lbm-to-slug conversion & 32.1740485 & 32.1740485 \\
+    gm & Gravity constant (ft\textsuperscript{3}/s\textsuperscript{2}) & $1.40764438125\times10^{16}$ & $1.40764544069\times10^{16}$ \\
+    j2 & Degree-2 zonal harmonic & $1.08262998905\times10^{-3}$ & $1.08261579002\times10^{-3}$ \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The standard WGS gravity model uses the second-degree zonal harmonic $J_2$ to
+account for oblateness; higher coefficients are neglected.
+
+\taossubhead{TSAP-Compatible Earth Models}
+
+TSAP and PMAST used WGS-72 and WGS-84 models containing zonal harmonics
+through degree 4. $J_2$ represents earth oblateness, while $J_3$ and $J_4$ describe
+additional latitude-dependent variations. Their use is questionable for typical
+trajectories because they are comparable to omitted nonzonal harmonics and to the
+neglected gravitational effects of the sun and moon. Nevertheless, the
+\texttt{tsap-72} and \texttt{tsap-84} models retain them so TAOS results can be
+consistent with its predecessors.
+
+\begin{table}[htbp]
+  \centering
+  \caption{TSAP-compatible earth-model values.}
+  \label{tab:tsap-compatible-earth-values}
+  \begin{tabularx}{0.84\linewidth}{@{}>{\ttfamily}lXll@{}}
+    \toprule
+    \normalfont Symbol & Description & WGS-84 & WGS-72 \\
+    \midrule
+    j3 & Degree-3 zonal harmonic & $-2.532153068\times10^{-6}$ & $-2.538810043\times10^{-6}$ \\
+    j4 & Degree-4 zonal harmonic & $-1.610987610\times10^{-6}$ & $-1.655970000\times10^{-6}$ \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\taossubhead{Full Degree-4 Earth Models}
+
+Two additional models, \texttt{wgs-84-full} and \texttt{gem-t1-full}, include all
+geopotential terms through degree 4. Their input coefficients are unnormalized, so
+replacement values must also be unnormalized. The source does not recommend
+these models for high-accuracy work because neglected solar and lunar gravity is of
+the same order as many retained coefficients.
+
+\addtocounter{table}{1}% The source manual intentionally skips Table 4-18.
+\begin{longtable}{@{}>{\ttfamily}lp{0.33\linewidth}ll@{}}
+  \caption{Full WGS-84 and GEM-T1 earth-model values.}
+  \label{tab:full-earth-model-values}\\
+  \toprule
+  \normalfont Symbol & Description & WGS-84 & GEM-T1 \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \normalfont Symbol & Description & WGS-84 & GEM-T1 \\
+  \midrule
+  \endhead
+  reqtr & Equatorial radius (ft) & 20925646.3255 & 20925646.3255 \\
+  rpolr & Polar radius (ft) & 20855486.5953 & 20855486.5953 \\
+  ecc & Eccentricity & 0.0818191908426 & 0.0818191908426 \\
+  flat & Flattening parameter & $1/298.257223563$ & $1/298.257223563$ \\
+  omega & Rotation rate (rad/s) & $7.292115\times10^{-5}$ & $7.292115\times10^{-5}$ \\
+  g & lbm-to-slug conversion & 32.1740485 & 32.1740485 \\
+  gm & Gravity constant & $1.40764438125\times10^{16}$ & $1.4076441552\times10^{16}$ \\
+  c20 & Degree-2 zonal harmonic & $-1.082629\times10^{-3}$ & $-1.082625\times10^{-3}$ \\
+  c22 & Degree-2 nonzonal harmonic & $1.572805\times10^{-6}$ & $1.574322\times10^{-6}$ \\
+  c30 & Degree-3 zonal harmonic & $2.532153\times10^{-6}$ & $2.532618\times10^{-6}$ \\
+  c31 & Degree-3 nonzonal harmonic & $2.194673\times10^{-6}$ & $2.192402\times10^{-6}$ \\
+  c32 & Degree-3 nonzonal harmonic & $3.096837\times10^{-7}$ & $3.086210\times10^{-7}$ \\
+  c33 & Degree-3 nonzonal harmonic & $1.000789\times10^{-7}$ & $1.005372\times10^{-7}$ \\
+  c40 & Degree-4 zonal harmonic & $1.610987\times10^{-6}$ & $1.616190\times10^{-6}$ \\
+  c41 & Degree-4 nonzonal harmonic & $-5.080013\times10^{-7}$ & $-5.060561\times10^{-7}$ \\
+  c42 & Degree-4 nonzonal harmonic & $7.780961\times10^{-8}$ & $7.759155\times10^{-8}$ \\
+  c43 & Degree-4 nonzonal harmonic & $5.926679\times10^{-8}$ & $5.922238\times10^{-8}$ \\
+  c44 & Degree-4 nonzonal harmonic & $-3.948164\times10^{-9}$ & $-4.015116\times10^{-9}$ \\
+  s22 & Degree-2 nonzonal harmonic & $-9.023759\times10^{-7}$ & $-9.035928\times10^{-7}$ \\
+  s31 & Degree-3 nonzonal harmonic & $2.709571\times10^{-7}$ & $2.695880\times10^{-7}$ \\
+  s32 & Degree-3 nonzonal harmonic & $-2.121201\times10^{-7}$ & $-2.119137\times10^{-7}$ \\
+  s33 & Degree-3 nonzonal harmonic & $1.973456\times10^{-7}$ & $1.970571\times10^{-7}$ \\
+  s41 & Degree-4 nonzonal harmonic & $-4.498693\times10^{-7}$ & $-4.507384\times10^{-7}$ \\
+  s42 & Degree-4 nonzonal harmonic & $1.466394\times10^{-7}$ & $1.484816\times10^{-7}$ \\
+  s43 & Degree-4 nonzonal harmonic & $-1.189998\times10^{-8}$ & $-1.198933\times10^{-8}$ \\
+  s44 & Degree-4 nonzonal harmonic & $6.540039\times10^{-9}$ & $6.517407\times10^{-9}$ \\
+  \bottomrule
+\end{longtable}

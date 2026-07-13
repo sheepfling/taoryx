@@ -1,0 +1,69 @@
+\subsection{\problemblock{*Radar} Data Block}\label{sec:block-radar}
+
+Radar observations of trajectories can be simulated from one or more fixed radar
+stations. Available observations include range, azimuth, and elevation; their rates and
+accelerations; and the vehicle aspect and meridional angles relative to each station,
+as described in \cref{sec:radar-observations}.
+
+The presence of one or more radar output variables in a problem triggers the radar
+calculation. Stations are numbered beginning with 1. Square-bracket subscripts on
+radar variables identify the station: \statevar{radrng[2]} is range from station 2,
+while \statevar{radrng[3][2]} is range from station 3 to trajectory 2. When two
+subscripts are used, the trajectory number is last.
+
+A separate \problemblock{*radar} block defines each station. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*radar 1 station_x alt=539.24 long=-91.43562
+                   latgd=30.02347
+\end{lstlisting}
+
+defines station 1, named \texttt{station\_x}, at a geodetic latitude of
+$30.02347^\circ$~N, a longitude of $91.43562^\circ$~W, and an altitude of
+539.24~ft.
+
+Any number of stations can be defined. Although calculations identify them by
+number, each also has a name used as a comment to document the station. The station
+number and name must immediately follow the \problemblock{*radar} keyword;
+location variables follow in any order.
+
+A station is normally located with geodetic \statevar{alt}, \statevar{long}, and
+\statevar{latgd}. Small local Cartesian offsets may be added with
+\statevar{diste}, \statevar{distn}, and \statevar{distd}. These are applied in
+the local geodetic horizon coordinate system and do not follow earth curvature, so
+they should remain small.
+
+Station coordinates normally use the earth shape selected by
+\problemblock{*earth}. A radar block may override that shape for radar geometry
+only. It can select \texttt{wgs-72} or \texttt{wgs-84}, or directly provide
+\statevar{reqtr} and one of \statevar{rpolr}, \statevar{flat}, or
+\statevar{ecc}. Additional shape values are redundant and may form inconsistent
+geometry.
+
+\begin{lstlisting}[style=taosmanual]
+*radar 2 station_y alt=112.4 long=65.345 latgd=12.435
+                   wgs-72 distn=25.5 diste=15.2 distd=-10.3
+\end{lstlisting}
+
+This defines station 2 relative to WGS-72 at 112.4~ft altitude,
+$65.345^\circ$~E longitude, and $12.435^\circ$~N latitude, then offsets it
+25.5~ft north, 15.2~ft east, and 10.3~ft upward.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Radar data-block variables.}
+  \label{tab:radar-data-block-variables}
+  \small
+  \begin{tabularx}{0.97\linewidth}{@{}>{\ttfamily}lX>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Variable & Description & \normalfont Variable & Description \\
+    \midrule
+    alt & Radar-station altitude (ft) & reqtr & Equatorial earth radius (ft) \\
+    long & Radar-station longitude (deg) & rpolr & Polar earth radius (ft) \\
+    latgd & Geodetic radar latitude (deg) & flat & Flattening, $0<\texttt{flat}<1$ \\
+    distn & North offset (ft) & ecc & Eccentricity, $0<\texttt{ecc}<1$ \\
+    diste & East offset (ft) & wgs-72 & Use WGS-72 earth shape \\
+    distd & Down offset (ft) & wgs-84 & Use WGS-84 earth shape \\
+    \bottomrule
+  \end{tabularx}
+\end{table}

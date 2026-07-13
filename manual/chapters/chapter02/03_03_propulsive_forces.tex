@@ -1,0 +1,55 @@
+% Source PDF page 88; manual page 2-59.
+\subsection{Propulsive Forces}\label{sec:propulsive-forces}
+
+The magnitude and direction of each propulsive force vector are specified in the
+table file, as described in \cref{sec:table-types}, or directly in the problem file,
+as described in \cref{sec:block-prop}. If more than one force vector is supplied,
+the vectors are summed to form $\sum\vec F_{\mathrm{prop}}$.
+
+Because the equations of motion treat the vehicle as a point mass, every thrust
+vector acts through the vehicle center of mass. Its direction is determined by thrust
+vector angles $\epsilon_1$ and $\epsilon_2$, shown in
+\cref{fig:chapter2-thrust-vector-angles}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.86\linewidth}{!}{\input{manual/figures/chapter02/fig-2-17}}
+  \caption{Thrust vector angles.}
+  \label{fig:chapter2-thrust-vector-angles}
+\end{figure}
+
+The angle $\epsilon_1$ is analogous to total angle of attack: it is the angle between
+the body $x$ axis and the thrust vector and can range from $0^\circ$ to
+$180^\circ$. The angle $\epsilon_2$ is analogous to windward meridian: it is the
+angle between the projection of the thrust vector onto the $\hat y_b$--$\hat z_b$
+plane and the negative $\hat y_b$ axis.
+
+The body-frame thrust vector is
+\begin{equation}
+  \begin{aligned}
+  \vec F_{\mathrm{prop}}
+  ={}&\lVert\vec F_{\mathrm{prop}}\rVert\cos\epsilon_1\,\hat x_b\\
+    &-\lVert\vec F_{\mathrm{prop}}\rVert
+      \sin\epsilon_1\cos\epsilon_2\,\hat y_b\\
+    &-\lVert\vec F_{\mathrm{prop}}\rVert
+      \sin\epsilon_1\sin\epsilon_2\,\hat z_b.
+  \end{aligned}
+  \label{eq:propulsive-force-vector}
+\end{equation}
+The function \texttt{force\_prop} evaluates this expression and transforms the
+result from body coordinates to ECFC coordinates using the method in
+\cref{sec:coordinate-transformations}.
+
+The associated output variables are
+\begin{center}
+\begin{tabularx}{0.78\linewidth}{@{}>{\ttfamily}l>{$}l<{$}X@{}}
+  thrust & \lVert\vec F_{\mathrm{prop}}\rVert & total thrust-vector magnitude.\\
+  ep1    & \epsilon_1 & thrust vector angle 1.\\
+  ep2    & \epsilon_2 & thrust vector angle 2.\\
+\end{tabularx}
+\end{center}
+If more than one propulsive force vector is supplied, \statevar{thrust} is the sum
+of the individual magnitudes. That total has a direct physical interpretation only
+when all thrust vectors are aligned. The angle outputs \statevar{ep1} and
+\statevar{ep2} correspond to the last thrust vector evaluated; multiple
+\problemblock{*prop} data blocks are evaluated in input order.

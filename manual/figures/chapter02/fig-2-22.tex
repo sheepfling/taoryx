@@ -1,0 +1,20 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,scale=0.85]
+  \coordinate (a) at (-3.7,0);
+  \draw (-5.2,1.0)--(a)--(-5.2,-1.0)--cycle;
+  \node[left] at (a) {cg};
+  \draw[->,thick] (a)--(-0.4,0) node[right] {$\hat x_b$};
+  \draw[->,thick] (a)--(-3.7,-1.45) node[below] {$\hat z_b$};
+  \draw[->,thick] (a)--(-1.5,-1.05) node[right] {$\hat u_r$};
+  \draw[->] (-2.1,0) arc[start angle=0,end angle=-25,radius=1.55]
+    node[midway,right] {$\eta_r$};
+
+  \coordinate (b) at (2.1,0);
+  \draw (b) circle (1.15);
+  \node[above left] at (b) {cg};
+  \draw[->,thick] (b)--(4.2,0) node[right] {$\hat y_b$};
+  \draw[->,thick] (b)--(2.1,-1.45) node[below] {$\hat z_b$};
+  \draw[->,thick] (b)--(3.55,-1.0) node[below right,align=left]
+    {$\hat u_r$ projected\\onto $\hat y_b$--$\hat z_b$ plane};
+  \draw[->] (3.05,0) arc[start angle=0,end angle=-34,radius=0.95]
+    node[midway,right] {$\phi_r$};
+\end{tikzpicture}

@@ -1,0 +1,156 @@
+% Source PDF pages 127--130; manual pages 2-98--2-101.
+\subsection{Search Methods}\label{sec:search-methods}
+
+TAOS uses two classes of one-dimensional search. Root searches vary a parameter
+$x$ until $f(x)=0$; minimization searches vary $x$ until $f(x)$ reaches a minimum.
+Well-behaved one-dimensional searches may be nested to solve multidimensional
+problems.
+
+The selected method depends on the application. Segment final conditions use a
+linear method because their search intervals are short enough that most functions are
+nearly linear. Trajectory searches used to satisfy constraints generally use a
+parabolic method because it often converges faster.
+
+For root searches, the parameter is restricted to an interval
+$x_{lo}<x<x_{hi}$. TAOS assumes that $f(x)$ is reasonably well behaved within the
+interval and that a single root is present.
+
+\taossubhead{Newton--Raphson Method}
+
+The Newton--Raphson method starts with an estimate $x_n$ and approximates the
+function locally by a straight line:
+\begin{equation}
+  f(x)=f(x_n)+(x-x_n)\left.\frac{\partial f}{\partial x}\right|_{x_n}.
+  \label{eq:newton-linearization}
+\end{equation}
+Setting the linear approximation to zero gives the next estimate,
+\begin{equation}
+  x_{n+1}=x_n-
+  \frac{f(x_n)}{\left.\dfrac{\partial f}{\partial x}\right|_{x_n}}.
+  \label{eq:newton-update-search}
+\end{equation}
+The geometry is illustrated in \cref{fig:newton-raphson-search}. The derivative is
+estimated numerically with a forward difference, and the update is repeated until
+$f(x)$ is within the requested tolerance.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-35}
+  \caption{Newton--Raphson search.}
+  \label{fig:newton-raphson-search}
+\end{figure}
+
+\taossubhead{Secant Method}
+
+The secant method also assumes that $f(x)$ is linear over the current interval. Given
+the function values at the lower and upper limits, the estimated root is
+\begin{equation}
+  x=x_{lo}-f(x_{lo})
+  \left[
+    \frac{x_{hi}-x_{lo}}{f(x_{hi})-f(x_{lo})}
+  \right].
+  \label{eq:secant-root-estimate}
+\end{equation}
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-36}
+  \caption{Secant search.}
+  \label{fig:secant-search}
+\end{figure}
+
+After evaluating $f(x)$, TAOS replaces the boundary whose function value has the
+same sign as $f(x)$. Retaining endpoints of opposite sign preserves a bracket around
+the root. The process continues until the estimated residual is within tolerance.
+
+\taossubhead{Parabolic Root Search}
+
+The parabolic method approximates the function by
+\begin{equation}
+  f(x)=a x^2+b x+c.
+  \label{eq:parabolic-search-polynomial}
+\end{equation}
+Three function evaluations determine $a$, $b$, and $c$. During startup, TAOS
+evaluates the function at $x-\Delta x$ and $x+\Delta x$, where $x$ is the initial
+estimate and $\Delta x$ represents its expected accuracy. A linear estimate similar
+to \cref{eq:secant-root-estimate} supplies the third point, with all points restricted
+to the search interval. The geometry is shown in
+\cref{fig:parabolic-root-search}.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-37}
+  \caption{Parabolic root search.}
+  \label{fig:parabolic-root-search}
+\end{figure}
+
+For three points $x_1$, $x_2$, and $x_3$, the polynomial coefficients are
+\begin{equation}
+  b=
+  \frac{
+    (x_2^2-x_3^2)\,[f(x_1)-f(x_3)]
+    -(x_1^2-x_3^2)\,[f(x_2)-f(x_3)]
+  }{
+    (x_2^2-x_3^2)(x_1-x_3)
+    -(x_1^2-x_3^2)(x_2-x_3)
+  },
+  \label{eq:parabolic-search-b}
+\end{equation}
+\begin{equation}
+  a=
+  \frac{f(x_2)-f(x_3)-b(x_2-x_3)}{x_2^2-x_3^2},
+  \label{eq:parabolic-search-a}
+\end{equation}
+\begin{equation}
+  c=f(x_2)-a x_2^2-b x_2.
+  \label{eq:parabolic-search-c}
+\end{equation}
+The two roots of the fitted parabola are
+\begin{equation}
+  x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}.
+  \label{eq:parabolic-search-roots}
+\end{equation}
+
+Normally only one root lies in the search interval. If both do, TAOS chooses the one
+nearest the most recent best estimate; if that rule does not distinguish them, the
+lower root is selected. After the new function evaluation, the point farthest from the
+best root estimate is discarded, and the fit is repeated until the residual is within
+tolerance.
+
+\taossubhead{Golden-Section Search}
+
+The golden-section method minimizes a function without derivatives. It evaluates
+two interior points chosen to divide the current interval into golden sections:
+\begin{equation}
+  x_1=x_{hi}-\alpha(x_{hi}-x_{lo}),
+  \label{eq:golden-section-x1}
+\end{equation}
+\begin{equation}
+  x_2=x_{lo}+\alpha(x_{hi}-x_{lo}),
+  \label{eq:golden-section-x2}
+\end{equation}
+where
+$\alpha=(\sqrt{5}-1)/2$. Based on $f(x_1)$ and $f(x_2)$, one outer portion of the
+interval is discarded, as illustrated in \cref{fig:golden-section-search}. One old
+interior point can be reused after every interval reduction. The process stops when
+$x_{hi}-x_{lo}$ is less than the requested tolerance.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-38}
+  \caption{Golden-section search.}
+  \label{fig:golden-section-search}
+\end{figure}
+
+\taossubhead{Parabolic Minimization}
+
+Parabolic minimization uses the same startup and coefficient formulas as the
+parabolic root search, but evaluates the stationary point of the fitted parabola,
+\begin{equation}
+  x=-\frac{b}{2a}.
+  \label{eq:parabolic-minimum}
+\end{equation}
+TAOS tests whether the stationary point is a minimum. If so, the interval is redefined
+to retain that point near the middle; otherwise, the interval is redefined around the
+three lowest function evaluations. The process repeats until the predicted value
+$a x^2+b x+c$ agrees with the actual evaluation $f(x)$ within tolerance.

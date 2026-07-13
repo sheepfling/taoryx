@@ -1,0 +1,44 @@
+\subsection{\problemblock{*Limits} Data Block}\label{sec:block-limits}
+
+TAOS, being a three-degree-of-freedom simulation, assumes that a control system is
+available that can achieve the body attitudes requested in the guidance scheme.
+Usually the control system can only maintain body attitudes for certain flight
+conditions, and the body-attitude angles are restricted as well. The
+\problemblock{*limits} data block provides a way to keep the trajectory within
+these bounds.
+
+Limits can be set on any of the guidance variables given in
+\cref{tab:body-attitude-guidance-angles,tab:flight-condition-guidance}, except for
+\texttt{intercept}, \texttt{prop}, \texttt{downria}, \texttt{upria}, and
+\texttt{l/d\_max}. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*limits alpha<20 alpha>-10
+\end{lstlisting}
+
+puts a $20^{\circ}$ upper boundary and a $-10^{\circ}$ lower boundary on angle of
+attack. Greater-than and less-than signs are used to designate whether the limit is an
+upper or lower bound.
+
+The limiting variables do not have to be the same as those used for the guidance
+scheme; limits can be imposed on any of the guidance variables. Any number of
+limits can be specified. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*limits bankgd>-60 bankgd<60 alpha>-15 alpha<15.0
+        beta>-15 beta<15
+\end{lstlisting}
+
+puts limits on three of the control variables: \statevar{alpha}, \statevar{beta}, and
+\statevar{bankgd}.
+
+Flight-condition guidance (\cref{tab:flight-condition-guidance}) requires iterative
+searches to solve for the control variables. Limits on the body-attitude angles help
+control convergence during these searches.
+
+\begin{quote}\small\itshape
+Source terminology. The source page prints \texttt{prop} in the list of guidance rules that cannot be
+limited. The corresponding guidance-rule name elsewhere in the manual is
+\texttt{propnav}; the source wording is retained here and the relationship is recorded
+in the Chapter~4 editorial metadata.
+\end{quote}

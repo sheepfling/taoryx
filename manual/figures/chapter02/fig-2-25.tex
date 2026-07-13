@@ -1,0 +1,23 @@
+\begin{tikzpicture}[
+  >=Latex,
+  node distance=0.55cm and 1.05cm,
+  box/.style={draw,minimum width=3.15cm,minimum height=0.75cm,align=center},
+  sidebox/.style={draw,text width=3.25cm,minimum height=2.9cm,align=center},
+  every path/.style={line width=0.7pt}
+]
+  \node[box] (forces) {Calculate Forces};
+  \node[box,below=of forces] (accel) {Calculate Accelerations};
+  \node[box,below=of accel] (rates) {Calculate Rates};
+  \node[box,below=of rates] (loop) {Guidance Loop};
+  \node[sidebox,right=1.55cm of accel] (vary)
+    {Vary control variables to get accelerations required by guidance rules};
+
+  \draw[->] ($(forces.north)+(0,0.55)$) -- (forces.north);
+  \draw[->] (forces) -- (accel);
+  \draw[->] (accel) -- (rates);
+  \draw[<->] (rates) -- (loop);
+  \draw[->] (loop.east) -| (vary.south);
+  \draw[->] (vary.north) |- ($(forces.north)+(0,0.55)$);
+  \draw[->] (loop.south) -- ++(0,-0.65)
+    node[below,align=center] {Solution\\complete};
+\end{tikzpicture}

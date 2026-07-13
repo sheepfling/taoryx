@@ -1,0 +1,37 @@
+\begin{tikzpicture}[
+  >=Latex,
+  node distance=0.42cm and 0.58cm,
+  block/.style={draw,align=center,minimum height=0.68cm,font=\small},
+  vehicle/.style={block,minimum width=1.65cm},
+  data/.style={block,text width=1.55cm,minimum height=2.45cm},
+  segment/.style={block,minimum width=1.05cm},
+  output/.style={block,text width=1.4cm,minimum height=1.0cm},
+  every path/.style={line width=0.65pt}
+]
+  \node[vehicle] (v1) {Vehicle 1};
+  \node[vehicle,below=of v1] (v2) {Vehicle 2};
+  \node[vehicle,below=of v2] (v3) {Vehicle 3};
+  \node[below=0.17cm of v3] (vdots) {$\vdots$};
+  \node[data,right=1.15cm of v2] (data) {Vehicle\\data\\structure};
+  \node[segment,right=0.85cm of data.north east,anchor=north west] (s1) {Seg\\1};
+  \node[segment,right=of s1] (s2) {Seg\\2};
+  \node[segment,right=of s2] (s3) {Seg\\3};
+  \node[right=0.18cm of s3] (sdots) {etc.};
+  \node[output,below=0.55cm of s1] (o1) {Output\\variables\\at $t_1$};
+  \node[output,right=of o1] (o2) {Output\\variables\\at $t_2$};
+  \node[output,right=of o2] (o3) {Output\\variables\\at $t_3$};
+  \node[right=0.18cm of o3] (odots) {etc.};
+
+  \draw[->] (v1.east) -- (data.west);
+  \draw[->] (v1.south) -- (v2.north);
+  \draw[->] (v2.south) -- (v3.north);
+  \draw[->] (v3.south) -- (vdots.north);
+  \draw[->] (data.north east) -| (s1.west);
+  \draw[->] (s1)--(s2);
+  \draw[->] (s2)--(s3);
+  \draw[->] (s3)--(sdots);
+  \draw[->] (data.south east) -| (o1.west);
+  \draw[->] (o1)--(o2);
+  \draw[->] (o2)--(o3);
+  \draw[->] (o3)--(odots);
+\end{tikzpicture}

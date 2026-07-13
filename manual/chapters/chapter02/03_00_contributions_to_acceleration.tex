@@ -1,0 +1,38 @@
+% Source PDF page 80; manual page 2-51.
+\section{Contributions to Acceleration}\label{sec:acceleration-contributions}
+
+The vehicle acceleration, given by the equations of motion, is
+\begin{equation}
+  \vec a_{\oplus}
+  =\frac{\sum\vec F}{m}
+   -2\left({}_{I}\vec\omega_{\oplus}\times\vec V_{\oplus}\right)
+   -{}_{I}\vec\omega_{\oplus}\times
+      \left({}_{I}\vec\omega_{\oplus}\times\vec r\right).
+  \label{eq:acceleration-force-contributions}
+\end{equation}
+The term $\sum\vec F/m$ represents the acceleration contributed by all external
+forces acting on the vehicle. These forces include the aerodynamic force
+$\sum\vec F_{\mathrm{aero}}$, the propulsive force
+$\sum\vec F_{\mathrm{prop}}$, and the gravitational force
+$\sum\vec F_{\mathrm{grav}}$. Their corresponding acceleration vectors are shown
+in \cref{fig:force-acceleration-contributions}.
+
+\begin{center}
+  \resizebox{0.83\linewidth}{!}{\input{manual/figures/chapter02/fig-2-16}}
+  {\captionsetup{hypcap=false}\captionof{figure}{Accelerations from forces acting on the vehicle.}}
+  \label{fig:force-acceleration-contributions}
+\end{center}
+
+Aerodynamic forces are functions of the vehicle geometry, the vehicle state, and
+atmospheric properties such as temperature, pressure, and density. The atmosphere
+models used to obtain those properties are described in
+\cref{sec:atmosphere-model}; aerodynamic-force calculations from input
+coefficients are described in \cref{sec:aerodynamic-forces}.
+
+Propulsive forces from rocket or jet engines are defined by input data and are
+described in \cref{sec:propulsive-forces}.
+
+TAOS assumes that trajectories remain sufficiently near the earth for terrestrial
+gravity to predominate. Gravitational forces from the moon, sun, and planets are
+neglected. The earth gravity model used to compute
+$\vec a_{\mathrm{grav}}$ is described in \cref{sec:gravity-model}.

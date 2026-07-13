@@ -1,0 +1,44 @@
+% Passive coordinate-transformation matrices used throughout the TAOS manual.
+% Their signs match the conventions in Chapter 2 rather than generic active
+% right-handed rotation matrices.
+\NewDocumentCommand{\TaosRollMatrix}{m}{%
+  \begin{bmatrix}
+    1 & 0 & 0 \\
+    0 & \cos #1 & \sin #1 \\
+    0 & -\sin #1 & \cos #1
+  \end{bmatrix}%
+}
+
+\NewDocumentCommand{\TaosPitchMatrix}{m}{%
+  \begin{bmatrix}
+    \cos #1 & 0 & -\sin #1 \\
+    0 & 1 & 0 \\
+    \sin #1 & 0 & \cos #1
+  \end{bmatrix}%
+}
+
+\NewDocumentCommand{\TaosYawMatrix}{m}{%
+  \begin{bmatrix}
+    \cos #1 & \sin #1 & 0 \\
+    -\sin #1 & \cos #1 & 0 \\
+    0 & 0 & 1
+  \end{bmatrix}%
+}
+
+\NewDocumentCommand{\TaosEulerSideslipMatrix}{m}{%
+  \begin{bmatrix}
+    \cos #1 & -\sin #1 & 0 \\
+    \sin #1 & \cos #1 & 0 \\
+    0 & 0 & 1
+  \end{bmatrix}%
+}
+
+\NewDocumentCommand{\TaosBasisColumn}{m}{%
+  \begin{bmatrix}
+    \hat{x}_{#1} \\
+    \hat{y}_{#1} \\
+    \hat{z}_{#1}
+  \end{bmatrix}%
+}
+
+\NewDocumentCommand{\TaosTransform}{m m}{[{}_{#1}A_{#2}]}

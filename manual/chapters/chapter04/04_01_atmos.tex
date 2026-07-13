@@ -1,0 +1,96 @@
+\subsection{\problemblock{*Atmos} Data Block}\label{sec:block-atmos}
+
+An atmosphere model is required to integrate the equations of motion. It defines
+temperature, pressure, density, speed of sound, and viscosity as functions of altitude,
+as described in \cref{sec:atmosphere-model}. TAOS contains the 20 standard
+models listed in \cref{tab:atmosphere-types} and also supports two forms of
+user-defined atmosphere. The default is the 1976 U.S. Standard Atmosphere.
+
+The models extend to 1000~km. Above 146~km, all models use the same values as the
+1976 U.S. Standard Atmosphere. Below sea level, temperature is extrapolated using
+the sea-level temperature gradient and pressure is held at the sea-level value; the
+other properties are computed from pressure and temperature.
+
+A standard atmosphere is selected by placing its number after the
+\problemblock{*atmos} keyword. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*atmos 20
+\end{lstlisting}
+
+selects the Kwajalein mean-annual atmosphere. One selected atmosphere applies to
+all trajectories in the problem; different trajectories cannot use different atmosphere
+models. Because type 1 is common, the keyword \texttt{standard} may be used in
+place of the number 1. Similarly, \texttt{none} may be used in place of type 0.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Atmosphere types.}
+  \label{tab:atmosphere-types}
+  \small
+  \begin{tabularx}{0.94\linewidth}{@{}rXrX@{}}
+    \toprule
+    Type & Atmosphere & Type & Atmosphere \\
+    \midrule
+     0 & None & 11 & $60^\circ$ North July \\
+     1 & 1976 U.S. Standard & 12 & $75^\circ$ North January \\
+     2 & $15^\circ$ North Annual & 13 & $75^\circ$ North January (cold) \\
+     3 & $30^\circ$ North January & 14 & $75^\circ$ North January (warm) \\
+     4 & $30^\circ$ North July & 15 & $75^\circ$ North July \\
+     5 & $45^\circ$ North January & 16 & Tonopah winter \\
+     6 & $45^\circ$ North July & 17 & Tonopah spring \\
+     7 & $45^\circ$ North spring/fall & 18 & Tonopah summer \\
+     8 & $60^\circ$ North January & 19 & Tonopah fall \\
+     9 & $60^\circ$ North January (cold) & 20 & Kwajalein mean annual \\
+    10 & $60^\circ$ North January (warm) & & \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\taossubhead{User-Defined Atmosphere}
+
+The first user-defined form requires tabulated values for every atmospheric property
+as a function of altitude. The format is illustrated by
+
+\begin{lstlisting}[style=taosmanual]
+*atmos user
+  alt    temp   pres    rho       sndspd  visc
+      0  548.2  2111.0  0.00224   1147   3.895e-7
+   5000  530.0  1774.0  0.00195   1128   3.780e-7
+  10000  511.0  1480.0  0.00168   1109   3.701e-7
+  15000  494.9  1229.0  0.00124   1072   2.602e-7
+  20000  477.5   833.0  0.00105   1051   3.400e-7
+\end{lstlisting}
+
+The keyword \texttt{user} indicates a user-defined atmosphere with all properties specified. The next
+line contains column headers for altitude and all atmospheric properties. Every
+keyword is required, but the order is arbitrary. These keywords are the same as the
+atmospheric output variables in the Appendix, and their units may be changed with
+\problemblock{*units/fmt}.
+
+Atmospheric properties are tabulated against altitude, so altitude is normally the
+first column. All properties on one line correspond to that altitude. Altitude values
+must be strictly increasing; duplicate values are not allowed. During integration the
+properties are linearly interpolated. Enough points must be provided for linear
+interpolation to represent the desired atmosphere adequately. There are no limits on the number of values that can be input.
+
+\taossubhead{Site-Measured Atmosphere}
+
+The second user-defined form requires only pressure and density as functions of
+altitude. It is called a site-measured atmosphere, and exponential interpolation is
+used so fewer points can represent a realistic profile.
+
+\begin{lstlisting}[style=taosmanual]
+*atmos site
+  alt    pres    rho
+      0  2115.0  0.00223
+  10000  1485.0  0.00166
+  20000   830.0  0.00105
+  30000   627.0  0.00089
+  40000   241.0  0.00058
+\end{lstlisting}
+
+A site-measured atmosphere is input in the same way as a complete user-defined
+atmosphere, except that there are fewer columns of data. Temperature is estimated
+from pressure and density with the ideal-gas law, and speed of sound and viscosity
+are computed from that temperature.

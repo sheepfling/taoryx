@@ -1,0 +1,436 @@
+\section{Full Tables}\label{sec:full-tables}
+
+Full tables provide more ways to define table values than simple tables. In a simple
+table, the table value is obtained by interpolation. Values of the independent
+variables---the state variables---are known from flight-path integration, and the
+tabulated data values are known from the input. Linear interpolation is used to
+compute the table value, or dependent variable. The only flexibility is in the
+selection of the independent variables and their values.
+
+In a full table, the table value is obtained by executing a sequence of math
+operations. When TAOS needs a table value, the value is first initialized to zero.
+Then the operations supplied in the table input are executed one at a time. Each
+operation adds, subtracts, multiplies, or otherwise combines the current table value
+with another value. The other value can be a constant, a value interpolated from a
+table, a state variable, or a user-defined variable. The process is analogous to using
+a calculator with an accumulation register.
+
+The sequence of math operations resembles a simple programming language. The
+operations let the user control how a table value is computed. Temporary values can
+be stored for later use, and simple \texttt{if-then} and \texttt{goto} statements
+provide flow control. The following example illustrates the concept:
+
+\begin{lstlisting}[style=taosmanual]
+(1st-stage)
+  table thrust units=lb
+  start
+    sub pres          # subtract atmospheric pressure
+    mult 3.219        # multiply by nozzle exit area
+    add tvac(time)    # add the vacuum thrust
+      time = 0, 0.1, 0.2, 0.5, 1.0, 4.0, 4.1, 4.2, 4.3
+      tvac = 0, 1200, 1050, 980, 950, 910, 100, 50, 0
+  end
+\end{lstlisting}
+
+This table defines thrust magnitude in pounds force as vacuum thrust minus
+atmospheric pressure multiplied by nozzle exit area:
+
+\begin{equation}
+  \left\lVert\vec{F}_{\mathrm{prop}}\right\rVert
+  = \left\lVert\vec{F}_{\mathrm{vac}}\right\rVert - pS_{\mathrm{noz}}.
+  \label{eq:full-table-thrust}
+\end{equation}
+
+The calculation begins at \texttt{start}, which initializes thrust to zero. The
+statement \texttt{sub pres} subtracts atmospheric pressure from zero, leaving the
+negative pressure as the current table value. The statement \texttt{mult 3.219}
+multiplies that value by a constant representing nozzle exit area. Finally,
+\texttt{add tvac(time)} interpolates vacuum thrust as a function of time and adds it
+to the current table value. The result is used in the flight-path calculations.
+
+As with any programming language, there are many ways to perform the same
+calculation. One could instead multiply pressure by exit area, save the result in a
+temporary variable, clear the table value, interpolate vacuum thrust, and subtract the
+saved pressure-area product. That method requires more operations and is less
+efficient.
+
+Tables are evaluated many times while a flight path is being calculated, so efficient
+table definitions are worthwhile. Reducing the number of operations can
+significantly reduce processing time.
+
+\subsection{Math Operations}\label{sec:table-math-operations}
+
+Math operations available in TAOS are listed in \cref{tab:math-operations}. A
+sequence always begins with \texttt{start} and ends with the \texttt{end} operation.
+The last operation in a table must be \texttt{end}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Math operations.}
+  \label{tab:math-operations}
+  \small
+  \begin{tabularx}{\linewidth}{@{}>{\ttfamily}lX>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Operation & Description & \normalfont Operation & Description \\
+    \midrule
+    add  & Add value to table value & ln   & Natural log of table value \\
+    sub  & Subtract value from table value & log  & Log base 10 of table value \\
+    mult & Multiply value by table value & e    & $e$ raised to the table-value power \\
+    div  & Divide table value by value & sin  & Sine of table value (in degrees) \\
+    idiv & Divide value by table value & cos  & Cosine of table value (in degrees) \\
+    exp  & Raise table value to power of value & tan  & Tangent of table value (in degrees) \\
+    iexp & Raise value to power of table value & asin & $\sin^{-1}$ of table value (in degrees) \\
+    max  & Limit table value to less than a value & acos & $\cos^{-1}$ of table value (in degrees) \\
+    min  & Limit table value to greater than a value & atan & $\tan^{-1}$ of table value (in degrees) \\
+    set  & Set table value to a value & zero & Set table value to zero \\
+    abs  & Absolute value of table value & csto & Store table value and set it to zero \\
+    neg  & Negate table value & if   & If-then statement \\
+    sqr  & Square table value & goto & Goto statement \\
+    sqrt & Square root of table value & end  & End of table \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Operations that act only on the current table value require no additional constant or
+table. For example,
+
+\begin{lstlisting}[style=taosmanual]
+start
+  add alpha
+  sin
+  sqr
+  add 1.0
+end
+\end{lstlisting}
+
+computes $1+\sin^2\alpha$. The \texttt{sin} and \texttt{sqr} operations require no
+additional values; they act only on the current table value. The \texttt{add}
+operation does require another value. Angle of attack is added in the first
+\texttt{add} statement, and the constant 1.0 is added in the second.
+
+In \cref{tab:math-operations}, operations \texttt{add} through \texttt{set} require
+an additional value; operations \texttt{abs} through \texttt{zero} do not. The
+\texttt{csto}, \texttt{if}, and \texttt{goto} operations are special operations
+discussed later. An additional value can be a constant, a state variable, a value
+interpolated from a table, a temporary storage variable, or a user-defined variable.
+
+\subsection{Constant Values and State Variable Values}\label{sec:table-constant-state-values}
+
+Constant values are always treated as real numbers. They can be entered with or
+without decimal points, and scientific notation in e-format is acceptable. For
+example,
+
+\begin{lstlisting}[style=taosmanual]
+add 2.0
+mult 1.5e-6
+exp 3
+\end{lstlisting}
+
+computes $\bigl((x+2.0)(1.5\times10^{-6})\bigr)^3$, where $x$ is the current table
+value.
+
+State-variable values change as the flight path is integrated. When table values are
+computed during path integration, current state-variable values can be retrieved by
+using the names in \cref{tab:taos-state-variables}. For example, dynamic pressure,
+defined as $0.7pM^2$, can be computed with
+
+\begin{lstlisting}[style=taosmanual]
+add 0.7
+mult pres
+mult mach
+mult mach
+\end{lstlisting}
+
+Default units for these variables are given in the appendix and can be changed with
+the \problemblock{*units/fmt} data block (\cref{sec:block-units-fmt}).
+
+\subsection{Tabulated Data Values}\label{sec:tabulated-data-values}
+
+Values used by math operations can be linearly interpolated from a table that is a
+function of as many as five independent variables. The tables use the same form as
+simple tables. The dependent-variable name is given first, followed by a list of
+independent variables in parentheses. Values for each independent variable define a
+matrix, and dependent-variable values are then given for every combination of
+independent values.
+
+The simplest table is a function of one variable. For example,
+
+\begin{lstlisting}[style=taosmanual]
+add cdh(alt)
+  alt = 0, 50000, 100000, 150000, 200000
+  cdh = 0.0, 0.002, 0.006, 0.011, 0.042
+\end{lstlisting}
+
+identifies a value called \texttt{cdh} as a function of altitude. The interpolated value
+of \texttt{cdh} is added to the current table value. The name \texttt{cdh} must be
+unique: it cannot be a state variable or user-defined variable. It is only an
+identification name and is not available as a storage variable for later operations.
+
+In the next example, the current table value is multiplied by a factor obtained from
+a tabulated function of Mach number and a user-defined variable called
+\texttt{type}:
+
+\begin{lstlisting}[style=taosmanual]
+mult factor(type,mach)
+  type = 0, 1
+  mach = 0.0, 0.999, 1.000, 25.0
+  factor = 0.5, 0.5, 1.0, 1.0, # Values for type=0
+           1.0, 1.0, 2.0, 2.0  # Values for type=1
+\end{lstlisting}
+
+The value of \texttt{type} is set in the problem file, for example in an
+\problemblock{*aero} or \problemblock{*prop} data block. If \texttt{type} is zero,
+the current table value is multiplied by 0.5 at subsonic Mach numbers and 1.0 at
+supersonic Mach numbers. If \texttt{type} is one, those factors are doubled.
+
+Tabulated functions of more than two variables are input using the pattern described
+for simple tables in \cref{sec:simple-tables}. A more general skewed format is
+described in \cref{sec:skewed-tabulated-data}.
+
+\subsection{Storage Variables}\label{sec:storage-variables}
+
+The \texttt{csto} (clear and store) operation saves a temporary calculation for later
+use, like a storage register on a calculator. After a value is saved and named, it can
+be retrieved by subsequent operations. For example,
+
+\begin{lstlisting}[style=taosmanual]
+add alpha
+cos
+sqr
+csto ca2
+\end{lstlisting}
+
+calculates $\cos^2\alpha$ and saves it as the variable \texttt{ca2}. The
+\texttt{csto} operation also sets the current table value to zero in preparation for
+subsequent operations.
+
+The storage-variable name supplied to \texttt{csto} must be unique; it cannot be a
+state variable from \cref{tab:taos-state-variables} or a user-defined variable used
+elsewhere in the table or problem files.
+
+The variable \texttt{ca2}, containing $\cos^2\alpha$, can be used in subsequent
+operations either as an operation value or as an independent variable of a table. For
+example,
+
+\begin{lstlisting}[style=taosmanual]
+add alpha
+cos
+sqr
+csto ca2
+add factor(ca2,mach)
+\end{lstlisting}
+
+uses \texttt{ca2} as an independent variable. This makes it possible to enter tables
+that are complex functions of state variables; here, \texttt{factor} is a function of
+$\cos^2\alpha$ and Mach number.
+
+\subsection{User-Defined Variables}\label{sec:table-user-defined-variables}
+
+If a variable name in a math operation is neither a state variable nor a storage
+variable, TAOS assumes that it is a user-defined variable. Its value must be supplied
+in the problem file in an \problemblock{*aero}, \problemblock{*constants},
+\problemblock{*cg}, \problemblock{*prop}, or \problemblock{*wind} data block
+(\cref{sec:block-aero,sec:block-constants,sec:block-cg,sec:block-prop,sec:block-wind}).
+These are the same places where table identification names are given.
+
+User-defined variables can be used in math operations like state variables. They are
+constants whose values are set in the problem file. The advantage of using a
+user-defined variable instead of a literal table-file constant is that the value can be
+automatically surveyed in the problem file (\cref{sec:block-survey}). If a table
+constant can take on different values, making it user-defined is usually preferable.
+For example,
+
+\begin{lstlisting}[style=taosmanual]
+(constant-thr)
+  table thrust units=lb
+  start
+    sub pres
+    mult anoz
+    add tvac
+  end
+\end{lstlisting}
+
+uses two user-defined variables, \texttt{anoz} and \texttt{tvac}. Because this is a
+thrust table, their values are supplied in the \problemblock{*prop} data block. The
+table is generic in the sense that it can represent any constant-thrust rocket motor.
+
+User-defined variables are powerful but must be documented carefully. A table file
+with many user-defined variables can be difficult to use later if the variables are not
+recorded. Comments should document every required user-defined variable.
+
+\subsection{If-Then Statements}\label{sec:if-then-statements}
+
+The \texttt{if} operation provides a simple way to control the flow of calculations in
+a table. An if statement has the form
+
+\begin{lstlisting}[style=taosmanual]
+if (relationship) then math-operation
+\end{lstlisting}
+
+where a relationship has the form
+
+\begin{lstlisting}[style=taosmanual]
+value relation value
+\end{lstlisting}
+
+and each value is a constant or variable name. The relation is \texttt{<},
+\texttt{>}, or \texttt{=}. For example,
+
+\begin{lstlisting}[style=taosmanual]
+if (mach > 5.0) then add f2(time) no-extrap
+  time = 0, 1, 2, 3
+  f2 = 2.5, 2.6, 2.95, 3.8
+\end{lstlisting}
+
+adds the value \texttt{f2}, interpolated as a function of time, if Mach number is
+greater than 5.
+
+The relationship is evaluated first. If it is true, the operation following
+\texttt{then} is executed. If it is false---in the example, if Mach number is less than
+or equal to 5---nothing is done, and processing continues with the next operation.
+
+Only simple relationships are allowed. Combinations such as
+\texttt{mach < 5 \& alt > 50000} are not allowed. Separate relations for not equal
+to and greater than or equal to are not provided because they are redundant.
+
+\subsection{Goto Statements}\label{sec:goto-statements}
+
+\texttt{goto} operations and labels also control calculation flow and are often used
+with \texttt{if} statements. Every math operation can have an optional label. A label
+is any name or value placed before an operation and separated from it by a colon:
+
+\begin{lstlisting}[style=taosmanual]
+label-1: add time
+label-2: sub tmark
+lable-3: csto delta-time
+\end{lstlisting}
+
+Labels, like other names, cannot contain delimiters such as blanks or commas, so
+underscores or dashes can be used to improve readability.
+
+Labels are referenced by \texttt{goto} operations. For example,
+
+\begin{lstlisting}[style=taosmanual]
+start
+super: if (mach < 1.0) then goto sub # "if" test
+       add mach
+       mult mach                         # This set of math
+       csto mach2                        # operations is for
+       add cdsup(mach2)                  # Mach > 1 (supersonic)
+         mach2 = 1.0, 4.0, 9.0, 25.0
+         cdsup = 0.120, 0.094, 0.075, 0.055
+       goto done
+
+sub:   add cdsub(alpha)                  # This set of math
+         alpha = 0, 5, 10                # operations is for
+         cdsub = 0.020, 0.023, 0.027     # Mach < 1 (subsonic)
+
+done:  end
+\end{lstlisting}
+
+performs one set of calculations when Mach number is subsonic and a different set
+when it is supersonic.
+
+\subsection{Skewed Tabulated Data}\label{sec:skewed-tabulated-data}
+
+The tabulated sets discussed so far have a dependent value for every combination of
+independent values. The independent values form a matrix, and dependent values are
+given for every combination. This is shown on the left of
+\cref{fig:square-skewed-data} for a function of two independent variables. The
+matrix forms a square for two independent variables or a cube for three independent
+variables, so these are called \emph{square tables}.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter03/fig-3-6}
+  \caption{Square and skewed tabulated data.}
+  \label{fig:square-skewed-data}
+\end{figure}
+
+Sets of tabulated data are often incomplete. The right side of
+\cref{fig:square-skewed-data} shows a function defined at different $x$ values for
+$z_1$, $z_2$, and $z_3$. Both the values and the number of points differ among the
+curves. TAOS calls such data sets \emph{skewed}. They can only be input using the
+full-table format; skewed tables are not allowed in the simple-table format.
+
+The following example shows how a skewed set is input:
+
+\begin{lstlisting}[style=taosmanual]
+add cxo(alt,mach)
+  alt = 0, 50000
+  mach = 3, 5, 7, 9
+  cxo = .020, .021, .019, .018, # Values for alt=0
+        .021, .022, .021, .020  # Values for alt=50000
+
+  alt = 100000, 150000
+  mach = 7, 10, 15
+  cxo = .024, .023, .021,       # Values for alt=100000
+        .027, .025, .024        # Values for alt=150000
+\end{lstlisting}
+
+The data is broken into smaller sets that are square in nature. Values at the same
+Mach numbers are available for altitudes of 0 and 50,000 feet, so that part is input
+first. Values at a different set of Mach numbers are available at altitudes of 100,000
+and 150,000 feet, so those are input next. This is similar to entering separate tables
+for low and high altitudes.
+
+The same table can be broken down further:
+
+\begin{lstlisting}[style=taosmanual]
+add cxo(alt,mach)
+  alt = 0
+  mach = 3, 5, 7, 9
+  cxo = .020, .021, .019, .018
+
+  alt = 50000
+  mach = 3, 5, 7, 9
+  cxo = .021, .022, .021, .020
+
+  alt = 100000
+  mach = 7, 10, 15
+  cxo = .024, .023, .021
+
+  alt = 150000
+  mach = 7, 10, 15
+  cxo = .027, .025, .024
+\end{lstlisting}
+
+Here a one-dimensional table is given for each altitude. The one-dimensional tables
+can have different Mach-number values and different numbers of points.
+
+In the general case, one-dimensional tables are given for the last, or rightmost,
+independent variable for every combination of the remaining independent variables
+and values. The sets are grouped or nested so that values for the leftmost
+independent variable form the outermost loop. The following three-dimensional
+example illustrates the pattern:
+
+\begin{lstlisting}[style=taosmanual]
+add ca(alt,mach,alpha)
+
+  alt=10000, mach=5, alpha=0,2,4,6,8 # Values for 10,000
+  ca = .20, .21, .23, .26, .28       # start here
+
+  alt=10000, mach=10, alpha=0,2,4,6
+  ca = .19, .19, .20, .22
+
+  alt=10000, mach=15, alpha=0,2,4
+  ca = .18, .19, .21
+
+  alt=30000, mach=10, alpha=0,2,4,6  # Values for 30,000
+  ca = .21, .23, .25, .29            # start here
+
+  alt=30000, mach=15, alpha=0,2,4
+  ca = .20, .21, .23
+\end{lstlisting}
+
+A one-dimensional angle-of-attack table is given for each combination of Mach
+number and altitude, but the number and values of angles of attack can differ for
+each table. All independent values for one set are placed on the same line; because
+input is free-field, this is allowed.
+
+Altitude is the leftmost independent variable, so altitude values form the outermost
+loop and Mach-number values are nested within them. The altitude value must be
+repeated until all Mach-number values have been supplied. This example contains
+more Mach numbers at 10,000 feet than at 30,000 feet. Altitude, Mach number, and
+angle of attack are all independent variables, so their values must each be strictly
+increasing or strictly decreasing.

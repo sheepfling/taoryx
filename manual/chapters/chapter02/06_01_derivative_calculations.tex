@@ -1,0 +1,45 @@
+% Source PDF pages 125--126; manual pages 2-96--2-97.
+\subsection{Derivative Calculations}\label{sec:derivative-calculations}
+
+The derivative calculation occurs inside the ``integrate all trajectories one time
+step'' operation of \cref{fig:trajectory-calculation-flow}. A fourth-order
+Runge--Kutta step calls the derivative function four times. The function
+\texttt{compute\_derivs} in the \texttt{derivs} module performs each derivative
+evaluation according to the sequence in
+\cref{fig:derivative-calculation-flow}.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-34}
+  \caption{Derivative calculation flowchart.}
+  \label{fig:derivative-calculation-flow}
+\end{figure}
+
+The derivative calculation is a function of time and the current vehicle state. TAOS
+stores the propagated state in ECFC coordinates, so it first computes the vehicle
+state in geocentric and geodetic coordinates
+(\cref{sec:geocentric,sec:geodetic}). Many later calculations depend on those
+coordinate representations.
+
+TAOS next evaluates longitude, latitude, altitude, and related state rates from
+\cref{sec:position-rates}. It then computes gravity
+(\cref{sec:gravity-model}), atmospheric properties
+(\cref{sec:atmosphere-model}), and the air-relative quantities such as airspeed,
+Mach number, dynamic pressure, and Reynolds number
+(\cref{sec:velocity-coordinate,sec:aerodynamic-forces}).
+
+An initial body attitude starts the guidance loop. From that attitude, TAOS calculates
+the body unit vectors and aerodynamic angles
+(\cref{sec:body-fixed,sec:wind-coordinate}). The aerodynamic and propulsive
+force tables are then evaluated, and the acceleration and state derivatives are formed
+from the equations in \cref{sec:numerical-integration}.
+
+Some guidance rules require geodetic acceleration components, flight-path-angle
+rates, or specific load factors. TAOS evaluates those quantities near the end of each
+guidance iteration and varies the body attitude until the commanded guidance
+conditions are satisfied, as described in \cref{sec:guidance-rules}.
+
+After the guidance loop converges, rail-launch or sled constraints may replace the
+unconstrained acceleration according to \cref{sec:rail-launches}. The remaining
+requested output variables are then calculated using the methods of
+\cref{sec:output-variables}.

@@ -1,0 +1,159 @@
+% Source PDF pages 100--102; manual pages 2-71--2-73.
+\subsection{Radar Observations}\label{sec:radar-observations}
+
+TAOS simulates radar observations by viewing a vehicle trajectory from a fixed
+position representing a radar antenna. Any number of radar locations can be used.
+For each station, a local geodetic horizon coordinate system is defined with its
+origin at the antenna, as shown in \cref{fig:radar-station-coordinates}. The
+station position relative to the earth center is $\vec r_r$, and its basis vectors
+$\hat x_r$, $\hat y_r$, and $\hat z_r$ are computed from the station longitude and
+latitude using \cref{eq:local-geodetic-x-unit-vector,eq:local-geodetic-y-unit-vector,eq:local-geodetic-z-unit-vector}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.72\linewidth}{!}{\input{manual/figures/chapter02/fig-2-20}}
+  \caption{Radar station coordinates.}
+  \label{fig:radar-station-coordinates}
+\end{figure}
+
+The vehicle position relative to the radar station is
+\begin{equation}
+  \Delta\vec r_r=\vec r-\vec r_r,
+  \label{eq:radar-relative-position}
+\end{equation}
+and radar range is $\lVert\Delta\vec r_r\rVert$. The corresponding line-of-sight
+unit vector is
+\begin{equation}
+  \hat u_r=\frac{\Delta\vec r_r}{\lVert\Delta\vec r_r\rVert}.
+  \label{eq:radar-line-of-sight-unit-vector}
+\end{equation}
+The radar azimuth $\alpha_r$ and elevation $\epsilon_r$, shown in
+\cref{fig:radar-observations}, are
+\begin{equation}
+  \tan\alpha_r
+  =\frac{\Delta\vec r_r\cdot\hat y_r}
+         {\Delta\vec r_r\cdot\hat x_r},
+  \label{eq:radar-azimuth}
+\end{equation}
+\begin{equation}
+  \sin\epsilon_r=-\hat u_r\cdot\hat z_r.
+  \label{eq:radar-elevation}
+\end{equation}
+Azimuth is measured in the local geodetic horizon plane from $\hat x_r$, so
+$0^\circ$ is north and $90^\circ$ is east. Elevation is positive above the local
+horizon, away from the earth.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.70\linewidth}{!}{\input{manual/figures/chapter02/fig-2-21}}
+  \caption{Radar observations.}
+  \label{fig:radar-observations}
+\end{figure}
+
+Differentiating the geometry gives range rate and range acceleration along
+$\hat u_r$:
+\begin{equation}
+  \lVert\Delta\dot{\vec r}_r\rVert
+  =\vec V_{\oplus}\cdot\hat u_r,
+  \label{eq:radar-range-rate}
+\end{equation}
+\begin{equation}
+  \lVert\Delta\ddot{\vec r}_r\rVert
+  =\vec a_{\oplus}\cdot\hat u_r
+   +\vec V_{\oplus}\cdot\dot{\hat u}_r.
+  \label{eq:radar-range-acceleration}
+\end{equation}
+The first two derivatives of the line-of-sight unit vector are
+\begin{equation}
+  \dot{\hat u}_r
+  =\frac{\vec V_{\oplus}
+         -(\vec V_{\oplus}\cdot\hat u_r)\hat u_r}
+        {\lVert\Delta\vec r_r\rVert},
+  \label{eq:radar-unit-vector-rate}
+\end{equation}
+\begin{equation}
+  \ddot{\hat u}_r
+  =\frac{\vec a_{\oplus}
+         -\lVert\Delta\ddot{\vec r}_r\rVert\hat u_r
+         -2(\vec V_{\oplus}\cdot\hat u_r)\dot{\hat u}_r}
+        {\lVert\Delta\vec r_r\rVert}.
+  \label{eq:radar-unit-vector-acceleration}
+\end{equation}
+The azimuth derivatives are
+\begin{equation}
+  \dot\alpha_r
+  =\frac{
+   (\vec V_{\oplus}\cdot\hat y_r)(\Delta\vec r_r\cdot\hat x_r)
+  -(\vec V_{\oplus}\cdot\hat x_r)(\Delta\vec r_r\cdot\hat y_r)}
+  {(\Delta\vec r_r\cdot\hat x_r)^2
+  +(\Delta\vec r_r\cdot\hat y_r)^2},
+  \label{eq:radar-azimuth-rate}
+\end{equation}
+\begin{equation}
+\begin{aligned}
+  \ddot\alpha_r={}&
+  \frac{
+   (\vec a_{\oplus}\cdot\hat y_r)(\Delta\vec r_r\cdot\hat x_r)
+  -(\vec a_{\oplus}\cdot\hat x_r)(\Delta\vec r_r\cdot\hat y_r)}
+  {(\Delta\vec r_r\cdot\hat x_r)^2
+  +(\Delta\vec r_r\cdot\hat y_r)^2}\\
+  &-\frac{2\dot\alpha_r\left[
+    (\vec V_{\oplus}\cdot\hat x_r)(\Delta\vec r_r\cdot\hat x_r)
+   +(\vec V_{\oplus}\cdot\hat y_r)(\Delta\vec r_r\cdot\hat y_r)
+   \right]}
+  {(\Delta\vec r_r\cdot\hat x_r)^2
+  +(\Delta\vec r_r\cdot\hat y_r)^2}.
+\end{aligned}
+\label{eq:radar-azimuth-acceleration}
+\end{equation}
+The elevation derivatives are
+\begin{equation}
+  \dot\epsilon_r
+  =-\dot{\hat u}_r\cdot\hat z_r\sec\epsilon_r,
+  \label{eq:radar-elevation-rate}
+\end{equation}
+\begin{equation}
+  \ddot\epsilon_r
+  =\left[\dot\epsilon_r^2\sin\epsilon_r
+         -\ddot{\hat u}_r\cdot\hat z_r\right]\sec\epsilon_r.
+  \label{eq:radar-elevation-acceleration}
+\end{equation}
+
+The radar aspect angle $\eta_r$ is the angle between the vehicle longitudinal axis
+$\hat x_b$ and the line of sight from the vehicle back to the radar, $-\hat u_r$.
+The meridional angle $\phi_r$ is formed by projecting that line of sight into the
+vehicle $\hat y_b$--$\hat z_b$ plane, as shown in
+\cref{fig:radar-aspect-meridional}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.84\linewidth}{!}{\input{manual/figures/chapter02/fig-2-22}}
+  \caption{Radar aspect and meridional angles.}
+  \label{fig:radar-aspect-meridional}
+\end{figure}
+
+The aspect angle satisfies
+\begin{equation}
+  \sin\eta_r
+  =\sqrt{(\hat u_r\cdot\hat y_b)^2+(\hat u_r\cdot\hat z_b)^2},
+  \label{eq:radar-aspect-sine}
+\end{equation}
+\begin{equation}
+  \cos\eta_r=-\hat u_r\cdot\hat x_b,
+  \label{eq:radar-aspect-cosine}
+\end{equation}
+and the meridional angle is defined by
+\begin{equation}
+  \sin\phi_r
+  =\frac{-\hat u_r\cdot\hat z_b}
+         {\sqrt{(\hat u_r\cdot\hat y_b)^2+(\hat u_r\cdot\hat z_b)^2}},
+  \label{eq:radar-meridional-sine}
+\end{equation}
+\begin{equation}
+  \cos\phi_r
+  =\frac{-\hat u_r\cdot\hat y_b}
+         {\sqrt{(\hat u_r\cdot\hat y_b)^2+(\hat u_r\cdot\hat z_b)^2}}.
+  \label{eq:radar-meridional-cosine}
+\end{equation}
+These calculations are implemented in \texttt{radar\_out} in the
+\texttt{derivs} module.

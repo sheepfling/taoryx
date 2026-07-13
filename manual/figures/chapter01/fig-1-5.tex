@@ -1,0 +1,43 @@
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,line cap=round,line join=round,font=\sffamily\small]
+  \useasboundingbox (0,0) rectangle (10.2,3.85);
+  \tikzset{
+    fileicon/.pic={
+      % Slightly three-dimensional document icon, closer to the workstation icon
+      % printed in the source manual.
+      \draw[line width=0.55pt] (0.10,0.07) -- (0.72,0.18) -- (0.72,0.96) -- (0.10,0.84) -- cycle;
+      \draw[line width=0.85pt,fill=white] (0,0.14) -- (0.57,0.24) -- (0.57,1.02) -- (0,0.92) -- cycle;
+      \draw[line width=0.65pt] (0.11,0.76)--(0.45,0.82);
+      \draw[line width=0.65pt] (0.11,0.62)--(0.45,0.68);
+      \draw[line width=0.65pt] (0.11,0.48)--(0.40,0.53);
+      \draw[line width=0.65pt] (0.12,0.29) rectangle (0.43,0.43);
+    },
+    taosicon/.pic={
+      % Stylized winged-flight icon and pedestal, preserving the visual role of
+      % the historical Silicon Graphics TAOS desktop icon without embedding a raster.
+      \draw[line width=0.85pt] (0.08,0.18)--(0.48,0.00)--(1.12,0.20)--(0.72,0.38)--cycle;
+      \draw[line width=0.75pt] (0.42,0.31)--(0.63,0.50)--(0.78,0.33);
+      \draw[line width=0.9pt] (0.58,0.36)
+        .. controls (0.44,0.68) and (0.57,1.02) .. (0.94,1.24)
+        .. controls (0.80,0.93) and (0.82,0.66) .. (0.99,0.43);
+      \draw[line width=0.8pt] (0.72,0.88)--(0.20,1.05)--(0.55,0.78);
+      \draw[line width=0.8pt] (0.79,0.83)--(1.32,1.02)--(0.96,0.73);
+      \draw[line width=0.65pt] (0.84,1.13)--(1.07,1.34);
+      \draw[line width=0.65pt] (0.88,1.10)--(1.20,1.18);
+    }
+  }
+
+  \pic[scale=1.28] at (3.05,2.34) {fileicon};
+  \node[anchor=north] at (3.41,2.36) {test.tbl};
+  \pic[scale=1.28] at (3.05,0.28) {fileicon};
+  \node[anchor=north] at (3.41,0.30) {test.prb};
+
+  \pic[scale=1.32] at (6.45,1.10) {taosicon};
+  \node[anchor=north] at (7.20,1.02) {taos};
+
+  \node[align=left,anchor=west] (files) at (0.10,1.50) {Table and\\Problem File\\Icons};
+  \draw[->,line width=0.95pt] (files.east) -- (2.86,2.82);
+  \draw[->,line width=0.95pt] (files.east) -- (2.86,0.77);
+
+  \node[align=left,anchor=west] (icon) at (8.62,2.54) {TAOS\\Icon};
+  \draw[->,line width=0.95pt] (icon.west) -- (7.63,2.08);
+\end{tikzpicture}

@@ -1,0 +1,59 @@
+fixture_validation:
+  source: TAOS 1995 User's Manual, SAND95-1652
+  policy:
+    executable_complete: The fixture contains no source ellipsis and is structurally complete.
+    documentation_excerpt: The source intentionally omits intervening data and the fixture is not executable-complete.
+    external_dependency: A referenced table is not bundled with the worked example and is reported, not treated as a syntax error.
+  fixtures:
+    - path: examples/chapter03/recruits-thr.tbl
+      language: tbl
+      source_pdf_pages: [160]
+      source_manual_pages: [3-25]
+      expected_status: executable_complete
+    - path: examples/chapter03/stmi-full.tbl
+      language: tbl
+      source_pdf_pages: [160]
+      source_manual_pages: [3-25]
+      expected_status: executable_complete
+    - path: examples/chapter03/stmi-simple.tbl
+      language: tbl
+      source_pdf_pages: [160]
+      source_manual_pages: [3-25]
+      expected_status: executable_complete
+    - path: examples/chapter03/orbus-mdt.tbl
+      language: tbl
+      source_pdf_pages: [161, 162]
+      source_manual_pages: [3-26, 3-27]
+      expected_status: executable_complete_with_source_warning
+      source_notes:
+        - The first tmark array contains two consecutive 0.00 abscissas exactly as printed, despite the general rule against duplicate independent values.
+    - path: examples/chapter03/reentry-ca-excerpt.tbl
+      language: tbl
+      source_pdf_pages: [163, 164]
+      source_manual_pages: [3-28, 3-29]
+      expected_status: documentation_excerpt
+    - path: examples/chapter04/ballistic-reentry.tbl
+      language: tbl
+      source_pdf_pages: [257]
+      source_manual_pages: [4-92]
+      expected_status: executable_complete
+    - path: examples/chapter04/ballistic-reentry.prb
+      language: prb
+      source_pdf_pages: [257, 258, 259, 260, 261, 262]
+      source_manual_pages: [4-92, 4-93, 4-94, 4-95, 4-96, 4-97]
+      expected_status: structurally_valid
+    - path: examples/chapter04/ballistic-rocket.prb
+      language: prb
+      source_pdf_pages: [263, 264, 265, 266, 267, 268, 269]
+      source_manual_pages: [4-98, 4-99, 4-100, 4-101, 4-102, 4-103, 4-104]
+      expected_status: structurally_valid
+    - path: examples/chapter04/air-launched-intercept.prb
+      language: prb
+      source_pdf_pages: [270, 271, 272, 273, 274, 275, 276]
+      source_manual_pages: [4-105, 4-106, 4-107, 4-108, 4-109, 4-110, 4-111]
+      expected_status: structurally_valid
+    - path: examples/chapter04/ground-launched-intercept.prb
+      language: prb
+      source_pdf_pages: [277, 278, 279, 280]
+      source_manual_pages: [4-112, 4-113, 4-114, 4-115]
+      expected_status: structurally_valid

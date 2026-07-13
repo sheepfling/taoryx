@@ -1,0 +1,21 @@
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small]
+  \draw[thick]
+    (0,0) .. controls (1.0,1.2) and (1.8,1.2) .. (2.6,0.8)
+    .. controls (3.5,0.3) and (4.6,0.2) .. (5.4,0.35)
+    .. controls (6.0,0.5) and (6.3,1.0) .. (5.8,1.25)
+    .. controls (5.2,1.55) and (4.9,1.0) .. (5.5,0.8)
+    .. controls (6.5,0.45) and (7.2,0.35) .. (7.7,-0.15)
+    .. controls (8.0,-0.55) and (8.4,-0.9) .. (8.9,-1.15);
+  \fill (0,0) circle (1.5pt);
+  \fill (2.6,0.8) circle (1.5pt);
+  \fill (5.4,0.35) circle (1.5pt);
+  \fill (5.8,1.25) circle (1.5pt);
+  \fill (7.7,-0.15) circle (1.5pt);
+  \fill (8.9,-1.15) circle (1.5pt);
+  \node[below left] at (0,0) {Beginning of trajectory};
+  \node[above] at (1.25,1.0) {Segment 1};
+  \node[above,align=center] at (3.8,0.95) {Segment 2\\Constant angle-of-attack pullout};
+  \node[above,align=center] at (5.9,1.55) {Segment 3\\Level turn};
+  \node[below,align=center] at (6.2,0.15) {Segment 4\\Ballistic};
+  \node[below right] at (8.9,-1.15) {End of trajectory};
+\end{tikzpicture}

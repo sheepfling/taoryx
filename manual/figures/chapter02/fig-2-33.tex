@@ -1,0 +1,26 @@
+\begin{tikzpicture}[
+  >=Latex,
+  node distance=0.45cm,
+  flowbox/.style={draw,align=center,text width=5.2cm,minimum height=0.72cm,font=\small},
+  decision/.style={draw,rounded corners=8pt,align=center,text width=4.2cm,minimum height=0.72cm,font=\small},
+  every path/.style={line width=0.7pt}
+]
+  \node[flowbox] (init) {Initialize starting trajectories};
+  \node[flowbox,below=of init] (dt) {Compute a $\Delta t$};
+  \node[flowbox,below=of dt] (integrate) {Integrate all trajectories one time step};
+  \node[flowbox,below=of integrate] (final) {If a segment final condition is hit, change segment or end trajectory};
+  \node[flowbox,below=of final] (search) {If a search function is hit, restart trajectories as necessary for the search};
+  \node[flowbox,below=of search] (new) {Check for starting new trajectories};
+  \node[decision,below=of new] (done) {All trajectories completed?};
+
+  \draw[->] (init)--(dt);
+  \draw[->] (dt)--(integrate);
+  \draw[->] (integrate)--(final);
+  \draw[->] (final)--(search);
+  \draw[->] (search)--(new);
+  \draw[->] (new)--(done);
+  \draw[->] (done.west) -- ++(-1.1,0) |- (dt.west)
+    node[pos=0.13,above,font=\scriptsize] {no};
+  \draw[->] (done.south) -- ++(0,-0.48)
+    node[below,font=\scriptsize] {yes};
+\end{tikzpicture}

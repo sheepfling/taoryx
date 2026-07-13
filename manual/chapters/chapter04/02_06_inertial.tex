@@ -1,0 +1,97 @@
+\subsection{\problemblock{*Inertial} Data Block}\label{sec:block-inertial}
+
+TAOS maintains an inertial-platform coordinate system that is fixed in inertial
+space. The Euler angles \statevar{yawi}, \statevar{pitchi}, and
+\statevar{rolli} are referenced to this system, and position, velocity, and
+acceleration can be output in it as described in \cref{sec:inertial-platform}.
+
+The platform is initially aligned with the local geodetic horizon coordinate system
+and located at the trajectory initial position. Its $x$ axis points north, its $y$ axis
+points east, and its $z$ axis points down toward the earth. This alignment and
+position can be changed at the beginning of any segment with an
+\problemblock{*inertial} block.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Inertial-platform alignment coordinate systems.}
+  \label{tab:inertial-platform-alignments}
+  \begin{tabularx}{0.82\linewidth}{@{}>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Name & Description \\
+    \midrule
+    body       & Body-axis system \\
+    ecfc       & Earth-centered, earth-fixed system; optional east and down vectors \\
+    geocentric & Local geocentric horizon; optional longitude/latitude/radius position \\
+    geodetic   & Local geodetic horizon; optional longitude/latitude/altitude position \\
+    velocity   & $x$ parallel to velocity, with $z$ coplanar with the geodetic $z$ axis \\
+    wind       & Wind-axis system \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The default alignment is geodetic. All coordinate systems in
+\cref{tab:inertial-platform-alignments} are defined in \cref{sec:coordinate-systems}.
+
+\taossubhead{Geocentric and Geodetic Alignment}
+
+The data block
+
+\begin{lstlisting}[style=taosmanual]
+*inertial platform alignment geocentric
+\end{lstlisting}
+
+aligns the inertial system with the current local geocentric horizon and locates its
+origin at the vehicle center of mass. The words \texttt{platform} and
+\texttt{alignment} are optional; the shorter form \texttt{*inertial geocentric}
+is equivalent.
+
+The platform may instead be placed at a specified longitude, latitude, and altitude,
+and at a specified time:
+
+\begin{lstlisting}[style=taosmanual]
+*inertial platform lat=28.8 long=-81.5 alt=550 time=100
+\end{lstlisting}
+
+This aligns with the geodetic horizon at $28.8^\circ$~N, $81.5^\circ$~W, an
+altitude of 550~ft, and a mission time of 100~s. Alignment time is required to account
+for earth rotation. For a geodetic alignment, \statevar{long}, \statevar{lat}, and
+\statevar{alt} specify the location; altitude is optional and defaults to zero, or sea
+level. For geocentric alignment, \statevar{long}, \statevar{lat}, and
+\statevar{rcm} are used.
+
+\taossubhead{Body, Wind, and Velocity Alignment}
+
+The inertial platform can be aligned with the body axes with
+
+\begin{lstlisting}[style=taosmanual]
+*inertial platform body
+\end{lstlisting}
+
+Body-attitude information is not available at the beginning of the first trajectory
+segment because the guidance scheme has not yet been executed. The platform should
+therefore not be aligned with the body or wind systems on the first segment. An
+initial dummy segment with a final condition of \texttt{tseg>0} can first calculate
+the attitude; at the start of the second segment the platform can then be aligned with
+the body, wind, or velocity system.
+
+For body, wind, or velocity alignment, the platform is located at the vehicle center of
+mass. An alignment time may still be supplied. This aligns the platform as though
+the current position and velocity existed at the specified mission time.
+
+\taossubhead{ECFC Alignment}
+
+For earth-centered, earth-fixed alignment, the platform origin is the vehicle center of
+mass and its axes are parallel to the ECFC unit vectors. The orientation may be
+changed by entering east and down vectors. Only two unit vectors are needed; TAOS
+computes the remaining vector to form a right-handed system. Components are given
+in ECFC coordinates with \statevar{eastx}, \statevar{easty},
+\statevar{eastz}, \statevar{downx}, \statevar{downy}, and
+\statevar{downz}. If only one vector is supplied, the default is used for the other.
+For example,
+
+\begin{lstlisting}[style=taosmanual]
+*inertial ecfc eastx=0.7071 easty=0.7071 eastz=0.0
+               downx=0.0   downy=0.0    downz=-1
+\end{lstlisting}
+
+twists the east and north inertial vectors by approximately $45^\circ$.

@@ -1,0 +1,74 @@
+\section{Segment Data Blocks}\label{sec:segment-data-blocks}
+
+Segment data blocks provide the information required to calculate one trajectory
+segment. This includes numerical-integration parameters, vehicle configuration,
+guidance rules, segment final conditions, and what to do next. Because this is a
+large amount of information, it is organized into subordinate data blocks; in other
+words, segment data blocks contain other kinds of data blocks.
+
+A segment begins with a line containing the keyword \problemblock{*segment}, for
+example,
+
+\begin{lstlisting}[style=taosmanual]
+*segment 23 2nd Stage Boost
+\end{lstlisting}
+
+The value following \problemblock{*segment} is the segment number, in this case
+23. It is required and must be unique within the trajectory. An optional title, such as
+\texttt{2nd Stage Boost}, follows the number.
+
+The remainder of the segment definition consists of the data blocks listed in
+\cref{tab:segment-data-blocks}. A segment block extends from its
+\problemblock{*segment} keyword to the next trajectory- or problem-level keyword.
+Usually the terminating keyword is another \problemblock{*segment} or a
+\problemblock{*trajectory}. 
+\Cref{tab:trajectory-data-blocks,tab:problem-data-blocks} list the trajectory- and
+problem-level keywords.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Segment data blocks.}
+  \label{tab:segment-data-blocks}
+  \begin{tabularx}{0.88\linewidth}{@{}>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Data block & Description \\
+    \midrule
+    *aero      & Defines aerodynamic coefficients \\
+    *constants & Provides values for user-defined variables \\
+    *cg        & Defines the center of gravity \\
+    *fly       & Defines a guidance rule \\
+    *increment & Allows discontinuities in the vehicle state \\
+    *inertial  & Aligns an inertial-platform coordinate system \\
+    *integ     & Provides numerical-integration parameters \\
+    *limits    & Defines limits on the flight path \\
+    *prop      & Defines propulsive thrust and mass flow \\
+    *rail      & Provides parameters for rail launches and sleds \\
+    *reset     & Resets selected vehicle-state quantities \\
+    *when      & Provides final conditions and what to do next \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The following segment is an example of a rail-launched missile:
+
+\begin{lstlisting}[style=taosmanual]
+*segment 1 Rail Launch
+  *integ dtprnt=0.10 dt=0.01
+  *aero ca=(stage1-ca) cn=(stage1-cn)
+  *prop thrust=(thrust1) mdot=(mdot1)
+  *prop thrust=(t-recruits) mdot=(m-recruits)
+  *rail launch cfstat=0.15 cfslid=0.01
+  *when plength=25.0 goto 3
+\end{lstlisting}
+
+This segment contains an \problemblock{*integ} block giving the integration and
+print step sizes, an \problemblock{*aero} block selecting aerodynamic tables, two
+\problemblock{*prop} blocks selecting thrust and mass-flow tables, a
+\problemblock{*rail} block defining rail-launch guidance and friction, and a
+\problemblock{*when} block defining the final condition. The
+\problemblock{*when} block also specifies how the trajectory continues; here,
+segment 3 is computed next.
+
+The following subsections describe the input parameters and format for each segment
+data block. Additional complete segment examples are given in
+\cref{sec:problem-examples}.

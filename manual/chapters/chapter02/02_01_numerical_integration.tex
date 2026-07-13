@@ -1,0 +1,175 @@
+% Source PDF pages 67--69; manual pages 2-38--2-40.
+\subsection{Numerical Integration}\label{sec:numerical-integration}
+
+For numerical integration, the equations of motion are written in terms of the state
+vector
+\begin{equation}
+  \vec S(t)
+  =\begin{bmatrix}\vec r\\[0.2em]\vec V_{\oplus}\end{bmatrix}
+  =\begin{bmatrix}
+    \vec r\mathbin{\cdot}\hat x_{\oplus}\\
+    \vec r\mathbin{\cdot}\hat y_{\oplus}\\
+    \vec r\mathbin{\cdot}\hat z_{\oplus}\\
+    \vec V_{\oplus}\mathbin{\cdot}\hat x_{\oplus}\\
+    \vec V_{\oplus}\mathbin{\cdot}\hat y_{\oplus}\\
+    \vec V_{\oplus}\mathbin{\cdot}\hat z_{\oplus}
+  \end{bmatrix}
+  =\begin{bmatrix}
+    x_{\oplus}\\y_{\oplus}\\z_{\oplus}\\
+    \dot x_{\oplus}\\\dot y_{\oplus}\\\dot z_{\oplus}
+  \end{bmatrix}.
+  \label{eq:trajectory-state-vector}
+\end{equation}
+The state is a function of time and has a corresponding derivative vector. Given a
+time and state,
+\begin{equation}
+  \dot{\vec S}(t,\vec S)
+  =\begin{bmatrix}\dot{\vec r}\\[0.2em]\dot{\vec V}_{\oplus}\end{bmatrix}
+  =\begin{bmatrix}\vec V_{\oplus}\\[0.2em]\vec a_{\oplus}\end{bmatrix}
+  =\begin{bmatrix}
+    \vec V_{\oplus}\mathbin{\cdot}\hat x_{\oplus}\\
+    \vec V_{\oplus}\mathbin{\cdot}\hat y_{\oplus}\\
+    \vec V_{\oplus}\mathbin{\cdot}\hat z_{\oplus}\\
+    \vec a_{\oplus}\mathbin{\cdot}\hat x_{\oplus}\\
+    \vec a_{\oplus}\mathbin{\cdot}\hat y_{\oplus}\\
+    \vec a_{\oplus}\mathbin{\cdot}\hat z_{\oplus}
+  \end{bmatrix}
+  =\begin{bmatrix}
+    \dot x_{\oplus}\\\dot y_{\oplus}\\\dot z_{\oplus}\\
+    \ddot x_{\oplus}\\\ddot y_{\oplus}\\\ddot z_{\oplus}
+  \end{bmatrix}.
+  \label{eq:trajectory-state-derivative-vector}
+\end{equation}
+With the earth spin vector aligned with $\hat z_{\oplus}$, the acceleration
+components are
+\begin{equation}
+  \ddot x_{\oplus}
+  =\frac{\sum\vec F\mathbin{\cdot}\hat x_{\oplus}}{m}
+   +\omega_{\oplus}
+      \left(2\dot y_{\oplus}+\omega_{\oplus}x_{\oplus}\right),
+  \label{eq:ecfc-x-acceleration-state-form}
+\end{equation}
+\begin{equation}
+  \ddot y_{\oplus}
+  =\frac{\sum\vec F\mathbin{\cdot}\hat y_{\oplus}}{m}
+   +\omega_{\oplus}
+      \left(-2\dot x_{\oplus}+\omega_{\oplus}y_{\oplus}\right),
+  \label{eq:ecfc-y-acceleration-state-form}
+\end{equation}
+\begin{equation}
+  \ddot z_{\oplus}
+  =\frac{\sum\vec F\mathbin{\cdot}\hat z_{\oplus}}{m},
+  \label{eq:ecfc-z-acceleration-state-form}
+\end{equation}
+where
+\begin{equation}
+  \omega_{\oplus}=\left\lVert{}_{I}\vec\omega_{\oplus}\right\rVert.
+  \label{eq:earth-spin-rate-magnitude}
+\end{equation}
+The state and derivative vectors are augmented with equations for vehicle mass $m$,
+path length $r$, ground range $r_s$, and any user-defined integral variables
+(\cref{sec:trajectory-block-define}).
+
+\taossubhead{Vehicle Mass}
+
+The initial mass is part of the trajectory initial conditions
+(\cref{sec:block-initial}), and the mass rate is supplied as a function of time and
+vehicle state through the propulsive model (\cref{sec:block-prop}). The associated
+output variables are
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.19\textwidth}p{0.56\textwidth}@{}}
+  fuel & $\Delta m\,g$ & Fuel used; in English units, $g=32.174\,\mathrm{lb_m/slug}$.\\
+  mass & $m$ & Vehicle mass.\\
+  mdt  & $\dot m$ & Mass rate.\\
+  wt   & $m g$ & Vehicle weight.\\
+\end{longtable}
+
+\taossubhead{Path Length}
+
+The path length $r$ is the distance traveled through the air. It is the time integral
+of $\lVert\vec V_{\oplus}\rVert$ and is commonly used for launch-rail or sled-track
+length. The associated output variables are
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.19\textwidth}p{0.56\textwidth}@{}}
+  plength & $r$ & Path length for the complete trajectory.\\
+  plmark  & $r$ & Path length from a designated trajectory point.\\
+  plseg   & $r$ & Path length for the current segment.\\
+\end{longtable}
+
+\taossubhead{Ground Range}
+
+The ground range $r_s$ is the length of the projection of the flight path onto the
+earth's surface. Its derivative is the ground speed
+$\lVert\vec V_s\rVert$, the speed of the point on the surface directly below the
+vehicle. The ground-speed expression is derived in \cref{sec:ground-speed}.
+
+\taossubhead{Runge--Kutta Integration}
+
+The complete state and derivative vectors evaluated by \texttt{compute\_derivs} are
+\begin{equation}
+  \vec S(t)
+  =\begin{bmatrix}
+    x_{\oplus}\\y_{\oplus}\\z_{\oplus}\\
+    \dot x_{\oplus}\\\dot y_{\oplus}\\\dot z_{\oplus}\\
+    m\\r\\r_s
+  \end{bmatrix},
+  \qquad
+  \dot{\vec S}(t,\vec S)
+  =\begin{bmatrix}
+    \dot x_{\oplus}\\\dot y_{\oplus}\\\dot z_{\oplus}\\
+    \ddot x_{\oplus}\\\ddot y_{\oplus}\\\ddot z_{\oplus}\\
+    \dot m\\
+    \lVert\vec V_{\oplus}\rVert\\
+    \lVert\vec V_s\rVert
+  \end{bmatrix}.
+  \label{eq:augmented-trajectory-state}
+\end{equation}
+TAOS integrates these equations with a fixed-step, fourth-order Runge--Kutta
+method. Numerical accuracy is therefore controlled by the input step size
+$\Delta t$:
+\begin{equation}
+  \vec S(t+\Delta t)
+  =\vec S(t)
+   +\frac{1}{6}
+    \left(
+      \dot{\vec S}
+      +2\dot{\vec S}'
+      +2\dot{\vec S}''
+      +\dot{\vec S}'''
+    \right)\Delta t,
+  \label{eq:runge-kutta-fourth-order-step}
+\end{equation}
+where
+\begin{equation}
+  \dot{\vec S}=\dot{\vec S}(t,\vec S),
+  \label{eq:runge-kutta-stage-zero}
+\end{equation}
+\begin{equation}
+  \dot{\vec S}'
+  =\dot{\vec S}
+    \left(
+      t+0.5\Delta t,
+      \vec S+0.5\Delta t\,\dot{\vec S}(t)
+    \right),
+  \label{eq:runge-kutta-stage-one}
+\end{equation}
+\begin{equation}
+  \dot{\vec S}''
+  =\dot{\vec S}
+    \left(
+      t+0.5\Delta t,
+      \vec S+0.5\Delta t\,\dot{\vec S}'(t)
+    \right),
+  \label{eq:runge-kutta-stage-two}
+\end{equation}
+\begin{equation}
+  \dot{\vec S}'''
+  =\dot{\vec S}
+    \left(
+      t+\Delta t,
+      \vec S+\Delta t\,\dot{\vec S}''(t)
+    \right).
+  \label{eq:runge-kutta-stage-three}
+\end{equation}
+Each integration step requires four derivative evaluations and is performed by
+\texttt{integration\_step}. At every time step, TAOS also computes output variables
+from the state and derivative vectors, including the longitude, latitude, and
+flight-path-angle rates derived below.

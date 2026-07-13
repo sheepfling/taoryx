@@ -1,0 +1,130 @@
+% Source PDF pages 107--109; manual pages 2-78--2-80.
+\section{Guidance Rules}\label{sec:guidance-rules}
+
+Because TAOS is a three-degree-of-freedom point-mass trajectory simulation, the
+body attitude or angular orientation cannot be obtained from the equations of
+motion. Instead, body attitude is supplied through guidance rules. TAOS assumes
+that the vehicle has a control system capable of maintaining the commanded
+attitude.
+
+The body-fixed coordinate system is defined relative to another coordinate system
+by three angles. Relative to the geocentric, geodetic, or inertial-platform systems,
+these are three Euler angles. Relative to a velocity coordinate system, they are a
+pair of aerodynamic angles and a bank angle. The valid combinations are listed in
+\cref{tab:body-attitude-control-variables}.
+
+% Several earlier semantic longtables are intentionally unnumbered but still advance
+% LaTeX's table counter. Restore the source-manual sequence before Tables 2-2 and 2-3.
+\setcounter{table}{1}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Body-attitude control variables.}
+  \label{tab:body-attitude-control-variables}
+  \small
+  \renewcommand{\arraystretch}{1.12}
+  \begin{tabularx}{\linewidth}{@{}c>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+    \toprule
+    Set & \multicolumn{3}{c}{Body-attitude angles}\\
+    \midrule
+    1 & $\alpha$ Angle of attack & $\beta_E$ Euler sideslip angle & $\mu_{gc}$ Geocentric bank angle\\
+    2 & $\alpha$ Angle of attack & $\beta$ Sideslip angle & $\mu_{gc}$ Geocentric bank angle\\
+    3 & $\alpha_T$ Total angle of attack & $\phi_w$ Windward meridian & $\mu_{gc}$ Geocentric bank angle\\
+    4 & $\alpha$ Angle of attack & $\beta_E$ Euler sideslip angle & $\mu_{gd}$ Geodetic bank angle\\
+    5 & $\alpha$ Angle of attack & $\beta$ Sideslip angle & $\mu_{gd}$ Geodetic bank angle\\
+    6 & $\alpha_T$ Total angle of attack & $\phi_w$ Windward meridian & $\mu_{gd}$ Geodetic bank angle\\
+    7 & $\Psi_{gc}$ Geocentric yaw angle & $\Theta_{gc}$ Geocentric pitch angle & $\Phi_{gc}$ Geocentric roll angle\\
+    8 & $\Psi_{gd}$ Geodetic yaw angle & $\Theta_{gd}$ Geodetic pitch angle & $\Phi_{gd}$ Geodetic roll angle\\
+    9 & $\Psi_p$ Inertial yaw angle & $\Theta_p$ Inertial pitch angle & $\Phi_p$ Inertial roll angle\\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\taossubhead{Control Variables}
+
+Vehicle acceleration, and therefore vehicle motion, is determined by the forces
+acting on the vehicle. These forces generally depend on aerodynamic angles, which
+in turn depend on the body-attitude angles. The attitude angles therefore control the
+forces that control the trajectory and can be regarded as \emph{control variables}.
+
+For a vehicle of fixed geometry, aerodynamic forces commonly depend on altitude,
+velocity, angle of attack, and sideslip angle. Propulsive forces commonly depend on
+altitude, velocity, and power setting. Altitude and velocity follow from the vehicle
+state, but angle of attack, sideslip, and power setting are independent quantities that
+must be supplied to integrate the equations of motion.
+
+TAOS uses four control variables. Three are selected from one row of
+\cref{tab:body-attitude-control-variables}; the fourth is power setting $P$. A
+control variable affects the trajectory only when the corresponding force tables
+depend on it. For example, if the propulsion tables are not functions of power
+setting, changing $P$ has no effect on propulsive force or trajectory.
+
+\taossubhead{Guidance Rules}
+
+Guidance rules determine the control-variable values. A rule may specify a control
+variable directly or may specify a flight condition from which TAOS solves for a
+control variable. Four control variables are used, so four guidance rules are required,
+although controls whose desired value is zero may use their default.
+
+A direct rule such as ``fly at a $5^\circ$ angle of attack'' supplies a control value
+without further calculation. Directly supplied attitude variables must form one of
+the consistent sets in \cref{tab:body-attitude-control-variables}; all directly
+specified angles must come from the same row.
+
+An indirect rule such as ``fly at a $0^\circ$ vertical flight-path angle'' commands
+level flight. The required angle of attack is not known in advance, so TAOS solves
+for the control value that produces the requested condition. The indirect rules and
+their associated solution variables are listed in
+\cref{tab:indirect-guidance-rules}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Guidance rules that indirectly specify control variables.}
+  \label{tab:indirect-guidance-rules}
+  \small
+  \renewcommand{\arraystretch}{1.08}
+  \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.25\textwidth}>{\centering\arraybackslash}p{0.20\textwidth}@{}}
+    \toprule
+    Guidance rule & Control variables & Solution variable\\
+    \midrule
+    Fly at a constant altitude & $\alpha,\alpha_T,P$ & $\ddot h$\\
+    Fly at a constant lift coefficient & $\alpha,\alpha_T$ & $C_L$\\
+    Fly at a constant side-force coefficient & $\beta,\beta_E,\phi_w$ & $C_S$\\
+    Fly at a constant dynamic pressure & $P,\alpha,\alpha_T$ & $\ddot q$\\
+    Fly at a constant geocentric flight-path angle & $\alpha,\alpha_T,P$ & $\dot\gamma_{gc}$\\
+    Fly at a constant geodetic flight-path angle & $\alpha,\alpha_T,P$ & $\dot\gamma_{gd}$\\
+    Fly intercept or proportional navigation in pitch & $\alpha,\alpha_T$ & $\dot\gamma_{gd}$\\
+    Fly intercept or proportional navigation in yaw & $\beta,\beta_E,\phi_w,\mu_{gc},\mu_{gd}$ & $\dot\psi_{gd}$\\
+    Fly at a constant lift-to-drag ratio & $\alpha,\alpha_T$ & $L/D$\\
+    Fly at the maximum lift-to-drag ratio & $\alpha,\alpha_T$ & $\alpha_{L/D}$\\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[htbp]
+  \ContinuedFloat
+  \centering
+  \caption[]{Guidance rules that indirectly specify control variables (continued).}
+  \small
+  \renewcommand{\arraystretch}{1.08}
+  \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.25\textwidth}>{\centering\arraybackslash}p{0.20\textwidth}@{}}
+    \toprule
+    Guidance rule & Control variables & Solution variable\\
+    \midrule
+    Fly at a constant Mach number & $P,\alpha,\alpha_T$ & $\dot M$\\
+    Fly at a constant axial-$g$ loading & $P,\alpha,\alpha_T$ & $\vec a_{sp}\cdot\hat x_b$\\
+    Fly at a constant lateral-$g$ loading & $\beta,\beta_E,\phi_w$ & $\vec a_{sp}\cdot\hat y_b$\\
+    Fly at a constant normal-$g$ loading & $\alpha,\alpha_T$ & $\vec a_{sp}\cdot\hat z_b$\\
+    Fly at a constant geocentric heading angle & $\beta,\beta_E,\phi_w,\mu_{gc},\mu_{gd}$ & $\dot\psi_{gc}$\\
+    Fly at a constant geodetic heading angle & $\beta,\beta_E,\phi_w,\mu_{gc},\mu_{gd}$ & $\dot\psi_{gd}$\\
+    Fly at a constant thrust & $P$ & $\lVert\vec F_{\mathrm{prop}}\rVert$\\
+    Fly up/down the range-insensitive axis in pitch & $\alpha,\alpha_T$ & $r_{\mathrm{iip}}$\\
+    Fly up/down the range-insensitive axis in yaw & $\beta,\beta_E,\phi_w,\mu_{gc},\mu_{gd}$ & $\alpha_{\mathrm{iip}}$\\
+    Fly at a constant velocity & $P,\alpha,\alpha_T$ & $\lVert\vec V_{\oplus}\rVert$\\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+A solution variable is a function of the control variables and is associated with its
+guidance rule. It is generally an acceleration-like quantity that can change
+instantaneously along the trajectory.

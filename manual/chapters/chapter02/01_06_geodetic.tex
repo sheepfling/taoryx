@@ -1,0 +1,260 @@
+% Source PDF pages 43--47; manual pages 2-14--2-18.
+\subsection{Geodetic Coordinate System}\label{sec:geodetic}
+
+The geodetic coordinate system is similar to the geocentric system, except that
+position and velocity orientations are referenced to an ellipsoidal rather than a
+spherical earth. The ellipsoidal model is more accurate, so geodetic coordinates are
+used more often than geocentric coordinates. TAOS follows the method in
+Reference~7 for the ellipsoidal geometry.
+
+The earth's surface is modeled as an ellipsoid of revolution. In the equatorial plane,
+defined by $\hat{x}_{\oplus}$ and $\hat{y}_{\oplus}$, the ellipsoid is a circle of
+radius $R_{\oplus}$. The polar radius $R_p$ is less than the equatorial radius, so
+points on the surface satisfy
+\begin{equation}
+  \frac{x_s^2}{R_{\oplus}^2}
+  +\frac{y_s^2}{R_{\oplus}^2}
+  +\frac{z_s^2}{R_p^2}=1.
+  \label{eq:ellipsoid-surface}
+\end{equation}
+
+The ellipsoid is symmetric about the $\hat{z}_{\oplus}$ axis, so its geometry can be
+analyzed in the $\hat{x}_{\oplus}$--$\hat{z}_{\oplus}$ plane, as shown in
+\cref{fig:ellipsoidal-earth-geometry}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.75\linewidth}{!}{\input{manual/figures/chapter02/fig-2-6}}
+  \caption{Ellipsoidal earth geometry.}
+  \label{fig:ellipsoidal-earth-geometry}
+\end{figure}
+
+The ellipse equation in this plane is
+\begin{equation}
+  R_{\oplus}^2=x_s^2+\frac{z_s^2}{1-e^2},
+  \label{eq:ellipsoid-plane-equation}
+\end{equation}
+where $e$ is the eccentricity from \cref{eq:ellipsoid-parameter-relation}. Points on
+the surface, such as $S$, satisfy this equation. A surface normal, such as the line
+between $S$ and $Q$, has slope
+\begin{equation}
+  \tan\delta_{gd}=-\frac{d x_s}{d z_s}.
+  \label{eq:geodetic-latitude-slope}
+\end{equation}
+Differentiating \cref{eq:ellipsoid-plane-equation} and substituting in
+\cref{eq:geodetic-latitude-slope} gives
+\begin{equation}
+  \frac{z_s}{x_s}=(1-e^2)\tan\delta_{gd}.
+  \label{eq:ellipsoid-surface-ratio}
+\end{equation}
+Solving \cref{eq:ellipsoid-plane-equation,eq:ellipsoid-surface-ratio} for $x_s$
+produces
+\begin{equation}
+  x_s=\frac{R_{\oplus}\cos\delta_{gd}}
+           {\sqrt{1-e^2\sin^2\delta_{gd}}}.
+  \label{eq:ellipsoid-xs}
+\end{equation}
+From \cref{fig:ellipsoidal-earth-geometry}, point $S$ also satisfies
+\begin{equation}
+  x_s=N\cos\delta_{gd},
+  \label{eq:ellipsoid-xs-normal}
+\end{equation}
+where $N$ is the distance from $S$ to the $\hat{z}_{\oplus}$ axis measured along the
+surface normal. Consequently,
+\begin{equation}
+  N=\frac{R_{\oplus}}
+          {\sqrt{1-e^2\sin^2\delta_{gd}}}.
+  \label{eq:ellipsoid-normal-distance}
+\end{equation}
+Substitution into \cref{eq:ellipsoid-surface-ratio} gives
+\begin{equation}
+  z_s=(N-e^2N)\sin\delta_{gd}
+     =N(1-e^2)\sin\delta_{gd}.
+  \label{eq:ellipsoid-zs}
+\end{equation}
+Thus the distance between the $z$-axis intercept of the normal, point $Q$, and its
+$x$-axis intercept is $Ne^2$.
+
+\taossubhead{Geodetic Position}
+
+The ellipsoidal relationships locate the vehicle relative to the earth's surface. In
+\cref{fig:ellipsoidal-earth-geometry,fig:geodetic-coordinate-geometry}, the vehicle
+is at point $P$, given by $\vec{r}$, and point $S$ is on the surface directly below it.
+
+\noindent\begin{tabularx}{\textwidth}{@{}>{\ttfamily}l>{$\displaystyle}l<{$}X@{}}
+  alt & h &
+    Altitude: distance from the vehicle's center of mass to the ellipsoid, measured
+    along the surface normal from $S$ to $P$. \\
+  long & \lambda &
+    Longitude: the angle between the ECFC $x$ axis and the projection of
+    $\vec{r}$ onto the equatorial plane, positive eastward. \\
+  latgd & \delta_{gd} &
+    Geodetic latitude: the angle between the local geodetic north/down geometry
+    and the equatorial plane; equivalently, the angle that the ellipsoid surface
+    normal makes with the equatorial plane. It is positive northward. \\
+\end{tabularx}
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.72\linewidth}{!}{\input{manual/figures/chapter02/fig-2-7}}
+  \caption{Geodetic coordinate-system geometry.}
+  \label{fig:geodetic-coordinate-geometry}
+\end{figure}
+
+Longitude is identical in the geocentric and geodetic systems and is computed from
+\cref{eq:longitude-from-ecfc}. The remaining ECFC/geodetic position relationships
+are
+\begin{equation}
+  \vec{r}\cdot\hat{x}_{\oplus}=\tilde{x}\cos\lambda,
+  \label{eq:geodetic-position-x}
+\end{equation}
+\begin{equation}
+  \vec{r}\cdot\hat{y}_{\oplus}=\tilde{x}\sin\lambda,
+  \label{eq:geodetic-position-y}
+\end{equation}
+\begin{equation}
+  \vec{r}\cdot\hat{z}_{\oplus}
+    =\bigl[N(1-e^2)+h\bigr]\sin\delta_{gd},
+  \label{eq:geodetic-position-z}
+\end{equation}
+where
+\begin{equation}
+  \tilde{x}=(N+h)\cos\delta_{gd}.
+  \label{eq:geodetic-equatorial-projection}
+\end{equation}
+The function \texttt{p\_geodetic\_to\_ecfc} evaluates these expressions when the
+geodetic quantities are known. In the reverse direction, altitude and geodetic
+latitude cannot be isolated directly because $\delta_{gd}$ appears
+transcendentally. An iterative solution is therefore required.
+
+Extending $\hat{z}_{gd}$ to the ECFC $z$ axis gives the intercept distance
+\begin{equation}
+  z_i=Ne^2\sin\delta_{gd}
+     =\frac{R_{\oplus}e^2\sin\delta_{gd}}
+            {\sqrt{1-e^2\sin^2\delta_{gd}}}.
+  \label{eq:geodetic-axis-intercept}
+\end{equation}
+For an initial estimate, the earth is treated as nearly spherical so that
+\begin{equation}
+  \sin\delta_{gd}\approx\sin\delta_{gc}
+    =\frac{\vec{r}\cdot\hat{z}_{\oplus}}{\lVert\vec{r}\rVert}.
+  \label{eq:initial-geodetic-latitude-estimate}
+\end{equation}
+This approximation is poor when $\lVert\vec{r}\rVert\ll R_{\oplus}$, but it is
+sufficient to start the iteration. The initial intercept estimate is
+\begin{equation}
+  z_i=R_{\oplus}e^2\sin\delta_{gc}.
+  \label{eq:initial-axis-intercept}
+\end{equation}
+The following sequence is then repeated:
+\begin{equation}
+  z_d=\vec{r}\cdot\hat{z}_{\oplus}+z_i,
+  \label{eq:geodetic-iteration-zd}
+\end{equation}
+\begin{equation}
+  N+h=\sqrt{\tilde{x}^{2}+z_d^{2}},
+  \label{eq:geodetic-iteration-altitude}
+\end{equation}
+\begin{equation}
+  \sin\delta_{gd}=\frac{z_d}{N+h},
+  \label{eq:geodetic-iteration-latitude}
+\end{equation}
+\begin{equation}
+  N=\frac{R_{\oplus}}
+          {\sqrt{1-e^2\sin^2\delta_{gd}}},
+  \label{eq:geodetic-iteration-normal}
+\end{equation}
+\begin{equation}
+  z_i=Ne^2\sin\delta_{gd}.
+  \label{eq:geodetic-iteration-intercept}
+\end{equation}
+Iteration terminates when successive $z_i$ values differ by less than $10^{-8}$.
+Typical applications achieve approximately \SI{0.01}{\foot} accuracy in fewer than
+three iterations; no more than 25 iterations are performed. Altitude is obtained
+from \cref{eq:geodetic-iteration-altitude}, and geodetic latitude from
+\cref{eq:geodetic-iteration-latitude}.
+
+\taossubhead{Geodetic Velocity}
+
+\noindent\begin{tabularx}{\textwidth}{@{}>{\ttfamily}l>{$\displaystyle}l<{$}X@{}}
+  vel & \lVert\vec{V}_{\oplus}\rVert &
+    Magnitude of the earth-relative velocity vector. \\
+  gamgd & \gamma_{gd} &
+    Geodetic vertical flight-path angle: the angle between the velocity vector and
+    the local geodetic horizon plane, positive away from the earth's surface. \\
+  psigd & \psi_{gd} &
+    Geodetic horizontal flight-path, or heading, angle: the angle between local
+    north and the projection of velocity onto the local geodetic horizon plane,
+    positive clockwise from north so that $90^{\circ}$ is east. \\
+\end{tabularx}
+
+The earth-relative speed is the same in geocentric and geodetic coordinates. The
+geodetic flight-path angles are defined by
+\begin{equation}
+  \vec{V}_{\oplus}\cdot\hat{x}_{gd}
+    =\lVert\vec{V}_{\oplus}\rVert
+      \cos\gamma_{gd}\cos\psi_{gd},
+  \label{eq:geodetic-velocity-x}
+\end{equation}
+\begin{equation}
+  \vec{V}_{\oplus}\cdot\hat{y}_{gd}
+    =\lVert\vec{V}_{\oplus}\rVert
+      \cos\gamma_{gd}\sin\psi_{gd},
+  \label{eq:geodetic-velocity-y}
+\end{equation}
+\begin{equation}
+  \vec{V}_{\oplus}\cdot\hat{z}_{gd}
+    =-\lVert\vec{V}_{\oplus}\rVert\sin\gamma_{gd}.
+  \label{eq:geodetic-velocity-z}
+\end{equation}
+Therefore,
+\begin{equation}
+  \sin\gamma_{gd}
+    =-\frac{\vec{V}_{\oplus}\cdot\hat{z}_{gd}}
+            {\lVert\vec{V}_{\oplus}\rVert},
+  \label{eq:geodetic-gamma-from-ecfc}
+\end{equation}
+\begin{equation}
+  \tan\psi_{gd}
+    =\frac{\vec{V}_{\oplus}\cdot\hat{y}_{gd}}
+           {\vec{V}_{\oplus}\cdot\hat{x}_{gd}}.
+  \label{eq:geodetic-psi-from-ecfc}
+\end{equation}
+The function \texttt{v\_ecfc\_to\_geodetic} evaluates these equations using the
+unit vectors in
+\cref{eq:local-geodetic-x-unit-vector,eq:local-geodetic-y-unit-vector,eq:local-geodetic-z-unit-vector}.
+They are identical in form to the geocentric equations, except that the local geodetic
+horizon replaces the local geocentric horizon.
+
+The reverse calculation, performed by \texttt{v\_geodetic\_to\_ecfc}, is
+\begin{equation}
+\begin{aligned}
+  \vec{V}_{\oplus}\cdot\hat{x}_{\oplus}
+    ={}&-(\vec{V}_{\oplus}\cdot\hat{x}_{gd})
+         \cos\lambda\sin\delta_{gd}
+       -(\vec{V}_{\oplus}\cdot\hat{y}_{gd})\sin\lambda\\
+      &-(\vec{V}_{\oplus}\cdot\hat{z}_{gd})
+         \cos\lambda\cos\delta_{gd},
+\end{aligned}
+\label{eq:geodetic-to-ecfc-x}
+\end{equation}
+\begin{equation}
+\begin{aligned}
+  \vec{V}_{\oplus}\cdot\hat{y}_{\oplus}
+    ={}&-(\vec{V}_{\oplus}\cdot\hat{x}_{gd})
+         \sin\lambda\sin\delta_{gd}
+       +(\vec{V}_{\oplus}\cdot\hat{y}_{gd})\cos\lambda\\
+      &-(\vec{V}_{\oplus}\cdot\hat{z}_{gd})
+         \sin\lambda\cos\delta_{gd},
+\end{aligned}
+\label{eq:geodetic-to-ecfc-y}
+\end{equation}
+\begin{equation}
+  \vec{V}_{\oplus}\cdot\hat{z}_{\oplus}
+    =(\vec{V}_{\oplus}\cdot\hat{x}_{gd})\cos\delta_{gd}
+     -(\vec{V}_{\oplus}\cdot\hat{z}_{gd})\sin\delta_{gd}.
+  \label{eq:geodetic-to-ecfc-z}
+\end{equation}
+These are the same transformations as
+\cref{eq:geocentric-to-ecfc-x,eq:geocentric-to-ecfc-y,eq:geocentric-to-ecfc-z},
+with the geodetic subscript replacing the geocentric subscript.

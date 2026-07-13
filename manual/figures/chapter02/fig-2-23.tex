@@ -1,0 +1,16 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,scale=0.9]
+  \coordinate (o) at (-3.1,0);
+  \coordinate (v) at (2.9,1.25);
+  \node[left,align=center] at (o) {current\\vehicle};
+  \fill (v) circle (2.2pt) node[right,align=left] {other\\vehicle};
+  \draw[->,thick] (o)--(-2.0,1.15) node[above] {$\hat x_b$};
+  \draw[->,thick] (o)--(2.55,-1.0) node[right] {$\hat y_b$};
+  \draw[->,thick] (o)--(-3.1,-1.4) node[below] {$\hat z_b$};
+  \draw[->,very thick] (o)--(v) node[pos=0.72,above] {$\Delta\vec r_i$};
+  \draw[thin] (o)--(2.9,0.35)--(v);
+  \draw[->] (-2.2,0.25) arc[start angle=18,end angle=42,radius=0.85]
+    node[midway,above] {$\alpha_i$};
+  \draw[->] (2.1,0.55) arc[start angle=0,end angle=48,radius=0.55]
+    node[midway,right] {$\epsilon_i$};
+  \draw (2.6,0.35)--(2.6,0.64)--(2.88,0.64);
+\end{tikzpicture}

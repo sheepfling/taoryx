@@ -1,0 +1,140 @@
+% Source PDF pages 30--32; manual pages 2-1--2-3.
+As mentioned in the previous section, TAOS uses the same methods as its predecessor
+TSAP,\taosref{2} so the description of the mathematical formulation given in the
+TSAP manual applies to TAOS as well. However, that description is incomplete. This
+chapter includes the TSAP material together with additional information on coordinate
+systems, equations of motion, atmosphere and gravity models, guidance methods,
+range calculations, searches, and optimization.
+
+\taossubhead{Notation}
+
+Although a list of symbols is included in the nomenclature, some of the notation
+requires additional explanation. TAOS uses many coordinate systems, so the notation
+is designed to state coordinate-system relationships precisely.
+
+Vectors of arbitrary magnitude, used for position, velocity, and acceleration, are
+denoted with an arrow. Vector magnitude is denoted with double bars, unit vectors
+with a caret, and matrices with square brackets:
+\[
+\begin{aligned}
+  \vec{x}       &={} \text{vector of arbitrary magnitude},\\
+  \lVert\vec{x}\rVert &={} \text{magnitude of vector},\\
+  \hat{x}       &={} \text{unit vector},\\
+  [A]           &={} \text{matrix}.
+\end{aligned}
+\]
+
+A right subscript on a vector indicates a coordinate-system association. For unit
+vectors, it identifies the coordinate system represented by the unit vector. For other
+vectors, it identifies the coordinate-system dependence produced by differentiation
+with respect to time. For example, $\vec{V}_{\oplus}$ is the velocity vector relative
+to an earth-fixed coordinate system.
+
+Left and right subscripts indicate that a value is relative to two reference frames.
+Thus, ${}_{I}\vec{\omega}_{\oplus}$ is the rotational velocity between the inertial
+and earth-fixed coordinate systems. This notation is also used for transformation
+matrices and other quantities that convert from one system to another.
+
+Derivatives with respect to time are denoted with one or two dots above the symbol:
+\[
+\begin{aligned}
+  \dot{h}  &={} \text{first derivative of $h$ with respect to time},\\
+  \ddot{h} &={} \text{second derivative of $h$ with respect to time}.
+\end{aligned}
+\]
+
+The dot product between two vectors can be interpreted as the projection of one
+vector onto another. Projecting a vector onto the unit vectors of a coordinate system
+gives the components of the vector in that system. For example,
+\[
+\begin{aligned}
+  \vec{V}_{\oplus}\mathbin{\cdot}\hat{x}_{gd}
+    &={} \text{component of earth-fixed velocity in the geodetic $x$ direction},\\
+  \vec{V}_{\oplus}\mathbin{\cdot}\hat{x}_{b}
+    &={} \text{component of earth-fixed velocity in the body $x$ direction}.
+\end{aligned}
+\]
+
+\taossubhead{Numerical Errors}
+
+The equations of motion are purposely written in a nonsingular earth-fixed form to
+avoid numerical problems during integration, such as division by zero. The only two
+conditions that cause the equations of motion themselves to fail are a vehicle at the
+center of the earth and a vehicle with zero mass. If either condition occurs, the
+trajectory is ended and an error message is issued.
+
+Although the equations of motion are nonsingular, many output-variable equations
+contain denominators that can become zero in special situations. If this occurs,
+TAOS assumes a reasonable value, such as zero, and continues execution.
+
+\taossubhead{Program Modules}
+
+The TAOS source code is divided into modules containing related functions or
+subroutines, as shown in \cref{tab:taos-program-modules}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{TAOS program modules.}
+  \label{tab:taos-program-modules}
+  \begin{tabularx}{0.68\linewidth}{@{}>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Module & Description \\
+    \midrule
+    atmos  & Model atmospheres \\
+    coords & Coordinate systems \\
+    derivs & Equations of motion and guidance \\
+    errors & Error messages \\
+    in\_prb & Problem input \\
+    in\_seg & Trajectory-segment input \\
+    in\_trj & Trajectory input \\
+    main   & Main program \\
+    numeric & Numerical analysis \\
+    output & Output files \\
+    path   & Trajectory calculation and control \\
+    search & Search and optimization control \\
+    tables & Table input and interpolation \\
+    util   & Utility functions \\
+    vf02   & Optimization \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Many of these modules, such as \texttt{errors}, \texttt{in\_prb}, \texttt{output},
+and \texttt{tables}, perform input or output functions and are documented in
+\cref{chap:table-files,chap:problem-files}. The modules containing trajectory
+calculations---\texttt{atmos}, \texttt{coords}, \texttt{derivs}, \texttt{numeric},
+\texttt{path}, and \texttt{search}---are documented in this chapter.
+
+\taossubhead{Units}
+
+Internally, TAOS uses English units for everything except atmosphere calculations,
+which use metric units. The input and output units can be changed from the default
+English system to metric units with the \problemblock{*Units/Fmt} data block
+(\cref{sec:block-units-fmt}).
+
+The following conversion factors are used in TAOS:
+\begin{center}
+\begin{tabular}{@{}r l@{}}
+  \num{0.017453293} & radians per degree \\
+  \num{57.29577951} & degrees per radian \\
+  \num{2.204622476} & pounds mass per kilogram \\
+  \num{0.45359240} & kilograms per pound mass \\
+  \num{32.1740485} & pounds mass per slug \\
+  \num{0.03108095} & slugs per pound mass \\
+  \num{3.280839895} & feet per meter \\
+  \num{0.3048} & meters per foot \\
+  \num{6076.1} & feet per nautical mile \\
+  \num{0.0001645792} & nautical miles per foot \\
+  \num{5280.0} & feet per statute mile \\
+  \num{0.0001893939} & statute miles per foot \\
+  \num{0.224808924} & pounds force per newton \\
+  \num{4.448222} & newtons per pound force \\
+  \num{0.020885434} & pounds per square foot per pascal \\
+  \num{47.88026} & pascals per pound per square foot \\
+  \num{9.806650} & acceleration of gravity in meters per second squared \\
+\end{tabular}
+\end{center}
+
+\noindent\textit{Editorial note.} The descriptions of the first two angular
+conversion factors are reversed in the printed source; the mathematically consistent
+labels are used here.

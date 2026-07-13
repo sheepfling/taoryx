@@ -1,0 +1,1747 @@
+appendix_output_variable_reference:
+  source_pdf_pages:
+  - 282
+  - 283
+  - 284
+  - 285
+  - 286
+  - 287
+  - 288
+  - 289
+  - 290
+  - 291
+  - 292
+  source_manual_pages:
+  - A-1
+  - A-2
+  - A-3
+  - A-4
+  - A-5
+  - A-6
+  - A-7
+  - A-8
+  - A-9
+  - A-10
+  - A-11
+  status: complete
+  entry_count: 171
+  usage:
+    table_file_state_variables: sec:table-file-format
+    table_math_state_values: sec:table-constant-state-values
+    trajectory_output_requests: sec:trajectory-block-print
+    problem_output_requests: sec:problem-block-print
+    unit_and_format_overrides: sec:block-units-fmt
+  entries:
+  - name: accebx
+    symbol_latex: \vec a_{\oplus}\mathbin{\cdot}\hat x_b
+    description_latex: component of acceleration with respect to the earth's surface in the body $x$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: acceby
+    symbol_latex: \vec a_{\oplus}\mathbin{\cdot}\hat y_b
+    description_latex: component of acceleration with respect to the earth's surface in the body $y$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: accebz
+    symbol_latex: \vec a_{\oplus}\mathbin{\cdot}\hat z_b
+    description_latex: component of acceleration with respect to the earth's surface in the body $z$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: accelx
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat x_{\oplus}
+    description_latex: $x$ component of inertial acceleration in ECFC coordinates
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: accely
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat y_{\oplus}
+    description_latex: $y$ component of inertial acceleration in ECFC coordinates
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: accelz
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat z_{\oplus}
+    description_latex: $z$ component of inertial acceleration in ECFC coordinates
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: accibx
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat x_b
+    description_latex: component of inertial acceleration in the body $x$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: acciby
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat y_b
+    description_latex: component of inertial acceleration in the body $y$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: accibz
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat z_b
+    description_latex: component of inertial acceleration in the body $z$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: alpha
+    symbol_latex: \alpha
+    description_latex: angle of attack
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:wind-coordinate
+  - name: alpha_l/d
+    symbol_latex: \alpha_{L/D}
+    description_latex: angle of attack at maximum lift-to-drag ratio
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:aerodynamic-variables
+  - name: alt
+    symbol_latex: h
+    description_latex: geodetic altitude
+    default_units_latex: \mathrm{ft}
+    decimal_places: 1
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:geodetic
+  - name: altdt
+    symbol_latex: \dot h
+    description_latex: geodetic altitude rate
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 282
+    source_manual_page: A-1
+    status: visually_verified
+    references:
+    - sec:position-rates
+  - name: alphat
+    symbol_latex: \alpha_T
+    description_latex: total angle of attack
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:wind-coordinate
+  - name: ballistic
+    symbol_latex: \beta_c
+    description_latex: ballistic coefficient
+    default_units_latex: \mathrm{lb_f/ft^2}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-variables
+  - name: bankgc
+    symbol_latex: \mu_{gc}
+    description_latex: geocentric bank angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:wind-coordinate
+  - name: bankgd
+    symbol_latex: \mu_{gd}
+    description_latex: geodetic bank angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:wind-coordinate
+  - name: beta
+    symbol_latex: \beta
+    description_latex: sideslip angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:wind-coordinate
+  - name: betae
+    symbol_latex: \beta_E
+    description_latex: Euler sideslip angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:wind-coordinate
+  - name: ca
+    symbol_latex: C_A
+    description_latex: axial-force coefficient
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: cd
+    symbol_latex: C_D
+    description_latex: drag-force coefficient
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: cg
+    symbol_latex: ''
+    description_latex: vehicle center of mass
+    default_units_latex: ''
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+  - name: cl
+    symbol_latex: C_L
+    description_latex: lift-force coefficient
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: cn
+    symbol_latex: C_N
+    description_latex: normal-force coefficient
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: crsrng
+    symbol_latex: \Delta r_S
+    description_latex: crossrange
+    default_units_latex: \mathrm{nm}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:ranges-distances
+  - name: cs
+    symbol_latex: C_S
+    description_latex: side-force coefficient
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: cx
+    symbol_latex: C_X
+    description_latex: $x$ component of body force coefficient
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: cy
+    symbol_latex: C_Y
+    description_latex: $y$ component of body force coefficient
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: cz
+    symbol_latex: C_Z
+    description_latex: $z$ component of body force coefficient
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: dwnrng
+    symbol_latex: \Delta r_S
+    description_latex: downrange
+    default_units_latex: \mathrm{nm}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:ranges-distances
+  - name: dynprs
+    symbol_latex: q
+    description_latex: dynamic pressure
+    default_units_latex: \mathrm{lb_f/ft^2}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: east
+    symbol_latex: \Delta r_S
+    description_latex: east position
+    default_units_latex: \mathrm{nm}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:ranges-distances
+  - name: ep1
+    symbol_latex: \epsilon_1
+    description_latex: thrust-vector angle between the thrust vector and body $x$ axis
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:propulsive-forces
+    editorial_note: appendix_ep_angle_units
+  - name: ep2
+    symbol_latex: \epsilon_2
+    description_latex: thrust-vector meridional angle in the body $y$--$z$ plane
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:propulsive-forces
+    editorial_note: appendix_ep_angle_units
+  - name: fuel
+    symbol_latex: \Delta m
+    description_latex: fuel used
+    default_units_latex: \mathrm{lb_m}
+    decimal_places: 2
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:numerical-integration
+  - name: gamgc
+    symbol_latex: \gamma_{gc}
+    description_latex: geocentric vertical flight-path angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:geocentric
+  - name: gamgcdt
+    symbol_latex: \dot\gamma_{gc}
+    description_latex: geocentric vertical flight-path-angle rate
+    default_units_latex: \mathrm{deg/sec}
+    decimal_places: 3
+    source_pdf_page: 283
+    source_manual_page: A-2
+    status: visually_verified
+    references:
+    - sec:flight-path-rates
+  - name: gamgd
+    symbol_latex: \gamma_{gd}
+    description_latex: geodetic vertical flight-path angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:geodetic
+  - name: gamgddt
+    symbol_latex: \dot\gamma_{gd}
+    description_latex: geodetic vertical flight-path-angle rate
+    default_units_latex: \mathrm{deg/sec}
+    decimal_places: 3
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:flight-path-rates
+  - name: grmark
+    symbol_latex: r_S
+    description_latex: ground range since the last ``mark''
+    default_units_latex: \mathrm{nm}
+    decimal_places: 3
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:ground-speed
+  - name: grseg
+    symbol_latex: r_S
+    description_latex: segment ground range
+    default_units_latex: \mathrm{nm}
+    decimal_places: 3
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:ground-speed
+  - name: iip_azm
+    symbol_latex: \alpha_{\mathrm{iip}}
+    description_latex: azimuth from the tangent-plane origin to the initial impact point
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:iip-calculations
+  - name: iip_latgd
+    symbol_latex: \delta_{\mathrm{iip}}
+    description_latex: geodetic latitude of the initial impact point
+    default_units_latex: \mathrm{deg}
+    decimal_places: 5
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:iip-calculations
+  - name: iip_long
+    symbol_latex: \lambda_{\mathrm{iip}}
+    description_latex: longitude of the initial impact point
+    default_units_latex: \mathrm{deg}
+    decimal_places: 5
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:iip-calculations
+    editorial_note: appendix_iip_long_description
+  - name: iip_rng
+    symbol_latex: r_{\mathrm{iip}}
+    description_latex: range from the tangent-plane origin to the initial impact point
+    default_units_latex: \mathrm{nm}
+    decimal_places: 3
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:iip-calculations
+  - name: iip_time
+    symbol_latex: t_{\mathrm{iip}}
+    description_latex: time to the initial impact point
+    default_units_latex: \mathrm{sec}
+    decimal_places: 3
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:iip-calculations
+  - name: latgc
+    symbol_latex: \delta_{gc}
+    description_latex: geocentric latitude
+    default_units_latex: \mathrm{deg}
+    decimal_places: 5
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:geocentric
+  - name: latgcdt
+    symbol_latex: \dot\delta_{gc}
+    description_latex: geocentric latitude rate
+    default_units_latex: \mathrm{deg/sec}
+    decimal_places: 7
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:position-rates
+  - name: latgd
+    symbol_latex: \delta_{gd}
+    description_latex: geodetic latitude
+    default_units_latex: \mathrm{deg}
+    decimal_places: 5
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:geodetic
+  - name: latgddt
+    symbol_latex: \dot\delta_{gd}
+    description_latex: geodetic latitude rate
+    default_units_latex: \mathrm{deg/sec}
+    decimal_places: 7
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:position-rates
+  - name: l/d
+    symbol_latex: L/D
+    description_latex: lift-to-drag ratio
+    default_units_latex: ''
+    decimal_places: 4
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:aerodynamic-variables
+  - name: long
+    symbol_latex: \lambda
+    description_latex: longitude
+    default_units_latex: \mathrm{deg}
+    decimal_places: 5
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:geocentric
+  - name: longdt
+    symbol_latex: \dot\lambda
+    description_latex: longitude rate
+    default_units_latex: \mathrm{deg/sec}
+    decimal_places: 7
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:position-rates
+  - name: mach
+    symbol_latex: M
+    description_latex: Mach number
+    default_units_latex: ''
+    decimal_places: 4
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: mass
+    symbol_latex: m
+    description_latex: vehicle mass
+    default_units_latex: \mathrm{lb_m}
+    decimal_places: 4
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:numerical-integration
+  - name: mdt
+    symbol_latex: \dot m
+    description_latex: mass rate
+    default_units_latex: \mathrm{lb_m/sec}
+    decimal_places: 4
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:numerical-integration
+  - name: north
+    symbol_latex: \Delta r_S
+    description_latex: north position
+    default_units_latex: \mathrm{nm}
+    decimal_places: 3
+    source_pdf_page: 284
+    source_manual_page: A-3
+    status: visually_verified
+    references:
+    - sec:ranges-distances
+  - name: ntotal
+    symbol_latex: \lVert\vec a_{sp}\rVert
+    description_latex: magnitude of the specific-load factor
+    default_units_latex: ''
+    decimal_places: 4
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:specific-load
+  - name: nu
+    symbol_latex: \nu
+    description_latex: kinematic viscosity
+    default_units_latex: \mathrm{ft^2/sec}
+    decimal_places: 8
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:atmosphere-model
+  - name: nx
+    symbol_latex: \vec a_{sp}\mathbin{\cdot}\hat x_b
+    description_latex: specific-load factor in the body $x$ direction
+    default_units_latex: ''
+    decimal_places: 4
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:specific-load
+  - name: ny
+    symbol_latex: \vec a_{sp}\mathbin{\cdot}\hat y_b
+    description_latex: specific-load factor in the body $y$ direction
+    default_units_latex: ''
+    decimal_places: 4
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:specific-load
+  - name: nz
+    symbol_latex: \vec a_{sp}\mathbin{\cdot}\hat z_b
+    description_latex: specific-load factor in the body $z$ direction
+    default_units_latex: ''
+    decimal_places: 4
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:specific-load
+  - name: phi
+    symbol_latex: \phi_w
+    description_latex: windward-meridian angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:wind-coordinate
+  - name: pitchgc
+    symbol_latex: \Theta_{gc}
+    description_latex: geocentric pitch angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: pitchgd
+    symbol_latex: \Theta_{gd}
+    description_latex: geodetic pitch angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: pitchi
+    symbol_latex: \Theta_i
+    description_latex: inertial-platform pitch angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: plength
+    symbol_latex: r
+    description_latex: path length
+    default_units_latex: \mathrm{ft}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:numerical-integration
+  - name: plmark
+    symbol_latex: r
+    description_latex: path length since the last ``mark''
+    default_units_latex: \mathrm{ft}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:numerical-integration
+  - name: plseg
+    symbol_latex: r
+    description_latex: segment path length
+    default_units_latex: \mathrm{ft}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:numerical-integration
+  - name: power
+    symbol_latex: P
+    description_latex: power setting
+    default_units_latex: ''
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:guidance-rules
+  - name: pres
+    symbol_latex: p
+    description_latex: pressure
+    default_units_latex: \mathrm{lb_f/ft^2}
+    decimal_places: 4
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:atmosphere-model
+  - name: psigc
+    symbol_latex: \psi_{gc}
+    description_latex: geocentric horizontal flight-path angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:geocentric
+  - name: psigcdt
+    symbol_latex: \dot\psi_{gc}
+    description_latex: geocentric horizontal flight-path-angle rate
+    default_units_latex: \mathrm{deg/sec}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:flight-path-rates
+  - name: psigd
+    symbol_latex: \psi_{gd}
+    description_latex: geodetic horizontal flight-path angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:geodetic
+  - name: psigddt
+    symbol_latex: \dot\psi_{gd}
+    description_latex: geodetic horizontal flight-path-angle rate
+    default_units_latex: \mathrm{deg/sec}
+    decimal_places: 3
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:flight-path-rates
+  - name: radasp[i]
+    symbol_latex: \eta_r
+    description_latex: aspect angle of the vehicle with respect to the $i$th radar station
+    default_units_latex: \mathrm{deg}
+    decimal_places: 4
+    source_pdf_page: 285
+    source_manual_page: A-4
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radaz[i]
+    symbol_latex: \alpha_r
+    description_latex: azimuth angle relative to the $i$th radar station
+    default_units_latex: \mathrm{deg}
+    decimal_places: 4
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radazdt[i]
+    symbol_latex: \dot\alpha_r
+    description_latex: azimuth-angle rate relative to the $i$th radar station
+    default_units_latex: \mathrm{deg/sec}
+    decimal_places: 4
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radazdt2[i]
+    symbol_latex: \ddot\alpha_r
+    description_latex: azimuth-angle acceleration relative to the $i$th radar station
+    default_units_latex: \mathrm{deg/sec^2}
+    decimal_places: 5
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radelv[i]
+    symbol_latex: \epsilon_r
+    description_latex: elevation angle relative to the $i$th radar station
+    default_units_latex: \mathrm{deg}
+    decimal_places: 4
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radelvdt[i]
+    symbol_latex: \dot\epsilon_r
+    description_latex: elevation-angle rate relative to the $i$th radar station
+    default_units_latex: \mathrm{deg/sec}
+    decimal_places: 4
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radelvdt2[i]
+    symbol_latex: \ddot\epsilon_r
+    description_latex: elevation-angle acceleration relative to the $i$th radar station
+    default_units_latex: \mathrm{deg/sec^2}
+    decimal_places: 5
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radmer[i]
+    symbol_latex: \phi_r
+    description_latex: meridional angle of the vehicle with respect to the $i$th radar station
+    default_units_latex: \mathrm{deg}
+    decimal_places: 4
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radrng[i]
+    symbol_latex: \lVert\Delta\vec r_r\rVert
+    description_latex: range relative to the $i$th radar station
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radrngdt[i]
+    symbol_latex: \lVert\Delta\dot{\vec r}_r\rVert
+    description_latex: range rate relative to the $i$th radar station
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: radrngdt2[i]
+    symbol_latex: \lVert\Delta\ddot{\vec r}_r\rVert
+    description_latex: range acceleration relative to the $i$th radar station
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:radar-observations
+  - name: range
+    symbol_latex: r_S
+    description_latex: ground range
+    default_units_latex: \mathrm{nm}
+    decimal_places: 3
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:ground-speed
+  - name: rcm
+    symbol_latex: \lVert\vec r\rVert
+    description_latex: distance from the center of the earth
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:geocentric
+  - name: rcmdt
+    symbol_latex: \lVert\dot{\vec r}\rVert
+    description_latex: rate of change of distance from the center of the earth
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:geocentric
+    editorial_note: appendix_rcmdt_unit_and_reference
+  - name: relaz[i]
+    symbol_latex: \alpha_i
+    description_latex: $i$th vehicle azimuth angle relative to the body coordinate system
+    default_units_latex: \mathrm{deg}
+    decimal_places: 4
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:relative-vehicle
+  - name: relelv[i]
+    symbol_latex: \epsilon_i
+    description_latex: $i$th vehicle elevation angle relative to the body coordinate system
+    default_units_latex: \mathrm{deg}
+    decimal_places: 4
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:relative-vehicle
+  - name: relrng[i]
+    symbol_latex: \lVert\Delta\vec r_i\rVert
+    description_latex: $i$th vehicle relative range
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:relative-vehicle
+  - name: relvel[i]
+    symbol_latex: \lVert\Delta\dot{\vec r}_i\rVert
+    description_latex: closure velocity of the $i$th vehicle
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 286
+    source_manual_page: A-5
+    status: visually_verified
+    references:
+    - sec:relative-vehicle
+  - name: relxb[i]
+    symbol_latex: \Delta\vec r_i\mathbin{\cdot}\hat x_b
+    description_latex: component of the $i$th vehicle position relative to the body in the body $x$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:relative-vehicle
+  - name: relyb[i]
+    symbol_latex: \Delta\vec r_i\mathbin{\cdot}\hat y_b
+    description_latex: component of the $i$th vehicle position relative to the body in the body $y$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:relative-vehicle
+  - name: relzb[i]
+    symbol_latex: \Delta\vec r_i\mathbin{\cdot}\hat z_b
+    description_latex: component of the $i$th vehicle position relative to the body in the body $z$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:relative-vehicle
+  - name: reypft
+    symbol_latex: R_N
+    description_latex: Reynolds number per foot
+    default_units_latex: \mathrm{ft^{-1}}
+    decimal_places: 0
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:aerodynamic-forces
+  - name: rho
+    symbol_latex: \rho
+    description_latex: density
+    default_units_latex: \mathrm{lb_m/ft^3}
+    decimal_places: 7
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:atmosphere-model
+  - name: rollgc
+    symbol_latex: \Phi_{gc}
+    description_latex: geocentric roll angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: rollgd
+    symbol_latex: \Phi_{gd}
+    description_latex: geodetic roll angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: rolli
+    symbol_latex: \Phi_i
+    description_latex: inertial-platform roll angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: segment
+    symbol_latex: ''
+    description_latex: segment number
+    default_units_latex: ''
+    decimal_places: 0
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+  - name: sndspd
+    symbol_latex: c
+    description_latex: speed of sound
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:atmosphere-model
+  - name: temp
+    symbol_latex: T
+    description_latex: temperature
+    default_units_latex: '{}^\circ\mathrm{R}'
+    decimal_places: 3
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:atmosphere-model
+  - name: thrust
+    symbol_latex: \lVert\vec F_{\mathrm{prop}}\rVert
+    description_latex: magnitude of the thrust vector
+    default_units_latex: \mathrm{lb_f}
+    decimal_places: 2
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:propulsive-forces
+  - name: time
+    symbol_latex: t
+    description_latex: mission time
+    default_units_latex: \mathrm{sec}
+    decimal_places: 3
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+  - name: tmark
+    symbol_latex: t
+    description_latex: time since the last ``mark''
+    default_units_latex: \mathrm{sec}
+    decimal_places: 3
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+  - name: tseg
+    symbol_latex: t
+    description_latex: segment time
+    default_units_latex: \mathrm{sec}
+    decimal_places: 3
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+  - name: uxbx
+    symbol_latex: \hat x_b\mathbin{\cdot}\hat x_{\oplus}
+    description_latex: component of the body $x$-axis unit vector in the ECFC $x$ direction
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: uxby
+    symbol_latex: \hat x_b\mathbin{\cdot}\hat y_{\oplus}
+    description_latex: component of the body $x$-axis unit vector in the ECFC $y$ direction
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: uxbz
+    symbol_latex: \hat x_b\mathbin{\cdot}\hat z_{\oplus}
+    description_latex: component of the body $x$-axis unit vector in the ECFC $z$ direction
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 287
+    source_manual_page: A-6
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: uybx
+    symbol_latex: \hat y_b\mathbin{\cdot}\hat x_{\oplus}
+    description_latex: component of the body $y$-axis unit vector in the ECFC $x$ direction
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: uyby
+    symbol_latex: \hat y_b\mathbin{\cdot}\hat y_{\oplus}
+    description_latex: component of the body $y$-axis unit vector in the ECFC $y$ direction
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: uybz
+    symbol_latex: \hat y_b\mathbin{\cdot}\hat z_{\oplus}
+    description_latex: component of the body $y$-axis unit vector in the ECFC $z$ direction
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: uzbx
+    symbol_latex: \hat z_b\mathbin{\cdot}\hat x_{\oplus}
+    description_latex: component of the body $z$-axis unit vector in the ECFC $x$ direction
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: uzby
+    symbol_latex: \hat z_b\mathbin{\cdot}\hat y_{\oplus}
+    description_latex: component of the body $z$-axis unit vector in the ECFC $y$ direction
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: uzbz
+    symbol_latex: \hat z_b\mathbin{\cdot}\hat z_{\oplus}
+    description_latex: component of the body $z$-axis unit vector in the ECFC $z$ direction
+    default_units_latex: ''
+    decimal_places: 6
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: vair
+    symbol_latex: \lVert\vec V_{W\oplus}\rVert
+    description_latex: airspeed
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 2
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:velocity-coordinate
+  - name: vel
+    symbol_latex: \lVert\vec V_{\oplus}\rVert
+    description_latex: velocity with respect to the earth's surface
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 2
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:geodetic
+  - name: veldt
+    symbol_latex: \lVert\vec a_{\oplus}\rVert
+    description_latex: acceleration with respect to the earth's surface
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 2
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:ecfc
+    - sec:equations-of-motion
+  - name: velebx
+    symbol_latex: \vec V_{\oplus}\mathbin{\cdot}\hat x_b
+    description_latex: component of velocity with respect to the earth's surface in the body $x$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: veleby
+    symbol_latex: \vec V_{\oplus}\mathbin{\cdot}\hat y_b
+    description_latex: component of velocity with respect to the earth's surface in the body $y$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: velebz
+    symbol_latex: \vec V_{\oplus}\mathbin{\cdot}\hat z_b
+    description_latex: component of velocity with respect to the earth's surface in the body $z$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 288
+    source_manual_page: A-7
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: velibx
+    symbol_latex: \vec V_I\mathbin{\cdot}\hat x_b
+    description_latex: component of inertial velocity in the body $x$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: veliby
+    symbol_latex: \vec V_I\mathbin{\cdot}\hat y_b
+    description_latex: component of inertial velocity in the body $y$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: velibz
+    symbol_latex: \vec V_I\mathbin{\cdot}\hat z_b
+    description_latex: component of inertial velocity in the body $z$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: vgr
+    symbol_latex: \lVert\vec V_S\rVert
+    description_latex: ground speed
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 2
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:ground-speed
+  - name: windd
+    symbol_latex: \Delta\vec V_{W\oplus}\mathbin{\cdot}\hat z_{gd}
+    description_latex: wind component in the geodetic $z$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 2
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:velocity-coordinate
+  - name: winde
+    symbol_latex: \Delta\vec V_{W\oplus}\mathbin{\cdot}\hat y_{gd}
+    description_latex: wind component in the geodetic $y$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 2
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:velocity-coordinate
+  - name: windn
+    symbol_latex: \Delta\vec V_{W\oplus}\mathbin{\cdot}\hat x_{gd}
+    description_latex: wind component in the geodetic $x$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 2
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:velocity-coordinate
+  - name: wt
+    symbol_latex: m\mathbin{\cdot}g
+    description_latex: weight
+    default_units_latex: \mathrm{lb_f}
+    decimal_places: 2
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:numerical-integration
+  - name: wtdt
+    symbol_latex: \dot m\mathbin{\cdot}g
+    description_latex: weight rate or fuel flow
+    default_units_latex: \mathrm{lb_f/sec}
+    decimal_places: 3
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:numerical-integration
+  - name: xecfc
+    symbol_latex: \vec r\mathbin{\cdot}\hat x_{\oplus}
+    description_latex: component of the position vector in the ECFC $x$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: xecfcdt
+    symbol_latex: \vec V_{\oplus}\mathbin{\cdot}\hat x_{\oplus}
+    description_latex: component of the earth-relative velocity vector in the ECFC $x$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: xecfcdt2
+    symbol_latex: \vec a_{\oplus}\mathbin{\cdot}\hat x_{\oplus}
+    description_latex: component of the earth-relative acceleration vector in the ECFC $x$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: xecic
+    symbol_latex: \vec r\mathbin{\cdot}\hat x_I
+    description_latex: component of the position vector in the ECIC $x$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:ecic
+  - name: xecicdt
+    symbol_latex: \vec V_I\mathbin{\cdot}\hat x_I
+    description_latex: component of the inertial velocity vector in the ECIC $x$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:ecic
+  - name: xecicdt2
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat x_I
+    description_latex: component of the inertial acceleration vector in the ECIC $x$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 289
+    source_manual_page: A-8
+    status: visually_verified
+    references:
+    - sec:ecic
+  - name: xip
+    symbol_latex: (\vec r-\vec r_p)\mathbin{\cdot}\hat x_p
+    description_latex: component of position relative to the inertial-platform $x$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: xipdt
+    symbol_latex: \vec V_I\mathbin{\cdot}\hat x_p
+    description_latex: component of inertial velocity in the inertial-platform $x$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: xipdt2
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat x_p
+    description_latex: component of inertial acceleration in the inertial-platform $x$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: xtp
+    symbol_latex: (\vec r-\vec r_{tp})\mathbin{\cdot}\hat x_{tp}
+    description_latex: component of position relative to the tangent-plane $x$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:tangent-plane
+  - name: xtpdt
+    symbol_latex: \vec V_{\oplus}\mathbin{\cdot}\hat x_{tp}
+    description_latex: component of earth-relative velocity in the tangent-plane $x$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:tangent-plane
+    editorial_note: appendix_tangent_plane_derivatives
+  - name: xtpdt2
+    symbol_latex: \vec a_{\oplus}\mathbin{\cdot}\hat x_{tp}
+    description_latex: component of earth-relative acceleration in the tangent-plane $x$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:tangent-plane
+    editorial_note: appendix_tangent_plane_derivatives
+  - name: yawgc
+    symbol_latex: \Psi_{gc}
+    description_latex: geocentric yaw angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: yawgd
+    symbol_latex: \Psi_{gd}
+    description_latex: geodetic yaw angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:body-fixed
+  - name: yawi
+    symbol_latex: \Psi_i
+    description_latex: inertial-platform yaw angle
+    default_units_latex: \mathrm{deg}
+    decimal_places: 3
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: yecfc
+    symbol_latex: \vec r\mathbin{\cdot}\hat y_{\oplus}
+    description_latex: component of the position vector in the ECFC $y$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: yecfcdt
+    symbol_latex: \vec V_{\oplus}\mathbin{\cdot}\hat y_{\oplus}
+    description_latex: component of the earth-relative velocity vector in the ECFC $y$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:ecfc
+    editorial_note: appendix_ecfc_direction_descriptions
+  - name: yecfcdt2
+    symbol_latex: \vec a_{\oplus}\mathbin{\cdot}\hat y_{\oplus}
+    description_latex: component of the earth-relative acceleration vector in the ECFC $y$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: yecic
+    symbol_latex: \vec r\mathbin{\cdot}\hat y_I
+    description_latex: component of the position vector in the ECIC $y$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:ecic
+  - name: yecicdt
+    symbol_latex: \vec V_I\mathbin{\cdot}\hat y_I
+    description_latex: component of the inertial velocity vector in the ECIC $y$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:ecic
+  - name: yecicdt2
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat y_I
+    description_latex: component of the inertial acceleration vector in the ECIC $y$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 290
+    source_manual_page: A-9
+    status: visually_verified
+    references:
+    - sec:ecic
+  - name: yip
+    symbol_latex: (\vec r-\vec r_p)\mathbin{\cdot}\hat y_p
+    description_latex: component of position relative to the inertial-platform $y$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: yipdt
+    symbol_latex: \vec V_I\mathbin{\cdot}\hat y_p
+    description_latex: component of inertial velocity in the inertial-platform $y$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: yipdt2
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat y_p
+    description_latex: component of inertial acceleration in the inertial-platform $y$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: ytp
+    symbol_latex: (\vec r-\vec r_{tp})\mathbin{\cdot}\hat y_{tp}
+    description_latex: component of position relative to the tangent-plane $y$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:tangent-plane
+  - name: ytpdt
+    symbol_latex: \vec V_{\oplus}\mathbin{\cdot}\hat y_{tp}
+    description_latex: component of earth-relative velocity in the tangent-plane $y$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:tangent-plane
+    editorial_note: appendix_tangent_plane_derivatives
+  - name: ytpdt2
+    symbol_latex: \vec a_{\oplus}\mathbin{\cdot}\hat y_{tp}
+    description_latex: component of earth-relative acceleration in the tangent-plane $y$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:tangent-plane
+    editorial_note: appendix_tangent_plane_derivatives
+  - name: zecfc
+    symbol_latex: \vec r\mathbin{\cdot}\hat z_{\oplus}
+    description_latex: component of the position vector in the ECFC $z$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: zecfcdt
+    symbol_latex: \vec V_{\oplus}\mathbin{\cdot}\hat z_{\oplus}
+    description_latex: component of the earth-relative velocity vector in the ECFC $z$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:ecfc
+    editorial_note: appendix_ecfc_direction_descriptions
+  - name: zecfcdt2
+    symbol_latex: \vec a_{\oplus}\mathbin{\cdot}\hat z_{\oplus}
+    description_latex: component of the earth-relative acceleration vector in the ECFC $z$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:ecfc
+  - name: zecic
+    symbol_latex: \vec r\mathbin{\cdot}\hat z_I
+    description_latex: component of the position vector in the ECIC $z$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:ecic
+  - name: zecicdt
+    symbol_latex: \vec V_I\mathbin{\cdot}\hat z_I
+    description_latex: component of the inertial velocity vector in the ECIC $z$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:ecic
+  - name: zecicdt2
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat z_I
+    description_latex: component of the inertial acceleration vector in the ECIC $z$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 291
+    source_manual_page: A-10
+    status: visually_verified
+    references:
+    - sec:ecic
+  - name: zip
+    symbol_latex: (\vec r-\vec r_p)\mathbin{\cdot}\hat z_p
+    description_latex: component of position relative to the inertial-platform $z$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 292
+    source_manual_page: A-11
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: zipdt
+    symbol_latex: \vec V_I\mathbin{\cdot}\hat z_p
+    description_latex: component of inertial velocity in the inertial-platform $z$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 292
+    source_manual_page: A-11
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: zipdt2
+    symbol_latex: \vec a_I\mathbin{\cdot}\hat z_p
+    description_latex: component of inertial acceleration in the inertial-platform $z$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 292
+    source_manual_page: A-11
+    status: visually_verified
+    references:
+    - sec:inertial-platform
+  - name: ztp
+    symbol_latex: (\vec r-\vec r_{tp})\mathbin{\cdot}\hat z_{tp}
+    description_latex: component of position relative to the tangent-plane $z$ direction
+    default_units_latex: \mathrm{ft}
+    decimal_places: 2
+    source_pdf_page: 292
+    source_manual_page: A-11
+    status: visually_verified
+    references:
+    - sec:tangent-plane
+  - name: ztpdt
+    symbol_latex: \vec V_{\oplus}\mathbin{\cdot}\hat z_{tp}
+    description_latex: component of earth-relative velocity in the tangent-plane $z$ direction
+    default_units_latex: \mathrm{ft/sec}
+    decimal_places: 3
+    source_pdf_page: 292
+    source_manual_page: A-11
+    status: visually_verified
+    references:
+    - sec:tangent-plane
+    editorial_note: appendix_tangent_plane_derivatives
+  - name: ztpdt2
+    symbol_latex: \vec a_{\oplus}\mathbin{\cdot}\hat z_{tp}
+    description_latex: component of earth-relative acceleration in the tangent-plane $z$ direction
+    default_units_latex: \mathrm{ft/sec^2}
+    decimal_places: 4
+    source_pdf_page: 292
+    source_manual_page: A-11
+    status: visually_verified
+    references:
+    - sec:tangent-plane
+    editorial_note: appendix_tangent_plane_derivatives

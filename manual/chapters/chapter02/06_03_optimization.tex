@@ -1,0 +1,144 @@
+% Source PDF pages 131--134; manual pages 2-102--2-105.
+\subsection{Optimization}\label{sec:optimization}
+
+The general nonlinear programming problem varies $n$ parameters $x_i$ to minimize
+an objective function subject to $m$ equality and inequality constraints:
+\begin{equation}
+\begin{aligned}
+  &\underset{x_i}{\operatorname{minimize}}
+  && f(x_i), && i=1,2,\ldots,n,\\
+  &\text{subject to}
+  && c_j(x_i)=0, && j=1,2,\ldots,m_e,\\
+  &&& c_j(x_i)\ge 0, && j=m_e+1,\ldots,m.
+\end{aligned}
+\label{eq:general-nonlinear-program}
+\end{equation}
+The equality constraints are conventionally listed first, followed by the inequality
+constraints.
+
+\taossubhead{Han--Powell Method (vf02)}
+
+TAOS uses the Han--Powell method, originally distributed by Powell as
+\texttt{vf02ad}, to solve the nonlinear programming problem.\manualref{3,22} The
+method belongs to the recursive quadratic programming family. It solves a sequence
+of quadratic subproblems using an active-constraint set. The active set contains all
+equality constraints plus selected inequality constraints currently treated as
+equalities.
+
+Initial estimates for the parameters are required. At each iteration, the parameters
+are modified to reduce the objective function while satisfying the constraints. For a
+fixed active set, the nonlinear problem reduces to
+\begin{equation}
+\begin{aligned}
+  &\underset{x}{\operatorname{minimize}} && f(x),\\
+  &\text{subject to} && c(x)=0.
+\end{aligned}
+\label{eq:active-set-equality-problem}
+\end{equation}
+Each iteration first determines a search direction and then performs a
+one-dimensional minimization in that direction.
+
+For a trial increment $\delta x$, the objective function is approximated by
+\begin{equation}
+  f(x+\delta x)-f(x)
+  \simeq Q(\delta x)
+  =f_x(x)\,\delta x
+   +\frac{1}{2}\delta x^{T}f_{xx}(x)\delta x,
+  \label{eq:optimization-quadratic-approximation}
+\end{equation}
+and the constraints are linearized as
+\begin{equation}
+  c(x+\delta x)
+  \simeq c(x)+c_x(x)\,\delta x.
+  \label{eq:optimization-constraint-linearization}
+\end{equation}
+Here $f_x$ and $c_x$ are gradients and $f_{xx}$ is the Hessian of the objective.
+The Hessian is replaced by a positive-definite variable-metric matrix $B$, giving the
+quadratic subproblem
+\begin{equation}
+\begin{aligned}
+  &\underset{\delta x}{\operatorname{minimize}}
+  && Q(\delta x)
+     =f_x(x)\,\delta x
+      +\frac{1}{2}\delta x^{T}B\delta x,\\
+  &\text{subject to}
+  && c_x(x)\,\delta x+c(x)=0.
+\end{aligned}
+\label{eq:optimization-quadratic-subproblem}
+\end{equation}
+
+The solution supplies a search direction $\delta x$. A one-dimensional search then
+chooses the step along that direction, using a penalty function to account for
+constraint violations. TAOS uses a version of \texttt{vf02ad} obtained from
+D.~G. Hull at The University of Texas at Austin and converted to C by the manual's
+author.
+
+\taossubhead{Optimization Parameters}
+
+The user designates optimization parameters with the special keywords described in
+\cref{sec:block-optimize}. Any numerical problem-file value may be a parameter,
+although initial conditions, guidance rules, and segment final conditions are the
+most common choices. Optimization is generally more reliable and economical when
+the number of parameters is kept small.
+
+Guidance variables control trajectory shape. A common trajectory-shaping problem
+uses a tabulated control history, such as angle of attack versus time, with the tabulated
+angles and the final time designated as optimization parameters. The intermediate
+time coordinates remain fixed, as shown in
+\cref{fig:trajectory-shaping-optimization}.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-39}
+  \caption{Optimization used for trajectory shaping.}
+  \label{fig:trajectory-shaping-optimization}
+\end{figure}
+
+A reasonable preliminary trajectory is important because the optimization is
+sensitive to the initial estimates of the final time and control history. The procedure
+works best when the control-history points are evenly distributed. Because the final
+time is itself variable, it can move too close to the preceding time point or far beyond
+the remaining history. TAOS can periodically restart the optimization and
+redistribute the time points evenly.
+
+\taossubhead{Objective Functions and Constraints}
+
+The user supplies the objective function and constraints through the problem file.
+Common objectives include time, range, and velocity. A maximization is performed
+by minimizing the negative of the desired quantity. Equality and inequality
+constraints may reference trajectory output values at the end of any segment and may
+combine values from multiple trajectories.
+
+Constraints that apply over the entire path require integral user variables, as
+described in \cref{sec:trajectory-block-define}. For example, a path-accumulated
+altitude violation may be defined by
+\begin{equation}
+  h_{\max}=
+  \begin{cases}
+    \displaystyle\int (h-100000)^2\,dt, & h>100000,\\[4pt]
+    0, & \text{otherwise},
+  \end{cases}
+  \label{eq:maximum-altitude-integral}
+\end{equation}
+so the variable grows whenever altitude exceeds \SI{100000}{\foot}. The source then
+states the optimization constraint
+\begin{equation}
+  \operatorname{Constrain}\quad h_{\max}<0.
+  \label{eq:maximum-altitude-constraint}
+\end{equation}
+The strict inequality is reproduced as printed; in practical use the integral's initial
+value and the optimizer's inequality convention determine how the zero-violation
+state is represented.
+
+Large differences in the magnitude of objectives and constraints can cause numerical
+problems. TAOS therefore permits normalization by reference values chosen so the
+scaled quantities are typically between one and ten. Reference values may be
+selected automatically or supplied by the user.
+
+\taossubhead{Gradients}
+
+The optimizer requires the gradients $f_x(x)$ and $c_x(x)$. TAOS computes them
+numerically with forward or central differences. For the same perturbation size,
+central differences are normally more accurate but require an additional function
+evaluation. Forward differences can often obtain adequate accuracy with a smaller
+perturbation and are less expensive; both choices are available.

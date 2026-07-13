@@ -1,0 +1,144 @@
+\section{Table File Format}\label{sec:table-file-format}
+
+Table files are text files that can be created with a text editor or word processor.
+On UNIX, the standard \texttt{vi} editor can be used; on a Silicon Graphics
+workstation, the \texttt{jot} editor can be used. Table files can also be created with
+other software, such as Aero\taosref{20} and Rocket.\taosref{21}
+
+\taossubhead{Values}
+
+Table data is read line by line and is not column dependent. Information must be
+given in the correct order so TAOS knows how to interpret it. Lines can be any
+number of characters in length, and blank lines are ignored. Names and values in the
+file can have up to 72 characters, so they are essentially unlimited in length for the
+intended use.
+
+Names and values are separated with white-space characters (such as space, tab, or
+carriage return), commas, equal signs, parentheses, colons, greater-than signs, and
+less-than signs. Because these special characters are delimiters, they cannot be
+embedded within a name or value. For example, the value \texttt{30,000} is not
+correct because the comma separates values; TAOS interprets it as two values,
+\texttt{30} and \texttt{0}. The correct input is \texttt{30000}.
+
+Input values are free-field rather than column dependent, so indentation can be used
+to make a table file easier to understand. The examples in this manual use
+indentation to show relationships among values. This style is encouraged because it
+reduces input errors.
+
+Values can be entered with or without a decimal point. All values are interpreted as
+real numbers; no distinction is made for integers. Values can also be entered in
+scientific notation, or e-format. For example, the number 2000 can be entered as
+\texttt{2000}, \texttt{2000.0}, or \texttt{2.0e3}.
+
+TAOS converts all characters to lower case before interpreting them as names or
+values, so upper- and lower-case letters are equivalent. Lower-case characters are
+recommended for readability.
+
+\taossubhead{Comments}
+
+Comments start with the special character \texttt{\#} and continue to the end of the
+line. They can be placed anywhere in the file except within a name or value. The
+following lines show valid comments:
+
+\begin{lstlisting}[style=taosmanual]
+# the entire line is used for comments
+0.2 0.3 0.4 0.5 # Mach numbers
+\end{lstlisting}
+
+In the first line, the \texttt{\#} symbol is in the first column. Everything after it is
+treated as a comment and ignored by TAOS, so the entire line is a comment. In the
+second example, the comment begins after the four values; everything from the
+\texttt{\#} symbol to the end of the line is ignored.
+
+\taossubhead{State Variables}
+
+As TAOS computes the trajectory of a vehicle, it keeps track of many values. These
+values together define the vehicle's state as it moves along the trajectory, so they are
+called \emph{state variables}. As noted previously, a table defines a single value: it
+contains enough information for TAOS to compute that value. Usually the value is a
+function of one or more state variables. For example, thrust is often a function of
+time. At each instant along the trajectory, time is known; therefore, the thrust value
+can be determined. \Cref{tab:taos-state-variables} lists the state variables that can be
+referenced in TAOS tables.
+
+\begingroup
+\small
+\setlength{\LTpre}{0.8\baselineskip}
+\setlength{\LTpost}{0.8\baselineskip}
+\renewcommand{\arraystretch}{1.03}
+\begin{longtable}{@{}>{\ttfamily}p{0.105\textwidth}p{0.31\textwidth}>{\ttfamily}p{0.105\textwidth}p{0.31\textwidth}@{}}
+\caption{TAOS state variables.}\label{tab:taos-state-variables}\\
+\toprule
+\normalfont Variable & Description & \normalfont Variable & Description \\
+\midrule
+\endfirsthead
+\caption[]{TAOS state variables (continued).}\\
+\toprule
+\normalfont Variable & Description & \normalfont Variable & Description \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+alpha   & Angle of attack & pitchgd & Geodetic pitch angle \\
+alphat  & Total angle of attack & pitchi & Inertial pitch angle \\
+alt\limitedstate & Geodetic altitude & power & Power setting \\
+altdt\limitedstate & Geodetic altitude rate & pres\limitedstate & Atmospheric pressure \\
+bankgc & Geocentric bank angle & psigc\limitedstate & Geocentric heading angle \\
+bankgd & Geodetic bank angle & psigd\limitedstate & Geodetic heading angle \\
+beta & Sideslip angle & range & Range \\
+betae & Euler sideslip angle & rcm\limitedstate & Distance from earth center \\
+cg & Center of gravity & rcmdt\limitedstate & Rate from earth center \\
+dynprs\limitedstate & Dynamic pressure & reypft & Reynolds number per foot \\
+ep1 & Thrust-vector angle 1 & rho\limitedstate & Atmospheric density \\
+ep2 & Thrust-vector angle 2 & rollgc & Geocentric roll angle \\
+gamgc\limitedstate & Geocentric flight-path angle & rollgd & Geodetic roll angle \\
+gamgd\limitedstate & Geodetic flight-path angle & rolli & Inertial roll angle \\
+grmark & Ground range since last reset & segment & Segment number \\
+grseg & Segment ground range & sndspd\limitedstate & Atmospheric speed of sound \\
+latgc\limitedstate & Geocentric latitude & sref & Aerodynamic reference area \\
+latgcdt & Geocentric latitude rate & temp\limitedstate & Atmospheric temperature \\
+latgd\limitedstate & Geodetic latitude & thrust & Total thrust \\
+latgddt & Geodetic latitude rate & time\limitedstate & Time \\
+long\limitedstate & Longitude & tmark\limitedstate & Time since last reset \\
+longdt & Longitude rate & tseg\limitedstate & Segment time \\
+mach & Mach number & vair & Velocity relative to air \\
+mass\limitedstate & Vehicle mass & vel\limitedstate & Inertial velocity \\
+nu\limitedstate & Atmospheric kinematic viscosity & vgr & Velocity relative to ground \\
+plength & Path length & visc\limitedstate & Atmospheric viscosity \\
+plmark & Path length since last reset & wt\limitedstate & Vehicle weight \\
+plseg & Segment path length & yawgc & Geocentric yaw angle \\
+phi & Windward meridian & yawgd & Geodetic yaw angle \\
+pitchgc & Geocentric pitch angle & yawi & Inertial yaw angle \\
+\end{longtable}
+\endgroup
+
+Wind and center-of-gravity tables can only be functions of the state variables marked
+with a dagger (\limitedstate) in \cref{tab:taos-state-variables}. These tables are
+evaluated before all state variables are known. Tables also cannot be functions of
+themselves; for example, a thrust table cannot be a function of \statevar{thrust}.
+
+The default units for state variables are given in the appendix. They can be changed
+in the problem file with the \problemblock{*units/fmt} data block
+(\cref{sec:block-units-fmt}).
+
+\taossubhead{User-Defined Variables}
+
+There are times when the state variables alone do not provide enough flexibility. For
+example, there may be three thrust-versus-time curves for three versions of a rocket
+motor. The curves can be placed in separate tables, or they can be placed in one
+table. If they are placed in one table, thrust becomes a function of both time and
+another variable that might be called \texttt{version}. This new variable is a
+\emph{user-defined variable}: any name can be used except those reserved for the
+state variables in \cref{tab:taos-state-variables}.
+
+When TAOS detects a user-defined variable, its value must be given in the problem
+file. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*prop thrust=(stage1) version=2
+\end{lstlisting}
+
+says to use a table called \tableid{stage1} for thrust and to set the user-defined
+variable \texttt{version} equal to two. The value of \texttt{version} is constant within
+a trajectory segment, but it can be surveyed like any other numerical input value
+(\cref{sec:block-survey}).

@@ -1,0 +1,20 @@
+\begin{tikzpicture}[>=Latex,x=1.0cm,y=0.9cm,line cap=round]
+  \draw[->] (0,0)--(7.8,0);
+  \draw (0,0)--(0,3.15);
+  \draw (7.2,0)--(7.2,3.15);
+  \draw (2.25,0)--(2.25,1.05);
+  \draw (5.05,0)--(5.05,2.55);
+  \fill (2.25,1.05) circle (2pt);
+  \fill (5.05,2.55) circle (2pt);
+  \node[above left] at (2.25,1.05) {$f(x_1)$};
+  \node[above left] at (5.05,2.55) {$f(x_2)$};
+  \draw[<->] (0.25,2.18)--(4.80,2.18);
+  \node[fill=white,align=center] at (2.55,2.18) {Minimum must be\\in this interval};
+  \draw[->] (5.30,1.35)--(6.90,1.35);
+  \node[below,align=center] at (6.10,1.32) {Eliminate this part\\of the search interval};
+  \node[below] at (0,0) {$x_{lo}$};
+  \node[below] at (2.25,0) {$x_1$};
+  \node[below] at (5.05,0) {$x_2$};
+  \node[below] at (7.2,0) {$x_{hi}$};
+  \node[left] at (0,2.75) {$f(x)$};
+\end{tikzpicture}

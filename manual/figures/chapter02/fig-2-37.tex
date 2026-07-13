@@ -1,0 +1,29 @@
+\begin{tikzpicture}[>=Latex,x=1.0cm,y=0.9cm,line cap=round]
+  \draw[->] (0,0)--(8.0,0);
+  \draw (0,-1.25)--(0,3.55);
+  \draw (7.6,-1.25)--(7.6,3.55);
+  \draw[line width=0.9pt]
+    plot[smooth] coordinates {(0,3.1) (1.35,2.86) (2.7,2.15) (3.85,0.78) (4.85,-0.38) (6.1,-0.88) (7.6,-1.05)};
+  \draw[line width=0.75pt,dashed]
+    plot[smooth] coordinates {(1.0,2.98) (2.7,2.12) (3.95,0.82) (4.95,-0.05) (5.6,-0.28)};
+  \coordinate (p1) at (1.25,2.88);
+  \coordinate (p2) at (2.75,2.10);
+  \coordinate (p3) at (4.95,-0.42);
+  \draw[densely dashed] (p1)--(1.25,0);
+  \draw[densely dashed] (p2)--(2.75,0);
+  \draw[densely dashed] (p3)--(4.95,0);
+  \fill (p1) circle (1.7pt);
+  \fill (p2) circle (1.7pt);
+  \fill (p3) circle (1.7pt);
+  \node[below] at (1.25,0) {$x_1$};
+  \node[below=0.34cm] at (1.25,0) {$x-\Delta x$};
+  \node[below] at (2.75,0) {$x_2$};
+  \node[below=0.34cm] at (2.75,0) {$x+\Delta x$};
+  \node[below right] at (p3) {$x_3$};
+  \node[align=left,text width=3.6cm] at (6.0,2.25)
+    {A parabola is fit through the three points to obtain a new estimate of the root};
+  \node[below] at (0,-1.25) {$x_{lo}$};
+  \node[below] at (7.6,-1.25) {$x_{hi}$};
+  \node[left] at (0,0) {$0$};
+  \node[left] at (0,3.1) {$f(x)$};
+\end{tikzpicture}

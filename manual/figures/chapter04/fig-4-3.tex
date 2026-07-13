@@ -1,0 +1,13 @@
+\begin{tikzpicture}[>=Latex,font=\small,scale=0.9]
+  \coordinate (O) at (0,0);
+  \draw[->,thick] (O) -- (5.2,0) node[right] {$\hat{x}_b$};
+  \draw[->,thick] (O) -- (-0.3,2.0) node[above] {$\hat{z}_b$};
+  \draw[->,thick] (O) -- (-1.1,-1.1) node[below left] {$\hat{y}_b$};
+  \draw[->,very thick] (O) -- (4.1,1.35) node[above right] {$\vec F_{\mathrm{prop}}$};
+  \draw[dashed] (4.1,1.35) -- (4.1,0);
+  \draw[->] (1.5,0) arc[start angle=0,end angle=18,radius=1.5];
+  \node at (1.7,0.3) {$\epsilon_1$};
+  \draw[->] (4.1,0.55) arc[start angle=-90,end angle=-30,radius=0.8];
+  \node[right] at (4.65,0.45) {$\epsilon_2$};
+  \node[below] at (2.4,-0.35) {Projection of $\vec F_{\mathrm{prop}}$ onto the $\hat{x}_b$--$\hat{z}_b$ plane};
+\end{tikzpicture}

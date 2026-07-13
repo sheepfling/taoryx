@@ -1,0 +1,83 @@
+\section{Problem Data Blocks}\label{sec:problem-data-blocks}
+
+A problem file contains one or more problems or cases, which in turn contain one or
+more trajectory definitions. Each trajectory definition begins with a
+\problemblock{*trajectory} block (\cref{sec:trajectory-data-blocks}) and ends at
+the next nontrajectory, nonsegment keyword. The trajectories contain one or more
+segments and therefore form the hierarchy introduced in
+\cref{fig:problem-file-organization}.
+
+It is important to group data blocks according to their purpose. All blocks defining
+a segment must be grouped together, and all blocks defining a trajectory must be
+grouped together. The remaining problem-level blocks do not have to be contiguous,
+but the problem file is easier to understand if they are grouped rather than scattered
+throughout the file. Grouping these blocks also tends to reduce input errors.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter04/fig-4-7}
+  \caption{Problem and data-block organization.}
+  \label{fig:problem-data-block-organization}
+\end{figure}
+
+The resulting structure is illustrated in
+\cref{fig:problem-data-block-organization}. A problem begins with an identifier in
+parentheses. The identifier is often the same as the problem filename, but this is not
+required. A group of data blocks containing information that applies to the entire
+problem follows.
+
+These initial blocks are not associated with a particular trajectory or segment; they
+apply to all trajectories. Examples are the \problemblock{*atmos},
+\problemblock{*earth}, and \problemblock{*wind} blocks.
+\Cref{tab:problem-data-blocks} gives the complete list. Blocks marked with
+\limitedstate{} are best placed at the beginning of the problem. The remaining
+problem-level blocks should normally be placed after the trajectory definitions.
+
+After the initial group of problem-level blocks, the blocks defining the first
+trajectory are given. Within that trajectory are the blocks defining its segments. A
+second trajectory definition follows the first, and this pattern continues for every
+trajectory in the problem. The final group of problem-level blocks follows the
+trajectories, and the problem ends with \problemblock{*end}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Problem data blocks.}
+  \label{tab:problem-data-blocks}
+  \begin{tabularx}{0.82\linewidth}{@{}>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Data block & Description \\
+    \midrule
+    *atmos\limitedstate     & Atmosphere model \\
+    *define\limitedstate    & Problem-level user-defined variables \\
+    *earth\limitedstate     & Earth model \\
+    *egs                    & EGS database files \\
+    *file                   & Problem-level output files \\
+    *optimize               & Trajectory optimization \\
+    *print                  & Problem-level printout \\
+    *radar\limitedstate     & Radar observations \\
+    *search                 & Trajectory searches \\
+    *summarize              & Summary variables \\
+    *survey                 & Trajectory surveys \\
+    *title\limitedstate     & Problem title \\
+    *units/fmt              & Units and output format \\
+    *wind\limitedstate      & Wind model \\
+    \bottomrule
+  \end{tabularx}
+
+  \smallskip
+  \footnotesize\limitedstate\ Best placed before trajectory definitions; the
+  remaining blocks normally follow the trajectories.
+\end{table}
+
+The blocks at the beginning of a problem do not reference trajectory or segment
+information such as trajectory numbers, segment numbers, or user-defined variables.
+They contain general information independent of the individual trajectories. For
+example, \problemblock{*atmos} and \problemblock{*earth} select the atmosphere
+and earth models used by every trajectory.
+
+The blocks at the end usually reference trajectory or segment information that must
+already have been defined. For example, a \problemblock{*search} block defines an
+objective function that refers to trajectory and segment numbers. An
+\problemblock{*egs} block may refer to user-defined variables, which must be
+defined before they are used. Placing the \problemblock{*egs} block at the end of
+the problem avoids this potential forward-reference error.

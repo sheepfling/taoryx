@@ -1,0 +1,39 @@
+\subsection{\problemblock{*Print} Data Block}\label{sec:trajectory-block-print}
+
+The trajectory-level \problemblock{*print} block is similar to the
+\problemblock{*file} block in \cref{sec:trajectory-block-file}, except that it
+writes trajectory variables to the standard printout file instead of to a user-named
+column file. The standard file has the same basename as the problem file and uses the
+extension \texttt{.out} rather than \texttt{.prb}. It contains page breaks and
+headings formatted for a printer with 132 characters per line and 60 lines per page.
+
+One table of trajectory data is written for each \problemblock{*print} block. Any
+number of blocks may appear in a trajectory, with a maximum of ten trajectory
+variables in each block. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*print time alt range mach gamgd dynprs
+\end{lstlisting}
+
+produces output like \cref{fig:trajectory-printout-example}.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.96\linewidth}
+    \lstinputlisting[style=taosmanual,basicstyle=\ttfamily\scriptsize]{examples/chapter04/trajectory-printout-example.txt}
+  \end{minipage}
+  \caption{Trajectory printout example.}
+  \label{fig:trajectory-printout-example}
+\end{figure}
+
+The output begins with a page heading, title, and column headings, which are
+repeated on each page, followed by the trajectory values. Units and formats are
+controlled by \problemblock{*units/fmt}.
+
+A line is printed at the beginning and end of every segment and at each print interval
+within the segment. A blank line separates segments so they can be identified easily.
+Radar and relative-vehicle variables, whose names begin with \texttt{rad} or
+\texttt{rel}, require a square-bracket subscript. For example,
+\statevar{radrng[2]} is range from station 2 to the current trajectory, and
+\statevar{relvel[4]} is the closing velocity of trajectory 4 relative to the current
+trajectory.

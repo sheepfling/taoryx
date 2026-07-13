@@ -1,0 +1,135 @@
+\subsection{Ballistic Reentry}\label{sec:example-ballistic-reentry}
+
+One of the simplest problems for TAOS is a ballistic reentry. Ballistic flight occurs
+when all of the control variables (angle of attack, angle of sideslip, bank angle, and
+power setting) are zero so no guidance rules are required. If the vehicle's
+configuration is assumed to remain the same throughout reentry, its trajectory can
+be modeled with one segment that starts from the entry point and continues to
+impact.
+
+\taossubhead{Table File}
+
+The only forces acting on the vehicle are from aerodynamic drag and gravity so only
+a drag table is required. For conceptual design drag is often assumed to be only a
+function of Mach number because altitude effects are usually small. The following
+simple table file contains the axial-force coefficient as a function of Mach number:
+
+\lstinputlisting[style=taosmanual]{examples/chapter04/ballistic-reentry-source.tbl.txt}
+
+\taossubhead{Problem File}
+
+The following problem file is used to calculate a set of ballistic reentry trajectories:
+
+\lstinputlisting[style=taosmanual,basicstyle=\ttfamily\scriptsize]{examples/chapter04/ballistic-reentry-source.prb.txt}
+
+Like all problems, it begins with a name enclosed in parentheses. This is followed by
+data blocks that provide a title, an atmosphere model, and an earth model.
+
+This problem involves only one vehicle so a single trajectory has been defined that
+starts with segment number 1. The trajectory definition extends from the
+\problemblock{*trajectory} keyword to the first \problemblock{*survey} keyword.
+Data blocks within the trajectory definition have been indented to show the problem
+structure.
+
+\taossubhead{Trajectory Definition and Surveys}
+
+Trajectories require initial conditions and at least one segment definition. Since this
+problem has only one trajectory, specific initial conditions must be given. It cannot
+be initialized from another trajectory because no other trajectories exist.
+
+This set of trajectories is generic in that the location of the trajectory on the earth's
+surface and the direction of the trajectories is not important. Thus, the initial latitude
+and longitude can be set to zero and an initial heading angle of \ang{90} (east) can be
+chosen. This is typical of trajectories calculated during conceptual design.
+
+Two of the initial conditions, velocity and flight-path angle, are set to survey
+variables. The \problemblock{*survey} data blocks near the end of the problem
+provide values for these variables. Survey number 1, which varies the initial
+flight-path angle, is the inner loop and has a set of specific values. Survey number 2,
+which varies the initial velocity, is the outer loop. Its values have been given in the
+``\texttt{lo}, \texttt{hi}, \texttt{inc}'' form so initial velocity takes on the values
+15,000, 16,000, 17,000, and \SI{18000}{\foot\per\second}.
+
+In general, trajectories must have a \problemblock{*print} data block giving a list of
+variables that will be written to the printout file. Often this is the same list of
+variables written to the EGS database file.
+
+This trajectory only requires one segment. The \problemblock{*integ} data block is
+used to enter an integration step size and a print interval, and an
+\problemblock{*aero} data block is used to provide the name of the drag table. The
+segment final condition ends the trajectory when the altitude becomes less than
+zero.
+
+Summary variables have been defined for the maximum dynamic pressure,
+\statevar{max_q}, and the maximum axial $g$ loading, \statevar{max_g}. Even
+though there is only one trajectory, trajectory numbers are still required in the
+summary-variable definitions. In this case, the trajectory numbers are given as
+subscripts enclosed in brackets. The vehicle is decelerating, giving negative axial
+$g$'s, so the \texttt{min} function is used to select the most negative value and then
+the \texttt{neg} operation is used to convert this to a positive number.
+
+The \problemblock{*egs} data block is used to create an EGS database file so the
+trajectory information can be plotted. The names given in the
+\problemblock{*survey} data block, \statevar{gentry} and \statevar{ventry}, appear
+in the EGS database file and are used for plotting.
+
+\taossubhead{Results}
+
+This problem calculates 16 trajectories, one for each combination of survey values.
+On a Silicon Graphics workstation, the problem runs in about 9 seconds so it takes
+a little over 0.5 seconds to compute each trajectory.
+
+The following listing is typical of the trajectory printout for this problem:
+
+\begin{center}
+\begin{minipage}{0.98\linewidth}
+\lstinputlisting[style=taosmanual,basicstyle=\ttfamily\tiny]{examples/chapter04/ballistic-reentry-printout.txt}
+\end{minipage}
+\end{center}
+
+This page corresponds to the first trajectory computed by TAOS, which is for an
+initial velocity of \SI{15000}{\foot\per\second} and an initial flight-path angle of
+\ang{-35}.
+
+The summary variables are tabulated as a function of the survey variables on the last
+printout page as follows:
+
+\begin{center}
+\begin{minipage}{0.86\linewidth}
+\lstinputlisting[style=taosmanual,basicstyle=\ttfamily\scriptsize]{examples/chapter04/ballistic-reentry-summary.txt}
+\end{minipage}
+\end{center}
+
+The trajectory data is plotted with EGS in
+\cref{fig:example-reentry-altitude-range,fig:example-reentry-velocity-time,fig:example-reentry-max-q,fig:example-reentry-max-g}.
+The first two figures show four trajectories for different initial flight-path angles and
+a constant initial velocity. The last two figures show the summary variables plotted
+as a function of the survey variables.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.84\linewidth}{!}{\input{manual/figures/chapter04/fig-4-14}}
+  \caption{Altitude versus range for example ballistic trajectories.}
+  \label{fig:example-reentry-altitude-range}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.84\linewidth}{!}{\input{manual/figures/chapter04/fig-4-15}}
+  \caption{Velocity versus time for example ballistic trajectories.}
+  \label{fig:example-reentry-velocity-time}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.84\linewidth}{!}{\input{manual/figures/chapter04/fig-4-16}}
+  \caption{Maximum dynamic pressure for example ballistic trajectories.}
+  \label{fig:example-reentry-max-q}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.84\linewidth}{!}{\input{manual/figures/chapter04/fig-4-17}}
+  \caption{Maximum axial G's for example ballistic trajectories.}
+  \label{fig:example-reentry-max-g}
+\end{figure}

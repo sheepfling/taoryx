@@ -1,0 +1,58 @@
+% Source PDF page 70; manual page 2-41.
+\subsection{Rail Launches and Sled Tests}\label{sec:rail-launches}
+
+For rail-launched rockets and sled tests, the acceleration is modified to restrict
+motion to the rail direction. The rail or sled-track orientation is supplied through
+the guidance rules as a body attitude, and the rail is assumed to be aligned with the
+body $\hat x_b$ axis.
+
+The ECFC acceleration components required to keep the vehicle on the rail are
+\begin{equation}
+  \begin{aligned}
+    \ddot x_{\oplus}
+      &=\lVert\vec a_{rail}\rVert
+        \left(\hat x_b\mathbin{\cdot}\hat x_{\oplus}\right),\\
+    \ddot y_{\oplus}
+      &=\lVert\vec a_{rail}\rVert
+        \left(\hat x_b\mathbin{\cdot}\hat y_{\oplus}\right),\\
+    \ddot z_{\oplus}
+      &=\lVert\vec a_{rail}\rVert
+        \left(\hat x_b\mathbin{\cdot}\hat z_{\oplus}\right).
+  \end{aligned}
+  \label{eq:rail-constrained-acceleration-components}
+\end{equation}
+The acceleration magnitude along the rail is
+\begin{equation}
+  \lVert\vec a_{rail}\rVert
+  =\vec a_{\oplus}\mathbin{\cdot}\hat x_b
+   -\lVert\vec a_f\rVert.
+  \label{eq:rail-acceleration-magnitude}
+\end{equation}
+The loss of acceleration caused by rail friction is computed from the static or
+kinetic coefficient of friction $\mu_f$ and the total force normal to the rail:
+\begin{equation}
+  \lVert\vec a_f\rVert
+  =\frac{\mu_f\lVert\sum\vec F_n\rVert}{m}
+  =\mu_f\lVert\vec a_n\rVert,
+  \label{eq:rail-friction-acceleration}
+\end{equation}
+where
+\begin{equation}
+  \lVert\vec a_n\rVert
+  =\sqrt{
+      \left(\vec a_{\oplus}\mathbin{\cdot}\hat y_b\right)^2
+      +\left(\vec a_{\oplus}\mathbin{\cdot}\hat z_b\right)^2
+    }.
+  \label{eq:rail-normal-acceleration}
+\end{equation}
+Thus, the normal acceleration is the component of the total acceleration
+perpendicular to the rail, and the friction loss is its magnitude multiplied by
+$\mu_f$. When the velocity magnitude is less than \SI{0.001}{\foot\per\second},
+TAOS uses the static coefficient; otherwise it uses the kinetic coefficient
+(\cref{sec:block-rail}).
+
+A launch-rail mechanism prevents a rocket from moving backward, so TAOS enforces
+$\lVert\vec a_{rail}\rVert>0$ for rail launches and holds the vehicle motionless
+before motor ignition. This restriction is not applied to sled tests because a sled
+may both accelerate and decelerate. Sled tracks are normally parallel to the earth's
+surface, making the pre-ignition acceleration along the track zero.

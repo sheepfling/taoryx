@@ -1,0 +1,53 @@
+\subsection{\problemblock{*Integ} Data Block}\label{sec:block-integ}
+
+Trajectories are computed by integrating the equations of motion with a fourth-order,
+fixed-step Runge--Kutta numerical method. The integration step size, which controls
+the accuracy of the calculation, is fixed within each trajectory segment. It must be
+small enough to capture changes in aerodynamic and propulsive forces, but large
+enough that computation time is not excessive.
+
+The default step size is 0.10~s. It can be changed with an
+\problemblock{*integ} block; for example,
+
+\begin{lstlisting}[style=taosmanual]
+*integ dt=0.25
+\end{lstlisting}
+
+requests a 0.25~s step. Typical values range from 0.01 to 0.5~s. The minimum
+allowable integration step is $1\times10^{-6}$~s.
+
+Output variables are saved at the beginning and end of each segment and at even
+increments of the print interval within the segment. In addition to controlling
+printout density, the print interval controls memory use because all trajectory output
+variables are retained in memory at those times. Small print intervals therefore
+increase memory requirements, and large intervals reduce them. The print interval
+\statevar{dtprnt} defaults to 1.0~s. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*integ dtprnt=0.5 dt=0.05
+\end{lstlisting}
+
+changes the print interval to 0.5~s and the integration step to 0.05~s.
+
+\taossubhead{Guidance Time Constant}
+
+Some guidance rules, including those in \cref{tab:flight-condition-guidance},
+specify control variables indirectly through a desired flight condition. When the
+actual condition differs from the desired condition, TAOS changes the free controls
+so that the trajectory moves toward the requested state. The rate of that correction is
+controlled by the guidance time constant \statevar{dtguid}.
+
+A small \statevar{dtguid} produces large corrections in an attempt to reach the
+desired condition quickly. A large value produces small corrections and gradual
+convergence. Thus, the parameter behaves somewhat like a time constant: small
+values may produce oscillations that do or do not damp, while large values tend to
+produce exponential convergence but may correct too slowly.
+
+\begin{lstlisting}[style=taosmanual]
+*integ dtprnt=1.0 dt=0.20 dtguid=5.0
+\end{lstlisting}
+
+sets the time constant to 5~s. This is considered a large value and causes only small
+flight-path corrections; they may be too small to achieve the desired conditions.
+Experimentation is sometimes required. The default value of 1~s works well for
+most guidance rules.

@@ -1,0 +1,61 @@
+state_variables:
+  - {name: alpha, description: Angle of attack}
+  - {name: alphat, description: Total angle of attack}
+  - {name: alt, description: Geodetic altitude, early_available: true}
+  - {name: altdt, description: Geodetic altitude rate, early_available: true}
+  - {name: bankgc, description: Geocentric bank angle}
+  - {name: bankgd, description: Geodetic bank angle}
+  - {name: beta, description: Sideslip angle}
+  - {name: betae, description: Euler sideslip angle}
+  - {name: cg, description: Center of gravity}
+  - {name: dynprs, description: Dynamic pressure, early_available: true}
+  - {name: ep1, description: Thrust-vector angle 1}
+  - {name: ep2, description: Thrust-vector angle 2}
+  - {name: gamgc, description: Geocentric flight-path angle, early_available: true}
+  - {name: gamgd, description: Geodetic flight-path angle, early_available: true}
+  - {name: grmark, description: Ground range since last reset}
+  - {name: grseg, description: Segment ground range}
+  - {name: latgc, description: Geocentric latitude, early_available: true}
+  - {name: latgcdt, description: Geocentric latitude rate}
+  - {name: latgd, description: Geodetic latitude, early_available: true}
+  - {name: latgddt, description: Geodetic latitude rate}
+  - {name: long, description: Longitude, early_available: true}
+  - {name: longdt, description: Longitude rate}
+  - {name: mach, description: Mach number, early_available: true}
+  - {name: mass, description: Vehicle mass, early_available: true}
+  - {name: nu, description: Atmospheric kinematic viscosity, early_available: true}
+  - {name: plength, description: Path length}
+  - {name: plmark, description: Path length since last reset}
+  - {name: plseg, description: Segment path length}
+  - {name: phi, description: Windward meridian}
+  - {name: pitchgc, description: Geocentric pitch angle}
+  - {name: pitchgd, description: Geodetic pitch angle}
+  - {name: pitchi, description: Inertial pitch angle}
+  - {name: power, description: Power setting}
+  - {name: pres, description: Atmospheric pressure, early_available: true}
+  - {name: psigc, description: Geocentric heading angle, early_available: true}
+  - {name: psigd, description: Geodetic heading angle, early_available: true}
+  - {name: range, description: Range}
+  - {name: rcm, description: Distance from earth center, early_available: true}
+  - {name: rcmdt, description: Rate from earth center, early_available: true}
+  - {name: reypft, description: Reynolds number per foot}
+  - {name: rho, description: Atmospheric density, early_available: true}
+  - {name: rollgc, description: Geocentric roll angle}
+  - {name: rollgd, description: Geodetic roll angle}
+  - {name: rolli, description: Inertial roll angle}
+  - {name: segment, description: Segment number}
+  - {name: sndspd, description: Atmospheric speed of sound, early_available: true}
+  - {name: sref, description: Aerodynamic reference area}
+  - {name: temp, description: Atmospheric temperature, early_available: true}
+  - {name: thrust, description: Total thrust}
+  - {name: time, description: Time, early_available: true}
+  - {name: tmark, description: Time since last reset, early_available: true}
+  - {name: tseg, description: Segment time, early_available: true}
+  - {name: vair, description: Velocity relative to air}
+  - {name: vel, description: Inertial velocity, early_available: true}
+  - {name: vgr, description: Velocity relative to ground}
+  - {name: visc, description: Atmospheric viscosity, early_available: true}
+  - {name: wt, description: Vehicle weight, early_available: true}
+  - {name: yawgc, description: Geocentric yaw angle}
+  - {name: yawgd, description: Geodetic yaw angle}
+  - {name: yawi, description: Inertial yaw angle}

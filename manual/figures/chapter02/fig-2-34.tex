@@ -1,0 +1,26 @@
+\begin{tikzpicture}[
+  >=Latex,
+  node distance=0.28cm,
+  flowbox/.style={draw,align=center,text width=5.3cm,minimum height=0.60cm,font=\scriptsize},
+  guide/.style={draw,align=center,text width=5.05cm,minimum height=0.60cm,font=\scriptsize,fill=black!3},
+  every path/.style={line width=0.6pt}
+]
+  \node[flowbox] (coords) {Compute coordinate-system unit vectors and the vehicle state in different coordinate systems};
+  \node[flowbox,below=of coords] (rates) {Compute state rates};
+  \node[flowbox,below=of rates] (gravity) {Compute acceleration of gravity};
+  \node[flowbox,below=of gravity] (atmos) {Compute atmosphere properties};
+  \node[flowbox,below=of atmos] (air) {Compute wind, airspeed, Mach number, dynamic pressure, and Reynolds number};
+  \node[guide,below=of air] (att) {Compute body attitude, aerodynamic angles, and body unit vectors};
+  \node[guide,below=of att] (forces) {Compute aerodynamic and propulsive forces};
+  \node[guide,below=of forces] (derivs) {Compute accelerations and derivatives};
+  \node[guide,below=of derivs] (loads) {Compute angular-acceleration rates and specific load factors};
+  \node[flowbox,below=of loads] (rail) {Revise accelerations and derivatives for a rail launch or sled test};
+  \node[flowbox,below=of rail] (other) {Compute other output variables};
+
+  \foreach \a/\b in {coords/rates,rates/gravity,gravity/atmos,atmos/air,air/att,att/forces,forces/derivs,derivs/loads,loads/rail,rail/other}
+    \draw[->] (\a)--(\b);
+
+  \draw[->] (loads.east) -- ++(1.0,0) |- (att.east)
+    node[pos=0.28,right,align=left,font=\scriptsize]
+    {Loop to vary body attitude\\to satisfy guidance rules};
+\end{tikzpicture}

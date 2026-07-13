@@ -1,0 +1,26 @@
+\section{Examples}\label{sec:problem-examples}
+
+The preceding sections give detailed descriptions of every data block that can appear
+in a problem file, but they do not make it obvious how the blocks are assembled to
+calculate complete trajectories. This section therefore presents four example
+problems and illustrates several TAOS capabilities.
+
+The first example calculates a set of simple ballistic-reentry trajectories and shows
+how surveys and summary variables are used for tradeoff studies. Although the
+problem is simple, it shows the overall structure of a problem file. More complicated
+trajectories use the same basic organization.
+
+The second example calculates a rail-launched, two-stage ballistic rocket and uses
+optimization to satisfy trajectory constraints. It illustrates multiple trajectories,
+multiple segments, and a relatively simple optimization loop.
+
+The third example computes a long-range intercept of a ballistic missile with
+optimization. It is a more complex problem in which optimization shapes the
+interceptor trajectory to meet the target.
+
+The last example also computes an intercept, but it uses a TAOS intercept-guidance
+algorithm instead of optimization.
+
+The processing times quoted in these examples were measured on a Silicon Graphics
+Indigo-2 workstation with a 200-MHz R4400 processor and are included only as
+historical context for the 1995 implementation.

@@ -1,0 +1,327 @@
+equation,section,manual_page,pdf_page,status,notes
+1-1,Trajectory Simulation,1-2,19,visually_verified,Force and moment equations share one source number
+1-2,Trajectory Simulation,1-2,19,visually_verified,Point-mass force equation
+2-1,ECIC Coordinate System,2-7,36,visually_verified,Earth rotation angle
+2-2,ECIC Coordinate System,2-7,36,visually_verified,Earth rotation rate
+2-3,ECIC Coordinate System,2-7,36,visually_verified,ECIC position components
+2-4,ECIC Coordinate System,2-7,36,visually_verified,ECIC velocity components
+2-5,ECIC Coordinate System,2-7,36,visually_verified,ECIC acceleration components
+2-6,Local Geocentric Horizon,2-8,37,visually_verified,Local geocentric horizon unit vectors
+2-7,Geocentric Coordinate System,2-9,38,visually_verified,Geocentric position components in ECFC coordinates
+2-8,Geocentric Coordinate System,2-10,39,visually_verified,Longitude from ECFC position
+2-9,Geocentric Coordinate System,2-10,39,visually_verified,Geocentric latitude from ECFC position
+2-10,Geocentric Coordinate System,2-11,40,visually_verified,Local geocentric north velocity component
+2-11,Geocentric Coordinate System,2-11,40,visually_verified,Local geocentric east velocity component
+2-12,Geocentric Coordinate System,2-11,40,visually_verified,Local geocentric down velocity component
+2-13,Geocentric Coordinate System,2-11,40,visually_verified,Geocentric vertical flight-path angle
+2-14,Geocentric Coordinate System,2-11,40,visually_verified,Geocentric heading angle
+2-15,Geocentric Coordinate System,2-11,40,visually_verified,Geocentric-to-ECFC x velocity transformation
+2-16,Geocentric Coordinate System,2-11,40,visually_verified,Geocentric-to-ECFC y velocity transformation
+2-17,Geocentric Coordinate System,2-11,40,visually_verified,Geocentric-to-ECFC z velocity transformation
+2-18,Local Geodetic Horizon,2-12,41,visually_verified,Ellipsoid radius eccentricity and flattening relation
+2-19,Local Geodetic Horizon,2-13,42,visually_verified,Local geodetic north unit vector
+2-20,Local Geodetic Horizon,2-13,42,visually_verified,Local geodetic east unit vector
+2-21,Local Geodetic Horizon,2-13,42,visually_verified,Local geodetic down unit vector
+2-22,Geodetic Coordinate System,2-14,43,visually_verified,Ellipsoid surface equation
+2-23,Geodetic Coordinate System,2-14,43,visually_verified,Ellipsoid meridional section equation
+2-24,Geodetic Coordinate System,2-15,44,visually_verified,Geodetic latitude from surface-normal slope
+2-25,Geodetic Coordinate System,2-15,44,visually_verified,Ellipsoid surface coordinate ratio
+2-26,Geodetic Coordinate System,2-15,44,visually_verified,Ellipsoid surface x coordinate
+2-27,Geodetic Coordinate System,2-15,44,visually_verified,Surface x coordinate in terms of normal radius
+2-28,Geodetic Coordinate System,2-15,44,visually_verified,Prime vertical radius of curvature
+2-29,Geodetic Coordinate System,2-15,44,visually_verified,Ellipsoid surface z coordinate
+2-30,Geodetic Coordinate System,2-16,45,visually_verified,Geodetic position ECFC x component
+2-31,Geodetic Coordinate System,2-16,45,visually_verified,Geodetic position ECFC y component
+2-32,Geodetic Coordinate System,2-16,45,visually_verified,Geodetic position ECFC z component
+2-33,Geodetic Coordinate System,2-16,45,visually_verified,Equatorial projection of geodetic position
+2-34,Geodetic Coordinate System,2-16,45,visually_verified,Surface-normal z-axis intercept
+2-35,Geodetic Coordinate System,2-17,46,visually_verified,Initial spherical estimate of geodetic latitude
+2-36,Geodetic Coordinate System,2-17,46,visually_verified,Initial z-axis intercept estimate
+2-37,Geodetic Coordinate System,2-17,46,visually_verified,Iteration shifted z coordinate
+2-38,Geodetic Coordinate System,2-17,46,visually_verified,Iteration radius and altitude relation
+2-39,Geodetic Coordinate System,2-17,46,visually_verified,Iteration geodetic latitude relation
+2-40,Geodetic Coordinate System,2-17,46,visually_verified,Iteration normal radius
+2-41,Geodetic Coordinate System,2-17,46,visually_verified,Iteration z-axis intercept update
+2-42,Geodetic Coordinate System,2-18,47,visually_verified,Local geodetic north velocity component
+2-43,Geodetic Coordinate System,2-18,47,visually_verified,Local geodetic east velocity component
+2-44,Geodetic Coordinate System,2-18,47,visually_verified,Local geodetic down velocity component
+2-45,Geodetic Coordinate System,2-18,47,visually_verified,Geodetic vertical flight-path angle
+2-46,Geodetic Coordinate System,2-18,47,visually_verified,Geodetic heading angle
+2-47,Geodetic Coordinate System,2-18,47,visually_verified,Geodetic-to-ECFC x velocity transformation
+2-48,Geodetic Coordinate System,2-18,47,visually_verified,Geodetic-to-ECFC y velocity transformation
+2-49,Geodetic Coordinate System,2-18,47,visually_verified,Geodetic-to-ECFC z velocity transformation
+3-1,Full Tables,3-13,148,visually_verified,Vacuum thrust minus ambient pressure times nozzle exit area
+4-1,Trajectory *Define data block,4-35,200,visually_verified,Stagnation-point heat-transfer approximation
+4-2,Trajectory *Define data block,4-38,203,visually_verified,Minimum-dynamic-pressure integral derivative when constraint is satisfied
+4-3,Trajectory *Define data block,4-38,203,visually_verified,Minimum-dynamic-pressure integral derivative when constraint is violated
+4-4,*Initial data block,4-44,209,visually_verified,Rotation between ECFC and ECIC coordinate systems
+4-5,*Optimize data block,4-64,229,visually_verified,Path-constraint integral when minimum dynamic pressure is violated
+4-6,*Optimize data block,4-64,229,visually_verified,Path-constraint integral otherwise
+4-7,*Optimize data block,4-67,232,visually_verified,Forward-difference numerical derivative
+4-8,*Optimize data block,4-67,232,visually_verified,Central-difference numerical derivative
+2-50,Body-Fixed Cartesian Coordinate System,2-20,49,visually_verified,Geodetic Euler rotation matrix
+2-51,Body-Fixed Cartesian Coordinate System,2-20,49,visually_verified,Body x unit vector from geodetic Euler angles
+2-52,Body-Fixed Cartesian Coordinate System,2-20,49,visually_verified,Body y unit vector from geodetic Euler angles
+2-53,Body-Fixed Cartesian Coordinate System,2-20,49,visually_verified,Body z unit vector from geodetic Euler angles
+2-54,Body-Fixed Cartesian Coordinate System,2-21,50,visually_verified,Cosine of geodetic Euler yaw angle
+2-55,Body-Fixed Cartesian Coordinate System,2-21,50,visually_verified,Sine of geodetic Euler yaw angle
+2-56,Body-Fixed Cartesian Coordinate System,2-21,50,visually_verified,Geodetic Euler pitch relation
+2-57,Body-Fixed Cartesian Coordinate System,2-21,50,visually_verified,Geodetic Euler roll relation
+2-58,Body-Fixed Cartesian Coordinate System,2-21,50,visually_verified,Intermediate y axis for Euler-angle recovery
+2-59,Body-Fixed Cartesian Coordinate System,2-21,50,visually_verified,Linear system for intermediate x axis
+2-60,Body-Fixed Cartesian Coordinate System,2-21,50,visually_verified,Explicit intermediate x axis
+2-61,Body-Fixed Cartesian Coordinate System,2-22,51,visually_verified,Vertical-body Euler-angle singularity convention
+2-62,Velocity Cartesian Coordinate Systems,2-24,53,visually_verified,Wind-corrected velocity
+2-63,Velocity Cartesian Coordinate Systems,2-24,53,visually_verified,Wind-relative velocity x unit vector
+2-64,Velocity Cartesian Coordinate Systems,2-25,54,visually_verified,Wind-relative velocity y unit vector
+2-65,Velocity Cartesian Coordinate Systems,2-25,54,visually_verified,Wind-relative velocity z unit vector
+2-66,Velocity Cartesian Coordinate Systems,2-25,54,visually_verified,Earth-relative velocity x unit vector
+2-67,Velocity Cartesian Coordinate Systems,2-25,54,visually_verified,Geodetic-to-velocity transformation matrix
+2-68,Velocity Cartesian Coordinate Systems,2-25,54,visually_verified,Velocity x unit vector from geodetic flight-path angles
+2-69,Velocity Cartesian Coordinate Systems,2-25,54,visually_verified,Velocity y unit vector from geodetic heading
+2-70,Velocity Cartesian Coordinate Systems,2-25,54,visually_verified,Velocity z unit vector from geodetic flight-path angles
+2-71,Wind Cartesian Coordinate System,2-26,55,visually_verified,Wind unit vectors from bank angle
+2-72,Wind Cartesian Coordinate System,2-27,56,visually_verified,Wind-to-body aerodynamic rotation matrix
+2-73,Wind Cartesian Coordinate System,2-27,56,visually_verified,Body x unit vector from angle of attack and Euler sideslip
+2-74,Wind Cartesian Coordinate System,2-27,56,visually_verified,Body y unit vector from Euler sideslip
+2-75,Wind Cartesian Coordinate System,2-27,56,visually_verified,Body z unit vector from angle of attack and Euler sideslip
+2-76,Wind Cartesian Coordinate System,2-27,56,visually_verified,Angle of attack projection definition
+2-77,Wind Cartesian Coordinate System,2-27,56,visually_verified,Sideslip projection definition
+2-78,Wind Cartesian Coordinate System,2-29,58,visually_verified,Sideslip definition at ninety-degree angle of attack
+2-79,Wind Cartesian Coordinate System,2-29,58,visually_verified,Total angle of attack definition
+2-80,Wind Cartesian Coordinate System,2-29,58,visually_verified,Windward meridian definition
+2-81,Wind Cartesian Coordinate System,2-30,59,visually_verified,Total angle of attack from alpha and Euler sideslip
+2-82,Wind Cartesian Coordinate System,2-30,59,visually_verified,Windward meridian from alpha and Euler sideslip
+2-83,Wind Cartesian Coordinate System,2-30,59,visually_verified,Sideslip from alpha and Euler sideslip
+2-84,Wind Cartesian Coordinate System,2-30,59,visually_verified,Total angle of attack from alpha and sideslip
+2-85,Wind Cartesian Coordinate System,2-30,59,visually_verified,Windward meridian from alpha and sideslip
+2-86,Wind Cartesian Coordinate System,2-30,59,visually_verified,Euler sideslip from alpha and sideslip
+2-87,Wind Cartesian Coordinate System,2-30,59,visually_verified,Angle of attack from total angle and windward meridian
+2-88,Wind Cartesian Coordinate System,2-30,59,visually_verified,Sideslip from total angle and windward meridian
+2-89,Wind Cartesian Coordinate System,2-30,59,visually_verified,Euler sideslip from total angle and windward meridian
+2-90,Tangent Plane Cartesian Coordinate System,2-33,62,visually_verified,Tangent-plane x unit vector
+2-91,Tangent Plane Cartesian Coordinate System,2-33,62,visually_verified,Tangent-plane y unit vector
+2-92,Tangent Plane Cartesian Coordinate System,2-33,62,visually_verified,Tangent-plane z unit vector
+2-93,Coordinate Transformations,2-35,64,visually_verified,ECFC-to-body projection of propulsive force
+2-94,Coordinate Transformations,2-35,64,visually_verified,Inverse body-to-ECFC force transformation
+2-95,Coordinate Transformations,2-35,64,visually_verified,Transpose form of body-to-ECFC force transformation
+2-96,Coordinate Transformations,2-35,64,visually_verified,Column-vector form of body-to-ECFC force transformation
+2-97,Equations of Motion,2-36,65,visually_verified,Newton second law for a point mass
+2-98,Equations of Motion,2-36,65,visually_verified,Inertial acceleration as the second position derivative
+2-99,Equations of Motion,2-36,65,visually_verified,Transport theorem with earth-fixed inner derivative
+2-100,Equations of Motion,2-36,65,visually_verified,Transport theorem evaluated in the rotating frame
+2-101,Equations of Motion,2-36,65,visually_verified,Expanded inertial acceleration
+2-102,Equations of Motion,2-36,65,visually_verified,Earth-relative velocity and acceleration definitions
+2-103,Equations of Motion,2-37,66,visually_verified,Grouped inertial acceleration terms
+2-104,Equations of Motion,2-37,66,visually_verified,Inertial and earth-fixed acceleration relationship
+2-105,Equations of Motion,2-37,66,visually_verified,Earth-fixed rotating-earth equation of motion
+2-106,Equations of Motion,2-37,66,visually_verified,First-order equations of motion
+2-107,Numerical Integration,2-38,67,visually_verified,Six-component ECFC state vector
+2-108,Numerical Integration,2-38,67,visually_verified,State derivative vector
+2-109,Numerical Integration,2-38,67,visually_verified,ECFC x acceleration component
+2-110,Numerical Integration,2-38,67,visually_verified,ECFC y acceleration component
+2-111,Numerical Integration,2-38,67,visually_verified,ECFC z acceleration component
+2-112,Numerical Integration,2-38,67,visually_verified,Earth spin-rate magnitude
+2-113,Numerical Integration,2-39,68,visually_verified,Augmented integration state and derivative vectors
+2-114,Numerical Integration,2-40,69,visually_verified,Fourth-order Runge-Kutta update
+2-115,Numerical Integration,2-40,69,visually_verified,Runge-Kutta first derivative evaluation
+2-116,Numerical Integration,2-40,69,visually_verified,Runge-Kutta second derivative evaluation
+2-117,Numerical Integration,2-40,69,visually_verified,Runge-Kutta third derivative evaluation
+2-118,Numerical Integration,2-40,69,visually_verified,Runge-Kutta fourth derivative evaluation
+2-119,Rail Launches and Sled Tests,2-41,70,visually_verified,Rail-constrained ECFC acceleration components
+2-120,Rail Launches and Sled Tests,2-41,70,visually_verified,Acceleration magnitude along the rail
+2-121,Rail Launches and Sled Tests,2-41,70,visually_verified,Acceleration loss from rail friction
+2-122,Rail Launches and Sled Tests,2-41,70,visually_verified,Acceleration normal to the rail
+2-123,Longitude Latitude and Altitude Rates,2-42,71,visually_verified,Sine of longitude
+2-124,Longitude Latitude and Altitude Rates,2-42,71,visually_verified,Cosine of longitude
+2-125,Longitude Latitude and Altitude Rates,2-42,71,visually_verified,Longitude inverse-tangent definition
+2-126,Longitude Latitude and Altitude Rates,2-42,71,visually_verified,Longitude rate in ECFC components
+2-127,Longitude Latitude and Altitude Rates,2-42,71,visually_verified,Longitude rate in unit-vector form
+2-128,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,Geocentric latitude rate
+2-129,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,Starting identity for geodetic latitude rate
+2-130,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,Differentiated geodetic latitude identity
+2-131,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,General geodetic latitude-rate solution
+2-132,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,Equatorial projection definition for rate derivation
+2-133,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,Equatorial projection rate
+2-134,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,ECFC z-position rate
+2-135,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,Altitude rate
+2-136,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,Geodetic latitude rate using the ellipsoid normal radius
+2-137,Longitude Latitude and Altitude Rates,2-43,72,visually_verified,Final geodetic latitude-rate expression
+2-138,Longitude Latitude and Altitude Rates,2-44,73,visually_verified,Altitude acceleration
+2-139,Longitude Latitude and Altitude Rates,2-44,73,visually_verified,Derivative definition for the geodetic down unit vector
+2-140,Longitude Latitude and Altitude Rates,2-44,73,visually_verified,Expanded geodetic down-unit-vector derivative
+2-141,Longitude Latitude and Altitude Rates,2-44,73,visually_verified,Dynamic-pressure definition used for rates
+2-142,Longitude Latitude and Altitude Rates,2-44,73,visually_verified,Approximated dynamic-pressure second derivative
+2-143,Longitude Latitude and Altitude Rates,2-44,73,visually_verified,Atmospheric-density rate
+2-144,Longitude Latitude and Altitude Rates,2-44,73,visually_verified,Approximated atmospheric-density second derivative
+2-145,Longitude Latitude and Altitude Rates,2-45,74,visually_verified,Mach-number definition
+2-146,Longitude Latitude and Altitude Rates,2-45,74,visually_verified,Mach-number rate
+2-147,Longitude Latitude and Altitude Rates,2-45,74,visually_verified,Speed-of-sound rate
+2-148,Ground Speed and Range,2-46,75,visually_verified,Ground-speed vector definition
+2-149,Ground Speed and Range,2-46,75,visually_verified,Surface-point relative velocity as an altitude-vector derivative
+2-150,Ground Speed and Range,2-46,75,visually_verified,Expanded surface-point relative velocity
+2-151,Ground Speed and Range,2-46,75,visually_verified,Ground-speed vector in geodetic components
+2-152,Ground Speed and Range,2-46,75,visually_verified,Ground-speed vector from flight-path angles
+2-153,Flight Path Angle Rates,2-47,76,visually_verified,Velocity-frame angular-velocity sum
+2-154,Flight Path Angle Rates,2-47,76,visually_verified,ECFC-to-geodetic angular velocity
+2-155,Flight Path Angle Rates,2-47,76,visually_verified,Geodetic-to-velocity angular velocity
+2-156,Flight Path Angle Rates,2-47,76,visually_verified,Expanded velocity-frame angular velocity
+2-157,Flight Path Angle Rates,2-47,76,visually_verified,Velocity-frame angular velocity y component
+2-158,Flight Path Angle Rates,2-47,76,visually_verified,Heading term orthogonality
+2-159,Flight Path Angle Rates,2-48,77,visually_verified,Simplified velocity-frame y angular-rate component
+2-160,Flight Path Angle Rates,2-48,77,visually_verified,Velocity-frame angular velocity z component
+2-161,Flight Path Angle Rates,2-48,77,visually_verified,Simplified velocity-frame z angular-rate component
+2-162,Flight Path Angle Rates,2-48,77,visually_verified,Earth-fixed acceleration from velocity-frame differentiation
+2-163,Flight Path Angle Rates,2-48,77,visually_verified,Speed rate from acceleration
+2-164,Flight Path Angle Rates,2-48,77,visually_verified,Velocity-frame angular-velocity cross product
+2-165,Flight Path Angle Rates,2-48,77,visually_verified,Acceleration decomposition in velocity coordinates
+2-166,Flight Path Angle Rates,2-48,77,visually_verified,Velocity-frame y acceleration component
+2-167,Flight Path Angle Rates,2-48,77,visually_verified,Velocity-frame z angular-rate component from acceleration
+2-168,Flight Path Angle Rates,2-49,78,visually_verified,Velocity-frame z acceleration component
+2-169,Flight Path Angle Rates,2-49,78,visually_verified,Velocity-frame y angular-rate component from acceleration
+2-170,Flight Path Angle Rates,2-49,78,visually_verified,Geodetic vertical flight-path-angle rate
+2-171,Flight Path Angle Rates,2-49,78,visually_verified,Geodetic heading rate
+2-172,Specific Load Factors,2-50,79,visually_verified,Specific-load vector from inertial and gravity acceleration
+2-173,Specific Load Factors,2-50,79,visually_verified,Specific-load vector from aerodynamic and propulsive forces
+2-174,Specific Load Factors,2-50,79,visually_verified,Normal specific-load magnitude
+2-175,Contributions to Acceleration,2-51,80,visually_verified,"Vehicle acceleration with force, Coriolis, and centrifugal contributions"
+2-176,Atmosphere Model,2-52,81,visually_verified,Aerostatic pressure relation
+2-177,Atmosphere Model,2-52,81,visually_verified,Perfect-gas law
+2-178,Atmosphere Model,2-52,81,visually_verified,Constant molecular-temperature gradient within a layer
+2-179,Atmosphere Model,2-53,82,visually_verified,Molecular temperature definition
+2-180,Atmosphere Model,2-53,82,visually_verified,Geopotential altitude integral
+2-181,Atmosphere Model,2-53,82,visually_verified,Inverse-square gravity model for atmosphere calculations
+2-182,Atmosphere Model,2-53,82,visually_verified,Closed-form geopotential altitude
+2-183,Atmosphere Model,2-53,82,visually_verified,Lambert sea-level gravity equation
+2-184,Atmosphere Model,2-53,82,visually_verified,Effective earth radius for geopotential calculations
+2-185,Atmosphere Model,2-54,83,visually_verified,Molecular temperature within an atmosphere layer
+2-186,Atmosphere Model,2-54,83,visually_verified,Molecular weight within an atmosphere layer
+2-187,Atmosphere Model,2-54,83,visually_verified,Atmospheric temperature from molecular temperature
+2-188,Atmosphere Model,2-54,83,visually_verified,Aerostatic relation in geopotential altitude
+2-189,Atmosphere Model,2-54,83,visually_verified,Pressure in terms of molecular temperature
+2-190,Atmosphere Model,2-54,83,visually_verified,Separable pressure differential equation
+2-191,Atmosphere Model,2-54,83,visually_verified,Pressure in an isothermal atmosphere layer
+2-192,Atmosphere Model,2-54,83,visually_verified,Pressure in a nonisothermal atmosphere layer
+2-193,Atmosphere Model,2-55,84,visually_verified,Atmospheric density
+2-194,Atmosphere Model,2-55,84,visually_verified,Speed of sound
+2-195,Atmosphere Model,2-55,84,visually_verified,Kinematic viscosity from Sutherland formula
+2-196,Aerodynamic Forces,2-56,85,visually_verified,Body-frame windward-meridian unit vector
+2-197,Aerodynamic Forces,2-56,85,visually_verified,Aerodynamic force from axial and normal coefficients
+2-198,Aerodynamic Forces,2-57,86,visually_verified,Aerodynamic force from lift drag and side-force coefficients
+2-199,Aerodynamic Forces,2-57,86,visually_verified,Aerodynamic force from body-axis coefficients
+2-200,Propulsive Forces,2-59,88,visually_verified,Body-frame propulsive force vector
+2-201,Gravity Model,2-60,89,visually_verified,Gravity acceleration as geopotential gradient
+2-202,Gravity Model,2-60,89,visually_verified,Full spherical-harmonic geopotential expansion
+2-203,Gravity Model,2-60,89,visually_verified,Point-mass geopotential term
+2-204,Gravity Model,2-60,89,visually_verified,Zonal geopotential using C coefficients
+2-205,Gravity Model,2-61,90,visually_verified,Zonal geopotential using J coefficients
+2-206,Gravity Model,2-61,90,visually_verified,Associated Legendre function definition
+2-207,Gravity Model,2-61,90,visually_verified,Order-zero Legendre function definition
+2-208,Gravity Model,2-61,90,visually_verified,Legendre derivative notation
+2-209,Gravity Model,2-61,90,visually_verified,First four order-zero Legendre functions
+2-210,Gravity Model,2-61,90,visually_verified,Normalized Legendre function
+2-211,Gravity Model,2-62,91,visually_verified,Normalized spherical-harmonic coefficient
+2-212,Gravity Model,2-62,91,visually_verified,Geocentric north gravity component from the geopotential
+2-213,Gravity Model,2-62,91,visually_verified,Geocentric east gravity component from the geopotential
+2-214,Gravity Model,2-62,91,visually_verified,Geocentric inward gravity component from the geopotential
+2-215,Gravity Model,2-62,91,visually_verified,Full spherical-harmonic geocentric north acceleration
+2-216,Gravity Model,2-62,91,visually_verified,Full spherical-harmonic geocentric east acceleration
+2-217,Gravity Model,2-62,91,visually_verified,Full spherical-harmonic geocentric inward acceleration
+2-218,Gravity Model,2-63,92,visually_verified,J2-only geocentric north acceleration
+2-219,Gravity Model,2-63,92,visually_verified,J2-only geocentric east acceleration
+2-220,Gravity Model,2-63,92,visually_verified,J2-only geocentric inward acceleration
+2-221,Ranges and Distances,2-67,96,visually_verified,Sodano inverse ellipsoidal surface distance
+2-222,Ranges and Distances,2-67,96,visually_verified,Sodano auxiliary central angle
+2-223,Ranges and Distances,2-67,96,visually_verified,Sodano inverse auxiliary m
+2-224,Ranges and Distances,2-67,96,visually_verified,Reduced latitude beta1
+2-225,Ranges and Distances,2-67,96,visually_verified,Reduced latitude beta2
+2-226,Ranges and Distances,2-67,96,visually_verified,Sodano forward azimuth
+2-227,Ranges and Distances,2-67,96,visually_verified,Sodano backward azimuth
+2-228,Ranges and Distances,2-68,97,visually_verified,Corrected longitude difference for Sodano inverse method
+2-229,Ranges and Distances,2-68,97,visually_verified,Reduced-latitude difference series
+2-230,Ranges and Distances,2-68,97,visually_verified,Alternative reduced-latitude difference relation
+2-231,Ranges and Distances,2-68,97,visually_verified,Third flattening parameter n
+2-232,Ranges and Distances,2-68,97,visually_verified,Downrange and crossrange perpendicularity condition
+2-233,Ranges and Distances,2-69,98,visually_verified,Newton-Raphson update used for downrange solution
+2-234,Ranges and Distances,2-69,98,visually_verified,Downrange error function
+2-235,Ranges and Distances,2-69,98,visually_verified,Sodano direct angular-distance correction
+2-236,Ranges and Distances,2-69,98,visually_verified,Sodano direct auxiliary m
+2-237,Ranges and Distances,2-69,98,visually_verified,Sodano direct auxiliary n
+2-238,Ranges and Distances,2-69,98,visually_verified,Normalized surface distance xi
+2-239,Ranges and Distances,2-69,98,visually_verified,Printed Sodano eccentricity factor e prime
+2-240,Ranges and Distances,2-70,99,visually_verified,Direct-method geodetic latitude
+2-241,Ranges and Distances,2-70,99,visually_verified,Direct-method sine of reduced latitude beta2
+2-242,Ranges and Distances,2-70,99,visually_verified,Direct-method cosine of reduced latitude beta2
+2-243,Ranges and Distances,2-70,99,visually_verified,Direct-method longitude
+2-244,Ranges and Distances,2-70,99,visually_verified,Direct-method longitude correction l
+2-245,Ranges and Distances,2-70,99,visually_verified,Direct-method backward azimuth
+2-246,Radar Observations,2-71,100,visually_verified,Vehicle position relative to radar station
+2-247,Radar Observations,2-71,100,visually_verified,Radar line-of-sight unit vector
+2-248,Radar Observations,2-71,100,visually_verified,Radar azimuth angle
+2-249,Radar Observations,2-71,100,visually_verified,Radar elevation angle
+2-250,Radar Observations,2-72,101,visually_verified,Radar range rate
+2-251,Radar Observations,2-72,101,visually_verified,Radar range acceleration
+2-252,Radar Observations,2-72,101,visually_verified,Radar line-of-sight unit-vector rate
+2-253,Radar Observations,2-72,101,visually_verified,Radar line-of-sight unit-vector acceleration
+2-254,Radar Observations,2-72,101,visually_verified,Radar azimuth rate
+2-255,Radar Observations,2-72,101,visually_verified,Radar azimuth acceleration
+2-256,Radar Observations,2-72,101,visually_verified,Radar elevation rate
+2-257,Radar Observations,2-72,101,visually_verified,Radar elevation acceleration
+2-258,Radar Observations,2-73,102,visually_verified,Radar aspect-angle sine
+2-259,Radar Observations,2-73,102,visually_verified,Radar aspect-angle cosine
+2-260,Radar Observations,2-73,102,visually_verified,Radar meridional-angle sine
+2-261,Radar Observations,2-73,102,visually_verified,Radar meridional-angle cosine
+2-262,Relative Vehicle Calculations,2-74,103,visually_verified,Relative position of the ith vehicle
+2-263,Relative Vehicle Calculations,2-74,103,visually_verified,Relative line-of-sight unit vector
+2-264,Relative Vehicle Calculations,2-74,103,visually_verified,Relative vehicle azimuth
+2-265,Relative Vehicle Calculations,2-74,103,visually_verified,Relative vehicle elevation
+2-266,Initial Impact Point Calculations,2-75,104,visually_verified,IIP aerodynamic acceleration from drag coefficient and ballistic coefficient
+2-267,Initial Impact Point Calculations,2-75,104,visually_verified,IIP aerodynamic acceleration using ballistic coefficient
+2-268,Initial Impact Point Calculations,2-75,104,visually_verified,IIP aerodynamic acceleration using dynamic pressure
+2-269,Initial Impact Point Calculations,2-75,104,visually_verified,IIP air-relative velocity unit vector
+2-270,Initial Impact Point Calculations,2-75,104,visually_verified,IIP aerodynamic acceleration vector form
+2-271,Aerodynamic Variables,2-77,106,visually_verified,Ballistic coefficient
+2-272,Aerodynamic Variables,2-77,106,visually_verified,Lift-to-drag ratio
+2-273,Control Variable Solution Process,2-82,111,visually_verified,Parabolic desired-state transition
+2-274,Control Variable Solution Process,2-82,111,visually_verified,Derivative of parabolic desired-state transition
+2-275,Control Variable Solution Process,2-83,112,visually_verified,Parabolic transition coefficient a
+2-276,Control Variable Solution Process,2-83,112,visually_verified,Parabolic transition coefficient b
+2-277,Control Variable Solution Process,2-83,112,visually_verified,Cubic desired-state transition
+2-278,Control Variable Solution Process,2-83,112,visually_verified,Second derivative of cubic transition
+2-279,Control Variable Solution Process,2-83,112,visually_verified,Cubic transition coefficient b
+2-280,Control Variable Solution Process,2-84,113,visually_verified,Cubic transition coefficient a
+2-281,Control Variable Solution Process,2-84,113,visually_verified,Multidimensional Newton-Raphson update
+2-282,Control Variable Solution Process,2-84,113,visually_verified,Guidance residual Jacobian matrix
+2-283,Control Variable Solution Process,2-84,113,visually_verified,Gaussian-elimination linear system
+2-284,Intercepts and Proportional Navigation,2-85,114,visually_verified,Nonaccelerating intercept position equality
+2-285,Intercepts and Proportional Navigation,2-85,114,visually_verified,Estimated time to intercept
+2-286,Intercepts and Proportional Navigation,2-85,114,visually_verified,Predicted intercept point
+2-287,Intercepts and Proportional Navigation,2-87,116,visually_verified,Line-of-sight yaw angle
+2-288,Intercepts and Proportional Navigation,2-87,116,visually_verified,Line-of-sight pitch angle
+2-289,Intercepts and Proportional Navigation,2-87,116,visually_verified,Line-of-sight yaw rate
+2-290,Intercepts and Proportional Navigation,2-87,116,visually_verified,Line-of-sight pitch rate
+2-291,Intercepts and Proportional Navigation,2-87,116,visually_verified,Proportional-navigation yaw acceleration
+2-292,Intercepts and Proportional Navigation,2-87,116,visually_verified,Proportional-navigation pitch acceleration
+2-293,Intercepts and Proportional Navigation,2-87,116,visually_verified,Closure velocity
+2-294,Intercepts and Proportional Navigation,2-87,116,visually_verified,First printed line-of-sight rotation matrix
+2-295,Intercepts and Proportional Navigation,2-87,116,visually_verified,Second printed line-of-sight rotation matrix
+2-296,Intercepts and Proportional Navigation,2-88,117,visually_verified,Transposed line-of-sight to ECFC acceleration matrix
+2-297,Intercepts and Proportional Navigation,2-88,117,visually_verified,Commanded ECFC acceleration components
+2-298,Search Methods,2-98,127,visually_verified,Newton-Raphson local linearization
+2-299,Search Methods,2-98,127,visually_verified,Newton-Raphson root update
+2-300,Search Methods,2-99,128,visually_verified,Secant root estimate
+2-301,Search Methods,2-99,128,visually_verified,Parabolic search polynomial
+2-302,Search Methods,2-100,129,visually_verified,Parabolic interpolation coefficient b
+2-303,Search Methods,2-100,129,visually_verified,Parabolic interpolation coefficient a
+2-304,Search Methods,2-100,129,visually_verified,Parabolic interpolation coefficient c
+2-305,Search Methods,2-100,129,visually_verified,Roots of the fitted parabola
+2-306,Search Methods,2-101,130,visually_verified,First golden-section interior point
+2-307,Search Methods,2-101,130,visually_verified,Second golden-section interior point
+2-308,Search Methods,2-101,130,visually_verified,Stationary point of a parabola
+2-309,Optimization,2-102,131,visually_verified,General nonlinear programming problem
+2-310,Optimization,2-102,131,visually_verified,Active-set equality-constrained problem
+2-311,Optimization,2-102,131,visually_verified,Quadratic approximation to the objective
+2-312,Optimization,2-102,131,visually_verified,Linearized constraints
+2-313,Optimization,2-103,132,visually_verified,Variable-metric quadratic subproblem
+2-314,Optimization,2-104,133,visually_verified,Path-integrated maximum-altitude violation
+2-315,Optimization,2-104,133,visually_verified,Printed maximum-altitude optimization constraint

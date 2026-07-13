@@ -1,0 +1,28 @@
+acceleration_state_variables:
+  atmosphere:
+    - {name: temp, symbol: T, quantity: temperature, description: Atmospheric temperature}
+    - {name: pres, symbol: p, quantity: pressure, description: Atmospheric pressure}
+    - {name: rho, symbol: rho, quantity: density, description: Atmospheric density}
+    - {name: sndspd, symbol: c, quantity: speed, description: Speed of sound}
+    - {name: nu, symbol: nu, quantity: kinematic_viscosity, description: Atmospheric kinematic viscosity}
+  aerodynamic_state:
+    - {name: dynprs, symbol: q, quantity: pressure, description: Dynamic pressure}
+    - {name: mach, symbol: M, quantity: dimensionless, description: Mach number}
+    - {name: reypft, symbol: RN, quantity: inverse_length, description: Reynolds number per unit length}
+  aerodynamic_coefficients:
+    - {name: ca, symbol: CA, quantity: dimensionless, description: Axial aerodynamic force coefficient}
+    - {name: cn, symbol: CN, quantity: dimensionless, description: Normal aerodynamic force coefficient}
+    - {name: cl, symbol: CL, quantity: dimensionless, description: Total aerodynamic lift coefficient}
+    - {name: cd, symbol: CD, quantity: dimensionless, description: Total aerodynamic drag coefficient}
+    - {name: cs, symbol: CS, quantity: dimensionless, description: Total aerodynamic side-force coefficient}
+    - {name: cx, symbol: CX, quantity: dimensionless, description: Body x-axis aerodynamic force coefficient}
+    - {name: cy, symbol: CY, quantity: dimensionless, description: Body y-axis aerodynamic force coefficient}
+    - {name: cz, symbol: CZ, quantity: dimensionless, description: Body z-axis aerodynamic force coefficient}
+  propulsion:
+    - {name: thrust, symbol: norm_F_prop, quantity: force, description: Total thrust-vector magnitude}
+    - {name: ep1, symbol: epsilon1, quantity: angle, description: Thrust vector angle 1}
+    - {name: ep2, symbol: epsilon2, quantity: angle, description: Thrust vector angle 2}
+internal_quantities:
+  atmosphere: [molecular_temperature, molecular_weight, geopotential_altitude, effective_geopotential_earth_radius]
+  aerodynamics: [windward_meridian_unit_vector, aerodynamic_reference_area]
+  gravity: [geopotential, associated_legendre_functions, normalized_harmonic_coefficients]

@@ -1,0 +1,17 @@
+\begin{tikzpicture}[scale=1.02,>=Latex,line cap=round,line join=round]
+  \coordinate (O) at (0,0);
+  \coordinate (V) at (1.15,2.65);
+  \coordinate (H) at (1.75,0.62);
+  \draw[->,line width=0.9pt] (O) -- (-1.75,1.90) node[above left] {$\hat{x}_{gc}$};
+  \draw[->,line width=0.9pt] (O) -- (3.00,0) node[right] {$\hat{y}_{gc}$};
+  \draw[->,line width=0.9pt] (O) -- (0,-1.60) node[below] {$\hat{z}_{gc}$};
+  \draw[->,line width=1.05pt] (O) -- (V) node[above left] {$\vec V_{\oplus}$};
+  \draw[line width=0.85pt] (O) -- (H);
+  \draw[dashed] (V) -- (H);
+  \node[align=left,right] at (2.12,1.40) {Projection of $\vec V_{\oplus}$\\onto $\hat{x}_{gc}\hat{y}_{gc}$ plane};
+  \draw[->] (0.75,0.27) arc[start angle=20,end angle=67,radius=0.82];
+  \node at (1.08,0.95) {$\gamma_{gc}$};
+  \draw[->] (-0.32,0.48) arc[start angle=124,end angle=28,radius=0.58];
+  \node at (0.10,0.73) {$\psi_{gc}$};
+  \node[below left] at (O) {Vehicle};
+\end{tikzpicture}

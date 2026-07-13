@@ -1,0 +1,33 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,font=\sffamily\scriptsize]
+  \coordinate (s0) at (0,0);
+  \coordinate (s1) at (1.25,1.50);
+  \coordinate (s2) at (2.10,2.55);
+  \coordinate (s3) at (5.35,2.55);
+  \coordinate (s4) at (6.40,2.55);
+  \coordinate (s5) at (5.80,1.70);
+  \coordinate (s6) at (6.80,1.50);
+  \coordinate (s7) at (8.85,0.00);
+
+  \draw[line width=1.15pt] (s0)
+    .. controls (0.25,0.65) and (0.75,1.10) .. (s1)
+    .. controls (1.45,2.10) and (1.75,2.45) .. (s2)
+    -- (s3)
+    .. controls (6.55,2.55) and (6.95,2.95) .. (s4)
+    .. controls (6.55,2.10) and (6.10,1.75) .. (s5)
+    .. controls (6.25,1.30) and (6.55,1.35) .. (s6)
+    .. controls (7.55,1.20) and (8.25,0.60) .. (s7);
+
+  \foreach \p in {s1,s2,s3,s4,s5,s6}{\fill (\p) circle (2.2pt);}
+  \draw[->,line width=0.9pt] (-0.55,-0.35)--(0.05,0.15);
+  \draw[->,line width=0.9pt] (9.35,-0.35)--(8.85,0.05);
+
+  \node[align=left,below left] at (-0.45,-0.15) {Beginning of\\trajectory};
+  \node[align=left,left] at (0.85,1.12) {Segment 1\\Constant flight-\\path-angle climb};
+  \node[align=left,above] at (1.65,2.75) {Segment 2\\Constant-angle-of-\\attack pushover};
+  \node[align=center,above] at (3.75,2.60) {Segment 3\\Level flight};
+  \node[align=left,above] at (6.65,2.80) {Segment 4\\Level turn};
+  \node[align=left,below] at (5.05,1.45) {Segment 5\\Level turn in the\\other direction};
+  \node[align=left,right] at (6.95,1.85) {Segment 6\\Constant-$g$\\pushover};
+  \node[align=left,right] at (8.05,0.65) {Segment 7\\Ballistic descent};
+  \node[align=right,below right] at (9.40,-0.10) {End of\\trajectory};
+\end{tikzpicture}

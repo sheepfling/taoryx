@@ -1,0 +1,106 @@
+\subsection{\problemblock{*Aero} Data Block}\label{sec:block-aero}
+
+The \problemblock{*aero} data block is used to define the aerodynamic
+coefficients. It is optional; if it is not input, all aerodynamic coefficients are set
+to zero. If more than one \problemblock{*aero} data block is input in a segment,
+the aerodynamic forces are computed for each \problemblock{*aero} data block and
+then added together.
+
+There are three different sets of aerodynamic coefficients that can be input: the
+axial and normal force coefficients ($C_A$ and $C_N$), the lift, drag, and side-force
+coefficients ($C_L$, $C_D$, and $C_S$), and the body $x$-, $y$-, and $z$-axis force
+coefficients ($C_X$, $C_Y$, and $C_Z$). The aerodynamic coefficients are defined
+in \cref{sec:aerodynamic-forces}.
+
+Within each \problemblock{*aero} data block, a consistent set of aerodynamic
+coefficients must be input. Coefficients from different sets cannot be mixed. For
+example, $C_L$ and $C_D$ are in the same set, so they form a valid set of
+coefficients, whereas $C_L$ and $C_A$ are not in the same set, so they cannot be
+used together.
+
+If a segment has more than one \problemblock{*aero} block, it is recommended
+that all of them use the same type of aerodynamic coefficients. If this is done, then
+all of the output aerodynamic coefficients are the sum of the coefficients from each
+\problemblock{*aero} block. Otherwise, the forces used to compute the trajectory
+are correct, but only the $C_L$, $C_D$, and $C_S$ output coefficients are correctly
+totaled.
+
+\taossubhead{Constant Coefficients}
+
+Aerodynamic coefficients can be input either as constants or as tables. Constant
+values are input by giving the coefficient name and its value as follows:
+
+\begin{lstlisting}[style=taosmanual]
+*aero ca=0.0215 cn=0.118 sref=5.437
+\end{lstlisting}
+
+This data block defines the axisymmetric coefficients $C_A$ and $C_N$. These
+values are constant for the duration of the segment.
+
+Besides the aerodynamic coefficient values, a value has been given for the reference
+area $S_{\mathrm{ref}}$. The reference area is used to compute the aerodynamic
+forces from the coefficients and it has default units of \si{\square\foot}. It is
+required when all coefficients are set to constants; when tables are used, the
+reference area can be given in one of the tables.
+
+When a reference area is specified in the \problemblock{*aero} data block, it
+overrides values given in tables. When multiple \problemblock{*aero} blocks are
+given or when aerodynamic tables contain different values of $S_{\mathrm{ref}}$,
+\statevar{sref} should not be given in the \problemblock{*aero} data block.
+
+\taossubhead{Aerodynamic Tables}
+
+Aerodynamic coefficients can also be given in tables by setting the coefficient names
+equal to a table identification name enclosed in parentheses. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*aero ca=(ca-clean) cn=(cn-clean)
+\end{lstlisting}
+
+requests a table called \tableid{ca-clean} for the axial-force coefficient and a table
+called \tableid{cn-clean} for the normal-force coefficient.
+
+Tables can be used for some coefficients while others can be set to constants. In the
+following example, the lift coefficient is set to a table name and the drag coefficient
+is set to a constant:
+
+\begin{lstlisting}[style=taosmanual]
+*aero cl=(lift-x) cd=0.2351
+\end{lstlisting}
+
+The side-force coefficient is not given, so it is set to zero. The reference area is not
+given either, so it must be provided in the \tableid{lift-x} table.
+
+\taossubhead{User-Defined Variables}
+
+Tables can be functions of user-defined variables as shown in
+\cref{sec:table-user-defined-variables}. If user-defined variables are
+referenced in a table, then values for them must be given in the problem file.
+
+One place values can be given for user-defined variables is in the
+\problemblock{*aero} data block. Although values can be given for any user-defined
+variable within this data block, usually values are only given for the user-defined
+variables in the aerodynamic tables. Values for other user-defined variables are
+given in the data blocks where they are referenced. This way the table name and its
+user-defined variables are given together in the problem file. Another method is to
+give values for the user-defined variables in a \problemblock{*constants} data block
+(\cref{sec:block-constants}).
+
+Once a value has been given for a user-defined variable, it remains set at that value
+unless changed in a subsequent data block. This means that values for user-defined
+variables do not have to be repeated within each segment if they do not change.
+However, it is good practice to provide values in each segment to avoid input errors.
+
+The following \problemblock{*aero} data block defines values for two user-defined
+variables:
+
+\begin{lstlisting}[style=taosmanual]
+*aero cd=(drg-model) cl=(lft-model)
+  flaps=25, gear=0, sref=225.0
+\end{lstlisting}
+
+This block provides table names for $C_L$ and $C_D$, and it sets the reference area
+to \SI{225}{\square\foot}. It also provides values for two user-defined variables:
+\texttt{flaps} and \texttt{gear}. These variables must appear in the tables;
+arbitrary variable names that never appear in a table cannot be input. These
+variables could be flags in the table used for flap deflection and gear up or down.

@@ -1,0 +1,133 @@
+% Source PDF pages 65--66; manual pages 2-36--2-37.
+\section{Equations of Motion}\label{sec:equations-of-motion}
+
+The equations of motion are derived from Newton's second law applied to a point
+mass:
+\begin{equation}
+  \vec a_I=\frac{\sum\vec F}{m}.
+  \label{eq:newton-point-mass}
+\end{equation}
+This equation defines acceleration in an inertial coordinate system. For trajectory
+analysis it is more convenient to express acceleration in the earth-fixed system,
+$\vec a_{\oplus}$. The earth-fixed system rotates relative to the inertial system at
+the earth spin rate ${}_{I}\vec\omega_{\oplus}$.
+
+In inertial coordinates, acceleration is the second derivative of the vehicle position
+vector:
+\begin{equation}
+  \vec a_I
+  ={}^{I}\!\frac{d^2\vec r}{dt^2}
+  ={}^{I}\!\frac{d}{dt}
+    \left({}^{I}\!\frac{d\vec r}{dt}\right).
+  \label{eq:inertial-position-second-derivative}
+\end{equation}
+Here ${}^{I}d/dt$ denotes differentiation with respect to inertial coordinates. If
+the inner derivative is evaluated relative to the rotating earth-fixed frame, the
+transport theorem gives
+\begin{equation}
+  \vec a_I
+  ={}^{I}\!\frac{d}{dt}
+    \left[
+      {}^{\oplus}\!\frac{d\vec r}{dt}
+      +\left({}_{I}\vec\omega_{\oplus}\times\vec r\right)
+    \right].
+  \label{eq:inertial-derivative-earth-fixed-inner}
+\end{equation}
+The notation ${}^{\oplus}d/dt$ denotes differentiation with respect to earth-fixed
+coordinates. Differentiating the outer derivative in the same rotating frame gives
+\begin{equation}
+  \begin{aligned}
+  \vec a_I={}&
+  {}^{\oplus}\!\frac{d}{dt}
+    \left[
+      {}^{\oplus}\!\frac{d\vec r}{dt}
+      +{}_{I}\vec\omega_{\oplus}\times\vec r
+    \right]\\
+  &+{}_{I}\vec\omega_{\oplus}\times
+    \left[
+      {}^{\oplus}\!\frac{d\vec r}{dt}
+      +{}_{I}\vec\omega_{\oplus}\times\vec r
+    \right].
+  \end{aligned}
+  \label{eq:transport-theorem-expanded}
+\end{equation}
+Expanding the derivatives results in
+\begin{equation}
+  \begin{aligned}
+  \vec a_I={}&
+  \left[
+    {}^{\oplus}\!\frac{d^2\vec r}{dt^2}
+    +\frac{d\,{}_{I}\vec\omega_{\oplus}}{dt}\times\vec r
+    +{}_{I}\vec\omega_{\oplus}\times
+      {}^{\oplus}\!\frac{d\vec r}{dt}
+  \right]\\
+  &+{}_{I}\vec\omega_{\oplus}\times
+      {}^{\oplus}\!\frac{d\vec r}{dt}
+   +{}_{I}\vec\omega_{\oplus}\times
+      \left({}_{I}\vec\omega_{\oplus}\times\vec r\right).
+  \end{aligned}
+  \label{eq:inertial-acceleration-expanded}
+\end{equation}
+The derivative of the earth spin rate is zero because
+${}_{I}\vec\omega_{\oplus}$ is constant. The notation is simplified with
+\begin{equation}
+  \vec V_{\oplus}
+    ={}^{\oplus}\!\frac{d\vec r}{dt},
+  \qquad
+  \vec a_{\oplus}
+    ={}^{\oplus}\!\frac{d^2\vec r}{dt^2}.
+  \label{eq:earth-relative-velocity-acceleration-definitions}
+\end{equation}
+Substitution gives
+\begin{equation}
+  \begin{aligned}
+  \vec a_I={}&
+    \left[
+      \vec a_{\oplus}
+      +{}_{I}\vec\omega_{\oplus}\times\vec V_{\oplus}
+    \right]\\
+    &+\left[
+      {}_{I}\vec\omega_{\oplus}\times\vec V_{\oplus}
+      +{}_{I}\vec\omega_{\oplus}\times
+        \left({}_{I}\vec\omega_{\oplus}\times\vec r\right)
+    \right].
+  \end{aligned}
+  \label{eq:inertial-acceleration-grouped}
+\end{equation}
+Combining the two identical Coriolis terms produces
+\begin{equation}
+  \vec a_I
+  =\vec a_{\oplus}
+   +2\left({}_{I}\vec\omega_{\oplus}\times\vec V_{\oplus}\right)
+   +{}_{I}\vec\omega_{\oplus}\times
+      \left({}_{I}\vec\omega_{\oplus}\times\vec r\right).
+  \label{eq:inertial-earth-acceleration-relation}
+\end{equation}
+Finally, combining \cref{eq:newton-point-mass} with
+\cref{eq:inertial-earth-acceleration-relation} gives the earth-fixed equation of
+motion:
+\begin{equation}
+  \vec a_{\oplus}
+  =\frac{\sum\vec F}{m}
+   -2\left({}_{I}\vec\omega_{\oplus}\times\vec V_{\oplus}\right)
+   -{}_{I}\vec\omega_{\oplus}\times
+      \left({}_{I}\vec\omega_{\oplus}\times\vec r\right).
+  \label{eq:earth-fixed-equation-of-motion}
+\end{equation}
+This second-order differential equation can be written as the following pair of
+first-order equations:
+\begin{equation}
+  \begin{aligned}
+    \dot{\vec r}_{\oplus}&=\vec V_{\oplus},\\[0.3em]
+    \dot{\vec V}_{\oplus}
+      &=\frac{\sum\vec F}{m}
+       -2\left({}_{I}\vec\omega_{\oplus}\times\vec V_{\oplus}\right)
+       -{}_{I}\vec\omega_{\oplus}\times
+          \left({}_{I}\vec\omega_{\oplus}\times\vec r\right).
+  \end{aligned}
+  \label{eq:first-order-equations-of-motion}
+\end{equation}
+Given an initial position $\vec r$, an earth-relative velocity
+$\vec V_{\oplus}$, an initial time $t_0$, the vehicle mass $m$, and the forces
+$\sum\vec F$, these equations can be integrated with respect to time to obtain a
+trajectory. The associated integration functions are in the \texttt{derivs} module.

@@ -1,0 +1,18 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,scale=0.86]
+  % Simplified slender vehicle.
+  \draw[line width=0.9pt,rotate=18] (-3.2,-0.32) -- (2.5,-0.32)
+    -- (3.0,0) -- (2.5,0.32) -- (-3.2,0.32)
+    .. controls (-3.65,0.22) and (-3.65,-0.22) .. cycle;
+  \draw[line width=0.8pt,rotate=18] (1.65,0.32) -- (2.15,1.05) -- (2.45,0.38);
+  \draw[line width=0.8pt,rotate=18] (1.65,-0.32) -- (2.15,-1.05) -- (2.45,-0.38);
+  \coordinate (cg) at (0,0);
+  \draw[->,line width=1.05pt] (cg) -- (4.0,1.10)
+    node[right,align=left] {$\displaystyle\vec a_{\mathrm{aero}}=
+      \frac{\sum\vec F_{\mathrm{aero}}}{m}$};
+  \draw[->,line width=1.05pt] (cg) -- (-3.3,-1.55)
+    node[left,align=right] {$\displaystyle\vec a_{\mathrm{prop}}=
+      \frac{\sum\vec F_{\mathrm{prop}}}{m}$};
+  \draw[->,line width=1.05pt] (cg) -- (0,-2.05)
+    node[right,align=left] {$\displaystyle\vec a_{\mathrm{grav}}=
+      \frac{\sum\vec F_{\mathrm{grav}}}{m}$};
+\end{tikzpicture}

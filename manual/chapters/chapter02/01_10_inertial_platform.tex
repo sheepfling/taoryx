@@ -1,0 +1,48 @@
+% Source PDF page 61; manual page 2-32.
+\subsection{Inertial Platform Cartesian Coordinate System}\label{sec:inertial-platform}
+
+An inertial-platform coordinate system can be defined at any point in a trajectory.
+Its origin is at the vehicle's center of mass, and at a selected time its axes may be
+aligned with any of the other coordinate systems. By default, the system is aligned
+with the local geodetic horizon system at the beginning of the trajectory, so that
+$\hat x_p=\hat x_{gd}$, $\hat y_p=\hat y_{gd}$, and
+$\hat z_p=\hat z_{gd}$ at initialization. Once aligned, the platform remains fixed
+in inertial space until the user realigns it through the
+\problemblock{*inertial} data block described in \cref{sec:block-inertial}.
+
+The function \texttt{inertial\_platform\_coords} computes position, inertial
+velocity, and inertial acceleration relative to the platform. Let $\vec r_p$ be the
+vector from the earth's center to the platform origin.
+
+\taossubhead{Position}
+
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.25\textwidth}p{0.50\textwidth}@{}}
+  xip & $(\vec r-\vec r_p)\mathbin{\cdot}\hat x_p$ &
+    Position relative to the inertial platform in the $x$ direction.\\
+  yip & $(\vec r-\vec r_p)\mathbin{\cdot}\hat y_p$ &
+    Position relative to the inertial platform in the $y$ direction.\\
+  zip & $(\vec r-\vec r_p)\mathbin{\cdot}\hat z_p$ &
+    Position relative to the inertial platform in the $z$ direction.\\
+\end{longtable}
+
+\taossubhead{Velocity}
+
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.25\textwidth}p{0.50\textwidth}@{}}
+  xipdt & $\vec V_I\mathbin{\cdot}\hat x_p$ &
+    Inertial velocity component in the platform $x$ direction.\\
+  yipdt & $\vec V_I\mathbin{\cdot}\hat y_p$ &
+    Inertial velocity component in the platform $y$ direction.\\
+  zipdt & $\vec V_I\mathbin{\cdot}\hat z_p$ &
+    Inertial velocity component in the platform $z$ direction.\\
+\end{longtable}
+
+\taossubhead{Acceleration}
+
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.25\textwidth}p{0.50\textwidth}@{}}
+  xipdt2 & $\vec a_I\mathbin{\cdot}\hat x_p$ &
+    Inertial acceleration component in the platform $x$ direction.\\
+  yipdt2 & $\vec a_I\mathbin{\cdot}\hat y_p$ &
+    Inertial acceleration component in the platform $y$ direction.\\
+  zipdt2 & $\vec a_I\mathbin{\cdot}\hat z_p$ &
+    Inertial acceleration component in the platform $z$ direction.\\
+\end{longtable}

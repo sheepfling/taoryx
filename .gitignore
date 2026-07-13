@@ -118,6 +118,8 @@ ipython_config.py
 .pdm-build/
 
 # pixi
+/INBOX/
+/qa/
 #   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
 # pixi.lock
 #   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
@@ -216,3 +218,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+.DS_Store
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+dist/
+build/
+TAOS_manual_1995.pdf
+assets/source_pages/

@@ -1,0 +1,17 @@
+\begin{tikzpicture}[scale=0.95,>=Latex,line cap=round,line join=round]
+  \coordinate (O) at (0,0);
+  \draw[->] (O)--(-2.50,0) node[left] {$\hat{y}_b$};
+  \draw[->] (O)--(0,-2.50) node[below] {$\hat{z}_b$};
+  \draw[->,line width=1pt] (O)--(-1.65,-1.75) node[below left] {$\hat{x}_w$};
+  \draw[->,line width=1pt] (O)--(1.65,-1.75) node[below right] {$\hat{x}_w$};
+  \draw[->] (-0.95,-1.35) arc[start angle=-130,end angle=-92,radius=0.75];
+  \draw[->] (0.95,-1.35) arc[start angle=-50,end angle=-88,radius=0.75];
+  \node at (-0.85,-1.80) {$+\beta$};
+  \node at (0.85,-1.80) {$-\beta$};
+  \draw[->] (2.2,-0.02)--(2.2,1.20);
+  \draw[->] (2.2,-0.02)--(2.2,-1.20);
+  \node[right] at (2.25,1.15) {$\alpha=-90^{\circ}$};
+  \node[right] at (2.25,0) {$\alpha=0^{\circ}$};
+  \node[right] at (2.25,-1.15) {$\alpha=+90^{\circ}$};
+  \node[align=left] at (-1.95,1.30) {Angle of attack and sideslip when\\$\hat{x}_w\cdot\hat{x}_b=0$};
+\end{tikzpicture}

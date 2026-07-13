@@ -1,0 +1,66 @@
+chapter: 2
+section: 2.4
+name: Output Variables
+source:
+  manual_pages: [2-64, 2-65, 2-66, 2-67, 2-68, 2-69, 2-70, 2-71, 2-72, 2-73, 2-74, 2-75, 2-76, 2-77]
+  pdf_pages: [93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106]
+  numbered_equations: [2-221, 2-272]
+  numbered_figures: [2-18, 2-24]
+evaluation:
+  policy: on_demand
+  triggers:
+    - listed as a print variable
+    - referenced by a segment final condition
+    - referenced elsewhere in a problem file
+ranges_and_distances:
+  east_north:
+    geometry: lines of constant latitude and longitude
+    intended_use: short-range trajectories where earth curvature is negligible
+  geodesic_algorithm:
+    name: Sodano inverse method
+    implementation_function: sodano_inverse
+    properties: [noniterative, short_range, long_range]
+    inputs: [longitude_1, geodetic_latitude_1, longitude_2, geodetic_latitude_2]
+    outputs: [surface_distance, forward_azimuth, backward_azimuth]
+  downrange_crossrange:
+    search: Newton-Raphson
+    error_function: pi_over_2_minus_absolute_azimuth_difference
+    direct_method_function: sodano_direct
+radar:
+  station_frame: local_geodetic_horizon
+  implementation_function: radar_out
+  observables:
+    - range
+    - range_rate
+    - range_acceleration
+    - azimuth
+    - azimuth_rate
+    - azimuth_acceleration
+    - elevation
+    - elevation_rate
+    - elevation_acceleration
+    - aspect
+    - meridional_angle
+relative_vehicle:
+  frame: current_vehicle_body
+  implementation_function: vehicle_obs
+  rates_in_body_frame: not_computed
+  reason: guidance-defined body attitude may change instantaneously
+initial_impact_point:
+  purpose: range_safety_estimate_after_propulsion_failure
+  propulsion: disabled
+  aerodynamics: constant_ballistic_coefficient_drag_model
+  gravity: selected_taos_gravity_model
+  integration:
+    method: Fehlberg adaptive Runge-Kutta 4/5
+    step_bounds_seconds: [0.5, 60]
+    error_bounds_feet: [0.001, 0.01]
+    typical_step_seconds: [10, 20]
+  functions: [iip_calc, iip_derivs, iip_out]
+  range_reference: tangent_plane_origin
+aerodynamic_derived_variables:
+  ballistic_coefficient: W_divided_by_CD_Sref
+  lift_to_drag: CL_divided_by_CD
+  maximum_lift_to_drag_search:
+    method: golden_section
+    implementation_function: maxld

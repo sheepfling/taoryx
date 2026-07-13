@@ -1,0 +1,14 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,scale=0.78]
+  \foreach \y in {0,1.2,2.4}{\draw[densely dashed] (-3.6,\y)--(4.0,\y);}
+  \foreach \x in {-2.4,-1.2,0,1.2,2.4,3.6}{\draw[densely dashed] (\x,-0.5)--(\x,3.0);}
+  \coordinate (o) at (-1.2,0.6);
+  \coordinate (v) at (2.4,2.4);
+  \fill (o) circle (2.4pt) node[below left,align=center] {reference\\point};
+  \fill (v) circle (2.4pt) node[right] {vehicle};
+  \draw[->,very thick] (o)--(3.2,0.6) node[midway,below] {east axis};
+  \draw[->,very thick] (o)--(-1.2,2.9) node[above] {north axis};
+  \draw[<->,thick] (-1.2,2.4)--(2.4,2.4) node[midway,above] {east};
+  \draw[<->,thick] (2.4,0.6)--(2.4,2.4) node[midway,right] {north};
+  \node[align=left] at (-4.6,2.4) {lines of\\constant latitude};
+  \node at (0.6,-0.85) {lines of constant longitude};
+\end{tikzpicture}

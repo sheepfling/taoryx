@@ -1,0 +1,279 @@
+chapter: 4
+notes:
+- id: chapter4-limits-prop-name
+  source_pdf_page: 191
+  source_manual_page: 4-26
+  section: 4.2.8
+  source_text: prop
+  interpretation: propnav
+  handling: The diplomatic prose retains the source's printed word "prop" and adds a clearly separated note that
+    the guidance-rule name used elsewhere is "propnav".
+- id: chapter4-when-east-example
+  source_pdf_page: 196
+  source_manual_page: 4-31
+  section: 4.2.12
+  source_text: '*when east[2] = east[1] goto 7'
+  prior_reconstruction: '*when east[1] = east[2] goto 8'
+  handling: Restored the source ordering and target segment. The equality is symmetric, but the goto target is not,
+    so this is a substantive source-fidelity correction.
+- id: chapter4-problem-define-identifiers
+  source_pdf_pages:
+  - 217
+  - 218
+  source_manual_pages:
+  - 4-52
+  - 4-53
+  section: 4.4.2
+  source_identifiers:
+  - del_alt
+  - rel_range
+  handling: Underscore identifiers are preserved from the source images. OCR layers that rendered them as hyphens
+    were not followed.
+- id: chapter4-ballistic-output-transcription
+  source_pdf_pages:
+  - 259
+  - 260
+  source_manual_pages:
+  - 4-94
+  - 4-95
+  section: 4.5.1
+  handling: Restored the representative trajectory and summary printouts as semantic text listings. Numeric values
+    are transcribed from the source pages; the historical TAOS executable was not rerun.
+- id: chapter4-ballistic-fixture-separation
+  source_pdf_pages:
+  - 257
+  - 258
+  source_manual_pages:
+  - 4-92
+  - 4-93
+  section: 4.5.1
+  handling: The Version 15 parser fixtures remain byte-for-byte unchanged. Separate .txt listing transcriptions
+    preserve the underscore identifiers printed in the 1995 source for the diplomatic manual text.
+- id: chapter4-v17-example-output-transcriptions
+  source_pdf_pages:
+  - 267
+  - 268
+  - 274
+  - 275
+  - 279
+  - 280
+  source_manual_pages:
+  - 4-102
+  - 4-103
+  - 4-109
+  - 4-110
+  - 4-114
+  - 4-115
+  sections:
+  - 4.5.2
+  - 4.5.3
+  - 4.5.4
+  handling: Historical trajectory printout excerpts were restored as semantic text listings. Numeric values were
+    transcribed from the source pages; TAOS 96.0 was not rerun.
+- id: chapter4-v17-fixture-invariance
+  sections:
+  - 4.5.2
+  - 4.5.3
+  - 4.5.4
+  handling: The Version 15 parser fixtures remain byte-for-byte unchanged. The new .txt files contain only source-faithful
+    historical output transcriptions and are not parser fixtures.
+- id: chapter4-optimize-central-difference
+  source_pdf_page: 232
+  source_manual_page: 4-67
+  section: 4.4.6
+  handling: Equation 4-8 is typeset in its mathematically complete central-difference form. The source OCR layer
+    corrupts the fraction, but the rendered equation and surrounding explanation support the reconstructed form.
+- id: chapter4-optimize-dx-default
+  source_pdf_page: 231
+  source_manual_page: 4-66
+  section: 4.4.6
+  source_value: '1.0e-8'
+  prior_reconstruction: '1.0e-3'
+  handling: Restored the derivative-increment default printed in Table 4-20. The rendered source page clearly gives
+    1.0 x 10^-8.
+- id: chapter4-ground-intercept-first-relative-velocity
+  source_pdf_page: 279
+  source_manual_page: 4-114
+  section: 4.5.4
+  source_value: '-4731.568'
+  ocr_text_layer_value: '-4131.560'
+  handling: The semantic printout follows the visible printed digits rather than the corrupted OCR text layer.
+- id: chapter4-v17-source-listing-separation
+  sections:
+  - 4.5.2
+  - 4.5.3
+  - 4.5.4
+  handling: The manual displays separate .txt transcriptions of the printed problem listings. The established .prb
+    parser fixtures remain byte-for-byte unchanged.
+- id: chapter4-v18-source-normalization
+  source_pdf_pages:
+  - 176
+  - 177
+  - 185
+  - 186
+  - 187
+  - 188
+  - 189
+  - 190
+  - 192
+  - 193
+  - 194
+  - 195
+  - 204
+  - 205
+  - 206
+  - 207
+  - 208
+  - 209
+  - 210
+  - 211
+  - 212
+  - 215
+  - 216
+  - 219
+  - 220
+  - 221
+  - 222
+  - 239
+  - 240
+  - 250
+  - 251
+  - 252
+  - 253
+  - 254
+  - 255
+  sections:
+  - 4.2.2
+  - 4.2.3
+  - 4.2.5
+  - 4.2.6
+  - 4.2.7
+  - 4.2.9
+  - 4.2.10
+  - 4.2.11
+  - 4.3.2
+  - 4.3.3
+  - 4.3.4
+  - 4.3.5
+  - 4.3.6
+  - 4.3.7
+  - 4.4.1
+  - 4.4.3
+  - 4.4.8
+  - 4.4.12
+  - 4.4.13
+  - 4.4.14
+  handling: The diplomatic prose follows the rendered source pages. Obvious OCR corruption, line-break hyphenation,
+    and visibly corrupted identifier spellings are normalized to the canonical TAOS names used by the surrounding
+    tables and examples.
+- id: chapter4-v18-units-table-corrections
+  source_pdf_pages:
+  - 251
+  - 252
+  - 253
+  source_manual_pages:
+  - 4-86
+  - 4-87
+  - 4-88
+  section: 4.4.13
+  handling: The full allowable-unit inventory and formatting rules are restored. The semantic table retains prior
+    verified token and description corrections where the scan or OCR layer is visibly corrupt, while the accompanying
+    prose remains source-near.
+- id: chapter4-v18-fixture-invariance
+  sections:
+  - 4.2.2
+  - 4.2.3
+  - 4.2.5
+  - 4.2.6
+  - 4.2.7
+  - 4.2.9
+  - 4.2.10
+  - 4.2.11
+  - 4.3.2
+  - 4.3.3
+  - 4.3.4
+  - 4.3.5
+  - 4.3.6
+  - 4.3.7
+  - 4.4.1
+  - 4.4.3
+  - 4.4.8
+  - 4.4.12
+  - 4.4.13
+  - 4.4.14
+  handling: All ten Version 15 parser fixtures remain byte-for-byte unchanged. This pass modifies only Chapter 4
+    prose and semantic presentation.
+- id: chapter4-v18-earth-model-table-preservation
+  source_pdf_pages:
+  - 219
+  - 220
+  - 221
+  - 222
+  source_manual_pages:
+  - 4-54
+  - 4-55
+  - 4-56
+  - 4-57
+  section: 4.4.3
+  handling: Existing verified numerical earth-model tables and equations are retained. The pass restores the explanatory
+    model-selection, override, geometry-consistency, and applicability prose without altering the validated constants.
+- id: chapter4-v19-residual-diplomatic-restoration
+  source_pdf_pages:
+  - 166
+  - 167
+  - 168
+  - 169
+  - 170
+  - 171
+  - 172
+  - 173
+  - 178
+  - 179
+  - 180
+  - 181
+  - 182
+  - 183
+  - 184
+  - 198
+  - 199
+  - 213
+  - 214
+  sections:
+  - '4.0'
+  - '4.1'
+  - '4.2'
+  - '4.2.4'
+  - '4.3'
+  - '4.4'
+  handling: Version 19 restores near-source wording in six coherent residual regions after the three ranked diplomatic batches. Line-break hyphenation and obvious OCR corruption are normalized, while equations, tables, semantic cross-references, and established parser fixtures remain unchanged.
+- id: chapter4-v19-ld-max-keyword
+  source_pdf_page: 182
+  source_manual_page: 4-17
+  section: 4.2.4
+  source_value: l/d-max
+  prior_reconstruction: l/d_max
+  handling: The guidance-rule keyword is restored to the hyphenated spelling printed in the source and used by the surrounding TAOS input-language convention.
+- id: chapter4-v19-residual-queue-classification
+  section: Chapter 4
+  handling: Remaining source-sentence matches below the diagnostic score threshold are classified as restored *fly material, table/equation/listing text, OCR damage, layout-sensitive text, or coherent prose review. This triage classification is diagnostic and does not replace manual source inspection.
+- id: chapter4-v19-figure-review
+  source_pdf_pages:
+  - 26
+  - 27
+  - 34
+  - 167
+  figures:
+  - 1-5
+  - 1-6
+  - 2-1
+  - 4-2
+  handling: Four editable figures were revised against the rendered source. Figure 1-5 restores the distinctive file and TAOS application icon geometry; Figure 1-6 restores the historical printout hierarchy and fourteen rows; Figure 2-1 adds source-like graticule and geographic cues; Figure 4-2 restores both the nested-bracket and branching-tree views.
+- id: chapter4-v19-fixture-invariance
+  sections:
+  - '4.0'
+  - '4.1'
+  - '4.2'
+  - '4.2.4'
+  - '4.3'
+  - '4.4'
+  handling: All ten Version 15 .tbl and .prb parser fixtures remain byte-for-byte unchanged. Version 19 modifies only prose, metadata, QA assets, and editable figure sources.

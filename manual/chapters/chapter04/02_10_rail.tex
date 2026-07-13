@@ -1,0 +1,36 @@
+\subsection{\problemblock{*Rail} Data Block}\label{sec:block-rail}
+
+Rail launches and sled tests are special cases because rails constrain the vehicle to
+move in only one direction. For these cases, a \problemblock{*rail} block is used
+instead of \problemblock{*fly} blocks to determine body attitude and trajectory.
+The rail or sled direction is taken from the trajectory initial conditions or from the
+end of the preceding segment, and motion remains constrained in that direction for
+the duration of the segment as described in \cref{sec:rail-launches}.
+
+A rail launch is requested with
+
+\begin{lstlisting}[style=taosmanual]
+*rail launch cfstat=0.15 cfslid=0.01
+\end{lstlisting}
+
+where \statevar{cfstat} is the static coefficient of friction and
+\statevar{cfslid} is the sliding, or kinematic, coefficient. Static friction is used
+while velocity is less than 0.001~ft/s; above that speed the sliding coefficient is
+used. Because of this switch, two segments are often used to simulate a launch: the
+first covers motion from zero to 0.001~ft/s, and the second covers velocities above
+0.001~ft/s. This represents the time required for thrust to overcome static friction
+and begin moving the vehicle.
+
+For a launch rail, TAOS assumes that the missile is attached so that it cannot move
+backward. Negative acceleration in the rail direction is therefore ignored. Path length
+\statevar{plength} can be used as the segment final condition to represent physical
+rail length.
+
+A sled test is requested with
+
+\begin{lstlisting}[style=taosmanual]
+*rail sled cfstat=0.17 cfslid=0.02
+\end{lstlisting}
+
+using the same friction definitions. Negative acceleration is allowed for a sled test
+because the vehicle can accelerate to speed and then slow to a stop.

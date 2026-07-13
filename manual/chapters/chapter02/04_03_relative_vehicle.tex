@@ -1,0 +1,44 @@
+% Source PDF page 103; manual page 2-74.
+\subsection{Relative Vehicle Calculations}\label{sec:relative-vehicle}
+
+When more than one vehicle trajectory is computed, TAOS can express each vehicle's
+position relative to another vehicle. For a selected current vehicle, the other
+vehicle can be described either by relative range, azimuth, and elevation or by its
+$x$, $y$, and $z$ coordinates in the current vehicle's body frame, as shown in
+\cref{fig:relative-vehicle-calculations}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.73\linewidth}{!}{\input{manual/figures/chapter02/fig-2-23}}
+  \caption{Relative vehicle calculations.}
+  \label{fig:relative-vehicle-calculations}
+\end{figure}
+
+The current vehicle's body-frame orientation is supplied by the guidance rules. It is
+an input quantity and may change instantaneously, so TAOS does not compute relative
+rates or accelerations in body coordinates.
+
+The position of the $i$th vehicle relative to the current vehicle is
+\begin{equation}
+  \Delta\vec r_i=\vec r_i-\vec r,
+  \label{eq:relative-vehicle-position}
+\end{equation}
+with associated unit vector
+\begin{equation}
+  \hat u_i=\frac{\Delta\vec r_i}{\lVert\Delta\vec r_i\rVert}.
+  \label{eq:relative-vehicle-unit-vector}
+\end{equation}
+The relative azimuth and elevation are defined by
+\begin{equation}
+  \tan\alpha_i
+  =\frac{\Delta\vec r_i\cdot\hat y_b}
+         {\Delta\vec r_i\cdot\hat x_b},
+  \label{eq:relative-vehicle-azimuth}
+\end{equation}
+\begin{equation}
+  \sin\epsilon_i=-\hat u_i\cdot\hat z_b.
+  \label{eq:relative-vehicle-elevation}
+\end{equation}
+The body-axis relative-position components are obtained directly by projecting
+$\Delta\vec r_i$ onto $\hat x_b$, $\hat y_b$, and $\hat z_b$. The function
+\texttt{vehicle\_obs} in the \texttt{path} module performs these calculations.

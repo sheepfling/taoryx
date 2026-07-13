@@ -1,0 +1,22 @@
+\begin{tikzpicture}[scale=0.92,>=Latex,line cap=round,line join=round]
+  % Stylized vehicle outline, redrawn from the source figure.
+  \draw[line width=0.9pt]
+    (-3.2,0.55) .. controls (-2.35,0.50) and (-1.55,0.32) .. (-0.70,0.08)
+    -- (0.70,-0.28) .. controls (1.15,-0.40) and (1.45,-0.32) .. (1.62,-0.08)
+    .. controls (1.74,0.10) and (1.65,0.28) .. (1.38,0.36)
+    -- (0.55,0.62) -- (0.10,1.10) -- (-0.72,0.88)
+    -- (-1.15,0.45) -- (-2.45,0.78) -- cycle;
+  \draw[line width=0.9pt] (-3.2,0.55) .. controls (-2.45,0.78) and (-1.75,0.65) .. (-0.90,0.30);
+  \draw[line width=0.9pt] (-1.15,0.45) -- (-0.45,-0.22) -- (0.25,-0.38) -- (0.72,-0.28);
+  \draw[line width=0.9pt] (1.38,0.36) -- (1.28,0.92) -- (0.72,1.18) -- (0.10,1.10);
+  \draw[line width=0.9pt] (1.42,0.30) ellipse [x radius=0.18,y radius=0.34];
+
+  \draw[->,line width=0.9pt] (-3.05,0.57) -- (-4.25,0.92)
+    node[left] {Thrust};
+  \draw[->,line width=0.9pt] (-0.15,0.55) -- (-0.05,1.95)
+    node[above] {Lift};
+  \draw[->,line width=0.9pt] (-0.20,-0.05) -- (-0.20,-1.30)
+    node[below] {Weight};
+  \draw[->,line width=0.9pt] (1.55,-0.02) -- (2.95,-0.55)
+    node[right] {Drag};
+\end{tikzpicture}

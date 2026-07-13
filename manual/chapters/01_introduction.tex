@@ -1,0 +1,301 @@
+\chapter{Introduction}\label{chap:introduction}
+
+Sandia National Laboratories tests high-speed flight vehicles, such as sounding
+rockets, reentry bodies, and guided missiles. \Cref{fig:taos-application} illustrates a
+typical sounding-rocket test flight. These vehicles often travel at hypersonic
+velocities and at high altitudes. The Trajectory Analysis and Optimization System
+(TAOS) has been developed to calculate trajectories for this type of high-speed
+vehicle; however, it can also be used for slower-speed vehicles, such as aircraft and
+cruise missiles.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.86\linewidth}{!}{\input{manual/figures/chapter01/fig-1-1}}
+  \caption{A TAOS application.}
+  \label{fig:taos-application}
+\end{figure}
+
+TAOS predicts aircraft and missile trajectories from known vehicle characteristics.
+Given a vehicle's mass, its initial conditions, and the forces acting on it, TAOS
+computes its trajectory. A vehicle's trajectory is defined by its position, velocity,
+and acceleration as a function of time. This information is used to determine a
+vehicle's overall performance characteristics, such as its range, speed, time of
+flight, and altitude. \Cref{fig:typical-trajectory-information} shows typical trajectory
+information plotted as a function of time.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.96\linewidth}{!}{\input{manual/figures/chapter01/fig-1-2}}
+  \caption{Typical trajectory information.}
+  \label{fig:typical-trajectory-information}
+\end{figure}
+
+\section{Trajectory Simulation}\label{sec:trajectory-simulation}
+
+The motion of an object relative to a fixed point in space is obtained from a set of
+differential equations called the equations of motion. The equations of motion are
+based on Newton's second law as applied to rigid bodies of constant mass:
+\begin{equation}
+  \begin{aligned}
+    \sum \mathbf{F} &= m\mathbf{a}_{I}, &&\text{force equation},\\
+    \sum \mathbf{M} &= \mathbf{I}\dot{\boldsymbol{\omega}}_{I}, &&\text{moment equation}.
+  \end{aligned}
+  \label{eq:force-equation}
+\end{equation}
+These equations represent a set of second-order differential equations that is
+integrated with respect to time to compute an object's motion. The position and
+velocity of the object's center of mass are obtained from the force equation, and the
+object's angular orientation and rate are obtained from the moment equation. The two
+inertial acceleration vectors each have three components, so there are six
+second-order differential equations and the system is said to have six degrees of
+freedom (6-DOF).
+
+TAOS uses a simpler approach that assumes the vehicle has a control system,
+automatic or human, capable of controlling the vehicle's angular orientation.
+Therefore, angular orientation is assumed to be known and is supplied as an input
+quantity. This assumption eliminates the moment equation and three degrees of
+freedom. The problem reduces to
+\begin{equation}
+  \sum \mathbf{F}=m\mathbf{a}_{I},
+  \label{eq:point-mass-force}
+\end{equation}
+which represents a set of three second-order differential equations for the motion of
+a point mass. Thus, TAOS is often called a point-mass trajectory simulation or a
+three-degree-of-freedom (3-DOF) simulation. The vehicle's position, velocity, and
+acceleration depend on the forces acting on it and on its mass. Its angular orientation
+is input, and it is assumed that a control system is capable of maintaining it. The
+angular orientation is required to calculate the forces acting on the vehicle.
+
+Although \Cref{eq:point-mass-force} is for a constant-mass rigid body, it can be used
+for variable-mass bodies such as aircraft and rockets. Mass can change
+instantaneously, for example when a weapon is dropped, and mass can change because
+a propulsive system burns and exhausts fuel. An instantaneous mass change is handled
+by dividing the trajectory into portions before and after the change. Mass changes
+from a propulsive system produce propulsive and drag forces; these forces must be
+included in the total force. An additional mass-flow equation is added to the set of
+differential equations to provide user control over vehicle mass.
+
+Over long time periods, control systems generally keep angular accelerations near
+zero, a condition called trimmed flight. In a point-mass simulation the forces acting
+on the vehicle must correspond to this trimmed condition. Trim forces used to
+maintain the vehicle in various body orientations must be included as part of the total
+force acting on the vehicle.
+
+Point-mass, 3-DOF trajectory simulations can be calculated much faster than full
+6-DOF simulations and require less information about the vehicle. This makes them
+well suited to conceptual design, mission planning, and vehicle performance analysis.
+They are excellent for predicting long-duration trajectory characteristics and overall
+system performance. They cannot be used to study stability and control problems
+involving the dynamic response of the vehicle and its control system, and they are
+poorly suited to trajectories with large angular accelerations. Details of the
+mathematical formulation used in TAOS are given in \Cref{chap:methods}.
+
+\section{Development History}\label{sec:development-history}
+
+The specific methods used in TAOS for flight-path prediction have a long history.
+They began with development of the Point-Mass Simulation Tool (PMAST).\taosref{1} The
+equations of motion, coordinate transformations, and preliminary code for PMAST
+were derived by J. L. McDowell in 1984. This mathematical formulation was enhanced
+and converted into usable software by the author during 1985. Because of its
+capabilities and user interface, PMAST became widely used at Sandia for trajectory
+prediction.
+
+Parametric optimization methods vary a set of parameters to minimize an objective
+function subject to constraints. These methods can vary the shape of a trajectory or
+the timing of trajectory events to meet mission-planning and flight-path constraints.
+Parametric optimization was tested in PMAST, but it was unreliable because of
+singularities in the equations of motion and vehicle-attitude definitions. These
+problems motivated development of a new version of the code.
+
+During 1987 and 1988, D. E. Outka modified the equations of motion and mathematics
+in PMAST, resulting in the Trajectory Simulation and Analysis Program (TSAP).\taosref{2} The
+equations of motion in PMAST were derived in a wind coordinate system, which is
+typical for aircraft trajectory simulations. Outka derived the TSAP equations of
+motion in an earth-centered, earth-fixed coordinate system to avoid numerical
+singularities. This method is commonly used for missile trajectories. Outka also used
+unit vectors for coordinate transformations rather than transformation matrices and
+improved the reliability and efficiency of the optimization procedure. The TSAP user
+interface remained nearly identical to PMAST, and TSAP quickly became Sandia's
+standard point-mass trajectory simulation software.
+
+From 1988 to 1993, capabilities were added to TSAP as required to support flight-test
+projects at Sandia. Problems involving multiple vehicles remained awkward, and TSAP
+was not easy to adapt because of its program structure. In 1993 a decision was made
+to develop a new multivehicle point-mass trajectory code.
+
+The result was TAOS. Its mathematical formulation is nearly identical to TSAP, but
+the primary change is extension to multiple vehicles. TAOS was written in the C
+programming language rather than Fortran. C data structures and dynamic memory
+allocation make it easier to extend from a single vehicle to multiple vehicles. The
+user-interface style is similar to TSAP, but numerous changes support multivehicle
+analysis, increase flexibility, and improve usability.
+
+Numerical methods were also improved. Depending on the problem, single trajectories
+without optimization require from approximately the same processing time to about
+20 percent less time than TSAP. Long trajectories with optimization can run 50 to 60
+percent faster. TAOS was designed for UNIX systems but was written in standard ANSI
+C and could run on any computer system with a 32-bit C compiler. The source reports
+that it was tested on an IBM personal computer running Windows NT with the Borland
+C/C++ compiler. It required a 32-bit operating system and compiler, such as Windows
+NT or VAX/VMS.
+
+\section{Program Capabilities}\label{sec:program-capabilities}
+
+TAOS is a general-purpose program capable of simulating many kinds of trajectories.
+It divides a trajectory into pieces, called \emph{trajectory segments}, such that each
+piece is relatively simple to describe.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.96\linewidth}{!}{\input{manual/figures/chapter01/fig-1-3}}
+  \caption{Segmented trajectories.}
+  \label{fig:segmented-trajectories}
+\end{figure}
+
+\Cref{fig:segmented-trajectories} shows a trajectory divided into seven segments.
+Within each segment, the vehicle configuration and guidance rules remain unchanged.
+When either changes, a new segment is defined. The segment trajectories are combined
+to form the complete trajectory.
+
+Guidance rules, for example ``fly level'' or ``fly at a constant angle of attack,''
+determine the vehicle's angular orientation. Some rules directly specify orientation,
+while others specify it indirectly. Because guidance rules change instantaneously
+between segments, trajectories can have discontinuities in angular orientation. The
+method assumes that these discontinuities are small and that the control system can
+change rapidly from one orientation to another.
+
+Multiple trajectories represent more than one vehicle or object. They can be used to
+track spent boosters or deployed objects and to compute intercept trajectories.
+\Cref{fig:multiple-trajectory-example} shows two trajectories that intercept.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.60\linewidth}{!}{\input{manual/figures/chapter01/fig-1-4}}
+  \caption{A multiple-trajectory example.}
+  \label{fig:multiple-trajectory-example}
+\end{figure}
+
+During conceptual-design studies, sets of trajectories are often computed while one
+or more input parameters are systematically varied. TAOS provides a survey
+capability for these tradeoff studies.
+
+\subsection*{Parameter Optimization}
+
+Mission planning and conceptual-design studies often require trajectories satisfying
+many constraints. Parameter optimization varies selected input values to minimize an
+objective function and satisfy those constraints. Optimization is the most powerful
+feature in TAOS and gives the software great flexibility.
+
+TAOS uses a parameter-optimization method called VF02, originally developed by
+Powell.\taosref{3} This recursive quadratic programming method solves a general nonlinear
+programming problem in which a set of parameters is varied to minimize an objective
+function subject to equality and inequality constraints. Typical parameters include
+initial conditions, guidance rules, and segment final conditions. Typical objective
+functions include time, range, and altitude.
+
+Simple constraints specify a value or limit for a trajectory variable, such as final
+altitude, velocity, range, or flight-path angle. More complex constraints relate values
+between trajectories. For example, an altitude in one trajectory can be constrained
+to equal an altitude in another trajectory. Constraints can also apply to an entire
+trajectory, such as maximum altitude or minimum dynamic pressure.
+
+\section{Table and Problem Input Files}\label{sec:input-files}
+
+The 1995 version of TAOS is a noninteractive program. All input data resides in one
+or more files created before running TAOS, and output files are created during
+execution. All input and output files are text files that can be created, inspected, and
+modified with a text editor.
+
+TAOS uses two types of input files: table files containing data such as thrust, mass
+flow, and aerodynamic coefficients, and problem files containing trajectory-definition
+data. Table filenames use the extension \texttt{.tbl}, and problem filenames use the
+extension \texttt{.prb}. TAOS keys on these file types when processing input. Any
+number of table and problem files can be supplied, although a typical run uses one or
+two table files and one problem file.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+File type & Extension & Typical contents \\
+\midrule
+Table file & \texttt{.tbl} & Aerodynamics, propulsion, tabulated functions \\
+Problem file & \texttt{.prb} & Initial/final conditions, trajectory description, print control \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Table files define forces acting on the vehicle and other quantities that are complex
+functions of vehicle state. They usually remain constant for a given vehicle, so the
+same table files are reused for many trajectories. Details are given in
+\Cref{chap:table-files}. Problem files describe how trajectories are computed,
+including initial conditions, segment definitions, and output descriptions. They are
+generally smaller and change frequently. Their format is given in
+\Cref{chap:problem-files}. A problem file is required; table files are optional because
+constant aerodynamic and propulsive forces can be defined within a problem file.
+
+\section{Program Execution}\label{sec:program-execution}
+
+TAOS is executed from a UNIX shell or from DOS. On UNIX systems the command is
+entered from a terminal or terminal window; on PC systems it is entered from a DOS
+window. The command has the form
+\begin{lstlisting}[language={},backgroundcolor=\color{white},frame=single]
+taos file1.tbl file2.tbl ... filex.prb
+\end{lstlisting}
+The program name is followed by a list of table and problem filenames separated by
+spaces. A full path may be required for the executable, for example:
+\begin{lstlisting}[language={},backgroundcolor=\color{white},frame=single]
+/usr/public/taos file1.tbl file2.tbl ... filex.prb
+\end{lstlisting}
+TAOS reads all table files first and then executes problem files in the order given.
+
+On Silicon Graphics workstations used in Sandia's Aerospace Systems Development
+Center, an icon was provided for TAOS. Input files could be selected, dragged to the
+TAOS icon, and dropped to submit a batch job. Double-clicking the icon opened a
+window containing the system batch-job list; the window was updated every five
+seconds and could be left open to monitor job status continuously.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.72\linewidth}{!}{\input{manual/figures/chapter01/fig-1-5}}
+  \caption{TAOS Icon on Silicon Graphics Workstations.}
+  \label{fig:taos-icon}
+\end{figure}
+
+As TAOS calculates each trajectory, it saves output data in memory. The original
+manual notes typical requirements of 4 to 16 MB, depending on trajectory length,
+integration step size, and print interval. This could constrain smaller PC systems of
+the period.
+
+\section{Output Files}\label{sec:output-files}
+
+TAOS automatically creates printout files. A printout file has the same base name as
+the input problem file and the extension \texttt{.out}. A separate printout file is
+created for each problem file. It always contains a listing of the problem file and
+error messages; the remaining content is controlled by the problem file, including
+the variables printed and the print interval.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter01/fig-1-6}
+  \caption{Example Printout.}
+  \label{fig:example-printout}
+\end{figure}
+
+TAOS also writes status information and error messages to standard output. On UNIX
+systems this information can be redirected to a file. When the Silicon Graphics icon
+is used, it is written to the batch-job output file.
+
+Two additional output formats can be created: files containing trajectory values
+formatted for the Engineering Graphics System (EGS),\taosref{4} and files containing trajectory
+values arranged in columns. EGS was used to produce the trajectory plots in the
+original report. Column-oriented files can be plotted with other software and are
+also useful for exchanging trajectory information.
+
+\section{Future Plans}\label{sec:future-plans}
+
+The original manual anticipated interactive creation and editing of table and problem
+files, including interactive plotting of tabulated data to help users avoid input errors.
+It also anticipated interactive plotting of trajectory output during execution so that
+long optimization runs could be observed and stopped if they were not working
+correctly. Finally, as with PMAST and TSAP, new output variables and guidance rules
+were expected to be added as required to support Sandia projects.

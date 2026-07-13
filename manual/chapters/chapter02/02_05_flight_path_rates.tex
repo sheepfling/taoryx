@@ -1,0 +1,196 @@
+% Source PDF pages 76--78; manual pages 2-47--2-49.
+\subsection{Flight Path Angle Rates}\label{sec:flight-path-rates}
+
+The function \texttt{compute\_rates} evaluates the following flight-path-angle rate
+output variables:
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.19\textwidth}p{0.56\textwidth}@{}}
+  psigcdt & $\dot\psi_{gc}$ & Geocentric heading rate.\\
+  psigddt & $\dot\psi_{gd}$ & Geodetic heading rate.\\
+  gamgcdt & $\dot\gamma_{gc}$ & Geocentric vertical flight-path-angle rate.\\
+  gamgddt & $\dot\gamma_{gd}$ & Geodetic vertical flight-path-angle rate.\\
+\end{longtable}
+
+The rates are derived from the angular velocity between the velocity coordinate
+system defined by \cref{eq:velocity-x-from-geodetic,eq:velocity-y-from-geodetic,eq:velocity-z-from-geodetic}
+and the geocentric or geodetic coordinate system. The derivation below is for the
+geodetic rates; the geocentric derivation is identical after replacing $gd$ with
+$gc$.
+
+The angular velocity of the velocity coordinate system is
+\begin{equation}
+  {}_{\oplus}\vec\omega_V
+  ={}_{\oplus}\vec\omega_{gd}
+   +{}_{gd}\vec\omega_V,
+  \label{eq:velocity-frame-angular-velocity-sum}
+\end{equation}
+the sum of the angular velocity between ECFC and geodetic coordinates and the
+angular velocity between geodetic and velocity coordinates. From the coordinate
+system definitions,
+\begin{equation}
+  {}_{\oplus}\vec\omega_{gd}
+  =\dot\lambda\,\hat z_{\oplus}
+   -\dot\delta_{gd}\,\hat y_{gd},
+  \label{eq:ecfc-to-geodetic-angular-velocity}
+\end{equation}
+and
+\begin{equation}
+  {}_{gd}\vec\omega_V
+  =\dot\psi_{gd}\,\hat z_{gd}
+   +\dot\gamma_{gd}\,\hat y_V.
+  \label{eq:geodetic-to-velocity-angular-velocity}
+\end{equation}
+Therefore,
+\begin{equation}
+  {}_{\oplus}\vec\omega_V
+  =\dot\lambda\,\hat z_{\oplus}
+   -\dot\delta_{gd}\,\hat y_{gd}
+   +\dot\psi_{gd}\,\hat z_{gd}
+   +\dot\gamma_{gd}\,\hat y_V.
+  \label{eq:velocity-frame-angular-velocity-expanded}
+\end{equation}
+The component in the $\hat y_V$ direction is
+\begin{equation}
+  {}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat y_V
+  =\left(
+      \dot\lambda\,\hat z_{\oplus}
+      -\dot\delta_{gd}\,\hat y_{gd}
+    \right)\mathbin{\cdot}\hat y_V
+   +\dot\gamma_{gd},
+  \label{eq:velocity-angular-rate-y-component}
+\end{equation}
+because
+\begin{equation}
+  \dot\psi_{gd}\,\hat z_{gd}\mathbin{\cdot}\hat y_V=0.
+  \label{eq:heading-term-orthogonal-yv}
+\end{equation}
+Using the heading-angle relationship in \cref{eq:velocity-y-from-geodetic},
+\cref{eq:velocity-angular-rate-y-component} becomes
+\begin{equation}
+  {}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat y_V
+  =\dot\lambda\,\hat z_{\oplus}\mathbin{\cdot}\hat y_V
+   -\dot\delta_{gd}\cos\psi_{gd}
+   +\dot\gamma_{gd}.
+  \label{eq:velocity-angular-rate-y-simplified}
+\end{equation}
+The component of \cref{eq:velocity-frame-angular-velocity-expanded} in the
+$\hat z_V$ direction is
+\begin{equation}
+  {}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat z_V
+  =\left(
+      \dot\lambda\,\hat z_{\oplus}
+      -\dot\delta_{gd}\,\hat y_{gd}
+      +\dot\psi_{gd}\,\hat z_{gd}
+    \right)\mathbin{\cdot}\hat z_V.
+  \label{eq:velocity-angular-rate-z-component}
+\end{equation}
+Using \cref{eq:velocity-z-from-geodetic} simplifies this expression to
+\begin{equation}
+  {}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat z_V
+  =\dot\lambda\,\hat z_{\oplus}\mathbin{\cdot}\hat z_V
+   -\dot\delta_{gd}\sin\gamma_{gd}\sin\psi_{gd}
+   +\dot\psi_{gd}\cos\gamma_{gd}.
+  \label{eq:velocity-angular-rate-z-simplified}
+\end{equation}
+
+An independent expression for the angular velocity between the ECFC and velocity
+systems follows by differentiating the velocity in the velocity frame:
+\begin{equation}
+  \vec a_{\oplus}
+  =\frac{d\lVert\vec V_{\oplus}\rVert}{dt}\,\hat x_V
+   +{}_{\oplus}\vec\omega_V\times\vec V_{\oplus},
+  \label{eq:velocity-derivative-in-rotating-velocity-frame}
+\end{equation}
+where
+\begin{equation}
+  \frac{d\lVert\vec V_{\oplus}\rVert}{dt}
+  =\frac{\vec a_{\oplus}\mathbin{\cdot}\vec V_{\oplus}}
+         {\lVert\vec V_{\oplus}\rVert}
+  =\vec a_{\oplus}\mathbin{\cdot}\hat x_V.
+  \label{eq:speed-rate-from-acceleration}
+\end{equation}
+Because $\vec V_{\oplus}$ is aligned with $\hat x_V$, the cross product becomes
+\begin{equation}
+  \begin{aligned}
+  {}_{\oplus}\vec\omega_V\times\vec V_{\oplus}
+  &=\begin{vmatrix}
+    \hat x_V&\hat y_V&\hat z_V\\
+    \omega_{Vx}&\omega_{Vy}&\omega_{Vz}\\
+    \lVert\vec V_{\oplus}\rVert&0&0
+  \end{vmatrix}\\
+  &=\lVert\vec V_{\oplus}\rVert
+    \left[
+      \left({}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat z_V\right)\hat y_V
+      -\left({}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat y_V\right)\hat z_V
+    \right].
+  \end{aligned}
+  \label{eq:velocity-frame-cross-product}
+\end{equation}
+The quantities $\omega_{Vx}$, $\omega_{Vy}$, and $\omega_{Vz}$ are the components
+of ${}_{\oplus}\vec\omega_V$ in velocity coordinates. Combining
+\cref{eq:velocity-derivative-in-rotating-velocity-frame,eq:speed-rate-from-acceleration,eq:velocity-frame-cross-product}
+gives
+\begin{equation}
+  \begin{aligned}
+  \vec a_{\oplus}={}&
+  \left(\vec a_{\oplus}\mathbin{\cdot}\hat x_V\right)\hat x_V\\
+  &+\lVert\vec V_{\oplus}\rVert
+    \left[
+      \left({}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat z_V\right)\hat y_V
+      -\left({}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat y_V\right)\hat z_V
+    \right].
+  \end{aligned}
+  \label{eq:acceleration-in-velocity-frame}
+\end{equation}
+Its $\hat y_V$ component is
+\begin{equation}
+  \vec a_{\oplus}\mathbin{\cdot}\hat y_V
+  =\lVert\vec V_{\oplus}\rVert
+    \left({}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat z_V\right),
+  \label{eq:acceleration-yv-component}
+\end{equation}
+so
+\begin{equation}
+  {}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat z_V
+  =\frac{\vec a_{\oplus}\mathbin{\cdot}\hat y_V}
+         {\lVert\vec V_{\oplus}\rVert}.
+  \label{eq:angular-rate-z-from-acceleration}
+\end{equation}
+Similarly,
+\begin{equation}
+  \vec a_{\oplus}\mathbin{\cdot}\hat z_V
+  =-\lVert\vec V_{\oplus}\rVert
+    \left({}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat y_V\right),
+  \label{eq:acceleration-zv-component}
+\end{equation}
+and therefore
+\begin{equation}
+  {}_{\oplus}\vec\omega_V\mathbin{\cdot}\hat y_V
+  =-\frac{\vec a_{\oplus}\mathbin{\cdot}\hat z_V}
+          {\lVert\vec V_{\oplus}\rVert}.
+  \label{eq:angular-rate-y-from-acceleration}
+\end{equation}
+Equating \cref{eq:velocity-angular-rate-y-simplified} and
+\cref{eq:angular-rate-y-from-acceleration} gives the geodetic vertical
+flight-path-angle rate:
+\begin{equation}
+  \dot\gamma_{gd}
+  =-\frac{\vec a_{\oplus}\mathbin{\cdot}\hat z_V}
+          {\lVert\vec V_{\oplus}\rVert}
+   -\dot\lambda\,\hat z_{\oplus}\mathbin{\cdot}\hat y_V
+   +\dot\delta_{gd}\cos\psi_{gd}.
+  \label{eq:geodetic-flight-path-angle-rate}
+\end{equation}
+Equating \cref{eq:velocity-angular-rate-z-simplified} and
+\cref{eq:angular-rate-z-from-acceleration} gives the geodetic heading rate:
+\begin{equation}
+  \dot\psi_{gd}
+  =\frac{
+    \dfrac{\vec a_{\oplus}\mathbin{\cdot}\hat y_V}
+          {\lVert\vec V_{\oplus}\rVert}
+    -\dot\lambda\,\hat z_{\oplus}\mathbin{\cdot}\hat z_V
+    +\dot\delta_{gd}\sin\gamma_{gd}\sin\psi_{gd}
+  }{\cos\gamma_{gd}}.
+  \label{eq:geodetic-heading-rate}
+\end{equation}
+The velocity-frame unit vectors $\hat y_V$ and $\hat z_V$ are given by
+\cref{eq:velocity-y-from-geodetic,eq:velocity-z-from-geodetic}.

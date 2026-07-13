@@ -1,0 +1,746 @@
+project: taos-manual-1995
+current_release: v21
+source_pdf: TAOS_manual_1995.pdf
+source_pages: 307
+status_values:
+- not_started
+- skeleton
+- transcribed
+- math_verified
+- visually_verified
+- complete
+phases:
+  scaffold: complete
+  frontmatter: complete
+  nomenclature: complete
+  chapter_1: complete
+  chapter_2: complete
+  chapter_3: complete
+  chapter_4: complete
+  backmatter: complete
+  figure_registry: complete
+  table_registry: in_progress
+  equation_registry: complete
+  equation_provenance: complete
+  semantic_metadata: in_progress
+  visual_comparison: complete
+  vector_figure_modernization: complete
+  source_text_fidelity_audit: complete
+  fixture_parser_validation: complete
+  canonical_parser_phase1: complete
+  codex_handoff: complete
+  chapter_4_diplomatic_transcription: in_progress
+chapter_2_parts:
+  introduction_notation_modules_units:
+    manual_pages:
+    - 2-1
+    - 2-2
+    - 2-3
+    source_pdf_pages:
+    - 30
+    - 31
+    - 32
+    status: complete
+  coordinate_systems_overview:
+    manual_pages:
+    - 2-4
+    source_pdf_pages:
+    - 33
+    status: complete
+  coordinate_systems_2_1_1_to_2_1_6:
+    manual_pages:
+    - 2-5
+    - 2-6
+    - 2-7
+    - 2-8
+    - 2-9
+    - 2-10
+    - 2-11
+    - 2-12
+    - 2-13
+    - 2-14
+    - 2-15
+    - 2-16
+    - 2-17
+    - 2-18
+    source_pdf_pages:
+    - 34
+    - 35
+    - 36
+    - 37
+    - 38
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 47
+    status: complete
+  coordinate_systems_2_1_7_to_2_1_12:
+    manual_pages:
+    - 2-19
+    - 2-20
+    - 2-21
+    - 2-22
+    - 2-23
+    - 2-24
+    - 2-25
+    - 2-26
+    - 2-27
+    - 2-28
+    - 2-29
+    - 2-30
+    - 2-31
+    - 2-32
+    - 2-33
+    - 2-34
+    - 2-35
+    source_pdf_pages:
+    - 48
+    - 49
+    - 50
+    - 51
+    - 52
+    - 53
+    - 54
+    - 55
+    - 56
+    - 57
+    - 58
+    - 59
+    - 60
+    - 61
+    - 62
+    - 63
+    - 64
+    status: complete
+  equations_of_motion:
+    manual_pages:
+    - 2-36
+    - 2-37
+    - 2-38
+    - 2-39
+    - 2-40
+    - 2-41
+    - 2-42
+    - 2-43
+    - 2-44
+    - 2-45
+    - 2-46
+    - 2-47
+    - 2-48
+    - 2-49
+    - 2-50
+    source_pdf_pages:
+    - 65
+    - 66
+    - 67
+    - 68
+    - 69
+    - 70
+    - 71
+    - 72
+    - 73
+    - 74
+    - 75
+    - 76
+    - 77
+    - 78
+    - 79
+    status: complete
+  contributions_to_acceleration:
+    manual_pages:
+    - 2-51
+    - 2-52
+    - 2-53
+    - 2-54
+    - 2-55
+    - 2-56
+    - 2-57
+    - 2-58
+    - 2-59
+    - 2-60
+    - 2-61
+    - 2-62
+    - 2-63
+    source_pdf_pages:
+    - 80
+    - 81
+    - 82
+    - 83
+    - 84
+    - 85
+    - 86
+    - 87
+    - 88
+    - 89
+    - 90
+    - 91
+    - 92
+    status: complete
+  output_variables:
+    manual_pages:
+    - 2-64
+    - 2-65
+    - 2-66
+    - 2-67
+    - 2-68
+    - 2-69
+    - 2-70
+    - 2-71
+    - 2-72
+    - 2-73
+    - 2-74
+    - 2-75
+    - 2-76
+    - 2-77
+    source_pdf_pages:
+    - 93
+    - 94
+    - 95
+    - 96
+    - 97
+    - 98
+    - 99
+    - 100
+    - 101
+    - 102
+    - 103
+    - 104
+    - 105
+    - 106
+    status: complete
+  guidance_rules:
+    status: complete
+    manual_pages:
+    - 2-78
+    - 2-79
+    - 2-80
+    - 2-81
+    - 2-82
+    - 2-83
+    - 2-84
+    - 2-85
+    - 2-86
+    - 2-87
+    - 2-88
+    - 2-89
+    - 2-90
+    source_pdf_pages:
+    - 107
+    - 108
+    - 109
+    - 110
+    - 111
+    - 112
+    - 113
+    - 114
+    - 115
+    - 116
+    - 117
+    - 118
+    - 119
+  trajectory_calculations:
+    status: complete
+    manual_pages:
+    - 2-91
+    - 2-92
+    - 2-93
+    - 2-94
+    - 2-95
+    - 2-96
+    - 2-97
+    - 2-98
+    - 2-99
+    - 2-100
+    - 2-101
+    - 2-102
+    - 2-103
+    - 2-104
+    - 2-105
+    source_pdf_pages:
+    - 120
+    - 121
+    - 122
+    - 123
+    - 124
+    - 125
+    - 126
+    - 127
+    - 128
+    - 129
+    - 130
+    - 131
+    - 132
+    - 133
+    - 134
+milestones:
+- id: v1
+  description: Canonical document scaffold
+  status: complete
+- id: v2
+  description: Front matter and Chapter 1 transcription
+  status: complete
+- id: v3
+  description: Semantic nomenclature and Chapter 3 table-file language
+  status: complete
+- id: v4
+  description: Chapter 4 problem-file language and complete examples
+  status: complete
+- id: v5
+  description: Chapter 2 notation, program overview, units, and coordinate systems through geodetic coordinates
+  status: complete
+- id: v6
+  description: Chapter 2 body velocity wind inertial-platform tangent-plane systems and coordinate transformations
+  status: complete
+- id: v7
+  description: Chapter 2 rotating-earth equations of motion, numerical integration, state rates, ground range, flight-path
+    rates, and specific loads
+  status: complete
+- id: v8
+  description: Chapter 2 atmosphere, aerodynamic, propulsive, and gravity acceleration models
+  status: complete
+- id: v9
+  description: Chapter 2 ranges and distances, radar observations, relative-vehicle geometry, initial-impact-point
+    calculations, and aerodynamic output variables
+  status: complete
+- id: v10
+  description: Chapter 2 guidance rules, control-variable solution, intercept guidance, proportional navigation,
+    range-insensitive axis, and flight-path limits
+  status: complete
+- id: v11
+  description: Chapter 2 trajectory execution, derivative pipeline, search methods, and Han-Powell optimization
+  status: complete
+- id: v12
+  description: Appendix output-variable reference with 171 semantic entries and default formatting metadata
+  status: complete
+- id: v13
+  description: References, source-faithful semantic index, and historical distribution pages
+  status: complete
+- id: v14
+  description: Project-wide visual comparison, source-page coverage audit, and vector-figure modernization
+  status: complete
+- id: v15
+  description: Source-text fidelity audit and parser-backed validation of extracted TAOS fixtures
+  status: complete
+- id: v16
+  description: Chapter 4 diplomatic-transcription batch 1 for the eight highest-priority audit regions
+  status: complete
+- id: v17
+  description: Chapter 4 diplomatic-transcription batch 2 for trajectory-level *define, optimization, search, summary,
+    survey, and the remaining worked examples
+  status: complete
+- id: v18
+  description: Chapter 4 diplomatic-transcription batch 3 for units and formatting, integration, propulsion, Earth
+    and atmosphere models, radar, trajectory initialization, and ancillary data blocks
+  status: complete
+- id: v19
+  description: Chapter 4 residual diplomatic restoration, classified low-score review queue, and targeted revision
+    of Figures 1-5, 1-6, 2-1, and 4-2
+  status: complete
+backmatter_parts:
+  appendix_output_variable_reference:
+    status: complete
+    manual_pages:
+    - A-1
+    - A-2
+    - A-3
+    - A-4
+    - A-5
+    - A-6
+    - A-7
+    - A-8
+    - A-9
+    - A-10
+    - A-11
+    - A-12
+    source_pdf_pages:
+    - 282
+    - 283
+    - 284
+    - 285
+    - 286
+    - 287
+    - 288
+    - 289
+    - 290
+    - 291
+    - 292
+    - 293
+    entry_count: 171
+  references:
+    status: complete
+    manual_pages:
+    - Ref-1
+    - Ref-2
+    source_pdf_pages:
+    - 294
+    - 295
+    entry_count: 23
+  index:
+    status: complete
+    manual_pages:
+    - Index-1
+    - Index-2
+    - Index-3
+    - Index-4
+    - Index-5
+    - Index-6
+    - Index-7
+    - Index-8
+    - Index-9
+    - Index-10
+    source_pdf_pages:
+    - 296
+    - 297
+    - 298
+    - 299
+    - 300
+    - 301
+    - 302
+    - 303
+    - 304
+    - 305
+    item_count: 770
+    content_page_count: 9
+    blank_page_count: 1
+  distribution:
+    status: complete
+    manual_pages:
+    - Dist-1
+    - Dist-2
+    source_pdf_pages:
+    - 306
+    - 307
+    entry_count: 35
+    total_copies: 60
+    blank_page_count: 1
+quality_assurance:
+  source_page_coverage:
+    pages: 307
+    status: complete
+    registry: metadata/source_page_coverage.csv
+  numbered_figures:
+    count: 72
+    status: visually_verified
+  semantic_listing_figures:
+    count: 6
+    status: complete
+  raster_objects_in_manual_pdf:
+    count: 0
+    status: complete
+  figure_comparison_report:
+    status: complete
+    path: qa/build/figure_comparison.pdf
+  manual_page_contact_sheets:
+    status: complete
+    count: 13
+    path: qa/page-contact-sheets
+  editable_semantic_figures:
+    count: 66
+    status: complete
+  tikz_pgfplots_figures:
+    count: 65
+    status: complete
+  semantic_tabular_figures:
+    count: 1
+    status: complete
+  final_manual_pages: 208
+  chapter_4_diplomatic_audit:
+    status: complete
+    sections: 8
+    weighted_token_recall_percent: 82.6
+    weighted_bigram_recall_percent: 67.5
+    weighted_trigram_recall_percent: 63.1
+    path: qa/chapter04_diplomatic_audit_v16.md
+  chapter_4_diplomatic_audit_v17:
+    status: complete
+    sections: 8
+    weighted_token_recall_percent: 70.9
+    weighted_bigram_recall_percent: 43.2
+    weighted_trigram_recall_percent: 28.1
+    path: qa/chapter04_diplomatic_audit_v17.md
+  source_text_fidelity_v17:
+    status: complete
+    source_sentences: 2566
+    chapter_4_near_verbatim_percent: 31.0
+    chapter_4_edited_close_percent: 43.8
+    chapter_4_review_percent: 25.2
+    chapter_4_median_score: 80.3
+    path: qa/source_text_fidelity.md
+  chapter_4_diplomatic_audit_v18:
+    status: complete
+    sections: 20
+    weighted_token_recall_percent: 80.3
+    weighted_bigram_recall_percent: 48.4
+    weighted_trigram_recall_percent: 29.4
+    path: qa/chapter04_diplomatic_audit_v18.md
+  source_text_fidelity_v18:
+    status: complete
+    source_sentences: 2566
+    chapter_4_near_verbatim_percent: 40.8
+    chapter_4_edited_close_percent: 41.8
+    chapter_4_review_percent: 17.4
+    chapter_4_median_score: 86.3
+    path: qa/source_text_fidelity.md
+  chapter_4_residual_audit_v19:
+    status: complete
+    sections: 6
+    weighted_token_recall_percent: 68.5
+    weighted_bigram_recall_percent: 47.5
+    weighted_trigram_recall_percent: 33.8
+    path: qa/chapter04_residual_audit_v19.md
+  source_text_fidelity_v19:
+    status: complete
+    source_sentences: 2566
+    chapter_4_near_verbatim_percent: 46.3
+    chapter_4_edited_close_percent: 40.3
+    chapter_4_review_percent: 13.4
+    chapter_4_median_score: 88.5
+    path: qa/source_text_fidelity.md
+  chapter_4_residual_queue_v19:
+    status: complete
+    threshold: 70.0
+    low_sentence_count: 173
+    classification_counts:
+      layout_sensitive: 7
+      ocr_damaged: 3
+      remaining_prose_review: 90
+      restored_fly_region: 30
+      table_equation_or_listing: 43
+    path: qa/chapter04_residual_audit_v19.json
+  targeted_figure_review_v19:
+    status: complete
+    figures:
+    - 1-5
+    - 1-6
+    - 2-1
+    - 4-2
+    path: qa/TAOS_targeted_figure_review_v19.pdf
+validation_passes:
+  version: 19
+  source_text_fidelity: complete
+  fixture_parser: complete
+  runtime_execution: not_performed
+  chapter_4_diplomatic_batch_1: complete
+  targeted_diplomatic_audit: complete
+  chapter_4_diplomatic_batch_2: complete
+  targeted_diplomatic_audit_v17: complete
+  chapter_4_diplomatic_batch_3: complete
+  targeted_diplomatic_audit_v18: complete
+  chapter_4_residual_batch_v19: complete
+  targeted_figure_review_v19: complete
+  classified_residual_queue_v19: complete
+chapter_4_diplomatic_batches:
+  ranked_batch_1:
+    status: complete
+    release: v16
+    source_pdf_pages:
+    - 174
+    - 175
+    - 191
+    - 196
+    - 197
+    - 217
+    - 218
+    - 223
+    - 224
+    - 225
+    - 226
+    - 237
+    - 238
+    - 257
+    - 258
+    - 259
+    - 260
+    - 261
+    - 262
+    sections:
+    - 4.2.1
+    - 4.2.8
+    - 4.2.12
+    - 4.4.2
+    - 4.4.4
+    - 4.4.5
+    - 4.4.7
+    - 4.5.1
+    metadata: metadata/diplomatic_transcription_chapter4.yaml
+  ranked_batch_2:
+    status: complete
+    release: v17
+    source_pdf_pages:
+    - 200
+    - 201
+    - 202
+    - 203
+    - 227
+    - 228
+    - 229
+    - 230
+    - 231
+    - 232
+    - 233
+    - 234
+    - 235
+    - 236
+    - 241
+    - 242
+    - 243
+    - 244
+    - 245
+    - 246
+    - 247
+    - 248
+    - 249
+    - 263
+    - 264
+    - 265
+    - 266
+    - 267
+    - 268
+    - 269
+    - 270
+    - 271
+    - 272
+    - 273
+    - 274
+    - 275
+    - 276
+    - 277
+    - 278
+    - 279
+    - 280
+    - 281
+    sections:
+    - 4.3.1
+    - 4.4.6
+    - 4.4.9
+    - 4.4.10
+    - 4.4.11
+    - 4.5.2
+    - 4.5.3
+    - 4.5.4
+    metadata: metadata/diplomatic_transcription_chapter4_v17.yaml
+    audit: qa/chapter04_diplomatic_audit_v17.md
+  ranked_batch_3:
+    status: complete
+    release: v18
+    source_pdf_pages:
+    - 176
+    - 177
+    - 185
+    - 186
+    - 187
+    - 188
+    - 189
+    - 190
+    - 192
+    - 193
+    - 194
+    - 195
+    - 204
+    - 205
+    - 206
+    - 207
+    - 208
+    - 209
+    - 210
+    - 211
+    - 212
+    - 215
+    - 216
+    - 219
+    - 220
+    - 221
+    - 222
+    - 239
+    - 240
+    - 250
+    - 251
+    - 252
+    - 253
+    - 254
+    - 255
+    sections:
+    - 4.2.2
+    - 4.2.3
+    - 4.2.5
+    - 4.2.6
+    - 4.2.7
+    - 4.2.9
+    - 4.2.10
+    - 4.2.11
+    - 4.3.2
+    - 4.3.3
+    - 4.3.4
+    - 4.3.5
+    - 4.3.6
+    - 4.3.7
+    - 4.4.1
+    - 4.4.3
+    - 4.4.8
+    - 4.4.12
+    - 4.4.13
+    - 4.4.14
+    metadata: metadata/diplomatic_transcription_chapter4_v18.yaml
+    audit: qa/chapter04_diplomatic_audit_v18.md
+  residual_batch_v19:
+    status: complete
+    release: v19
+    source_pdf_pages:
+    - 166
+    - 167
+    - 168
+    - 169
+    - 170
+    - 171
+    - 172
+    - 173
+    - 178
+    - 179
+    - 180
+    - 181
+    - 182
+    - 183
+    - 184
+    - 198
+    - 199
+    - 213
+    - 214
+    sections:
+    - '4.0'
+    - '4.1'
+    - '4.2'
+    - 4.2.4
+    - '4.3'
+    - '4.4'
+    figures:
+    - 1-5
+    - 1-6
+    - 2-1
+    - 4-2
+    metadata: metadata/diplomatic_transcription_chapter4_v19.yaml
+    audit: qa/chapter04_residual_audit_v19.md
+version_21_handoff:
+  status: complete
+  release: v21
+  equation_provenance:
+    status: complete
+    equations: 326
+    source_pages_with_equations: 80
+    metadata_csv: metadata/equations_provenance.csv
+    metadata_json: metadata/equations_provenance.json
+    audit_markdown: qa/equation_provenance_audit_v21.md
+    audit_pdf: qa/TAOS_equation_provenance_audit_v21.pdf
+  parser:
+    status: phase_1_complete
+    package: src/taoryx.language
+    wheel: dist/taoryx.language-0.1.0-py3-none-any.whl
+  handoff_docs:
+    - AGENTS.md
+    - BUILDING.md
+    - CODEX_HANDOFF.md
+  boundary: All numbered equations are transcribed and provenance-mapped; executable mathematics implementation remains future work.

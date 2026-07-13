@@ -1,0 +1,238 @@
+chapter: 4
+release: v17
+scope: ranked_diplomatic_batch_2
+source_manual: SAND95-1652
+method:
+  description: Restore source wording for the second ranked Chapter 4 diplomatic batch while preserving
+    verified mathematics, tables, figures, semantic labels, and parser fixtures.
+  preserve_source_wording: true
+  preserve_parser_fixtures: true
+  preserve_numbered_objects: true
+  normalize_only:
+  - line-break hyphenation
+  - obvious OCR corruption
+  - typographic quotation marks
+  - cross-references expressed as semantic LaTeX
+sections:
+- id: chapter4.trajectory.define
+  title: '*Define Data Block'
+  section: 4.3.1
+  source_pdf_pages:
+  - 200
+  - 201
+  - 202
+  - 203
+  source_manual_pages:
+  - 4-35
+  - 4-36
+  - 4-37
+  - 4-38
+  tex_file: manual/chapters/chapter04/03_01_define.tex
+  audit_rank: 21
+  baseline_token_recall_percent: 30.2
+  baseline_bigram_recall_percent: 13.1
+  status: diplomatically_transcribed
+  restored:
+  - standard and user-defined variable relationship
+  - temporary-variable rules and statement continuation
+  - table-function and control-statement restrictions
+  - integral-variable purpose, initialization, and optimization convention
+- id: chapter4.problem.optimize
+  title: '*Optimize Data Block'
+  section: 4.4.6
+  source_pdf_pages:
+  - 227
+  - 228
+  - 229
+  - 230
+  - 231
+  - 232
+  - 233
+  - 234
+  - 235
+  - 236
+  source_manual_pages:
+  - 4-62
+  - 4-63
+  - 4-64
+  - 4-65
+  - 4-66
+  - 4-67
+  - 4-68
+  - 4-69
+  - 4-70
+  - 4-71
+  tex_file: manual/chapters/chapter04/04_06_optimize.tex
+  audit_rank: 16
+  baseline_token_recall_percent: 32.6
+  baseline_bigram_recall_percent: 11.6
+  status: diplomatically_transcribed
+  restored:
+  - loop independence and parameter-number rules
+  - objective, constraint, endpoint, and reference-factor syntax
+  - all optimization-control defaults and operating guidance
+  - restart, derivative, survey, print, initial-estimate, and bound behavior
+  - convergence messages and complete troubleshooting guidance
+- id: chapter4.problem.search
+  title: '*Search Data Block'
+  section: 4.4.9
+  source_pdf_pages:
+  - 241
+  - 242
+  - 243
+  - 244
+  source_manual_pages:
+  - 4-76
+  - 4-77
+  - 4-78
+  - 4-79
+  tex_file: manual/chapters/chapter04/04_09_search.tex
+  audit_rank: 20
+  baseline_token_recall_percent: 25.7
+  baseline_bigram_recall_percent: 12.2
+  status: diplomatically_transcribed
+  restored:
+  - one-dimensional parameter and placeholder behavior
+  - objective syntax and endpoint inheritance rules
+  - required control values, defaults, scaling, and print behavior
+  - independent, nested, and invalid intersecting loop structures
+- id: chapter4.problem.summarize
+  title: '*Summarize Data Block'
+  section: 4.4.10
+  source_pdf_pages:
+  - 245
+  - 246
+  - 247
+  source_manual_pages:
+  - 4-80
+  - 4-81
+  - 4-82
+  tex_file: manual/chapters/chapter04/04_10_summarize.tex
+  audit_rank: 0
+  baseline_token_recall_percent: 35.4
+  baseline_bigram_recall_percent: 15.0
+  status: diplomatically_transcribed
+  restored:
+  - survey relationship and source printout interpretation
+  - initialization and name-scope behavior
+  - max, min, first, and last interpolation behavior
+  - accumulated math-operation semantics and examples
+- id: chapter4.problem.survey
+  title: '*Survey Data Block'
+  section: 4.4.11
+  source_pdf_pages:
+  - 248
+  - 249
+  source_manual_pages:
+  - 4-83
+  - 4-84
+  tex_file: manual/chapters/chapter04/04_11_survey.tex
+  audit_rank: 19
+  baseline_token_recall_percent: 33.2
+  baseline_bigram_recall_percent: 12.0
+  status: diplomatically_transcribed
+  restored:
+  - placeholder-to-block relationship
+  - nesting order and EGS variable naming
+  - low, high, increment, and exact-final-case behavior
+  - direct values and combined sorted survey sets
+- id: chapter4.example.ballistic_rocket
+  title: Ballistic Rocket
+  section: 4.5.2
+  source_pdf_pages:
+  - 263
+  - 264
+  - 265
+  - 266
+  - 267
+  - 268
+  - 269
+  source_manual_pages:
+  - 4-98
+  - 4-99
+  - 4-100
+  - 4-101
+  - 4-102
+  - 4-103
+  - 4-104
+  tex_file: manual/chapters/chapter04/05_02_ballistic_rocket.tex
+  baseline_token_recall_percent: 50.0
+  baseline_bigram_recall_percent: 29.1
+  status: diplomatically_transcribed
+  restored:
+  - full vehicle, staging, and table-requirement narrative
+  - segment-by-segment rail, boost, coast, staging, and payload explanation
+  - booster-trajectory and optimization setup discussion
+  - historical runtime, printout excerpt, and figure interpretation
+- id: chapter4.example.air_intercept
+  title: Air-Launched Intercept
+  section: 4.5.3
+  source_pdf_pages:
+  - 270
+  - 271
+  - 272
+  - 273
+  - 274
+  - 275
+  - 276
+  source_manual_pages:
+  - 4-105
+  - 4-106
+  - 4-107
+  - 4-108
+  - 4-109
+  - 4-110
+  - 4-111
+  tex_file: manual/chapters/chapter04/05_03_air_intercept.tex
+  baseline_token_recall_percent: 49.3
+  baseline_bigram_recall_percent: 31.4
+  status: diplomatically_transcribed
+  restored:
+  - target/interceptor timing and table requirements
+  - optimization-parameter, constraint, and fixed-target integration rationale
+  - user-defined metric variables and common coordinate reference
+  - historical runtime, printout excerpt, range, and intercept velocity
+- id: chapter4.example.ground_intercept
+  title: Ground-Launched Intercept
+  section: 4.5.4
+  source_pdf_pages:
+  - 277
+  - 278
+  - 279
+  - 280
+  - 281
+  source_manual_pages:
+  - 4-112
+  - 4-113
+  - 4-114
+  - 4-115
+  - 4-116
+  tex_file: manual/chapters/chapter04/05_04_ground_intercept.tex
+  baseline_token_recall_percent: 56.8
+  baseline_bigram_recall_percent: 36.7
+  status: diplomatically_transcribed
+  restored:
+  - launch-delay and predictive-guidance rationale
+  - constant propulsion and relative-velocity final-condition explanation
+  - mission-time versus burn-duration explanation
+  - historical runtime, complete printout excerpt, and guidance interpretation
+supporting_files:
+- examples/chapter04/ballistic-rocket-printout.txt
+- examples/chapter04/air-intercept-printout.txt
+- examples/chapter04/ground-intercept-printout.txt
+source_listing_files:
+- examples/chapter04/ballistic-rocket-source.prb.txt
+- examples/chapter04/air-launched-intercept-source.prb.txt
+- examples/chapter04/ground-launched-intercept-source.prb.txt
+fixture_invariance:
+  sha256:
+    examples/chapter03/orbus-mdt.tbl: ded304ae6ff44bbaa6cd9651843f4901ddd8d43a257d9e97375f85697e831683
+    examples/chapter03/recruits-thr.tbl: d11a0109c8af903478c1e35ecd39b3e0fc769ccfaa6f30b22f906de9345ae9a2
+    examples/chapter03/reentry-ca-excerpt.tbl: d078d629f1d240f1d99382e558e49bafdef9ff351b994ca0bd1018b4e0685fe5
+    examples/chapter03/stmi-full.tbl: 900d29157b8eff70f05b5a3091b27bd6391678b080bee7cda72df43cc86ab8f5
+    examples/chapter03/stmi-simple.tbl: 310b74d5a21ecddd058a037f36ef258f1a527ae3c8da120d3bd30aeec4a22fbd
+    examples/chapter04/air-launched-intercept.prb: b2dfa5b409b626b78dd1bb145880d481858338ae5865a4ae106723f348e57de2
+    examples/chapter04/ballistic-reentry.prb: 286817cb104fe1ac04c87d3ddb4833d77e568f1dc4b3771e85a8a7ba87fcb41d
+    examples/chapter04/ballistic-reentry.tbl: df979968363b97e31255bd128b11a5aec44819e26e7739f2de3d5c2804a2352f
+    examples/chapter04/ballistic-rocket.prb: 8592c979fa08f30beb4e9fe9b505737dc558cf58578512a0827395963c9506e6
+    examples/chapter04/ground-launched-intercept.prb: 2cd6ab4ba3c1368528d1f6bff3d9da38a9bc87e36d4754abe42cdca23dd4ca10

@@ -1,0 +1,43 @@
+\subsection{\problemblock{*Cg} Data Block}\label{sec:block-cg}
+
+One assumption in TAOS is that a control system is capable of maintaining the
+vehicle body attitude. For example, a constant-angle-of-attack guidance scheme
+assumes that a control system can maintain that attitude. On many aerospace
+vehicles the control system uses aerodynamic devices such as flaps, canards, and
+elevators. The settings required for steady flight at a given body attitude depend on
+the vehicle center of gravity; maintaining a constant angle of attack can require
+different control settings as the center of gravity changes.
+
+The aerodynamic coefficients used by TAOS represent steady, trimmed flight. They
+are therefore often functions of center of gravity. Center of gravity, in turn, is often a
+function of vehicle weight. As fuel or propellant is consumed, weight and center of
+gravity change, and this affects the aerodynamics.
+
+TAOS handles this relationship by allowing aerodynamic tables to be functions of
+the \statevar{cg} state variable and by defining \statevar{cg} with a
+\problemblock{*cg} block. The value may be a constant or may be computed from a
+table. The block is optional; center of gravity defaults to zero when no block is
+present.
+
+The following block sets center of gravity to a constant value:
+
+\begin{lstlisting}[style=taosmanual]
+*cg cg=0.69
+\end{lstlisting}
+
+Center of gravity can be expressed in inches, as percent of body length, or in any
+other convenient convention, provided the same convention is used in both the
+\problemblock{*cg} block and the aerodynamic tables. TAOS treats the value as
+nondimensional.
+
+A table can also be used:
+
+\begin{lstlisting}[style=taosmanual]
+*cg cg=(wt-cg) config=2
+\end{lstlisting}
+
+This requests table \tableid{wt-cg} to compute center of gravity. Like other tables,
+it can depend on weight or on any permitted state or user-defined variable. The
+example also assigns the user-defined variable \texttt{config}. A
+\problemblock{*cg} block can assign values to any user-defined variables, but it is
+normally used only for variables referenced by the center-of-gravity table.

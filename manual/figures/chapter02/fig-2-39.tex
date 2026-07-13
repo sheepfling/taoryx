@@ -1,0 +1,22 @@
+\begin{tikzpicture}[>=Latex,x=1.0cm,y=0.76cm,line cap=round]
+  \draw[->] (0,0)--(9.7,0) node[below] {Time};
+  \draw[->] (0,0)--(0,5.15);
+  \node[left,align=center] at (-0.18,2.35) {Angle\\of\\attack};
+  \draw[line width=0.9pt]
+    plot coordinates {(0,1.9) (1.2,3.0) (2.35,3.0) (3.45,2.25) (4.75,1.55) (6.05,2.40) (7.25,1.82)};
+  \foreach \x/\lab in {0/{t_0},1.2/{t_1},2.35/{t_2},3.45/{t_3},4.75/{t_4},6.05/{t_5},7.25/{t_x}}
+    \node[below] at (\x,0) {$\lab$};
+  \draw[densely dashed] (0,0)--(0,1.9);
+  \draw[densely dashed] (1.2,0)--(1.2,3.0);
+  \draw[densely dashed] (2.35,0)--(2.35,3.0);
+  \draw[densely dashed] (3.45,0)--(3.45,2.25);
+  \draw[densely dashed] (4.75,0)--(4.75,1.55);
+  \draw[densely dashed] (6.05,0)--(6.05,2.40);
+  \draw[densely dashed] (7.25,0)--(7.25,1.82);
+  \node[align=center,font=\small] (angles) at (3.40,4.55)
+    {Angle-of-attack values are\\defined as optimization parameters};
+  \draw[->] (angles.south east)--(3.70,2.25);
+  \node[align=left,font=\small] (final) at (8.45,3.75)
+    {Final time is also\\defined as an\\optimization parameter};
+  \draw[->] (final.south west)--(7.30,0.18);
+\end{tikzpicture}

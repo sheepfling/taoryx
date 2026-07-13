@@ -1,0 +1,275 @@
+% Source PDF pages 95--99; manual pages 2-66--2-70.
+\subsection{Ranges and Distances}\label{sec:ranges-distances}
+
+Projecting a flight path onto the earth's surface produces the ground range described
+in \cref{sec:ground-speed}. Ground range measures distance traveled but is
+not referenced to a fixed origin or direction. The quantities in this section use
+surface coordinate systems to describe a vehicle's ground track relative to a known
+reference point and azimuth.
+
+\taossubhead{East and North Distances}
+
+An east/north coordinate system is defined on the earth's surface. Its east axis
+follows a line of constant latitude and its north axis follows a line of constant
+longitude, as shown in \cref{fig:east-north-distances}. The origin is a known
+reference point, commonly the initial vehicle position. This two-dimensional system
+is most useful for short trajectories for which earth curvature is not important.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.82\linewidth}{!}{\input{manual/figures/chapter02/fig-2-18}}
+  \caption{East and north distances.}
+  \label{fig:east-north-distances}
+\end{figure}
+
+The east distance is measured between the reference longitude and the vehicle
+longitude along the reference latitude. The north distance is measured between the
+reference latitude and vehicle latitude along the reference longitude. Both
+calculations require the surface distance between two known longitude/latitude
+points.
+
+\taossubhead{Sodano's Inverse Method}
+
+TAOS uses Sodano's inverse method because it is noniterative and accurate over both
+short and long distances.\manualref{16} The function \texttt{sodano\_inverse} in
+the \texttt{derivs} module takes two surface points
+$(\lambda_1,\delta_{gd_1})$ and $(\lambda_2,\delta_{gd_2})$. Their ellipsoidal
+surface distance $\Delta r_s$ is
+\begin{equation}
+\begin{aligned}
+\frac{\Delta r_s}{R_p}={}&(1+f+f^2)\phi
+ +\sin\beta_1\sin\beta_2
+  \left[(f+f^2)\sin\phi-\frac12 f^2\phi^2\csc\phi\right]\\
+&-\frac12m\left[(f+f^2)(\phi+\sin\phi\cos\phi)
+                 -f^2\phi^2\cot\phi\right]\\
+&-\frac12\sin^2\beta_1\sin^2\beta_2\,f^2\sin\phi\cos\phi\\
+&+\frac12\sin\beta_1\sin\beta_2\,m f^2
+  \left[\sin\phi\cos^2\phi+\phi^2\csc\phi\right]\\
+&+\frac1{16}f^2m^2
+  \left[\phi+\sin\phi\cos\phi-2\sin\phi\cos^3\phi
+        -8\phi^2\cot\phi\right].
+\end{aligned}
+\label{eq:sodano-inverse-distance}
+\end{equation}
+Here the auxiliary central angle $\phi$ and quantity $m$ are
+\begin{equation}
+  \cos\phi
+  =\sin\beta_1\sin\beta_2
+   +\cos\beta_1\cos\beta_2\cos(\lambda_2-\lambda_1),
+  \label{eq:sodano-central-angle}
+\end{equation}
+\begin{equation}
+  m=1-\cos^2\beta_1\cos^2\beta_2
+       \sin^2(\lambda_2-\lambda_1)\csc^2\phi,
+  \label{eq:sodano-inverse-m}
+\end{equation}
+and the reduced latitudes are
+\begin{equation}
+  \tan\beta_1
+  =(1-f)\tan\delta_{gd_1}
+  =\frac{R_p\sin\delta_{gd_1}}{R_{\oplus}\cos\delta_{gd_1}},
+  \label{eq:sodano-beta1}
+\end{equation}
+\begin{equation}
+  \tan\beta_2
+  =(1-f)\tan\delta_{gd_2}
+  =\frac{R_p\sin\delta_{gd_2}}{R_{\oplus}\cos\delta_{gd_2}}.
+  \label{eq:sodano-beta2}
+\end{equation}
+The equatorial radius $R_{\oplus}$, polar radius $R_p$, and flattening $f$ are
+defined in \cref{sec:local-geodetic}.
+
+\noindent\textit{Editorial note.} The printed source omits the cosine function
+before $(\lambda_2-\lambda_1)$ in \cref{eq:sodano-central-angle}; it is restored
+here because the surrounding equations and the spherical law of cosines require it.
+
+Sodano's inverse method also provides the forward and backward azimuths of the
+surface curve joining the points. Azimuth is measured clockwise from north, so
+$0^\circ$ points north and $90^\circ$ points east. The forward azimuth is evaluated
+at the first point and the backward azimuth at the second point:
+\begin{equation}
+  \tan\psi_{\mathrm{fwd}}
+  =\frac{\cos\beta_2\sin\Lambda}
+         {\sin\Delta\beta
+          +2\cos\beta_2\sin\beta_1\sin^2(\Lambda/2)},
+  \label{eq:sodano-forward-azimuth}
+\end{equation}
+\begin{equation}
+  \tan\psi_{\mathrm{back}}
+  =\frac{\cos\beta_1\sin\Lambda}
+         {\sin\Delta\beta
+          -2\cos\beta_1\sin\beta_2\sin^2(\Lambda/2)}.
+  \label{eq:sodano-backward-azimuth}
+\end{equation}
+The corrected longitude difference $\Lambda$ is
+\begin{equation}
+\begin{aligned}
+\Lambda={}&\lambda_2-\lambda_1
+ +\frac{\cos\beta_1\cos\beta_2\sin(\lambda_2-\lambda_1)}{\sin\phi}
+ \Bigg[(f+f^2)\phi\\
+&\quad-\frac12\sin\beta_1\sin\beta_2\,f^2
+       \left(\sin\phi+2\phi^2\csc\phi\right)\\
+&\quad+\frac14m f^2
+       \left(\sin\phi\cos\phi-5\phi+4\phi^2\cot\phi\right)
+ \Bigg],
+\end{aligned}
+\label{eq:sodano-corrected-longitude-difference}
+\end{equation}
+while the reduced-latitude difference can be written as the series
+\begin{equation}
+\begin{aligned}
+\Delta\beta={}&\delta_{gd_2}-\delta_{gd_1}
++n\left(\sin2\delta_{gd_1}-\sin2\delta_{gd_2}\right)\\
+&-\frac12n^2\left(\sin4\delta_{gd_1}-\sin4\delta_{gd_2}\right)
++\frac13n^3\left(\sin6\delta_{gd_1}-\sin6\delta_{gd_2}\right),
+\end{aligned}
+\label{eq:sodano-delta-beta-series}
+\end{equation}
+or equivalently
+\begin{equation}
+\begin{aligned}
+\Delta\beta={}&\delta_{gd_2}-\delta_{gd_1}
++2\sin(\delta_{gd_2}-\delta_{gd_1})
+ \Big[\sin\beta_1\sin\beta_2(n+n^2+n^3)\\
+&\hspace{11em}-\cos\beta_1\cos\beta_2(n-n^2+n^3)\Big],
+\end{aligned}
+\label{eq:sodano-delta-beta-alternative}
+\end{equation}
+where
+\begin{equation}
+  n=\frac{R_{\oplus}-R_p}{R_{\oplus}+R_p}.
+  \label{eq:sodano-flattening-n}
+\end{equation}
+
+\taossubhead{Downrange and Crossrange}
+
+A second surface coordinate system measures downrange from a reference point along
+a reference azimuth and crossrange perpendicular to that azimuth, as shown in
+\cref{fig:downrange-crossrange}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.78\linewidth}{!}{\input{manual/figures/chapter02/fig-2-19}}
+  \caption{Downrange and crossrange.}
+  \label{fig:downrange-crossrange}
+\end{figure}
+
+A Newton--Raphson iteration varies the downrange location of point P until the
+backward azimuth from P to the reference point and the forward azimuth from P to
+the vehicle differ by $90^\circ$:
+\begin{equation}
+  \theta=\psi_{\mathrm{back}}-\psi_{\mathrm{fwd}}=90^\circ.
+  \label{eq:downrange-crossrange-perpendicular}
+\end{equation}
+The generic Newton--Raphson update is
+\begin{equation}
+  x_{n+1}
+  =x_n-f(x_n)\left[\frac{\partial f(x_n)}{\partial x}\right]^{-1},
+  \label{eq:downrange-newton-raphson}
+\end{equation}
+where $n$ is the iteration count. TAOS estimates the derivative with a forward
+difference. For the downrange search, $x$ is the downrange distance and the error
+function is
+\begin{equation}
+  f(x)=\frac{\pi}{2}
+       -\left|\psi_{\mathrm{back}}-\psi_{\mathrm{fwd}}\right|.
+  \label{eq:downrange-error-function}
+\end{equation}
+
+\taossubhead{Sodano's Direct Method}
+
+The error evaluation requires Sodano's direct method. Given reference longitude
+$\lambda_1$, reference latitude $\delta_{gd_1}$, reference azimuth $\psi$, and
+surface distance $\Delta r_s$, the method computes the backward azimuth,
+longitude $\lambda_2$, and latitude $\delta_{gd_2}$ of point P.\manualref{16}
+It begins by evaluating
+\begin{equation}
+\begin{aligned}
+\phi={}&\xi-ne'^2\sin\xi
+ +\frac12me'^2(\sin\xi\cos\xi-\xi)
+ +\frac52n^2e'^4\sin\xi\cos\xi\\
+&+\frac1{16}m^2e'^4
+ \left(11\xi-13\sin\xi\cos\xi-8\xi\cos^2\xi
+       +10\sin\xi\cos^3\xi\right)\\
+&+\frac12mne'^4
+ \left(3\sin\xi+2\xi\cos\xi-5\sin\xi\cos^2\xi\right),
+\end{aligned}
+\label{eq:sodano-direct-phi}
+\end{equation}
+where, for this direct-method derivation,
+\begin{equation}
+  m=\frac12
+    \left(1+\frac12e'^2\sin^2\beta_1\right)
+    \left(1-\cos^2\beta_1\sin^2\psi\right),
+  \label{eq:sodano-direct-m}
+\end{equation}
+\begin{equation}
+  n=\frac12
+    \left(1+\frac12e'^2\sin^2\beta_1\right)
+    \left(\sin^2\beta_1\cos\xi
+          +\cos\beta_1\cos\psi\sin\beta_1\sin\xi\right),
+  \label{eq:sodano-direct-n}
+\end{equation}
+\begin{equation}
+  \xi=\frac{\Delta r_s}{R_p},
+  \label{eq:sodano-direct-xi}
+\end{equation}
+and the source defines
+\begin{equation}
+  e'=\frac{1}{\sqrt{1-e^2}}
+     =\sqrt{\frac{R_{\oplus}^2+R_p^2}{R_p^2}}.
+  \label{eq:sodano-eprime}
+\end{equation}
+The reduced latitude $\beta_1$ is computed from
+\cref{eq:sodano-beta1}. The geodetic latitude of P then follows from
+\begin{equation}
+  \tan\delta_{gd_2}
+  =\frac{\tan\beta_2}{1-f}
+  =\frac{R_{\oplus}\sin\beta_2}{R_p\cos\beta_2},
+  \label{eq:sodano-direct-latitude}
+\end{equation}
+with
+\begin{equation}
+  \sin\beta_2
+  =\sin\beta_1\cos\phi+\cos\beta_1\cos\psi\sin\phi,
+  \label{eq:sodano-direct-sin-beta2}
+\end{equation}
+\begin{equation}
+  \cos\beta_2
+  =\sqrt{\cos^2\beta_1\sin^2\psi
+          +\left(\sin\beta_1\sin\phi
+                 -\cos\beta_1\cos\psi\cos\phi\right)^2}.
+  \label{eq:sodano-direct-cos-beta2}
+\end{equation}
+The longitude is
+\begin{equation}
+  \lambda_2=\lambda_1+l
+  +\tan^{-1}\!\left[
+    \frac{\sin\phi\sin\psi}
+         {\cos\beta_1\cos\phi-\sin\beta_1\sin\phi\cos\psi}
+  \right],
+  \label{eq:sodano-direct-longitude}
+\end{equation}
+where
+\begin{equation}
+  l=\cos\beta_1\sin\psi
+    \left[-f\xi+3f^2n\sin\xi
+          +\frac32f^2m(\xi-\sin\xi\cos\xi)\right].
+  \label{eq:sodano-direct-l-correction}
+\end{equation}
+Finally, the backward azimuth from P to the reference point is
+\begin{equation}
+  \tan\psi_{\mathrm{back}}
+  =\frac{-\cos\beta_1\sin\psi}
+         {\sin\beta_1\sin\phi-\cos\beta_1\cos\psi\cos\phi}.
+  \label{eq:sodano-direct-backward-azimuth}
+\end{equation}
+The function \texttt{sodano\_direct} implements these equations. Once P is known,
+Sodano's inverse method gives the forward azimuth and distance from P to the
+vehicle, and \cref{eq:downrange-error-function} supplies the Newton--Raphson
+error.
+
+\noindent\textit{Editorial note.} Equation~\ref{eq:sodano-eprime} is reproduced
+as printed. Its two equalities are not algebraically consistent with the eccentricity
+definition in \cref{eq:ellipsoid-parameter-relation}; the source issue is recorded in
+the Chapter 2 editorial metadata rather than silently corrected.

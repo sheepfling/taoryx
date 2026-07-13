@@ -1,0 +1,154 @@
+\subsection{\problemblock{*Initial} Data Block}\label{sec:block-initial}
+
+The initial conditions, or starting point, of a trajectory are given in the
+\problemblock{*initial} data block. They define the initial vehicle state: position,
+velocity, and mass. They may also define starting time, ground range, and path
+length.
+
+Initial conditions can be provided directly by specifying position, velocity, and
+mass, or indirectly by taking them from another trajectory. The second method is
+used when a vehicle releases or drops an object or when a missile stages, allowing
+all resulting trajectories to be computed together.
+
+\taossubhead{Specific Initial Conditions}
+
+When specific conditions are entered, the block begins with a coordinate-system
+keyword followed by variables and values defining the state. Position and velocity
+variables must be consistent with the selected coordinate system. The valid position
+sets are given in \cref{tab:initial-position-variables} and the valid velocity sets in
+\cref{tab:initial-velocity-variables}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Initial position variables.}
+  \label{tab:initial-position-variables}
+  \begin{tabularx}{0.78\linewidth}{@{}l>{\ttfamily}lX@{}}
+    \toprule
+    Coordinate system & \normalfont Variable & Description \\
+    \midrule
+    Geodetic & alt  & Altitude \\
+             & long & Longitude \\
+             & lat  & Latitude \\
+    \addlinespace
+    Geocentric & rcm  & Distance from earth center \\
+               & long & Longitude \\
+               & lat  & Latitude \\
+    \addlinespace
+    ECFC or ECIC & x & Position $x$ component \\
+                 & y & Position $y$ component \\
+                 & z & Position $z$ component \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Geodetic coordinates are the default. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*initial
+  alt=30000 long=0 lat=45       # Position vector variables
+  vel=750 gamma=0 psi=90        # Velocity vector variables
+  wt=2000 time=0                # Other variables
+\end{lstlisting}
+
+uses the geodetic position and velocity sets without explicitly naming the coordinate
+system.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Initial velocity variables.}
+  \label{tab:initial-velocity-variables}
+  \begin{tabularx}{0.76\linewidth}{@{}l>{\ttfamily}lX@{}}
+    \toprule
+    Coordinate system & \normalfont Variable & Description \\
+    \midrule
+    Geodetic or geocentric & vel   & Velocity \\
+                            & gamma & Flight-path angle \\
+                            & psi   & Heading angle \\
+    \addlinespace
+    ECFC or ECIC & xdt & Velocity $x$ component \\
+                 & ydt & Velocity $y$ component \\
+                 & zdt & Velocity $z$ component \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Other initial-condition variables.}
+  \label{tab:other-initial-condition-variables}
+  \begin{tabularx}{0.72\linewidth}{@{}>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Variable & Description \\
+    \midrule
+    mach    & Mach number, used instead of \statevar{vel} \\
+    wt      & Weight \\
+    mass    & Mass, used instead of \statevar{wt} \\
+    time    & Time \\
+    range   & Ground range \\
+    path    & Path length \\
+    t\_0     & Time at which \statevar{omega_0} applies \\
+    omega\_0 & Angle between ECFC and ECIC at \statevar{t_0} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The units of all variables are those of the standard output variables in the Appendix
+and may be changed with \problemblock{*units/fmt}. The only required value in
+\cref{tab:other-initial-condition-variables} is \statevar{wt}, or equivalently
+\statevar{mass}. One may replace the other, but both cannot be entered. Likewise,
+\statevar{mach} may replace \statevar{vel} when specifying initial velocity, but
+Mach number and velocity cannot both be supplied.
+
+The remaining variables are optional and default to zero. The variables
+\statevar{t_0} and \statevar{omega_0} control the angular difference between the
+ECFC and ECIC coordinate systems. At time $t_0$, ECIC is rotated from ECFC by
+$\Omega_0$; therefore, at mission time $t$,
+
+\begin{equation}
+  \Omega = \Omega_0 + \lVert\vec\omega_{\oplus}\rVert\,(t-t_0),
+  \label{eq:initial-ecic-rotation}
+\end{equation}
+
+where the earth rotation rate is specified by \problemblock{*earth}.
+
+The following example gives initial conditions in ECFC coordinates:
+
+\begin{lstlisting}[style=taosmanual]
+*initial ecfc
+  x=19099345.2  y=9974312.7   z=6489105.4   # Position
+  xdt=-173.973  ydt=10327.52  zdt=26425.9   # Velocity
+  time=769.35   wt=1053.9                   # Time and weight
+  t_epoch=-1045.2 omega_0=25.3              # ECFC to ECIC
+\end{lstlisting}
+
+The trajectory begins at 769.35~s. The ECFC-to-ECIC angle is not known at that
+instant, so it is entered at the known time $-1045.2$~s, 1814.55~s before the
+trajectory start. Times for all trajectories are referenced to the common $t=0$
+mission time.
+
+\taossubhead{Initial Conditions from a Trajectory}
+
+A trajectory can obtain its initial conditions from another trajectory so that several
+trajectories branch from a common vehicle. For example, if trajectory 1 is an aircraft
+that releases a weapon at the beginning of segment 6, the weapon can be initialized
+with
+
+\begin{lstlisting}[style=taosmanual]
+*initial from segment 6, trajectory 1
+\end{lstlisting}
+
+The \texttt{from} keyword requests initial conditions from another trajectory.
+Conditions are always taken at the beginning of the specified segment.
+
+In this form the \texttt{segment} and \texttt{trajectory} values are supplied as
+shown, and position and velocity variables from
+\cref{tab:initial-position-variables,tab:initial-velocity-variables} are omitted.
+Values of \statevar{t_0} and \statevar{omega_0} may still follow the segment and
+trajectory numbers and are often kept identical for every trajectory so all use the
+same ECIC system.
+
+After initialization from another trajectory, the first segment may use
+\problemblock{*increment} and \problemblock{*reset} to adjust the copied state.
+A deployed object's weight generally must be set because it differs from the original
+vehicle, and its position is often adjusted because the two centers of mass are not at
+exactly the same location.

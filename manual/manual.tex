@@ -1,0 +1,43 @@
+\documentclass[11pt,twoside,openany]{book}
+\usepackage{manual/styles/taos}
+\input{manual/math/matrices/rotations}
+
+\title{Trajectory Analysis and Optimization System (TAOS) User's Manual}
+\author{David E. Salguero}
+\date{December 1995}
+
+\begin{document}
+\frontmatter
+\hypersetup{pageanchor=false}
+\input{manual/frontmatter/cover}
+\input{manual/frontmatter/title}
+\hypersetup{pageanchor=true}
+\input{manual/frontmatter/abstract}
+\input{manual/frontmatter/acknowledgements}
+\input{manual/frontmatter/disclaimer}
+\input{manual/frontmatter/reconstruction_note}
+\tableofcontents
+\listoffigures
+\listoftables
+\input{manual/frontmatter/nomenclature}
+
+\mainmatter
+\input{manual/chapters/01_introduction}
+\input{manual/chapters/02_methods}
+\input{manual/chapters/03_table_files}
+\input{manual/chapters/04_problem_files}
+
+\backmatter
+\clearpage
+\pagenumbering[A]{bychapter}
+\input{manual/backmatter/appendix}
+\clearpage
+\pagenumbering[Ref]{bychapter}
+\input{manual/backmatter/references}
+\clearpage
+\pagenumbering[Index]{bychapter}
+\input{manual/backmatter/index}
+\clearpage
+\pagenumbering[Dist]{bychapter}
+\input{manual/backmatter/distribution}
+\end{document}

@@ -1,0 +1,115 @@
+% Source PDF pages 85--87; manual pages 2-56--2-58.
+\subsection{Aerodynamic Forces}\label{sec:aerodynamic-forces}
+
+Aerodynamic force vectors are calculated from aerodynamic coefficients supplied in
+a table file or problem file, as described in
+\cref{sec:table-types,sec:block-aero}. A coefficient is converted to force by
+multiplying it by dynamic pressure $q$ and aerodynamic reference area
+$S_{\mathrm{ref}}$.
+
+TAOS accepts three coefficient systems: axial and normal coefficients
+$(C_A,C_N)$; lift, drag, and side-force coefficients $(C_L,C_D,C_S)$; and body
+$x$-, $y$-, and $z$-axis coefficients $(C_X,C_Y,C_Z)$. Each set defines an
+aerodynamic force vector. If more than one set is supplied, their force vectors are
+summed to form $\sum\vec F_{\mathrm{aero}}$.
+
+Aerodynamic coefficients are often functions of Mach number and Reynolds number.
+TAOS computes those quantities together with dynamic pressure as
+\begin{center}
+\begin{tabularx}{0.90\linewidth}{@{}>{\ttfamily}l>{$}l<{$}X@{}}
+  dynprs & q=0.7pM^2 & dynamic pressure.\\
+  mach   & M=\lVert\vec V_{w\oplus}\rVert/c & Mach number.\\
+  reypft & R_N=\lVert\vec V_{w\oplus}\rVert/\nu & Reynolds number per unit length.\\
+\end{tabularx}
+\end{center}
+These variables depend on atmospheric pressure $p$, speed of sound $c$, and
+kinematic viscosity $\nu$ from \cref{sec:atmosphere-model}.
+
+\taossubhead{Axial and Normal Force Coefficients}
+
+Axial and normal coefficients are commonly used for axisymmetric vehicles such as
+reentry bodies and missiles. The axial force acts opposite the body $x$ axis, and the
+normal force acts opposite the windward meridian $\phi_w$.
+
+A body-frame unit vector in the windward-meridian direction is obtained by
+projecting the wind $x$ axis onto the plane spanned by $\hat y_b$ and $\hat z_b$,
+as illustrated by \cref{fig:alpha-betae-definitions}:
+\begin{equation}
+  \hat\phi_b
+  =\frac{
+      (\hat x_w\mathbin{\cdot}\hat y_b)\hat y_b
+      +(\hat x_w\mathbin{\cdot}\hat z_b)\hat z_b}
+    {\sqrt{
+      (\hat x_w\mathbin{\cdot}\hat y_b)^2
+      +(\hat x_w\mathbin{\cdot}\hat z_b)^2}}.
+  \label{eq:windward-meridian-unit-vector}
+\end{equation}
+The axial and normal coefficients then produce
+\begin{equation}
+  \vec F_{\mathrm{aero}}
+  =-\left(C_A\hat x_b+C_N\hat\phi_b\right)qS_{\mathrm{ref}}.
+  \label{eq:aero-force-axial-normal}
+\end{equation}
+The first term is the axial force and the second is the normal force.
+\Cref{eq:windward-meridian-unit-vector} is singular when $\hat x_w$ is aligned
+with $\hat x_b$, corresponding to zero total angle of attack. TAOS sets the normal
+force to zero in that case.
+
+\taossubhead{Lift, Drag, and Side-Force Coefficients}
+
+Lift, drag, and side-force coefficients are commonly used for aircraft. Drag acts
+opposite $\hat x_w$, lift acts opposite $\hat z_w$, and side force acts in the
+positive $\hat y_w$ direction. The aerodynamic force vector is therefore
+\begin{equation}
+  \vec F_{\mathrm{aero}}
+  =-\left(C_D\hat x_w-C_S\hat y_w+C_L\hat z_w\right)
+    qS_{\mathrm{ref}}.
+  \label{eq:aero-force-lift-drag-side}
+\end{equation}
+
+\taossubhead{Body-Axes Force Coefficients}
+
+Coefficients $C_X$, $C_Y$, and $C_Z$, which may be obtained directly from wind
+tunnel testing, define forces aligned with the body-fixed coordinate system:
+\begin{equation}
+  \vec F_{\mathrm{aero}}
+  =\left(C_X\hat x_b+C_Y\hat y_b+C_Z\hat z_b\right)
+    qS_{\mathrm{ref}}.
+  \label{eq:aero-force-body-axes}
+\end{equation}
+
+\taossubhead{Aerodynamic-Force Evaluation}
+
+The function \texttt{force\_aero} evaluates aerodynamic forces. It first converts
+each input coefficient system to lift, drag, and side-force components using the
+preceding definitions and coordinate transformations. If a segment contains
+multiple \problemblock{*aero} data blocks, the force from each block is added to
+form the total lift, drag, and side force. The final force is transformed from the wind
+system to ECFC coordinates for use in the equations of motion.
+
+The aerodynamic-coefficient output variables are
+\begin{center}
+\begin{tabularx}{0.86\linewidth}{@{}>{\ttfamily}l>{$}l<{$}X@{}}
+  ca & C_A & axial aerodynamic force coefficient.\\
+  cn & C_N & normal aerodynamic force coefficient.\\
+  \addlinespace[0.25em]
+  cl & C_L & total aerodynamic lift coefficient.\\
+  cd & C_D & total aerodynamic drag coefficient.\\
+  cs & C_S & total aerodynamic side-force coefficient.\\
+  \addlinespace[0.25em]
+  cx & C_X & body $x$-axis aerodynamic force coefficient.\\
+  cy & C_Y & body $y$-axis aerodynamic force coefficient.\\
+  cz & C_Z & body $z$-axis aerodynamic force coefficient.\\
+\end{tabularx}
+\end{center}
+The lift, drag, and side-force outputs are always calculated. The other coefficient
+outputs are defined only when their corresponding coefficient system is supplied.
+For example, if the input tables define $C_A$ and $C_N$, the variables
+\statevar{ca} and \statevar{cn} are defined while \statevar{cx}, \statevar{cy},
+and \statevar{cz} remain undefined.
+
+When multiple aerodynamic coefficient sets are supplied, only $C_L$, $C_D$, and
+$C_S$ are guaranteed to represent the complete aerodynamic force. If every input
+set uses the same coefficient convention, the corresponding source-system outputs
+are also totaled correctly. If conventions are mixed, the remaining coefficient
+outputs are either undefined or represent partial totals.

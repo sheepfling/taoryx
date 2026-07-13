@@ -1,0 +1,17 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,scale=0.9]
+  \coordinate (o) at (-3.5,-1.6);
+  \coordinate (p) at (1.0,0.2);
+  \coordinate (v) at (0.4,2.0);
+  \draw[densely dashed] (o)--(4.2,-1.6) node[right] {latitude};
+  \draw[densely dashed] (o)--(-3.5,2.5) node[above] {longitude};
+  \draw[->,very thick] (o)--(3.4,1.25) node[pos=0.56,below] {downrange}
+    node[right,align=left] {reference\\azimuth};
+  \fill (o) circle (2.3pt) node[below left,align=center] {reference\\point};
+  \fill (p) circle (2.3pt) node[below right] {P};
+  \fill (v) circle (2.3pt) node[above] {vehicle};
+  \draw[->,thick] (p)--(v) node[midway,right] {crossrange};
+  \draw[->] ($(p)+(22:0.52)$) arc[start angle=22,end angle=108,radius=0.52]
+    node[midway,above right] {$\theta$};
+  \draw[->] (-3.0,-0.7) arc[start angle=80,end angle=25,radius=0.75]
+    node[midway,right,align=center] {azimuth\\angle};
+\end{tikzpicture}

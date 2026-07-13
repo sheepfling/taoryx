@@ -1,0 +1,281 @@
+% Source PDF pages 71--74; manual pages 2-42--2-45.
+\subsection{Longitude, Latitude, and Altitude Rates}\label{sec:position-rates}
+
+TAOS computes the longitude, latitude, and altitude rates in the function
+\texttt{compute\_state\_rates}. The corresponding output variables are
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.19\textwidth}p{0.56\textwidth}@{}}
+  longdt  & $\dot\lambda$ & Longitude rate.\\
+  latgcdt & $\dot\delta_{gc}$ & Geocentric latitude rate.\\
+  latgddt & $\dot\delta_{gd}$ & Geodetic latitude rate.\\
+  altdt   & $\dot h$ & Altitude rate, or rate of climb.\\
+\end{longtable}
+
+\taossubhead{Longitude Rate}
+
+Longitude $\lambda$ is defined by
+\begin{equation}
+  \sin\lambda
+  =\frac{\vec r\mathbin{\cdot}\hat y_{\oplus}}
+  {\sqrt{
+    \left(\vec r\mathbin{\cdot}\hat x_{\oplus}\right)^2
+    +\left(\vec r\mathbin{\cdot}\hat y_{\oplus}\right)^2
+  }},
+  \label{eq:longitude-sine}
+\end{equation}
+\begin{equation}
+  \cos\lambda
+  =\frac{\vec r\mathbin{\cdot}\hat x_{\oplus}}
+  {\sqrt{
+    \left(\vec r\mathbin{\cdot}\hat x_{\oplus}\right)^2
+    +\left(\vec r\mathbin{\cdot}\hat y_{\oplus}\right)^2
+  }},
+  \label{eq:longitude-cosine}
+\end{equation}
+so that
+\begin{equation}
+  \lambda
+  =\tan^{-1}
+    \left[
+      \frac{\vec r\mathbin{\cdot}\hat y_{\oplus}}
+           {\vec r\mathbin{\cdot}\hat x_{\oplus}}
+    \right].
+  \label{eq:longitude-arctangent}
+\end{equation}
+This definition is common to the geocentric and geodetic coordinate systems.
+Differentiating it gives
+\begin{equation}
+  \dot\lambda
+  =\frac{
+    \left(\vec V_{\oplus}\mathbin{\cdot}\hat y_{\oplus}\right)
+    \left(\vec r\mathbin{\cdot}\hat x_{\oplus}\right)
+    -
+    \left(\vec V_{\oplus}\mathbin{\cdot}\hat x_{\oplus}\right)
+    \left(\vec r\mathbin{\cdot}\hat y_{\oplus}\right)
+  }{
+    \left(\vec r\mathbin{\cdot}\hat x_{\oplus}\right)^2
+    +\left(\vec r\mathbin{\cdot}\hat y_{\oplus}\right)^2
+  },
+  \label{eq:longitude-rate-component-form}
+\end{equation}
+or, equivalently,
+\begin{equation}
+  \dot\lambda
+  =\frac{
+    \vec V_{\oplus}\mathbin{\cdot}
+    \left(-\sin\lambda\,\hat x_{\oplus}
+          +\cos\lambda\,\hat y_{\oplus}\right)
+  }{
+    \sqrt{
+      \left(\vec r\mathbin{\cdot}\hat x_{\oplus}\right)^2
+      +\left(\vec r\mathbin{\cdot}\hat y_{\oplus}\right)^2
+    }
+  }.
+  \label{eq:longitude-rate-unit-vector-form}
+\end{equation}
+The denominator is the projection of the position vector onto the equatorial plane.
+If it becomes zero, longitude rate is undefined and TAOS sets it to zero.
+
+\taossubhead{Geocentric Latitude Rate}
+
+From the local geocentric horizon geometry in
+\cref{fig:local-geocentric-horizon}, the geocentric latitude rate is
+\begin{equation}
+  \dot\delta_{gc}
+  =\frac{\vec V_{\oplus}\mathbin{\cdot}\hat x_{gc}}
+         {\lVert\vec r\rVert}.
+  \label{eq:geocentric-latitude-rate}
+\end{equation}
+
+\taossubhead{Geodetic Latitude Rate}
+
+The geodetic latitude rate cannot be isolated as directly. Multiplying
+\cref{eq:geodetic-equatorial-projection} by
+$(1-e^2)\tan\delta_{gd}$ and subtracting
+\cref{eq:geodetic-position-z} gives
+\begin{equation}
+  \tilde x(1-e^2)\tan\delta_{gd}
+  -\vec r\mathbin{\cdot}\hat z_{\oplus}
+  =-h e^2\sin\delta_{gd}.
+  \label{eq:geodetic-latitude-rate-start}
+\end{equation}
+Differentiation with respect to time yields
+\begin{equation}
+  \begin{aligned}
+    &\dot{\tilde x}(1-e^2)\tan\delta_{gd}
+    +\dot\delta_{gd}\,\tilde x(1-e^2)\sec^2\delta_{gd}
+    -\vec V_{\oplus}\mathbin{\cdot}\hat z_{\oplus}\\
+    &\qquad=-\dot h\,e^2\sin\delta_{gd}
+    -\dot\delta_{gd}\,h e^2\cos\delta_{gd}.
+  \end{aligned}
+  \label{eq:geodetic-latitude-rate-differentiated}
+\end{equation}
+Solving for $\dot\delta_{gd}$ gives
+\begin{equation}
+  \dot\delta_{gd}
+  =\frac{
+    \left\{
+      \dot z\cos\delta_{gd}
+      -\left[
+        \dot{\tilde x}(1-e^2)
+        +\dot h\,e^2\cos\delta_{gd}
+       \right]\sin\delta_{gd}
+    \right\}\cos\delta_{gd}
+  }{
+    \tilde x(1-e^2)+h e^2\cos^3\delta_{gd}
+  },
+  \label{eq:geodetic-latitude-rate-general}
+\end{equation}
+where
+\begin{equation}
+  \tilde x=(N+h)\cos\delta_{gd},
+  \label{eq:equatorial-projection-for-rate}
+\end{equation}
+\begin{equation}
+  \dot{\tilde x}
+  =\vec V_{\oplus}\mathbin{\cdot}
+   \left(
+     \cos\lambda\,\hat x_{\oplus}
+     +\sin\lambda\,\hat y_{\oplus}
+   \right),
+  \label{eq:equatorial-projection-rate}
+\end{equation}
+\begin{equation}
+  \dot z=\vec V_{\oplus}\mathbin{\cdot}\hat z_{\oplus},
+  \label{eq:ecfc-z-position-rate}
+\end{equation}
+and
+\begin{equation}
+  \dot h=-\vec V_{\oplus}\mathbin{\cdot}\hat z_{gd}.
+  \label{eq:altitude-rate}
+\end{equation}
+Substituting these relationships into
+\cref{eq:geodetic-latitude-rate-general} and simplifying gives
+\begin{equation}
+  \dot\delta_{gd}
+  =\frac{\vec V_{\oplus}\mathbin{\cdot}\hat x_{gd}}
+  {N\left(
+       \dfrac{1-e^2}{1-e^2\sin^2\delta_{gd}}
+     \right)+h}.
+  \label{eq:geodetic-latitude-rate-normal-radius}
+\end{equation}
+Finally, substituting the ellipsoid normal radius $N$ from
+\cref{eq:ellipsoid-normal-distance} gives
+\begin{equation}
+  \dot\delta_{gd}
+  =\frac{\vec V_{\oplus}\mathbin{\cdot}\hat x_{gd}}
+  {h+
+    \dfrac{R_{\oplus}(1-e^2)}
+    {\left(1-e^2\sin^2\delta_{gd}\right)^{3/2}}}.
+  \label{eq:geodetic-latitude-rate-final}
+\end{equation}
+The equation is singular when its denominator is zero. In that condition TAOS sets
+the geodetic latitude rate equal to the geocentric value.
+
+\taossubhead{Altitude Rate and Acceleration}
+
+The altitude rate is given by \cref{eq:altitude-rate}. Differentiating it gives the
+vertical acceleration
+\begin{equation}
+  \ddot h
+  =-\vec a_{\oplus}\mathbin{\cdot}\hat z_{gd}
+   -\vec V_{\oplus}\mathbin{\cdot}\dot{\hat z}_{gd},
+  \label{eq:altitude-acceleration}
+\end{equation}
+where differentiation of the geodetic down unit vector gives
+\begin{equation}
+  \dot{\hat z}_{gd}
+  =\frac{d}{dt}
+  \left[
+    -\cos\delta_{gd}
+      \left(
+        \cos\lambda\,\hat x_{\oplus}
+        +\sin\lambda\,\hat y_{\oplus}
+      \right)
+    -\sin\delta_{gd}\,\hat z_{\oplus}
+  \right],
+  \label{eq:geodetic-down-unit-vector-derivative-definition}
+\end{equation}
+which expands to
+\begin{equation}
+  \begin{aligned}
+  \dot{\hat z}_{gd}={}&
+    \left[
+      \sin\delta_{gd}
+      \left(
+        \cos\lambda\,\hat x_{\oplus}
+        +\sin\lambda\,\hat y_{\oplus}
+      \right)
+      -\cos\delta_{gd}\,\hat z_{\oplus}
+    \right]\dot\delta_{gd}\\
+  &+\cos\delta_{gd}
+    \left(
+      \sin\lambda\,\hat x_{\oplus}
+      -\cos\lambda\,\hat y_{\oplus}
+    \right)\dot\lambda.
+  \end{aligned}
+  \label{eq:geodetic-down-unit-vector-derivative}
+\end{equation}
+The vertical acceleration is required by one of the guidance rules discussed in
+\cref{sec:control-variable-solution}.
+
+\taossubhead{Dynamic Pressure and Mach Number Rates}
+
+The second derivative of dynamic pressure and the first derivative of Mach number
+are required by several guidance rules. Dynamic pressure is defined as
+\begin{equation}
+  q=0.5\,\rho\lVert\vec V_{w\oplus}\rVert^2.
+  \label{eq:dynamic-pressure-rate-definition}
+\end{equation}
+Under the derivative approximations used by TAOS, differentiating twice gives
+\begin{equation}
+  \ddot q
+  =0.5\,\ddot\rho\lVert\vec V_{w\oplus}\rVert^2
+   +2\dot\rho\lVert\vec V_{w\oplus}\rVert
+      \lVert\dot{\vec V}_{w\oplus}\rVert
+   +\rho\lVert\dot{\vec V}_{w\oplus}\rVert^2,
+  \label{eq:dynamic-pressure-second-derivative}
+\end{equation}
+where
+\begin{equation}
+  \dot\rho
+  =\frac{\partial h}{\partial t}\frac{\partial\rho}{\partial h}
+  =\dot h\frac{\partial\rho}{\partial h},
+  \label{eq:atmospheric-density-rate}
+\end{equation}
+and
+\begin{equation}
+  \ddot\rho
+  =\frac{\partial^2 h}{\partial t^2}\frac{\partial\rho}{\partial h}
+  =\ddot h\frac{\partial\rho}{\partial h}.
+  \label{eq:atmospheric-density-second-rate}
+\end{equation}
+Terms involving $\lVert\ddot{\vec V}_{w\oplus}\rVert$ and
+$\partial^2\rho/\partial h^2$ are assumed small,
+$\lVert\dot{\vec V}_{w\oplus}\rVert$ is approximated by
+$\lVert\vec a_{\oplus}\rVert$, and the atmospheric density derivative is obtained
+numerically from the selected atmosphere model.
+
+Mach number is
+\begin{equation}
+  M=\frac{\lVert\vec V_{w\oplus}\rVert}{c},
+  \label{eq:mach-number-rate-definition}
+\end{equation}
+and its time derivative is
+\begin{equation}
+  \dot M
+  =\frac{
+    \lVert\dot{\vec V}_{w\oplus}\rVert c
+    -\lVert\vec V_{w\oplus}\rVert\dot c
+  }{c^2},
+  \label{eq:mach-number-rate}
+\end{equation}
+where
+\begin{equation}
+  \dot c
+  =\frac{\partial h}{\partial t}\frac{\partial c}{\partial h}
+  =\dot h\frac{\partial c}{\partial h}.
+  \label{eq:speed-of-sound-rate}
+\end{equation}
+Again, $\lVert\dot{\vec V}_{w\oplus}\rVert$ is approximated by
+$\lVert\vec a_{\oplus}\rVert$, and the altitude derivative of the speed of sound is
+computed numerically from the atmosphere model.

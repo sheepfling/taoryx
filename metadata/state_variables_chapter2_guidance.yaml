@@ -1,0 +1,104 @@
+chapter: 2
+section: 2.5
+control_variables:
+  - name: alpha
+    symbol: alpha
+    description: angle of attack
+  - name: alphat
+    symbol: alpha_T
+    description: total angle of attack
+  - name: beta
+    symbol: beta
+    description: projection-defined sideslip angle
+  - name: betae
+    symbol: beta_E
+    description: Euler sideslip angle
+  - name: phi
+    symbol: phi_w
+    description: windward meridian
+  - name: bankgc
+    symbol: mu_gc
+    description: geocentric bank angle
+  - name: bankgd
+    symbol: mu_gd
+    description: geodetic bank angle
+  - name: yawgc
+    symbol: Psi_gc
+    description: geocentric yaw angle
+  - name: pitchgc
+    symbol: Theta_gc
+    description: geocentric pitch angle
+  - name: rollgc
+    symbol: Phi_gc
+    description: geocentric roll angle
+  - name: yawgd
+    symbol: Psi_gd
+    description: geodetic yaw angle
+  - name: pitchgd
+    symbol: Theta_gd
+    description: geodetic pitch angle
+  - name: rollgd
+    symbol: Phi_gd
+    description: geodetic roll angle
+  - name: yawi
+    symbol: Psi_p
+    description: inertial-platform yaw angle
+  - name: pitchi
+    symbol: Theta_p
+    description: inertial-platform pitch angle
+  - name: rolli
+    symbol: Phi_p
+    description: inertial-platform roll angle
+  - name: power
+    symbol: P
+    description: power setting
+solution_variables:
+  - name: altitude_acceleration
+    symbol: ddot_h
+  - name: lift_coefficient
+    symbol: C_L
+  - name: side_force_coefficient
+    symbol: C_S
+  - name: dynamic_pressure_acceleration
+    symbol: ddot_q
+  - name: geocentric_flight_path_rate
+    symbol: dot_gamma_gc
+  - name: geodetic_flight_path_rate
+    symbol: dot_gamma_gd
+  - name: geocentric_heading_rate
+    symbol: dot_psi_gc
+  - name: geodetic_heading_rate
+    symbol: dot_psi_gd
+  - name: lift_to_drag
+    symbol: L_over_D
+  - name: maximum_lift_to_drag_alpha
+    symbol: alpha_L_over_D
+  - name: mach_rate
+    symbol: dot_M
+  - name: axial_specific_load
+    symbol: a_sp_dot_x_b
+  - name: lateral_specific_load
+    symbol: a_sp_dot_y_b
+  - name: normal_specific_load
+    symbol: a_sp_dot_z_b
+  - name: thrust
+    symbol: norm_F_prop
+  - name: initial_impact_point_range
+    symbol: r_iip
+  - name: initial_impact_point_azimuth
+    symbol: alpha_iip
+  - name: earth_relative_speed
+    symbol: norm_V_earth
+proportional_navigation_variables:
+  - name: line_of_sight_yaw
+    symbol: Lambda_y
+  - name: line_of_sight_pitch
+    symbol: Lambda_p
+  - name: closure_velocity
+    symbol: V_c
+  - name: navigation_constant
+    symbol: N_prime
+  - name: yaw_normal_acceleration
+    symbol: n_y
+  - name: pitch_normal_acceleration
+    symbol: n_p

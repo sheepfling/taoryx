@@ -1,0 +1,25 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,font=\sffamily\scriptsize]
+  \coordinate (O) at (0,0);
+
+  % Reference local-horizon and velocity axes.
+  \draw[->,line width=1.0pt] (O)--(3.15,0) node[right] {$\hat{y}_{V}$};
+  \draw[->,line width=1.0pt] (O)--(0,-2.05) node[below] {$\hat{z}_{V}$};
+  \draw[->,line width=1.0pt] (O)--(-0.72,-1.55) node[below left] {$\hat{z}_{w}$};
+  \draw[->,line width=1.05pt] (O)--(2.45,-0.82) node[right] {$\hat{y}_{w}$};
+  \draw[->,line width=0.9pt] (O)--(0.20,1.55) node[above] {$\hat{x}_{V}=\hat{x}_{w}$};
+
+  % Bank angle arc.
+  \draw[->] (1.35,0) arc[start angle=0,end angle=-18.5,radius=1.35];
+  \node at (1.65,-0.25) {$\mu_{gc}$ or $\mu_{gd}$};
+
+  % Measurement-plane annotation, moved clear of all vector labels.
+  \node[align=left,anchor=east] at (-1.05,1.25)
+    {Plane of measurement\\for sideslip angle $\beta_E$};
+  \draw[->,line width=0.75pt] (-0.92,0.95)--(-0.08,0.35);
+
+  \node[align=right,anchor=east] at (-0.55,0.05)
+    {Geocentric or geodetic\\local horizontal};
+  \draw[line width=0.75pt] (-0.42,0)--(O);
+  \node[align=left,anchor=west] at (0.55,1.18)
+    {$\hat{y}_{V}$ and $\hat{z}_{V}$ lie in the page;\\$\hat{x}_{V}$ is normal to the page.};
+\end{tikzpicture}

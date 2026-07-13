@@ -1,0 +1,36 @@
+output_variables:
+  ranges_and_distances:
+    - {name: crsrng, symbol: delta_r_s, quantity: length, description: Distance perpendicular to a reference azimuth}
+    - {name: dwnrng, symbol: delta_r_s, quantity: length, description: Distance along a reference azimuth}
+    - {name: east, symbol: delta_r_s, quantity: length, description: Distance along constant latitude}
+    - {name: north, symbol: delta_r_s, quantity: length, description: Distance along constant longitude}
+  radar:
+    - {name: radrng, symbol: norm_delta_r_r, quantity: length, description: Radar range}
+    - {name: radrngdt, symbol: norm_delta_r_r_dot, quantity: speed, description: Radar range rate}
+    - {name: radrngdt2, symbol: norm_delta_r_r_ddot, quantity: acceleration, description: Radar range acceleration}
+    - {name: radaz, symbol: alpha_r, quantity: angle, description: Radar azimuth angle}
+    - {name: radazdt, symbol: alpha_r_dot, quantity: angular_rate, description: Radar azimuth rate}
+    - {name: radazdt2, symbol: alpha_r_ddot, quantity: angular_acceleration, description: Radar azimuth acceleration}
+    - {name: radelv, symbol: epsilon_r, quantity: angle, description: Radar elevation angle}
+    - {name: radelvdt, symbol: epsilon_r_dot, quantity: angular_rate, description: Radar elevation rate}
+    - {name: radelvdt2, symbol: epsilon_r_ddot, quantity: angular_acceleration, description: Radar elevation acceleration}
+    - {name: radasp, symbol: eta_r, quantity: angle, description: Vehicle aspect angle from radar}
+    - {name: radmer, symbol: phi_r, quantity: angle, description: Vehicle meridional angle from radar}
+  relative_vehicle:
+    - {name: relrng, symbol: norm_delta_r_i, quantity: length, description: Relative range of the ith vehicle}
+    - {name: relaz, symbol: alpha_i, quantity: angle, description: Relative azimuth angle of the ith vehicle}
+    - {name: relelv, symbol: epsilon_i, quantity: angle, description: Relative elevation angle of the ith vehicle}
+    - {name: relvel, symbol: norm_delta_r_i_dot, quantity: speed, description: Closure velocity of the ith vehicle}
+    - {name: relxb, symbol: delta_r_i_dot_x_b, quantity: length, description: Relative body x position}
+    - {name: relyb, symbol: delta_r_i_dot_y_b, quantity: length, description: Relative body y position}
+    - {name: relzb, symbol: delta_r_i_dot_z_b, quantity: length, description: Relative body z position}
+  initial_impact_point:
+    - {name: iip_latgd, symbol: delta_iip, quantity: angle, description: Geodetic latitude of the initial impact point}
+    - {name: iip_long, symbol: lambda_iip, quantity: angle, description: Longitude of the initial impact point}
+    - {name: iip_time, symbol: t_iip, quantity: time, description: Time at the initial impact point}
+    - {name: iip_rng, symbol: r_iip, quantity: length, description: Range to the initial impact point}
+    - {name: iip_azm, symbol: alpha_iip, quantity: angle, description: Azimuth to the initial impact point}
+  aerodynamic:
+    - {name: alpha_l/d, symbol: alpha_L_over_D, quantity: angle, description: Angle of attack at maximum lift-to-drag ratio}
+    - {name: ballistic, symbol: beta_c, quantity: mass_per_area, description: Ballistic coefficient}
+    - {name: l/d, symbol: L_over_D, quantity: dimensionless, description: Lift-to-drag ratio}

@@ -1,0 +1,53 @@
+% Source PDF pages 93--94; manual pages 2-64--2-65.
+\section{Output Variables}\label{sec:output-variables}
+
+At each integration step, TAOS can compute the following output variables from the
+vehicle state. These quantities are evaluated only when the input problem references
+them, for example in a print-variable list or as a segment final condition.
+
+\begingroup
+\small
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\begin{longtable}{@{}>{\ttfamily}p{0.18\textwidth}>{$\displaystyle}p{0.24\textwidth}<{$}p{0.52\textwidth}@{}}
+  \multicolumn{3}{c}{\sffamily\bfseries\large Range and Distance}\\[0.25em]
+  crsrng & \Delta r_s & distance perpendicular to a reference azimuth.\\
+  dwnrng & \Delta r_s & distance along a reference azimuth.\\
+  east   & \Delta r_s & distance along constant latitude.\\
+  north  & \Delta r_s & distance along constant longitude.\\[0.35em]
+  \midrule
+  \multicolumn{3}{c}{\sffamily\bfseries\large Radar Observations}\\[0.25em]
+  radrng    & \lVert\Delta\vec r_r\rVert & radar range.\\
+  radrngdt  & \lVert\Delta\dot{\vec r}_r\rVert & radar range rate.\\
+  radrngdt2 & \lVert\Delta\ddot{\vec r}_r\rVert & radar range acceleration.\\
+  radaz     & \alpha_r & radar azimuth angle.\\
+  radazdt   & \dot\alpha_r & radar azimuth rate.\\
+  radazdt2  & \ddot\alpha_r & radar azimuth acceleration.\\
+  radelv    & \epsilon_r & radar elevation angle.\\
+  radelvdt  & \dot\epsilon_r & radar elevation rate.\\
+  radelvdt2 & \ddot\epsilon_r & radar elevation acceleration.\\
+  radasp    & \eta_r & vehicle aspect angle from radar.\\
+  radmer    & \phi_r & vehicle meridional angle from radar.\\[0.35em]
+  \midrule
+  \multicolumn{3}{c}{\sffamily\bfseries\large Relative Vehicle Variables}\\[0.25em]
+  relrng & \lVert\Delta\vec r_i\rVert & relative range of the $i$th vehicle.\\
+  relaz  & \alpha_i & relative azimuth angle of the $i$th vehicle.\\
+  relelv & \epsilon_i & relative elevation angle of the $i$th vehicle.\\
+  relvel & \lVert\Delta\dot{\vec r}_i\rVert & closure velocity of the $i$th vehicle.\\
+  relxb  & \Delta\vec r_i\cdot\hat x_b & $x$ position of the $i$th vehicle in body coordinates.\\
+  relyb  & \Delta\vec r_i\cdot\hat y_b & $y$ position of the $i$th vehicle in body coordinates.\\
+  relzb  & \Delta\vec r_i\cdot\hat z_b & $z$ position of the $i$th vehicle in body coordinates.\\[0.35em]
+  \midrule
+  \multicolumn{3}{c}{\sffamily\bfseries\large Initial Impact Point Variables}\\[0.25em]
+  iip\_latgd & \delta_{\mathrm{iip}} & geodetic latitude of the initial impact point.\\
+  iip\_long  & \lambda_{\mathrm{iip}} & longitude of the initial impact point.\\
+  iip\_time  & t_{\mathrm{iip}} & time at the initial impact point.\\
+  iip\_rng   & r_{\mathrm{iip}} & range to the initial impact point.\\
+  iip\_azm   & \alpha_{\mathrm{iip}} & azimuth to the initial impact point.\\[0.35em]
+  \midrule
+  \multicolumn{3}{c}{\sffamily\bfseries\large Aerodynamic Variables}\\[0.25em]
+  alpha\_l/d & \alpha_{L/D} & angle of attack at maximum lift-to-drag ratio.\\
+  ballistic  & \beta_c & ballistic coefficient.\\
+  l/d        & L/D & lift-to-drag ratio.\\
+\end{longtable}
+\endgroup

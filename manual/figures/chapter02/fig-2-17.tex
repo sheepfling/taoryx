@@ -1,0 +1,26 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,scale=0.88]
+  \coordinate (o) at (-3.6,0);
+  \coordinate (p) at (2.2,1.45);
+  \draw[->,line width=1.0pt] (o) -- (3.5,0) node[right] {$\hat x_b$};
+  \draw[->,line width=1.0pt] (o) -- (-3.6,-1.35) node[below] {$\hat z_b$};
+  \draw[->,line width=1.0pt] (o) -- (-2.5,-0.95) node[below right] {$\hat y_b$};
+  \node[above left] at (o) {vehicle};
+  \node[above left] at (-3.0,1.05) {$\hat y_b$ is out of the page};
+
+  % Thrust vector and its projection.
+  \draw[<-,line width=1.15pt] (o) -- (p)
+    node[midway,above left] {$\vec F_{\mathrm{prop}}$};
+  \draw[dashed] (p) -- (2.2,0);
+  \draw[->,line width=0.85pt] (o) ++(1.45,0) arc[start angle=0,end angle=14,radius=1.45]
+    node[midway,right] {$\epsilon_1$};
+
+  % yz-plane at the projected point.
+  \draw (2.2,0) ellipse (0.58 and 1.35);
+  \draw[->] (2.2,0) -- (2.2,-1.55) node[below] {$\hat z_b$};
+  \draw[->] (2.2,0) -- (3.15,-0.75) node[right] {$\hat y_b$};
+  \draw[line width=0.9pt] (2.2,0) -- (2.55,0.92);
+  \draw[->,line width=0.8pt] (2.2,0.62) arc[start angle=90,end angle=69,radius=0.62]
+    node[midway,right] {$\epsilon_2$};
+  \node[align=left,right] at (2.85,1.35)
+    {projection of $\vec F_{\mathrm{prop}}$\\onto the $\hat y_b$--$\hat z_b$ plane};
+\end{tikzpicture}

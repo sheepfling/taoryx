@@ -1,0 +1,17 @@
+\begin{tikzpicture}[>=Latex,x=1.0cm,y=1.0cm,line cap=round]
+  \coordinate (v) at (0.6,2.65);
+  \coordinate (p) at (8.5,0.0);
+  \draw[line width=0.8pt] (v) .. controls (3.0,4.2) and (6.7,3.4) .. (p);
+  \draw[line width=0.8pt] (v) .. controls (3.1,3.55) and (6.7,2.75) .. (p);
+  \draw[line width=0.8pt] (v) .. controls (3.2,3.0) and (6.7,2.25) .. (p);
+  \fill (v) circle (2pt);
+  \fill (p) circle (2pt);
+  \draw[->,line width=0.8pt] (v) -- ++(0,0.85);
+  \draw[->,line width=0.8pt] (v) -- ++(0.65,-0.4);
+  \node[left,align=right] at ($(v)+(-0.15,0.75)$)
+    {$\Delta\vec V$ along range-\\insensitive axis};
+  \node[below left] at (v) {Vehicle};
+  \node[right,align=left] at (p) {Impact\\point};
+  \node[above] at (5.9,3.3) {Ballistic trajectories};
+  \draw[->] (6.35,3.05) -- (6.75,2.55);
+\end{tikzpicture}

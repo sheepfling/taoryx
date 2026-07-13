@@ -1,0 +1,237 @@
+% Source PDF pages 89--92; manual pages 2-60--2-63.
+\subsection{Gravity Model}\label{sec:gravity-model}
+
+The gravitational field surrounding a planet can be represented by a potential
+function $U$. The acceleration required for trajectory propagation is the gradient
+of that potential:
+\begin{equation}
+  \nabla U=\vec a_{\mathrm{grav}}.
+  \label{eq:gravity-potential-gradient}
+\end{equation}
+For the earth, $U$ is the geopotential. It is a function of the geocentric coordinates
+$\lVert\vec r\rVert$, $\delta_{gc}$, and $\lambda$ and is commonly expanded in
+spherical harmonics as\manualref{6}
+\begin{equation}
+  \begin{aligned}
+  U=\frac{GM}{\lVert\vec r\rVert}
+  \Bigg\{1
+  &+\sum_{n=2}^{\infty}\sum_{m=0}^{n}
+    \left[\frac{R_{\oplus}}{\lVert\vec r\rVert}\right]^n
+    P_{n,m}(\sin\delta_{gc})\\[-0.2em]
+  &\qquad\times
+    \left[C_{n,m}\cos(m\lambda)+S_{n,m}\sin(m\lambda)\right]
+  \Bigg\}.
+  \end{aligned}
+  \label{eq:geopotential-spherical-harmonics}
+\end{equation}
+The coefficients $C_{n,m}$ and $S_{n,m}$ are related to spatial features of the
+earth's gravity field. Earth gravity models derived from satellite tracking therefore
+consist of values for $GM$, $R_{\oplus}$, $C_{n,m}$, and $S_{n,m}$.
+
+Because the geocentric origin coincides with the earth's center of mass, the
+first-degree terms $C_{1,0}$ and $C_{1,1}$ are zero. The expansion therefore begins
+at degree $n=2$.
+
+\taossubhead{Geopotential}
+
+The geopotential can be interpreted as three parts. The first is the point-mass term
+\begin{equation}
+  \frac{GM}{\lVert\vec r\rVert},
+  \label{eq:point-mass-geopotential}
+\end{equation}
+which is the complete potential used by the spherical-earth model. All harmonic
+corrections are neglected for that model.
+
+The second part contains terms that depend on latitude but not longitude, namely the
+$m=0$ terms. These are the zonal harmonics. The degree-2 zonal harmonic, which
+represents the earth's oblateness, is the largest spherical-harmonic correction. A
+zonal-only potential is
+\begin{equation}
+  U=\frac{GM}{\lVert\vec r\rVert}
+  \left\{1+\sum_{n=2}^{\infty}
+    \left[\frac{R_{\oplus}}{\lVert\vec r\rVert}\right]^n
+    P_{n,0}(\sin\delta_{gc})C_{n,0}\right\}.
+  \label{eq:zonal-geopotential-c-coefficients}
+\end{equation}
+Defining $J_n=-C_{n,0}$ gives the more common form
+\begin{equation}
+  U=\frac{GM}{\lVert\vec r\rVert}
+  \left\{1-\sum_{n=2}^{\infty}
+    \left[\frac{R_{\oplus}}{\lVert\vec r\rVert}\right]^n
+    P_{n,0}(\sin\delta_{gc})J_n\right\}.
+  \label{eq:zonal-geopotential-j-coefficients}
+\end{equation}
+
+The third part consists of the remaining longitude-dependent terms. The largest is
+usually the degree-2, order-2 term, which represents the earth's asymmetry about the
+equator. Even that term is substantially smaller than the degree-2 zonal harmonic
+associated with oblateness.\manualref{10}
+
+\taossubhead{Legendre Functions}
+
+The terms $P_{n,m}(\sin\delta_{gc})$ are Legendre functions of
+$\sin\delta_{gc}$ defined by\manualref{6}
+\begin{equation}
+  P_{n,m}(\sin\delta_{gc})
+  =\cos^m\delta_{gc}\,
+   \frac{d^m}{d(\sin\delta_{gc})^m}
+   \left[P_{n,0}(\sin\delta_{gc})\right],
+  \label{eq:associated-legendre-definition}
+\end{equation}
+where
+\begin{equation}
+  P_{n,0}(\sin\delta_{gc})
+  =\frac{1}{2^n n!}
+   \frac{d^n}{d(\sin\delta_{gc})^n}
+   \left(\sin^2\delta_{gc}-1\right)^n.
+  \label{eq:legendre-order-zero-definition}
+\end{equation}
+The notation
+\begin{equation}
+  \frac{d^n}{d(\sin\delta_{gc})^n}
+  \left[P(\sin\delta_{gc})\right]
+  \label{eq:legendre-derivative-notation}
+\end{equation}
+denotes the $n$th derivative of $P$ with respect to $\sin\delta_{gc}$. The first
+four order-zero functions are
+\begin{equation}
+  \begin{aligned}
+  P_{1,0}(\sin\delta_{gc})&=\sin\delta_{gc},\\
+  P_{2,0}(\sin\delta_{gc})&=\tfrac12
+    \left(3\sin^2\delta_{gc}-1\right),\\
+  P_{3,0}(\sin\delta_{gc})&=\tfrac12
+    \left(5\sin^3\delta_{gc}-3\sin\delta_{gc}\right),\\
+  P_{4,0}(\sin\delta_{gc})&=\tfrac18
+    \left(35\sin^4\delta_{gc}-30\sin^2\delta_{gc}+3\right).
+  \end{aligned}
+  \label{eq:first-four-legendre-functions}
+\end{equation}
+
+\taossubhead{Normalization}
+
+The spherical-harmonic coefficients in
+\cref{eq:geopotential-spherical-harmonics,eq:zonal-geopotential-c-coefficients}
+are unnormalized. As degree increases, the unnormalized coefficients become very
+small partly because of the physical gravity field and partly because the associated
+Legendre functions become large. A common normalization scales the functions by
+\begin{equation}
+  \overline{P}_{n,m}
+  =\left[(2-\delta_m)(2n+1)
+    \frac{(n-m)!}{(n+m)!}\right]^{1/2}P_{n,m},
+  \label{eq:normalized-legendre-function}
+\end{equation}
+and scales a cosine coefficient by the inverse factor:
+\begin{equation}
+  \overline{C}_{n,m}
+  =\left[\frac{1}{(2-\delta_m)(2n+1)}
+    \frac{(n+m)!}{(n-m)!}\right]^{1/2}C_{n,m}.
+  \label{eq:normalized-gravity-coefficient}
+\end{equation}
+Here $\delta_m=1$ for $m=0$ and $\delta_m=0$ for $m>0$. A bar denotes a
+normalized function or coefficient.
+
+TAOS uses unnormalized Legendre functions and coefficients because it retains no
+terms above degree 4. Published coefficients for the WGS-84\manualref{6} and
+GEM-T1\manualref{11} models are normalized and must be unnormalized before use
+in TAOS.
+
+\taossubhead{Gravity Acceleration Vector}
+
+Because $\vec a_{\mathrm{grav}}=\nabla U$, its components in geocentric coordinates
+are
+\begin{equation}
+  \vec a_{\mathrm{grav}}\mathbin{\cdot}\hat x_{gc}
+  =\frac{1}{\lVert\vec r\rVert}
+   \frac{\partial U}{\partial\delta_{gc}},
+  \label{eq:gravity-geocentric-x-gradient}
+\end{equation}
+\begin{equation}
+  \vec a_{\mathrm{grav}}\mathbin{\cdot}\hat y_{gc}
+  =\frac{1}{\lVert\vec r\rVert\cos\delta_{gc}}
+   \frac{\partial U}{\partial\lambda},
+  \label{eq:gravity-geocentric-y-gradient}
+\end{equation}
+and
+\begin{equation}
+  \vec a_{\mathrm{grav}}\mathbin{\cdot}\hat z_{gc}
+  =-\frac{\partial U}{\partial\lVert\vec r\rVert}.
+  \label{eq:gravity-geocentric-z-gradient}
+\end{equation}
+The radial component is negated because the position vector $\vec r$ points in the
+opposite direction from the inward geocentric unit vector $\hat z_{gc}$.
+Differentiating \cref{eq:geopotential-spherical-harmonics} gives
+\begin{equation}
+  \begin{aligned}
+  \vec a_{\mathrm{grav}}\mathbin{\cdot}\hat x_{gc}
+  ={}&\frac{GM}{\lVert\vec r\rVert^2}
+  \sum_{n=2}^{\infty}
+  \left[\frac{R_{\oplus}}{\lVert\vec r\rVert}\right]^n
+  \sum_{m=0}^{n}
+  \frac{\partial P_{n,m}(\sin\delta_{gc})}{\partial\delta_{gc}}\\[-0.2em]
+  &\qquad\times
+  \left[C_{n,m}\cos(m\lambda)+S_{n,m}\sin(m\lambda)\right],
+  \end{aligned}
+  \label{eq:gravity-full-geocentric-x}
+\end{equation}
+\begin{equation}
+  \begin{aligned}
+  \vec a_{\mathrm{grav}}\mathbin{\cdot}\hat y_{gc}
+  ={}&\frac{GM}{\lVert\vec r\rVert^2}
+  \sum_{n=2}^{\infty}
+  \left[\frac{R_{\oplus}}{\lVert\vec r\rVert}\right]^n
+  \sum_{m=0}^{n}
+  \frac{mP_{n,m}(\sin\delta_{gc})}{\cos\delta_{gc}}\\[-0.2em]
+  &\qquad\times
+  \left[-C_{n,m}\sin(m\lambda)+S_{n,m}\cos(m\lambda)\right],
+  \end{aligned}
+  \label{eq:gravity-full-geocentric-y}
+\end{equation}
+and
+\begin{equation}
+  \begin{aligned}
+  \vec a_{\mathrm{grav}}\mathbin{\cdot}\hat z_{gc}
+  =\frac{GM}{\lVert\vec r\rVert^2}
+  \Bigg\{1
+  &+\sum_{n=2}^{\infty}(n+1)
+    \left[\frac{R_{\oplus}}{\lVert\vec r\rVert}\right]^n\\[-0.2em]
+  &\quad\times\sum_{m=0}^{n}P_{n,m}(\sin\delta_{gc})
+    \left[C_{n,m}\cos(m\lambda)+S_{n,m}\sin(m\lambda)\right]
+  \Bigg\}.
+  \end{aligned}
+  \label{eq:gravity-full-geocentric-z}
+\end{equation}
+
+The function \texttt{accel\_grav} evaluates these expressions through degree
+$n=4$ for the \texttt{wgs-84-full} and \texttt{gem-t1-full} earth models described
+in \cref{sec:block-earth}. Solar and lunar gravity are neglected. The
+\texttt{tsap-72} and \texttt{tsap-84} models retain zonal harmonics through degree
+4 for compatibility with TSAP. Those models are somewhat inconsistent because the
+$J_3$ and $J_4$ terms are roughly the same order of magnitude as some omitted
+nonzonal terms.
+
+The standard \texttt{wgs-72} and \texttt{wgs-84} models retain only the dominant
+second-degree zonal harmonic $J_2$. Their acceleration equations reduce to
+\begin{equation}
+  \vec a_{\mathrm{grav}}\mathbin{\cdot}\hat x_{gc}
+  =-\frac{GM}{\lVert\vec r\rVert^2}
+    \left[\frac{R_{\oplus}}{\lVert\vec r\rVert}\right]^2
+    \left(3J_2\sin\delta_{gc}\cos\delta_{gc}\right),
+  \label{eq:gravity-j2-geocentric-x}
+\end{equation}
+\begin{equation}
+  \vec a_{\mathrm{grav}}\mathbin{\cdot}\hat y_{gc}=0,
+  \label{eq:gravity-j2-geocentric-y}
+\end{equation}
+and
+\begin{equation}
+  \vec a_{\mathrm{grav}}\mathbin{\cdot}\hat z_{gc}
+  =\frac{GM}{\lVert\vec r\rVert^2}
+   \left\{1-
+    \left[\frac{R_{\oplus}}{\lVert\vec r\rVert}\right]^2
+    \frac{3}{2}J_2\left(3\sin^2\delta_{gc}-1\right)
+   \right\}.
+  \label{eq:gravity-j2-geocentric-z}
+\end{equation}
+The $J_2$-only models provide adequate accuracy for a point-mass trajectory code
+such as TAOS. For most trajectories, the effects of higher-order harmonics are small
+relative to uncertainties in other models, especially the atmosphere.

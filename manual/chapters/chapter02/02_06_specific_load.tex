@@ -1,0 +1,38 @@
+% Source PDF page 79; manual page 2-50.
+\subsection{Specific Load Factors}\label{sec:specific-load}
+
+One definition of the specific-load vector is the vehicle's inertial acceleration minus
+the acceleration caused by gravity:
+\begin{equation}
+  \vec a_{sp}=\vec a_I-\vec a_{grav}.
+  \label{eq:specific-load-inertial-definition}
+\end{equation}
+An equivalent definition is the sum of the aerodynamic and propulsive forces divided
+by vehicle mass:
+\begin{equation}
+  \vec a_{sp}
+  =\frac{\sum\vec F_{aero}+\sum\vec F_{prop}}{m}.
+  \label{eq:specific-load-force-definition}
+\end{equation}
+Specific-load factors are the components of $\vec a_{sp}$. They are used to establish
+structural requirements and limits and are commonly referred to as vehicle
+\emph{g loading}. The function \texttt{compute\_derivs} evaluates
+\begin{longtable}{@{}>{\ttfamily}p{0.17\textwidth}p{0.21\textwidth}p{0.54\textwidth}@{}}
+  nx & $\vec a_{sp}\mathbin{\cdot}\hat x_b$ &
+    Specific-load component along the body $x$ axis, commonly called axial g's.\\
+  ny & $\vec a_{sp}\mathbin{\cdot}\hat y_b$ &
+    Specific-load component along the body $y$ axis.\\
+  nz & $\vec a_{sp}\mathbin{\cdot}\hat z_b$ &
+    Specific-load component along the body $z$ axis.\\
+  ntotal & $\lVert\vec a_{sp}\rVert$ &
+    Magnitude of the specific-load vector, commonly called total g's.\\
+\end{longtable}
+The normal, or lateral, specific load is
+\begin{equation}
+  a_{sp_n}
+  =\sqrt{
+    \left(\vec a_{sp}\mathbin{\cdot}\hat y_b\right)^2
+    +\left(\vec a_{sp}\mathbin{\cdot}\hat z_b\right)^2
+  }.
+  \label{eq:normal-specific-load}
+\end{equation}

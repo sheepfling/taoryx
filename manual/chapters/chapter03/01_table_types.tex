@@ -1,0 +1,70 @@
+\section{Table Types}\label{sec:table-types}
+
+Each table in a table file has a table type corresponding to the value defined in the
+table. For example, the \tabletype{thrust} table type defines a thrust value. The table
+type is compared with its use in the problem file, and an input error occurs if the
+table is not used correctly---for example, if a thrust table is used for an axial-force
+coefficient. \Cref{tab:table-types} lists the table types used in TAOS.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Table types.}
+  \label{tab:table-types}
+  \begin{tabularx}{0.82\linewidth}{@{}>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Table type & Description \\
+    \midrule
+    ca     & Axial-force coefficient (in body coordinates) \\
+    cn     & Normal-force coefficient (in body coordinates) \\
+    cl     & Lift-force coefficient (in wind coordinates) \\
+    cd     & Drag-force coefficient (in wind coordinates) \\
+    cs     & Side-force coefficient (in wind coordinates) \\
+    cx     & Body $x$-axis force coefficient \\
+    cy     & Body $y$-axis force coefficient \\
+    cz     & Body $z$-axis force coefficient \\
+    thrust & Thrust magnitude \\
+    tvec1  & Thrust-vector angle 1 \\
+    tvec2  & Thrust-vector angle 2 \\
+    mdot   & Mass flow \\
+    cg     & Center of gravity \\
+    windv  & Wind magnitude \\
+    windh  & Wind direction or heading \\
+    winde  & Wind component in east direction \\
+    windn  & Wind component in north direction \\
+    windd  & Wind component in ``down'' direction \\
+    output & User-defined output variable \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Aerodynamic-force coefficients can be defined in one of three ways: in the vehicle
+body axes with $C_X$, $C_Y$, and $C_Z$; in the wind axes with $C_L$, $C_D$, and
+$C_S$; or in an axisymmetric system with $C_A$ and $C_N$. These sets of
+coefficients go together and cannot be mixed. For example, $C_L$, $C_D$, and
+$C_S$ form a valid set, whereas $C_L$, $C_D$, and $C_A$ do not.
+
+Thrust and mass-flow tables are used for all types of jet and rocket motors. The
+thrust table defines the magnitude of the thrust vector; the direction of the thrust
+vector relative to the body coordinate system is given by the thrust-vector-angle
+tables.
+
+Point-mass trajectory-analysis methods assume that a vehicle is always in a trimmed
+condition; that is, the moments always sum to zero. Therefore, trimmed aerodynamic
+coefficients should be input rather than untrimmed values. Trimmed aerodynamic
+coefficients are often a function of the vehicle's center of gravity, and center of
+gravity is in turn often a function of vehicle weight. The \tabletype{cg} table type is
+provided to define a center-of-gravity value that can be used later in the aerodynamic
+coefficient tables.
+
+Wind tables define the components of the wind-velocity vector in a local-horizon
+coordinate system. Horizontal wind velocity is given either by the \tabletype{windv}
+(velocity magnitude) and \tabletype{windh} (wind heading) tables or by the
+\tabletype{winde} (east component) and \tabletype{windn} (north component)
+tables. The \tabletype{windv} and \tabletype{windh} tables go together, and the
+\tabletype{winde} and \tabletype{windn} tables go together. A vertical wind
+component can also be input with the \tabletype{windd} table.
+
+Output tables are used to calculate user-defined output variables such as heat-transfer
+rates. Values from output tables are not used during the trajectory calculations, but
+they are available when computing user-defined output variables
+(\cref{sec:trajectory-block-define,sec:problem-block-define}).

@@ -1,0 +1,26 @@
+\subsection{\problemblock{*Iip} Data Block}\label{sec:block-iip}
+
+The initial impact point (IIP) is obtained by integrating a ballistic trajectory from the
+current vehicle state to a final altitude with no propulsive forces, as described in
+\cref{sec:iip-calculations}. A simplified constant-drag aerodynamic model is
+specified by a ballistic coefficient. The result estimates the impact point following a
+propulsive-system failure and is used in range-safety analysis.
+
+The calculation is performed when any associated output variable is referenced:
+\statevar{iip_latgd}, \statevar{iip_long}, \statevar{iip_time},
+\statevar{iip_rng}, or \statevar{iip_azm}. The required ballistic coefficient and
+final impact altitude are given by
+
+\begin{lstlisting}[style=taosmanual]
+*iip iip_beta=550 iip_alt=1000
+\end{lstlisting}
+
+which sets the coefficient to 550~lb/ft$^2$ and the impact altitude to 1000~ft when
+default units are used. Both values default to zero. A zero-drag calculation is
+requested by setting the ballistic coefficient to zero rather than to a very large
+number. The coefficient may be reset or incremented at any time during the
+trajectory.
+
+The outputs \statevar{iip_rng} and \statevar{iip_azm} give range and azimuth from
+the origin of the tangent-plane coordinate system. When those quantities are used,
+the \problemblock{*tangent} block should define the desired reference origin.

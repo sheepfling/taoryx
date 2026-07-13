@@ -1,0 +1,7 @@
+# PROVISIONAL: replace with a verified transcription of the TAOS grammar.
+# This file is documentation input, not executable syntax yet.
+
+problem <name> {
+    table <name>
+    equation <id>
+}

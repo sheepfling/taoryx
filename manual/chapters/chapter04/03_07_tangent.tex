@@ -1,0 +1,22 @@
+\subsection{\problemblock{*Tangent} Data Block}\label{sec:block-tangent}
+
+The tangent-plane coordinate-system origin is fixed to the earth and specified in
+geodetic coordinates. Its $x$ and $y$ axes are tangent to the earth's surface, its $z$
+axis points upward, and the $x$ axis is oriented by a heading or azimuth measured
+clockwise from north, as described in \cref{sec:tangent-plane}.
+
+Appendix output variables give position, velocity, and acceleration in tangent-plane
+coordinates. The initial-impact-point range and azimuth are also measured from the
+tangent-plane origin.
+
+The location and orientation are supplied with a \problemblock{*tangent} block:
+
+\begin{lstlisting}[style=taosmanual]
+*tangent latgd=21.982 long=-159.759 alt=87.2 azm=140
+\end{lstlisting}
+
+This places the origin at $21.982^\circ$~N, $159.759^\circ$~W, 87.2~ft above sea
+level, with the $x$ axis along a $140^\circ$ azimuth, approximately southeast.
+
+The block is optional. By default, the origin is on the earth's surface directly below
+the vehicle initial position, and the $x$ axis points north.

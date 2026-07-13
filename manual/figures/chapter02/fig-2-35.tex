@@ -1,0 +1,17 @@
+\begin{tikzpicture}[>=Latex,x=1.0cm,y=0.9cm,line cap=round]
+  \draw[->] (0,0)--(7.2,0) node[right] {$x$};
+  \draw[->] (0,-1.2)--(0,4.1) node[above] {$f(x)$};
+  \draw[line width=0.9pt]
+    plot[smooth] coordinates {(0.45,3.5) (1.6,3.25) (2.7,2.65) (3.6,1.65) (4.25,0.45) (5.0,-0.55) (6.4,-1.05)};
+  \coordinate (pn) at (3.55,1.72);
+  \coordinate (root) at (4.45,0);
+  \draw[densely dashed] (pn)--(3.55,0) node[below] {$x_n$};
+  \draw[densely dashed] (pn)--(0,1.72) node[left] {$f(x_n)$};
+  \draw[line width=0.75pt] (2.65,3.15)--(4.45,0)--(5.0,-0.95);
+  \draw[->] (3.9,1.20)--(4.30,0.37);
+  \node[right] at (3.9,1.45) {$\dfrac{\partial f}{\partial x}$};
+  \fill (pn) circle (1.8pt);
+  \fill (root) circle (1.8pt);
+  \node[below] at (root) {$x_{n+1}$};
+  \node[left] at (0,0) {$0$};
+\end{tikzpicture}

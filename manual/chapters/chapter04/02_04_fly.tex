@@ -1,0 +1,302 @@
+\subsection{\problemblock{*Fly} Data Block}\label{sec:block-fly}
+
+TAOS uses input guidance rules to determine values for four control variables so a
+trajectory can be calculated. Three of the controls specify body attitude---for
+example, angle of attack, sideslip, and bank angle---and the fourth controls thrust
+level through the power setting. Guidance rules and control-variable values are
+entered with \problemblock{*fly} data blocks.
+
+The \problemblock{*fly} blocks are optional. If none are given for a segment, all
+control variables are set to zero. Unless unusual aerodynamic tables are supplied,
+this represents a ballistic trajectory. Each \problemblock{*fly} block specifies one
+guidance rule that determines one or more control-variable values. Because there are
+four control variables, no more than four \problemblock{*fly} blocks can be used in
+one segment. A control variable whose desired value is zero need not be specified,
+because zero is the default.
+
+\taossubhead{Body-Attitude Guidance}
+
+The three body-attitude controls are treated separately from power setting. They can
+be specified directly relative to the surrounding air mass with aerodynamic angles;
+directly with conventional Euler yaw, pitch, and roll angles relative to inertial,
+geocentric, or geodetic coordinates; or indirectly by supplying a desired flight
+condition, such as level flight, and allowing TAOS to solve for the control values
+that produce it.
+
+The body-attitude angles that may be specified directly are listed in
+\cref{tab:body-attitude-guidance-angles}. These angles combine into the nine
+consistent sets shown in \cref{tab:consistent-body-attitude-sets}. All directly
+specified angles in a segment must be members of one consistent set.
+
+\begin{longtable}{@{}>{\ttfamily}l>{$}l<{$}p{0.50\linewidth}@{}}
+  \caption{Body-attitude angles for vehicle guidance.}\label{tab:body-attitude-guidance-angles}\\
+  \toprule
+  \normalfont Variable & \normalfont Symbol & \normalfont Description \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \normalfont Variable & \normalfont Symbol & \normalfont Description \\
+  \midrule
+  \endhead
+  alpha   & \alpha        & Angle of attack \\
+  alphat  & \alpha_T      & Total angle of attack \\
+  bankgc  & \mu_{gc}      & Geocentric bank angle \\
+  bankgd  & \mu_{gd}      & Geodetic bank angle \\
+  beta    & \beta         & Angle of sideslip \\
+  betae   & \beta_E       & Euler angle of sideslip \\
+  phi     & \phi_w        & Windward meridian \\
+  pitchgc & \Theta_{gc}   & Geocentric pitch angle \\
+  pitchgd & \Theta_{gd}   & Geodetic pitch angle \\
+  pitchi  & \Theta_i      & Inertial-platform pitch angle \\
+  rollgc  & \Phi_{gc}     & Geocentric roll angle \\
+  rollgd  & \Phi_{gd}     & Geodetic roll angle \\
+  rolli   & \Phi_i        & Inertial-platform roll angle \\
+  yawgc   & \Psi_{gc}     & Geocentric yaw angle \\
+  yawgd   & \Psi_{gd}     & Geodetic yaw angle \\
+  yawi    & \Psi_i        & Inertial-platform yaw angle \\
+  \bottomrule
+\end{longtable}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Consistent sets of body-attitude angles.}
+  \label{tab:consistent-body-attitude-sets}
+  \begin{tabular}{@{}clll@{}}
+    \toprule
+    Set & \multicolumn{3}{c}{Body-attitude angles} \\
+    \midrule
+    1 & \texttt{alpha}  & \texttt{betae}   & \texttt{bankgc} \\
+    2 & \texttt{alpha}  & \texttt{beta}    & \texttt{bankgc} \\
+    3 & \texttt{alphat} & \texttt{phi}     & \texttt{bankgc} \\
+    4 & \texttt{alpha}  & \texttt{betae}   & \texttt{bankgd} \\
+    5 & \texttt{alpha}  & \texttt{beta}    & \texttt{bankgd} \\
+    6 & \texttt{alphat} & \texttt{phi}     & \texttt{bankgd} \\
+    7 & \texttt{yawgc}  & \texttt{pitchgc} & \texttt{rollgc} \\
+    8 & \texttt{yawgd}  & \texttt{pitchgd} & \texttt{rollgd} \\
+    9 & \texttt{yawi}   & \texttt{pitchi}  & \texttt{rolli} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Often all three angles in a set are entered directly in three separate
+\problemblock{*fly} blocks, but this is not required. If only one or two angles are
+specified, the remaining angles are free. Other guidance rules may determine those
+free angles, or they remain at their default value of zero.
+
+The usual form of a \problemblock{*fly} block is the keyword followed by a
+guidance variable and its value. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*fly alpha=5.0
+*fly betae=2.5
+\end{lstlisting}
+
+requests an angle of attack of $5^\circ$ and an Euler sideslip of $2.5^\circ$. The
+specified variables appear in both Set 1 and Set 4, but TAOS chooses Set 1 because it
+has the lower set number. The remaining body-attitude variable is therefore
+\texttt{bankgc}. Because it is not specified and no other guidance rule determines
+it, geocentric bank angle defaults to zero. Power setting also defaults to zero.
+
+Use of \texttt{alpha} and \texttt{betae} is encouraged over \texttt{alpha} and
+\texttt{beta}. The projection-based sideslip angle \texttt{beta} becomes awkward
+when angle of attack approaches $\pm90^\circ$; TAOS modifies the standard
+definition to avoid a singularity, but the \texttt{alpha}/\texttt{betae} combination
+is the more robust representation (\cref{sec:wind-coordinate}).
+
+The following pair is inconsistent and generates an input error because total angle
+of attack is paired with windward meridian, not Euler sideslip:
+
+\begin{lstlisting}[style=taosmanual]
+*fly alphat=5.0       # Incorrect: inconsistent angle set
+*fly betae=5.0
+\end{lstlisting}
+
+\taossubhead{Referencing Current Values}
+
+An asterisk can be entered in place of a numerical value to request the value at the
+end of the preceding segment:
+
+\begin{lstlisting}[style=taosmanual]
+*fly yawgd=*
+*fly pitchgd=*
+*fly rollgd=*
+\end{lstlisting}
+
+Asterisk values should not be used in the first segment of a trajectory because no
+preceding values exist.
+
+\taossubhead{Power Setting}
+
+The \statevar{power} variable is a special control that can be used with propulsion
+tables to simulate an engine throttle. If the thrust and mass-flow tables are functions
+of \statevar{power}, changing it changes thrust and fuel flow. Power setting is
+nondimensional; its numerical scale can represent engine speed, throttle position, or
+another convenient quantity, provided the same convention is used in the table and
+problem files. It may be specified directly or determined indirectly from a desired
+flight condition such as constant Mach number.
+
+\taossubhead{Flight-Condition Guidance}
+
+Control variables can also be specified indirectly with desired flight conditions. In
+this case TAOS identifies the controls that have not been directly specified---the
+free control variables---and varies them with the iterative Newton--Raphson method
+described in \cref{sec:control-variable-solution} until the requested conditions are
+satisfied. The available flight-condition rules are listed in
+\cref{tab:flight-condition-guidance}.
+
+\begin{longtable}{@{}>{\ttfamily}lp{0.69\linewidth}@{}}
+  \caption{Flight conditions for vehicle guidance.}\label{tab:flight-condition-guidance}\\
+  \toprule
+  \normalfont Variable & Description \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \normalfont Variable & Description \\
+  \midrule
+  \endhead
+  alt       & Fly at a constant altitude \\
+  cl        & Fly at a constant lift coefficient \\
+  cs        & Fly at a constant side-force coefficient \\
+  downria   & Fly down the range-insensitive axis \\
+  dynprs    & Fly at a constant dynamic pressure \\
+  gamgc     & Fly at a constant geocentric flight-path angle \\
+  gamgd     & Fly at a constant geodetic flight-path angle \\
+  intercept & Fly to intercept another trajectory \\
+  l/d       & Fly at a constant lift-to-drag ratio \\
+  l/d-max   & Fly at the maximum lift-to-drag ratio \\
+  mach      & Fly at a constant Mach number \\
+  nx        & Fly at a constant axial specific-load factor \\
+  ny        & Fly at a constant lateral specific-load factor \\
+  nz        & Fly at a constant normal specific-load factor \\
+  propnav   & Fly to intercept with proportional navigation \\
+  psigc     & Fly at a constant geocentric heading angle \\
+  psigd     & Fly at a constant geodetic heading angle \\
+  thrust    & Fly at a constant thrust \\
+  upria     & Fly up the range-insensitive axis \\
+  vel       & Fly at a constant velocity \\
+  \bottomrule
+\end{longtable}
+
+The search normally converges, but convergence is not guaranteed. If a problem
+occurs, first verify that the free controls can actually influence the requested flight
+conditions. For example, with zero bank angle, angle of attack has no effect on
+heading and cannot be used to solve for a commanded heading. Next inspect the
+control limits in the \problemblock{*limits} block. Restricting free angles to the
+range covered by the aerodynamic tables prevents unreasonable extrapolation. Finally,
+inspect \statevar{dtguid} in the \problemblock{*integ} block. This value acts as a
+time constant or gain controlling how rapidly the trajectory is corrected from the
+actual state to the desired state; a value that is either too large or too small can
+prevent the trajectory from approaching the command.
+
+The following set of rules requests level flight at Mach 0.8:
+
+\begin{lstlisting}[style=taosmanual]
+*fly gamgd=0
+*fly mach=0.80
+*fly bankgd=0
+*fly betae=0
+\end{lstlisting}
+
+Two controls are fixed directly, \texttt{bankgd} and \texttt{betae}, and two are
+specified indirectly. TAOS solves for angle of attack and power setting to obtain a
+zero geodetic flight-path angle and Mach 0.8. The last two blocks are optional because
+both variables default to zero; they are shown for clarity.
+
+\taossubhead{Special Guidance Rules}
+
+The rules \texttt{l/d-max}, \texttt{intercept}, \texttt{propnav},
+\texttt{downria}, and \texttt{upria} require special handling. The maximum
+lift-to-drag rule solves for the angle of attack that maximizes $L/D$ and requires no
+value:
+
+\begin{lstlisting}[style=taosmanual]
+*fly l/d-max
+\end{lstlisting}
+
+The predictive-intercept rule takes the trajectory number of the target:
+
+\begin{lstlisting}[style=taosmanual]
+*fly intercept=3
+\end{lstlisting}
+
+This directs the vehicle toward the estimated intercept point using the method in
+\cref{sec:intercepts-pn}. Proportional navigation uses the same
+form:
+
+\begin{lstlisting}[style=taosmanual]
+*fly propnav=2
+\end{lstlisting}
+
+and uses \statevar{dtguid} from the \problemblock{*integ} block as the navigation
+constant. Both intercept rules require one free control for yaw and one for pitch, so
+each is equivalent to two ordinary guidance rules. When either is used, a segment
+can contain at most three \problemblock{*fly} blocks.
+
+The \texttt{downria} and \texttt{upria} rules align the body $x$ axis with the range-
+insensitive axis. A velocity increment along this axis changes time to impact without
+changing impact range. The former selects the direction that reduces flight time and
+the latter the direction that increases it (\cref{sec:range-insensitive-axis}). Their
+value is the impact altitude used by the initial-impact-point calculation, usually zero:
+
+\begin{lstlisting}[style=taosmanual]
+*fly downria=100000
+\end{lstlisting}
+
+This example solves for the range-insensitive axis using an assumed impact altitude
+of 100,000 ft. Like the intercept rules, the range-insensitive rules require free yaw
+and pitch controls and are equivalent to two ordinary guidance rules.
+
+\taossubhead{Rate Guidance}
+
+Body-attitude rates and flight-condition rates are specified by appending
+\texttt{dt}---for ``dot,'' or first derivative with respect to time---to a guidance
+variable. For example, the following rules request level flight, a geodetic heading
+rate of $5~\mathrm{deg/s}$, zero Euler sideslip, and a power-setting rate of 1000
+units/s:
+
+\begin{lstlisting}[style=taosmanual]
+*fly gamgd=0
+*fly psigddt=5.0
+*fly betae=0
+*fly powerdt=1000
+\end{lstlisting}
+
+If power setting is proportional to thrust in the propulsion tables, the result is a
+level, accelerating turn. TAOS varies angle of attack and geocentric bank angle to
+produce the requested heading rate while maintaining level flight.
+
+\taossubhead{Guidance Tables}
+
+If constants and rates do not describe the desired trajectory, a guidance value can be
+interpolated from a table as a function of a state variable:
+
+\begin{lstlisting}[style=taosmanual]
+*fly alpha vrs tseg interp-2
+  0.0   0.0
+  5.0   1.0
+  6.0   2.0
+  5.0   3.0
+  0.0   4.0
+\end{lstlisting}
+
+The required keyword \texttt{vrs} separates the guidance variable from the
+independent state variable. Guidance tables may depend on the same state variables
+as table-file data (\cref{tab:taos-state-variables}). Three interpolation methods
+are available:
+
+\begin{center}
+\begin{tabular}{@{}>{\ttfamily}ll@{}}
+  interp-1 & Linear interpolation (default) \\
+  interp-2 & Circular interpolation \\
+  interp-3 & Polynomial interpolation \\
+\end{tabular}
+\end{center}
+
+Guidance tables are used especially in flight-path optimization, where an angle-of-
+attack or other control history is varied to optimize a flight condition subject to
+constraints. During optimization, table values are perturbed by very small amounts
+when numerical gradients are formed. To evaluate those gradients accurately, TAOS
+must integrate exactly to each point in a time-based guidance table. It therefore
+adjusts the integration step automatically so that every point in a table depending on
+\statevar{time}, \statevar{tseg}, or \statevar{tmark} lies at the end of an integration
+step.

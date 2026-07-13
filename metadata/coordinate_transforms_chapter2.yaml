@@ -1,0 +1,60 @@
+coordinate_transforms:
+  - id: geodetic_to_body_euler
+    section: 2.1.7
+    source_equations: [2-50, 2-51, 2-52, 2-53]
+    source_frame: local_geodetic_horizon
+    destination_frame: body_fixed
+    parameters: [Psi_gd, Theta_gd, Phi_gd]
+    sequence: [yaw_about_z, pitch_about_intermediate_y, roll_about_intermediate_x]
+    latex_macros: [TaosYawMatrix, TaosPitchMatrix, TaosRollMatrix]
+  - id: geocentric_to_body_euler
+    section: 2.1.7
+    source_frame: local_geocentric_horizon
+    destination_frame: body_fixed
+    parameters: [Psi_gc, Theta_gc, Phi_gc]
+    derived_from: geodetic_to_body_euler
+  - id: platform_to_body_euler
+    section: 2.1.7
+    source_frame: inertial_platform
+    destination_frame: body_fixed
+    parameters: [Psi_i, Theta_i, Phi_i]
+    derived_from: geodetic_to_body_euler
+  - id: wind_relative_velocity_frame
+    section: 2.1.8
+    source_equations: [2-62, 2-63, 2-64, 2-65]
+    source_frame: ecfc
+    destination_frame: velocity_wind_relative
+    construction: Normalize wind-corrected velocity then complete the right-handed frame using local down
+  - id: geodetic_to_velocity
+    section: 2.1.8
+    source_equations: [2-66, 2-67, 2-68, 2-69, 2-70]
+    source_frame: local_geodetic_horizon
+    destination_frame: velocity_earth_relative
+    parameters: [psi_gd, gamma_gd]
+    sequence: [heading_about_z, flight_path_about_intermediate_y]
+  - id: velocity_to_wind
+    section: 2.1.9
+    source_equations: [2-71]
+    source_frame: velocity
+    destination_frame: wind
+    parameters: [mu_gc_or_mu_gd]
+    sequence: [bank_about_x]
+  - id: wind_to_body_aerodynamic
+    section: 2.1.9
+    source_equations: [2-72, 2-73, 2-74, 2-75]
+    source_frame: wind
+    destination_frame: body_fixed
+    parameters: [alpha, beta_E]
+    sequence: [euler_sideslip_about_wind_z, angle_of_attack_about_body_minus_y]
+  - id: ecfc_to_body_projection
+    section: 2.1.12
+    source_equations: [2-93]
+    source_frame: ecfc
+    destination_frame: body_fixed
+    operation: Dot product with destination unit vectors
+  - id: body_to_ecfc_columns
+    section: 2.1.12
+    source_equations: [2-94, 2-95, 2-96]
+    source_frame: body_fixed
+    destination_frame: ecfc
+    operation: Multiply by the transpose of the orthogonal forward transformation

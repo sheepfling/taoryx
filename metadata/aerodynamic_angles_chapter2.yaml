@@ -1,0 +1,36 @@
+aerodynamic_angle_sets:
+  - id: alpha_betae
+    variables: [alpha, betae]
+    definition: Sequential rotations between wind and body frames
+    recommended_for: Aircraft and general nonsingular use
+    typical_ranges:
+      alpha_deg: [-180, 180]
+      betae_deg: [-90, 90]
+    conversion_equations: [2-81, 2-82, 2-83]
+  - id: alpha_beta
+    variables: [alpha, beta]
+    definition: Projections of the wind axis into body-coordinate planes
+    recommended_for: Axisymmetric vehicles away from the ninety-degree singularity
+    valid_branches:
+      forward: xw_dot_xb > 0
+      backward: xw_dot_xb < 0
+      singular: xw_dot_xb = 0
+    definition_equations: [2-76, 2-77, 2-78]
+    conversion_equations: [2-84, 2-85, 2-86]
+  - id: alphat_phiw
+    variables: [alphat, phi]
+    definition: Total angle between wind and body x axes plus windward meridian in the body yz plane
+    ranges:
+      alphat_deg: [0, 180]
+      phi_deg_conventional: [0, 360]
+    definition_equations: [2-79, 2-80]
+    conversion_equations: [2-87, 2-88, 2-89]
+singular_conventions:
+  - condition: body_x_aligned_with_local_down
+    effect: Euler yaw is undefined
+    taos_action: Set yaw and roll to zero and infer pitch from alignment sign
+    source_equation: 2-61
+  - condition: xw_dot_xb_equals_zero
+    effect: Projection-defined alpha and beta are not unique
+    taos_action: Retain alpha definition and use the special beta definition
+    source_equation: 2-78

@@ -1,0 +1,36 @@
+% Source PDF page 33; manual page 2-4.
+\section{Coordinate Systems}\label{sec:coordinate-systems}
+
+When mathematically describing the motion of one object relative to others, it is
+necessary to define one or more reference frames or coordinate systems. The
+object's motion is written in terms of one of these systems. When dynamics are
+involved, the relationship between those systems and an inertial, nonaccelerating
+reference frame is also required.
+
+Trajectory quantities such as position, velocity, and acceleration are stated in
+terms of coordinate systems. A position near the earth's surface, for example, can
+be described by Cartesian $x$, $y$, and $z$ components measured from the earth's
+center, or by longitude, latitude, and altitude. The most useful representation
+depends on the problem being solved, so TAOS provides several systems:
+
+\begin{itemize}[leftmargin=1.6em]
+  \item earth-centered and fixed, Cartesian (ECFC), used for the equations of
+    motion and for all unit vectors;
+  \item earth-centered, inertial, Cartesian (ECIC), used for inertial quantities;
+  \item geocentric, used with a spherical earth for longitude and latitude;
+  \item local geocentric horizon, used with a spherical earth for flight-path angles;
+  \item geodetic, used with an ellipsoidal earth for longitude, latitude, and altitude;
+  \item local geodetic horizon, used with an ellipsoidal earth for flight-path angles;
+  \item body-fixed, used for Euler angles and vehicle angular orientation;
+  \item velocity, used in defining bank angle;
+  \item wind, used for aerodynamic angles;
+  \item inertial-platform, used for inertial alignment platforms; and
+  \item tangent-plane, used for range-safety and flat-earth calculations.
+\end{itemize}
+
+The equations of motion are written in ECFC coordinates, making ECFC the primary
+TAOS coordinate system. Every coordinate-system unit vector is also expressed in
+ECFC terms so that the vectors can be used directly for coordinate transformations.
+The following subsections define the systems, their unit vectors, and their mutual
+relationships. Functions that calculate unit vectors or perform coordinate transforms
+are contained in the \texttt{coords} module.

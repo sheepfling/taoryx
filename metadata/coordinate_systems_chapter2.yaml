@@ -1,0 +1,153 @@
+coordinate_systems:
+  - id: ecfc
+    name: Earth-Centered and Fixed, Cartesian
+    abbreviation: ECFC
+    section: 2.1.1
+    manual_pages: [2-5, 2-6]
+    source_pdf_pages: [34, 35]
+    origin: Center of the earth
+    axes:
+      x: Greenwich meridian in the equatorial plane
+      y: 90 degrees east longitude in the equatorial plane
+      z: North pole and earth spin axis
+    primary_use: Equations of motion and common representation of unit vectors
+    reconstructed_status: visually_verified
+  - id: ecic
+    name: Earth-Centered, Inertial, Cartesian
+    abbreviation: ECIC
+    section: 2.1.2
+    manual_pages: [2-7]
+    source_pdf_pages: [36]
+    origin: Center of the earth
+    axes:
+      z: Aligned with the earth spin axis
+      xy: Inertially fixed and rotated from ECFC by the earth rotation angle
+    primary_use: Inertial position, velocity, and acceleration components
+    reconstructed_status: visually_verified
+  - id: local_geocentric_horizon
+    name: Local Geocentric Horizon
+    abbreviation: local geocentric
+    section: 2.1.3
+    manual_pages: [2-8]
+    source_pdf_pages: [37]
+    origin: Vehicle center of mass
+    axes:
+      x: North in the local spherical-earth horizon plane
+      y: East in the local spherical-earth horizon plane
+      z: Down toward the earth center
+    primary_use: Geocentric flight-path angles and spherical-earth local components
+    reconstructed_status: visually_verified
+  - id: geocentric
+    name: Geocentric
+    abbreviation: geocentric
+    section: 2.1.4
+    manual_pages: [2-9, 2-10, 2-11]
+    source_pdf_pages: [38, 39, 40]
+    origin: Center of the earth
+    position_variables: [rcm, long, latgc]
+    velocity_variables: [vel, gamgc, psigc]
+    primary_use: Spherical-earth longitude, latitude, radius, and flight-path angles
+    reconstructed_status: visually_verified
+  - id: local_geodetic_horizon
+    name: Local Geodetic Horizon
+    abbreviation: local geodetic
+    section: 2.1.5
+    manual_pages: [2-12, 2-13]
+    source_pdf_pages: [41, 42]
+    origin: Vehicle center of mass
+    axes:
+      x: North in the plane tangent to the reference ellipsoid
+      y: East in the plane tangent to the reference ellipsoid
+      z: Down normal to the reference ellipsoid
+    primary_use: Ellipsoidal-earth local components and geodetic flight-path angles
+    reconstructed_status: visually_verified
+  - id: geodetic
+    name: Geodetic
+    abbreviation: geodetic
+    section: 2.1.6
+    manual_pages: [2-14, 2-15, 2-16, 2-17, 2-18]
+    source_pdf_pages: [43, 44, 45, 46, 47]
+    origin: Center of the earth for position geometry; local reference at the vehicle
+    position_variables: [alt, long, latgd]
+    velocity_variables: [vel, gamgd, psigd]
+    primary_use: Ellipsoidal-earth longitude, latitude, altitude, and flight-path angles
+    reconstructed_status: visually_verified
+  - id: body_fixed
+    name: Body-Fixed Cartesian
+    abbreviation: body
+    section: 2.1.7
+    manual_pages: [2-19, 2-20, 2-21, 2-22, 2-23]
+    source_pdf_pages: [48, 49, 50, 51, 52]
+    origin: Vehicle center of mass
+    axes:
+      x: Vehicle longitudinal axis
+      y: Toward the right wing
+      z: Toward the bottom of the vehicle
+    orientation_variables:
+      geocentric: [yawgc, pitchgc, rollgc]
+      geodetic: [yawgd, pitchgd, rollgd]
+      inertial_platform: [yawi, pitchi, rolli]
+    primary_use: Aerodynamic and propulsive force components and vehicle attitude
+    reconstructed_status: visually_verified
+  - id: velocity
+    name: Velocity Cartesian
+    abbreviation: velocity
+    section: 2.1.8
+    manual_pages: [2-24, 2-25]
+    source_pdf_pages: [53, 54]
+    origin: Vehicle center of mass
+    variants:
+      wind_relative:
+        x: Aligned with velocity relative to the atmosphere
+        y: Normal to the plane formed by wind-relative velocity and local down
+        z: Completes the right-handed frame and points generally down
+      earth_relative:
+        x: Aligned with earth-relative velocity
+        y: Defined by the local horizon and heading angle
+        z: Completes the right-handed frame
+    primary_use: Intermediate frame for flight-path angles and wind coordinates
+    reconstructed_status: visually_verified
+  - id: wind
+    name: Wind Cartesian
+    abbreviation: wind
+    section: 2.1.9
+    manual_pages: [2-26, 2-27, 2-28, 2-29, 2-30, 2-31]
+    source_pdf_pages: [55, 56, 57, 58, 59, 60]
+    origin: Vehicle center of mass
+    axes:
+      x: Aligned with velocity relative to the atmosphere
+      yz: Rotated from the velocity frame by the bank angle
+    orientation_variables: [alpha, alphat, beta, betae, phi, bankgc, bankgd]
+    primary_use: Aerodynamic angles and aerodynamic-force components
+    reconstructed_status: visually_verified
+  - id: inertial_platform
+    name: Inertial Platform Cartesian
+    abbreviation: platform
+    section: 2.1.10
+    manual_pages: [2-32]
+    source_pdf_pages: [61]
+    origin: Vehicle center of mass at the platform alignment instant
+    axes: User-aligned at initialization or realignment and then fixed in inertial space
+    primary_use: Inertial platform position velocity acceleration and Euler angles
+    reconstructed_status: visually_verified
+  - id: tangent_plane
+    name: Tangent Plane Cartesian
+    abbreviation: tangent plane
+    section: 2.1.11
+    manual_pages: [2-33, 2-34]
+    source_pdf_pages: [62, 63]
+    origin: User-defined geodetic point or the surface below initial vehicle position
+    axes:
+      x: User-selected azimuth in the tangent local horizon plane
+      y: Completes a right-handed horizontal pair
+      z: Upward normal to the reference ellipsoid
+    primary_use: Range safety and flat-earth approximations
+    reconstructed_status: visually_verified
+coordinate_transformation_convention:
+  section: 2.1.12
+  manual_pages: [2-35]
+  source_pdf_pages: [64]
+  representation: Unit vectors expressed in ECFC components
+  forward_operation: Project an ECFC vector onto destination-frame unit vectors
+  inverse_operation: Transpose the orthogonal transformation matrix
+  reconstructed_status: visually_verified

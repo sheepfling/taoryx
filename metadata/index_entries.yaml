@@ -1,0 +1,3205 @@
+index:
+  source_pdf_pages:
+  - 296
+  - 297
+  - 298
+  - 299
+  - 300
+  - 301
+  - 302
+  - 303
+  - 304
+  - 305
+  source_manual_pages:
+  - Index-1
+  - Index-2
+  - Index-3
+  - Index-4
+  - Index-5
+  - Index-6
+  - Index-7
+  - Index-8
+  - Index-9
+  - Index-10
+  content_page_count: 9
+  blank_page_count: 1
+  pages:
+  - source_pdf_page: 296
+    source_manual_page: Index-1
+    show_title: true
+    left:
+    - type: letter
+      text: A
+    - type: variable
+      text: accebx
+      references:
+      - 2-22
+    - type: variable
+      text: acceby
+      references:
+      - 2-22
+    - type: variable
+      text: accebz
+      references:
+      - 2-22
+    - type: entry
+      text: Acceleration
+      references:
+      - 2-51
+    - type: subentry
+      text: body
+      references:
+      - 2-22
+    - type: subentry
+      text: earth-fixed
+      references:
+      - 2-37
+    - type: subentry
+      text: gravity
+      references:
+      - 2-62
+    - type: subentry
+      text: inertial
+      references:
+      - 2-36
+    - type: variable
+      text: accibx
+      references:
+      - 2-22
+    - type: variable
+      text: acciby
+      references:
+      - 2-22
+    - type: variable
+      text: accibz
+      references:
+      - 2-22
+    - type: entry
+      text: Aerodynamic angles
+      references:
+      - 2-26
+      - 2-29
+      - 4-13
+    - type: entry
+      text: Aerodynamic coefficients
+      references:
+      - 3-3
+    - type: subentry
+      text: axial and normal
+      references:
+      - 2-56
+    - type: subentry
+      text: body axes
+      references:
+      - 2-57
+    - type: subentry
+      text: center of gravity
+      references:
+      - 4-12
+    - type: subentry
+      text: lift, drag, and sideforce
+      references:
+      - 2-56
+    - type: subentry
+      text: multiple
+      references:
+      - 2-57
+    - type: subentry
+      text: problem file
+      references:
+      - 4-9
+    - type: subentry
+      text: reference area
+      references:
+      - 3-10
+      - 4-9
+    - type: subentry
+      text: tables
+      references:
+      - 3-3
+    - type: entry
+      text: Airspeed
+      references:
+      - 2-24
+    - type: variable
+      text: alpha
+      references:
+      - 2-31
+    - type: variable
+      text: alpha_l/d
+      references:
+      - 2-65
+    - type: variable
+      text: alphat
+      references:
+      - 2-31
+    - type: variable
+      text: alt
+      references:
+      - 2-15
+    - type: variable
+      text: altdt
+      references:
+      - 2-42
+    - type: entry
+      text: Altitude rate
+      references:
+      - 2-44
+    - type: entry
+      text: Angle of attack
+      references:
+      - 2-26
+      - 2-27
+      - 2-29
+      - 2-31
+      - 4-14
+    - type: entry
+      text: Atmosphere
+    - type: subentry
+      text: assumptions
+      references:
+      - 2-52
+    - type: subentry
+      text: density
+      references:
+      - 2-54
+    - type: subentry
+      text: geopotential altitude
+      references:
+      - 2-53
+    - type: subentry
+      text: high altitude
+      references:
+      - 2-55
+    - type: subentry
+      text: input data
+      references:
+      - 4-50
+    - type: subentry
+      text: models
+      references:
+      - 2-52
+    - type: subentry
+      text: molecular weight
+      references:
+      - 2-53
+    right:
+    - type: subentry
+      text: pressure
+      references:
+      - 2-54
+    - type: subentry
+      text: speed of sound
+      references:
+      - 2-55
+    - type: subentry
+      text: temperature
+      references:
+      - 2-54
+    - type: subentry
+      text: user-defined
+      references:
+      - 4-50
+      - 4-51
+    - type: subentry
+      text: viscosity
+      references:
+      - 2-55
+    - type: letter
+      text: B
+    - type: variable
+      text: ballistic
+      references:
+      - 2-65
+    - type: entry
+      text: Ballistic coefficient
+      references:
+      - 2-77
+    - type: entry
+      text: Bank angles
+      references:
+      - 2-26
+      - 2-31
+    - type: variable
+      text: bankgc
+      references:
+      - 2-31
+    - type: variable
+      text: bankgd
+      references:
+      - 2-31
+    - type: variable
+      text: beta
+      references:
+      - 2-31
+    - type: variable
+      text: betae
+      references:
+      - 2-31
+    - type: entry
+      text: Body
+    - type: subentry
+      text: accelerations
+      references:
+      - 2-22
+    - type: subentry
+      text: attitude
+      references:
+      - 1-2
+      - 2-78
+      - 4-13
+    - type: subentry
+      text: coordinate system
+      references:
+      - 2-19
+      - 2-74
+    - type: subentry
+      text: Euler angles
+      references:
+      - 2-30
+      - 4-13
+    - type: subentry
+      text: unit vectors
+      references:
+      - 2-20
+      - 2-27
+    - type: subentry
+      text: velocities
+      references:
+      - 2-22
+    - type: letter
+      text: C
+    - type: variable
+      text: ca
+      references:
+      - 2-57
+    - type: variable
+      text: cd
+      references:
+      - 2-57
+    - type: entry
+      text: Center of gravity
+      references:
+      - 4-12
+    - type: variable
+      text: cl
+      references:
+      - 2-57
+    - type: variable
+      text: cn
+      references:
+      - 2-57
+    - type: entry
+      text: Code
+    - type: subentry
+      text: data structure
+      references:
+      - 2-92
+    - type: subentry
+      text: execution
+      references:
+      - 1-9
+    - type: subentry
+      text: flowchart
+      references:
+      - 2-91
+    - type: subentry
+      text: memory requirements
+      references:
+      - 1-9
+    - type: subentry
+      text: modules
+      references:
+      - 2-2
+    - type: subentry
+      text: portability
+      references:
+      - 1-5
+    - type: entry
+      text: Coefficients of friction
+      references:
+      - 2-41
+    - type: entry
+      text: Comments
+      references:
+      - 3-6
+      - 4-5
+    - type: entry
+      text: Coordinate systems
+    - type: subentry
+      text: body-fixed
+      references:
+      - 2-19
+      - 2-74
+  - source_pdf_page: 297
+    source_manual_page: Index-2
+    show_title: false
+    left:
+    - type: subentry
+      text: earth-fixed
+      references:
+      - 2-5
+    - type: subentry
+      text: ECFC
+      references:
+      - 2-5
+    - type: subentry
+      text: ECIC
+      references:
+      - 2-7
+    - type: subentry
+      text: geocentric
+      references:
+      - 2-9
+    - type: subentry
+      text: geodetic
+      references:
+      - 2-14
+    - type: subentry
+      text: inertial
+      references:
+      - 2-7
+    - type: subentry
+      text: inertial platform
+      references:
+      - 2-32
+    - type: subentry
+      text: local geocentric horizon
+      references:
+      - 2-8
+    - type: subentry
+      text: local geodetic horizon
+      references:
+      - 2-12
+    - type: subentry
+      text: overview
+      references:
+      - 2-4
+    - type: subentry
+      text: radar
+      references:
+      - 2-71
+    - type: subentry
+      text: tangent plane
+      references:
+      - 2-33
+    - type: subentry
+      text: transforms
+      references:
+      - 2-35
+    - type: subentry
+      text: unit vectors
+      references:
+      - 2-35
+    - type: subentry
+      text: velocity
+      references:
+      - 2-24
+      - 2-47
+    - type: subentry
+      text: wind
+      references:
+      - 2-26
+    - type: entry
+      text: Crossrange
+      references:
+      - 2-68
+      - 4-39
+    - type: variable
+      text: crsrng
+      references:
+      - 2-64
+      - 2-68
+    - type: variable
+      text: cs
+      references:
+      - 2-57
+    - type: variable
+      text: cx
+      references:
+      - 2-57
+    - type: variable
+      text: cy
+      references:
+      - 2-57
+    - type: variable
+      text: cz
+      references:
+      - 2-57
+    - type: letter
+      text: D
+    - type: entry
+      text: Data blocks
+    - type: subblock
+      text: '*aero'
+      references:
+      - 4-9
+    - type: subblock
+      text: '*atmos'
+      references:
+      - 4-50
+    - type: subblock
+      text: '*cg'
+      references:
+      - 4-12
+    - type: subblock
+      text: '*constants'
+      references:
+      - 4-11
+    - type: subblock
+      text: '*define'
+      references:
+      - 4-35
+      - 4-52
+    - type: subblock
+      text: '*dwn/crs'
+      references:
+      - 4-39
+    - type: subblock
+      text: '*earth'
+      references:
+      - 4-54
+    - type: subblock
+      text: '*egs'
+      references:
+      - 4-58
+    - type: subblock
+      text: '*file'
+      references:
+      - 4-40
+      - 4-60
+    - type: subblock
+      text: '*fly'
+      references:
+      - 4-13
+    - type: subblock
+      text: '*iip'
+      references:
+      - 4-42
+    - type: subblock
+      text: '*increment'
+      references:
+      - 4-20
+    - type: subblock
+      text: '*inertial'
+      references:
+      - 4-23
+    - type: subblock
+      text: '*initial'
+      references:
+      - 4-43
+    - type: subblock
+      text: '*integ'
+      references:
+      - 4-25
+    - type: subblock
+      text: '*limits'
+      references:
+      - 4-26
+    - type: subblock
+      text: '*optimize'
+      references:
+      - 4-62
+    - type: subblock
+      text: '*print'
+      references:
+      - 4-46
+      - 4-72
+    - type: subblock
+      text: '*prop'
+      references:
+      - 4-27
+    - type: subblock
+      text: '*radar'
+      references:
+      - 4-74
+    - type: subblock
+      text: '*rail'
+      references:
+      - 4-29
+    - type: subblock
+      text: '*reset'
+      references:
+      - 4-30
+    - type: subblock
+      text: '*search'
+      references:
+      - 4-76
+    - type: subblock
+      text: '*segment'
+      references:
+      - 4-7
+    right:
+    - type: subblock
+      text: '*summarize'
+      references:
+      - 4-80
+    - type: subblock
+      text: '*survey'
+      references:
+      - 4-83
+    - type: subblock
+      text: '*tangent'
+      references:
+      - 4-42
+      - 4-47
+    - type: subblock
+      text: '*title'
+      references:
+      - 4-85
+    - type: subblock
+      text: '*trajectory'
+      references:
+      - 4-33
+    - type: subblock
+      text: '*units/fmt'
+      references:
+      - 4-86
+    - type: subblock
+      text: '*when'
+      references:
+      - 4-31
+    - type: subblock
+      text: '*wind'
+      references:
+      - 4-89
+    - type: subentry
+      text: definition
+      references:
+      - 4-3
+    - type: entry
+      text: Distances
+    - type: subentry
+      text: downrange/crossrange
+      references:
+      - 2-68
+      - 4-39
+    - type: subentry
+      text: east/north
+      references:
+      - 2-66
+      - 4-39
+    - type: entry
+      text: Downrange
+      references:
+      - 2-68
+      - 4-39
+    - type: variable
+      text: dwnrng
+      references:
+      - 2-64
+      - 2-68
+    - type: entry
+      text: Dynamic pressure
+      references:
+      - 2-44
+      - 2-56
+    - type: variable
+      text: dynprs
+      references:
+      - 2-56
+    - type: letter
+      text: E
+    - type: entry
+      text: Earth
+    - type: subentry
+      text: azimuths
+      references:
+      - 2-66
+      - 2-69
+    - type: subentry
+      text: distances
+      references:
+      - 2-66
+      - 2-69
+    - type: subentry
+      text: ellipsoidal
+      references:
+      - 2-60
+      - 4-54
+    - type: subentry
+      text: geometry
+      references:
+      - 2-12
+      - 2-14
+      - 2-53
+      - 4-74
+    - type: subentry
+      text: gravity
+      references:
+      - 2-53
+    - type: subentry
+      text: gravity coefficients
+      references:
+      - 2-61
+    - type: subentry
+      text: gravity model
+      references:
+      - 2-60
+    - type: subentry
+      text: gravity vector
+      references:
+      - 2-62
+    - type: subentry
+      text: initial rotation
+      references:
+      - 2-7
+    - type: subentry
+      text: input data
+      references:
+      - 4-54
+    - type: subentry
+      text: rotation rate
+      references:
+      - 2-7
+    - type: subentry
+      text: spherical
+      references:
+      - 2-60
+      - 4-54
+    - type: subentry
+      text: TSAP
+      references:
+      - 4-55
+    - type: subentry
+      text: WGS
+      references:
+      - 2-12
+      - 4-54
+    - type: variable
+      text: east
+      references:
+      - 2-64
+      - 2-66
+    - type: variable
+      text: ep1
+      references:
+      - 2-59
+    - type: variable
+      text: ep2
+      references:
+      - 2-59
+    - type: entry
+      text: Equations of motion
+      references:
+      - 2-36
+      - 2-38
+      - 2-41
+      - 2-75
+      - 2-96
+    - type: entry
+      text: Euler sideslip angle
+      references:
+      - 2-26
+      - 2-31
+      - 4-14
+    - type: letter
+      text: F
+    - type: entry
+      text: Final conditions
+      references:
+      - 2-94
+    - type: entry
+      text: Flight path angles
+      references:
+      - 2-17
+      - 2-47
+    - type: entry
+      text: Forces
+    - type: subentry
+      text: aerodynamic
+      references:
+      - 2-51
+      - 2-56
+      - 3-1
+  - source_pdf_page: 298
+    source_manual_page: Index-3
+    show_title: false
+    left:
+    - type: subentry
+      text: aerodynamic vector
+      references:
+      - 2-56
+      - 2-57
+    - type: subentry
+      text: propulsive
+      references:
+      - 2-51
+      - 2-59
+      - 3-1
+      - 4-27
+    - type: subentry
+      text: thrust vector
+      references:
+      - 2-59
+    - type: entry
+      text: Friction coefficients
+      references:
+      - 2-41
+    - type: variable
+      text: fuel
+      references:
+      - 2-39
+    - type: letter
+      text: G
+    - type: entry
+      text: G loading
+      references:
+      - 2-50
+    - type: variable
+      text: gamgc
+      references:
+      - 2-10
+    - type: variable
+      text: gamgcdt
+      references:
+      - 2-47
+    - type: variable
+      text: gamgd
+      references:
+      - 2-17
+    - type: variable
+      text: gamgddt
+      references:
+      - 2-47
+    - type: entry
+      text: Geocentric
+    - type: subentry
+      text: bank angle
+      references:
+      - 2-26
+    - type: subentry
+      text: coordinates
+      references:
+      - 2-9
+    - type: subentry
+      text: Euler angles
+      references:
+      - 2-19
+      - 2-21
+    - type: subentry
+      text: flight path angle
+      references:
+      - 2-10
+      - 2-25
+    - type: subentry
+      text: flight path angle rate
+      references:
+      - 2-47
+    - type: subentry
+      text: heading angle
+      references:
+      - 2-10
+    - type: subentry
+      text: heading rate
+      references:
+      - 2-47
+    - type: subentry
+      text: latitude
+      references:
+      - 2-9
+    - type: subentry
+      text: latitude rate
+      references:
+      - 2-42
+    - type: subentry
+      text: local horizon
+      references:
+      - 2-8
+    - type: subentry
+      text: longitude
+      references:
+      - 2-9
+    - type: subentry
+      text: pitch angle
+      references:
+      - 2-22
+    - type: subentry
+      text: roll angle
+      references:
+      - 2-22
+    - type: subentry
+      text: unit vectors
+      references:
+      - 2-8
+    - type: subentry
+      text: velocity vector
+      references:
+      - 2-10
+    - type: subentry
+      text: yaw angle
+      references:
+      - 2-22
+    - type: entry
+      text: Geodetic
+    - type: subentry
+      text: altitude
+      references:
+      - 2-15
+    - type: subentry
+      text: altitude acceleration
+      references:
+      - 2-44
+    - type: subentry
+      text: altitude rate
+      references:
+      - 2-42
+      - 2-44
+    - type: subentry
+      text: bank angle
+      references:
+      - 2-26
+    - type: subentry
+      text: Euler angles
+      references:
+      - 2-19
+      - 2-21
+    - type: subentry
+      text: flight path angle
+      references:
+      - 2-17
+      - 2-25
+    - type: subentry
+      text: flight path angle rate
+      references:
+      - 2-47
+    - type: subentry
+      text: heading angle
+      references:
+      - 2-17
+    - type: subentry
+      text: heading rate
+      references:
+      - 2-47
+    - type: subentry
+      text: latitude
+      references:
+      - 2-15
+    - type: subentry
+      text: latitude rate
+      references:
+      - 2-42
+      - 2-43
+    - type: subentry
+      text: local horizon
+      references:
+      - 2-12
+    - type: subentry
+      text: longitude
+      references:
+      - 2-15
+    - type: subentry
+      text: pitch angle
+      references:
+      - 2-22
+    - type: subentry
+      text: roll angle
+      references:
+      - 2-22
+    - type: subentry
+      text: unit vectors
+      references:
+      - 2-13
+    - type: subentry
+      text: velocity
+      references:
+      - 2-17
+    - type: subentry
+      text: velocity vector
+      references:
+      - 2-17
+    right:
+    - type: subentry
+      text: yaw angle
+      references:
+      - 2-22
+    - type: entry
+      text: Geopotential
+      references:
+      - 2-60
+    - type: entry
+      text: Geopotential altitude
+      references:
+      - 2-53
+    - type: entry
+      text: Gravity
+      references:
+      - 2-51
+      - 2-60
+    - type: variable
+      text: grmark
+      references:
+      - 2-46
+    - type: entry
+      text: Ground range
+      references:
+      - 2-39
+      - 2-46
+    - type: entry
+      text: Ground speed
+      references:
+      - 2-39
+      - 2-46
+    - type: variable
+      text: grseg
+      references:
+      - 2-46
+    - type: entry
+      text: Guidance
+    - type: subentry
+      text: control variables
+      references:
+      - 2-78
+      - 2-81
+      - 2-90
+    - type: subentry
+      text: cubic transition
+      references:
+      - 2-83
+    - type: subentry
+      text: intercept
+      references:
+      - 4-112
+    - type: subentry
+      text: intercepts
+      references:
+      - 2-85
+      - 4-17
+    - type: subentry
+      text: limits
+      references:
+      - 2-90
+    - type: subentry
+      text: method
+      references:
+      - 2-81
+      - 2-84
+    - type: subentry
+      text: Newton-Raphson
+      references:
+      - 2-84
+    - type: subentry
+      text: parabolic transition
+      references:
+      - 2-82
+    - type: subentry
+      text: proportional navigation
+      references:
+      - 2-85
+      - 4-17
+    - type: subentry
+      text: range insensitive axis
+      references:
+      - 2-89
+      - 4-17
+    - type: subentry
+      text: rules
+      references:
+      - 1-6
+      - 2-78
+      - 2-79
+      - 4-13
+      - 4-17
+      - 4-18
+    - type: subentry
+      text: tables
+      references:
+      - 4-18
+    - type: subentry
+      text: time constant
+      references:
+      - 4-25
+    - type: entry
+      text: Guidance rules
+      references:
+      - 4-15
+    - type: letter
+      text: H
+    - type: entry
+      text: Heading angles
+      references:
+      - 2-47
+    - type: letter
+      text: I
+    - type: entry
+      text: IIP
+      references:
+      - 2-75
+    - type: variable
+      text: iip_azm
+      references:
+      - 2-65
+    - type: variable
+      text: iip_latgd
+      references:
+      - 2-64
+    - type: variable
+      text: iip_long
+      references:
+      - 2-65
+    - type: variable
+      text: iip_rng
+      references:
+      - 2-65
+    - type: variable
+      text: iip_time
+      references:
+      - 2-65
+    - type: entry
+      text: Inertial platform
+    - type: subentry
+      text: acceleration
+      references:
+      - 2-32
+    - type: subentry
+      text: alignment
+      references:
+      - 2-32
+      - 4-23
+    - type: subentry
+      text: coordinate system
+      references:
+      - 2-32
+    - type: subentry
+      text: Euler angles
+      references:
+      - 2-19
+      - 2-21
+    - type: subentry
+      text: pitch angle
+      references:
+      - 2-22
+    - type: subentry
+      text: position
+      references:
+      - 2-32
+    - type: subentry
+      text: roll angle
+      references:
+      - 2-22
+    - type: subentry
+      text: velocity
+      references:
+      - 2-32
+  - source_pdf_page: 299
+    source_manual_page: Index-4
+    show_title: false
+    left:
+    - type: subentry
+      text: yaw angle
+      references:
+      - 2-22
+    - type: entry
+      text: Initial conditions
+      references:
+      - 4-43
+    - type: entry
+      text: Initial impact point
+    - type: subentry
+      text: ballistic coefficient
+      references:
+      - 2-75
+      - 4-42
+    - type: subentry
+      text: input data
+      references:
+      - 4-42
+    - type: subentry
+      text: methods
+      references:
+      - 2-75
+    - type: entry
+      text: Intercepts
+      references:
+      - 2-85
+    - type: letter
+      text: L
+    - type: variable
+      text: l/d
+      references:
+      - 2-65
+    - type: variable
+      text: latgc
+      references:
+      - 2-9
+    - type: variable
+      text: latgcdt
+      references:
+      - 2-42
+    - type: variable
+      text: latgd
+      references:
+      - 2-15
+    - type: variable
+      text: latgddt
+      references:
+      - 2-42
+    - type: entry
+      text: Legendre functions
+      references:
+      - 2-61
+    - type: entry
+      text: Lift-to-drag ratio
+      references:
+      - 2-77
+    - type: entry
+      text: Load factors
+      references:
+      - 2-50
+    - type: variable
+      text: long
+      references:
+      - 2-9
+      - 2-15
+    - type: variable
+      text: longdt
+      references:
+      - 2-42
+    - type: entry
+      text: Longitude rate
+      references:
+      - 2-42
+    - type: letter
+      text: M
+    - type: variable
+      text: mach
+      references:
+      - 2-56
+    - type: entry
+      text: Mach number
+      references:
+      - 2-44
+      - 2-56
+    - type: variable
+      text: mass
+      references:
+      - 2-39
+    - type: entry
+      text: Mass flow
+      references:
+      - 3-3
+    - type: entry
+      text: Math operations
+      references:
+      - 3-13
+      - 3-15
+    - type: variable
+      text: mdt
+      references:
+      - 2-39
+    - type: entry
+      text: Methods
+    - type: subentry
+      text: atmosphere
+      references:
+      - 2-52
+    - type: subentry
+      text: coordinate systems
+      references:
+      - 2-4
+    - type: subentry
+      text: equations of motion
+      references:
+      - 2-36
+    - type: subentry
+      text: forces
+      references:
+      - 2-51
+      - 2-56
+      - 2-59
+    - type: subentry
+      text: gravity
+      references:
+      - 2-60
+    - type: subentry
+      text: guidance
+      references:
+      - 2-78
+    - type: subentry
+      text: initial impact point
+      references:
+      - 2-75
+    - type: subentry
+      text: multi-vehicle
+      references:
+      - 2-74
+    - type: subentry
+      text: Newton-Raphson
+      references:
+      - 2-69
+    - type: subentry
+      text: notation
+      references:
+      - 2-1
+    - type: subentry
+      text: optimization
+      references:
+      - 2-102
+    - type: subentry
+      text: overview
+      references:
+      - 1-2
+    right:
+    - type: subentry
+      text: radar
+      references:
+      - 2-71
+    - type: subentry
+      text: range and distance
+      references:
+      - 2-66
+    - type: subentry
+      text: searches
+      references:
+      - 2-98
+    - type: subentry
+      text: trajectories
+      references:
+      - 2-91
+    - type: entry
+      text: Multi-vehicle
+    - type: subentry
+      text: calculations
+      references:
+      - 2-74
+    - type: subentry
+      text: constraints
+      references:
+      - 4-64
+    - type: subentry
+      text: examples
+      references:
+      - 4-102
+    - type: subentry
+      text: initial conditions
+      references:
+      - 4-22
+      - 4-45
+    - type: subentry
+      text: intercept
+      references:
+      - 2-85
+    - type: subentry
+      text: object deployment
+      references:
+      - 4-22
+    - type: subentry
+      text: trajectories
+      references:
+      - 2-94
+    - type: letter
+      text: N
+    - type: entry
+      text: Newton-Raphson
+      references:
+      - 2-84
+      - 2-98
+    - type: entry
+      text: Nomenclature
+      references:
+      - x
+      - 2-1
+    - type: variable
+      text: north
+      references:
+      - 2-64
+      - 2-66
+    - type: entry
+      text: Notation
+      references:
+      - x
+      - 2-1
+    - type: variable
+      text: ntotal
+      references:
+      - 2-50
+    - type: variable
+      text: nu
+      references:
+      - 2-52
+    - type: entry
+      text: Numerical integration
+      references:
+      - 2-38
+      - 2-39
+      - 2-75
+      - 2-93
+      - 4-25
+    - type: variable
+      text: nx
+      references:
+      - 2-50
+    - type: variable
+      text: ny
+      references:
+      - 2-50
+    - type: variable
+      text: nz
+      references:
+      - 2-50
+    - type: letter
+      text: O
+    - type: entry
+      text: Object deployment
+      references:
+      - 4-22
+    - type: entry
+      text: Optimization
+      references:
+      - 1-7
+      - 2-94
+      - 2-102
+    - type: subentry
+      text: constraints
+      references:
+      - 4-63
+      - 4-64
+    - type: subentry
+      text: derivatives
+      references:
+      - 4-67
+      - 4-70
+    - type: subentry
+      text: example
+      references:
+      - 4-68
+    - type: subentry
+      text: examples
+      references:
+      - 4-102
+      - 4-108
+    - type: subentry
+      text: guidance
+      references:
+      - 4-18
+    - type: subentry
+      text: input data
+      references:
+      - 4-62
+    - type: subentry
+      text: loops
+      references:
+      - 4-62
+    - type: subentry
+      text: objective function
+      references:
+      - 4-63
+    - type: subentry
+      text: parameters
+      references:
+      - 4-62
+    - type: subentry
+      text: problem file
+      references:
+      - 4-5
+    - type: subentry
+      text: reference values
+      references:
+      - 4-65
+    - type: subentry
+      text: restarts
+      references:
+      - 4-66
+    - type: subentry
+      text: starting trajectory
+      references:
+      - 4-68
+      - 4-70
+    - type: subentry
+      text: surveys
+      references:
+      - 4-67
+      - 4-71
+    - type: subentry
+      text: troubleshooting
+      references:
+      - 4-69
+    - type: entry
+      text: Output files
+      references:
+      - 1-10
+      - 4-40
+      - 4-60
+  - source_pdf_page: 300
+    source_manual_page: Index-5
+    show_title: false
+    left:
+    - type: entry
+      text: Output variables
+    - type: subvariable
+      text: accebx
+      references:
+      - 2-22
+    - type: subvariable
+      text: acceby
+      references:
+      - 2-22
+    - type: subvariable
+      text: accebz
+      references:
+      - 2-22
+    - type: subvariable
+      text: accibx
+      references:
+      - 2-22
+    - type: subvariable
+      text: acciby
+      references:
+      - 2-22
+    - type: subvariable
+      text: accibz
+      references:
+      - 2-22
+    - type: subvariable
+      text: alpha
+      references:
+      - 2-31
+    - type: subvariable
+      text: alpha_l/d
+      references:
+      - 2-65
+    - type: subvariable
+      text: alphat
+      references:
+      - 2-31
+    - type: subvariable
+      text: alt
+      references:
+      - 2-15
+    - type: subvariable
+      text: altdt
+      references:
+      - 2-42
+    - type: subvariable
+      text: ballistic
+      references:
+      - 2-65
+    - type: subvariable
+      text: bankgc
+      references:
+      - 2-31
+    - type: subvariable
+      text: bankgd
+      references:
+      - 2-31
+    - type: subvariable
+      text: beta
+      references:
+      - 2-31
+    - type: subvariable
+      text: betae
+      references:
+      - 2-31
+    - type: subvariable
+      text: ca
+      references:
+      - 2-57
+    - type: subvariable
+      text: cd
+      references:
+      - 2-57
+    - type: subvariable
+      text: cl
+      references:
+      - 2-57
+    - type: subvariable
+      text: cn
+      references:
+      - 2-57
+    - type: subvariable
+      text: crsrng
+      references:
+      - 2-64
+    - type: subvariable
+      text: cs
+      references:
+      - 2-57
+    - type: subvariable
+      text: cx
+      references:
+      - 2-57
+    - type: subvariable
+      text: cy
+      references:
+      - 2-57
+    - type: subvariable
+      text: cz
+      references:
+      - 2-57
+    - type: subvariable
+      text: density
+      references:
+      - 2-52
+    - type: subvariable
+      text: dwnrng
+      references:
+      - 2-64
+    - type: subvariable
+      text: dynprs
+      references:
+      - 2-56
+    - type: subvariable
+      text: east
+      references:
+      - 2-64
+    - type: subvariable
+      text: ep1
+      references:
+      - 2-59
+    - type: subvariable
+      text: ep2
+      references:
+      - 2-59
+    - type: subvariable
+      text: fuel
+      references:
+      - 2-39
+    - type: subvariable
+      text: gamgc
+      references:
+      - 2-10
+    - type: subvariable
+      text: gamgcdt
+      references:
+      - 2-47
+    - type: subvariable
+      text: gamgd
+      references:
+      - 2-17
+    - type: subvariable
+      text: gamgddt
+      references:
+      - 2-47
+    - type: subvariable
+      text: grmark
+      references:
+      - 2-46
+    - type: subvariable
+      text: grseg
+      references:
+      - 2-46
+    - type: subvariable
+      text: iip_azm
+      references:
+      - 2-65
+    - type: subvariable
+      text: iip_latgd
+      references:
+      - 2-64
+    - type: subvariable
+      text: iip_long
+      references:
+      - 2-65
+    - type: subvariable
+      text: iip_rng
+      references:
+      - 2-65
+    - type: subvariable
+      text: iip_time
+      references:
+      - 2-65
+    - type: subvariable
+      text: l/d
+      references:
+      - 2-65
+    - type: subvariable
+      text: latgc
+      references:
+      - 2-9
+    - type: subvariable
+      text: latgcdt
+      references:
+      - 2-42
+    - type: subvariable
+      text: latgd
+      references:
+      - 2-15
+    - type: subvariable
+      text: latgddt
+      references:
+      - 2-42
+    - type: subvariable
+      text: long
+      references:
+      - 2-9
+      - 2-15
+    - type: subvariable
+      text: longdt
+      references:
+      - 2-42
+    - type: subvariable
+      text: mach
+      references:
+      - 2-56
+    - type: subvariable
+      text: mass
+      references:
+      - 2-39
+    right:
+    - type: subvariable
+      text: mdt
+      references:
+      - 2-39
+    - type: subvariable
+      text: north
+      references:
+      - 2-64
+    - type: subvariable
+      text: nu
+      references:
+      - 2-52
+    - type: subvariable
+      text: nx
+      references:
+      - 2-50
+    - type: subvariable
+      text: phi
+      references:
+      - 2-31
+    - type: subvariable
+      text: pitchgc
+      references:
+      - 2-22
+    - type: subvariable
+      text: pitchgd
+      references:
+      - 2-22
+    - type: subvariable
+      text: pitchi
+      references:
+      - 2-22
+    - type: subvariable
+      text: plength
+      references:
+      - 2-39
+    - type: subvariable
+      text: plmark
+      references:
+      - 2-39
+    - type: subvariable
+      text: plseg
+      references:
+      - 2-39
+    - type: subvariable
+      text: pres
+      references:
+      - 2-52
+    - type: subentry
+      text: printout format
+      references:
+      - 4-86
+    - type: subvariable
+      text: psigc
+      references:
+      - 2-10
+    - type: subvariable
+      text: psigcdt
+      references:
+      - 2-47
+    - type: subvariable
+      text: psigd
+      references:
+      - 2-17
+    - type: subvariable
+      text: psigddt
+      references:
+      - 2-47
+    - type: subvariable
+      text: radasp
+      references:
+      - 2-64
+    - type: subvariable
+      text: radaz
+      references:
+      - 2-64
+    - type: subvariable
+      text: radazdt
+      references:
+      - 2-64
+    - type: subvariable
+      text: radazdt2
+      references:
+      - 2-64
+    - type: subvariable
+      text: radelv
+      references:
+      - 2-64
+    - type: subvariable
+      text: radelvdt
+      references:
+      - 2-64
+    - type: subvariable
+      text: radelvdt2
+      references:
+      - 2-64
+    - type: subvariable
+      text: radmer
+      references:
+      - 2-64
+    - type: subvariable
+      text: radrng
+      references:
+      - 2-64
+    - type: subvariable
+      text: radrngdt
+      references:
+      - 2-64
+    - type: subvariable
+      text: radrngdt2
+      references:
+      - 2-64
+    - type: subvariable
+      text: range
+      references:
+      - 2-46
+    - type: subvariable
+      text: rcm
+      references:
+      - 2-9
+    - type: subvariable
+      text: relaz
+      references:
+      - 2-64
+    - type: subvariable
+      text: relelv
+      references:
+      - 2-64
+    - type: subvariable
+      text: relrng
+      references:
+      - 2-64
+    - type: subvariable
+      text: relvel
+      references:
+      - 2-64
+    - type: subvariable
+      text: relxb
+      references:
+      - 2-64
+    - type: subvariable
+      text: relyb
+      references:
+      - 2-64
+    - type: subvariable
+      text: relzb
+      references:
+      - 2-64
+    - type: subvariable
+      text: reypft
+      references:
+      - 2-56
+    - type: subvariable
+      text: rollgc
+      references:
+      - 2-22
+    - type: subvariable
+      text: rollgd
+      references:
+      - 2-22
+    - type: subvariable
+      text: rolli
+      references:
+      - 2-22
+    - type: subvariable
+      text: sndspd
+      references:
+      - 2-52
+    - type: subvariable
+      text: temp
+      references:
+      - 2-52
+    - type: subvariable
+      text: thrust
+      references:
+      - 2-59
+    - type: subvariable
+      text: units
+      references:
+      - 2-3
+      - 4-86
+    - type: subvariable
+      text: vair
+      references:
+      - 2-24
+    - type: subvariable
+      text: vel
+      references:
+      - 2-10
+      - 2-17
+    - type: subvariable
+      text: velebx
+      references:
+      - 2-22
+    - type: subvariable
+      text: veleby
+      references:
+      - 2-22
+    - type: subvariable
+      text: velebz
+      references:
+      - 2-23
+    - type: subvariable
+      text: velibx
+      references:
+      - 2-23
+    - type: subvariable
+      text: veliby
+      references:
+      - 2-23
+    - type: subvariable
+      text: velibz
+      references:
+      - 2-23
+    - type: subvariable
+      text: vgr
+      references:
+      - 2-46
+  - source_pdf_page: 301
+    source_manual_page: Index-6
+    show_title: false
+    left:
+    - type: subvariable
+      text: wt
+      references:
+      - 2-39
+    - type: subvariable
+      text: xecfc
+      references:
+      - 2-5
+    - type: subvariable
+      text: xecfcdt
+      references:
+      - 2-6
+    - type: subvariable
+      text: xecfcdt2
+      references:
+      - 2-6
+    - type: subvariable
+      text: xecic
+      references:
+      - 2-7
+    - type: subvariable
+      text: xecicdt
+      references:
+      - 2-7
+    - type: subvariable
+      text: xecicdt2
+      references:
+      - 2-7
+    - type: subvariable
+      text: xip
+      references:
+      - 2-32
+    - type: subvariable
+      text: xipdt
+      references:
+      - 2-32
+    - type: subvariable
+      text: xipdt2
+      references:
+      - 2-32
+    - type: subvariable
+      text: xtp
+      references:
+      - 2-33
+    - type: subvariable
+      text: xtpdt
+      references:
+      - 2-33
+    - type: subvariable
+      text: xtpdt2
+      references:
+      - 2-34
+    - type: subvariable
+      text: yawgc
+      references:
+      - 2-22
+    - type: subvariable
+      text: yawgd
+      references:
+      - 2-22
+    - type: subvariable
+      text: yawi
+      references:
+      - 2-22
+    - type: subvariable
+      text: yecfc
+      references:
+      - 2-5
+    - type: subvariable
+      text: yecfcdt
+      references:
+      - 2-6
+    - type: subvariable
+      text: yecfcdt2
+      references:
+      - 2-6
+    - type: subvariable
+      text: yecic
+      references:
+      - 2-7
+    - type: subvariable
+      text: yecicdt
+      references:
+      - 2-7
+    - type: subvariable
+      text: yecicdt2
+      references:
+      - 2-7
+    - type: subvariable
+      text: yip
+      references:
+      - 2-32
+    - type: subvariable
+      text: yipdt
+      references:
+      - 2-32
+    - type: subvariable
+      text: yipdt2
+      references:
+      - 2-32
+    - type: subvariable
+      text: ytp
+      references:
+      - 2-33
+    - type: subvariable
+      text: ytpdt
+      references:
+      - 2-33
+    - type: subvariable
+      text: ytpdt2
+      references:
+      - 2-34
+    - type: subvariable
+      text: zecfc
+      references:
+      - 2-5
+    - type: subvariable
+      text: zecfcdt
+      references:
+      - 2-6
+    - type: subvariable
+      text: zecfcdt2
+      references:
+      - 2-6
+    - type: subvariable
+      text: zecic
+      references:
+      - 2-7
+    - type: subvariable
+      text: zecicdt
+      references:
+      - 2-7
+    - type: subvariable
+      text: zecicdt2
+      references:
+      - 2-7
+    - type: subvariable
+      text: zip
+      references:
+      - 2-32
+    - type: subvariable
+      text: zipdt
+      references:
+      - 2-32
+    - type: subvariable
+      text: zipdt2
+      references:
+      - 2-32
+    - type: subvariable
+      text: ztp
+      references:
+      - 2-33
+    - type: subvariable
+      text: ztpdt
+      references:
+      - 2-33
+    - type: subvariable
+      text: ztpdt2
+      references:
+      - 2-34
+    - type: letter
+      text: P
+    - type: entry
+      text: Path length
+      references:
+      - 2-39
+    - type: variable
+      text: phi
+      references:
+      - 2-31
+    - type: variable
+      text: pitchgc
+      references:
+      - 2-22
+    - type: variable
+      text: pitchgd
+      references:
+      - 2-22
+    - type: variable
+      text: pitchi
+      references:
+      - 2-22
+    - type: variable
+      text: plength
+      references:
+      - 2-39
+    - type: variable
+      text: plmark
+      references:
+      - 2-39
+    right:
+    - type: entry
+      text: Plotting
+      references:
+      - 1-10
+      - 4-58
+      - 4-95
+    - type: variable
+      text: plseg
+      references:
+      - 2-39
+    - type: entry
+      text: PMAST
+      references:
+      - 1-4
+      - 4-55
+    - type: entry
+      text: Power setting
+      references:
+      - 4-15
+    - type: variable
+      text: pres
+      references:
+      - 2-52
+    - type: entry
+      text: Printout file
+      references:
+      - 4-72
+      - 4-80
+      - 4-86
+    - type: entry
+      text: Printout files
+      references:
+      - 1-10
+      - 4-25
+      - 4-46
+    - type: entry
+      text: Problem file
+    - type: subentry
+      text: data blocks
+      references:
+      - 4-3
+      - 4-49
+    - type: subentry
+      text: examples
+      references:
+      - 4-2
+    - type: subentry
+      text: format
+      references:
+      - 4-4
+    - type: subentry
+      text: organization
+      references:
+      - 4-2
+      - 4-48
+    - type: subentry
+      text: overview
+      references:
+      - 4-1
+    - type: subentry
+      text: values
+      references:
+      - 4-4
+    - type: entry
+      text: Problems
+    - type: subentry
+      text: comments
+      references:
+      - 4-5
+    - type: subentry
+      text: data blocks
+      references:
+      - 4-3
+    - type: subentry
+      text: examples
+      references:
+      - 4-91
+      - 4-92
+      - 4-98
+      - 4-105
+      - 4-112
+    - type: subentry
+      text: filenames
+      references:
+      - 1-8
+    - type: subentry
+      text: optimization
+      references:
+      - 4-5
+    - type: subentry
+      text: searches
+      references:
+      - 4-5
+    - type: subentry
+      text: surveys
+      references:
+      - 4-5
+    - type: subentry
+      text: table names
+      references:
+      - 3-5
+    - type: subentry
+      text: title
+      references:
+      - 4-5
+      - 4-85
+    - type: entry
+      text: Program
+    - type: subentry
+      text: data structure
+      references:
+      - 2-92
+    - type: subentry
+      text: execution
+      references:
+      - 1-9
+    - type: subentry
+      text: flowchart
+      references:
+      - 2-91
+    - type: subentry
+      text: memory requirements
+      references:
+      - 1-9
+    - type: subentry
+      text: modules
+      references:
+      - 2-2
+    - type: subentry
+      text: portability
+      references:
+      - 1-5
+    - type: entry
+      text: Proportional navigation
+      references:
+      - 2-85
+    - type: variable
+      text: psigc
+      references:
+      - 2-10
+    - type: variable
+      text: psigcdt
+      references:
+      - 2-47
+    - type: variable
+      text: psigd
+      references:
+      - 2-17
+    - type: variable
+      text: psigddt
+      references:
+      - 2-47
+    - type: letter
+      text: R
+    - type: entry
+      text: Radar
+    - type: subentry
+      text: accelerations
+      references:
+      - 2-72
+    - type: subentry
+      text: aspect angle
+      references:
+      - 2-73
+    - type: subentry
+      text: azimuth
+      references:
+      - 2-71
+    - type: subentry
+      text: coordinate system
+      references:
+      - 2-71
+    - type: subentry
+      text: elevation
+      references:
+      - 2-71
+    - type: subentry
+      text: input data
+      references:
+      - 4-74
+    - type: subentry
+      text: meridional angle
+      references:
+      - 2-73
+  - source_pdf_page: 302
+    source_manual_page: Index-7
+    show_title: false
+    left:
+    - type: subentry
+      text: observations
+      references:
+      - 2-71
+    - type: subentry
+      text: range
+      references:
+      - 2-71
+    - type: subentry
+      text: rates
+      references:
+      - 2-72
+    - type: subentry
+      text: unit vectors
+      references:
+      - 2-71
+    - type: variable
+      text: radasp
+      references:
+      - 2-64
+    - type: variable
+      text: radaz
+      references:
+      - 2-64
+    - type: variable
+      text: radazdt
+      references:
+      - 2-64
+    - type: variable
+      text: radazdt2
+      references:
+      - 2-64
+    - type: variable
+      text: radelv
+      references:
+      - 2-64
+    - type: variable
+      text: radelvdt
+      references:
+      - 2-64
+    - type: variable
+      text: radelvdt2
+      references:
+      - 2-64
+    - type: variable
+      text: radmer
+      references:
+      - 2-64
+    - type: variable
+      text: radrng
+      references:
+      - 2-64
+    - type: variable
+      text: radrngdt
+      references:
+      - 2-64
+    - type: variable
+      text: radrngdt2
+      references:
+      - 2-64
+    - type: entry
+      text: Rail launch
+      references:
+      - 2-41
+      - 4-29
+      - 4-100
+    - type: entry
+      text: Range
+    - type: subentry
+      text: downrange/crossrange
+      references:
+      - 2-68
+      - 4-39
+    - type: subentry
+      text: east/north
+      references:
+      - 2-66
+      - 4-39
+    - type: subentry
+      text: ground
+      references:
+      - 2-46
+    - type: variable
+      text: range
+      references:
+      - 2-46
+    - type: entry
+      text: Range insensitive axis
+      references:
+      - 2-89
+    - type: entry
+      text: Range safety
+      references:
+      - 2-75
+      - 4-42
+    - type: variable
+      text: rcm
+      references:
+      - 2-9
+    - type: entry
+      text: Relative vehicle
+    - type: subentry
+      text: azimuth
+      references:
+      - 2-74
+    - type: subentry
+      text: calculations
+      references:
+      - 2-74
+    - type: subentry
+      text: elevation
+      references:
+      - 2-74
+    - type: subentry
+      text: range
+      references:
+      - 2-74
+    - type: variable
+      text: relaz
+      references:
+      - 2-64
+    - type: variable
+      text: relelv
+      references:
+      - 2-64
+    - type: variable
+      text: relrng
+      references:
+      - 2-64
+    - type: variable
+      text: relvel
+      references:
+      - 2-64
+    - type: variable
+      text: relxb
+      references:
+      - 2-64
+    - type: variable
+      text: relyb
+      references:
+      - 2-64
+    - type: variable
+      text: relzb
+      references:
+      - 2-64
+    - type: entry
+      text: Reynold's number
+      references:
+      - 2-56
+    - type: variable
+      text: reypft
+      references:
+      - 2-56
+    - type: variable
+      text: rho
+      references:
+      - 2-52
+    - type: variable
+      text: rollgc
+      references:
+      - 2-22
+    right:
+    - type: variable
+      text: rollgd
+      references:
+      - 2-22
+    - type: variable
+      text: rolli
+      references:
+      - 2-22
+    - type: entry
+      text: Runge-Kutta
+      references:
+      - 2-39
+      - 2-75
+    - type: entry
+      text: Running TAOS
+      references:
+      - 1-9
+    - type: letter
+      text: S
+    - type: entry
+      text: Searches
+    - type: subentry
+      text: golden section
+      references:
+      - 2-100
+    - type: subentry
+      text: input data
+      references:
+      - 4-76
+    - type: subentry
+      text: loops
+      references:
+      - 4-78
+    - type: subentry
+      text: methods
+      references:
+      - 2-98
+    - type: subentry
+      text: Newton-Raphson
+      references:
+      - 2-69
+      - 2-84
+      - 2-98
+    - type: subentry
+      text: objective function
+      references:
+      - 4-76
+    - type: subentry
+      text: optimization
+      references:
+      - 2-102
+    - type: subentry
+      text: parabolic
+      references:
+      - 2-99
+    - type: subentry
+      text: parabolic minimum
+      references:
+      - 2-101
+    - type: subentry
+      text: problem file
+      references:
+      - 4-5
+    - type: subentry
+      text: secant
+      references:
+      - 2-94
+      - 2-99
+    - type: subentry
+      text: trajectory
+      references:
+      - 2-94
+    - type: entry
+      text: Segments
+    - type: subentry
+      text: data blocks
+      references:
+      - 4-7
+    - type: subentry
+      text: definition
+      references:
+      - 1-6
+      - 4-1
+    - type: subentry
+      text: description
+      references:
+      - 4-7
+    - type: subentry
+      text: final conditions
+      references:
+      - 2-94
+      - 4-31
+    - type: subentry
+      text: number
+      references:
+      - 4-2
+      - 4-7
+    - type: entry
+      text: Sideslip angle
+      references:
+      - 2-27
+      - 2-31
+      - 4-14
+    - type: entry
+      text: Sled tracks
+      references:
+      - 2-41
+      - 4-29
+    - type: variable
+      text: sndspd
+      references:
+      - 2-52
+    - type: entry
+      text: Sodano's method
+    - type: subentry
+      text: direct
+      references:
+      - 2-69
+    - type: subentry
+      text: inverse
+      references:
+      - 2-66
+    - type: entry
+      text: Specific load factors
+      references:
+      - 2-50
+    - type: entry
+      text: Summary variables
+    - type: subentry
+      text: definition
+      references:
+      - 4-80
+    - type: subentry
+      text: examples
+      references:
+      - 4-82
+    - type: subentry
+      text: math operations
+      references:
+      - 4-81
+    - type: entry
+      text: Surveys
+      references:
+      - 1-7
+    - type: subentry
+      text: definition
+      references:
+      - 4-83
+    - type: subentry
+      text: examples
+      references:
+      - 4-93
+    - type: subentry
+      text: name
+      references:
+      - 4-83
+    - type: subentry
+      text: number
+      references:
+      - 4-83
+    - type: subentry
+      text: problem file
+      references:
+      - 4-5
+    - type: subentry
+      text: summary variables
+      references:
+      - 4-80
+    - type: subentry
+      text: values
+      references:
+      - 4-83
+      - 4-84
+    - type: letter
+      text: T
+    - type: entry
+      text: Table files
+    - type: subentry
+      text: organization
+      references:
+      - 3-2
+  - source_pdf_page: 303
+    source_manual_page: Index-8
+    show_title: false
+    left:
+    - type: subentry
+      text: overview
+      references:
+      - 3-1
+    - type: entry
+      text: Tables
+    - type: subentry
+      text: aerodynamic coefficients
+      references:
+      - 2-57
+    - type: subentry
+      text: aerodynamic reference area
+      references:
+      - 3-10
+    - type: subentry
+      text: comments
+      references:
+      - 3-6
+    - type: subentry
+      text: dependent values
+      references:
+      - 3-11
+      - 3-17
+      - 3-22
+    - type: subentry
+      text: examples
+      references:
+      - 3-10
+      - 3-12
+      - 3-25
+      - 4-92
+    - type: subentry
+      text: extrapolation
+      references:
+      - 3-9
+    - type: subentry
+      text: filenames
+      references:
+      - 1-8
+    - type: subentry
+      text: full format
+      references:
+      - 3-13
+    - type: subentry
+      text: function definition
+      references:
+      - 3-9
+    - type: subentry
+      text: goto operation
+      references:
+      - 3-21
+    - type: subentry
+      text: id name
+      references:
+      - 3-2
+      - 3-5
+      - 3-9
+    - type: subentry
+      text: if-then operation
+      references:
+      - 3-20
+    - type: subentry
+      text: independent variables
+      references:
+      - 3-11
+      - 3-17
+      - 3-22
+    - type: subentry
+      text: labels
+      references:
+      - 3-21
+    - type: subentry
+      text: mass flow units
+      references:
+      - 3-10
+    - type: subentry
+      text: math operations
+      references:
+      - 3-13
+      - 3-15
+    - type: subentry
+      text: parameters
+      references:
+      - 3-10
+    - type: subentry
+      text: propulsion
+      references:
+      - 2-59
+    - type: subentry
+      text: simple format
+      references:
+      - 3-9
+    - type: subentry
+      text: skewed tabulated data
+      references:
+      - 3-22
+    - type: subentry
+      text: state variables
+      references:
+      - 3-7
+      - 3-16
+    - type: subentry
+      text: storage variables
+      references:
+      - 3-18
+    - type: subentry
+      text: table type
+      references:
+      - 3-3
+    - type: subentry
+      text: temporary variables
+      references:
+      - 3-18
+    - type: subentry
+      text: thrust units
+      references:
+      - 3-10
+    - type: subentry
+      text: user-defined variables
+      references:
+      - 3-8
+      - 3-19
+    - type: subentry
+      text: values
+      references:
+      - 3-6
+      - 3-16
+    - type: entry
+      text: Tangent Plane, definition
+      references:
+      - 4-47
+    - type: entry
+      text: Tangent plane
+    - type: subentry
+      text: acceleration
+      references:
+      - 2-34
+    - type: subentry
+      text: coordinate system
+      references:
+      - 2-33
+    - type: subentry
+      text: initial impact point
+      references:
+      - 4-42
+    - type: subentry
+      text: position
+      references:
+      - 2-33
+    - type: subentry
+      text: unit vectors
+      references:
+      - 2-33
+    - type: subentry
+      text: velocity
+      references:
+      - 2-33
+    - type: entry
+      text: TAOS, execution
+      references:
+      - 1-9
+    - type: variable
+      text: temp
+      references:
+      - 2-52
+    - type: variable
+      text: thrust
+      references:
+      - 2-59
+      - 3-3
+    - type: entry
+      text: Thrust vector angles
+      references:
+      - 2-59
+      - 4-27
+      - 4-28
+    - type: entry
+      text: Titles
+      references:
+      - 4-85
+    - type: entry
+      text: Total angle of attack
+      references:
+      - 2-29
+      - 4-15
+    - type: entry
+      text: Trajectories
+    - type: subentry
+      text: calculations
+      references:
+      - 2-92
+    - type: subentry
+      text: constraints
+      references:
+      - 2-104
+    - type: subentry
+      text: definition
+      references:
+      - 4-33
+    - type: subentry
+      text: derivative calculation
+      references:
+      - 2-96
+    right:
+    - type: subentry
+      text: flowchart
+      references:
+      - 2-93
+      - 2-96
+    - type: subentry
+      text: initial conditions
+      references:
+      - 4-43
+    - type: subentry
+      text: limits
+      references:
+      - 2-90
+    - type: subentry
+      text: multiple
+      references:
+      - 1-6
+      - 2-94
+    - type: subentry
+      text: name
+      references:
+      - 4-2
+      - 4-33
+    - type: subentry
+      text: number
+      references:
+      - 4-2
+      - 4-33
+    - type: subentry
+      text: optimization
+      references:
+      - 1-7
+      - 2-94
+      - 2-102
+      - 4-62
+    - type: subentry
+      text: rail launch
+      references:
+      - 2-41
+      - 4-29
+    - type: subentry
+      text: searches
+      references:
+      - 2-94
+    - type: subentry
+      text: segments
+      references:
+      - 4-1
+    - type: subentry
+      text: shaping
+      references:
+      - 2-103
+    - type: subentry
+      text: surveys
+      references:
+      - 1-7
+    - type: entry
+      text: TSAP
+      references:
+      - 1-4
+      - 2-1
+      - 4-55
+    - type: letter
+      text: U
+    - type: entry
+      text: Unit vectors
+    - type: subentry
+      text: body
+      references:
+      - 2-20
+      - 2-27
+    - type: subentry
+      text: coordinate system transforms
+      references:
+      - 2-35
+    - type: subentry
+      text: geocentric
+      references:
+      - 2-8
+    - type: subentry
+      text: geodetic
+      references:
+      - 2-13
+    - type: subentry
+      text: radar
+      references:
+      - 2-71
+    - type: subentry
+      text: tangent plane
+      references:
+      - 2-33
+    - type: subentry
+      text: velocity
+      references:
+      - 2-24
+      - 2-25
+    - type: subentry
+      text: wind
+      references:
+      - 2-26
+    - type: entry
+      text: Units
+    - type: subentry
+      text: changing
+      references:
+      - 4-86
+    - type: subentry
+      text: conversion
+      references:
+      - 2-3
+    - type: subentry
+      text: thrust and mass flow
+      references:
+      - 4-27
+    - type: entry
+      text: User-defined variables
+    - type: subentry
+      text: examples
+      references:
+      - 4-109
+    - type: subentry
+      text: if-then statements
+      references:
+      - 4-37
+    - type: subentry
+      text: integral
+      references:
+      - 4-38
+    - type: subentry
+      text: math operations
+      references:
+      - 4-36
+    - type: subentry
+      text: output tables
+      references:
+      - 3-3
+      - 4-37
+    - type: subentry
+      text: problem
+      references:
+      - 4-52
+    - type: subentry
+      text: tables
+      references:
+      - 3-19
+      - 4-10
+      - 4-11
+      - 4-28
+    - type: subentry
+      text: trajectory
+      references:
+      - 4-35
+    - type: letter
+      text: V
+    - type: variable
+      text: vair
+      references:
+      - 2-24
+    - type: variable
+      text: vel
+      references:
+      - 2-10
+      - 2-17
+    - type: variable
+      text: velebx
+      references:
+      - 2-22
+    - type: variable
+      text: veleby
+      references:
+      - 2-22
+    - type: variable
+      text: velebz
+      references:
+      - 2-23
+    - type: variable
+      text: velibx
+      references:
+      - 2-23
+    - type: variable
+      text: veliby
+      references:
+      - 2-23
+  - source_pdf_page: 304
+    source_manual_page: Index-9
+    show_title: false
+    left:
+    - type: variable
+      text: velibz
+      references:
+      - 2-23
+    - type: entry
+      text: Velocity
+    - type: subentry
+      text: coordinate system
+      references:
+      - 2-24
+      - 2-47
+    - type: subentry
+      text: unit vectors
+      references:
+      - 2-24
+      - 2-25
+    - type: variable
+      text: vgr
+      references:
+      - 2-46
+    - type: letter
+      text: W
+    - type: entry
+      text: WGS
+      references:
+      - 2-12
+    - type: entry
+      text: Wind
+    - type: subentry
+      text: coordinate system
+      references:
+      - 2-26
+    - type: subentry
+      text: unit vectors
+      references:
+      - 2-26
+    - type: entry
+      text: Winds
+    - type: subentry
+      text: definition
+      references:
+      - 2-24
+    - type: subentry
+      text: input data
+      references:
+      - 4-89
+    - type: subentry
+      text: tables
+      references:
+      - 3-4
+      - 4-89
+    - type: entry
+      text: Windward meridian
+      references:
+      - 2-29
+      - 2-31
+      - 4-15
+    - type: variable
+      text: wt
+      references:
+      - 2-39
+    - type: letter
+      text: X
+    - type: variable
+      text: xecfc
+      references:
+      - 2-5
+    - type: variable
+      text: xecfcdt
+      references:
+      - 2-6
+    - type: variable
+      text: xecfcdt2
+      references:
+      - 2-6
+    - type: variable
+      text: xecic
+      references:
+      - 2-7
+    - type: variable
+      text: xecicdt
+      references:
+      - 2-7
+    - type: variable
+      text: xecicdt2
+      references:
+      - 2-7
+    - type: variable
+      text: xip
+      references:
+      - 2-32
+    - type: variable
+      text: xipdt
+      references:
+      - 2-32
+    - type: variable
+      text: xipdt2
+      references:
+      - 2-32
+    - type: variable
+      text: xtp
+      references:
+      - 2-33
+    - type: variable
+      text: xtpdt
+      references:
+      - 2-33
+    - type: variable
+      text: xtpdt2
+      references:
+      - 2-34
+    right:
+    - type: letter
+      text: Y
+    - type: variable
+      text: yawgc
+      references:
+      - 2-22
+    - type: variable
+      text: yawgd
+      references:
+      - 2-22
+    - type: variable
+      text: yawi
+      references:
+      - 2-22
+    - type: variable
+      text: yecfc
+      references:
+      - 2-5
+    - type: variable
+      text: yecfcdt
+      references:
+      - 2-6
+    - type: variable
+      text: yecfcdt2
+      references:
+      - 2-6
+    - type: variable
+      text: yecic
+      references:
+      - 2-7
+    - type: variable
+      text: yecicdt
+      references:
+      - 2-7
+    - type: variable
+      text: yecicdt2
+      references:
+      - 2-7
+    - type: variable
+      text: yip
+      references:
+      - 2-32
+    - type: variable
+      text: yipdt
+      references:
+      - 2-32
+    - type: variable
+      text: yipdt2
+      references:
+      - 2-32
+    - type: variable
+      text: ytp
+      references:
+      - 2-33
+    - type: variable
+      text: ytpdt
+      references:
+      - 2-33
+    - type: variable
+      text: ytpdt2
+      references:
+      - 2-34
+    - type: letter
+      text: Z
+    - type: variable
+      text: zecfc
+      references:
+      - 2-5
+    - type: variable
+      text: zecfcdt
+      references:
+      - 2-6
+    - type: variable
+      text: zecfcdt2
+      references:
+      - 2-6
+    - type: variable
+      text: zecic
+      references:
+      - 2-7
+    - type: variable
+      text: zecicdt
+      references:
+      - 2-7
+    - type: variable
+      text: zecicdt2
+      references:
+      - 2-7
+    - type: variable
+      text: zip
+      references:
+      - 2-32
+    - type: variable
+      text: zipdt
+      references:
+      - 2-32
+    - type: variable
+      text: zipdt2
+      references:
+      - 2-32
+    - type: variable
+      text: ztp
+      references:
+      - 2-33
+    - type: variable
+      text: ztpdt
+      references:
+      - 2-33
+    - type: variable
+      text: ztpdt2
+      references:
+      - 2-34
+  blank_page:
+    source_pdf_page: 305
+    source_manual_page: Index-10
+    text: Intentionally Left Blank

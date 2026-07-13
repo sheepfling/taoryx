@@ -1,0 +1,58 @@
+\begin{tikzpicture}[scale=0.95,>=Latex,line cap=round,line join=round]
+  \coordinate (O) at (0,0);
+  \begin{scope}
+    \clip (O) circle (2.05);
+    % Latitude grid.
+    \draw[thin] (-2.00,0.00) arc[start angle=180,end angle=360,x radius=2.00,y radius=0.36];
+    \draw[thin] (-2.00,0.00) arc[start angle=180,end angle=0,x radius=2.00,y radius=0.36];
+    \draw[thin] (-1.88,0.78) arc[start angle=170,end angle=370,x radius=1.90,y radius=0.47];
+    \draw[thin] (-1.88,-0.78) arc[start angle=190,end angle=350,x radius=1.90,y radius=0.47];
+    \draw[thin] (-1.52,1.38) arc[start angle=158,end angle=382,x radius=1.58,y radius=0.34];
+    \draw[thin] (-1.52,-1.38) arc[start angle=202,end angle=338,x radius=1.58,y radius=0.34];
+    % Meridians.
+    \draw[thin] (0,2.05) arc[start angle=90,end angle=270,x radius=0.52,y radius=2.05];
+    \draw[thin] (0,2.05) arc[start angle=90,end angle=-90,x radius=0.52,y radius=2.05];
+    \draw[thin] (0,2.05) arc[start angle=90,end angle=270,x radius=1.10,y radius=2.05];
+    \draw[thin] (0,2.05) arc[start angle=90,end angle=-90,x radius=1.10,y radius=2.05];
+    \draw[thin] (0,2.05) arc[start angle=90,end angle=270,x radius=1.62,y radius=2.05];
+    \draw[thin] (0,2.05) arc[start angle=90,end angle=-90,x radius=1.62,y radius=2.05];
+
+    % Simplified continental outlines. These are intentionally schematic but retain
+    % the geographic cue present in the source illustration.
+    \draw[line width=0.48pt,fill=black!9]
+      (-0.53,1.09) .. controls (-0.18,1.30) and (0.18,1.20) .. (0.45,0.96)
+      .. controls (0.72,0.74) and (0.72,0.48) .. (0.52,0.28)
+      .. controls (0.35,0.10) and (0.30,-0.05) .. (0.22,-0.34)
+      .. controls (0.12,-0.73) and (-0.11,-1.05) .. (-0.35,-1.12)
+      .. controls (-0.50,-0.92) and (-0.67,-0.68) .. (-0.71,-0.38)
+      .. controls (-0.76,-0.02) and (-0.69,0.31) .. (-0.78,0.54)
+      .. controls (-0.73,0.79) and (-0.64,0.94) .. (-0.53,1.09);
+    \draw[line width=0.48pt,fill=black!9]
+      (-0.60,1.16) .. controls (-0.89,1.26) and (-1.05,1.48) .. (-1.29,1.45)
+      .. controls (-1.50,1.39) and (-1.55,1.18) .. (-1.37,1.02)
+      .. controls (-1.18,0.91) and (-0.99,0.97) .. (-0.83,0.87);
+    \draw[line width=0.48pt,fill=black!9]
+      (0.37,1.03) .. controls (0.72,1.31) and (1.14,1.38) .. (1.54,1.18)
+      .. controls (1.78,1.02) and (1.88,0.72) .. (1.63,0.55)
+      .. controls (1.38,0.39) and (1.11,0.49) .. (0.91,0.30)
+      .. controls (0.78,0.17) and (0.84,-0.04) .. (0.67,-0.15);
+    \draw[line width=0.48pt,fill=black!9]
+      (-1.42,0.62) .. controls (-1.72,0.80) and (-1.89,0.58) .. (-1.72,0.34)
+      .. controls (-1.56,0.15) and (-1.31,0.12) .. (-1.23,-0.11)
+      .. controls (-1.17,-0.31) and (-1.38,-0.43) .. (-1.27,-0.63)
+      .. controls (-1.15,-0.86) and (-0.95,-1.08) .. (-0.82,-1.37)
+      .. controls (-0.63,-1.24) and (-0.60,-0.98) .. (-0.71,-0.76)
+      .. controls (-0.82,-0.52) and (-0.73,-0.29) .. (-0.82,-0.09)
+      .. controls (-0.93,0.17) and (-1.15,0.28) .. (-1.42,0.62);
+    \draw[line width=0.48pt,fill=black!9]
+      (1.07,-1.04) .. controls (1.27,-0.91) and (1.56,-0.94) .. (1.66,-1.15)
+      .. controls (1.54,-1.34) and (1.27,-1.42) .. (1.05,-1.31)
+      .. controls (0.93,-1.22) and (0.95,-1.10) .. (1.07,-1.04);
+  \end{scope}
+
+  \draw[line width=0.95pt] (O) circle (2.05);
+  \draw[->,line width=1.05pt] (O) -- (-2.72,-1.16) node[below left] {$\hat{x}_{\oplus}$};
+  \draw[->,line width=1.05pt] (O) -- (2.92,0.00) node[right] {$\hat{y}_{\oplus}$};
+  \draw[->,line width=1.05pt] (O) -- (0,2.82) node[above] {$\hat{z}_{\oplus}$};
+  \fill (O) circle (1.35pt);
+\end{tikzpicture}

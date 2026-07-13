@@ -1,0 +1,463 @@
+\subsection{\problemblock{*Optimize} Data Block}\label{sec:block-optimize}
+
+Parametric optimization can be used to maximize or minimize a trajectory
+characteristic, such as final range or velocity, and it can be used to satisfy
+trajectory constraints, such as a final impact position or flight-path angle.
+Although optimization is one of the most powerful features of TAOS, the numerical
+optimization methods are complex and are not as reliable as the ordinary trajectory
+integration methods.
+
+A parametric optimization problem varies a set of input parameters
+$\boldsymbol{x}$ to maximize or minimize an objective function
+$f(\boldsymbol{x})$ subject to a set of constraints
+$\boldsymbol{c}(\boldsymbol{x})$.  The parameters are numerical values in the
+problem file.  The objective is a trajectory output variable evaluated at a specified
+point, usually the end of a segment.  Constraints may be equalities, for which an
+output variable must equal a value, or inequalities, for which a limit or boundary is
+imposed.
+
+TAOS uses the nonlinear constrained recursive-quadratic-programming method
+\texttt{vf02ad}, described in \cref{sec:optimization}.  The partial
+derivatives required by the algorithm are estimated with forward or central
+differences.
+
+\taossubhead{Optimization Loops}
+
+Optimization is often applied to only part of a trajectory.  This part is called the
+\emph{optimization loop}.  The loop begins with the first segment containing one of
+the optimization parameters and extends to the segment at which the objective
+function is evaluated.  It may contain any number of segments.
+
+A problem may contain as many as five optimization loops, identified by the letters
+\texttt{a} through \texttt{e}.  The loops may not overlap and may not be nested.
+Each must be completely independent of every other search or optimization loop.
+The loop letter associates the parameter placeholders with the
+\problemblock{*optimize} block that defines the objective and constraints.
+
+An optimization loop may have any number of parameters, but in practice the method
+works best with fewer than about 25.  It normally converges faster and more reliably
+when fewer parameters are used, so the objective is to include only enough
+parameters to represent the trajectory adequately.  Parameter numbers start at one
+and must be sequential, although the placeholders need not appear in numerical order
+in the problem file.
+
+\taossubhead{Optimization Parameters}
+
+An input value is designated as parameter $n$ of loop $x$ by replacing the number
+with \texttt{optx-n}.  For example,
+
+\begin{lstlisting}[style=taosmanual]
+*fly alpha=opta-2
+\end{lstlisting}
+
+makes angle of attack parameter 2 in loop \texttt{a}.  Any input variable that would
+otherwise contain a number, rather than a table name or keyword, can be used as an
+optimization parameter.  Initial conditions and guidance rules are the most common
+choices.
+
+A frequently used technique for optimizing the shape of a trajectory is to define a
+segment with a tabulated guidance rule and an optimized final condition:
+
+\begin{lstlisting}[style=taosmanual]
+*fly alpha vrs tseg
+  opta-1   0.0
+  opta-2   5.0
+  opta-3  10.0
+  opta-4  15.0
+  opta-5  opta-6
+
+*when tseg>opta-6 stop
+\end{lstlisting}
+
+Six parameters define this angle-of-attack time history.  The segment times must be
+estimated, but optimization determines the angle-of-attack values required to satisfy
+the objective and constraints.  The final time is also made a parameter to provide
+additional flexibility in shaping the flight path.
+
+\taossubhead{Objective Function}
+
+The optimization parameters alone do not define the loop.  The objective and any
+constraints are entered in the \problemblock{*optimize} block.  The first line of the
+block defines the objective function.  Time, range, and velocity are commonly used,
+but any output variable is valid.  For example,
+
+\begin{lstlisting}[style=taosmanual]
+*optimize a for vel=max on segment 6, trajectory 1
+\end{lstlisting}
+
+sets the objective to maximum velocity at the end of segment 6 in trajectory 1.  The
+loop letter follows the \problemblock{*optimize} keyword, and the keyword
+\texttt{for} is required.  The output variable is set equal to \texttt{min} or
+\texttt{max}.  The segment and trajectory numbers are required.
+
+\taossubhead{Constraints}
+
+The next lines may define equality or inequality constraints.  Constraints are
+optional.  For example,
+
+\begin{lstlisting}[style=taosmanual]
+constrain vel=3000
+constrain gamgd=-80
+constrain qmin<0
+\end{lstlisting}
+
+constrains trajectory output variables, not the input parameters.  Because these lines
+do not specify endpoints, they are evaluated at the same segment and trajectory as
+the objective.  In continuation of the preceding example, velocity must equal 3000,
+geodetic flight-path angle must equal $-80^\circ$, and the user-defined variable
+\texttt{qmin} must remain below zero at the end of segment 6 in trajectory 1.
+
+A constraint may name a different endpoint:
+
+\begin{lstlisting}[style=taosmanual]
+constrain vel on segment 3, trajectory 2 = 3000
+\end{lstlisting}
+
+which constrains velocity at the end of segment 3 in trajectory 2 to 3000 ft/s.
+
+Integral user-defined variables are often used for inequality constraints that must
+hold over the entire flight path.  For example, a vehicle with aerodynamic controls
+may require a minimum dynamic pressure of
+500~lbf/ft\textsuperscript{2}.  A suitable integral variable is
+
+\begin{align}
+  q_{\min} &= \int (q-500)^2\,dt,
+    && q<500, \label{eq:optimization-qmin-violation}\\
+  q_{\min} &= 0,
+    && \text{otherwise}. \label{eq:optimization-qmin-satisfied}
+\end{align}
+
+Constraining \texttt{qmin<0} forces the trajectory to remain above the minimum
+pressure.  Altitude, load factors, and other flight-path limits can be handled in the
+same way.  Integral variables are defined as described in
+\cref{sec:trajectory-block-define}.
+
+\taossubhead{Multiple-Vehicle Constraints}
+
+A complete constraint consists of the keyword \texttt{constrain}, a relationship,
+and an optional reference factor.  The relationship contains an output-variable name,
+one of the relations \texttt{=}, \texttt{<}, or \texttt{>}, and a value.  The value
+may be a number or another output variable evaluated at the same or a different
+trajectory point.  This feature is useful for intercept calculations.  For example,
+
+\begin{lstlisting}[style=taosmanual]
+constrain alt=alt[2]
+\end{lstlisting}
+
+requires the altitude on the optimization trajectory to equal the altitude on trajectory
+2.  A bracketed subscript is one way to enter a trajectory number.
+
+The same type of constraint can be written with keywords:
+
+\begin{lstlisting}[style=taosmanual]
+constrain alt on segment 6, trajectory 1
+  = alt on segment 4, trajectory 3
+\end{lstlisting}
+
+This requires the altitude at the end of segment 6 in trajectory 1 to equal the altitude
+at the end of segment 4 in trajectory 3.  Both endpoints must have been computed by
+the time the objective is evaluated.  The keywords \texttt{on segment} and
+\texttt{trajectory} supply the endpoint numbers.
+
+Trajectory subscripts and endpoint keywords are alternative syntaxes:
+
+\begin{lstlisting}[style=taosmanual]
+constrain east[2] on segment 4 = east[1] on segment 7
+
+constrain east on segment 4, trajectory 2
+  = east on segment 7, trajectory 1
+\end{lstlisting}
+
+Both forms define the same relationship.  A trajectory number may not be supplied
+both as a subscript and with the \texttt{trajectory} keyword.  If both segment and
+trajectory numbers are given, the segment number comes first.  If neither is given,
+the objective-function endpoint is used.
+
+\taossubhead{Referencing Values}
+
+Optimization is more reliable when the parameters, objective, and constraints have
+approximately the same order of magnitude.  If some values are orders of magnitude
+larger than others, numerical difficulties often result.  TAOS therefore provides
+reference factors that normalize values during the calculation.
+
+A constraint containing a nonzero number, such as \texttt{alt=30000}, is
+automatically referenced by that number.  Other constraints may supply an explicit
+factor:
+
+\begin{lstlisting}[style=taosmanual]
+constrain vel on segment 11 = vel[3] on segment 4, ref=1000
+\end{lstlisting}
+
+Both velocities are then divided by 1000 for the numerical calculation.  The
+\texttt{ref} item is optional, must be the last item in the constraint, and does not
+change the physical relationship.
+
+\taossubhead{Optimization Control Variables}
+
+After the constraints, optional control variables may be entered.  They are listed in
+\cref{tab:optimization-control-variables}.  All have reasonable defaults.
+The objective reference \statevar{fref} normalizes the objective in the same way that
+\texttt{ref} normalizes a constraint.  For best results,
+$|f(\boldsymbol{x})/f_{\mathrm{ref}}|$ should be between 1 and 10.  The convergence
+accuracy \statevar{tol} determines when the method considers a solution valid.
+Smaller values can produce a better solution, but require more iterations; if the
+value is too small, convergence may not be achieved.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Optimization data-block input variables.}
+  \label{tab:optimization-control-variables}
+  \small
+  \begin{tabularx}{0.98\linewidth}{@{}>{\ttfamily}lX>{\ttfamily}lX@{}}
+    \toprule
+    \normalfont Variable & Description & \normalfont Variable & Description \\
+    \midrule
+    fref & Objective-function reference value (default 1.0) &
+    derivs & Derivative method (default 1) \\
+    tol & Convergence accuracy (default $1.0\times10^{-6}$) &
+    dx & Derivative increment (default $1.0\times10^{-8}$) \\
+    maxitr & Maximum number of iterations (default 50) &
+    adjust & Guidance-table adjustment (default 0) \\
+    integ & Integration control (default 1) &
+    surveys & Survey-control flag (default 0) \\
+    restarts & Restart control (default 0) &
+    print & Printout control (default 0) \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The maximum iteration count \statevar{maxitr} controls the number of calls to
+\texttt{vf02ad}.  It is related to, but is not the same as, the number of objective
+function evaluations or trajectories computed.  With \texttt{maxitr=0}, one
+trajectory is calculated using the initial parameter estimates.  This is useful for
+checking whether the starting trajectory is reasonable.
+
+Optimization recomputes trajectories many times.  The integration control
+\statevar{integ} determines whether all trajectories in the problem are recomputed
+for every function evaluation (1) or only the trajectory containing the objective is
+recomputed (0).  If the problem is restricted to one trajectory, zero can reduce the
+run time substantially.  If constraints refer to other trajectories, one is normally
+necessary.
+
+\taossubhead{Automatically Restarting Optimization}
+
+If the method has not converged within the maximum number of iterations, it can be
+restarted from the current solution.  A restart sometimes permits further progress
+toward the minimum.  The variable \statevar{restarts} specifies how many restarts
+are allowed; zero means none.  When restarts are used, \statevar{maxitr} should be
+reduced to a value such as 20.  On the last restart, TAOS allows twice the stated
+number of iterations in an effort to achieve convergence.
+
+When an angle-of-attack time history is optimized, the segment times must be
+estimated.  The method works best when the points are evenly distributed:
+
+\begin{lstlisting}[style=taosmanual]
+*fly alpha vrs tseg
+  opta-1    0
+  opta-2   20
+  opta-3   40
+  opta-4   60
+  opta-5   80
+  opta-6  100
+  opta-7  opta-8
+
+*when tseg>opta-8 stop
+\end{lstlisting}
+
+During optimization the final segment time \texttt{opta-8} can become either very
+large or very close to the preceding point at 100 seconds, producing an uneven
+distribution that affects the solution.  The guidance-table adjustment variable
+\statevar{adjust} controls whether the fixed time points are redistributed evenly at
+each restart.  Zero disables the adjustment; one enables it.
+
+\taossubhead{Numerical Derivatives}
+
+The optimization algorithm requires partial derivatives.  They are computed by a
+central-difference method when \texttt{derivs=0}, or a forward-difference method
+when \texttt{derivs=1}.  Forward differences use
+
+\begin{equation}
+  \frac{\partial f}{\partial x}
+  \approx \frac{f(x+\delta x)-f(x)}{\delta x},
+  \label{eq:optimization-forward-difference}
+\end{equation}
+
+and central differences use
+
+\begin{equation}
+  \frac{\partial f}{\partial x}
+  \approx \frac{f(x+\delta x)-f(x-\delta x)}{2\delta x}.
+  \label{eq:optimization-central-difference}
+\end{equation}
+
+The derivative increment \statevar{dx} controls $\delta x$.  Smaller increments
+improve the derivative until numerical precision is reached.  Central differences
+require more function evaluations, but usually give more accurate derivatives than
+forward differences for the same increment.  The defaults normally work well and
+do not need to be changed.
+
+\taossubhead{Survey Control Flag}
+
+If surveys are used with optimization, \statevar{surveys} controls the starting
+trajectory for each set of survey values.  The first survey case always starts from the
+\texttt{par-n} values in the \problemblock{*optimize} block.  With the default
+\texttt{surveys=0}, the same starting trajectory is used for every later survey case.
+With \texttt{surveys=1}, the optimum from the preceding case becomes the starting
+trajectory for the next.  This often improves convergence when the optimum changes
+only slightly between adjacent survey values.
+
+\taossubhead{Printout Control}
+
+TAOS always prints an optimization summary giving the parameters, objective, and
+constraints at each iteration.  If \texttt{print=1}, the complete trajectory is also
+printed after every iteration.  This can help locate a problem, but it produces a large
+amount of output and is not recommended unless \statevar{maxitr} is very small,
+such as zero or one.
+
+\taossubhead{Initial Estimates and Limits on Parameters}
+
+The method requires an initial estimate, or starting trajectory.  It works best when
+the starting trajectory has characteristics similar to the final solution.  An initial
+value must be provided for every parameter.  Optional upper and lower boundaries
+and an optional normalizing reference value may also be supplied.
+
+Values are identified by the same parameter numbers used in the problem file.  For
+example,
+
+\begin{lstlisting}[style=taosmanual]
+par-3=6.5  lo-3=-10  hi-3=30
+\end{lstlisting}
+
+sets the initial estimate for parameter 3 to 6.5 and limits it to the interval
+$[-10,30]$.  No reference is needed because the value is not extremely large or
+small.  By contrast,
+
+\begin{lstlisting}[style=taosmanual]
+par-2=4000  lo-2=-10000  hi-2=100000  ref-2=10000
+\end{lstlisting}
+
+normalizes parameter 2 by 10,000.  A reference is normally useful when parameter
+values exceed about 1000 or are smaller than about 0.01.  Initial estimates are
+required; limits are optional but recommended; references are optional.  Placing the
+values for each parameter on a separate line makes the block easier to read.
+
+\taossubhead{Example Data Block}
+
+The complete block consists of the objective, constraints, controls, and parameter
+values:
+
+\begin{lstlisting}[style=taosmanual]
+*optimize a for range=max on segment 12, trajectory 1
+
+  constrain vel=4000
+  constrain gamgd=-75
+
+  fref=100 maxitr=40 tol=1.0e-7
+
+  par-1=9.9  lo-1=-15 hi-1=15
+  par-2=8.5  lo-2=-15 hi-2=15
+  par-3=5.0  lo-3=-15 hi-3=15
+  par-4=1.0  lo-4=-15 hi-4=15
+  par-5=65.0 lo-5=51.0 hi-5=300.0
+\end{lstlisting}
+
+This five-parameter problem maximizes range at the end of segment 12 in trajectory
+1.  At the optimum, final velocity must be 4000 ft/s and the final geodetic
+flight-path angle must be $-75^\circ$.  The procedure ends when it converges or after
+40 iterations, with no automatic restarts.
+
+\taossubhead{Convergence}
+
+Optimization terminates when the maximum number of iterations is exceeded, when
+convergence is detected, or when the method has difficulty making further progress.
+If the iteration limit is reached, the last several objective values should be inspected.
+If they are changing very little, the resulting trajectory is probably near optimum;
+otherwise \statevar{maxitr} should be increased.
+
+The message ``optimization procedure does not detect convergence, but it cannot
+make further progress towards the minimum'' means that the method found a search
+direction, but the one-dimensional search along that direction could not locate a
+better point.  This usually means the method has converged as far as the numerical
+precision and tolerance permit.  The message can be treated as a warning; in general,
+it indicates that a good solution has been found.
+
+\taossubhead{Troubleshooting the Optimization Loop}
+
+Trajectory optimization is more an art than a science because methods such as
+\texttt{vf02ad} are sensitive to the starting trajectory and the accuracy of the partial
+derivatives.  Experience and judgement are required.  The loop definition is the
+first item to inspect if the method fails to converge or produces a poor result.  When
+a parameter is varied, the objective or at least one constraint should change.  A
+parameter that affects neither can be removed.
+
+The loop ends at the segment named by the objective.  At that point, every trajectory
+and segment referenced by a constraint must already have been computed.  If a loop
+involves several trajectories and \texttt{integ=0}, problems may occur; it is often
+more practical to use \texttt{integ=1}, even though it is less efficient.
+
+Test runs with \texttt{maxitr=0} are useful for checking the loop.  A few runs with
+different parameter values quickly show whether the objective and constraints
+respond correctly and whether the starting trajectory is reasonable.
+
+\taossubhead{Troubleshooting Segment Final Conditions}
+
+When a parameter controls the length of a segment, a time-based final condition is
+preferred:
+
+\begin{lstlisting}[style=taosmanual]
+*when tseg>opta-3 goto 5
+\end{lstlisting}
+
+Time is strictly increasing, while quantities such as altitude may cross the same
+value more than once.  Only one optimized time final condition should be used.  If
+several final conditions compete, different conditions can end the segment on
+different iterations and confuse the optimizer.  Additional endpoint requirements
+should be expressed as optimization constraints.
+
+\taossubhead{Troubleshooting the Starting Trajectory}
+
+The method is sensitive to the initial parameter estimates, particularly when many
+parameters are used.  If a loop fails or gives a poor solution, try different estimates;
+even small changes sometimes restore convergence.  An optimum should not be
+trusted completely because a local rather than global minimum can be found.  Rerun
+an important analysis from a substantially different starting trajectory.  If the same
+solution results, a global optimum has probably been located.
+
+\taossubhead{Troubleshooting Numerical Derivatives}
+
+Numerical derivatives are formed by very small perturbations of the trajectory.  The
+integration step size in the \problemblock{*integ} block must be small enough to
+resolve those perturbations.  If it is too large, integration errors produce incorrect
+derivatives and the optimizer moves toward an incorrect solution.  Experimentation
+is required to determine an adequate step.
+
+If integration accuracy is not the problem, derivative truncation error may be too
+large.  Decrease \statevar{dx} by an order of magnitude or more, or select central
+differences with \texttt{derivs=0}.  The increment cannot be made arbitrarily small;
+when roundoff becomes larger than truncation error, increase \statevar{dx} and use
+central differences.
+
+\taossubhead{Troubleshooting Surveys}
+
+Optimization with surveys often causes problems because one starting solution may
+not work for all survey values.  This is especially true when the parameters form an
+angle-of-attack time history.  Such trajectories are best run individually unless the
+survey value changes only slightly.  The restart and adjustment options can
+sometimes help, but they should be treated as a last resort.
+
+\taossubhead{Troubleshooting Angle-of-Attack Time Histories}
+
+A common problem occurs when the final optimized abscissa becomes smaller than
+the preceding fixed time:
+
+\begin{lstlisting}[style=taosmanual]
+*fly alpha vrs tseg
+  opta-1    0
+  opta-2   10
+  opta-3   20
+  opta-4  opta-5
+\end{lstlisting}
+
+If \texttt{opta-5} falls below 20, the time values are no longer strictly increasing and
+table interpolation fails.  Its lower limit must therefore be set to a value slightly
+larger than the preceding time point.

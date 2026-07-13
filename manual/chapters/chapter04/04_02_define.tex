@@ -1,0 +1,85 @@
+\subsection{\problemblock{*Define} Data Block}\label{sec:problem-block-define}
+
+TAOS always computes a standard set of variables for each trajectory. Additional
+variables can be defined within a trajectory definition that are functions of these
+standard variables (\cref{sec:trajectory-block-define}). These user-defined
+variables are defined only within a trajectory. If a quantity of interest is a function
+of variables from more than one trajectory, it must be defined outside of the
+trajectory definitions. Then, trajectory numbers can be used to reference values
+from different trajectories.
+
+The difference between \problemblock{*define} data blocks within a trajectory
+definition and those outside of a trajectory definition is that
+\problemblock{*define} data blocks within a trajectory are restricted to be
+functions of that trajectory's output variables, and data blocks outside a trajectory
+are not restricted to be functions of a single trajectory.
+\problemblock{*define} data blocks outside of trajectory definitions can be used to
+compute relative values comparing two or more trajectories.
+
+User-defined variables are input the same way regardless of whether the
+\problemblock{*define} data block is within a trajectory definition or not. A unique
+name is given followed by equations that show how to compute the new variable.
+User-defined variables that are defined outside of trajectory definitions cannot be
+integral variables; this type of user-defined variable is only allowed within a
+trajectory definition.
+
+The equations defining how to compute the user-defined variable are given in a
+simplified C language which is similar to Fortran. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*define del_alt
+  del_alt = (alt[1] - alt[2]) / 3280.84;
+\end{lstlisting}
+
+computes the difference in altitude between trajectory numbers 1 and 2 in
+kilometers. The name of the new variable is \statevar{del_alt}. It is given following
+the \problemblock{*define} keyword, and it must also appear on the left side of an
+equation somewhere in the definition. In this example, with one equation,
+\statevar{del_alt} must be the variable on the left side of the equal sign.
+
+The values and variables on the right side of the equal sign must all be standard
+output variables, previously input user-defined variables, temporary variables, or
+constants. In this case, \statevar{alt} is a standard output variable and 3280.84 is a
+constant. Since this data block is located outside of the trajectory definitions in the
+problem file, trajectory numbers are required to fully specify the variables.
+Trajectory numbers are enclosed in square brackets so they look like subscripts.
+
+\Cref{tab:user-defined-math} contains a list of operators and
+functions that can be used in equations for user-defined variables. All of the standard
+mathematical operators are available, and they have the same precedence as in C and
+Fortran. Many standard functions are also provided; again these are defined in TAOS
+as they are in the C language.
+
+The \texttt{table()} function shown in \cref{tab:user-defined-math}
+cannot be used in \problemblock{*define} data blocks outside of a trajectory
+definition. Tables are functions of the state of a vehicle or trajectory so they must be
+associated with a specific trajectory. They cannot be evaluated outside of a
+trajectory.
+
+Equations must end with a semicolon like in C. The semicolon is required even when
+there is only one equation like in the example shown above. Since equations continue
+until a semicolon is encountered, they can extend across multiple lines as necessary.
+
+When more than one equation is required to define a value, temporary variables can
+be used. These variables must be unique, that is, they cannot have the same name as
+a standard output variable or another user-defined variable. They are only defined
+within the \problemblock{*define} data block. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*define rel_range
+  dx = (east[2] - east[1])^2;
+  dy = (north[2] - north[1])^2;
+  rel_range = sqrt(dx+dy);
+\end{lstlisting}
+
+computes a relative horizontal range between two trajectories using two temporary
+variables, \statevar{dx} and \statevar{dy}, in the calculation.
+
+If-then-else statements can be used as shown in
+\cref{sec:trajectory-block-define}, but \texttt{while} loops, \texttt{for} loops,
+and other C-language control statements are not allowed.
+
+User-defined variables given outside of the trajectory definitions can only be
+referenced by \problemblock{*print}, \problemblock{*file},
+\problemblock{*egs}, and other \problemblock{*define} data blocks that are also
+outside of the trajectory definitions.

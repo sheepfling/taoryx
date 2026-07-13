@@ -1,0 +1,16 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,scale=0.88]
+  \coordinate (c) at (-3.5,-1.9);
+  \coordinate (r) at (1.0,0.55);
+  \draw[very thick] (c) arc[start angle=180,end angle=0,x radius=3.5,y radius=2.25];
+  \draw[->,thick] (c)--(3.8,-1.9) node[right] {equatorial plane};
+  \draw[->,thick] (c)--(-3.5,2.2) node[above] {$\hat z_{\oplus}$};
+  \draw[<->] (-3.8,-1.9)--(-3.8,0.45) node[midway,left] {$R_p$};
+  \draw[<->] (-3.5,-2.25)--(3.1,-2.25) node[midway,below] {$R_{\oplus}$};
+  \draw[->,very thick] (c)--(r) node[midway,above left] {$\vec r_r$};
+  \fill (r) circle (2.3pt) node[above right] {radar station};
+  \draw (0.25,0.95)--(1.65,-0.25)--(2.45,0.65)--(1.05,1.85)--cycle;
+  \draw[->,thick] (r)--(0.15,1.45) node[above left] {$\hat x_r$};
+  \draw[->,thick] (r)--(1.85,1.28) node[above right] {$\hat y_r$};
+  \draw[->,thick] (r)--(0.55,-0.35) node[below] {$\hat z_r$};
+  \node[align=left] at (2.9,0.2) {geodetic local\\horizon plane};
+\end{tikzpicture}

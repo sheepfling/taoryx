@@ -1,0 +1,73 @@
+figure,title,manual_page,pdf_page,target_format,status,notes
+1-1,A TAOS Application,1-1,18,tikz,visually_verified,Editable TikZ redraw used in the compiled manual; source crop preserved in manual/figures/chapter01/source-crops/fig-1-1.png
+1-2,Typical Trajectory Information,1-1,18,pgfplots,visually_verified,Editable PGFPlots redraw used in the compiled manual; source crop preserved in manual/figures/chapter01/source-crops/fig-1-2.png
+1-3,Segmented Trajectories,1-6,23,tikz,visually_verified,Editable TikZ redraw used in the compiled manual; source crop preserved in manual/figures/chapter01/source-crops/fig-1-3.png
+1-4,A Multiple Trajectory Example,1-7,24,pgfplots,visually_verified,Editable PGFPlots redraw used in the compiled manual; source crop preserved in manual/figures/chapter01/source-crops/fig-1-4.png
+1-5,TAOS Icon on Silicon Graphics Workstations,1-9,26,tikz,visually_verified,"Version 19 source-comparison redraw: historical SGI file icons, TAOS application icon, labels, and arrow geometry reconstructed in editable TikZ; source crop preserved in manual/figures/chapter01/source-crops/fig-1-5.png"
+1-6,Example Printout,1-10,27,latex,visually_verified,"Version 19 source-comparison reconstruction: split Sandia/TAOS header, ruled separator, indented titles, and fixed-width data alignment restored as semantic LaTeX; source crop preserved in manual/figures/chapter01/source-crops/fig-1-6.png"
+2-1,The ECFC Coordinate System,2-5,34,tikz,visually_verified,Version 19 source-comparison redraw: denser ECFC graticule and editable continental outlines added while preserving the source axis geometry; source crop archived in manual/figures/chapter02/source-crops/fig-2-1.png
+2-2,Local Geocentric Horizon Coordinates,2-8,37,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-2.png
+2-3,Geocentric Position Components,2-9,38,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-3.png
+2-4,Geocentric Velocity Components,2-10,39,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-4.png
+2-5,Local Geodetic Horizon Coordinates,2-12,41,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-5.png
+2-6,Ellipsoidal Earth Geometry,2-14,43,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-6.png
+2-7,Geodetic Coordinate System Geometry,2-16,45,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-7.png
+3-1,Forces Acting on Vehicle,3-1,136,tikz,visually_verified,Vector redraw in manual/figures/chapter03/fig-3-1.tex
+3-2,Axial Force Coefficient as Function of Mach Number,3-1,136,pgfplots,visually_verified,Vector redraw in manual/figures/chapter03/fig-3-2.tex
+3-3,Thrust and Mass Flow as a Function of Time,3-2,137,pgfplots,visually_verified,Vector redraw in manual/figures/chapter03/fig-3-3.tex
+3-4,Table Files and Tables,3-2,137,tikz,visually_verified,Vector redraw in manual/figures/chapter03/fig-3-4.tex
+3-5,Table Extrapolation Option,3-10,145,tikz,visually_verified,Vector redraw in manual/figures/chapter03/fig-3-5.tex
+3-6,Square and Skewed Tabulated Data,3-22,157,tikz,visually_verified,Vector redraw in manual/figures/chapter03/fig-3-6.tex
+4-1,Segmented Flight Paths,4-1,166,tikz,visually_verified,Editable TikZ redraw in manual/figures/chapter04/fig-4-1.tex
+4-2,Problem File Organization,4-2,167,tikz,visually_verified,Version 19 source-comparison redraw: both the nested-bracket representation and the hierarchical tree are restored in editable TikZ; dedicated source crop archived in manual/figures/chapter04/source-crops/fig-4-2.png
+4-3,Thrust Vector Angles,4-27,192,tikz,visually_verified,Editable TikZ redraw in manual/figures/chapter04/fig-4-3.tex
+4-4,Downrange and Crossrange Definition,4-39,204,tikz,visually_verified,Editable TikZ redraw in manual/figures/chapter04/fig-4-4.tex
+4-5,Trajectory Output File Example,4-40,205,latex-listing,visually_verified,Semantic listing in examples/chapter04/trajectory-output-example.txt
+4-6,Trajectory Printout Example,4-46,211,latex-listing,visually_verified,Semantic listing in examples/chapter04/trajectory-printout-example.txt
+4-7,Problem and Data Block Organization,4-48,213,tikz,visually_verified,Editable TikZ redraw in manual/figures/chapter04/fig-4-7.tex
+4-8,Example of EGS Database File,4-58,223,latex-listing,visually_verified,Semantic listing in examples/chapter04/egs-database-example.txt
+4-9,Trajectory Output File Example,4-60,225,latex-listing,visually_verified,Semantic listing in examples/chapter04/problem-output-example.txt
+4-10,Trajectory Printout Example,4-72,237,latex-listing,visually_verified,Semantic listing in examples/chapter04/problem-printout-example.txt
+4-11,Valid Multiple Search Structures,4-79,244,tikz,visually_verified,Editable TikZ redraw in manual/figures/chapter04/fig-4-11.tex
+4-12,Summary Variable Printout,4-80,245,latex-listing,visually_verified,Semantic listing in examples/chapter04/summary-printout-example.txt
+4-13,Wind Horizontal Component Direction,4-89,254,tikz,visually_verified,Editable TikZ redraw in manual/figures/chapter04/fig-4-13.tex
+4-14,Altitude versus Range for Example Ballistic Trajectories,4-95,260,pgfplots,visually_verified,Editable PGFPlots reconstruction used in the compiled manual; source plot crop archived in manual/figures/chapter04/source-plots/fig-4-14.png
+4-15,Velocity versus Time for Example Ballistic Trajectories,4-96,261,pgfplots,visually_verified,Editable PGFPlots reconstruction used in the compiled manual; source plot crop archived in manual/figures/chapter04/source-plots/fig-4-15.png
+4-16,Maximum Dynamic Pressure for Example Ballistic Trajectories,4-96,261,pgfplots,visually_verified,Editable PGFPlots reconstruction used in the compiled manual; source plot crop archived in manual/figures/chapter04/source-plots/fig-4-16.png
+4-17,Maximum Axial Gs for Example Ballistic Trajectories,4-97,262,pgfplots,visually_verified,Editable PGFPlots reconstruction used in the compiled manual; source plot crop archived in manual/figures/chapter04/source-plots/fig-4-17.png
+4-18,Altitude versus Range for Example Ballistic Rocket,4-103,268,pgfplots,visually_verified,Editable PGFPlots reconstruction used in the compiled manual; source plot crop archived in manual/figures/chapter04/source-plots/fig-4-18.png
+4-19,Velocity versus Time for Example Ballistic Rocket,4-104,269,pgfplots,visually_verified,Editable PGFPlots reconstruction used in the compiled manual; source plot crop archived in manual/figures/chapter04/source-plots/fig-4-19.png
+4-20,Altitude versus East Position for an Intercept Trajectory,4-111,276,pgfplots,visually_verified,Editable PGFPlots reconstruction used in the compiled manual; source plot crop archived in manual/figures/chapter04/source-plots/fig-4-20.png
+4-21,Ground-Launched Intercept Example,4-115,280,pgfplots,visually_verified,Editable PGFPlots reconstruction used in the compiled manual; source plot crop archived in manual/figures/chapter04/source-plots/fig-4-21.png
+2-8,Body-Fixed Coordinates,2-19,48,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-8.png
+2-9,"Geodetic Yaw, Pitch, and Roll Angles",2-19,48,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-9.png
+2-10,Velocity Coordinate System,2-24,53,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-10.png
+2-11,Bank Angle and Wind Coordinate System,2-26,55,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-11.png
+2-12,Angle of Attack and Sideslip Definitions,2-27,56,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-12.png
+2-13,Angle of Attack and Sideslip Definitions,2-28,57,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-13.png
+2-14,Aerodynamic Angles at 90 Degree Angle of Attack,2-28,57,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-14.png
+2-15,Total Angle of Attack and Windward Meridian Definitions,2-29,58,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-15.png
+2-16,Accelerations from Forces Acting on the Vehicle,2-51,80,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-16.png
+2-17,Thrust Vector Angles,2-59,88,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-17.png
+2-18,East and North Distances,2-66,95,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-18.png
+2-19,Downrange and Crossrange,2-68,97,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-19.png
+2-20,Radar Station Coordinates,2-71,100,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-20.png
+2-21,Radar Observations,2-72,101,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-21.png
+2-22,Radar Aspect and Meridional Angles,2-73,102,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-22.png
+2-23,Relative Vehicle Calculations,2-74,103,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-23.png
+2-24,Lift-to-Drag Ratio,2-77,106,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-24.png
+2-25,Guidance Loop,2-81,110,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-25.png
+2-26,Parabolic Transition to Desired State,2-82,111,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-26.png
+2-27,Cubic Transition to Desired State,2-83,112,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-27.png
+2-28,Intercept Geometry,2-86,115,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-28.png
+2-29,Proportional Navigation Geometry,2-86,115,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-29.png
+2-30,Range Insensitive Axis,2-89,118,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-30.png
+2-31,Main Flowchart,2-91,120,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-31.png
+2-32,Vehicle Data Structure,2-92,121,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-32.png
+2-33,Trajectory Calculation Flowchart,2-93,122,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-33.png
+2-34,Derivative Calculation Flowchart,2-96,125,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-34.png
+2-35,Newton-Raphson Search,2-98,127,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-35.png
+2-36,Secant Search,2-99,128,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-36.png
+2-37,Parabolic Root Search,2-100,129,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-37.png
+2-38,Golden Section Search,2-101,130,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-38.png
+2-39,Optimization Used for Trajectory Shaping,2-103,132,tikz,visually_verified,Editable TikZ reconstruction used in the compiled manual; source crop archived in manual/figures/chapter02/source-crops/fig-2-39.png

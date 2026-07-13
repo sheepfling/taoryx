@@ -1,0 +1,29 @@
+math_operations:
+  - {name: add, description: Add value to table value, operand: required}
+  - {name: sub, description: Subtract value from table value, operand: required}
+  - {name: mult, description: Multiply table value by value, operand: required}
+  - {name: div, description: Divide table value by value, operand: required}
+  - {name: idiv, description: Divide value by table value, operand: required}
+  - {name: exp, description: Raise table value to power of value, operand: required}
+  - {name: iexp, description: Raise value to power of table value, operand: required}
+  - {name: max, description: Limit table value to less than a value, operand: required}
+  - {name: min, description: Limit table value to greater than a value, operand: required}
+  - {name: set, description: Set table value to a value, operand: required}
+  - {name: abs, description: Absolute value of table value, operand: none}
+  - {name: neg, description: Negate table value, operand: none}
+  - {name: sqr, description: Square table value, operand: none}
+  - {name: sqrt, description: Square root of table value, operand: none}
+  - {name: ln, description: Natural logarithm of table value, operand: none}
+  - {name: log, description: Base-10 logarithm of table value, operand: none}
+  - {name: e, description: e raised to the table-value power, operand: none}
+  - {name: sin, description: Sine of table value in degrees, operand: none}
+  - {name: cos, description: Cosine of table value in degrees, operand: none}
+  - {name: tan, description: Tangent of table value in degrees, operand: none}
+  - {name: asin, description: Inverse sine of table value in degrees, operand: none}
+  - {name: acos, description: Inverse cosine of table value in degrees, operand: none}
+  - {name: atan, description: Inverse tangent of table value in degrees, operand: none}
+  - {name: zero, description: Set table value to zero, operand: none}
+  - {name: csto, description: Store table value and set it to zero, operand: name}
+  - {name: if, description: If-then statement, operand: relationship}
+  - {name: goto, description: Goto statement, operand: label}
+  - {name: end, description: End of table, operand: none}

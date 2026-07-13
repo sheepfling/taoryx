@@ -1,0 +1,26 @@
+(* Documentation grammar for the TAOS table-file fixtures. *)
+table-file         = { table } ;
+table              = "(" , identifier , ")" , "table" , table-type ,
+                     [ "(" , identifier-list , ")" ] , { table-option } ,
+                     ( simple-body | full-body ) ;
+table-option       = "extrap" | "no-extrap" | identifier , "=" , atom ;
+simple-body        = assignment , { assignment } ;
+full-body          = "start" , { labelled-operation | operation | omission } , "end" ;
+labelled-operation = identifier , ":" , operation ;
+operation          = unary-operation
+                   | binary-operation , value
+                   | binary-operation , table-call , [ extrapolation ] , { assignment }
+                   | "csto" , identifier
+                   | "goto" , identifier
+                   | "if" , "(" , relationship , ")" , "then" , operation ;
+unary-operation    = "abs" | "neg" | "sqr" | "sqrt" | "ln" | "log" | "e"
+                   | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" | "zero" ;
+binary-operation   = "add" | "sub" | "mult" | "div" | "idiv" | "exp" | "iexp"
+                   | "min" | "max" | "set" ;
+table-call         = identifier , "(" , identifier-list , ")" ;
+assignment         = identifier , "=" , number , { number } ;
+relationship       = atom , ( "<" | ">" | "=" ) , atom ;
+extrapolation      = "extrap" | "no-extrap" ;
+omission           = "." , { "." | "etc." } ;
+identifier-list    = identifier , { identifier } ;
+atom               = number | identifier ;

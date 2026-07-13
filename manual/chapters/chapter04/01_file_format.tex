@@ -1,0 +1,107 @@
+\section{File Format}\label{sec:problem-file-format}
+
+Problem files are text files, so they can be created with any standard text editor,
+such as UNIX \texttt{vi} or the Silicon Graphics \texttt{jot} editor. They can also
+be created by other software, such as an interactive trajectory-design program.
+
+Information in a problem file is read into TAOS one line at a time. Each line
+contains names and values separated by special characters such as spaces or commas.
+These special characters are called \emph{delimiters}. Valid delimiters are
+white-space characters (space, tab, and so forth), commas, equal signs,
+parentheses, colons, greater-than signs, and less-than signs. Because delimiters are
+used to separate names and values, they cannot be embedded within a name or value.
+
+Internally, TAOS requires lowercase names. Names and keywords entered in uppercase
+are automatically converted to lowercase, so from a user's standpoint case is not
+significant except in titles.
+
+\taossubhead{Names and Values}
+
+Names and values can be placed anywhere on a line; they do not have to be in
+particular columns. This free-field style permits indentation that makes the
+problem-file structure easier to visualize and helps avoid input errors.
+
+Because input is free-field, the order of names and values is often important. For
+example, in the trajectory data block
+
+\begin{lstlisting}[style=taosmanual]
+*trajectory 3 missile start on 23
+\end{lstlisting}
+
+the keyword \problemblock{*trajectory} must be followed by a trajectory number,
+then by a trajectory or vehicle name, the keywords \texttt{start on}, and finally the
+starting segment number. In other data blocks, where lists of variables and values
+are given, order may be less critical.
+
+Numerical values can be entered as integers without a decimal point, real numbers
+with a decimal point, or real numbers in scientific notation (\emph{e}-format). For
+example,
+
+\begin{lstlisting}[style=taosmanual]
+*initial geodetic
+  time=20, vel=2.0e4, wt=345.5, gama=-24.3
+\end{lstlisting}
+
+uses \texttt{2.0e4}, which is interpreted as $2.0\times10^4$, or 20,000.
+Delimiters cannot be embedded within a value, so
+
+\begin{lstlisting}[style=taosmanual]
+wt=10,000       # Incorrect value
+\end{lstlisting}
+
+is incorrect. The comma is interpreted as a delimiter, and TAOS reads two values,
+10 and 0, instead of 10000.
+
+\taossubhead{Survey, Search, and Optimization Parameters}
+
+One of the powerful features of TAOS is its ability to vary input parameters
+systematically for tradeoff studies. Surveys, searches, and optimization loops all
+change numerical values in the problem file. Surveys vary parameters through a set
+of known values and compute a trajectory for each value. Searches vary one or two
+input parameters to achieve specified conditions during the trajectory. For example,
+the initial flight-path angle can be varied until the final range equals a desired value.
+Optimization loops vary a set of parameters to maximize or minimize a trajectory
+quantity subject to constraints. For example, an angle-of-attack history can be varied
+to maximize range while maintaining an impact velocity above a required value and
+a dynamic pressure above a specified minimum.
+
+All three methods adjust numerical input values. They cannot be used to change
+table names or other problem-file keywords.
+
+A numerical field is designated for a survey by assigning it a special keyword. For
+example,
+
+\begin{lstlisting}[style=taosmanual]
+*initial geodetic
+  time=20, vel=2.0e4, wt=surv-1, gama=-24.3
+\end{lstlisting}
+
+sets the initial weight to values supplied by survey loop 1 in the corresponding
+\problemblock{*survey} block (\cref{sec:block-survey}). Values are designated for
+searches with \texttt{srch-n}, where \texttt{n} is the search number
+(\cref{sec:block-search}). Optimization values use \texttt{optx-n}, where
+\texttt{x} identifies the optimization loop and \texttt{n} identifies the parameter
+(\cref{sec:block-optimize}). At this point it is only necessary to know that the
+capability exists; the separate survey, search, and optimization sections give the
+complete details.
+
+\taossubhead{Titles}
+
+Some data blocks have titles. Titles are special because delimiters are ignored. A
+title extends from the first nonblank character to the end of the line. Titles are also
+not converted to lowercase; case is preserved as entered.
+
+\taossubhead{Comments}
+
+Comments begin with the special character \texttt{\#} and continue to the end of the
+line. They can be placed anywhere in a problem file. Blank lines are ignored and can
+be used to separate groups of information for readability. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*define alt-km                         # Altitude in km
+  alt-km = alt / 3280.84;              # Convert units of altitude
+\end{lstlisting}
+
+defines a new variable called \texttt{alt-km} containing vehicle altitude in
+kilometres rather than feet. The comments document both the variable and the unit
+conversion.

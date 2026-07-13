@@ -1,0 +1,27 @@
+% Source PDF page 118; manual page 2-89.
+\subsection{Range Insensitive Axis}\label{sec:range-insensitive-axis}
+
+For a vehicle on a ballistic trajectory above the sensible atmosphere, an
+instantaneous velocity increment $\Delta\vec V$ normally changes both time and
+range to impact. If the increment is applied along a special direction called the
+\emph{range-insensitive axis}, only the impact time changes; impact range remains
+unchanged, as shown in \cref{fig:range-insensitive-axis}.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-30}
+  \caption{Range-insensitive axis.}
+  \label{fig:range-insensitive-axis}
+\end{figure}
+
+Two solutions exist. A velocity increment applied ``up'' the range-insensitive axis
+increases time to impact; one applied ``down'' the axis decreases it.
+
+The corresponding guidance rules align the body $x$ axis with one of these two
+directions. TAOS first computes the initial-impact-point range and azimuth from the
+current state with no velocity increment. It then uses a multidimensional
+Newton--Raphson search to vary the direction of a
+$\SI{10}{\foot\per\second}$ increment until the same impact point is recovered.
+Aerodynamic forces are omitted from all impact-point calculations in this search.
+The function \texttt{range\_insensitive\_axis} in the \texttt{derivs} module
+returns the required pitch and yaw angles.

@@ -1,0 +1,203 @@
+chapter: 4
+release: v16
+scope: ranked_diplomatic_batch_1
+source_manual: SAND95-1652
+method:
+  description: Restore source wording for the highest-priority Chapter 4 regions identified
+    by the Version 15 lexical audit while preserving verified mathematics, tables,
+    figures, semantic labels, and parser fixtures.
+  preserve_source_wording: true
+  preserve_parser_fixtures: true
+  preserve_numbered_objects: true
+  normalize_only:
+  - line-break hyphenation
+  - obvious OCR corruption
+  - typographic quotation marks
+  - cross-references expressed as semantic LaTeX
+sections:
+- id: chapter4.segment.aero
+  title: '*Aero Data Block'
+  section: 4.2.1
+  source_pdf_pages:
+  - 174
+  - 175
+  source_manual_pages:
+  - 4-9
+  - 4-10
+  tex_file: manual/chapters/chapter04/02_01_aero.tex
+  audit_rank: 8
+  baseline_token_recall_percent: 18.8
+  baseline_bigram_recall_percent: 7.0
+  status: diplomatically_transcribed
+  restored:
+  - coefficient-set consistency rules
+  - multiple-block totaling behavior
+  - constant/table reference-area requirements
+  - user-defined-variable lifetime and placement guidance
+- id: chapter4.segment.limits
+  title: '*Limits Data Block'
+  section: 4.2.8
+  source_pdf_pages:
+  - 191
+  source_manual_pages:
+  - 4-26
+  tex_file: manual/chapters/chapter04/02_08_limits.tex
+  audit_rank: 4
+  baseline_token_recall_percent: 27.3
+  baseline_bigram_recall_percent: 4.2
+  status: diplomatically_transcribed
+  restored:
+  - control-system assumption
+  - eligible and ineligible guidance-variable restrictions
+  - upper/lower-bound syntax
+  - convergence rationale
+- id: chapter4.segment.when
+  title: '*When Data Block'
+  section: 4.2.12
+  source_pdf_pages:
+  - 196
+  - 197
+  source_manual_pages:
+  - 4-31
+  - 4-32
+  tex_file: manual/chapters/chapter04/02_12_when.tex
+  audit_rank: 6
+  baseline_token_recall_percent: 17.5
+  baseline_bigram_recall_percent: 5.0
+  status: diplomatically_transcribed
+  restored:
+  - segment-start and segment-end behavior
+  - cross-trajectory comparison example
+  - equality versus inequality initialization semantics
+  - stop and goto behavior
+  - multiple-final-condition priority and time fail-safe guidance
+- id: chapter4.problem.define
+  title: '*Define Data Block'
+  section: 4.4.2
+  source_pdf_pages:
+  - 217
+  - 218
+  source_manual_pages:
+  - 4-52
+  - 4-53
+  tex_file: manual/chapters/chapter04/04_02_define.tex
+  audit_rank: 2
+  baseline_token_recall_percent: 17.0
+  baseline_bigram_recall_percent: 3.9
+  status: diplomatically_transcribed
+  restored:
+  - trajectory versus problem scope
+  - integral-variable restriction
+  - expression and semicolon rules
+  - table-function restriction
+  - temporary-variable scope
+  - permitted referencing blocks
+- id: chapter4.problem.egs
+  title: '*Egs Data Block'
+  section: 4.4.4
+  source_pdf_pages:
+  - 223
+  - 224
+  source_manual_pages:
+  - 4-58
+  - 4-59
+  tex_file: manual/chapters/chapter04/04_04_egs.tex
+  audit_rank: 1
+  baseline_token_recall_percent: 4.6
+  baseline_bigram_recall_percent: 2.6
+  status: diplomatically_transcribed
+  restored:
+  - historical EGS availability and purpose
+  - file type and multiplicity
+  - overwrite behavior
+  - radar and relative-vehicle subscripts
+  - survey data levels
+  - summary-database requirements
+- id: chapter4.problem.file
+  title: '*File Data Block'
+  section: 4.4.5
+  source_pdf_pages:
+  - 225
+  - 226
+  source_manual_pages:
+  - 4-60
+  - 4-61
+  tex_file: manual/chapters/chapter04/04_05_file.tex
+  audit_rank: 7
+  baseline_token_recall_percent: 24.6
+  baseline_bigram_recall_percent: 5.0
+  status: diplomatically_transcribed
+  restored:
+  - trajectory versus problem scope
+  - overwrite behavior
+  - 400-character and approximate 30-variable hard limit
+  - 12-variable portability recommendation
+  - double-subscript semantics
+- id: chapter4.problem.print
+  title: '*Print Data Block'
+  section: 4.4.7
+  source_pdf_pages:
+  - 237
+  - 238
+  source_manual_pages:
+  - 4-72
+  - 4-73
+  tex_file: manual/chapters/chapter04/04_07_print.tex
+  audit_rank: 5
+  baseline_token_recall_percent: 23.6
+  baseline_bigram_recall_percent: 4.5
+  status: diplomatically_transcribed
+  restored:
+  - standard output filename and printer format
+  - trajectory versus problem scope
+  - mission-time alignment
+  - repeated page and column headings
+  - ten-variable per-block limit
+  - double-subscript semantics
+- id: chapter4.example.ballistic_reentry
+  title: Ballistic Reentry
+  section: 4.5.1
+  source_pdf_pages:
+  - 257
+  - 258
+  - 259
+  - 260
+  - 261
+  - 262
+  source_manual_pages:
+  - 4-92
+  - 4-93
+  - 4-94
+  - 4-95
+  - 4-96
+  - 4-97
+  tex_file: manual/chapters/chapter04/05_01_ballistic_reentry.tex
+  audit_rank: 3
+  baseline_token_recall_percent: 12.7
+  baseline_bigram_recall_percent: 4.2
+  status: diplomatically_transcribed
+  restored:
+  - complete explanatory narrative
+  - trajectory-definition and survey discussion
+  - historical runtime statement
+  - representative trajectory printout
+  - summary-variable printout
+  - figure interpretation paragraph
+supporting_files:
+- examples/chapter04/ballistic-reentry-printout.txt
+- examples/chapter04/ballistic-reentry-summary.txt
+fixture_invariance:
+  sha256:
+    examples/chapter03/orbus-mdt.tbl: ded304ae6ff44bbaa6cd9651843f4901ddd8d43a257d9e97375f85697e831683
+    examples/chapter03/recruits-thr.tbl: d11a0109c8af903478c1e35ecd39b3e0fc769ccfaa6f30b22f906de9345ae9a2
+    examples/chapter03/reentry-ca-excerpt.tbl: d078d629f1d240f1d99382e558e49bafdef9ff351b994ca0bd1018b4e0685fe5
+    examples/chapter03/stmi-full.tbl: 900d29157b8eff70f05b5a3091b27bd6391678b080bee7cda72df43cc86ab8f5
+    examples/chapter03/stmi-simple.tbl: 310b74d5a21ecddd058a037f36ef258f1a527ae3c8da120d3bd30aeec4a22fbd
+    examples/chapter04/air-launched-intercept.prb: b2dfa5b409b626b78dd1bb145880d481858338ae5865a4ae106723f348e57de2
+    examples/chapter04/ballistic-reentry.prb: 286817cb104fe1ac04c87d3ddb4833d77e568f1dc4b3771e85a8a7ba87fcb41d
+    examples/chapter04/ballistic-reentry.tbl: df979968363b97e31255bd128b11a5aec44819e26e7739f2de3d5c2804a2352f
+    examples/chapter04/ballistic-rocket.prb: 8592c979fa08f30beb4e9fe9b505737dc558cf58578512a0827395963c9506e6
+    examples/chapter04/ground-launched-intercept.prb: 2cd6ab4ba3c1368528d1f6bff3d9da38a9bc87e36d4754abe42cdca23dd4ca10
+source_listing_files:
+- examples/chapter04/ballistic-reentry-source.tbl.txt
+- examples/chapter04/ballistic-reentry-source.prb.txt

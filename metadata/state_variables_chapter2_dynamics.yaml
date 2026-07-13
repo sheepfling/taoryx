@@ -1,0 +1,34 @@
+dynamics_state_variables:
+  section_2_2_1:
+    - {name: fuel, symbol: Delta_m_times_g, quantity: fuel_used, description: Fuel used}
+    - {name: mass, symbol: m, quantity: mass, description: Vehicle mass}
+    - {name: mdt, symbol: m_dot, quantity: mass_rate, description: Vehicle mass rate}
+    - {name: wt, symbol: m_times_g, quantity: weight, description: Vehicle weight}
+    - {name: plength, symbol: r, quantity: path_length, description: Complete trajectory path length}
+    - {name: plmark, symbol: r, quantity: path_length, description: Path length from a designated trajectory point}
+    - {name: plseg, symbol: r, quantity: path_length, description: Segment path length}
+  section_2_2_3:
+    - {name: longdt, symbol: lambda_dot, quantity: angular_rate, description: Longitude rate}
+    - {name: latgcdt, symbol: delta_gc_dot, quantity: angular_rate, description: Geocentric latitude rate}
+    - {name: latgddt, symbol: delta_gd_dot, quantity: angular_rate, description: Geodetic latitude rate}
+    - {name: altdt, symbol: h_dot, quantity: velocity, description: Altitude rate or rate of climb}
+  section_2_2_4:
+    - {name: range, symbol: r_s, quantity: ground_range, description: Ground range for the complete trajectory}
+    - {name: grseg, symbol: r_s, quantity: ground_range, description: Ground range for a trajectory segment}
+    - {name: grmark, symbol: r_s, quantity: ground_range, description: Ground range from a designated trajectory point}
+    - {name: vgr, symbol: norm_V_s, quantity: ground_speed, description: Ground speed}
+  section_2_2_5:
+    - {name: psigcdt, symbol: psi_gc_dot, quantity: angular_rate, description: Geocentric heading rate}
+    - {name: psigddt, symbol: psi_gd_dot, quantity: angular_rate, description: Geodetic heading rate}
+    - {name: gamgcdt, symbol: gamma_gc_dot, quantity: angular_rate, description: Geocentric vertical flight-path-angle rate}
+    - {name: gamgddt, symbol: gamma_gd_dot, quantity: angular_rate, description: Geodetic vertical flight-path-angle rate}
+  section_2_2_6:
+    - {name: nx, symbol: a_sp_dot_x_b, quantity: specific_load, description: Body x-axis specific-load factor}
+    - {name: ny, symbol: a_sp_dot_y_b, quantity: specific_load, description: Body y-axis specific-load factor}
+    - {name: nz, symbol: a_sp_dot_z_b, quantity: specific_load, description: Body z-axis specific-load factor}
+    - {name: ntotal, symbol: norm_a_sp, quantity: specific_load, description: Magnitude of the specific-load vector}
+internal_derived_quantities:
+  - {name: dynamic_pressure_second_derivative, symbol: q_ddot, section: 2.2.3}
+  - {name: mach_rate, symbol: M_dot, section: 2.2.3}
+  - {name: altitude_acceleration, symbol: h_ddot, section: 2.2.3}
+  - {name: normal_specific_load, symbol: a_sp_n, section: 2.2.6}

@@ -1,0 +1,113 @@
+\subsection{\problemblock{*Units/Fmt} Data Block}\label{sec:block-units-fmt}
+
+All TAOS output variables have default units and print formats listed in the
+Appendix. The \problemblock{*units/fmt} block changes either or both. When a
+variable's units are changed, they change everywhere on both input and output. For
+example, if altitude is changed from feet to kilometers, every reference to altitude
+in table files, problem files, and output files is interpreted in kilometers rather than
+feet.
+
+\taossubhead{Units}
+
+Units are changed by giving the variable name and its new unit. Allowed unit tokens
+are listed in \cref{tab:allowable-units}. Units must be dimensionally consistent:
+a distance variable expressed in feet may be changed to nautical miles, meters, or
+kilometers, but not to a unit of time or mass.
+
+\begin{longtable}{@{}>{\ttfamily}lp{0.29\linewidth}>{\ttfamily}lp{0.32\linewidth}@{}}
+  \caption{Allowable units.}\label{tab:allowable-units}\\
+  \toprule
+  \normalfont Units & Description & \normalfont Units & Description \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \normalfont Units & Description & \normalfont Units & Description \\
+  \midrule
+  \endhead
+  ft & Feet & m/sec2 & Meters/second$^2$ \\
+  in & Inches & m/min2 & Meters/minute$^2$ \\
+  mi & Statute miles & m/hr2 & Meters/hour$^2$ \\
+  nm & Nautical miles & km/sec2 & Kilometers/second$^2$ \\
+  m & Meters & km/min2 & Kilometers/minute$^2$ \\
+  km & Kilometers & km/hr2 & Kilometers/hour$^2$ \\
+  sec & Seconds & deg/sec2 & Degrees/second$^2$ \\
+  min & Minutes & deg/min2 & Degrees/minute$^2$ \\
+  hr & Hours & deg/hr2 & Degrees/hour$^2$ \\
+  deg & Degrees & rad/sec2 & Radians/second$^2$ \\
+  rad & Radians & rad/min2 & Radians/minute$^2$ \\
+  ft/sec & Feet/second & rad/hr2 & Radians/hour$^2$ \\
+  ft/min & Feet/minute & rev/sec2 & Revolutions/second$^2$ \\
+  ft/hr & Feet/hour & rev/min2 & Revolutions/minute$^2$ \\
+  in/sec & Inches/second & lb & Pounds mass \\
+  in/min & Inches/minute & slugs & Slugs \\
+  in/hr & Inches/hour & gm & Grams \\
+  mi/sec & Statute miles/second & kg & Kilograms \\
+  mi/min & Statute miles/minute & lb/sec & Pounds mass/second \\
+  mi/hr & Statute miles/hour & lb/min & Pounds mass/minute \\
+  knots & Nautical miles/hour & lb/hr & Pounds mass/hour \\
+  m/sec & Meters/second & slugs/sec & Slugs/second \\
+  m/min & Meters/minute & slugs/min & Slugs/minute \\
+  m/hr & Meters/hour & slugs/hr & Slugs/hour \\
+  km/sec & Kilometers/second & g/sec & Grams/second \\
+  km/min & Kilometers/minute & g/min & Grams/minute \\
+  km/hr & Kilometers/hour & g/hr & Grams/hour \\
+  deg/sec & Degrees/second & kg/sec & Kilograms/second \\
+  deg/min & Degrees/minute & kg/min & Kilograms/minute \\
+  deg/hr & Degrees/hour & kg/hr & Kilograms/hour \\
+  rad/sec & Radians/second & lbf & Pounds force \\
+  rad/min & Radians/minute & n & Newtons \\
+  rad/hr & Radians/hour & kn & Kilonewtons \\
+  rev/sec & Revolutions/second & lbf/ft2 & Pounds force/foot$^2$ \\
+  rpm & Revolutions/minute & psi & Pounds force/inch$^2$ \\
+  g & G's & pascal & Pascals \\
+  ft/sec2 & Feet/second$^2$ & kpascal & Kilopascals \\
+  ft/min2 & Feet/minute$^2$ & 1/in & Per inch \\
+  ft/hr2 & Feet/hour$^2$ & 1/ft & Per foot \\
+  in/sec2 & Inches/second$^2$ & 1/m & Per meter \\
+  in/min2 & Inches/minute$^2$ & ft2/sec & Feet$^2$/second \\
+  in/hr2 & Inches/hour$^2$ & m2/sec & Meters$^2$/second \\
+  mi/sec2 & Statute miles/second$^2$ & lb/ft3 & Pounds mass/foot$^3$ \\
+  mi/min2 & Statute miles/minute$^2$ & lb/m3 & Pounds mass/meter$^3$ \\
+  mi/hr2 & Statute miles/hour$^2$ & g/cm3 & Grams/centimeter$^3$ \\
+  nm/hr2 & Nautical miles/hour$^2$ & kg/m3 & Kilograms/meter$^3$ \\
+  \bottomrule
+\end{longtable}
+
+The aerodynamic reference area \statevar{sref} is not a standard output variable,
+but its units can also be changed. Its default is ft$^2$. The distance unit supplied to
+the block is squared for area; for example,
+
+\begin{lstlisting}[style=taosmanual]
+*units/fmt sref in
+\end{lstlisting}
+
+changes the reference-area unit to in$^2$.
+
+\taossubhead{Output Format}
+
+Print format affects output files only, but it applies to every kind of output,
+including plot files and EGS databases. A format is written as the letter
+\texttt{e} or \texttt{f}, a period, and a number. The letter selects scientific
+notation or ordinary fixed-point notation. For example, 250 in E-format is printed as
+\texttt{2.50e02}, where \texttt{e02} denotes multiplication by $10^2$; in
+F-format it is printed as \texttt{250}. The number after the period gives the number
+of digits following the decimal point.
+
+\begin{lstlisting}[style=taosmanual]
+*units/fmt alt   km    f.3
+           vel   m/sec f.2
+           range km
+           mach        e.5
+\end{lstlisting}
+
+This changes altitude to kilometers with three decimal places, velocity to meters per
+second with two decimal places, and range to kilometers with its default format.
+Mach number is nondimensional, so only its format is changed, to scientific notation
+with five decimal places.
+
+Any number of variables may be changed within one block. Units, format, or both may
+be supplied. When both are changed, the unit must appear first and the format second.
+The format of a user-defined variable can be controlled in the same way, but TAOS
+cannot convert its units because it does not know the variable's original dimensions.
+A user-defined variable must therefore be computed in the desired unit system in its
+\problemblock{*define} block.

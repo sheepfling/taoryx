@@ -1,0 +1,10 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,scale=0.9]
+  \draw[->,thick] (0,0)--(5.3,0) node[below] {angle of attack};
+  \draw[->,thick] (0,0)--(0,3.5) node[left] {$L/D$};
+  \draw[very thick] plot[smooth] coordinates
+    {(0,0) (1.1,1.25) (2.1,2.35) (3.2,3.05) (4.0,2.65) (4.7,2.1)};
+  \coordinate (m) at (3.2,3.05);
+  \fill (m) circle (2.4pt);
+  \draw[densely dashed] (3.2,0)--(m);
+  \draw[->] (4.65,3.4)--(3.32,3.08) node[pos=0,above] {maximum $L/D$};
+\end{tikzpicture}

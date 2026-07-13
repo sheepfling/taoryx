@@ -1,0 +1,25 @@
+\begin{tikzpicture}[>=Latex,x=1.0cm,y=1.0cm,line cap=round]
+  \coordinate (o) at (0,0);
+  \coordinate (proj) at (6.3,0);
+  \coordinate (target) at (6.3,4.25);
+  \coordinate (yend) at (3.55,0.95);
+
+  \draw[->] (o) -- ++(-0.8,-0.85) node[below left] {$\hat x_{\oplus}$};
+  \draw[->] (o) -- (yend) node[above] {$\hat y_{\oplus}$};
+  \draw[->] (o) -- ++(0,3.65) node[left] {$\hat z_{\oplus}$};
+  \draw[->,line width=0.85pt] (o) -- (target) node[midway,above left] {$\Delta\vec r$};
+  \draw[->] (o) -- (proj);
+  \draw[densely dashed] (proj) -- (target);
+  \draw[->] (target) -- ++(-1.45,0.2) node[above left] {$\Delta\vec V$};
+
+  \draw[->] (1.25,0) arc[start angle=0,end angle=-34,radius=1.25];
+  \node at (1.35,-0.55) {$\Lambda_y$};
+  \draw[->] (4.75,0) arc[start angle=0,end angle=34,radius=1.55];
+  \node at (4.55,0.95) {$\Lambda_p$};
+
+  \fill (o) circle (2pt);
+  \fill (target) circle (2pt);
+  \node[left,align=right] at (-0.2,0.55) {Vehicle 1\\(interceptor)};
+  \node[right,align=left] at (target) {Vehicle 2\\(target)};
+  \node[right,align=left] at (proj) {$\Delta\vec r$ projected\\onto the $x$--$y$ plane};
+\end{tikzpicture}

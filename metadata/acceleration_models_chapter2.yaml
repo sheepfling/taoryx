@@ -1,0 +1,83 @@
+chapter: 2
+section: 2.3
+name: Contributions to Acceleration
+source:
+  manual_pages: [2-51, 2-52, 2-53, 2-54, 2-55, 2-56, 2-57, 2-58, 2-59, 2-60, 2-61, 2-62, 2-63]
+  pdf_pages: [80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92]
+  numbered_equations: [2-175, 2-220]
+force_decomposition:
+  external_force_sets: [aerodynamic, propulsive, gravitational]
+  rotating_frame_terms: [coriolis, centrifugal]
+  neglected_gravity_sources: [sun, moon, planets]
+atmosphere:
+  implementations:
+    - {id: us_standard_1976, description: 1976 U.S. standard atmosphere, native_max_altitude_km: 146}
+    - {id: supplemental_1966, description: 1966 supplemental atmospheres}
+    - {id: tonopah, description: Tonopah range atmosphere data}
+    - {id: kwajalein_mean_annual, description: Mean annual Kwajalein atmosphere}
+  base_assumptions:
+    - hydrostatic equilibrium
+    - perfect gas
+    - concentric layers
+    - constant molecular-temperature gradient within each layer
+    - inverse-square gravity for geopotential conversion
+  sea_level:
+    reference_geopotential_m_per_s2: 9.80665
+    molecular_weight_1976_kg_per_kmol: 28.9644
+    molecular_weight_other_models_kg_per_kmol: 28.96
+  interpolation:
+    below_146_km: layer equations
+    above_146_km:
+      source: 1976 U.S. standard atmosphere high-altitude table
+      maximum_altitude_km: 1000
+      temperature: linear
+      pressure: exponential
+      density: exponential
+  functions: [atmos_setup, atmos_properties, atmos_hi_alt]
+aerodynamics:
+  coefficient_systems:
+    axial_normal: [CA, CN]
+    wind_axes: [CL, CD, CS]
+    body_axes: [CX, CY, CZ]
+  conversion_factors: [dynamic_pressure, reference_area]
+  canonical_accumulation_frame: wind
+  final_equations_frame: ecfc
+  special_case:
+    condition: total angle of attack equals zero
+    behavior: set normal force to zero because the windward-meridian unit vector is singular
+  implementation_function: force_aero
+propulsion:
+  frame: body
+  direction_variables: [epsilon1, epsilon2]
+  epsilon1_range_degrees: [0, 180]
+  transform_target: ecfc
+  implementation_function: force_prop
+  multiple_vectors:
+    force_behavior: vector sum
+    thrust_output_behavior: sum of magnitudes
+    angle_output_behavior: angles from last evaluated propulsive vector
+gravity:
+  potential_representation: spherical harmonics
+  coefficients: [GM, R_earth, Cnm, Snm]
+  legendre_form: unnormalized inside TAOS
+  maximum_degree_in_taos: 4
+  model_families:
+    spherical:
+      terms: point_mass_only
+    wgs_72:
+      terms: [point_mass, J2]
+    wgs_84:
+      terms: [point_mass, J2]
+    tsap_72:
+      terms: [point_mass, J2, J3, J4]
+    tsap_84:
+      terms: [point_mass, J2, J3, J4]
+    wgs_84_full:
+      terms: spherical_harmonics_through_degree_4
+    gem_t1_full:
+      terms: spherical_harmonics_through_degree_4
+  implementation_function: accel_grav
+  approximations:
+    - Solar and lunar gravity are neglected.
+    - Standard WGS models retain only J2.
+    - TSAP-compatible zonal models omit nonzonal terms that can be comparable to J3 and J4.

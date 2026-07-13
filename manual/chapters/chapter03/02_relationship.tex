@@ -1,0 +1,27 @@
+\section{Table/Problem File Relationship}\label{sec:table-problem-relationship}
+
+Information in the problem file tells TAOS which tables to use for each part of the
+trajectory. Trajectories are divided into segments, and different tables can be used in
+each segment. For example, the line
+
+\begin{lstlisting}[style=taosmanual]
+*aero ca=(stage1-ca-on) cn=(stage1-cn)
+\end{lstlisting}
+
+in the problem file tells TAOS to use a table called \tableid{stage1-ca-on} for the
+axial-force coefficient and a table called \tableid{stage1-cn} for the normal-force
+coefficient (\cref{sec:block-aero}). These table names must appear in the input table
+files. When TAOS needs an axial-force coefficient, it retrieves the value from the
+\tableid{stage1-ca-on} table.
+
+Table names are given in \problemblock{*aero}, \problemblock{*prop},
+\problemblock{*cg}, and \problemblock{*wind} data blocks in the problem file. They
+can also be used in \problemblock{*define} data blocks when defining user-defined
+output variables. All tables referenced in a problem file must appear in the table
+files.
+
+More than one table of each type can be given in a trajectory segment; the values
+from each table are added together. For example, if two thrust tables are given, they
+are evaluated separately and then added to obtain the total thrust force. Multiple
+tables can also be used for a component buildup of the total vehicle lift and drag
+forces.

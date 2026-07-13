@@ -1,0 +1,110 @@
+coordinate_state_variables:
+  ecfc:
+    coordinate_system: Earth-Centered and Fixed, Cartesian
+    section: 2.1.1
+    variables:
+      - {name: xecfc, quantity: position, axis: x, description: ECFC x component of position}
+      - {name: yecfc, quantity: position, axis: y, description: ECFC y component of position}
+      - {name: zecfc, quantity: position, axis: z, description: ECFC z component of position}
+      - {name: xecfcdt, quantity: velocity, axis: x, description: ECFC x component of earth-relative velocity}
+      - {name: yecfcdt, quantity: velocity, axis: y, description: ECFC y component of earth-relative velocity}
+      - {name: zecfcdt, quantity: velocity, axis: z, description: ECFC z component of earth-relative velocity}
+      - {name: xecfcdt2, quantity: acceleration, axis: x, description: ECFC x component of earth-relative acceleration}
+      - {name: yecfcdt2, quantity: acceleration, axis: y, description: ECFC y component of earth-relative acceleration}
+      - {name: zecfcdt2, quantity: acceleration, axis: z, description: ECFC z component of earth-relative acceleration}
+  ecic:
+    coordinate_system: Earth-Centered, Inertial, Cartesian
+    section: 2.1.2
+    variables:
+      - {name: xecic, quantity: position, axis: x, description: ECIC x component of position}
+      - {name: yecic, quantity: position, axis: y, description: ECIC y component of position}
+      - {name: zecic, quantity: position, axis: z, description: ECIC z component of position}
+      - {name: xecicdt, quantity: velocity, axis: x, description: ECIC x component of inertial velocity}
+      - {name: yecicdt, quantity: velocity, axis: y, description: ECIC y component of inertial velocity}
+      - {name: zecicdt, quantity: velocity, axis: z, description: ECIC z component of inertial velocity}
+      - {name: xecicdt2, quantity: acceleration, axis: x, description: ECIC x component of inertial acceleration}
+      - {name: yecicdt2, quantity: acceleration, axis: y, description: ECIC y component of inertial acceleration}
+      - {name: zecicdt2, quantity: acceleration, axis: z, description: ECIC z component of inertial acceleration}
+  geocentric:
+    coordinate_system: Geocentric
+    section: 2.1.4
+    variables:
+      - {name: rcm, symbol: r, quantity: position, description: Distance from the earth center}
+      - {name: long, symbol: lambda, quantity: position, description: Longitude}
+      - {name: latgc, symbol: delta_gc, quantity: position, description: Geocentric latitude}
+      - {name: vel, symbol: V, quantity: velocity, description: Magnitude of earth-relative velocity}
+      - {name: gamgc, symbol: gamma_gc, quantity: velocity, description: Geocentric vertical flight-path angle}
+      - {name: psigc, symbol: psi_gc, quantity: velocity, description: Geocentric horizontal flight-path or heading angle}
+  geodetic:
+    coordinate_system: Geodetic
+    section: 2.1.6
+    variables:
+      - {name: alt, symbol: h, quantity: position, description: Geodetic altitude above the reference ellipsoid}
+      - {name: long, symbol: lambda, quantity: position, description: Longitude shared with the geocentric system}
+      - {name: latgd, symbol: delta_gd, quantity: position, description: Geodetic latitude}
+      - {name: vel, symbol: V, quantity: velocity, description: Magnitude of earth-relative velocity}
+      - {name: gamgd, symbol: gamma_gd, quantity: velocity, description: Geodetic vertical flight-path angle}
+      - {name: psigd, symbol: psi_gd, quantity: velocity, description: Geodetic horizontal flight-path or heading angle}
+  body_fixed:
+    coordinate_system: Body-Fixed Cartesian
+    section: 2.1.7
+    variables:
+      - {name: yawgc, symbol: Psi_gc, quantity: attitude, description: Geocentric Euler yaw angle}
+      - {name: yawgd, symbol: Psi_gd, quantity: attitude, description: Geodetic Euler yaw angle}
+      - {name: yawi, symbol: Psi_i, quantity: attitude, description: Inertial-platform Euler yaw angle}
+      - {name: pitchgc, symbol: Theta_gc, quantity: attitude, description: Geocentric Euler pitch angle}
+      - {name: pitchgd, symbol: Theta_gd, quantity: attitude, description: Geodetic Euler pitch angle}
+      - {name: pitchi, symbol: Theta_i, quantity: attitude, description: Inertial-platform Euler pitch angle}
+      - {name: rollgc, symbol: Phi_gc, quantity: attitude, description: Geocentric Euler roll angle}
+      - {name: rollgd, symbol: Phi_gd, quantity: attitude, description: Geodetic Euler roll angle}
+      - {name: rolli, symbol: Phi_i, quantity: attitude, description: Inertial-platform Euler roll angle}
+      - {name: accebx, quantity: acceleration, axis: x, description: Earth-fixed acceleration in body coordinates}
+      - {name: acceby, quantity: acceleration, axis: y, description: Earth-fixed acceleration in body coordinates}
+      - {name: accebz, quantity: acceleration, axis: z, description: Earth-fixed acceleration in body coordinates}
+      - {name: accibx, quantity: acceleration, axis: x, description: Inertial acceleration in body coordinates}
+      - {name: acciby, quantity: acceleration, axis: y, description: Inertial acceleration in body coordinates}
+      - {name: accibz, quantity: acceleration, axis: z, description: Inertial acceleration in body coordinates}
+      - {name: velebx, quantity: velocity, axis: x, description: Earth-relative velocity in body coordinates}
+      - {name: veleby, quantity: velocity, axis: y, description: Earth-relative velocity in body coordinates}
+      - {name: velebz, quantity: velocity, axis: z, description: Earth-relative velocity in body coordinates}
+      - {name: velibx, quantity: velocity, axis: x, description: Inertial velocity in body coordinates}
+      - {name: veliby, quantity: velocity, axis: y, description: Inertial velocity in body coordinates}
+      - {name: velibz, quantity: velocity, axis: z, description: Inertial velocity in body coordinates}
+  wind:
+    coordinate_system: Wind Cartesian and related velocity frames
+    section: 2.1.8-2.1.9
+    variables:
+      - {name: vair, symbol: norm_V_w, quantity: velocity, description: Airspeed magnitude}
+      - {name: alpha, symbol: alpha, quantity: attitude, description: Angle of attack}
+      - {name: alphat, symbol: alpha_T, quantity: attitude, description: Total angle of attack}
+      - {name: bankgc, symbol: mu_gc, quantity: attitude, description: Geocentric bank angle}
+      - {name: bankgd, symbol: mu_gd, quantity: attitude, description: Geodetic bank angle}
+      - {name: beta, symbol: beta, quantity: attitude, description: Projection-defined sideslip angle}
+      - {name: betae, symbol: beta_E, quantity: attitude, description: Euler sideslip angle}
+      - {name: phi, symbol: phi_w, quantity: attitude, description: Windward-meridian angle}
+  inertial_platform:
+    coordinate_system: Inertial Platform Cartesian
+    section: 2.1.10
+    variables:
+      - {name: xip, quantity: position, axis: x, description: Position relative to inertial-platform origin}
+      - {name: yip, quantity: position, axis: y, description: Position relative to inertial-platform origin}
+      - {name: zip, quantity: position, axis: z, description: Position relative to inertial-platform origin}
+      - {name: xipdt, quantity: velocity, axis: x, description: Inertial velocity in platform coordinates}
+      - {name: yipdt, quantity: velocity, axis: y, description: Inertial velocity in platform coordinates}
+      - {name: zipdt, quantity: velocity, axis: z, description: Inertial velocity in platform coordinates}
+      - {name: xipdt2, quantity: acceleration, axis: x, description: Inertial acceleration in platform coordinates}
+      - {name: yipdt2, quantity: acceleration, axis: y, description: Inertial acceleration in platform coordinates}
+      - {name: zipdt2, quantity: acceleration, axis: z, description: Inertial acceleration in platform coordinates}
+  tangent_plane:
+    coordinate_system: Tangent Plane Cartesian
+    section: 2.1.11
+    variables:
+      - {name: xtp, quantity: position, axis: x, description: Position relative to tangent-plane origin}
+      - {name: ytp, quantity: position, axis: y, description: Position relative to tangent-plane origin}
+      - {name: ztp, quantity: position, axis: z, description: Position relative to tangent-plane origin}
+      - {name: xtpdt, quantity: velocity, axis: x, description: Earth-relative velocity in tangent-plane coordinates}
+      - {name: ytpdt, quantity: velocity, axis: y, description: Earth-relative velocity in tangent-plane coordinates}
+      - {name: ztpdt, quantity: velocity, axis: z, description: Earth-relative velocity in tangent-plane coordinates}
+      - {name: xtpdt2, quantity: acceleration, axis: x, description: Earth-relative acceleration in tangent-plane coordinates}
+      - {name: ytpdt2, quantity: acceleration, axis: y, description: Earth-relative acceleration in tangent-plane coordinates}
+      - {name: ztpdt2, quantity: acceleration, axis: z, description: Earth-relative acceleration in tangent-plane coordinates}

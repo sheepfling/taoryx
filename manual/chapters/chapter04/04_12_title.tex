@@ -1,0 +1,22 @@
+\subsection{\problemblock{*Title} Data Block}\label{sec:block-title}
+
+A problem title consisting of one or more lines of text is optional. When supplied,
+it is printed at the top of every page of standard output and at the beginning of EGS
+database files. A title helps identify and document a problem. There is no formal
+limit on the number of title lines, although printout becomes cluttered with more
+than five or six.
+
+\begin{lstlisting}[style=taosmanual]
+*title This is the first line of the title
+       this is the second line of the title
+       and so on, until a data block name is hit
+
+*atmos standard
+\end{lstlisting}
+
+The title begins with the first nonblank character after the
+\problemblock{*title} keyword and extends to the next valid data-block keyword. In
+the example, it begins at \texttt{This} and ends immediately before
+\problemblock{*atmos}. A title can therefore contain arbitrary text except a valid
+data-block keyword. Because all such keywords begin with an asterisk, difficulties
+can be avoided by not placing an asterisk at the beginning of a word in title text.

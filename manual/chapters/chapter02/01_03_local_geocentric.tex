@@ -1,0 +1,43 @@
+% Source PDF page 37; manual page 2-8.
+\subsection{Local Geocentric Horizon Coordinate System}\label{sec:local-geocentric}
+
+The local geocentric horizon coordinate system is defined to make geocentric
+flight-path angles easy to compute. Its origin is at the vehicle's center of mass,
+located by the position vector $\vec{r}$. The $z$ axis is aligned with $\vec{r}$ but
+points in the opposite direction, toward the center of the earth.
+
+The $x$ and $y$ axes lie in a plane perpendicular to $\vec{r}$ called the local
+geocentric horizon plane. This plane is tangent to the spherical earth at the point
+where $\vec{r}$ intersects the surface, point $S$ in
+\cref{fig:local-geocentric-horizon}. The $x$ axis points toward the north pole, and
+the $y$ axis points east, parallel to the equator.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.66\linewidth}{!}{\input{manual/figures/chapter02/fig-2-2}}
+  \caption{Local geocentric horizon coordinates.}
+  \label{fig:local-geocentric-horizon}
+\end{figure}
+
+The unit vectors, expressed in ECFC coordinates, are computed by
+\texttt{geoc\_unit\_vectors}:
+\begin{equation}
+\begin{aligned}
+  \hat{x}_{gc}
+    &= -\sin\delta_{gc}
+       (\cos\lambda\,\hat{x}_{\oplus}
+        +\sin\lambda\,\hat{y}_{\oplus})
+       +\cos\delta_{gc}\,\hat{z}_{\oplus},\\
+  \hat{y}_{gc}
+    &= -\sin\lambda\,\hat{x}_{\oplus}
+       +\cos\lambda\,\hat{y}_{\oplus},\\
+  \hat{z}_{gc}
+    &= -\cos\delta_{gc}
+       (\cos\lambda\,\hat{x}_{\oplus}
+        +\sin\lambda\,\hat{y}_{\oplus})
+       -\sin\delta_{gc}\,\hat{z}_{\oplus}.
+\end{aligned}
+\label{eq:local-geocentric-unit-vectors}
+\end{equation}
+Here $\delta_{gc}$ is geocentric latitude and $\lambda$ is longitude, defined in
+\cref{sec:geocentric}.

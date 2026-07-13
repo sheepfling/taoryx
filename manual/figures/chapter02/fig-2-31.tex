@@ -1,0 +1,30 @@
+\begin{tikzpicture}[
+  >=Latex,
+  node distance=0.34cm,
+  flowbox/.style={draw,align=center,text width=4.4cm,minimum height=0.58cm,font=\small},
+  every path/.style={line width=0.65pt}
+]
+  \node[flowbox] (args) {Process command-line arguments};
+  \node[flowbox,below=of args] (print) {Create a printout file};
+  \node[flowbox,below=of print] (tables) {If first problem file, read all table files};
+  \node[flowbox,below=of tables] (read) {Read problem input data};
+  \node[flowbox,below=of read] (compute) {Compute trajectories};
+  \node[flowbox,below=of compute] (output) {Output trajectory data};
+  \node[flowbox,below=of output] (survey) {Repeat for each combination of survey values};
+  \node[flowbox,below=of survey] (problem) {Repeat for each problem};
+  \node[flowbox,below=of problem] (file) {Repeat for each problem file};
+
+  \draw[->] (args)--(print);
+  \draw[->] (print)--(tables);
+  \draw[->] (tables)--(read);
+  \draw[->] (read)--(compute);
+  \draw[->] (compute)--(output);
+  \draw[->] (output)--(survey);
+  \draw[->] (survey)--(problem);
+  \draw[->] (problem)--(file);
+
+  \draw[->] (survey.west) -- ++(-1.0,0) |- (compute.west);
+  \draw[->] (problem.west) -- ++(-1.55,0) |- (read.west);
+  \draw[->] (file.west) -- ++(-2.05,0) |- (print.west);
+  \draw[->] (file.south) -- ++(0,-0.45);
+\end{tikzpicture}

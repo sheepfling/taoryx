@@ -1,0 +1,202 @@
+\subsection{\problemblock{*Define} Data Block}\label{sec:trajectory-block-define}
+
+The standard trajectory variables computed in TAOS are listed in the appendix.
+These variables are always computed and are available for printout and plotting;
+however, some problems require quantities that are not among the standard output
+variables. The required quantities differ with the type of problem.
+
+TAOS provides user-defined output variables for this purpose. As long as a variable
+of interest can be calculated from the standard variables with one or more equations,
+that is, as long as it is a function of the standard variables, it can be computed as a
+user-defined variable. A user-defined variable is given a name that must be different
+from every standard output-variable name. The name is followed by one or more
+equations showing how the new variable is computed. The equations may compute
+the variable directly, or they may define its time derivative so that the variable is
+integrated along with the equations of motion.
+
+The equations are entered in a simplified C language. The syntax is also similar to
+Fortran, so users familiar with either language should have little difficulty entering
+the equations. The following examples illustrate the input form. The first example,
+
+\begin{lstlisting}[style=taosmanual]
+*define alt-km
+  alt-km = alt / 3280.84;
+\end{lstlisting}
+
+computes altitude in kilometers rather than feet. The name of the new variable,
+\texttt{alt-km}, follows the \problemblock{*define} keyword, and it must appear on
+the left side of an assignment somewhere in the definition. This example contains
+only one simple equation, so \texttt{alt-km} is the variable on the left side of the
+equal sign. Every value and variable on the right side must be a standard output
+variable, a previously input user-defined variable, a temporary variable, or a
+constant. Here \statevar{alt} is a standard output variable and 3280.84 is a constant.
+Each statement ends with a required semicolon.
+
+\taossubhead{Temporary Variables}
+
+For a blunt body of revolution in hypersonic flow, the stagnation-point heat-transfer
+rate can be approximated by
+
+\begin{equation}
+  q_s = \frac{17600}{\sqrt{R_n}}
+        \sqrt{\frac{\rho}{\rho_0}}
+        \left(\frac{\lVert\vec V\rVert}{\lVert\vec V_c\rVert}\right)^{3.15}
+        \quad \mathrm{Btu/(ft^2\,s)},
+  \label{eq:stagnation-heating}
+\end{equation}
+
+where $R_n$ is the nose radius, $\rho$ and $\rho_0$ are the ambient and sea-level
+densities, $\lVert\vec V\rVert$ is flight velocity, and
+$\lVert\vec V_c\rVert$ is satellite velocity, usually 26,000~ft/s. The following data
+block defines a user variable, \texttt{stag-heat}, from this equation:
+
+\begin{lstlisting}[style=taosmanual]
+*define stag-heat
+  rnose = 1.0 / 12.0;
+  stag-heat = (17600.0/sqrt(rnose))*sqrt(rho/0.0023769)
+              * (vel/26000.0)^3.15;
+\end{lstlisting}
+
+A one-inch nose radius is converted to feet and stored in the temporary variable
+\texttt{rnose}. Temporary variables are used only while the user-defined variable is
+being calculated. If a name is not a standard output variable or a previously input
+user-defined variable, TAOS assumes it is a temporary variable. A temporary
+variable must be assigned before it is used.
+
+The only unusual operator in the stagnation-heating equation is
+\texttt{\textasciicircum}, which raises a value to a power. TAOS uses this operator
+rather than the C \texttt{pow} function or the Fortran \texttt{**} operator. The final
+assignment occupies two input lines. A statement continues until a semicolon is
+encountered; as in C, the semicolon is required at the end of every statement.
+
+\taossubhead{Math Operations and Functions}
+
+\Cref{tab:user-defined-math} lists the operators and functions that may appear in
+user-defined-variable equations. The standard arithmetic and relational operators
+have the same precedence they have in C and Fortran. The mathematical functions
+are defined with the usual C-language meanings.
+
+\begin{longtable}{@{}>{\ttfamily}lp{0.20\linewidth}>{\ttfamily}lp{0.37\linewidth}@{}}
+  \caption{User-defined-variable math operations and functions.}
+  \label{tab:user-defined-math}\\
+  \toprule
+  \normalfont Operator & Description & \normalfont Function & Description \\
+  \midrule
+  \endfirsthead
+  \toprule
+  \normalfont Operator & Description & \normalfont Function & Description \\
+  \midrule
+  \endhead
+  +   & Add & sin(x)   & Sine of $x$ in degrees \\
+  -   & Subtract & cos(x)   & Cosine of $x$ in degrees \\
+  *   & Multiply & tan(x)   & Tangent of $x$ in degrees \\
+  /   & Divide & asin(x)  & Inverse sine, $x\in[-1,1]$ \\
+  \textasciicircum{} & Exponentiation & acos(x)  & Inverse cosine, $x\in[-1,1]$ \\
+  >   & Greater than & atan(x)  & Inverse tangent in $[-\pi/2,\pi/2]$ \\
+  <   & Less than & atan2(x) & Inverse tangent in $[-\pi,\pi]$ \\
+  >=  & Greater than or equal & sinh(x)  & Hyperbolic sine \\
+  <=  & Less than or equal & cosh(x)    & Hyperbolic cosine \\
+  ==  & Equal to & tanh(x)    & Hyperbolic tangent \\
+  !=  & Not equal to & exp(x)     & Exponential function $e^x$ \\
+  \&\& & Logical and & log(x)     & Natural logarithm \\
+  ||  & Logical or & log10(x)   & Base-10 logarithm \\
+      & & sqrt(x)    & Square root \\
+      & & ceil(x)    & Smallest integer not less than $x$ \\
+      & & floor(x)   & Largest integer not greater than $x$ \\
+      & & abs(x)     & Absolute value \\
+      & & table(id)  & Lookup from an \tabletype{output} table named \texttt{id} \\
+  \bottomrule
+\end{longtable}
+
+The \texttt{table} function is special because it retrieves a value from a table file.
+Its argument is the table-identification name described in \cref{sec:simple-tables},
+and the table must have type \tabletype{output}. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*define special
+  special = (rho/0.0023769)*table(special-tbl);
+\end{lstlisting}
+
+references the output table \texttt{special-tbl}. One possible use is aerodynamic
+heating analysis: output tables containing heat-transfer rates can be interpolated
+along a trajectory, and the resulting value can then be printed or limited by an
+optimization constraint.
+
+If-then statements control how a user-defined variable is calculated. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*define nx-max
+  nx-max = max(nx);
+  if (nx-max < 0) nx-max = 0;
+\end{lstlisting}
+
+calculates maximum axial loading and limits \texttt{nx-max} to positive values. The
+relationship in an \texttt{if} statement is enclosed in parentheses. When the
+relationship is true, the following statement is executed.
+
+More than one statement can be executed by enclosing the statements in curly
+brackets:
+
+\begin{lstlisting}[style=taosmanual]
+*define new-var
+  new-var = 0;
+  if (time > 20) {
+    ratio = pres / 2116.2;
+    new-var = ratio * table(tbl-id);
+  }
+\end{lstlisting}
+
+C uses braces to group statements; the Fortran keywords \texttt{then} and
+\texttt{endif} are not used. Braces are also required for an if-then-else statement:
+
+\begin{lstlisting}[style=taosmanual]
+*define var
+  if (mach > 1.0) {
+    x = 1 + mach*mach;
+    var = sqrt(x) * table(outx);
+  } else {
+    var = table(outy);
+  }
+\end{lstlisting}
+
+The current version of TAOS supports assignment statements and if-then-else
+statements only. While loops, for loops, and other C control statements cannot be
+used.
+
+\taossubhead{Integral Variables}
+
+A common use of an integral user-defined variable is a flight-path optimization
+constraint. Constraints at particular points in a trajectory are entered directly in the
+\problemblock{*optimize} block, but an integral variable is needed when the entire
+flight path must remain within a limit.
+
+For example, a minimum dynamic pressure of 100~lbf/ft\textsuperscript{2} can be
+represented by
+
+\begin{align}
+  q>100\ \text{or}\ v<1000 &: \qquad
+    q_{\min}=\int 0\,dt, \label{eq:qmin-satisfied}\\
+  \text{otherwise} &: \qquad
+    q_{\min}=\int (100-q)^2\,dt. \label{eq:qmin-violated}
+\end{align}
+
+Optimization constraints work best when the constraint variable is less than zero
+while the constraint is satisfied and greater than zero when it is violated. If dynamic
+pressure is above the minimum while the vehicle is moving rapidly, the derivative is
+zero. If dynamic pressure falls below 100~lbf/ft\textsuperscript{2}, the derivative is
+positive. The definition is entered as
+
+\begin{lstlisting}[style=taosmanual]
+*define integral qmin=-0.10
+  if (dynprs > 100 || vel < 1000) {
+    qmin = 0.0;
+  } else {
+    qmin = (100.0 - dynprs)^2;
+  }
+\end{lstlisting}
+
+The \texttt{integral} keyword says that \texttt{qmin} is a derivative to be integrated
+with respect to time along the flight path. Its initial value is $-0.10$, so the
+constraint is initially satisfied. The conditional statement means: if dynamic
+pressure is greater than 100 or velocity is less than 1000, set the derivative to zero;
+otherwise, set it equal to the square of 100 minus dynamic pressure.

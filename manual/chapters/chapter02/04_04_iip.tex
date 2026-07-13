@@ -1,0 +1,74 @@
+% Source PDF pages 104--105; manual pages 2-75--2-76.
+\subsection{Initial Impact Point Calculations}\label{sec:iip-calculations}
+
+The initial impact point (IIP) is estimated by integrating a ballistic trajectory from
+the vehicle's current state to impact. Propulsive forces are removed, and the
+aerodynamic model is reduced to a constant drag coefficient specified through an
+input ballistic coefficient $\beta_{\mathrm{iip}}$. The IIP approximates the impact
+location following a propulsion-system failure and is therefore useful for range
+safety analysis.
+
+The IIP trajectory uses the equations of motion in \cref{sec:equations-of-motion}.
+Its acceleration contributions are gravity, computed as described in
+\cref{sec:gravity-model}, and aerodynamic drag; propulsive acceleration is zero.
+The source derives the aerodynamic acceleration as
+\begin{equation}
+\begin{aligned}
+  \vec a_{\mathrm{aero}}
+  &=\frac{\vec F_{\mathrm{aero}}}{m}
+   =\left(\frac{C_DqS_{\mathrm{ref}}}{m}\right)\hat x_{V_w}\\
+  &=\left(\frac{C_DS_{\mathrm{ref}}qg}{W}\right)\hat x_{V_w},
+\end{aligned}
+\label{eq:iip-aerodynamic-acceleration-coefficients}
+\end{equation}
+which becomes
+\begin{equation}
+  \vec a_{\mathrm{aero}}
+  =\left(\frac{qg}{\beta_{\mathrm{iip}}}\right)\hat x_{V_w},
+  \label{eq:iip-aerodynamic-acceleration-ballistic}
+\end{equation}
+and, using dynamic pressure,
+\begin{equation}
+  \vec a_{\mathrm{aero}}
+  =\frac{g\left(0.5\rho\lVert\vec V_{W\oplus}\rVert^2\right)}
+         {\beta_{\mathrm{iip}}}\hat x_{V_w}.
+  \label{eq:iip-aerodynamic-acceleration-dynamic-pressure}
+\end{equation}
+As in \cref{sec:velocity-coordinate},
+\begin{equation}
+  \hat x_{V_w}
+  =\frac{\vec V_{W\oplus}}{\lVert\vec V_{W\oplus}\rVert},
+  \label{eq:iip-wind-velocity-unit-vector}
+\end{equation}
+so the acceleration is written
+\begin{equation}
+  \vec a_{\mathrm{aero}}
+  =\frac{0.5g\rho\lVert\vec V_{W\oplus}\rVert\vec V_{W\oplus}}
+         {\beta_{\mathrm{iip}}}.
+  \label{eq:iip-aerodynamic-acceleration-vector}
+\end{equation}
+
+\noindent\textit{Editorial note.} Equations
+\ref{eq:iip-aerodynamic-acceleration-coefficients}--
+\ref{eq:iip-aerodynamic-acceleration-vector} are reproduced with the positive
+$\hat x_{V_w}$ sign printed in the source. This conflicts with the drag direction in
+\cref{eq:aero-force-lift-drag-side}, where drag acts along
+$-\hat x_w$. The inconsistency is retained for traceability and recorded in the
+editorial metadata.
+
+TAOS integrates the IIP trajectory with Fehlberg's adaptive Runge--Kutta method.\manualref{9}
+The method uses a fourth-order solution together with a fifth-order estimate to
+control local error and adjust step size. This is appropriate because only the final
+impact state is needed; there are no trajectory segments or print-interval output
+points in the auxiliary integration.
+
+The step size is bounded between $0.5$ and $60$ seconds while the estimated
+integration error is held between $0.001$ and $0.01$ ft. Typical steps are
+$10$--$20$ seconds, although the IIP calculation remains computationally
+significant because it is repeated from the current trajectory state.
+
+Impact time, longitude, and geodetic latitude are obtained directly from the
+integration. IIP range and azimuth are measured from the tangent-plane origin and
+computed with Sodano's inverse method in \cref{sec:ranges-distances}. The
+function \texttt{iip\_calc} performs the integration, \texttt{iip\_derivs} evaluates
+the IIP equations of motion, and \texttt{iip\_out} computes the output variables.

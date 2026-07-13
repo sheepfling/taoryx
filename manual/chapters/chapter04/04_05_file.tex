@@ -1,0 +1,64 @@
+\subsection{\problemblock{*File} Data Block}\label{sec:problem-block-file}
+
+The \problemblock{*file} data block is used to create files containing columns of
+trajectory information. A list of variable names is given in the data block, and a
+column of trajectory data is written for each variable. These files are not formatted
+for printing, that is, they do not contain page breaks and page headers. They are
+intended for use by other applications, such as plotting programs or spreadsheets,
+that require columns of data.
+
+\problemblock{*file} data blocks can appear either within trajectory definitions or
+outside of the trajectory definitions. The difference is that
+\problemblock{*file} data blocks within a trajectory definition assume the
+information written to the file is for a specific trajectory; whereas,
+\problemblock{*file} data blocks outside of the trajectory definitions do not make
+this assumption. The result is that the variables listed for
+\problemblock{*file} data blocks outside of the trajectory definitions must contain
+trajectory numbers enclosed in brackets.
+
+For example,
+
+\begin{lstlisting}[style=taosmanual]
+*file compare.dat
+  time[1] alt[1] alt[2] alt[3] vel[1] vel[2] vel[3]
+\end{lstlisting}
+
+writes the time from trajectory number 1, the altitudes from trajectories 1, 2, and 3,
+and the velocity from trajectories 1, 2, and 3 to the file \texttt{compare.dat}.
+\Cref{fig:problem-output-file-example} shows the first part of this file.
+
+\begin{center}
+  \begin{minipage}{0.96\linewidth}
+    \lstinputlisting[style=taosmanual,basicstyle=\ttfamily\scriptsize]{examples/chapter04/problem-output-example.txt}
+    \captionof{figure}{Problem-level trajectory output file example.}
+    \label{fig:problem-output-file-example}
+  \end{minipage}
+\end{center}
+
+The filename must be valid. If the file already exists, it is overwritten with no
+warning and old data is lost. This is normally satisfactory because the file always
+contains information from the most recent run. Any number of
+\problemblock{*file} data blocks can be included in a problem; one output file is
+created for each \problemblock{*file} data block.
+
+Any standard output variable or user-defined output variable can be written to the
+file. Most variables are associated with a trajectory so a trajectory number is
+required, and it must be enclosed in brackets as shown above. The only exceptions
+are user-defined variables defined outside of the trajectory definitions because they
+are associated with the entire problem, not a single trajectory. The units and the
+printout format are controlled with the \problemblock{*units/fmt} data block
+(\cref{sec:block-units-fmt}).
+
+Each output line is limited to 400 characters; this limits the number of output
+variables that can be listed to about 30. Usually it is best to limit the number of
+output variables to 12 or fewer because some screen editors and printers can only
+handle about 130 characters per line.
+
+Radar and relative-vehicle output variables, those starting with \texttt{rad} or
+\texttt{rel}, must contain an additional subscript enclosed in square brackets. The
+first subscript gives the radar station number or the trajectory number for the
+relative-vehicle calculations, and the second subscript gives the vehicle trajectory
+number. For example, the variable \statevar{radrng[2][1]} is used to print the radar
+range of trajectory number 1 from radar station number 2, and the variable
+\statevar{relvel[4][2]} is used to print the closing velocity of trajectory number 4
+relative to trajectory number 2.

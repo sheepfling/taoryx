@@ -1,0 +1,181 @@
+chapter: 4
+release: v19
+scope: residual_chapter4_overviews_file_format_and_fly
+source_manual: SAND95-1652
+method:
+  description: Restore source-near wording in the remaining Chapter 4 overview, file-format,
+    and guidance-rule regions while preserving verified equations, tables, figures,
+    semantic labels, and parser fixtures.
+  preserve_source_wording: true
+  preserve_parser_fixtures: true
+  preserve_numbered_objects: true
+  normalize_only:
+  - line-break hyphenation
+  - obvious OCR corruption
+  - canonical TAOS identifiers where the scan is visibly corrupted
+  - typographic quotation marks
+  - cross-references expressed as semantic LaTeX
+sections:
+- id: chapter4.introduction
+  title: Problem Files introduction
+  section: '4.0'
+  source_pdf_pages:
+  - 166
+  - 167
+  - 168
+  source_manual_pages:
+  - 4-1
+  - 4-2
+  - 4-3
+  tex_file: manual/chapters/chapter04/00_introduction.tex
+  restored:
+  - problem-file and trajectory hierarchy
+  - trajectory and segment identification rules
+  - complete pullout problem example and data-block explanation
+  baseline_token_recall_percent: 65.0
+  baseline_bigram_recall_percent: 45.3
+  status: diplomatically_transcribed
+- id: chapter4.file_format
+  title: File Format
+  section: '4.1'
+  source_pdf_pages:
+  - 169
+  - 170
+  - 171
+  source_manual_pages:
+  - 4-4
+  - 4-5
+  - 4-6
+  tex_file: manual/chapters/chapter04/01_file_format.tex
+  restored:
+  - delimiter and case rules
+  - free-field values and scientific notation
+  - survey search and optimization placeholders
+  - title and comment behavior
+  baseline_token_recall_percent: 40.4
+  baseline_bigram_recall_percent: 20.4
+  status: diplomatically_transcribed
+- id: chapter4.segment_overview
+  title: Segment Data Blocks
+  section: '4.2'
+  source_pdf_pages:
+  - 172
+  - 173
+  source_manual_pages:
+  - 4-7
+  - 4-8
+  tex_file: manual/chapters/chapter04/02_segment_overview.tex
+  restored:
+  - segment-block extent and required numbering
+  - complete segment-block registry
+  - rail-launched missile example and explanatory prose
+  baseline_token_recall_percent: 45.9
+  baseline_bigram_recall_percent: 28.2
+  status: diplomatically_transcribed
+- id: chapter4.segment.fly
+  title: '*Fly Data Block'
+  section: 4.2.4
+  source_pdf_pages:
+  - 178
+  - 179
+  - 180
+  - 181
+  - 182
+  - 183
+  - 184
+  source_manual_pages:
+  - 4-13
+  - 4-14
+  - 4-15
+  - 4-16
+  - 4-17
+  - 4-18
+  - 4-19
+  tex_file: manual/chapters/chapter04/02_04_fly.tex
+  restored:
+  - direct body-attitude guidance and consistent angle sets
+  - current-value asterisk and power-setting behavior
+  - indirect flight-condition guidance and convergence troubleshooting
+  - special intercept proportional-navigation and range-insensitive-axis rules
+  - table-valued guidance and rate guidance
+  baseline_token_recall_percent: 35.3
+  baseline_bigram_recall_percent: 18.8
+  status: diplomatically_transcribed
+- id: chapter4.trajectory_overview
+  title: Trajectory Data Blocks
+  section: '4.3'
+  source_pdf_pages:
+  - 198
+  - 199
+  source_manual_pages:
+  - 4-33
+  - 4-34
+  tex_file: manual/chapters/chapter04/03_trajectory_overview.tex
+  restored:
+  - trajectory-block registry and extent
+  - required trajectory identifier syntax
+  - required initial and segment blocks
+  - complete trajectory organization example
+  baseline_token_recall_percent: 39.6
+  baseline_bigram_recall_percent: 20.5
+  status: diplomatically_transcribed
+- id: chapter4.problem_overview
+  title: Problem Data Blocks
+  section: '4.4'
+  source_pdf_pages:
+  - 213
+  - 214
+  source_manual_pages:
+  - 4-48
+  - 4-49
+  tex_file: manual/chapters/chapter04/04_problem_overview.tex
+  restored:
+  - data-block grouping and hierarchy guidance
+  - problem identifier and termination rules
+  - complete problem-level block registry
+  - placement restrictions and execution order
+  baseline_token_recall_percent: 40.0
+  baseline_bigram_recall_percent: 18.5
+  status: diplomatically_transcribed
+figure_review:
+  figures:
+  - figure: 1-5
+    title: TAOS Icon on Silicon Graphics Workstations
+    source_pdf_page: 26
+    source_file: manual/figures/chapter01/source-crops/fig-1-5.png
+    reconstruction_file: manual/figures/chapter01/fig-1-5.tex
+    action: Reconstructed the two document icons and the distinctive winged TAOS application
+      icon in editable TikZ, preserving source labels and arrows.
+  - figure: 1-6
+    title: Example Printout
+    source_pdf_page: 27
+    source_file: manual/figures/chapter01/source-crops/fig-1-6.png
+    reconstruction_file: manual/figures/chapter01/fig-1-6.tex
+    action: Restored the split header, separator rule, title hierarchy, fixed-width
+      columns, and all fourteen printed data rows as semantic LaTeX.
+  - figure: 2-1
+    title: The ECFC Coordinate System
+    source_pdf_page: 34
+    source_file: manual/figures/chapter02/source-crops/fig-2-1.png
+    reconstruction_file: manual/figures/chapter02/fig-2-1.tex
+    action: Added a denser graticule and editable schematic continental outlines while
+      preserving the ECFC axis geometry.
+  - figure: 4-2
+    title: Problem File Organization
+    source_pdf_page: 167
+    source_file: manual/figures/chapter04/source-crops/fig-4-2.png
+    reconstruction_file: manual/figures/chapter04/fig-4-2.tex
+    action: 'Restored both source views: the left nested-bracket hierarchy and the
+      right branching tree.'
+fixture_invariance:
+  sha256:
+    examples/chapter03/orbus-mdt.tbl: ded304ae6ff44bbaa6cd9651843f4901ddd8d43a257d9e97375f85697e831683
+    examples/chapter03/recruits-thr.tbl: d11a0109c8af903478c1e35ecd39b3e0fc769ccfaa6f30b22f906de9345ae9a2
+    examples/chapter03/reentry-ca-excerpt.tbl: d078d629f1d240f1d99382e558e49bafdef9ff351b994ca0bd1018b4e0685fe5
+    examples/chapter03/stmi-full.tbl: 900d29157b8eff70f05b5a3091b27bd6391678b080bee7cda72df43cc86ab8f5
+    examples/chapter03/stmi-simple.tbl: 310b74d5a21ecddd058a037f36ef258f1a527ae3c8da120d3bd30aeec4a22fbd
+    examples/chapter04/air-launched-intercept.prb: b2dfa5b409b626b78dd1bb145880d481858338ae5865a4ae106723f348e57de2
+    examples/chapter04/ballistic-reentry.prb: 286817cb104fe1ac04c87d3ddb4833d77e568f1dc4b3771e85a8a7ba87fcb41d
+    examples/chapter04/ballistic-reentry.tbl: df979968363b97e31255bd128b11a5aec44819e26e7739f2de3d5c2804a2352f
+    examples/chapter04/ballistic-rocket.prb: 8592c979fa08f30beb4e9fe9b505737dc558cf58578512a0827395963c9506e6
+    examples/chapter04/ground-launched-intercept.prb: 2cd6ab4ba3c1368528d1f6bff3d9da38a9bc87e36d4754abe42cdca23dd4ca10

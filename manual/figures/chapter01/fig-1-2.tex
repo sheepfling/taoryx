@@ -1,0 +1,46 @@
+\begin{tikzpicture}
+  \begin{axis}[
+    name=altplot,
+    width=6.25cm,height=4.1cm,
+    xmin=0,xmax=240,ymin=0,ymax=100000,
+    xtick={0,60,120,180,240},
+    ytick={0,20000,40000,60000,80000,100000},
+    grid=major,
+    axis line style={line width=0.7pt},
+    tick label style={font=\scriptsize},
+    label style={font=\sffamily\scriptsize},
+    xlabel={Flight time (sec)},
+    ylabel={Altitude (ft)},
+    ylabel style={align=center},
+    scaled y ticks=false,
+    yticklabel style={/pgf/number format/fixed,/pgf/number format/1000 sep={}},
+  ]
+    \addplot[line width=1.1pt,smooth] coordinates {
+      (0,40000) (15,40500) (28,48000) (45,68000) (65,85000)
+      (85,93000) (110,92000) (135,85000) (160,70000) (178,45000)
+      (188,12000) (192,0)
+    };
+  \end{axis}
+
+  \begin{axis}[
+    at={($(altplot.east)+(1.55cm,0)$)},anchor=west,
+    width=6.25cm,height=4.1cm,
+    xmin=0,xmax=240,ymin=0,ymax=5000,
+    xtick={0,60,120,180,240},
+    ytick={0,1000,2000,3000,4000,5000},
+    grid=major,
+    axis line style={line width=0.7pt},
+    tick label style={font=\scriptsize},
+    label style={font=\sffamily\scriptsize},
+    xlabel={Flight time (sec)},
+    ylabel={Velocity (ft/sec)},
+    ylabel style={align=center},
+    scaled y ticks=false,
+    yticklabel style={/pgf/number format/fixed,/pgf/number format/1000 sep={}},
+  ]
+    \addplot[line width=1.1pt,smooth] coordinates {
+      (0,800) (18,2200) (34,4700) (47,4450) (75,4200) (110,4050)
+      (145,3900) (175,3750) (188,3300) (194,2500)
+    };
+  \end{axis}
+\end{tikzpicture}

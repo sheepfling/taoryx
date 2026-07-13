@@ -1,0 +1,180 @@
+% Source PDF pages 114--117; manual pages 2-85--2-88.
+\subsection{Intercepts and Proportional Navigation}\label{sec:intercepts-pn}
+
+TAOS can compute intercept trajectories by optimization, predictive guidance, or
+proportional navigation. Optimization constrains trajectory final conditions to meet
+the target while varying the trajectory shape to minimize or maximize another
+quantity such as time or velocity. Predictive guidance and proportional navigation
+instead construct an intercept trajectory directly at each integration point.
+
+Predictive guidance assumes a nonaccelerating target, estimates a straight-line
+intercept point, and commands the vehicle toward it. Proportional navigation tries to
+hold the line-of-sight direction constant by commanding acceleration proportional
+to line-of-sight angular rate.
+
+These are idealized trajectory methods. TAOS does not model the interceptor control
+system or the sensors used to detect and track the target, so the results are not
+intended to predict miss distance. They are useful for overall performance estimates
+such as time and range to intercept.
+
+\taossubhead{Predictive Guidance}
+
+In the geometry of \cref{fig:predictive-intercept-geometry}, vehicle 1 is the
+interceptor and vehicle 2 is the target. If both vehicles are treated as
+nonaccelerating and occupy the same position at intercept time $t_i$, then
+\begin{equation}
+  \vec r_1(t)+(t_i-t)\vec V_1
+  =\vec r_2(t)+(t_i-t)\vec V_2.
+  \label{eq:predictive-intercept-position-equality}
+\end{equation}
+The time to intercept is estimated as
+\begin{equation}
+  t_i-t=\frac{\lVert\vec r_2-\vec r_1\rVert}
+              {\lVert\vec V_1-\vec V_2\rVert},
+  \label{eq:predictive-time-to-intercept}
+\end{equation}
+and the predicted intercept point is
+\begin{equation}
+  \vec r_i=\vec r_2(t)+\vec V_2
+  \frac{\lVert\vec r_2-\vec r_1\rVert}
+       {\lVert\vec V_1-\vec V_2\rVert}.
+  \label{eq:predictive-intercept-point}
+\end{equation}
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-28}
+  \caption{Intercept geometry.}
+  \label{fig:predictive-intercept-geometry}
+\end{figure}
+
+TAOS determines geodetic horizontal and vertical flight-path angles for the straight
+line from the interceptor to $\vec r_i$ and uses them as guidance rules in the
+solution process of \cref{sec:control-variable-solution}. The calculation is
+implemented in \texttt{intercept} in the \texttt{derivs} module.
+
+\taossubhead{Proportional Navigation}
+
+Proportional navigation commands accelerations normal to the line of sight and
+proportional to its rate. In \cref{fig:proportional-navigation-geometry}, vehicle 1
+is the interceptor, vehicle 2 is the target, $\Delta\vec r$ is their relative position,
+and $\Delta\vec V$ is their relative velocity.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter02/fig-2-29}
+  \caption{Proportional-navigation geometry.}
+  \label{fig:proportional-navigation-geometry}
+\end{figure}
+
+The line-of-sight yaw and pitch angles relative to ECFC coordinates are defined by
+\begin{equation}
+  \tan\Lambda_y
+  =\frac{\Delta\vec r\cdot\hat y_{\oplus}}
+         {\Delta\vec r\cdot\hat x_{\oplus}},
+  \label{eq:line-of-sight-yaw}
+\end{equation}
+\begin{equation}
+  \tan\Lambda_p
+  =\frac{\Delta\vec r\cdot\hat z_{\oplus}}
+  {\sqrt{(\Delta\vec r\cdot\hat x_{\oplus})^2
+        +(\Delta\vec r\cdot\hat y_{\oplus})^2}}.
+  \label{eq:line-of-sight-pitch}
+\end{equation}
+Differentiation gives
+\begin{equation}
+  \dot\Lambda_y=
+  \frac{
+  (\Delta\vec r\cdot\hat x_{\oplus})(\Delta\vec V\cdot\hat y_{\oplus})
+  -(\Delta\vec r\cdot\hat y_{\oplus})(\Delta\vec V\cdot\hat x_{\oplus})}
+  {(\Delta\vec r\cdot\hat x_{\oplus})^2
+  +(\Delta\vec r\cdot\hat y_{\oplus})^2},
+  \label{eq:line-of-sight-yaw-rate}
+\end{equation}
+\begin{equation}
+\begin{aligned}
+  \dot\Lambda_p={}&
+  \Bigl[(\Delta\vec V\cdot\hat z_{\oplus})
+   \bigl((\Delta\vec r\cdot\hat x_{\oplus})^2
+        +(\Delta\vec r\cdot\hat y_{\oplus})^2\bigr)\\
+  &\quad-(\Delta\vec r\cdot\hat z_{\oplus})
+   \bigl((\Delta\vec r\cdot\hat x_{\oplus})
+         (\Delta\vec V\cdot\hat x_{\oplus})
+        +(\Delta\vec r\cdot\hat y_{\oplus})
+         (\Delta\vec V\cdot\hat y_{\oplus})\bigr)\Bigr]\\
+  &\Bigg/\Bigl[
+  \sqrt{(\Delta\vec r\cdot\hat x_{\oplus})^2
+        +(\Delta\vec r\cdot\hat y_{\oplus})^2}
+  \bigl((\Delta\vec r\cdot\hat x_{\oplus})^2
+       +(\Delta\vec r\cdot\hat y_{\oplus})^2
+       +(\Delta\vec r\cdot\hat z_{\oplus})^2\bigr)\Bigr].
+\end{aligned}
+\label{eq:line-of-sight-pitch-rate}
+\end{equation}
+The desired normal accelerations are
+\begin{equation}
+  n_y=N'V_c\dot\Lambda_y,
+  \label{eq:proportional-navigation-yaw-acceleration}
+\end{equation}
+\begin{equation}
+  n_p=N'V_c\dot\Lambda_p,
+  \label{eq:proportional-navigation-pitch-acceleration}
+\end{equation}
+where $N'$ is the navigation constant, typically between two and five, and
+closure velocity is
+\begin{equation}
+  V_c=-\frac{\Delta\vec V\cdot\Delta\vec r}
+             {\lVert\Delta\vec r\rVert}.
+  \label{eq:proportional-navigation-closure-velocity}
+\end{equation}
+
+The source constructs a line-of-sight coordinate system with its $x$ axis aligned
+with $\Delta\vec r$. The two printed rotation matrices are
+\begin{equation}
+  [R_p]=
+  \begin{bmatrix}
+    \cos\Lambda_p & \sin\Lambda_p & 0\\
+    -\sin\Lambda_p & \cos\Lambda_p & 0\\
+    0 & 0 & 1
+  \end{bmatrix},
+  \label{eq:source-los-pitch-rotation}
+\end{equation}
+\begin{equation}
+  [R_y]=
+  \begin{bmatrix}
+    \cos\Lambda_y & 0 & \sin\Lambda_y\\
+    0 & 1 & 0\\
+    -\sin\Lambda_y & 0 & \cos\Lambda_y
+  \end{bmatrix}.
+  \label{eq:source-los-yaw-rotation}
+\end{equation}
+Their product, transposed for acceleration transformation, is
+\begin{equation}
+  [T_{\oplus\leftarrow\mathrm{LOS}}]=
+  \begin{bmatrix}
+    \cos\Lambda_p\cos\Lambda_y & -\sin\Lambda_p\cos\Lambda_y & -\sin\Lambda_y\\
+    \sin\Lambda_p & \cos\Lambda_p & 0\\
+    \cos\Lambda_p\sin\Lambda_y & -\sin\Lambda_p\sin\Lambda_y & \cos\Lambda_y
+  \end{bmatrix},
+  \label{eq:los-to-ecfc-acceleration-matrix}
+\end{equation}
+and the commanded ECFC acceleration components are
+\begin{equation}
+  \begin{bmatrix}
+    \vec a_{\oplus}\cdot\hat x_{\oplus}\\
+    \vec a_{\oplus}\cdot\hat y_{\oplus}\\
+    \vec a_{\oplus}\cdot\hat z_{\oplus}
+  \end{bmatrix}
+  =[T_{\oplus\leftarrow\mathrm{LOS}}]
+  \begin{bmatrix}0\\n_p\\n_y\end{bmatrix}.
+  \label{eq:proportional-navigation-ecfc-acceleration}
+\end{equation}
+
+The component along the line-of-sight $x$ axis is set to zero because impact speed
+is not the primary concern; the normal components turn the trajectory toward the
+target. The resulting ECFC acceleration can be converted to desired horizontal and
+vertical flight-path-angle rates with
+\cref{eq:geodetic-flight-path-angle-rate,eq:geodetic-heading-rate}. The
+Newton--Raphson guidance loop then solves for control values that produce those
+rates. The proportional-navigation calculations are implemented by
+\texttt{prop\_nav} in the \texttt{derivs} module.

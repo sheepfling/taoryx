@@ -1,0 +1,43 @@
+\begin{tikzpicture}[>=Latex,line cap=round,line join=round,font=\sffamily\scriptsize]
+  % Panel 1: yaw about z_gd.
+  \begin{scope}[shift={(0,0)}]
+    \coordinate (O) at (0,0);
+    \draw[->,line width=0.9pt] (O)--(0,1.55) node[above] {$\hat{x}_{gd}$};
+    \draw[->,line width=0.9pt] (O)--(1.55,0) node[right] {$\hat{y}_{gd}$};
+    \node[left] at (-0.18,0.05) {$\hat{z}_{gd}$};
+    \node at (-0.15,-0.26) {$\otimes$};
+    \draw[->,line width=1.05pt] (O)--(0.88,1.12) node[above right] {$\hat{x}_{1}$};
+    \draw[->,line width=1.05pt] (O)--(1.12,-0.88) node[below right] {$\hat{y}_{1}$};
+    \draw[->] (0,0.68) arc[start angle=90,end angle=51,radius=0.68];
+    \node at (0.42,0.78) {$\Psi_{gd}$};
+    \node[align=center] at (0.72,-1.55) {Yaw rotation\\about $\hat{z}_{gd}$};
+  \end{scope}
+
+  % Panel 2: pitch about y_1; the y axis is normal to the page.
+  \begin{scope}[shift={(4.0,0)}]
+    \coordinate (O) at (0,0);
+    \node[align=center] at (0,1.72) {$\hat{y}_{1}$ is into\\the page};
+    \node at (0,1.18) {$\otimes$};
+    \draw[->,line width=0.9pt] (O)--(-0.85,1.15) node[above left] {$\hat{x}_{1}$};
+    \draw[->,line width=0.9pt] (O)--(-0.78,-1.18) node[left] {$\hat{z}_{1}$};
+    \draw[->,line width=1.05pt] (O)--(1.50,0.20) node[right] {$\hat{x}_{2}$};
+    \draw[->,line width=1.05pt] (O)--(-0.20,-1.48) node[right] {$\hat{z}_{2}$};
+    \draw[->] (-0.50,0.66) arc[start angle=127,end angle=8,radius=0.80];
+    \node at (0.45,0.72) {$\Theta_{gd}$};
+    \node[align=center] at (0.25,-2.05) {Pitch rotation\\about $\hat{y}_{1}$};
+  \end{scope}
+
+  % Panel 3: roll about x_2.
+  \begin{scope}[shift={(8.1,0)}]
+    \coordinate (O) at (0,0);
+    \node[align=center] at (0,1.72) {$\hat{x}_{2}$ is into\\the page};
+    \node at (0,1.18) {$\otimes$};
+    \draw[->,line width=0.9pt] (O)--(1.45,0) node[right] {$\hat{y}_{2}$};
+    \draw[->,line width=0.9pt] (O)--(0,-1.45) node[left] {$\hat{z}_{2}$};
+    \draw[->,line width=1.05pt] (O)--(1.12,0.82) node[above right] {$\hat{y}_{b}$};
+    \draw[->,line width=1.05pt] (O)--(0.82,-1.12) node[right] {$\hat{z}_{b}$};
+    \draw[->] (0.74,0) arc[start angle=0,end angle=36,radius=0.74];
+    \node at (0.92,0.30) {$\Phi_{gd}$};
+    \node[align=center] at (0.55,-2.05) {Roll rotation\\about $\hat{x}_{2}$};
+  \end{scope}
+\end{tikzpicture}

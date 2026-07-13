@@ -1,0 +1,89 @@
+\subsection{\problemblock{*Prop} Data Block}\label{sec:block-prop}
+
+Each \problemblock{*prop} data block defines a thrust force and its corresponding
+fuel flow or mass-flow rate. If more than one \problemblock{*prop} block is given
+in a segment, the propulsive forces and mass-flow rates from each block are added
+together to obtain the total propulsive force and mass-flow rate. If no
+\problemblock{*prop} blocks are given, thrust and mass flow are set to zero.
+
+A propulsive-force vector is defined by a magnitude and a direction. The direction is
+given by the two angles \statevar{ep1} and \statevar{ep2}, shown in
+\cref{fig:thrust-vector-angles} as $\epsilon_1$ and $\epsilon_2$. If both thrust-vector
+angles are zero, the default, the thrust force is aligned with the body $x$ axis.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter04/fig-4-3}
+  \caption{Thrust-vector angles.}
+  \label{fig:thrust-vector-angles}
+\end{figure}
+
+Values for the thrust force, thrust-vector angles, and mass-flow rate can be constants
+or can be obtained from tables. The following block sets the thrust and mass-flow
+rate to constant values:
+
+\begin{lstlisting}[style=taosmanual]
+*prop thrust=250 mdot=120.0
+      thr_units=kn mdt_units=kg/sec
+\end{lstlisting}
+
+The variables \statevar{thrust} and \statevar{mdot} give the thrust force and the
+mass-flow rate. The variables \texttt{thr\_units} and \texttt{mdt\_units} give their
+units. If no value or table name is provided for a variable, it is set to zero. Thus,
+\statevar{ep1} and \statevar{ep2} are both zero in this example.
+
+The default unit for thrust is pounds force, and the default unit for mass-flow rate is
+pounds mass per second. Other allowable units are listed in
+\cref{tab:propulsion-units}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Thrust and mass-flow-rate units.}
+  \label{tab:propulsion-units}
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    Thrust & \multicolumn{3}{c}{Mass flow} \\
+    \cmidrule(l){2-4}
+    & per second & per minute & per hour \\
+    \midrule
+    \texttt{lb} & \texttt{lb/sec} & \texttt{lb/min} & \texttt{lb/hr} \\
+    \texttt{n}  & \texttt{slugs/sec} & \texttt{slugs/min} & \texttt{slugs/hr} \\
+    \texttt{kn} & \texttt{g/sec} & \texttt{g/min} & \texttt{g/hr} \\
+                 & \texttt{kg/sec} & \texttt{kg/min} & \texttt{kg/hr} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Another example,
+
+\begin{lstlisting}[style=taosmanual]
+*prop thrust=(thr-recruits) mdot=(mdt-recruits)
+      nrecruits=2
+\end{lstlisting}
+
+illustrates the use of tables to compute thrust and mass-flow rate. Table
+\tableid{thr-recruits} supplies thrust. Table \tableid{mdt-recruits} supplies mass
+flow.
+
+The tables require a value for the user-defined variable \texttt{nrecruits}, which
+represents the number of motors. Like other data blocks that permit tables to be
+specified, a \problemblock{*prop} block may also provide values for user-defined
+variables. Once a value has been assigned, it remains set until changed in a later data
+block. It need not be repeated in every segment when it does not change.
+
+Units for thrust and mass-flow rate can be specified in the tables, so they are not
+shown in this example. If units are given in both places, the units in the
+\problemblock{*prop} data block override those in the tables.
+
+Some jet engines have thrust-vector control that can improve takeoff, landing, and
+turning performance. For example,
+
+\begin{lstlisting}[style=taosmanual]
+*prop thrust=(thr-f100x) mdot=(mdt-f100x)
+      ep1=10.0
+\end{lstlisting}
+
+sets the first thrust-vector angle to $10^\circ$. In this version of TAOS the thrust-vector
+angles can be constants or can be computed with tables; they must be known before
+the flight path is computed. The source notes that in future versions they would be
+control variables so that they could be varied to meet desired flight conditions.

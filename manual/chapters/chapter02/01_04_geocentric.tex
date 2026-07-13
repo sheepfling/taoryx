@@ -1,0 +1,154 @@
+% Source PDF pages 38--40; manual pages 2-9--2-11.
+\subsection{Geocentric Coordinate System}\label{sec:geocentric}
+
+The geocentric coordinate system has its origin at the center of the earth, like the
+ECFC system, but position and velocity are defined by magnitudes and orientation
+angles. The position-vector angles, longitude $\lambda$ and geocentric latitude
+$\delta_{gc}$, form a spherical coordinate system at the earth's center, as shown in
+\cref{fig:geocentric-position-components}.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.62\linewidth}{!}{\input{manual/figures/chapter02/fig-2-3}}
+  \caption{Geocentric position components.}
+  \label{fig:geocentric-position-components}
+\end{figure}
+
+\taossubhead{Geocentric Position}
+
+\noindent\begin{tabularx}{\textwidth}{@{}>{\ttfamily}l>{$\displaystyle}l<{$}X@{}}
+  rcm & \lVert\vec{r}\rVert &
+    Magnitude of the position vector, or distance from the earth's center. \\
+  long & \lambda &
+    Longitude: the angle between the ECFC $x$ axis and the projection of
+    $\vec{r}$ onto the equatorial plane. It is positive eastward, measured
+    counterclockwise from the ECFC $x$ axis. \\
+  latgc & \delta_{gc} &
+    Geocentric latitude: the angle between $\vec{r}$ and the equatorial plane,
+    positive northward. \\
+\end{tabularx}
+
+The function \texttt{p\_geocentric\_to\_ecfc} uses
+\begin{equation}
+\begin{aligned}
+  \vec{r}\cdot\hat{x}_{\oplus}
+    &= \lVert\vec{r}\rVert\cos\delta_{gc}\cos\lambda,\\
+  \vec{r}\cdot\hat{y}_{\oplus}
+    &= \lVert\vec{r}\rVert\cos\delta_{gc}\sin\lambda,\\
+  \vec{r}\cdot\hat{z}_{\oplus}
+    &= \lVert\vec{r}\rVert\sin\delta_{gc}.
+\end{aligned}
+\label{eq:geocentric-position-to-ecfc}
+\end{equation}
+
+The reverse relationships are evaluated by
+\texttt{p\_ecfc\_to\_geocentric}:
+\begin{equation}
+  \tan\lambda
+    = \frac{\vec{r}\cdot\hat{y}_{\oplus}}
+           {\vec{r}\cdot\hat{x}_{\oplus}},
+  \label{eq:longitude-from-ecfc}
+\end{equation}
+\begin{equation}
+  \sin\delta_{gc}
+    = \frac{\vec{r}\cdot\hat{z}_{\oplus}}
+           {\lVert\vec{r}\rVert}.
+  \label{eq:geocentric-latitude-from-ecfc}
+\end{equation}
+
+\taossubhead{Geocentric Velocity}
+
+The velocity orientation angles are measured relative to the local geocentric horizon
+system described in \cref{sec:local-geocentric}. As shown in
+\cref{fig:geocentric-velocity-components}, they are analogous to longitude and
+latitude, but are referenced to the local horizon rather than to ECFC.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.64\linewidth}{!}{\input{manual/figures/chapter02/fig-2-4}}
+  \caption{Geocentric velocity components.}
+  \label{fig:geocentric-velocity-components}
+\end{figure}
+
+\noindent\begin{tabularx}{\textwidth}{@{}>{\ttfamily}l>{$\displaystyle}l<{$}X@{}}
+  vel & \lVert\vec{V}_{\oplus}\rVert &
+    Magnitude of the earth-relative velocity vector. \\
+  gamgc & \gamma_{gc} &
+    Geocentric vertical flight-path angle: the angle between
+    $\vec{V}_{\oplus}$ and the local geocentric horizon plane. It is positive
+    when the vehicle moves away from the earth's surface. \\
+  psigc & \psi_{gc} &
+    Geocentric horizontal flight-path, or heading, angle: the angle between local
+    north $\hat{x}_{gc}$ and the projection of $\vec{V}_{\oplus}$ onto the local
+    horizon plane. It is positive clockwise from north. \\
+\end{tabularx}
+
+The velocity components in local geocentric coordinates are
+\begin{equation}
+  \vec{V}_{\oplus}\cdot\hat{x}_{gc}
+    = \lVert\vec{V}_{\oplus}\rVert
+      \cos\gamma_{gc}\cos\psi_{gc},
+  \label{eq:geocentric-velocity-x}
+\end{equation}
+\begin{equation}
+  \vec{V}_{\oplus}\cdot\hat{y}_{gc}
+    = \lVert\vec{V}_{\oplus}\rVert
+      \cos\gamma_{gc}\sin\psi_{gc},
+  \label{eq:geocentric-velocity-y}
+\end{equation}
+\begin{equation}
+  \vec{V}_{\oplus}\cdot\hat{z}_{gc}
+    = -\lVert\vec{V}_{\oplus}\rVert\sin\gamma_{gc}.
+  \label{eq:geocentric-velocity-z}
+\end{equation}
+Solving for the flight-path angles gives
+\begin{equation}
+  \sin\gamma_{gc}
+    = -\frac{\vec{V}_{\oplus}\cdot\hat{z}_{gc}}
+             {\lVert\vec{V}_{\oplus}\rVert},
+  \label{eq:geocentric-gamma-from-ecfc}
+\end{equation}
+\begin{equation}
+  \tan\psi_{gc}
+    = \frac{\vec{V}_{\oplus}\cdot\hat{y}_{gc}}
+           {\vec{V}_{\oplus}\cdot\hat{x}_{gc}}.
+  \label{eq:geocentric-psi-from-ecfc}
+\end{equation}
+These quantities are calculated in \texttt{v\_ecfc\_to\_geocentric}. If
+$\vec{V}_{\oplus}=\vec{0}$, both flight-path angles are undefined and TAOS sets
+$\gamma_{gc}=\psi_{gc}=0$. If the velocity is straight up or down
+($\lvert\gamma_{gc}\rvert=90^{\circ}$), heading is undefined and TAOS sets it to
+zero.
+
+The reverse calculation, performed by
+\texttt{v\_geocentric\_to\_ecfc}, is
+\begin{equation}
+\begin{aligned}
+  \vec{V}_{\oplus}\cdot\hat{x}_{\oplus}
+    ={}& -(\vec{V}_{\oplus}\cdot\hat{x}_{gc})
+          \cos\lambda\sin\delta_{gc}
+        -(\vec{V}_{\oplus}\cdot\hat{y}_{gc})\sin\lambda\\
+       &-(\vec{V}_{\oplus}\cdot\hat{z}_{gc})
+          \cos\lambda\cos\delta_{gc},
+\end{aligned}
+\label{eq:geocentric-to-ecfc-x}
+\end{equation}
+\begin{equation}
+\begin{aligned}
+  \vec{V}_{\oplus}\cdot\hat{y}_{\oplus}
+    ={}& -(\vec{V}_{\oplus}\cdot\hat{x}_{gc})
+          \sin\lambda\sin\delta_{gc}
+        +(\vec{V}_{\oplus}\cdot\hat{y}_{gc})\cos\lambda\\
+       &-(\vec{V}_{\oplus}\cdot\hat{z}_{gc})
+          \sin\lambda\cos\delta_{gc},
+\end{aligned}
+\label{eq:geocentric-to-ecfc-y}
+\end{equation}
+\begin{equation}
+  \vec{V}_{\oplus}\cdot\hat{z}_{\oplus}
+    = (\vec{V}_{\oplus}\cdot\hat{x}_{gc})\cos\delta_{gc}
+      -(\vec{V}_{\oplus}\cdot\hat{z}_{gc})\sin\delta_{gc}.
+  \label{eq:geocentric-to-ecfc-z}
+\end{equation}
+The local components in these equations are supplied by
+\cref{eq:geocentric-velocity-x,eq:geocentric-velocity-y,eq:geocentric-velocity-z}.

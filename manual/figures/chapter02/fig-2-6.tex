@@ -1,0 +1,23 @@
+\begin{tikzpicture}[scale=0.93,>=Latex,line cap=round,line join=round]
+  \coordinate (O) at (0,0);
+  \coordinate (Q) at (0,-1.32);
+  \coordinate (S) at (3.02,1.25);
+  \coordinate (P) at (4.12,2.20);
+  \draw[line width=0.95pt] (O) ellipse [x radius=3.55,y radius=2.05];
+  \draw[->,line width=0.9pt] (-4.15,0) -- (4.55,0) node[right] {$\hat{x}_{\oplus}$};
+  \draw[->,line width=0.9pt] (0,-2.55) -- (0,2.75) node[above] {$\hat{z}_{\oplus}$};
+  \draw[<->] (-3.98,0) -- (-3.98,2.05) node[midway,left] {$R_p$};
+  \draw[<->] (-3.55,-2.38) -- (0,-2.38) node[midway,below] {$R_{\oplus}$};
+  \draw[->,line width=1pt] (O) -- (P) node[midway,above left] {$\vec r$};
+  \draw[line width=0.9pt] (Q) -- (P);
+  \fill (Q) circle (1.4pt) node[below left] {$Q$};
+  \fill (S) circle (1.4pt) node[above left] {$S$};
+  \fill (P) circle (1.5pt) node[above right] {$P$};
+  \draw[<->] ($(S)+(0.20,0.18)$) -- ($(P)+(0.20,0.18)$) node[midway,right] {$h$};
+  \draw[<->] ($(Q)+(-0.22,0.15)$) -- ($(S)+(-0.22,0.15)$) node[midway,below right] {$N$};
+  \draw[<->] ($(Q)+(0.18,0.08)$) -- ($(O)+(0.18,0.08)$) node[midway,right] {$Ne^2$};
+  \draw[<->] (-0.48,0) -- (-0.48,-1.32) node[midway,left] {$z_i$};
+  \draw[->] (1.20,0) arc[start angle=0,end angle=39,radius=1.20];
+  \node at (1.38,0.50) {$\delta_{gd}$};
+  \draw ($(S)+(-0.18,-0.18)$) -- ++(0.18,-0.18) -- ++(0.18,0.18);
+\end{tikzpicture}

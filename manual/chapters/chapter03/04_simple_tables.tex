@@ -1,0 +1,218 @@
+\section{Simple Tables}\label{sec:simple-tables}
+
+Two table formats are available in TAOS. The first is called the \emph{simple}
+format because it is easy to create, but it has limited capability. The second is
+called the \emph{full} format because it provides the full capabilities of the
+software, but it is somewhat more difficult to create.
+
+Simple tables consist of a single set of tabulated numbers. The set defines a function
+of one or more state variables, or independent variables. The simplest table is a
+function of one variable. For example, a table of thrust values as a function of time
+is
+
+\begin{lstlisting}[style=taosmanual]
+(motor-1)
+  table thrust(time)
+    time   = 0.0, 0.5, 2.0, 4.0, 4.5, 5.0
+    thrust = 0.0, 3500., 3100., 2950., 600., 0.0
+\end{lstlisting}
+
+The table begins with a name in parentheses followed by the keyword
+\texttt{table}. This is followed by the table type, \tabletype{thrust}, and a list of
+independent variables---in this case, \statevar{time}. Tabulated values for the
+independent variable and the dependent variable are given next. For each value of
+time, a corresponding thrust value is given.
+
+\taossubhead{Table Identification Name}
+
+Simple tables always begin with a name enclosed in parentheses. This name is the
+\emph{table identification name}, and it is used in the problem file to reference the
+table. The name must be unique among all input table files. It cannot contain spaces
+or other delimiters; however, nondelimiter special characters such as underscores,
+periods, or dashes are encouraged to improve readability.
+
+\taossubhead{Table Function Definition}
+
+The table identification name is followed by the keyword \texttt{table} and the table
+type from \cref{tab:table-types}. A list of as many as five state variables, or
+independent variables, follows. These variables must be separated by commas and
+enclosed in parentheses so that the input resembles a function definition. For
+example,
+
+\begin{lstlisting}[style=taosmanual]
+table ca(mach,alt,alpha)
+\end{lstlisting}
+
+says that $C_A$ is a function of Mach number, altitude, and angle of attack.
+
+\taossubhead{Extrapolation Option}
+
+The function definition is followed by an extrapolation keyword, either
+\texttt{extrap} or \texttt{no-extrap}. This keyword is optional and controls how
+TAOS handles independent-variable values outside the tabulated range, as shown in
+\cref{fig:table-extrapolation-option}.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter03/fig-3-5}
+  \caption{Table extrapolation option.}
+  \label{fig:table-extrapolation-option}
+\end{figure}
+
+All interpolation and extrapolation is linear, which should be considered when
+entering values and setting the extrapolation option. The default is to allow
+extrapolation.
+
+\taossubhead{Table Parameters}
+
+The extrapolation option may be followed by a variable name and value called the
+\emph{table parameter}. This parameter provides additional information associated
+with the table.
+
+For aerodynamic-coefficient tables, the parameter is the reference area,
+\statevar{sref}. For thrust and mass-flow tables, a parameter called \texttt{units}
+gives the units used in the table. Allowable units are listed in
+\cref{tab:thrust-mass-flow-units}. Other table types do not use a table parameter.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Units for thrust and mass-flow tables.}
+  \label{tab:thrust-mass-flow-units}
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    Thrust units & Mass-flow units & Mass-flow units & Mass-flow units \\
+    \midrule
+    \texttt{lb} & \texttt{lb/sec} & \texttt{lb/min} & \texttt{lb/hr} \\
+    \texttt{n} (Newtons) & \texttt{slugs/sec} & \texttt{slugs/min} & \texttt{slugs/hr} \\
+    \texttt{kn} (kilonewtons) & \texttt{g/sec} & \texttt{g/min} & \texttt{g/hr} \\
+    & \texttt{kg/sec} & \texttt{kg/min} & \texttt{kg/hr} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\taossubhead{Examples}
+
+A complete table-definition line for an axial-force-coefficient table is
+
+\begin{lstlisting}[style=taosmanual]
+table ca(mach,alpha) extrap sref=2.162
+\end{lstlisting}
+
+This defines a table that is a function of Mach number and angle of attack, permits
+extrapolation, and uses a reference area of 2.162~ft\textsuperscript{2}. The units of
+\statevar{sref} default to square feet, but they can be changed with the
+\problemblock{*units/fmt} data block in the problem file
+(\cref{sec:block-units-fmt}). Another example is
+
+\begin{lstlisting}[style=taosmanual]
+table mdot(time,motor) no-extrap units=lb/hr
+\end{lstlisting}
+
+which defines a mass-flow-rate table that is a function of time and a user-defined
+variable called \texttt{motor}, does not allow extrapolation, and has units of
+pounds per hour.
+
+\taossubhead{Independent Variable Values}
+
+The table-definition information is designed to appear on one line. It is followed by
+values for the independent variables. The variable name is given first, followed by a
+list of values, for example,
+
+\begin{lstlisting}[style=taosmanual]
+mach = 0.2, 0.4, 0.6, 0.8, 0.9
+alpha = 0, 2, 4
+\end{lstlisting}
+
+Any number of values can be input; the number is limited only by the computer's
+available memory. Values for independent variables must be strictly increasing or
+strictly decreasing, and duplicate values are not allowed.
+
+Values can be entered with or without decimal points, and all are treated as real
+numbers. Scientific notation is also allowed:
+
+\begin{lstlisting}[style=taosmanual]
+time = 0., 1.0e1, 2.0e1, 6.0e1, 7.0e1, 9.0e1,
+       2e02, 4e02, 6e02
+\end{lstlisting}
+
+Spaces or commas are usually used to separate values because they make the
+separation clear. Values need not all appear on one line; they can be continued as in
+the preceding example.
+
+When a table is a function of more than one independent variable, the variables and
+their values must be given in the same order as in the function definition. For
+example,
+
+\begin{lstlisting}[style=taosmanual]
+table cx(alt,mach) extrap sref=5.30 # CORRECT:
+  alt = 0, 10000                    # altitudes first,
+  mach = 5, 10, 15, 20             # then Mach numbers
+\end{lstlisting}
+
+is correct because altitude precedes Mach number in both the function definition and
+the value lists. An error is generated if the Mach-number values are given first:
+
+\begin{lstlisting}[style=taosmanual]
+table cx(alt,mach) extrap sref=5.30 # INCORRECT: altitude
+  mach = 5, 10, 15, 20             # is first in definition,
+  alt = 0, 10000                    # but Mach values are
+                                    # given first
+\end{lstlisting}
+
+\taossubhead{Dependent Variable Values}
+
+After all independent-variable values have been given, the dependent values are
+listed. For tables with a single independent variable, there is a one-to-one
+correspondence between the independent and dependent values. The following
+complete thrust table illustrates this:
+
+\begin{lstlisting}[style=taosmanual]
+(example-thrust)
+  table thrust(time) units=lb no-extrap
+    time   = 0.0, 0.1, 1.0, 2.0, 3.0, 3.4, 3.5
+    thrust = 0, 5100, 4950, 4900, 4840, 4700, 0
+\end{lstlisting}
+
+At \statevar{time} equal to \SI{2.0}{\second}, thrust is \SI{4900}{\poundforce}. The
+same number of values must be given for both \statevar{time} and
+\statevar{thrust}.
+
+For tables with more than one independent variable, the dependent values must be
+given in the correct order. For example,
+
+\begin{lstlisting}[style=taosmanual]
+(example-cx)
+  table cx(alt,mach) extrap sref=5.30
+    alt = 0, 10000
+    mach = 5, 10, 15, 20
+    cx = 0.030, 0.027, 0.025, 0.024 # Values for alt=0
+         0.035, 0.031, 0.029, 0.028 # Values for alt=10000
+\end{lstlisting}
+
+Values for each Mach number at the first altitude are given first, followed by values
+for the second altitude. A dependent value is required for every combination of
+independent values. This example has two altitudes and four Mach numbers, so eight
+$C_X$ values are required.
+
+The following table is a function of three independent variables:
+
+\begin{lstlisting}[style=taosmanual]
+(example-ca)
+  table ca(alt,mach,alpha) no-extrap sref=10.0
+    alt = 0, 5000
+    mach = 4, 6, 8
+    alpha = 0, 2, 4, 6
+    ca = 0.020, 0.021, 0.022, 0.024 # mach=4, alt=0
+         0.018, 0.019, 0.020, 0.022 # mach=6, alt=0
+         0.017, 0.018, 0.019, 0.021 # mach=8, alt=0
+
+         0.021, 0.022, 0.023, 0.025 # mach=4, alt=5000
+         0.020, 0.021, 0.022, 0.024 # mach=6, alt=5000
+         0.019, 0.020, 0.021, 0.023 # mach=8, alt=5000
+\end{lstlisting}
+
+There are two altitudes, three Mach numbers, and four angles of attack, so there must
+be $2\cdot3\cdot4=24$ values for $C_A$. Values for altitude zero are given first.
+Within this set, values for Mach 4 are given first, followed by values for Mach 6, and
+so on. This pattern continues for all values of Mach number and altitude and can be
+extended to tables that are functions of four or five independent variables.

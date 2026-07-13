@@ -1,0 +1,56 @@
+chapter: 2
+section: 2.6.3
+name: Optimization
+source:
+  manual_pages: [2-102, 2-103, 2-104, 2-105]
+  pdf_pages: [131, 132, 133, 134]
+  numbered_equations: [2-309, 2-315]
+  numbered_figures: [2-39]
+problem:
+  type: nonlinear_programming
+  objective: minimize_f_of_x
+  equality_constraints: c_j_of_x_equals_zero
+  inequality_constraints: c_j_of_x_greater_than_or_equal_to_zero
+method:
+  name: Han_Powell
+  source_code_name: vf02ad
+  class: recursive_quadratic_programming
+  constraint_strategy: active_set
+  search_direction:
+    objective_model: quadratic
+    constraints: linearized
+    Hessian_approximation: positive_definite_variable_metric_matrix_B
+    equations: [2-311, 2-312, 2-313]
+  line_search: one_dimensional_penalty_function
+parameters:
+  input_location: problem_file
+  common_types:
+    - trajectory_initial_conditions
+    - guidance_rules
+    - segment_final_conditions
+  recommendation: use_few_parameters
+trajectory_shaping:
+  control_history: tabulated_guidance_variable_versus_time
+  common_parameters:
+    - tabulated_control_values
+    - final_time
+  restart_feature: redistribute_time_history_points_evenly
+objectives:
+  common:
+    - time
+    - range
+    - velocity
+  maximization: minimize_negative_objective
+constraints:
+  locations: segment_ends
+  multi_vehicle: supported
+  path_wide: user_defined_integral_variables
+  example_equations: [2-314, 2-315]
+normalization:
+  recommended_scaled_range: [1, 10]
+  reference_values: automatic_or_user_supplied
+gradients:
+  methods:
+    - forward_difference
+    - central_difference
+  central_difference_tradeoff: more_accurate_for_same_step_but_requires_extra_function_evaluation

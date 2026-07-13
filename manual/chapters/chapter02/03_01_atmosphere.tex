@@ -1,0 +1,211 @@
+% Source PDF pages 81--84; manual pages 2-52--2-55.
+\subsection{Atmosphere Model}\label{sec:atmosphere-model}
+
+The atmosphere models available in TAOS were originally developed by Acurex
+Corporation under contract to Sandia and subsequently corrected by Landrum in
+1987.\manualref{12} The models include the 1976 U.S. standard
+atmosphere,\manualref{13} the 1966 supplemental atmospheres,\manualref{14}
+Tonopah range data, and a mean annual Kwajalein atmosphere.\manualref{15}
+
+The 1976 U.S. standard atmosphere is an idealized mid-latitude representation of
+the atmosphere under year-round moderate solar activity. The other atmosphere
+models likewise represent average conditions for a location and season. Actual
+atmospheric properties on a particular day can differ substantially from the model;
+density differences as large as 50 percent are possible. Because future atmospheric
+conditions at a specified location and date cannot be predicted exactly, model
+atmospheres are used as a best approximation. The 1976 U.S. standard atmosphere
+is widely used to provide consistency when trajectories are compared.
+
+All available models use the same simplifying assumptions. The resulting equations
+relate altitude, temperature, pressure, density, speed of sound, and viscosity and
+produce the following TAOS output variables:
+\begin{center}
+\begin{tabularx}{0.78\linewidth}{@{}>{\ttfamily}l>{$}l<{$}X@{}}
+  temp   & T    & temperature.\\
+  pres   & p    & pressure.\\
+  rho    & \rho & density.\\
+  sndspd & c    & speed of sound.\\
+  nu     & \nu  & kinematic viscosity.\\
+\end{tabularx}
+\end{center}
+
+\taossubhead{Assumptions}
+
+The atmospheric gas composition is assumed to satisfy the aerostatic equation
+\begin{equation}
+  dp=-\rho g\,dh
+  \label{eq:atmos-aerostatic}
+\end{equation}
+and the perfect-gas law
+\begin{equation}
+  p=\rho\frac{R^*}{M_w}T,
+  \label{eq:atmos-perfect-gas}
+\end{equation}
+where $g$ is acceleration due to gravity, $h$ is altitude above sea level, $R^*$ is
+the universal gas constant, $8314.32\ \mathrm{N\,m/(kmol\,K)}$, and $M_w$ is
+molecular weight.
+
+The atmosphere is divided into concentric layers surrounding the earth. Within each
+layer the gradient of molecular temperature $\tau$ with respect to geopotential
+altitude $H$ is assumed constant:
+\begin{equation}
+  \frac{d\tau}{dH}=\text{constant}.
+  \label{eq:molecular-temperature-gradient}
+\end{equation}
+Molecular temperature and geopotential altitude are defined by
+\begin{equation}
+  \tau=\frac{M_{w0}}{M_w}T
+  \label{eq:molecular-temperature-definition}
+\end{equation}
+and
+\begin{equation}
+  H=\frac{1}{G}\int_0^h g\,dh.
+  \label{eq:geopotential-altitude-integral}
+\end{equation}
+The zero subscript denotes sea-level conditions. For example, $M_{w0}$ is the
+sea-level molecular weight: $28.9644\ \mathrm{kg/kmol}$ for the 1976 U.S.
+standard atmosphere and $28.96\ \mathrm{kg/kmol}$ for the other TAOS atmosphere
+models. The reference geopotential is
+$G=9.80665\ \mathrm{m/s^2}$, corresponding to the sea-level gravitational
+acceleration at latitude $45.5425^\circ$ from
+\cref{eq:lambert-sea-level-gravity}.
+
+For atmospheric calculations, gravity is assumed to vary with altitude according to
+the inverse-square law
+\begin{equation}
+  g=g_0\left(\frac{R'_{\oplus}}{R'_{\oplus}+h}\right)^2,
+  \label{eq:atmos-gravity-inverse-square}
+\end{equation}
+where $R'_{\oplus}$ is an effective earth radius used only for geopotential
+calculations. Substitution into \cref{eq:geopotential-altitude-integral} and
+integration gives
+\begin{equation}
+  H=\frac{g_0}{G}\left(\frac{R'_{\oplus}h}{R'_{\oplus}+h}\right).
+  \label{eq:geopotential-altitude-closed-form}
+\end{equation}
+The sea-level gravitational acceleration, in $\mathrm{m/s^2}$, is assumed to vary
+with latitude according to Lambert's equation:
+\begin{equation}
+  g_0=9.806160\left(1-0.0026373\cos 2\delta
+                      +0.0000059\cos^2 2\delta\right).
+  \label{eq:lambert-sea-level-gravity}
+\end{equation}
+Here $\delta$ is the latitude associated with the atmosphere model, not necessarily
+the current trajectory latitude. For example, a $60^\circ$N atmosphere uses
+$\delta=60^\circ$. This convention is inconsistent with the gravity model used for
+trajectory propagation, but it is consistent with the 1976 U.S. standard and 1966
+supplemental atmosphere definitions.
+
+The effective earth radius in \cref{eq:geopotential-altitude-closed-form} is
+\begin{equation}
+  R'_{\oplus}
+  =\frac{2g_0}
+  {3.085462\times10^{-6}
+   +2.27\times10^{-9}\cos 2\delta
+   -2.0\times10^{-12}\cos 4\delta}.
+  \label{eq:effective-geopotential-earth-radius}
+\end{equation}
+At latitude $45.5425^\circ$, this expression gives
+$R'_{\oplus}=6356.766\ \mathrm{km}$.
+
+The properties at the base of each atmosphere layer are supplied in tables as
+functions of geometric altitude $h$ or geopotential altitude $H$. Molecular
+temperature $\tau$ and its gradient $d\tau/dH$ are tabulated against $H$, while
+molecular weight $M_w$ is tabulated against $h$.
+
+\taossubhead{Temperature}
+
+For a point within the $i$th layer, molecular temperature and molecular weight are
+computed from the base values as
+\begin{equation}
+  \tau=\tau_i+\frac{d\tau}{dH}\left(H-H_i\right)
+  \label{eq:layer-molecular-temperature}
+\end{equation}
+and
+\begin{equation}
+  M_w=M_{wi}+\frac{dM_w}{dH}\left(H-H_i\right).
+  \label{eq:layer-molecular-weight}
+\end{equation}
+The atmospheric temperature is then
+\begin{equation}
+  T=\frac{M_w}{M_{w0}}\tau.
+  \label{eq:atmos-temperature}
+\end{equation}
+
+\taossubhead{Pressure}
+
+Writing \cref{eq:atmos-aerostatic,eq:atmos-perfect-gas} in terms of geopotential
+altitude using \cref{eq:molecular-temperature-definition,eq:geopotential-altitude-integral}
+gives
+\begin{equation}
+  dp=-\rho g_0\,dH
+  \label{eq:pressure-geopotential-differential}
+\end{equation}
+and
+\begin{equation}
+  p=\frac{\rho R^*\tau}{M_{w0}}.
+  \label{eq:pressure-molecular-temperature}
+\end{equation}
+Dividing the first expression by the second gives
+\begin{equation}
+  \frac{dp}{p}
+  =-\frac{g_0M_{w0}}{R^*\tau}\,dH.
+  \label{eq:pressure-separable-differential}
+\end{equation}
+Because $\tau$ is linear in $H$ within a layer, integration gives one of two forms.
+For an isothermal layer,
+\begin{equation}
+  p=p_i\exp\left[-\frac{g_0M_{w0}(H-H_i)}{R^*\tau_i}\right],
+  \qquad \frac{d\tau}{dH}=0,
+  \label{eq:pressure-isothermal-layer}
+\end{equation}
+while for a nonzero temperature gradient,
+\begin{equation}
+  p=p_i
+  \left(\frac{\tau_i}{\tau}\right)^{
+    \frac{g_0M_{w0}}{R^*\left(d\tau/dH\right)}},
+  \qquad \frac{d\tau}{dH}\ne0.
+  \label{eq:pressure-gradient-layer}
+\end{equation}
+These formulas are first used to determine pressure at atmosphere-layer base
+altitudes and then to compute pressure at an arbitrary geopotential altitude.
+
+\taossubhead{Density, Speed of Sound, and Viscosity}
+
+Combining \cref{eq:atmos-perfect-gas,eq:molecular-temperature-definition} gives
+atmospheric density:
+\begin{equation}
+  \rho=\frac{pM_{w0}}{R^*\tau}.
+  \label{eq:atmos-density}
+\end{equation}
+The speed of sound is
+\begin{equation}
+  c=\sqrt{\frac{kR^*T}{M_w}}
+   =\sqrt{\frac{kR^*\tau}{M_{w0}}},
+  \label{eq:atmos-speed-of-sound}
+\end{equation}
+where $k$ is the ratio of specific heats, taken as $1.4$ for air. Kinematic
+viscosity is computed from Sutherland's formula:
+\begin{equation}
+  \nu
+  =\frac{1}{\rho}
+   \frac{1.458\times10^{-6}\,\tau^{1.5}}{\tau+110.4}.
+  \label{eq:atmos-kinematic-viscosity}
+\end{equation}
+
+\taossubhead{Atmosphere Calculations}
+
+The 1976 U.S. standard-atmosphere table is defined through an altitude of
+$146\ \mathrm{km}$. The other models are defined to altitudes between
+$30\ \mathrm{km}$ and $117\ \mathrm{km}$ and are extrapolated so that they meet
+the 1976 standard atmosphere at $146\ \mathrm{km}$. Before trajectory
+calculations, the function \texttt{atmos\_setup} selects the requested atmosphere
+model and loads the applicable tables.
+
+Below $146\ \mathrm{km}$, the function \texttt{atmos\_properties} evaluates the
+model using the preceding equations. Above $146\ \mathrm{km}$, all models use a
+separate 1976-standard-atmosphere table containing temperature, pressure, and
+density through $1000\ \mathrm{km}$. The function \texttt{atmos\_hi\_alt}
+interpolates temperature linearly and pressure and density exponentially. All model
+atmosphere functions reside in the \texttt{atmos} module so they can be reused by
+other software.

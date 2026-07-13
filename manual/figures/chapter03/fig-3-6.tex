@@ -1,0 +1,41 @@
+\begin{tikzpicture}[x=0.72cm,y=0.72cm,font=\scriptsize]
+  \newcommand{\basegrid}[1]{%
+    \begin{scope}[shift={#1}]
+      \draw[line width=0.75pt] (0,0) rectangle (5,5);
+      \foreach \x in {1,2,3,4} {\draw[densely dotted] (\x,0)--(\x,5);}
+      \foreach \y in {1,2,3,4} {\draw[densely dotted] (0,\y)--(5,\y);}
+      \node[below,font=\small] at (2.5,0) {$x$};
+      \node[left,font=\small] at (0,2.5) {$f(x,z)$};
+      \node[left] at (0.10,3.60) {$z_1$};
+      \node[left] at (0.10,2.48) {$z_2$};
+      \node[left] at (0.10,1.28) {$z_3$};
+    \end{scope}%
+  }
+  \basegrid{(0,0)}
+  \basegrid{(8.0,0)}
+  \node[font=\small] at (2.5,5.55) {Square Table};
+  \node[font=\small] at (10.5,5.55) {Skewed Table};
+
+  \begin{scope}
+    \draw[line width=0.85pt] (0.5,3.45)--(1.5,4.0)--(2.5,4.25)--(3.5,4.2)--(4.5,3.55);
+    \draw[line width=0.85pt] (0.5,2.30)--(1.5,2.85)--(2.5,3.10)--(3.5,2.85)--(4.5,2.25);
+    \draw[line width=0.85pt] (0.5,1.15)--(1.5,1.65)--(2.5,1.85)--(3.5,1.65)--(4.5,1.30);
+    \foreach \x/\a/\b/\c in {0.5/3.45/2.30/1.15,1.5/4.0/2.85/1.65,2.5/4.25/3.10/1.85,3.5/4.2/2.85/1.65,4.5/3.55/2.25/1.30}{
+      \draw[dashed] (\x,0.25)--(\x,4.55);
+      \draw[fill=white] (\x-0.1,\a-0.1) rectangle ++(0.2,0.2);
+      \draw[fill=white] (\x-0.1,\b-0.1) rectangle ++(0.2,0.2);
+      \draw[fill=white] (\x-0.1,\c-0.1) rectangle ++(0.2,0.2);
+    }
+  \end{scope}
+
+  \begin{scope}[shift={(8.0,0)}]
+    \draw[line width=0.85pt] (1.2,3.55)--(2.4,4.00)--(3.7,3.85);
+    \draw[line width=0.85pt] (0.85,2.40)--(1.8,2.80)--(2.55,3.00)--(3.45,2.75)--(4.35,2.20);
+    \draw[line width=0.85pt] (0.55,1.10)--(1.5,1.55)--(2.55,1.75)--(3.8,1.50)--(4.65,0.90);
+    \foreach \x/\y in {1.2/3.55,2.4/4.00,3.7/3.85,0.85/2.40,1.8/2.80,2.55/3.00,3.45/2.75,4.35/2.20,0.55/1.10,1.5/1.55,2.55/1.75,3.8/1.50,4.65/0.90}
+      {\draw[fill=white] (\x-0.1,\y-0.1) rectangle ++(0.2,0.2);}
+    \foreach \x in {1.2,2.4,3.7} {\draw[dashed] (\x,3.2)--(\x,4.35);}
+    \foreach \x in {0.85,1.8,2.55,3.45,4.35} {\draw[dashed] (\x,2.0)--(\x,3.25);}
+    \foreach \x in {0.55,1.5,2.55,3.8,4.65} {\draw[dashed] (\x,0.55)--(\x,1.95);}
+  \end{scope}
+\end{tikzpicture}

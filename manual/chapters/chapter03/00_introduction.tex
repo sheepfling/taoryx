@@ -1,0 +1,56 @@
+Before a flight trajectory can be computed, all the forces acting on the vehicle must
+be known. On an airplane or rocket, the primary forces are lift, drag, thrust, and
+weight as shown in \cref{fig:forces-acting-on-vehicle}. Lift and drag forces are
+aligned with the wind-axis system, thrust forces are aligned relative to the body-axis
+system, and weight forces are aligned with the gravity vector.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter03/fig-3-1}
+  \caption{Forces acting on vehicle.}
+  \label{fig:forces-acting-on-vehicle}
+\end{figure}
+
+Lift and drag forces are normally given in terms of nondimensional lift and drag
+coefficients and a reference area. These aerodynamic coefficients are difficult to
+predict; they are often computed with aerodynamic-prediction software, such as
+Missile Datcom\taosref{18} and Sandiac\taosref{19}, or they are obtained from wind
+tunnel tests. The result is a tabulated set of aerodynamic coefficients that is often a
+function of Mach number, altitude, and angle of attack. For example,
+\cref{fig:axial-force-mach} shows the axial-force coefficient as a function of Mach
+number.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter03/fig-3-2}
+  \caption{Axial force coefficient as a function of Mach number.}
+  \label{fig:axial-force-mach}
+\end{figure}
+
+Thrust and mass-flow data for jet and rocket motors are usually obtained from
+analysis software or from tests. Again, this data is normally tabulated because no
+analytical functions exist. For jet engines, thrust and fuel flow are typically a
+function of Mach number, altitude, and power setting. For rocket motors, thrust and
+mass flow are usually given as functions of time, as shown in
+\cref{fig:thrust-mass-flow-time}.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter03/fig-3-3}
+  \caption{Thrust and mass flow as a function of time.}
+  \label{fig:thrust-mass-flow-time}
+\end{figure}
+
+Tabulated data defining forces on the vehicle are input to TAOS with table files.
+Each table file consists of one or more tables, with each table identified by a name,
+as shown in \cref{fig:table-files-and-tables}. A table defines a single value, such as
+thrust or mass flow. This value can be a constant, it can be interpolated from
+tabulated data, it can be computed from an equation, or it can be computed from a
+combination of interpolations and equations.
+
+\begin{figure}[htbp]
+  \centering
+  \input{manual/figures/chapter03/fig-3-4}
+  \caption{Table files and tables.}
+  \label{fig:table-files-and-tables}
+\end{figure}
