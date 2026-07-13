@@ -5384,7 +5384,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "IIP aerodynamic acceleration from drag coefficient and ballistic coefficient"
     },
     {
@@ -5404,7 +5404,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "IIP aerodynamic acceleration using ballistic coefficient"
     },
     {
@@ -5424,7 +5424,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "IIP aerodynamic acceleration using dynamic pressure"
     },
     {
@@ -5444,7 +5444,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "IIP air-relative velocity unit vector"
     },
     {
@@ -5464,7 +5464,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "IIP aerodynamic acceleration vector form"
     },
     {
@@ -5484,7 +5484,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Ballistic coefficient"
     },
     {
@@ -5504,7 +5504,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section24.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Lift-to-drag ratio"
     },
     {
@@ -5744,7 +5744,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Nonaccelerating intercept position equality"
     },
     {
@@ -5764,7 +5764,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Estimated time to intercept"
     },
     {
@@ -5784,7 +5784,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Predicted intercept point"
     },
     {
@@ -5804,7 +5804,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Line-of-sight yaw angle"
     },
     {
@@ -5824,7 +5824,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Line-of-sight pitch angle"
     },
     {
@@ -5844,7 +5844,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Line-of-sight yaw rate"
     },
     {
@@ -5864,7 +5864,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Line-of-sight pitch rate"
     },
     {
@@ -5884,7 +5884,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Proportional-navigation yaw acceleration"
     },
     {
@@ -5904,7 +5904,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Proportional-navigation pitch acceleration"
     },
     {
@@ -5924,7 +5924,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Closure velocity"
     },
     {
@@ -5944,7 +5944,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "First printed line-of-sight rotation matrix"
     },
     {
@@ -5964,7 +5964,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Second printed line-of-sight rotation matrix"
     },
     {
@@ -5984,7 +5984,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Transposed line-of-sight to ECFC acceleration matrix"
     },
     {
@@ -6004,7 +6004,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section25.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Commanded ECFC acceleration components"
     },
     {
