@@ -2204,7 +2204,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Six-component ECFC state vector"
     },
     {
@@ -2224,7 +2224,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "State derivative vector"
     },
     {
@@ -2244,7 +2244,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "ECFC x acceleration component"
     },
     {
@@ -2264,7 +2264,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "ECFC y acceleration component"
     },
     {
@@ -2284,7 +2284,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "ECFC z acceleration component"
     },
     {
@@ -2304,7 +2304,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Earth spin-rate magnitude"
     },
     {
@@ -2324,7 +2324,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Augmented integration state and derivative vectors"
     },
     {
@@ -2344,7 +2344,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Fourth-order Runge-Kutta update"
     },
     {
@@ -2364,7 +2364,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Runge-Kutta first derivative evaluation"
     },
     {
@@ -2384,7 +2384,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Runge-Kutta second derivative evaluation"
     },
     {
@@ -2404,7 +2404,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Runge-Kutta third derivative evaluation"
     },
     {
@@ -2424,7 +2424,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_section22.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Runge-Kutta fourth derivative evaluation"
     },
     {
