@@ -5,9 +5,11 @@ from taoryx.language.problem_parser import parse_problem_text
 def test_initial_accepts_authoritative_segment_trajectory_copy_form() -> None:
     document = parse_problem_text(
         "(demo)\n"
-        "*trajectory 2 vehicle start on 1\n"
-        "*initial from segment 6, trajectory 1\n"
-        "*end\n"
+            "*trajectory 2 vehicle start on 1\n"
+            "*initial from segment 6, trajectory 1\n"
+            "*segment 1\n"
+            "*when time>1 stop\n"
+            "*end\n"
     )
 
     block = document.problems[0].trajectories[0].blocks[0]
@@ -42,9 +44,11 @@ def test_initial_requires_weight_or_mass_for_direct_state() -> None:
 def test_initial_assignment_form_defaults_to_geodetic() -> None:
     document = parse_problem_text(
         "(demo)\n"
-        "*trajectory 1 vehicle start on 1\n"
-        "*initial alt=100 lat=0 long=0 wt=1\n"
-        "*end\n"
+            "*trajectory 1 vehicle start on 1\n"
+            "*initial alt=100 lat=0 long=0 wt=1\n"
+            "*segment 1\n"
+            "*when time>1 stop\n"
+            "*end\n"
     )
 
     block = document.problems[0].trajectories[0].blocks[0]

@@ -39,6 +39,8 @@ class DefineControlStatement(BaseModel):
     nested: "DefineControlStatement | None" = None
     body: list[Assignment] = Field(default_factory=list)
     else_body: list[Assignment] = Field(default_factory=list)
+    body_controls: list["DefineControlStatement"] = Field(default_factory=list)
+    else_controls: list["DefineControlStatement"] = Field(default_factory=list)
 ####
 
 
@@ -53,6 +55,7 @@ class BlockBase(BaseModel):
     scope: Literal["problem", "trajectory", "segment"]
     location: SourceLocation
     header: str = ""
+    source_text: str | None = None
     assignments: list[Assignment] = Field(default_factory=list)
     statements: list[RawStatement] = Field(default_factory=list)
 ####
@@ -63,6 +66,7 @@ class AtmosBlock(BlockBase):
     model: str | None = None
     columns: list[str] = Field(default_factory=list)
     rows: list[list[float]] = Field(default_factory=list)
+    row_locations: list[SourceLocation] = Field(default_factory=list)
 ####
 
 
@@ -220,6 +224,7 @@ class UnitFormatSetting(BaseModel):
 class WindBlock(BlockBase):
     keyword: Literal["wind"] = "wind"
     coordinate_system: Literal["geocentric", "geodetic"] | None = None
+    wind_form: Literal["speed-heading", "east-north"] | None = None
 ####
 
 
@@ -379,6 +384,7 @@ class Segment(BaseModel):
     number: int
     title: str
     location: SourceLocation
+    source_text: str | None = None
     blocks: list[SegmentBlock] = Field(default_factory=list)
 ####
 
@@ -388,6 +394,7 @@ class Trajectory(BaseModel):
     name: str
     start_segment: int
     location: SourceLocation
+    source_text: str | None = None
     blocks: list[TrajectoryBlock] = Field(default_factory=list)
     segments: list[Segment] = Field(default_factory=list)
 ####
@@ -396,6 +403,7 @@ class Trajectory(BaseModel):
 class Problem(BaseModel):
     name: str
     location: SourceLocation
+    source_text: str | None = None
     blocks: list[ProblemBlock] = Field(default_factory=list)
     trajectories: list[Trajectory] = Field(default_factory=list)
     ended: bool = False
@@ -413,6 +421,7 @@ class TableAssignment(BaseModel):
     name: str
     values: list[float]
     location: SourceLocation
+    source_text: str | None = None
 ####
 
 
@@ -425,6 +434,7 @@ class TableCall(BaseModel):
 class TableOperation(BaseModel):
     operator: str
     location: SourceLocation
+    source_text: str | None = None
     operand: str | float | TableCall | None = None
     label: str | None = None
     condition: str | None = None
@@ -439,6 +449,7 @@ class TableDefinition(BaseModel):
     table_type: str
     format: Literal["simple", "full"]
     location: SourceLocation
+    source_text: str | None = None
     independent_variables: list[str] = Field(default_factory=list)
     options: dict[str, str | float] = Field(default_factory=dict)
     assignments: list[TableAssignment] = Field(default_factory=list)

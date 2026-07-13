@@ -1,6 +1,7 @@
 """Canonical TAOS table- and problem-file language support."""
 
 from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
+from taoryx.language.ebnf import EbnfGrammar, EbnfReferenceError, EbnfSyntaxError, load_ebnf, parse_ebnf
 from taoryx.language.grammar_contracts import (
     SUPPORTED_GRAMMAR_CONTRACTS,
     TAOS96_FRAMING_CONTRACT,
@@ -18,6 +19,9 @@ from taoryx.language.table_parser import parse_table_file, parse_table_text
 
 __all__ = [
     "Diagnostic",
+    "EbnfGrammar",
+    "EbnfReferenceError",
+    "EbnfSyntaxError",
     "Severity",
     "SourceLocation",
     "parse_problem_file",
@@ -30,6 +34,8 @@ __all__ = [
     "LosslessRecord",
     "SourceSpan",
     "parse_lossless_file",
+    "load_ebnf",
+    "parse_ebnf",
     "TableCall",
     "FileKind",
     "IngestedDocument",

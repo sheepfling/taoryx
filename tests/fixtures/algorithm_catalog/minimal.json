@@ -1,0 +1,31 @@
+{
+  "catalog_version": "test",
+  "algorithms": [
+    {
+      "id": "A-001",
+      "slug": "basis",
+      "name": "Basis",
+      "domain": "coordinates",
+      "implementation_kind": "primitive",
+      "implementation_target": {"package": "taoryx", "module": "equations", "symbol": "basis"},
+      "dependencies": [],
+      "phase": "M0",
+      "priority": "P0",
+      "complexity": "low",
+      "equations": ["2-1"]
+    },
+    {
+      "id": "A-002",
+      "slug": "transform",
+      "name": "Transform",
+      "domain": "coordinates",
+      "implementation_kind": "formula_group",
+      "implementation_target": {"package": "taoryx", "module": "equations", "symbol": "transform"},
+      "dependencies": ["A-001"],
+      "phase": "M1",
+      "priority": "P0",
+      "complexity": "medium",
+      "equations": ["2-2"]
+    }
+  ]
+}

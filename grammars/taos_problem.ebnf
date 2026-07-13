@@ -4,7 +4,7 @@ trajectory         = "*trajectory" , integer , title , "start" , "on" , integer 
                      { trajectory-block } , segment , { segment } ;
 segment            = "*segment" , integer , [ title ] , { segment-block } ;
 problem-block      = atmosphere-block | earth-block | optimize-block | survey-block
-                   | summarize-block | egs-block | title-block | file-block
+                   | summarize-block | egs-block | title-block | define-block | file-block
                    | print-block | radar-block | search-block | units-block | wind-block ;
 trajectory-block   = define-block | downrange-block | file-block | iip-block
                    | initial-block | print-block | tangent-block ;
@@ -23,3 +23,51 @@ relationship       = variable , ( "=" | "<" | ">" ) , value ;
 value              = number | identifier | table-reference | indexed-variable | parameter-reference | "*" ;
 table-reference    = "(" , identifier , ")" ;
 parameter-reference = ( "surv-" | "srch-" | "opt" , loop-letter , "-" ) , integer ;
+
+(* Block productions intentionally describe only the documented header and
+   assignment boundary.  Bodies whose historical semantics are not yet
+   reconstructed remain source-preserved by the parser. *)
+atmosphere-block   = "*atmos" , { atom | assignment } ;
+define-block       = "*define" , { atom | assignment } ;
+earth-block        = "*earth" , { atom | assignment } ;
+egs-block          = "*egs" , { atom | assignment } ;
+file-block         = "*file" , { atom | assignment } ;
+print-block        = "*print" , { atom | assignment } ;
+radar-block        = "*radar" , { atom | assignment } ;
+search-block       = "*search" , { atom | assignment } ;
+summarize-block    = "*summarize" , { atom | assignment } ;
+survey-block       = "*survey" , { atom | assignment } ;
+title-block        = "*title" , { atom } ;
+units-block        = "*units/fmt" , { atom | assignment } ;
+wind-block         = "*wind" , { atom | assignment } ;
+downrange-block    = "*dwn/crs" , { atom | assignment } ;
+iip-block          = "*iip" , { atom | assignment } ;
+tangent-block      = "*tangent" , { atom | assignment } ;
+aero-block         = "*aero" , { atom | assignment } ;
+constants-block    = "*constants" , { atom | assignment } ;
+cg-block           = "*cg" , { atom | assignment } ;
+fly-block          = "*fly" , { atom | assignment } ;
+increment-block    = "*increment" , { atom | assignment } ;
+inertial-block     = "*inertial" , { atom | assignment } ;
+integration-block  = "*integ" , { atom | assignment } ;
+limits-block       = "*limits" , { atom | assignment | relationship } ;
+propulsion-block   = "*prop" , { atom | assignment } ;
+rail-block         = "*rail" , { atom | assignment } ;
+reset-block        = "*reset" , { atom | assignment } ;
+constraint         = "constrain" , relationship , { assignment } ;
+indexed-variable   = identifier , "[" , integer , "]" ;
+variable           = identifier ;
+loop-letter        = "a" | "b" | "c" | "d" | "e" ;
+coordinate-kind    = "geodetic" | "geocentric" | "ecfc" | "ecic" ;
+title              = { identifier | number } ;
+number             = [ "+" | "-" ] , digit , { digit | "." | "e" | "E" | "+" | "-" } ;
+integer            = digit , { digit } ;
+digit              = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+identifier         = letter , { letter | digit | "_" | "." | "/" | "-" } ;
+letter             = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J"
+                   | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T"
+                   | "U" | "V" | "W" | "X" | "Y" | "Z"
+                   | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j"
+                   | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t"
+                   | "u" | "v" | "w" | "x" | "y" | "z" ;
+atom               = number | identifier ;

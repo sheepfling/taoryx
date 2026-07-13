@@ -3,6 +3,9 @@ table-file         = { table } ;
 table              = "(" , identifier , ")" , "table" , table-type ,
                      [ "(" , identifier-list , ")" ] , { table-option } ,
                      ( simple-body | full-body ) ;
+table-type         = "ca" | "cn" | "cl" | "cd" | "cs" | "cx" | "cy" | "cz"
+                   | "thrust" | "tvec1" | "tvec2" | "mdot" | "cg"
+                   | "windv" | "windh" | "winde" | "windn" | "windd" | "output" ;
 table-option       = "extrap" | "no-extrap" | identifier , "=" , atom ;
 simple-body        = assignment , { assignment } ;
 full-body          = "start" , { labelled-operation | operation | omission } , "end" ;
@@ -24,3 +27,13 @@ extrapolation      = "extrap" | "no-extrap" ;
 omission           = "." , { "." | "etc." } ;
 identifier-list    = identifier , { identifier } ;
 atom               = number | identifier ;
+value              = number | identifier | table-call ;
+number             = [ "+" | "-" ] , ( digit , { digit | "." | "e" | "E" | "+" | "-" } | "." , digit , { digit | "e" | "E" | "+" | "-" } ) ;
+identifier         = letter , { letter | digit | "_" | "." | "/" | "-" } ;
+digit               = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+letter              = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J"
+                    | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T"
+                    | "U" | "V" | "W" | "X" | "Y" | "Z"
+                    | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j"
+                    | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t"
+                    | "u" | "v" | "w" | "x" | "y" | "z" ;

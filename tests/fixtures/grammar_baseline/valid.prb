@@ -1,0 +1,11 @@
+(grammar-valid)
+*title Independent grammar fixture
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=1 gama=0 psi=0 time=0 wt=1
+  *segment 1 nominal
+    *aero ca=0.1 cn=0.2
+    *fly alpha=5
+    *limits alt<100000
+    *when time>1 stop
+*end

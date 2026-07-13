@@ -120,7 +120,8 @@ def tokenize_expression(text: str) -> list[ExpressionToken]:
             raise ExpressionSyntaxError(f"Unexpected expression text at column {position + 1}: {text[position:position + 20]!r}")
         ####
         category = match.lastgroup
-        assert category is not None
+        if category is None:
+            raise ExpressionSyntaxError(f"Unable to classify expression text at column {position + 1}.")
         value = match.group(category)
         tokens.append(ExpressionToken(value=value, category=category, column=match.start(category) + 1))
         position = match.end()
@@ -221,7 +222,8 @@ class _ExpressionParser:
                 return ParameterExpression(family="search", index=int(lower.split("-")[1]))
             ####
             match = re.fullmatch(r"opt([a-e])-(\d+)", lower)
-            assert match is not None
+            if match is None:
+                raise ExpressionSyntaxError(f"Invalid optimization parameter reference {token.value!r}.")
             return ParameterExpression(family="optimize", loop=match.group(1), index=int(match.group(2)))
         ####
         if token.category == "wildcard" or token.value == "*":

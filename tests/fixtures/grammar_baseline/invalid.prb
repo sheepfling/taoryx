@@ -1,0 +1,9 @@
+(grammar-invalid)
+*trajectory 1 vehicle start on 1
+  *initial geodetic
+    alt=0
+  *segment 1 broken
+    *when time>1 goto 9
+    *when time&& stop
+    *when malformed
+*end

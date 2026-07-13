@@ -1,0 +1,11 @@
+(demo-ca) table ca(mach)
+mach=0 1 2
+ca=0.1 0.2 0.3
+
+(demo-output) table output
+start
+label: add force(time) extrap
+time=0 1
+force=10 20
+goto label
+end

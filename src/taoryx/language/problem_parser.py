@@ -7,12 +7,19 @@ from typing import Any
 from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
 from taoryx.language.expressions import (
     BinaryExpression,
+    CallExpression,
     ExpressionSyntaxError,
+    IndexedExpression,
     NameExpression,
+    NumberExpression,
+    ParameterExpression,
     TableReferenceExpression,
+    UnaryExpression,
+    WildcardExpression,
     parse_expression,
 )
 from taoryx.language.grammar_contracts import (
+    DOCUMENTED_STATE_VARIABLES,
     SUPPORTED_PROBLEM_BLOCKS,
     SUPPORTED_SEGMENT_BLOCKS,
     SUPPORTED_TRAJECTORY_BLOCKS,
@@ -70,6 +77,7 @@ from taoryx.language.models import (
 
 _BLOCK_RE = re.compile(r"^\s*\*(?P<keyword>[A-Za-z0-9_/]+)\b(?P<header>.*)$")
 _PROBLEM_RE = re.compile(r"^\s*\((?P<name>[^()]+)\)\s*$")
+_PROBLEM_NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 _ASSIGN_RE = re.compile(r"(?P<name>[A-Za-z_][A-Za-z0-9_./-]*(?:\[\d+\])?)\s*(?P<op>\+=|-=|\*=|/=|<=|>=|==|!=|=|<|>)\s*(?P<value>\([^()]+\)|\*|[^\s,;]+)")
 _STATEMENT_ASSIGN_RE = re.compile(r"^\s*(?P<name>[A-Za-z_][A-Za-z0-9_./-]*(?:\[\d+\])?)\s*(?P<op>\+=|-=|\*=|/=|<=|>=|==|!=|=|<|>)\s*(?P<value>.+?)\s*;?\s*$")
 _IF_ASSIGN_RE = re.compile(r"^\s*if\s*(?:\((?P<parenthesized>.+?)\)|(?P<condition>.+?))\s+(?:then\s+)?(?P<assignment>.+?)\s*;?\s*$", re.IGNORECASE)
@@ -78,18 +86,19 @@ _ELSE_IF_RE = re.compile(r"^\s*else\s+(?P<statement>if\b.+)$", re.IGNORECASE)
 _IF_BRACE_RE = re.compile(r"^\s*if\s*\((?P<condition>.+?)\)\s*\{\s*$", re.IGNORECASE)
 _ELSE_BRACE_RE = re.compile(r"^\s*\}\s*else\s*\{\s*$", re.IGNORECASE)
 _CLOSE_BRACE_RE = re.compile(r"^\s*\}\s*$")
-_LIMIT_RE = re.compile(r"(?P<variable>[A-Za-z_][A-Za-z0-9_.-]*)\s*(?P<operator>[<>])\s*(?P<value>[^\s,]+)")
+_LIMIT_RE = re.compile(r"(?P<variable>[A-Za-z_][A-Za-z0-9_./-]*)\s*(?P<operator>[<>])\s*(?P<value>[^\s,]+)")
 _FLY_ASSIGN_RE = re.compile(r"^\s*(?P<variable>[A-Za-z_][A-Za-z0-9_./-]*)\s*=\s*(?P<value>.+?)\s*$", re.IGNORECASE)
 _FLY_VRS_RE = re.compile(
     r"^\s*(?P<variable>[A-Za-z_][A-Za-z0-9_./-]*)\s+vrs\s+(?P<reference>[A-Za-z_][A-Za-z0-9_./-]*)(?:\s+(?P<interpolation>interp-[0-9]+))?\s*$",
     re.IGNORECASE,
 )
 _OPTIMIZE_ENDPOINT_RE = re.compile(
-    r"^(?P<text>[A-Za-z_][A-Za-z0-9_.-]*(?:\[\d+\])?|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[EeDd][+-]?\d+)?|\*)"
+    r"^(?P<text>[A-Za-z_][A-Za-z0-9_.-]*(?:\[\d+\])?|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[EeDd][+-]?[0-9]+)?)"
     r"(?:\s+on\s+segment\s+(?P<segment>\d+)(?:\s*,?\s*trajectory\s+(?P<trajectory>\d+))?)?\s*$",
     re.IGNORECASE,
 )
 _FREE_FIELD_SPLIT_RE = re.compile(r"[\s,=():<>]+")
+_ASSIGNMENT_BODY_BLOCKS = frozenset({"aero", "constants", "cg", "prop", "integ", "inertial", "reset", "increment"})
 _OPTIMIZE_CONTROL_NAMES = {"fref", "derivs", "tol", "dx", "maxitr", "adjust", "integ", "surveys", "restarts", "print"}
 _SURVEY_SETTING_RE = re.compile(r"(?P<name>lo|hi|inc|vals)\s*=\s*(?P<values>.*?)(?=(?:\s+[A-Za-z_][A-Za-z0-9_./-]*\s*=)|$)", re.IGNORECASE)
 _SURVEY_NUMBER_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[EeDd][+-]?\d+)?$")
@@ -102,6 +111,12 @@ _RESET_INCREMENT_VARIABLE_NAMES = {
     "dxb", "dyb", "dzb", "vel", "gamgc", "psigc", "gamgd", "psigd", "xecfcdt", "yecfcdt", "zecfcdt",
     "xecicdt", "yecicdt", "zecicdt", "wt", "mass", "fuel", "time", "tseg", "tmark", "range", "grseg",
     "grmark", "plength", "plseg", "plmark", "iip_beta", "velibx",
+}
+_RESET_INCREMENT_COORDINATE_FAMILIES = {
+    "geodetic": {"alt", "latgd", "gamgd", "psigd"},
+    "geocentric": {"rcm", "latgc", "gamgc", "psigc"},
+    "ecfc": {"xecfc", "yecfc", "zecfc", "xecfcdt", "yecfcdt", "zecfcdt"},
+    "ecic": {"xecic", "yecic", "zecic", "xecicdt", "yecicdt", "zecicdt"},
 }
 _AERO_COEFFICIENT_SETS = (
     {"ca", "cn"},
@@ -117,6 +132,7 @@ _WIND_SPEED_NAMES = {"windv", "windh", "windd"}
 _WIND_COMPONENT_NAMES = {"winde", "windn", "windd"}
 _SUMMARY_OPERATIONS_WITH_OPERAND = {"add", "sub", "mult", "div", "idiv", "exp", "iexp"}
 _SUMMARY_OPERATIONS_WITHOUT_OPERAND = {"abs", "neg", "sqr", "sqrt", "ln", "log", "e", "sin", "cos", "tan", "asin", "acos", "atan"}
+_FORBIDDEN_LIMIT_VARIABLES = {"intercept", "prop", "propnav", "downria", "upria", "l/d-max", "l/d_max"}
 _SUMMARY_FUNCTION_RE = re.compile(r"^(?P<function>max|min|first|last)\((?P<value>[^()]+)\)(?:\s+trajectory\s+(?P<trajectory>\d+))?$", re.IGNORECASE)
 _SUMMARY_SEGMENT_RE = re.compile(r"^(?P<value>\S+)\s+on\s+segment\s+(?P<segment>\d+)(?:\s*,?\s*trajectory\s+(?P<trajectory>\d+))?$", re.IGNORECASE)
 _INITIAL_VARIABLES = {
@@ -166,6 +182,17 @@ _FLY_CONDITION_VARIABLES = {
     "vel",
 }
 _FLY_VARIABLES = _FLY_DIRECT_VARIABLES | _FLY_CONDITION_VARIABLES
+_FLY_BODY_ATTITUDE_ANGLE_SETS = (
+    {"alpha", "betae", "bankgc"},
+    {"alpha", "beta", "bankgc"},
+    {"alphat", "phi", "bankgc"},
+    {"alpha", "betae", "bankgd"},
+    {"alpha", "beta", "bankgd"},
+    {"alphat", "phi", "bankgd"},
+    {"yawgc", "pitchgc", "rollgc"},
+    {"yawgd", "pitchgd", "rollgd"},
+    {"yawi", "pitchi", "rolli"},
+)
 _DOCUMENTED_UNITS = {
     "ft", "in", "mi", "nm", "m", "km", "sec", "min", "hr", "deg", "rad",
     "ft/sec", "ft/min", "ft/hr", "in/sec", "in/min", "in/hr", "mi/sec", "mi/min", "mi/hr", "knots",
@@ -181,6 +208,33 @@ _DOCUMENTED_UNITS = {
 }
 _PROP_THRUST_UNITS = {"lb", "n", "kn"}
 _PROP_MASS_FLOW_UNITS = {"lb/sec", "lb/min", "lb/hr", "slugs/sec", "slugs/min", "slugs/hr", "g/sec", "g/min", "g/hr", "kg/sec", "kg/min", "kg/hr"}
+_DOCUMENTED_DEFINE_FUNCTIONS = {
+    "abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "cosh", "exp", "floor",
+    "log", "log10", "max", "sin", "sinh", "sqrt", "table", "tan", "tanh",
+}
+_DOCUMENTED_DEFINE_FUNCTION_ARITY = {name: 1 for name in _DOCUMENTED_DEFINE_FUNCTIONS} | {"atan2": 2}
+_CONTINUATION_PARAMETER_NAMES = {
+    "dwn/crs": {"latgd", "long", "azm"},
+    "earth": _EARTH_PARAMETER_NAMES,
+    "iip": {"iip_beta", "iip_alt"},
+    "integ": _INTEGRATION_PARAMETER_NAMES,
+    "radar": _RADAR_PARAMETER_NAMES,
+    "rail": _RAIL_PARAMETER_NAMES,
+    "reset": _RESET_INCREMENT_VARIABLE_NAMES,
+    "increment": _RESET_INCREMENT_VARIABLE_NAMES,
+    "tangent": {"latgd", "long", "alt", "azm"},
+}
+_NUMERIC_PARAMETER_BLOCKS = {
+    "dwn/crs",
+    "earth",
+    "iip",
+    "integ",
+    "inertial",
+    "radar",
+    "rail",
+    "tangent",
+}
+_UNIQUE_PARAMETER_BLOCKS = _NUMERIC_PARAMETER_BLOCKS
 
 
 def _location(path: str, line: int, column: int = 1) -> SourceLocation:
@@ -197,13 +251,186 @@ def _parse_value(value: str):
 ####
 
 
-def _assignments(text: str, path: str, line: int, diagnostics: list[Diagnostic]) -> list[Assignment]:
+def _validate_expression_functions(expression: Any, path: str, line: int, diagnostics: list[Diagnostic]) -> None:
+    if isinstance(expression, CallExpression):
+        function = expression.function.casefold()
+        if function not in _DOCUMENTED_DEFINE_FUNCTIONS:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-define-function",
+                    message=f"Function {expression.function!r} is not documented for *define expressions; source text was preserved.",
+                    location=_location(path, line),
+                )
+            )
+        else:
+            expected_arity = _DOCUMENTED_DEFINE_FUNCTION_ARITY[function]
+            if len(expression.arguments) != expected_arity:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="invalid-define-function-arity",
+                        message=f"Function {expression.function!r} requires {expected_arity} argument(s); source text was preserved.",
+                        location=_location(path, line),
+                    )
+                )
+            elif function == "table" and not isinstance(expression.arguments[0], NameExpression):
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="invalid-define-table-argument",
+                        message="The documented table(id) form requires one table-identification name; source text was preserved.",
+                        location=_location(path, line),
+                    )
+                )
+        ####
+        for argument in expression.arguments:
+            _validate_expression_functions(argument, path, line, diagnostics)
+        ####
+        return
+    ####
+    if isinstance(expression, BinaryExpression):
+        _validate_expression_functions(expression.left, path, line, diagnostics)
+        _validate_expression_functions(expression.right, path, line, diagnostics)
+    elif hasattr(expression, "operand"):
+        _validate_expression_functions(expression.operand, path, line, diagnostics)
+    ####
+####
+
+
+def _contains_call_expression(expression: Any) -> bool:
+    if isinstance(expression, CallExpression):
+        return True
+    if isinstance(expression, BinaryExpression):
+        return _contains_call_expression(expression.left) or _contains_call_expression(expression.right)
+    if hasattr(expression, "operand"):
+        return _contains_call_expression(expression.operand)
+    return False
+####
+
+
+def _contains_nested_relationship(expression: Any) -> bool:
+    """Return whether an expression contains a relationship below its root."""
+
+    if isinstance(expression, BinaryExpression):
+        if expression.operator in {"=", "==", "!=", "<", ">", "<=", ">="}:
+            return True
+        return _contains_nested_relationship(expression.left) or _contains_nested_relationship(expression.right)
+    if isinstance(expression, UnaryExpression):
+        return _contains_nested_relationship(expression.operand)
+    if isinstance(expression, CallExpression):
+        return any(_contains_nested_relationship(argument) for argument in expression.arguments)
+    ####
+    return False
+####
+
+
+def _is_documented_when_relationship(expression: Any) -> bool:
+    """Check the manual's single relationship form used by ``*when``."""
+
+    return isinstance(expression, BinaryExpression) and expression.operator in {"=", "<", ">"} and not _contains_nested_relationship(expression.left) and not _contains_nested_relationship(expression.right)
+####
+
+
+def _validate_problem_define_expression(expression: Any, path: str, line: int, diagnostics: list[Diagnostic]) -> None:
+    """Reject trajectory-dependent table calls in problem-scope definitions."""
+    if isinstance(expression, CallExpression):
+        if expression.function.casefold() == "table":
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="table-call-outside-trajectory",
+                    message="The documented table() function cannot be evaluated in a problem-scope *define block; source text was preserved.",
+                    location=_location(path, line),
+                )
+            )
+        for argument in expression.arguments:
+            _validate_problem_define_expression(argument, path, line, diagnostics)
+        ####
+        return
+    ####
+    if isinstance(expression, BinaryExpression):
+        _validate_problem_define_expression(expression.left, path, line, diagnostics)
+        _validate_problem_define_expression(expression.right, path, line, diagnostics)
+    elif hasattr(expression, "operand"):
+        _validate_problem_define_expression(expression.operand, path, line, diagnostics)
+    ####
+
+
+def _validate_problem_define_control(control: DefineControlStatement, diagnostics: list[Diagnostic]) -> None:
+    if control.condition is not None:
+        _validate_problem_define_expression(control.condition, control.location.path, control.location.line, diagnostics)
+    if control.assignment is not None:
+        _validate_problem_define_expression(control.assignment.value, control.assignment.location.path, control.assignment.location.line, diagnostics)
+    for assignment in control.body + control.else_body:
+        _validate_problem_define_expression(assignment.value, assignment.location.path, assignment.location.line, diagnostics)
+    for nested_control in control.body_controls + control.else_controls:
+        _validate_problem_define_control(nested_control, diagnostics)
+    if control.nested is not None:
+        _validate_problem_define_control(control.nested, diagnostics)
+    ####
+
+
+def _validate_problem_define_table_calls(block: DefineBlock, diagnostics: list[Diagnostic]) -> None:
+    if block.scope != "problem":
+        return
+    ####
+    if block.initial_value is not None:
+        _validate_problem_define_expression(block.initial_value, block.location.path, block.location.line, diagnostics)
+    for assignment in block.assignments:
+        _validate_problem_define_expression(assignment.value, assignment.location.path, assignment.location.line, diagnostics)
+    for control in block.control_statements:
+        _validate_problem_define_control(control, diagnostics)
+    ####
+
+
+def _expression_names(expression: Any) -> set[str]:
+    if isinstance(expression, NameExpression):
+        return {expression.name.casefold()}
+    if isinstance(expression, IndexedExpression):
+        return {expression.name.casefold()}
+    if isinstance(expression, CallExpression):
+        arguments = expression.arguments[1:] if expression.function.casefold() == "table" else expression.arguments
+        return {name for argument in arguments for name in _expression_names(argument)}
+    if isinstance(expression, BinaryExpression):
+        return _expression_names(expression.left) | _expression_names(expression.right)
+    if hasattr(expression, "operand"):
+        return _expression_names(expression.operand)
+    return set()
+####
+
+
+def _validate_define_assignment_order(block: DefineBlock, diagnostics: list[Diagnostic]) -> None:
+    """Diagnose definite forward references to same-definition temporaries."""
+    assignments = block.assignments
+    for index, assignment in enumerate(assignments):
+        assigned_later = {item.name.casefold() for item in assignments[index + 1 :]}
+        for name in sorted(_expression_names(assignment.value) & assigned_later):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="define-variable-used-before-assignment",
+                    message=f"Temporary variable {name!r} is used before its assignment in this *define block; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
+    ####
+
+
+def _assignments(
+    text: str,
+    path: str,
+    line: int,
+    diagnostics: list[Diagnostic],
+    *,
+    allow_functions: bool = False,
+) -> list[Assignment]:
     if ";" in text:
         segments = [segment.strip() for segment in text.split(";") if segment.strip()]
         if len(segments) > 1:
             result: list[Assignment] = []
             for segment in segments:
-                result.extend(_assignments(segment, path, line, diagnostics))
+                result.extend(_assignments(segment, path, line, diagnostics, allow_functions=allow_functions))
             return result
         ####
         statement = _STATEMENT_ASSIGN_RE.fullmatch(text)
@@ -213,6 +440,16 @@ def _assignments(text: str, path: str, line: int, diagnostics: list[Diagnostic])
             except ExpressionSyntaxError as exc:
                 diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-expression", message=str(exc), location=_location(path, line)))
                 return []
+            if not allow_functions and _contains_call_expression(value):
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="unsupported-assignment-call",
+                        message="Function calls are documented only in *define expressions; source text was preserved.",
+                        location=_location(path, line),
+                    )
+                )
+            ####
             return [Assignment(name=statement.group("name"), operator=statement.group("op"), value=value, location=_location(path, line))]
         ####
     result: list[Assignment] = []
@@ -223,9 +460,58 @@ def _assignments(text: str, path: str, line: int, diagnostics: list[Diagnostic])
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-expression", message=str(exc), location=_location(path, line, match.start("value") + 1)))
             continue
         ####
+        if not allow_functions and _contains_call_expression(value):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-assignment-call",
+                    message="Function calls are documented only in *define expressions; source text was preserved.",
+                    location=_location(path, line, match.start("value") + 1),
+                )
+            )
+        ####
         result.append(Assignment(name=match.group("name"), operator=match.group("op"), value=value, location=_location(path, line, match.start("name") + 1)))
     ####
     return result
+####
+
+
+def _assignment_residual(text: str) -> tuple[int, str] | None:
+    covered = [False] * len(text)
+    for match in _ASSIGN_RE.finditer(text):
+        for index in range(*match.span()):
+            covered[index] = True
+    ####
+    for index, character in enumerate(text):
+        if not covered[index] and not character.isspace() and character != ",":
+            residual = text[index:].strip()
+            return index + 1, residual
+    ####
+    return None
+####
+
+
+def _diagnose_assignment_residual(
+    text: str,
+    keyword: str,
+    path: str,
+    line: int,
+    diagnostics: list[Diagnostic],
+) -> bool:
+    residual = _assignment_residual(text)
+    if residual is None:
+        return False
+    ####
+    column, residual_text = residual
+    diagnostics.append(
+        Diagnostic(
+            severity=Severity.ERROR,
+            code="invalid-assignment-line",
+            message=f"Unparsed assignment text {residual_text!r} remains in '*{keyword}'.",
+            location=_location(path, line, column),
+        )
+    )
+    return True
 ####
 
 
@@ -239,9 +525,10 @@ def _define_control(text: str, path: str, line: int, diagnostics: list[Diagnosti
         condition_text = match.group("parenthesized") or match.group("condition")
         try:
             condition = parse_expression(condition_text.strip())
+            _validate_expression_functions(condition, path, line, diagnostics)
             body_text = match.group("assignment").strip()
             nested = _define_control(body_text, path, line, diagnostics) if body_text.lower().startswith(("if ", "if(", "else ")) else None
-            assignments = [] if nested else _assignments(body_text, path, line, diagnostics)
+            assignments = [] if nested else _assignments(body_text, path, line, diagnostics, allow_functions=True)
         except ExpressionSyntaxError as exc:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-define-control", message=str(exc), location=_location(path, line)))
             return None
@@ -255,9 +542,15 @@ def _define_control(text: str, path: str, line: int, diagnostics: list[Diagnosti
                 )
             )
             return None
+        for assignment in assignments:
+            _validate_expression_functions(assignment.value, path, line, diagnostics)
+        ####
         return DefineControlStatement(kind="if", condition=condition, assignment=assignments[0] if assignments else None, nested=nested, location=_location(path, line))
     if match := _ELSE_ASSIGN_RE.fullmatch(text):
-        assignments = _assignments(match.group("assignment"), path, line, diagnostics)
+        assignments = _assignments(match.group("assignment"), path, line, diagnostics, allow_functions=True)
+        for assignment in assignments:
+            _validate_expression_functions(assignment.value, path, line, diagnostics)
+        ####
         return DefineControlStatement(kind="else", assignment=assignments[0] if assignments else None, location=_location(path, line))
     ####
     return None
@@ -273,14 +566,16 @@ def _define_statement(text: str, path: str, line: int, diagnostics: list[Diagnos
         except ExpressionSyntaxError as exc:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-expression", message=str(exc), location=_location(path, line)))
             return None
+        _validate_expression_functions(value, path, line, diagnostics)
         return DefineAssignmentStatement(
             assignment=Assignment(name=statement.group("name"), operator=statement.group("op"), value=value, location=_location(path, line))
         )
     if text.strip().lower().startswith(("if ", "if(", "else ")):
         diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-define-control", message=f"Unsupported *define control statement: {text.strip()!r}.", location=_location(path, line)))
         return None
-    assignments = _assignments(text, path, line, diagnostics)
+    assignments = _assignments(text, path, line, diagnostics, allow_functions=True)
     if len(assignments) == 1:
+        _validate_expression_functions(assignments[0].value, path, line, diagnostics)
         return DefineAssignmentStatement(assignment=assignments[0])
     if text.strip():
         diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-define-statement", message=f"Unsupported *define statement: {text.strip()!r}.", location=_location(path, line)))
@@ -334,7 +629,74 @@ def _validate_named_header(
                 )
             )
     ####
+
+
+def _validate_segment_termination(trajectory: Trajectory, diagnostics: list[Diagnostic]) -> None:
+    """Require each documented segment to contain a final-condition block."""
+    for segment in trajectory.segments:
+        if not any(isinstance(block, WhenBlock) for block in segment.blocks):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="missing-segment-when",
+                    message=f"Segment {segment.number} must contain at least one '*when' final-condition block; source text was preserved.",
+                    location=segment.location,
+                )
+            )
+    ####
+
+
+def _validate_trajectory_structure(trajectory: Trajectory, diagnostics: list[Diagnostic]) -> None:
+    """Require the documented initial-condition and segment children."""
+    if not any(isinstance(block, InitialBlock) for block in trajectory.blocks):
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="missing-trajectory-initial",
+                message=f"Trajectory {trajectory.number} must contain an '*initial' block; source text was preserved.",
+                location=trajectory.location,
+            )
+        )
+    if not trajectory.segments:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="missing-trajectory-segment",
+                message=f"Trajectory {trajectory.number} must contain at least one '*segment' block; source text was preserved.",
+                location=trajectory.location,
+            )
+        )
+    ####
 ####
+
+
+def _validate_continuation_parameters(
+    keyword: str,
+    assignments: list[Assignment],
+    path: str,
+    line: int,
+    diagnostics: list[Diagnostic],
+    *,
+    allowed_names: set[str] | None = None,
+) -> None:
+    """Apply a fixed block vocabulary to assignments on continuation lines."""
+
+    allowed = allowed_names if allowed_names is not None else _CONTINUATION_PARAMETER_NAMES.get(keyword)
+    if allowed is None:
+        return
+    ####
+    for assignment in assignments:
+        if assignment.name.casefold() not in allowed:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-block-parameter",
+                    message=f"Parameter {assignment.name!r} is not documented for '*{keyword}'.",
+                    location=assignment.location,
+                )
+            )
+        ####
+    ####
 
 
 def _validate_output_variables(
@@ -343,6 +705,8 @@ def _validate_output_variables(
     path: str,
     line: int,
     diagnostics: list[Diagnostic],
+    *,
+    scope: str | None = None,
 ) -> None:
     for token in tokens:
         if not _OUTPUT_VARIABLE_RE.fullmatch(token):
@@ -354,6 +718,18 @@ def _validate_output_variables(
                     location=_location(path, line),
                 )
             )
+        else:
+            base_name = token.split("[", 1)[0].casefold()
+            required_subscripts = 2 if scope == "problem" else 1
+            if base_name.startswith(("rad", "rel")) and token.count("[") != required_subscripts:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="invalid-related-output-subscript",
+                        message=f"Output variable {token!r} requires exactly {required_subscripts} subscript(s) in a {scope or 'trajectory'}-scope '*{keyword}' block; source text was preserved.",
+                        location=_location(path, line),
+                    )
+                )
         ####
     ####
 
@@ -388,6 +764,18 @@ def _validate_wind(
     ####
 
 
+def _wind_form(assignments: list[Assignment]) -> str | None:
+    names = {assignment.name.casefold() for assignment in assignments}
+    if len(assignments) == 3 and names == _WIND_SPEED_NAMES:
+        return "speed-heading"
+    ####
+    if len(assignments) == 3 and names == _WIND_COMPONENT_NAMES:
+        return "east-north"
+    ####
+    return None
+####
+
+
 def _parse_limits(header: str, path: str, line: int, diagnostics: list[Diagnostic]) -> list[Limit]:
     limits: list[Limit] = []
     matches = list(_LIMIT_RE.finditer(header))
@@ -418,6 +806,15 @@ def _parse_limits(header: str, path: str, line: int, diagnostics: list[Diagnosti
                 location=_location(path, line, match.start("variable") + 1),
             )
         )
+        if _contains_call_expression(value):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-limit-call",
+                    message="Limit values may not contain function calls; source text was preserved.",
+                    location=_location(path, line, match.start("value") + 1),
+                )
+            )
     ####
     if re.sub(r"[\s,]+", "", residual):
         diagnostics.append(
@@ -433,6 +830,23 @@ def _parse_limits(header: str, path: str, line: int, diagnostics: list[Diagnosti
 ####
 
 
+def _validate_limits(block: LimitsBlock, diagnostics: list[Diagnostic]) -> None:
+    """Reject guidance rules that the manual explicitly excludes from limits."""
+    for limit in block.limits:
+        if limit.variable.casefold() in _FORBIDDEN_LIMIT_VARIABLES:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unlimit-able-guidance-variable",
+                    message=f"Guidance variable {limit.variable!r} cannot be constrained by '*limits'.",
+                    location=limit.location,
+                )
+            )
+        ####
+    ####
+####
+
+
 def _parse_summary_operand(text: str, path: str, line: int, diagnostics: list[Diagnostic]) -> SummaryOperand | None:
     body = text.strip()
     function_match = _SUMMARY_FUNCTION_RE.fullmatch(body)
@@ -442,6 +856,26 @@ def _parse_summary_operand(text: str, path: str, line: int, diagnostics: list[Di
         except ExpressionSyntaxError as exc:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-summary-operand", message=str(exc), location=_location(path, line)))
             return None
+        if not isinstance(expression, (NameExpression, IndexedExpression)):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="invalid-summary-function-operand",
+                    message="Summary special functions require a variable or indexed variable operand; source text was preserved.",
+                    location=_location(path, line),
+                )
+            )
+        if isinstance(expression, IndexedExpression) and function_match.group("trajectory") is not None:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="conflicting-summary-trajectory",
+                    message="A summary special-function operand cannot use both a bracketed trajectory subscript and a 'trajectory' qualifier.",
+                    location=_location(path, line),
+                )
+            )
+        if _contains_call_expression(expression):
+            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="unsupported-summary-operand-call", message="Summary special functions may only contain a variable or indexed variable; source text was preserved.", location=_location(path, line)))
         ####
         return SummaryOperand(
             text=body,
@@ -457,6 +891,8 @@ def _parse_summary_operand(text: str, path: str, line: int, diagnostics: list[Di
         except ExpressionSyntaxError as exc:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-summary-operand", message=str(exc), location=_location(path, line)))
             return None
+        if _contains_call_expression(expression):
+            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="unsupported-summary-operand-call", message="Summary operands may not contain function calls; source text was preserved.", location=_location(path, line)))
         ####
         return SummaryOperand(
             text=body,
@@ -470,6 +906,15 @@ def _parse_summary_operand(text: str, path: str, line: int, diagnostics: list[Di
     except ExpressionSyntaxError as exc:
         diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-summary-operand", message=str(exc), location=_location(path, line)))
         return None
+    if _contains_call_expression(expression):
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="unsupported-summary-operand-call",
+                message="Summary operands may be variables, constants, or documented special functions; source text was preserved.",
+                location=_location(path, line),
+            )
+        )
     ####
     return SummaryOperand(text=body, expression=expression)
 
@@ -500,10 +945,21 @@ def _parse_summary_operation(text: str, path: str, line: int, diagnostics: list[
 def _validate_initial_assignments(block: InitialBlock, path: str, line: int, diagnostics: list[Diagnostic]) -> None:
     coordinate = block.coordinate_system or "geodetic"
     allowed = _INITIAL_VARIABLES[coordinate]
+    seen: set[str] = set()
     for assignment in block.assignments:
         name = assignment.name.casefold()
         if name not in allowed:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="unsupported-initial-parameter", message=f"Parameter {assignment.name!r} is not documented for '*initial {coordinate}'.", location=assignment.location))
+        elif name in seen:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="duplicate-initial-parameter",
+                    message=f"Parameter {assignment.name!r} is assigned more than once in '*initial'; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
+        seen.add(name)
         ####
     names = {assignment.name.casefold() for assignment in block.assignments}
     if {"wt", "mass"} <= names:
@@ -511,6 +967,21 @@ def _validate_initial_assignments(block: InitialBlock, path: str, line: int, dia
     ####
     if {"vel", "mach"} <= names:
         diagnostics.append(Diagnostic(severity=Severity.ERROR, code="conflicting-initial-velocity", message="'*initial' cannot specify both vel and mach.", location=_location(path, line)))
+    ####
+
+
+def _validate_initial_copy_assignments(assignments: list[Assignment], path: str, line: int, diagnostics: list[Diagnostic]) -> None:
+    """Allow only the manual-documented ECFC/ECIC settings after a copied state."""
+    for assignment in assignments:
+        if assignment.name.casefold() not in {"t_0", "omega_0"}:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-initial-copy-parameter",
+                    message=f"Parameter {assignment.name!r} is not documented after a copied '*initial' state; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
     ####
 
 
@@ -591,6 +1062,15 @@ def _parse_optimize_endpoint(text: str, path: str, line: int, diagnostics: list[
     subscript = re.search(r"\[(\d+)\]$", endpoint_text)
     if subscript:
         trajectory_subscript = int(subscript.group(1))
+    if trajectory_subscript is not None and match.group("trajectory") is not None:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="conflicting-endpoint-trajectory",
+                message="An endpoint cannot use both a bracketed trajectory subscript and a 'trajectory' qualifier.",
+                location=_location(path, line),
+            )
+        )
     ####
     expression = None
     try:
@@ -638,11 +1118,33 @@ def _parse_optimize_constraint(text: str, path: str, line: int, diagnostics: lis
 
 def _parse_search_objective(text: str, path: str, line: int, diagnostics: list[Diagnostic], *, report_incomplete: bool = False) -> SearchObjective | None:
     body = text.strip()
+    if body.casefold() in {"min", "max"}:
+        return SearchObjective(left=OptimizeEndpoint(text=body, expression=NameExpression(name=body)))
+    ####
     relation = re.search(r"(?P<operator>[<>=])", body)
     if relation is None:
         left = _parse_optimize_endpoint(body, path, line, diagnostics)
         if left is None:
             return None
+        if isinstance(left.expression, NumberExpression):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="invalid-search-endpoint",
+                    message="A search objective's first term must be an output variable, not a numeric value.",
+                    location=_location(path, line),
+                )
+            )
+        ####
+        if report_incomplete and (left.segment is None or (left.trajectory is None and left.trajectory_subscript is None)):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="invalid-search-endpoint",
+                    message="A search objective's first endpoint requires a segment and trajectory qualifier (or trajectory subscript).",
+                    location=_location(path, line),
+                )
+            )
         ####
         return SearchObjective(left=left)
     ####
@@ -650,23 +1152,104 @@ def _parse_search_objective(text: str, path: str, line: int, diagnostics: list[D
     right = _parse_optimize_endpoint(body[relation.end() :], path, line, diagnostics)
     if left is None or right is None:
         return None
+    if isinstance(left.expression, NumberExpression):
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="invalid-search-endpoint",
+                message="A search objective's first term must be an output variable, not a numeric value.",
+                location=_location(path, line),
+            )
+        )
+    ####
+    if left.segment is None and right.segment is not None:
+        left.segment = right.segment
+    elif right.segment is None and left.segment is not None:
+        right.segment = left.segment
+    ####
+    left_trajectory = left.trajectory if left.trajectory is not None else left.trajectory_subscript
+    right_trajectory = right.trajectory if right.trajectory is not None else right.trajectory_subscript
+    if left_trajectory is None and right_trajectory is not None:
+        left.trajectory = right_trajectory
+    elif right_trajectory is None and left_trajectory is not None:
+        right.trajectory = left_trajectory
+    elif left_trajectory is None and right_trajectory is None:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="invalid-search-endpoint",
+                message="A search objective relationship requires a trajectory qualifier or trajectory subscript.",
+                location=_location(path, line),
+            )
+        )
+    ####
+    if left.segment is None or (left.trajectory is None and left.trajectory_subscript is None):
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="invalid-search-endpoint",
+                message="A search objective's first endpoint requires a segment and trajectory qualifier (or trajectory subscript).",
+                location=_location(path, line),
+            )
+        )
     ####
     return SearchObjective(left=left, operator=relation.group("operator"), right=right)
 ####
 
 
 def _validate_search_controls(assignments: list[Assignment], path: str, line: int, diagnostics: list[Diagnostic]) -> None:
+    seen: set[str] = set()
     for assignment in assignments:
-        if assignment.name.casefold() not in _SEARCH_CONTROL_NAMES:
+        name = assignment.name.casefold()
+        if name in seen:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="duplicate-search-control",
+                    message=f"Search control {assignment.name!r} is assigned more than once; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
+        seen.add(name)
+        if name not in _SEARCH_CONTROL_NAMES:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="unsupported-search-control", message=f"Control {assignment.name!r} is not documented in a '*search' body.", location=assignment.location))
+        elif not _is_numeric_parameter_value(assignment.value):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="nonnumeric-search-control",
+                    message=f"Search control {assignment.name!r} requires a numeric value; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
     ####
 ####
 
 
 def _validate_optimize_controls(assignments: list[Assignment], path: str, line: int, diagnostics: list[Diagnostic]) -> None:
+    seen: set[str] = set()
     for assignment in assignments:
         name = assignment.name.casefold()
+        if name in seen:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="duplicate-optimize-control",
+                    message=f"Optimization control {assignment.name!r} is assigned more than once; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
+        seen.add(name)
         if name in _OPTIMIZE_CONTROL_NAMES or re.fullmatch(r"(?:par|lo|hi|ref)-\d+", name):
+            if not _is_numeric_parameter_value(assignment.value):
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="nonnumeric-optimize-control",
+                        message=f"Optimization control {assignment.name!r} requires a numeric value; source text was preserved.",
+                        location=assignment.location,
+                    )
+                )
             continue
         ####
         diagnostics.append(
@@ -698,6 +1281,117 @@ def _validate_propulsion_units(block: PropulsionBlock, diagnostics: list[Diagnos
                     location=assignment.location,
                 )
             )
+    ####
+####
+
+
+def _validate_reset_increment(block: Any, problem: Problem, diagnostics: list[Diagnostic]) -> None:
+    """Validate the manual's state-coordinate restrictions for reset/increment."""
+    names = {assignment.name.casefold() for assignment in block.assignments}
+    if {"wt", "mass"} <= names:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="conflicting-reset-mass",
+                message="A '*reset' or '*increment' block cannot specify both wt and mass.",
+                location=block.location,
+            )
+        )
+    ####
+    families = {
+        family
+        for family, variables in _RESET_INCREMENT_COORDINATE_FAMILIES.items()
+        if names & variables
+    }
+    if len(families) > 1:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="mixed-reset-coordinate-systems",
+                message="Position and velocity variables in one '*reset' or '*increment' block must use one coordinate system.",
+                location=block.location,
+            )
+        )
+    ####
+    if "time" in names and len(problem.trajectories) > 1:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="absolute-time-discontinuity-multiple-trajectories",
+                message="A multiple-trajectory problem cannot reset or increment absolute time.",
+                location=block.location,
+            )
+        )
+    ####
+####
+
+
+def _validate_fly_angle_set(segment: Any, diagnostics: list[Diagnostic]) -> None:
+    angle_blocks = [
+        block
+        for block in segment.blocks
+        if isinstance(block, FlyBlock) and block.guidance_variable is not None and block.guidance_variable.casefold() in {name for angle_set in _FLY_BODY_ATTITUDE_ANGLE_SETS for name in angle_set}
+    ]
+    specified = {block.guidance_variable.casefold() for block in angle_blocks if block.guidance_variable is not None}
+    if not specified or any(specified <= angle_set for angle_set in _FLY_BODY_ATTITUDE_ANGLE_SETS):
+        return
+    ####
+    location = angle_blocks[-1].location if angle_blocks else segment.location
+    diagnostics.append(
+        Diagnostic(
+            severity=Severity.ERROR,
+            code="inconsistent-fly-angle-set",
+            message="Body-attitude *fly angles do not form one of the nine consistent Table 4-3 angle sets.",
+            location=location,
+        )
+    )
+####
+
+
+def _validate_fly_blocks(trajectory: Trajectory, diagnostics: list[Diagnostic]) -> None:
+    """Validate per-trajectory structural rules for guidance blocks."""
+    for index, segment in enumerate(trajectory.segments):
+        fly_blocks = [block for block in segment.blocks if isinstance(block, FlyBlock)]
+        if len(fly_blocks) > 4:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="too-many-fly-blocks",
+                    message="A segment may contain no more than four '*fly' blocks.",
+                    location=fly_blocks[4].location,
+                )
+            )
+        ####
+        special_blocks = [
+            block
+            for block in fly_blocks
+            if block.guidance_variable is not None
+            and block.guidance_variable.casefold() in {"intercept", "propnav"}
+        ]
+        if special_blocks and len(fly_blocks) > 3:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="too-many-special-fly-blocks",
+                    message="A segment using '*fly intercept' or '*fly propnav' may contain no more than three '*fly' blocks.",
+                    location=fly_blocks[3].location,
+                )
+            )
+        ####
+        if index == 0:
+            for block in fly_blocks:
+                if isinstance(block.value, WildcardExpression):
+                    diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="wildcard-fly-in-first-segment",
+                            message="A '*fly' wildcard value requires a preceding trajectory segment.",
+                            location=block.location,
+                        )
+                    )
+                ####
+            ####
+        ####
     ####
 ####
 
@@ -743,6 +1437,317 @@ def _parse_survey_settings(text: str, path: str, line: int, diagnostics: list[Di
 ####
 
 
+def _validate_survey_configuration(block: SurveyBlock, diagnostics: list[Diagnostic]) -> None:
+    """Validate the documented incremental/explicit survey setting forms."""
+    seen: set[str] = set()
+    for setting in block.settings:
+        if setting.name in seen:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="duplicate-survey-setting",
+                    message=f"Survey setting {setting.name!r} is assigned more than once; source text was preserved.",
+                    location=setting.location,
+                )
+            )
+        seen.add(setting.name)
+    ####
+    settings = {setting.name: setting for setting in block.settings}
+    incremental_names = {"lo", "hi", "inc"}
+    present_incremental = incremental_names & settings.keys()
+    has_explicit_values = "vals" in settings
+
+    if not block.settings:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="missing-survey-values",
+                message="A '*survey' block requires lo/hi/inc settings, vals settings, or both.",
+                location=block.location,
+            )
+        )
+        return
+    ####
+    if present_incremental and present_incremental != incremental_names:
+        missing = ", ".join(sorted(incremental_names - present_incremental))
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="incomplete-survey-increment",
+                message=f"An incremental survey requires lo, hi, and inc; missing {missing}.",
+                location=block.location,
+            )
+        )
+    ####
+    if not present_incremental and not has_explicit_values:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="missing-survey-values",
+                message="A '*survey' block requires lo/hi/inc settings or at least one vals setting.",
+                location=block.location,
+            )
+        )
+    ####
+####
+
+
+def _validate_survey_output_names(problem: Problem, diagnostics: list[Diagnostic]) -> None:
+    """Reject survey names that collide with documented output-variable names."""
+    blocks = list(problem.blocks)
+    for trajectory in problem.trajectories:
+        blocks.extend(trajectory.blocks)
+        for segment in trajectory.segments:
+            blocks.extend(segment.blocks)
+    output_names = {
+        variable.casefold()
+        for block in blocks
+        if isinstance(block, (FileBlock, EgsBlock, PrintBlock))
+        for variable in block.variables
+    }
+    for block in blocks:
+        if isinstance(block, SurveyBlock) and block.name is not None and block.name.casefold() in output_names:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="conflicting-survey-output-name",
+                    message=f"Survey name {block.name!r} must not duplicate an output-variable name.",
+                    location=block.location,
+                )
+            )
+    ####
+
+
+def _validate_units_format_user_variables(problem: Problem, diagnostics: list[Diagnostic]) -> None:
+    """Reject unit changes for user variables declared by a ``*define`` block."""
+    blocks = list(problem.blocks)
+    for trajectory in problem.trajectories:
+        blocks.extend(trajectory.blocks)
+        for segment in trajectory.segments:
+            blocks.extend(segment.blocks)
+    ####
+    defined_names = {
+        block.variable.casefold()
+        for block in blocks
+        if isinstance(block, DefineBlock) and block.variable is not None
+    }
+    if not defined_names:
+        return
+    ####
+    for block in blocks:
+        if not isinstance(block, UnitsFormatBlock):
+            continue
+        for setting in block.settings:
+            if setting.unit is not None and setting.variable.casefold() in defined_names:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="units-on-user-defined-variable",
+                        message=f"*units/fmt may set a format for user-defined variable {setting.variable!r}, but cannot change its units; source text was preserved.",
+                        location=setting.location,
+                    )
+                )
+        ####
+    ####
+
+
+def _validate_define_target_names(problem: Problem, diagnostics: list[Diagnostic]) -> None:
+    """Keep declared user variables distinct from the manual's state vocabulary."""
+    blocks = list(problem.blocks)
+    for trajectory in problem.trajectories:
+        blocks.extend(trajectory.blocks)
+    ####
+    for block in blocks:
+        if not isinstance(block, DefineBlock) or block.variable is None:
+            continue
+        if block.variable.casefold() in DOCUMENTED_STATE_VARIABLES:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="reserved-define-variable",
+                    message=f"*define target {block.variable!r} is reserved for a documented TAOS state variable; source text was preserved.",
+                    location=block.location,
+                )
+            )
+        ####
+    ####
+    scope_groups: list[list[DefineBlock]] = [
+        [block for block in problem.blocks if isinstance(block, DefineBlock)]
+    ]
+    scope_groups.extend(
+        [block for block in trajectory.blocks if isinstance(block, DefineBlock)]
+        for trajectory in problem.trajectories
+    )
+
+    def collect_assignments(block: DefineBlock) -> list[Assignment]:
+        assignments = list(block.assignments)
+
+        def collect_control(control: DefineControlStatement) -> None:
+            if control.assignment is not None:
+                assignments.append(control.assignment)
+            assignments.extend(control.body)
+            assignments.extend(control.else_body)
+            for nested in control.body_controls + control.else_controls:
+                collect_control(nested)
+            if control.nested is not None:
+                collect_control(control.nested)
+            ####
+
+        for control in block.control_statements:
+            collect_control(control)
+        return assignments
+    ####
+
+    for define_blocks in scope_groups:
+        target_blocks: dict[str, list[DefineBlock]] = {}
+        for block in define_blocks:
+            if block.variable is not None:
+                target_blocks.setdefault(block.variable.casefold(), []).append(block)
+            ####
+        ####
+        for target_blocks_for_name in target_blocks.values():
+            for block in target_blocks_for_name[1:]:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="duplicate-define-variable",
+                        message=f"User-defined variable {block.variable!r} is declared by more than one *define block in the same scope; source text was preserved.",
+                        location=block.location,
+                    )
+                )
+            ####
+        ####
+        target_names = set(target_blocks)
+        for block in define_blocks:
+            temporary_assignments = [
+                assignment
+                for assignment in collect_assignments(block)
+                if block.variable is None or assignment.name.casefold() != block.variable.casefold()
+            ]
+            seen_temporaries: set[str] = set()
+            for assignment in temporary_assignments:
+                name = assignment.name.casefold()
+                if name in DOCUMENTED_STATE_VARIABLES:
+                    diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="reserved-define-temporary",
+                            message=f"Temporary variable {assignment.name!r} is reserved for a documented TAOS state variable; source text was preserved.",
+                            location=assignment.location,
+                        )
+                    )
+                ####
+                if name in target_names and name != (block.variable or "").casefold():
+                    diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="define-variable-collision",
+                            message=f"Temporary variable {assignment.name!r} conflicts with another user-defined *define target in the same scope; source text was preserved.",
+                            location=assignment.location,
+                        )
+                    )
+                ####
+                if name in seen_temporaries:
+                    diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="duplicate-define-temporary",
+                            message=f"Temporary variable {assignment.name!r} is assigned more than once in this *define block; source text was preserved.",
+                            location=assignment.location,
+                        )
+                    )
+                ####
+                seen_temporaries.add(name)
+            ####
+        ####
+    ####
+
+
+def _validate_egs_summary_prerequisites(problem: Problem, diagnostics: list[Diagnostic]) -> None:
+    """Require the survey and summary inputs documented for ``*egs summary``."""
+    surveys = [block for block in problem.blocks if isinstance(block, SurveyBlock)]
+    summaries = [block for block in problem.blocks if isinstance(block, SummarizeBlock) and block.operations]
+    for block in problem.blocks:
+        if not isinstance(block, EgsBlock) or not block.summary:
+            continue
+        if not surveys:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="missing-egs-summary-survey",
+                    message="'*egs summary' requires at least one '*survey' loop; source text was preserved.",
+                    location=block.location,
+                )
+            )
+        if not summaries:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="missing-egs-summary-variable",
+                    message="'*egs summary' requires at least one populated '*summarize' block; source text was preserved.",
+                    location=block.location,
+                )
+            )
+    ####
+####
+
+
+def _validate_define_target(block: DefineBlock, diagnostics: list[Diagnostic]) -> None:
+    """Ensure a populated definition assigns its declared user-defined variable."""
+    if block.variable is None:
+        return
+    ####
+    names = {assignment.name.casefold() for assignment in block.assignments}
+
+    def collect_control_names(control: DefineControlStatement) -> None:
+        if control.assignment is not None:
+            names.add(control.assignment.name.casefold())
+        names.update(assignment.name.casefold() for assignment in control.body)
+        names.update(assignment.name.casefold() for assignment in control.else_body)
+        for nested_control in control.body_controls + control.else_controls:
+            collect_control_names(nested_control)
+        if control.nested is not None:
+            collect_control_names(control.nested)
+        ####
+
+    for control in block.control_statements:
+        collect_control_names(control)
+    if names and block.variable.casefold() not in names:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="missing-define-target",
+                message=f"*define {block.variable!r} must assign its declared variable on the left side of an equation.",
+                location=block.location,
+            )
+        )
+    ####
+####
+
+
+def _validate_define_control_structure(block: DefineBlock, diagnostics: list[Diagnostic]) -> None:
+    """Reject a top-level ``else`` that has no preceding top-level ``if``."""
+    previous_control: DefineControlStatement | None = None
+    for statement in block.typed_statements:
+        if not isinstance(statement, DefineControlStatement):
+            previous_control = None
+            continue
+        ####
+        if statement.kind == "else" and (previous_control is None or previous_control.kind != "if"):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="orphan-define-else",
+                    message="A top-level *define else statement must follow a top-level if statement; source text was preserved.",
+                    location=statement.location,
+                )
+            )
+        ####
+        previous_control = statement
+    ####
+####
+
+
 def _parse_units_format_settings(text: str, path: str, line: int, diagnostics: list[Diagnostic]) -> list[UnitFormatSetting]:
     tokens = text.split()
     settings: list[UnitFormatSetting] = []
@@ -754,6 +1759,16 @@ def _parse_units_format_settings(text: str, path: str, line: int, diagnostics: l
         ####
         variable, second = tokens[index], tokens[index + 1]
         index += 2
+        if not _OUTPUT_VARIABLE_RE.fullmatch(variable):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="invalid-units-format-variable",
+                    message=f"Variable {variable!r} is not a valid output or user-defined variable name.",
+                    location=_location(path, line),
+                )
+            )
+        ####
         unit = None if _FORMAT_RE.fullmatch(second) else second
         format_value = second if unit is None else None
         if unit is not None and unit.casefold() not in _DOCUMENTED_UNITS:
@@ -800,11 +1815,248 @@ def _parse_atmos_body(block: AtmosBlock, text: str, path: str, line: int, diagno
         return
     ####
     block.rows.append(values)
+    block.row_locations.append(_location(path, line))
+    ####
+
+
+def _validate_atmos_rows(block: AtmosBlock, diagnostics: list[Diagnostic]) -> None:
+    if not block.rows or "alt" not in block.columns:
+        return
+    ####
+    altitude_index = block.columns.index("alt")
+    altitudes = [row[altitude_index] for row in block.rows]
+    for index, (previous, current) in enumerate(zip(altitudes, altitudes[1:]), start=1):
+        if current == previous:
+            code = "duplicate-atmos-altitude"
+            message = "Atmosphere altitude samples must not contain duplicate values."
+        elif current < previous:
+            code = "unordered-atmos-altitude"
+            message = "Atmosphere altitude samples must be strictly increasing."
+        else:
+            continue
+        ####
+        location = block.row_locations[index] if index < len(block.row_locations) else block.location
+        diagnostics.append(Diagnostic(severity=Severity.ERROR, code=code, message=message, location=location))
+    ####
 ####
 
 
-def _make_block(keyword: str, header: str, scope: str, path: str, line: int, diagnostics: list[Diagnostic]):
-    common: dict[str, Any] = {"scope": scope, "location": _location(path, line), "header": header.strip(), "assignments": _assignments(header, path, line, diagnostics)}
+def _validate_earth_shape_parameters(block: EarthBlock, diagnostics: list[Diagnostic]) -> None:
+    shape_assignments = [assignment for assignment in block.assignments if assignment.name.casefold() in {"rpolr", "ecc", "flat"}]
+    if len(shape_assignments) <= 1:
+        return
+    ####
+    diagnostics.append(
+        Diagnostic(
+            severity=Severity.ERROR,
+            code="conflicting-earth-shape-parameters",
+            message="An earth model may specify at most one of rpolr, ecc, or flat as the polar-shape parameter.",
+            location=shape_assignments[1].location,
+        )
+    )
+####
+
+
+def _validate_radar_shape_parameters(block: RadarBlock, diagnostics: list[Diagnostic]) -> None:
+    """Validate the alternative direct-earth-shape form documented for radar stations."""
+    shape_assignments = [
+        assignment
+        for assignment in block.assignments
+        if assignment.name.casefold() in {"reqtr", "rpolr", "ecc", "flat"}
+    ]
+    polar_assignments = [assignment for assignment in shape_assignments if assignment.name.casefold() != "reqtr"]
+    if not shape_assignments:
+        return
+    ####
+    if block.earth_shape is not None:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="conflicting-radar-earth-shape-definition",
+                message="A '*radar' station must select WGS-72/WGS-84 or provide direct earth-shape values, not both.",
+                location=shape_assignments[0].location,
+            )
+        )
+        return
+    ####
+    if not any(assignment.name.casefold() == "reqtr" for assignment in shape_assignments):
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="missing-radar-equatorial-radius",
+                message="Direct radar earth-shape input requires the equatorial radius parameter 'reqtr'.",
+                location=polar_assignments[0].location if polar_assignments else block.location,
+            )
+        )
+    ####
+    if not polar_assignments:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="missing-radar-polar-shape",
+                message="Direct radar earth-shape input requires one of 'rpolr', 'ecc', or 'flat'.",
+                location=shape_assignments[0].location,
+            )
+        )
+    elif len(polar_assignments) > 1:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="conflicting-radar-shape-parameters",
+                message="Direct radar earth-shape input may specify only one of 'rpolr', 'ecc', or 'flat'.",
+                location=polar_assignments[1].location,
+            )
+        )
+    ####
+####
+
+
+def _validate_unique_block_assignments(block: EarthBlock | RadarBlock, code: str, diagnostics: list[Diagnostic]) -> None:
+    seen: set[str] = set()
+    for assignment in block.assignments:
+        name = assignment.name.casefold()
+        if name in seen:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code=code,
+                    message=f"Parameter {assignment.name!r} is assigned more than once; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
+        seen.add(name)
+    ####
+####
+
+
+def _validate_assignment_operators(block: Any, diagnostics: list[Diagnostic]) -> None:
+    for assignment in block.assignments:
+        if assignment.operator != "=":
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="unsupported-assignment-operator",
+                    message=f"Operator {assignment.operator!r} is not documented for '*{block.keyword}' data-block assignments; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
+        ####
+    ####
+####
+
+
+def _validate_fixed_parameter_uniqueness(block: Any, diagnostics: list[Diagnostic]) -> None:
+    if block.keyword not in _UNIQUE_PARAMETER_BLOCKS or block.keyword in {"earth", "radar"}:
+        return
+    ####
+    seen: set[str] = set()
+    for assignment in block.assignments:
+        name = assignment.name.casefold()
+        if name in seen:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="duplicate-block-parameter",
+                    message=f"Parameter {assignment.name!r} is assigned more than once in '*{block.keyword}'; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
+        seen.add(name)
+    ####
+####
+
+
+def _is_numeric_parameter_value(value: Any) -> bool:
+    if isinstance(value, (NumberExpression, ParameterExpression)):
+        return True
+    ####
+    return isinstance(value, UnaryExpression) and _is_numeric_parameter_value(value.operand)
+####
+
+
+def _validate_numeric_parameters(block: Any, diagnostics: list[Diagnostic]) -> None:
+    if block.keyword not in _NUMERIC_PARAMETER_BLOCKS:
+        return
+    ####
+    for assignment in block.assignments:
+        if not _is_numeric_parameter_value(assignment.value):
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="nonnumeric-block-parameter",
+                    message=f"Parameter {assignment.name!r} in '*{block.keyword}' requires a numeric value or numeric survey placeholder; source text was preserved.",
+                    location=assignment.location,
+                )
+            )
+        ####
+    ####
+####
+
+
+def _validate_problem_global_blocks(problem: Problem, diagnostics: list[Diagnostic]) -> None:
+    earth_blocks = [block for block in problem.blocks if isinstance(block, EarthBlock)]
+    for block in earth_blocks[1:]:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="duplicate-earth-model",
+                message="A problem may define only one global earth model; source text was preserved.",
+                location=block.location,
+            )
+        )
+    atmos_blocks = [block for block in problem.blocks if isinstance(block, AtmosBlock)]
+    for block in atmos_blocks[1:]:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="duplicate-atmosphere-model",
+                message="A problem may define only one global atmosphere model; source text was preserved.",
+                location=block.location,
+            )
+        )
+    seen_radar_ids: set[int] = set()
+    for block in (block for block in problem.blocks if isinstance(block, RadarBlock)):
+        if block.radar_id is None or block.radar_id < 1:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="invalid-radar-id",
+                    message="Radar station numbers must begin at 1.",
+                    location=block.location,
+                )
+            )
+        elif block.radar_id in seen_radar_ids:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="duplicate-radar-id",
+                    message=f"Radar station number {block.radar_id} is declared more than once; source text was preserved.",
+                    location=block.location,
+                )
+            )
+        else:
+            seen_radar_ids.add(block.radar_id)
+    ####
+####
+
+
+def _make_block(
+    keyword: str,
+    header: str,
+    scope: str,
+    path: str,
+    line: int,
+    diagnostics: list[Diagnostic],
+    *,
+    source_text: str | None = None,
+):
+    common: dict[str, Any] = {
+        "scope": scope,
+        "location": _location(path, line),
+        "header": header.strip(),
+        "source_text": source_text,
+        "assignments": _assignments(header, path, line, diagnostics),
+    }
     if keyword == "when":
         common["assignments"] = []
     elif keyword == "limits":
@@ -871,6 +2123,7 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
             extra["variable"] = integral_match.group(1)
             try:
                 extra["initial_value"] = _parse_value(integral_match.group(2))
+                _validate_expression_functions(extra["initial_value"], path, line, diagnostics)
             except ExpressionSyntaxError as exc:
                 diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-define-integral-value", message=str(exc), location=_location(path, line)))
             if scope != "trajectory":
@@ -895,15 +2148,17 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
         elif extra.get("summary") and keyword == "egs" and extra["variables"]:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-egs-summary", message="The '*egs summary file' form does not accept output variable names.", location=_location(path, line)))
         else:
-            _validate_output_variables(keyword, extra["variables"], path, line, diagnostics)
+            _validate_output_variables(keyword, extra["variables"], path, line, diagnostics, scope=scope)
     elif keyword == "print":
         extra["variables"] = words
-        _validate_output_variables(keyword, words, path, line, diagnostics)
+        _validate_output_variables(keyword, words, path, line, diagnostics, scope=scope)
     elif keyword == "survey":
         match = re.fullmatch(r"\s*(\d+)\s+(\S+)(?:\s+(.*?))?\s*", header)
         if match:
             extra["survey_id"] = int(match.group(1))
             extra["name"] = match.group(2)
+            if extra["survey_id"] < 1:
+                diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-survey-id", message="Survey numbers must begin at 1.", location=_location(path, line)))
             extra["settings"] = _parse_survey_settings(match.group(3) or "", path, line, diagnostics)
         else:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-survey-header", message="Expected '*survey N name'.", location=_location(path, line)))
@@ -934,6 +2189,7 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
         _validate_named_header("wind", assignment_header, common["assignments"], _WIND_SPEED_NAMES | _WIND_COMPONENT_NAMES, path, line, diagnostics)
         if common["assignments"]:
             _validate_wind(common["assignments"], path, line, diagnostics)
+        extra["wind_form"] = _wind_form(common["assignments"])
     elif keyword == "fly":
         extra.update(_parse_fly(header, path, line, diagnostics))
     elif keyword == "rail":
@@ -1007,6 +2263,15 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
         match = re.search(r"^\s*([a-e])\s+for\s+(\S+)\s*=\s*(min|max)\s+on\s+segment\s+(\d+)(?:\s*,?\s*trajectory\s+(\d+))?", header, re.IGNORECASE)
         if match:
             extra.update(loop=match.group(1).lower(), objective_variable=match.group(2), objective_mode=match.group(3).lower(), segment=int(match.group(4)), trajectory=int(match.group(5)) if match.group(5) else None)
+            if match.group(5) is None:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="invalid-optimize-header",
+                        message="An '*optimize' objective requires both a segment and trajectory number.",
+                        location=_location(path, line),
+                    )
+                )
         else:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-optimize-header", message="Expected '*optimize loop for variable=min|max on segment N, trajectory N'.", location=_location(path, line)))
         ####
@@ -1015,6 +2280,8 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
         if match:
             extra["search_id"] = int(match.group(1))
             extra["variable"] = match.group(2).strip()
+            if extra["search_id"] < 1:
+                diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-search-id", message="Search numbers must begin at 1.", location=_location(path, line)))
             extra["objective"] = _parse_search_objective(match.group(3), path, line, diagnostics)
         else:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-search-header", message="Expected '*search N vary name until objective'.", location=_location(path, line)))
@@ -1025,6 +2292,24 @@ def _make_block(keyword: str, header: str, scope: str, path: str, line: int, dia
         else:
             try:
                 extra["condition"] = parse_expression(match.group(1))
+                if _contains_call_expression(extra["condition"]):
+                    diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="unsupported-condition-call",
+                            message="*when conditions may not contain function calls; source text was preserved.",
+                            location=_location(path, line),
+                        )
+                    )
+                elif not _is_documented_when_relationship(extra["condition"]):
+                    diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="unsupported-when-condition",
+                            message="*when requires one documented relationship using '=', '<', or '>'; compound conditions were preserved.",
+                            location=_location(path, line),
+                        )
+                    )
             except ExpressionSyntaxError as exc:
                 diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-when-condition", message=str(exc), location=_location(path, line)))
             ####
@@ -1051,8 +2336,37 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
     pending_search_line = 0
     lines = text.splitlines()
 
-    def recover(raw_line: str, code: str, line_number: int) -> None:
-        document.recovered_records.append(RecoveredRecord(text=raw_line.strip(), code=code, location=_location(path, line_number)))
+    def recover(raw_line: str, code: str, line_number: int, column: int = 1) -> None:
+        source_line = lines[line_number - 1] if 0 < line_number <= len(lines) else None
+        semantic_source = source_line.split("#", 1)[0].rstrip() if source_line is not None else None
+        preserved = source_line if source_line is not None and raw_line.strip() == semantic_source.strip() else raw_line
+        document.recovered_records.append(RecoveredRecord(text=preserved, code=code, location=_location(path, line_number, column)))
+    ####
+
+    def recover_assignment_diagnostics(diagnostic_start: int, line_number: int, raw_line: str) -> None:
+        for diagnostic in document.diagnostics[diagnostic_start:]:
+            if diagnostic.code == "unsupported-assignment-call":
+                recover(raw_line, diagnostic.code, line_number)
+        ####
+    ####
+
+    def recover_diagnostic(diagnostic: Diagnostic) -> None:
+        line_number = diagnostic.location.line if diagnostic.location is not None else 1
+        column = diagnostic.location.column if diagnostic.location is not None else 1
+        source_line = lines[line_number - 1] if 0 < line_number <= len(lines) else ""
+        recover(source_line, diagnostic.code, line_number, column)
+    ####
+
+    def report_missing_end(problem: Problem, line_number: int) -> None:
+        document.diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="missing-end",
+                message=f"Problem {problem.name!r} ended without the required '*end' block.",
+                location=_location(path, line_number),
+            )
+        )
+        recover_diagnostic(document.diagnostics[-1])
     ####
 
     def flush_unclosed_define_braces(line_number: int) -> None:
@@ -1067,7 +2381,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 location=_location(path, line_number),
             )
         )
-        recover("{", "unclosed-define-brace", line_number)
+        recover_diagnostic(document.diagnostics[-1])
         define_brace_stack.clear()
     ####
 
@@ -1084,7 +2398,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 location=_location(path, pending_define_line or line_number),
             )
         )
-        recover(pending_define, "incomplete-define-statement", pending_define_line or line_number)
+        recover_diagnostic(document.diagnostics[-1])
         pending_define = ""
         pending_define_line = 0
     ####
@@ -1102,7 +2416,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 location=_location(path, pending_optimize_line),
             )
         )
-        recover(pending_optimize, "invalid-optimize-constraint", pending_optimize_line)
+        recover_diagnostic(document.diagnostics[-1])
         pending_optimize = ""
         pending_optimize_line = 0
     ####
@@ -1112,8 +2426,12 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
         if not pending_search:
             return
         ####
+        diagnostic_start = len(document.diagnostics)
+        _parse_search_objective(pending_search, path, pending_search_line, document.diagnostics, report_incomplete=True)
+        for diagnostic in document.diagnostics[diagnostic_start:]:
+            recover_diagnostic(diagnostic)
         document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-search-objective", message="Incomplete search objective; source text was preserved.", location=_location(path, pending_search_line)))
-        recover(pending_search, "invalid-search-objective", pending_search_line)
+        recover_diagnostic(document.diagnostics[-1])
         pending_search = ""
         pending_search_line = 0
     ####
@@ -1129,7 +2447,22 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 flush_pending_define(number)
                 flush_unclosed_define_braces(number)
             ####
-            current_problem = Problem(name=problem_match.group("name").strip(), location=_location(path, number))
+            if current_problem is not None and not problem_closed:
+                report_missing_end(current_problem, number)
+            ####
+            problem_name = problem_match.group("name").strip()
+            if _PROBLEM_NAME_RE.fullmatch(problem_name) is None:
+                document.diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="invalid-problem-name",
+                        message=f"Problem name {problem_name!r} must be a nonempty identifier.",
+                        location=_location(path, number),
+                    )
+                )
+                recover(line, "invalid-problem-name", number)
+            ####
+            current_problem = Problem(name=problem_name, location=_location(path, number), source_text=original)
             document.problems.append(current_problem)
             current_trajectory = None
             current_segment = None
@@ -1181,10 +2514,53 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 match = re.match(r"(\d+)\s+(.*?)\s+start\s+on\s+(\d+)\s*$", header, re.IGNORECASE)
                 if not match:
                     document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-trajectory-header", message="Expected '*trajectory N name start on S'.", location=_location(path, number)))
+                    current_trajectory = None
+                    current_segment = None
+                    current_block = None
                     recover(line, "invalid-trajectory-header", number)
                     continue
                 ####
-                current_trajectory = Trajectory(number=int(match.group(1)), name=match.group(2).strip(), start_segment=int(match.group(3)), location=_location(path, number))
+                trajectory_name = match.group(2).strip()
+                if not trajectory_name:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="invalid-trajectory-header",
+                            message="A trajectory header requires a nonempty title between its number and 'start on' clause.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "invalid-trajectory-header", number)
+                ####
+                trajectory_number = int(match.group(1))
+                trajectory_name_key = trajectory_name.casefold()
+                if any(item.number == trajectory_number for item in current_problem.trajectories):
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="duplicate-trajectory-number",
+                            message=f"Trajectory number {trajectory_number} is not unique within this problem; source text was preserved.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "duplicate-trajectory-number", number)
+                if any(item.name.casefold() == trajectory_name_key for item in current_problem.trajectories):
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="duplicate-trajectory-name",
+                            message=f"Trajectory name {trajectory_name!r} is not unique within this problem; source text was preserved.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "duplicate-trajectory-name", number)
+                current_trajectory = Trajectory(
+                    number=trajectory_number,
+                    name=trajectory_name,
+                    start_segment=int(match.group(3)),
+                    location=_location(path, number),
+                    source_text=original,
+                )
                 current_problem.trajectories.append(current_trajectory)
                 current_segment = None
                 current_block = None
@@ -1193,16 +2569,36 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
             if keyword == "segment":
                 if current_trajectory is None:
                     document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="segment-outside-trajectory", message="Segment appears outside a trajectory.", location=_location(path, number)))
+                    current_segment = None
+                    current_block = None
                     recover(line, "segment-outside-trajectory", number)
                     continue
                 ####
                 match = re.match(r"(\d+)(?:\s+(.*))?$", header)
                 if not match:
                     document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-segment-header", message="Expected '*segment N [title]'.", location=_location(path, number)))
+                    current_segment = None
+                    current_block = None
                     recover(line, "invalid-segment-header", number)
                     continue
                 ####
-                current_segment = Segment(number=int(match.group(1)), title=(match.group(2) or "").strip(), location=_location(path, number))
+                segment_number = int(match.group(1))
+                if any(item.number == segment_number for item in current_trajectory.segments):
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="duplicate-segment-number",
+                            message=f"Segment number {segment_number} is not unique within trajectory {current_trajectory.number}; source text was preserved.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "duplicate-segment-number", number)
+                current_segment = Segment(
+                    number=segment_number,
+                    title=(match.group(2) or "").strip(),
+                    location=_location(path, number),
+                    source_text=original,
+                )
                 current_trajectory.segments.append(current_segment)
                 current_block = None
                 continue
@@ -1216,16 +2612,35 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
             elif keyword in trajectory_keywords:
                 scope = "trajectory"
                 current_segment = None
-            elif keyword in {"define", "file", "print"}:
+            elif keyword == "define":
+                # *define is documented only at problem or trajectory scope;
+                # it terminates the current segment context rather than
+                # acquiring false segment semantics.
+                scope = "trajectory" if current_trajectory is not None else "problem"
+                current_segment = None
+            elif keyword in {"file", "print"}:
                 scope = "segment" if current_segment is not None else "trajectory" if current_trajectory is not None else "problem"
             elif keyword in SUPPORTED_SEGMENT_BLOCKS:
-                scope = "segment" if current_segment is not None else "trajectory" if current_trajectory is not None else "problem"
+                # Segment blocks never change meaning based on the current
+                # enclosing scope.  Keep the declared scope so the attachment
+                # check below can reject a misplaced block instead of giving
+                # it false problem/trajectory semantics.
+                # Historical *inertial forms are also accepted before the
+                # first segment; the typed tests preserve that manual form.
+                scope = "trajectory" if keyword == "inertial" and current_trajectory is not None and current_segment is None else "segment"
             else:
                 scope = "segment" if current_segment is not None else "trajectory" if current_trajectory is not None else "problem"
             ####
             diagnostic_start = len(document.diagnostics)
-            block = _make_block(keyword, header, scope, path, number, document.diagnostics)
+            block = _make_block(keyword, header, scope, path, number, document.diagnostics, source_text=original)
             if block is None:
+                # An unrecognized header is a synchronization boundary.  Do
+                # not let following text inherit the previous block's typed
+                # meaning; it will be retained as orphan text below.
+                current_block = None
+                pending_define = ""
+                pending_define_line = 0
+                define_brace_stack.clear()
                 recover(line, "unknown-block", number)
                 continue
             ####
@@ -1237,7 +2652,12 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
             pending_define = ""
             pending_define_line = 0
             define_brace_stack.clear()
-            if isinstance(block, SearchBlock) and block.objective is not None and block.objective.operator is None:
+            if (
+                isinstance(block, SearchBlock)
+                and block.objective is not None
+                and block.objective.operator is None
+                and block.objective.left.text.casefold() not in {"min", "max"}
+            ):
                 search_header = re.fullmatch(r"\s*\d+\s+vary\s+.+?\s+until\s+(.+)\s*", block.header, re.IGNORECASE)
                 if search_header:
                     pending_search = search_header.group(1).strip()
@@ -1278,7 +2698,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
             continue
         ####
         if current_block is not None:
-            current_block.statements.append(RawStatement(text=line.strip(), location=_location(path, number)))
+            current_block.statements.append(RawStatement(text=original, location=_location(path, number)))
             if isinstance(current_block, DefineBlock):
                 stripped = line.strip()
                 if match := _IF_BRACE_RE.fullmatch(stripped):
@@ -1296,8 +2716,12 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                         recover(line, "invalid-define-control", number)
                     else:
                         control = DefineControlStatement(kind="if", condition=condition, location=_location(path, number))
-                        current_block.typed_statements.append(control)
-                        current_block.control_statements.append(control)
+                        if define_brace_stack:
+                            parent, in_else = define_brace_stack[-1]
+                            (parent.else_controls if in_else else parent.body_controls).append(control)
+                        else:
+                            current_block.typed_statements.append(control)
+                            current_block.control_statements.append(control)
                         define_brace_stack.append((control, False))
                     pending_define = ""
                     continue
@@ -1339,7 +2763,11 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     statements = pending_define.split(";")
                     pending_define = statements.pop()
                     for statement_text in statements:
+                        diagnostic_start = len(document.diagnostics)
                         typed = _define_statement(statement_text, path, pending_define_line or number, document.diagnostics)
+                        for diagnostic in document.diagnostics[diagnostic_start:]:
+                            recover_diagnostic(diagnostic)
+                        ####
                         if typed is None:
                             continue
                         if define_brace_stack:
@@ -1347,15 +2775,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                             if isinstance(typed, DefineAssignmentStatement):
                                 (control.else_body if in_else else control.body).append(typed.assignment)
                             else:
-                                document.diagnostics.append(
-                                    Diagnostic(
-                                        severity=Severity.ERROR,
-                                        code="unsupported-nested-define-control",
-                                        message="Nested *define controls inside braces are not yet represented.",
-                                        location=_location(path, pending_define_line or number),
-                                    )
-                                )
-                                recover(statement_text, "unsupported-nested-define-control", pending_define_line or number)
+                                (control.else_controls if in_else else control.body_controls).append(typed)
                         else:
                             current_block.typed_statements.append(typed)
                             if isinstance(typed, DefineControlStatement):
@@ -1368,7 +2788,10 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     flush_pending_optimize()
                 if pending_optimize and stripped.startswith("="):
                     candidate = f"{pending_optimize} {stripped}".strip()
+                    constraint_diagnostic_start = len(document.diagnostics)
                     constraint = _parse_optimize_constraint(candidate, path, pending_optimize_line, document.diagnostics)
+                    for diagnostic in document.diagnostics[constraint_diagnostic_start:]:
+                        recover_diagnostic(diagnostic)
                     if constraint is None:
                         document.diagnostics.append(
                             Diagnostic(
@@ -1378,7 +2801,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                                 location=_location(path, pending_optimize_line),
                             )
                         )
-                        recover(candidate, "invalid-optimize-constraint", pending_optimize_line)
+                        recover_diagnostic(document.diagnostics[-1])
                     else:
                         current_block.constraints.append(constraint)
                     pending_optimize = ""
@@ -1386,7 +2809,10 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     continue
                 if stripped.casefold().startswith("constrain"):
                     candidate = f"{pending_optimize} {stripped}".strip() if pending_optimize else stripped
+                    constraint_diagnostic_start = len(document.diagnostics)
                     constraint = _parse_optimize_constraint(candidate, path, pending_optimize_line or number, document.diagnostics)
+                    for diagnostic in document.diagnostics[constraint_diagnostic_start:]:
+                        recover_diagnostic(diagnostic)
                     if constraint is None:
                         if "=" not in candidate and "<" not in candidate and ">" not in candidate:
                             pending_optimize = candidate
@@ -1400,7 +2826,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                                     location=_location(path, number),
                                 )
                             )
-                            recover(stripped, "invalid-optimize-constraint", number)
+                            recover_diagnostic(document.diagnostics[-1])
                             pending_optimize = ""
                             pending_optimize_line = 0
                     else:
@@ -1409,8 +2835,22 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                         pending_optimize_line = 0
                     continue
                 ####
+                diagnostic_start = len(document.diagnostics)
                 assignments = _assignments(line, path, number, document.diagnostics)
+                recover_assignment_diagnostics(diagnostic_start, number, line)
                 _validate_optimize_controls(assignments, path, number, document.diagnostics)
+                if assignments and _diagnose_assignment_residual(line, "optimize", path, number, document.diagnostics):
+                    recover_diagnostic(document.diagnostics[-1])
+                elif not assignments and len(document.diagnostics) == diagnostic_start:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="invalid-optimize-control-line",
+                            message="Expected a documented optimization control assignment; source text was preserved.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "invalid-optimize-control-line", number)
                 current_block.controls.extend(assignments)
                 current_block.assignments.extend(assignments)
             elif isinstance(current_block, SearchBlock):
@@ -1421,7 +2861,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     objective = _parse_search_objective(f"{pending_search} {stripped}", path, pending_search_line, document.diagnostics)
                     if objective is None or objective.operator is None:
                         document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-search-objective", message="Malformed search objective relationship; source text was preserved.", location=_location(path, pending_search_line)))
-                        recover(f"{pending_search} {stripped}", "invalid-search-objective", pending_search_line)
+                        recover_diagnostic(document.diagnostics[-1])
                     else:
                         current_block.objective = objective
                     pending_search = ""
@@ -1433,18 +2873,39 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     recover(stripped, "unexpected-search-continuation", number)
                     continue
                 ####
+                diagnostic_start = len(document.diagnostics)
                 assignments = _assignments(line, path, number, document.diagnostics)
+                recover_assignment_diagnostics(diagnostic_start, number, line)
                 _validate_search_controls(assignments, path, number, document.diagnostics)
+                if assignments and _diagnose_assignment_residual(line, "search", path, number, document.diagnostics):
+                    recover_diagnostic(document.diagnostics[-1])
+                elif not assignments and len(document.diagnostics) == diagnostic_start:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="invalid-search-control-line",
+                            message="Expected a documented search control assignment; source text was preserved.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "invalid-search-control-line", number)
                 current_block.controls.extend(assignments)
                 current_block.assignments.extend(assignments)
             elif isinstance(current_block, SurveyBlock):
+                before = len(document.diagnostics)
                 settings = _parse_survey_settings(line, path, number, document.diagnostics)
-                if not settings:
+                for diagnostic in document.diagnostics[before:]:
+                    recover(line, diagnostic.code, number)
+                if not settings and len(document.diagnostics) == before:
                     recover(line, "invalid-survey-setting", number)
                 current_block.settings.extend(settings)
             elif isinstance(current_block, UnitsFormatBlock):
+                before = len(document.diagnostics)
                 settings = _parse_units_format_settings(line, path, number, document.diagnostics)
-                if not settings:
+                if len(document.diagnostics) > before:
+                    for diagnostic in document.diagnostics[before:]:
+                        recover(line, diagnostic.code, number)
+                elif not settings:
                     recover(line, "invalid-units-format-setting", number)
                 current_block.settings.extend(settings)
             elif isinstance(current_block, (FileBlock, EgsBlock, PrintBlock)):
@@ -1453,14 +2914,18 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-egs-summary", message="The '*egs summary file' form does not accept output variable lines.", location=_location(path, number)))
                     recover(line, "invalid-egs-summary", number)
                 else:
-                    _validate_output_variables(current_block.keyword, tokens, path, number, document.diagnostics)
+                    _validate_output_variables(current_block.keyword, tokens, path, number, document.diagnostics, scope=current_block.scope)
                     current_block.variables.extend(tokens)
-                    if any(diagnostic.location.line == number and diagnostic.code == "invalid-output-variable" for diagnostic in document.diagnostics):
-                        recover(line, "invalid-output-variable", number)
+                    for diagnostic in document.diagnostics:
+                        if diagnostic.location.line == number and diagnostic.code in {"invalid-output-variable", "invalid-related-output-subscript"}:
+                            recover(line, diagnostic.code, number)
             elif isinstance(current_block, WindBlock):
+                diagnostic_start = len(document.diagnostics)
                 assignments = _assignments(line, path, number, document.diagnostics)
+                recover_assignment_diagnostics(diagnostic_start, number, line)
                 _validate_named_header("wind", line, assignments, _WIND_SPEED_NAMES | _WIND_COMPONENT_NAMES, path, number, document.diagnostics)
                 current_block.assignments.extend(assignments)
+                current_block.wind_form = _wind_form(current_block.assignments)
                 if len(current_block.assignments) >= 3:
                     before = len(document.diagnostics)
                     _validate_wind(current_block.assignments, path, number, document.diagnostics)
@@ -1508,10 +2973,96 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 if len(document.diagnostics) > before:
                     recover(line, document.diagnostics[-1].code, number)
             elif isinstance(current_block, InitialBlock):
+                if current_block.mode == "from":
+                    diagnostic_start = len(document.diagnostics)
+                    assignments = _assignments(line, path, number, document.diagnostics)
+                    recover_assignment_diagnostics(diagnostic_start, number, line)
+                    if not assignments:
+                        document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-initial-copy-assignment", message="Expected t_0 or omega_0 assignment after a copied '*initial' state.", location=_location(path, number)))
+                        recover(line, "invalid-initial-copy-assignment", number)
+                    elif _diagnose_assignment_residual(line, "initial", path, number, document.diagnostics):
+                        recover_diagnostic(document.diagnostics[-1])
+                    current_block.assignments.extend(assignments)
+                    before = len(document.diagnostics)
+                    _validate_initial_copy_assignments(assignments, path, number, document.diagnostics)
+                    for diagnostic in document.diagnostics[before:]:
+                        recover(line, diagnostic.code, number)
+                    continue
+                ####
+                diagnostic_start = len(document.diagnostics)
                 assignments = _assignments(line, path, number, document.diagnostics)
+                recover_assignment_diagnostics(diagnostic_start, number, line)
                 if not assignments:
                     document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-initial-assignment", message="Expected an assignment in an *initial block.", location=_location(path, number)))
                     recover(line, "invalid-initial-assignment", number)
+                elif _diagnose_assignment_residual(line, "initial", path, number, document.diagnostics):
+                    recover_diagnostic(document.diagnostics[-1])
+                current_block.assignments.extend(assignments)
+            elif isinstance(current_block, LimitsBlock):
+                before = len(document.diagnostics)
+                limits = _parse_limits(line.strip(), path, number, document.diagnostics)
+                if len(document.diagnostics) > before:
+                    for diagnostic in document.diagnostics[before:]:
+                        recover(line, diagnostic.code, number)
+                if not limits:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="invalid-limits-body",
+                            message="A continued '*limits' line must contain one or more documented relationships.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "invalid-limits-body", number)
+                current_block.limits.extend(limits)
+            elif isinstance(current_block, WhenBlock):
+                document.diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="invalid-block-body",
+                        message=f"'*{current_block.keyword}' is a header-only block; continuation text was preserved without assignment semantics.",
+                        location=_location(path, number),
+                    )
+                )
+                recover(line, "invalid-block-body", number)
+            elif isinstance(current_block, RadarBlock):
+                body = line.strip()
+                shape_match = re.match(r"^(?P<shape>wgs-72|wgs-84)\b", body, re.IGNORECASE)
+                if shape_match:
+                    shape = shape_match.group("shape").casefold()
+                    if current_block.earth_shape is not None and current_block.earth_shape != shape:
+                        document.diagnostics.append(
+                            Diagnostic(
+                                severity=Severity.ERROR,
+                                code="conflicting-radar-earth-shape",
+                                message="A '*radar' station cannot specify both wgs-72 and wgs-84.",
+                                location=_location(path, number),
+                            )
+                        )
+                        recover(line, "conflicting-radar-earth-shape", number)
+                    else:
+                        current_block.earth_shape = shape
+                    body = body[shape_match.end() :].strip()
+                ####
+                diagnostic_start = len(document.diagnostics)
+                assignments = _assignments(body, path, number, document.diagnostics)
+                recover_assignment_diagnostics(diagnostic_start, number, line)
+                validation_start = len(document.diagnostics)
+                _validate_continuation_parameters("radar", assignments, path, number, document.diagnostics)
+                for diagnostic in document.diagnostics[validation_start:]:
+                    recover(line, diagnostic.code, number)
+                if assignments and _diagnose_assignment_residual(body, "radar", path, number, document.diagnostics):
+                    recover(line, "invalid-assignment-line", number)
+                elif not assignments and not shape_match:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="invalid-radar-setting",
+                            message="Expected a documented radar parameter or wgs-72/wgs-84 earth-shape selector.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "invalid-radar-setting", number)
                 current_block.assignments.extend(assignments)
             elif isinstance(current_block, AtmosBlock) and current_block.model in {"user", "site"}:
                 before = len(document.diagnostics)
@@ -1519,7 +3070,27 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 if len(document.diagnostics) > before:
                     recover(line, document.diagnostics[-1].code, number)
             else:
+                diagnostic_start = len(document.diagnostics)
                 assignments = _assignments(line, path, number, document.diagnostics)
+                recover_assignment_diagnostics(diagnostic_start, number, line)
+                validation_start = len(document.diagnostics)
+                allowed_names = _CONTINUATION_PARAMETER_NAMES.get(current_block.keyword)
+                if current_block.keyword == "inertial":
+                    allowed_names = {
+                        "body": {"time"},
+                        "ecfc": {"eastx", "easty", "eastz", "downx", "downy", "downz", "time"},
+                        "geocentric": {"long", "lat", "rcm", "time"},
+                        "geodetic": {"long", "lat", "alt", "time"},
+                        "velocity": {"time"},
+                        "wind": {"time"},
+                    }.get(getattr(current_block, "alignment", None))
+                _validate_continuation_parameters(current_block.keyword, assignments, path, number, document.diagnostics, allowed_names=allowed_names)
+                for diagnostic in document.diagnostics[validation_start:]:
+                    recover(line, diagnostic.code, number)
+                if assignments and current_block.keyword in _ASSIGNMENT_BODY_BLOCKS:
+                    if _diagnose_assignment_residual(line, current_block.keyword, path, number, document.diagnostics):
+                        recover_diagnostic(document.diagnostics[-1])
+                ####
                 if isinstance(current_block, InitialBlock) and not assignments:
                     document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-initial-assignment", message="Expected an assignment in an *initial block.", location=_location(path, number)))
                     recover(line, "invalid-initial-assignment", number)
@@ -1534,8 +3105,6 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     )
                     recover(line, "invalid-block-body", number)
                 current_block.assignments.extend(assignments)
-        elif current_problem is not None and current_problem.blocks and isinstance(current_problem.blocks[-1], TitleBlock):
-            current_problem.blocks[-1].title += "\n" + line.strip()
         else:
             document.diagnostics.append(Diagnostic(severity=Severity.WARNING, code="orphan-line", message=f"Line is not attached to a block: {line.strip()!r}", location=_location(path, number)))
             recover(line, "orphan-line", number)
@@ -1544,8 +3113,112 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
     flush_pending_define(len(lines) or 1)
     flush_pending_optimize()
     flush_pending_search()
+    if current_problem is not None and not problem_closed:
+        report_missing_end(current_problem, len(lines) or current_problem.location.line)
     for problem in document.problems:
+        before = len(document.diagnostics)
+        _validate_problem_global_blocks(problem, document.diagnostics)
+        for diagnostic in document.diagnostics[before:]:
+            recover_diagnostic(diagnostic)
+        before = len(document.diagnostics)
+        _validate_survey_output_names(problem, document.diagnostics)
+        for diagnostic in document.diagnostics[before:]:
+            recover_diagnostic(diagnostic)
+        before = len(document.diagnostics)
+        _validate_units_format_user_variables(problem, document.diagnostics)
+        for diagnostic in document.diagnostics[before:]:
+            recover_diagnostic(diagnostic)
+        before = len(document.diagnostics)
+        _validate_define_target_names(problem, document.diagnostics)
+        for diagnostic in document.diagnostics[before:]:
+            recover_diagnostic(diagnostic)
+        before = len(document.diagnostics)
+        _validate_egs_summary_prerequisites(problem, document.diagnostics)
+        for diagnostic in document.diagnostics[before:]:
+            recover_diagnostic(diagnostic)
+        for trajectory in problem.trajectories:
+            before = len(document.diagnostics)
+            _validate_trajectory_structure(trajectory, document.diagnostics)
+            for diagnostic in document.diagnostics[before:]:
+                recover_diagnostic(diagnostic)
+            before = len(document.diagnostics)
+            _validate_segment_termination(trajectory, document.diagnostics)
+            for diagnostic in document.diagnostics[before:]:
+                recover_diagnostic(diagnostic)
+            before = len(document.diagnostics)
+            _validate_fly_blocks(trajectory, document.diagnostics)
+            for diagnostic in document.diagnostics[before:]:
+                recover_diagnostic(diagnostic)
+            for segment in trajectory.segments:
+                before = len(document.diagnostics)
+                _validate_fly_angle_set(segment, document.diagnostics)
+                if len(document.diagnostics) > before:
+                    diagnostic = document.diagnostics[-1]
+                    recover_diagnostic(diagnostic)
+        ####
         for block in problem.blocks + [child for trajectory in problem.trajectories for child in trajectory.blocks] + [child for trajectory in problem.trajectories for segment in trajectory.segments for child in segment.blocks]:
+            before = len(document.diagnostics)
+            _validate_assignment_operators(block, document.diagnostics)
+            for diagnostic in document.diagnostics[before:]:
+                recover_diagnostic(diagnostic)
+            before = len(document.diagnostics)
+            _validate_fixed_parameter_uniqueness(block, document.diagnostics)
+            for diagnostic in document.diagnostics[before:]:
+                recover_diagnostic(diagnostic)
+            before = len(document.diagnostics)
+            _validate_numeric_parameters(block, document.diagnostics)
+            for diagnostic in document.diagnostics[before:]:
+                recover_diagnostic(diagnostic)
+            if isinstance(block, DefineBlock):
+                before = len(document.diagnostics)
+                _validate_define_target(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+                before = len(document.diagnostics)
+                _validate_define_control_structure(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+                before = len(document.diagnostics)
+                _validate_problem_define_table_calls(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+                before = len(document.diagnostics)
+                _validate_define_assignment_order(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+            if isinstance(block, AtmosBlock) and block.model in {"user", "site"}:
+                before = len(document.diagnostics)
+                _validate_atmos_rows(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+            if isinstance(block, SurveyBlock):
+                before = len(document.diagnostics)
+                _validate_survey_configuration(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+            if isinstance(block, EarthBlock):
+                before = len(document.diagnostics)
+                _validate_earth_shape_parameters(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+                before = len(document.diagnostics)
+                _validate_unique_block_assignments(block, "duplicate-earth-parameter", document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+            if isinstance(block, RadarBlock):
+                before = len(document.diagnostics)
+                _validate_radar_shape_parameters(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+                before = len(document.diagnostics)
+                _validate_unique_block_assignments(block, "duplicate-radar-parameter", document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
+            if isinstance(block, LimitsBlock):
+                before = len(document.diagnostics)
+                _validate_limits(block, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
             if isinstance(block, AeroBlock):
                 coefficient_names = {assignment.name.casefold() for assignment in block.assignments}
                 present_sets = [coefficient_set & coefficient_names for coefficient_set in _AERO_COEFFICIENT_SETS if coefficient_set & coefficient_names]
@@ -1558,15 +3231,22 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                             location=block.location,
                         )
                     )
-                    recover(block.header or "*aero", "inconsistent-aero-coefficients", block.location.line)
+                    recover_diagnostic(document.diagnostics[-1])
             if isinstance(block, PropulsionBlock):
                 before = len(document.diagnostics)
                 _validate_propulsion_units(block, document.diagnostics)
                 for diagnostic in document.diagnostics[before:]:
-                    recover(block.header or "*prop", diagnostic.code, diagnostic.location.line)
+                    recover_diagnostic(diagnostic)
+            if block.keyword in {"reset", "increment"}:
+                before = len(document.diagnostics)
+                _validate_reset_increment(block, problem, document.diagnostics)
+                for diagnostic in document.diagnostics[before:]:
+                    recover_diagnostic(diagnostic)
             if isinstance(block, WindBlock) and block.coordinate_system is not None and len(block.assignments) != 3:
                 document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-wind-components", message="A '*wind' block requires exactly windd plus either windv/windh or winde/windn.", location=block.location))
-                recover(block.header or "*wind", "invalid-wind-components", block.location.line)
+                recover_diagnostic(document.diagnostics[-1])
+            if isinstance(block, WindBlock) and block.wind_form is None and len(block.assignments) == 3:
+                block.wind_form = _wind_form(block.assignments)
             if isinstance(block, InitialBlock) and block.mode != "from":
                 before = len(document.diagnostics)
                 _validate_initial_assignments(block, path, block.location.line, document.diagnostics)
@@ -1575,14 +3255,62 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-initial-mass", message="A direct '*initial' block requires wt or mass.", location=block.location))
                 if len(document.diagnostics) > before:
                     for diagnostic in document.diagnostics[before:]:
-                        recover(block.header or "*initial", diagnostic.code, block.location.line)
+                        recover_diagnostic(diagnostic)
             if isinstance(block, (FileBlock, EgsBlock)) and block.filename is not None and not getattr(block, "summary", False) and not block.variables:
                 document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-output-variables", message=f"'*{block.keyword}' requires at least one output variable.", location=block.location))
-                recover(block.header or f"*{block.keyword}", "missing-output-variables", block.location.line)
+                recover_diagnostic(document.diagnostics[-1])
+            if isinstance(block, PrintBlock) and len(block.variables) > 10:
+                document.diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="too-many-print-variables",
+                        message="A '*print' block may contain no more than ten output variables.",
+                        location=block.location,
+                    )
+                )
+                recover_diagnostic(document.diagnostics[-1])
         ####
     ####
     if not document.problems:
         document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-problem", message="No '(problem-name)' declaration was found.", location=_location(path, 1)))
+    ####
+    recovered_keys = {(record.code, record.location.line, record.location.column) for record in document.recovered_records}
+    for diagnostic in document.diagnostics:
+        location = diagnostic.location
+        if location is None:
+            continue
+        key = (diagnostic.code, location.line, location.column)
+        if key in recovered_keys:
+            continue
+        same_line = next(
+            (
+                record
+                for record in document.recovered_records
+                if record.code == diagnostic.code and record.location.line == location.line
+            ),
+            None,
+        )
+        if same_line is not None:
+            recovered_keys.discard((same_line.code, same_line.location.line, same_line.location.column))
+            same_line.location = location
+            recovered_keys.add(key)
+            continue
+        source_line = lines[location.line - 1] if 0 < location.line <= len(lines) else ""
+        document.recovered_records.append(
+            RecoveredRecord(
+                text=source_line,
+                code=diagnostic.code,
+                location=location,
+            )
+        )
+        recovered_keys.add(key)
+    ####
+    document.diagnostics.sort(
+        key=lambda diagnostic: (
+            diagnostic.location.line if diagnostic.location is not None else len(lines) + 1,
+            diagnostic.location.column if diagnostic.location is not None else 1,
+        )
+    )
     ####
     return document
 ####
@@ -1590,5 +3318,6 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
 
 def parse_problem_file(path: str | Path) -> ProblemDocument:
     source = Path(path)
-    return parse_problem_text(source.read_text(encoding="utf-8"), str(source))
+    text = source.read_bytes().decode("utf-8", errors="surrogateescape")
+    return parse_problem_text(text, str(source))
 ####

@@ -14,7 +14,7 @@ def test_all_documented_block_keywords_dispatch() -> None:
 *radar 1 station
 *search 1 vary alpha until alt=100 on segment 1, trajectory 1
 *summarize sum
-*survey 1 survey
+*survey 1 survey vals=1
 *units/fmt
 *wind geodetic windv=10 windh=90 windd=0
 *trajectory 1 vehicle start on 1

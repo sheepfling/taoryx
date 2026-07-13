@@ -7,7 +7,16 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from taoryx.language.grammar_contracts import DOCUMENTED_STATE_VARIABLES
+
 NUMBER_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?$")
+# TAOS table names and labels use a wider historical name alphabet than
+# Python identifiers (for example, the manual's ``1st-stage`` table).  Values
+# used as variables in calls and independent-variable lists remain
+# letter/underscore-led.
+IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]*$")
+VARIABLE_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*$")
+OPTION_ATOM_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_./-]*$")
 TABLE_NAME_RE = re.compile(r"^\(([^()]+)\)$")
 BLOCK_RE = re.compile(r"^\*(?P<keyword>[A-Za-z0-9_/]+)\b(?P<header>.*)$")
 ASSIGNMENT_RE = re.compile(
@@ -56,7 +65,6 @@ TABLE_OPERATIONS_WITHOUT_OPERAND = {
     "atan",
     "zero",
     "end",
-    "start",
 }
 TABLE_OPERATIONS = TABLE_OPERATIONS_WITH_OPERAND | TABLE_OPERATIONS_WITHOUT_OPERAND | {"if"}
 TABLE_TYPES = {
@@ -80,6 +88,28 @@ TABLE_TYPES = {
     "windd",
     "output",
 }
+COEFFICIENT_TABLE_TYPES = {"ca", "cn", "cl", "cd", "cs", "cx", "cy", "cz"}
+THRUST_UNITS = {"lb", "n", "kn"}
+MASS_FLOW_UNITS = {
+    "lb/sec",
+    "lb/min",
+    "lb/hr",
+    "slugs/sec",
+    "slugs/min",
+    "slugs/hr",
+    "g/sec",
+    "g/min",
+    "g/hr",
+    "kg/sec",
+    "kg/min",
+    "kg/hr",
+}
+LIMITED_STATE_VARIABLES = {
+    "alt", "altdt", "dynprs", "gamgc", "gamgd", "latgc", "latgd",
+    "long", "mass", "pres", "psigc", "rcm", "rcmdt", "rho", "temp",
+    "time", "vel", "wt",
+}
+LIMITED_STATE_TABLE_TYPES = {"cg", "windv", "windh", "winde", "windn", "windd"}
 PROBLEM_LEVEL_BLOCKS = {
     "title",
     "atmos",
@@ -151,6 +181,7 @@ class NumericAssignment(BaseModel):
 class TableCall(BaseModel):
     name: str
     arguments: list[str] = Field(default_factory=list)
+    parenthesized: bool = False
     ####
 ####
 
@@ -172,6 +203,7 @@ class TaosTable(BaseModel):
     name: str
     table_type: str
     format: Literal["simple", "full"]
+    header_line: int
     independent_variables: list[str] = Field(default_factory=list)
     options: dict[str, str | float] = Field(default_factory=dict)
     assignments: list[NumericAssignment] = Field(default_factory=list)
@@ -242,6 +274,51 @@ class ProblemParseResult(BaseModel):
 
 def _strip_comment(line: str) -> str:
     return line.split("#", 1)[0]
+####
+
+
+def _validate_table_options(table_type: str, options: dict[str, str | float], line: int, issues: list[ParseIssue]) -> None:
+    """Apply the table-parameter rules documented in Chapter 3."""
+    allowed_parameter = "sref" if table_type in COEFFICIENT_TABLE_TYPES else "units" if table_type in {"thrust", "mdot"} else None
+    for name, value in options.items():
+        if name == "extrapolation":
+            continue
+        ####
+        if name != allowed_parameter:
+            issues.append(
+                ParseIssue(
+                    severity="error",
+                    code="unsupported-table-option",
+                    message=f"Table type {table_type!r} does not document the {name!r} header parameter.",
+                    line=line,
+                )
+            )
+            continue
+        ####
+        if name == "sref":
+            if not isinstance(value, float):
+                issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="invalid-table-sref",
+                        message="The sref table parameter requires a numeric value.",
+                        line=line,
+                    )
+                )
+        elif name == "units":
+            units = str(value).casefold()
+            allowed_units = THRUST_UNITS if table_type == "thrust" else MASS_FLOW_UNITS
+            if units not in allowed_units:
+                issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="unsupported-table-units",
+                        message=f"Units {value!r} are not documented for table type {table_type!r}.",
+                        line=line,
+                    )
+                )
+        ####
+    ####
 ####
 
 
@@ -369,7 +446,7 @@ class _TableTokenParser:
             self.advance()
         ####
         self.expect(")")
-        return TableCall(name=name, arguments=arguments)
+        return TableCall(name=name, arguments=arguments, parenthesized=True)
     ####
 
     def _looks_like_assignment(self) -> bool:
@@ -397,7 +474,19 @@ class _TableTokenParser:
             return None
         ####
         name_token = self.advance()
-        assert name_token is not None
+        if name_token is None:
+            return None
+        if VARIABLE_IDENTIFIER_RE.fullmatch(name_token.value) is None:
+            self.issues.append(
+                ParseIssue(
+                    severity="error",
+                    code="invalid-table-assignment-name",
+                    message=f"Table assignment name {name_token.value!r} must be an identifier.",
+                    line=name_token.line,
+                    column=name_token.column,
+                )
+            )
+        ####
         self.expect("=")
         values: list[float] = []
         while self.current() is not None:
@@ -415,6 +504,7 @@ class _TableTokenParser:
                 possible_next = self.tokens[following_position + 1] if following_position + 1 < len(self.tokens) else None
                 if (
                     possible.value.lower() in TABLE_OPERATIONS
+                    or possible.value == "("
                     or possible.value == "."
                     or possible.value.lower() == "etc."
                     or (possible_next is not None and possible_next.value in {"=", ":"})
@@ -463,9 +553,22 @@ class _TableTokenParser:
         if token is None:
             return None
         ####
+        if token.value.lower() == "end":
+            return None
+        ####
         label: str | None = None
         if self.peek() is not None and self.peek().value == ":":
             label = token.value
+            if IDENTIFIER_RE.fullmatch(label) is None:
+                self.issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="invalid-operation-label",
+                        message=f"Operation label {label!r} must be an identifier.",
+                        line=token.line,
+                        column=token.column,
+                    )
+                )
             self.advance()
             self.advance()
             token = self.current()
@@ -486,7 +589,8 @@ class _TableTokenParser:
                 depth = 1
                 while self.current() is not None and depth > 0:
                     current = self.advance()
-                    assert current is not None
+                    if current is None:
+                        break
                     if current.value == "(":
                         depth += 1
                     elif current.value == ")":
@@ -542,12 +646,50 @@ class _TableTokenParser:
                 )
                 return TableOperation(operator=operator, line=line, condition=" ".join(condition_tokens), label=label)
             ####
+            if nested.operator == "if":
+                self.issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="invalid-if-operation",
+                        message="A full-table if statement may contain a math operation, not a nested if statement.",
+                        line=line,
+                        column=token.column,
+                    )
+                )
+            ####
             return TableOperation(operator=operator, line=line, condition=condition_text, label=label, nested=nested)
         ####
         if operator in TABLE_OPERATIONS_WITH_OPERAND:
             call = self.parse_table_call()
             if call is not None:
-                if not call.arguments and NUMBER_RE.match(call.name):
+                if call.parenthesized and (
+                    not call.arguments
+                    or any(VARIABLE_IDENTIFIER_RE.fullmatch(argument) is None for argument in call.arguments)
+                ):
+                    self.issues.append(
+                        ParseIssue(
+                            severity="error",
+                            code="invalid-table-call",
+                            message="Table calls require one or more identifier arguments.",
+                            line=line,
+                            column=token.column,
+                        )
+                    )
+                ####
+                if call.parenthesized and len(call.arguments) > 5:
+                    self.issues.append(
+                        ParseIssue(
+                            severity="error",
+                            code="too-many-table-call-arguments",
+                            message="A tabulated table call may contain at most five independent variables.",
+                            line=line,
+                            column=token.column,
+                        )
+                    )
+                ####
+                if operator == "goto" and not call.arguments:
+                    operand = call.name
+                elif not call.arguments and NUMBER_RE.match(call.name):
                     operand = float(call.name)
                 elif not call.arguments:
                     operand = call.name
@@ -565,6 +707,19 @@ class _TableTokenParser:
                         column=token.column,
                     )
                 )
+            ####
+            if operator in {"csto", "goto"}:
+                pattern = r"[A-Za-z_][A-Za-z0-9_.-]*" if operator == "csto" else IDENTIFIER_RE.pattern
+                if not isinstance(operand, str) or re.fullmatch(pattern, operand) is None:
+                    self.issues.append(
+                        ParseIssue(
+                            severity="error",
+                            code="invalid-operation-operand",
+                            message=f"Operation {operator!r} requires a destination/name identifier operand.",
+                            line=line,
+                            column=token.column,
+                        )
+                    )
             ####
         ####
         if self.current() is not None and self.current().value.lower() in {"extrap", "no-extrap"}:
@@ -613,6 +768,17 @@ class _TableTokenParser:
         if name_token is None:
             return None
         ####
+        if IDENTIFIER_RE.fullmatch(name_token.value) is None:
+            self.issues.append(
+                ParseIssue(
+                    severity="error",
+                    code="invalid-table-name",
+                    message=f"Table name {name_token.value!r} must be an identifier.",
+                    line=name_token.line,
+                    column=name_token.column,
+                )
+            )
+        ####
         self.expect(")")
         self.skip_newlines()
         table_token = self.expect("table")
@@ -637,13 +803,48 @@ class _TableTokenParser:
         ####
         independent_variables: list[str] = []
         if self.accept("(") is not None:
+            list_token = self.current()
+            saw_variable = False
             while self.current() is not None and self.current().value != ")":
                 if self.current().value != "\n":
-                    independent_variables.append(self.current().value.lower())
+                    saw_variable = True
+                    variable = self.current()
+                    independent_variables.append(variable.value.lower())
+                    if VARIABLE_IDENTIFIER_RE.fullmatch(variable.value) is None:
+                        self.issues.append(
+                            ParseIssue(
+                                severity="error",
+                                code="invalid-independent-variable",
+                                message=f"Independent variable {variable.value!r} must be an identifier.",
+                                line=variable.line,
+                                column=variable.column,
+                            )
+                        )
                 ####
                 self.advance()
             ####
+            if not saw_variable:
+                self.issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="empty-independent-variable-list",
+                        message="A parenthesized table independent-variable list cannot be empty.",
+                        line=list_token.line if list_token is not None else name_token.line,
+                        column=list_token.column if list_token is not None else name_token.column,
+                    )
+                )
+            ####
             self.expect(")")
+            if len(independent_variables) > 5:
+                self.issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="too-many-independent-variables",
+                        message="A table may declare at most five independent variables.",
+                        line=name_token.line,
+                        column=name_token.column,
+                    )
+                )
         ####
         options: dict[str, str | float] = {}
         while self.current() is not None:
@@ -652,17 +853,48 @@ class _TableTokenParser:
                 break
             ####
             if self.current().value.lower() in {"extrap", "no-extrap"}:
-                options["extrapolation"] = self.current().value.lower()
+                option_token = self.current()
+                option = option_token.value.lower()
+                previous = options.get("extrapolation")
+                if previous is not None and previous != option:
+                    self.issues.append(
+                        ParseIssue(
+                            severity="error",
+                            code="conflicting-table-extrapolation",
+                            message="A table header may specify either 'extrap' or 'no-extrap', not both.",
+                            line=option_token.line,
+                            column=option_token.column,
+                        )
+                    )
+                else:
+                    options["extrapolation"] = option
                 self.advance()
                 continue
             ####
             if self._looks_like_assignment():
                 key = self.advance()
-                assert key is not None
+                if key is None:
+                    continue
                 self.expect("=")
                 value = self.parse_atom()
-                if value is not None:
+                if isinstance(value, float) or (isinstance(value, str) and OPTION_ATOM_RE.fullmatch(value) is not None):
                     options[key.value.lower()] = value
+                else:
+                    self.issues.append(
+                        ParseIssue(
+                            severity="error",
+                            code="invalid-table-option-value",
+                            message=f"Table option {key.value!r} requires a numeric or identifier atom.",
+                            line=key.line,
+                            column=key.column,
+                        )
+                    )
+                    if value == "(":
+                        while self.current() is not None and self.current().value not in {")", "\n"}:
+                            self.advance()
+                        ####
+                        self.accept(")")
+                    ####
                 ####
                 continue
             ####
@@ -677,8 +909,12 @@ class _TableTokenParser:
             )
             self.advance()
         ####
+        _validate_table_options(table_type, options, name_token.line, self.issues)
         self.skip_newlines()
-        format_name: Literal["simple", "full"] = "full" if self.accept("start") is not None else "simple"
+        format_name: Literal["simple", "full"] = "simple"
+        if self.current() is not None and self.current().value.lower() == "start" and not self._looks_like_assignment():
+            self.advance()
+            format_name = "full"
         assignments: list[NumericAssignment] = []
         operations: list[TableOperation] = []
         omissions: list[int] = []
@@ -726,7 +962,8 @@ class _TableTokenParser:
                 ####
                 if self.current().value.lower() == "end":
                     end_token = self.advance()
-                    assert end_token is not None
+                    if end_token is None:
+                        break
                     operations.append(TableOperation(operator="end", line=end_token.line))
                     saw_end = True
                     break
@@ -767,11 +1004,29 @@ class _TableTokenParser:
                         column=name_token.column,
                     )
                 )
+            else:
+                trailing_reported = False
+                while self.current() is not None and self.current().value != "(":
+                    token = self.current()
+                    if token.value != "\n" and not trailing_reported:
+                        self.issues.append(
+                            ParseIssue(
+                                severity="error",
+                                code="trailing-full-table-text",
+                                message=f"Full table {name_token.value!r} has text after its final 'end' operation; source was preserved.",
+                                line=token.line,
+                                column=token.column,
+                            )
+                        )
+                        trailing_reported = True
+                    self.advance()
+                ####
         ####
         return TaosTable(
             name=name_token.value,
             table_type=table_type,
             format=format_name,
+            header_line=name_token.line,
             independent_variables=independent_variables,
             options=options,
             assignments=assignments,
@@ -823,8 +1078,71 @@ def _validate_monotonic(values: list[float]) -> Literal["increasing", "decreasin
 
 
 def _semantic_validate_table(table: TaosTable, issues: list[ParseIssue]) -> None:
+    independent_names = {name.casefold() for name in table.independent_variables}
+    if table.table_type.casefold() in independent_names:
+        issues.append(
+            ParseIssue(
+                severity="error",
+                code="self-referential-table",
+                message=f"Table {table.name!r} cannot use its dependent variable {table.table_type!r} as an independent variable.",
+                line=table.header_line,
+            )
+        )
+    ####
+    if table.table_type.casefold() in LIMITED_STATE_TABLE_TYPES:
+        for variable in table.independent_variables:
+            if variable.casefold() not in LIMITED_STATE_VARIABLES:
+                issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="unsupported-limited-state-variable",
+                        message=f"Table type {table.table_type!r} may not depend on state variable {variable!r}; the manual permits only limited-state variables.",
+                        line=table.header_line,
+                    )
+                )
+            ####
+        ####
     if table.format == "simple":
         by_name = {assignment.name: assignment for assignment in table.assignments}
+        seen_assignments: dict[str, NumericAssignment] = {}
+        for assignment in table.assignments:
+            previous = seen_assignments.get(assignment.name)
+            if previous is not None:
+                issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="duplicate-table-assignment",
+                        message=(
+                            f"Simple table {table.name!r} assigns {assignment.name!r} more than once; "
+                            "the duplicate values are preserved without choosing one."
+                        ),
+                        line=assignment.line,
+                    )
+                )
+            ####
+            seen_assignments[assignment.name] = assignment
+        ####
+        provided_independent = [assignment.name for assignment in table.assignments if assignment.name in table.independent_variables]
+        declared_independent = [variable for variable in table.independent_variables if variable in by_name]
+        if len(provided_independent) == len(declared_independent) and provided_independent != declared_independent:
+            first_misordered = next(
+                assignment
+                for index, assignment in enumerate(table.assignments)
+                if assignment.name in table.independent_variables
+                and (
+                    index >= len(declared_independent)
+                    or assignment.name != declared_independent[len([item for item in table.assignments[: index + 1] if item.name in table.independent_variables]) - 1]
+                )
+            )
+            issues.append(
+                ParseIssue(
+                    severity="error",
+                    code="independent-assignment-order",
+                    message=f"Simple table {table.name!r} assigns independent variables in a different order than its header declaration.",
+                    line=first_misordered.line,
+                )
+            )
+        ####
         for variable in table.independent_variables:
             if variable not in by_name:
                 issues.append(
@@ -832,6 +1150,7 @@ def _semantic_validate_table(table: TaosTable, issues: list[ParseIssue]) -> None
                         severity="error",
                         code="missing-independent-values",
                         message=f"Table {table.name!r} is missing values for independent variable {variable!r}.",
+                        line=table.header_line,
                     )
                 )
             ####
@@ -843,6 +1162,7 @@ def _semantic_validate_table(table: TaosTable, issues: list[ParseIssue]) -> None
                     severity="error",
                     code="missing-dependent-values",
                     message=f"Simple table {table.name!r} is missing dependent values named {table.table_type!r}.",
+                    line=table.header_line,
                 )
             )
             return
@@ -853,12 +1173,21 @@ def _semantic_validate_table(table: TaosTable, issues: list[ParseIssue]) -> None
             if assignment is not None:
                 expected *= len(assignment.values)
                 ordering = _validate_monotonic(assignment.values)
-                if ordering not in {"increasing", "decreasing", "constant"}:
+                if ordering == "duplicate":
                     issues.append(
                         ParseIssue(
-                            severity="warning",
-                            code="nonmonotonic-independent-values",
-                            message=f"Independent variable {variable!r} in table {table.name!r} is {ordering}.",
+                            severity="error",
+                            code="duplicate-independent-values",
+                            message=f"Independent variable {variable!r} in simple table {table.name!r} contains duplicate values.",
+                            line=assignment.line,
+                        )
+                    )
+                elif ordering == "unordered":
+                    issues.append(
+                        ParseIssue(
+                            severity="error",
+                            code="unordered-independent-values",
+                            message=f"Independent variable {variable!r} in simple table {table.name!r} is not monotonic.",
                             line=assignment.line,
                         )
                     )
@@ -883,9 +1212,75 @@ def _semantic_validate_table(table: TaosTable, issues: list[ParseIssue]) -> None
                 severity="error",
                 code="empty-full-table",
                 message=f"Full table {table.name!r} contains no math operations.",
+                line=table.header_line,
             )
         )
         return
+    ####
+    labels: dict[str, TableOperation] = {}
+    storage_names: dict[str, TableOperation] = {}
+    goto_operations: list[TableOperation] = []
+
+    def inspect_control_flow(operation: TableOperation) -> None:
+        if operation.label is not None:
+            label = operation.label.casefold()
+            previous = labels.get(label)
+            if previous is not None:
+                issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="duplicate-operation-label",
+                        message=f"Full-table operation label {operation.label!r} is defined more than once; the destination is ambiguous.",
+                        line=operation.line,
+                    )
+                )
+            else:
+                labels[label] = operation
+        ####
+        if operation.operator == "csto" and isinstance(operation.operand, str):
+            storage_name = operation.operand.casefold()
+            if storage_name in DOCUMENTED_STATE_VARIABLES:
+                issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="reserved-storage-variable",
+                        message=f"Storage variable {operation.operand!r} is reserved for a documented TAOS state variable.",
+                        line=operation.line,
+                    )
+                )
+            ####
+            previous = storage_names.get(storage_name)
+            if previous is not None:
+                issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="duplicate-storage-variable",
+                        message=f"Storage variable {operation.operand!r} is stored more than once; its value is ambiguous.",
+                        line=operation.line,
+                    )
+                )
+            else:
+                storage_names[storage_name] = operation
+        ####
+        if operation.operator == "goto" and isinstance(operation.operand, str):
+            goto_operations.append(operation)
+        ####
+        if operation.nested is not None:
+            inspect_control_flow(operation.nested)
+        ####
+
+    for operation in table.operations:
+        inspect_control_flow(operation)
+    for operation in goto_operations:
+        if operation.operand is not None and operation.operand.casefold() not in labels:
+            issues.append(
+                ParseIssue(
+                    severity="error",
+                    code="undefined-operation-label",
+                    message=f"Goto destination {operation.operand!r} has no matching full-table operation label.",
+                    line=operation.line,
+                )
+            )
     ####
     for operation in table.operations:
         if not isinstance(operation.operand, TableCall) or not operation.operand.arguments:
@@ -918,6 +1313,35 @@ def _semantic_validate_table(table: TaosTable, issues: list[ParseIssue]) -> None
         ####
         for group in groups:
             by_name = {assignment.name: assignment for assignment in group}
+            seen_assignments: dict[str, NumericAssignment] = {}
+            for assignment in group:
+                previous = seen_assignments.get(assignment.name)
+                if previous is not None:
+                    issues.append(
+                        ParseIssue(
+                            severity="error",
+                            code="duplicate-interpolation-assignment",
+                            message=(
+                                f"Interpolation data for {dependent_name!r} assigns {assignment.name!r} more than once; "
+                                "the duplicate values are preserved without choosing one."
+                            ),
+                            line=assignment.line,
+                        )
+                    )
+                ####
+                seen_assignments[assignment.name] = assignment
+            ####
+            group_independent_names = [assignment.name for assignment in group if assignment.name != dependent_name]
+            if set(group_independent_names) == set(independent_names) and group_independent_names != independent_names:
+                issues.append(
+                    ParseIssue(
+                        severity="error",
+                        code="interpolation-assignment-order",
+                        message=f"Interpolation data for {dependent_name!r} lists independent variables in a different order than the table call.",
+                        line=group[0].line,
+                    )
+                )
+            ####
             if dependent_name not in by_name:
                 issues.append(
                     ParseIssue(

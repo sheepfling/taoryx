@@ -48,6 +48,23 @@ SUPPORTED_PROBLEM_BLOCKS = frozenset(
 )
 SUPPORTED_TRAJECTORY_BLOCKS = frozenset({"define", "dwn/crs", "file", "iip", "initial", "print", "tangent"})
 SUPPORTED_SEGMENT_BLOCKS = frozenset({"aero", "constants", "cg", "fly", "increment", "inertial", "integ", "limits", "prop", "rail", "reset", "when"})
+SUPPORTED_FLY_GUIDANCE_RULES = frozenset(
+    {
+        "alt", "cl", "cs", "downria", "dynprs", "gamgc", "gamgd", "intercept", "l/d", "l/d-max",
+        "mach", "nx", "ny", "nz", "propnav", "psigc", "psigd", "thrust", "upria", "vel",
+    }
+)
+
+DOCUMENTED_STATE_VARIABLES = frozenset(
+    {
+        "alpha", "alphat", "alt", "altdt", "bankgc", "bankgd", "beta", "betae", "cg", "dynprs",
+        "ep1", "ep2", "gamgc", "gamgd", "grmark", "grseg", "latgc", "latgcdt", "latgd", "latgddt",
+        "long", "longdt", "mach", "mass", "nu", "plength", "plmark", "plseg", "phi", "pitchgc",
+        "pitchgd", "pitchi", "power", "pres", "psigc", "psigd", "range", "rcm", "rcmdt", "reypft",
+        "rho", "rollgc", "rollgd", "rolli", "segment", "sndspd", "sref", "temp", "thrust", "time",
+        "tmark", "tseg", "vair", "vel", "vgr", "visc", "wt", "yawgc", "yawgd", "yawi",
+    }
+)
 
 SUPPORTED_GRAMMAR_CONTRACTS = (
     TAOS96_FREE_FIELD_CONTRACT,
