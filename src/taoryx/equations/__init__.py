@@ -48,6 +48,7 @@ from .geodesy import (
     geodetic_velocity_components_from_angles,
     geodetic_velocity_to_ecfc,
     polar_radius_from_equatorial_radius,
+    tangent_plane_unit_vectors,
 )
 from .radar import (
     RadarAngles,
@@ -109,6 +110,7 @@ __all__ = [
     "geodetic_velocity_components_from_angles",
     "geodetic_velocity_axes_from_angles",
     "geodetic_velocity_to_ecfc",
+    "tangent_plane_unit_vectors",
     "implementation_summary",
     "load_equation_registry",
     "polar_radius_from_equatorial_radius",

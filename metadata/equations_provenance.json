@@ -1864,7 +1864,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_part2.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Tangent-plane x unit vector"
     },
     {
@@ -1884,7 +1884,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_part2.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Tangent-plane y unit vector"
     },
     {
@@ -1904,7 +1904,7 @@
       "transcription_status": "visually_verified",
       "verification_scope": "visual transcription plus section-level structural and selected numerical checks",
       "validation_suite": "tools/check_chapter02_part2.py",
-      "code_implementation_status": "not yet mapped to an executable mathematics implementation",
+      "code_implementation_status": "implemented",
       "notes": "Tangent-plane z unit vector"
     },
     {

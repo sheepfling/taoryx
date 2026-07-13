@@ -22,6 +22,7 @@ from taoryx.equations import (
     geodetic_velocity_components_from_angles,
     geodetic_velocity_to_ecfc,
     polar_radius_from_equatorial_radius,
+    tangent_plane_unit_vectors,
 )
 
 
@@ -171,4 +172,33 @@ def test_geocentric_unit_vectors_are_orthonormal() -> None:
     assert dot(vectors[0], vectors[1]) == pytest.approx(0.0)
     assert dot(vectors[0], vectors[2]) == pytest.approx(0.0)
     assert dot(vectors[1], vectors[2]) == pytest.approx(0.0)
+####
+
+
+def test_tangent_plane_unit_vectors_follow_manual_formulas() -> None:
+    longitude = math.radians(-73.5)
+    latitude = math.radians(40.0)
+    azimuth = math.radians(15.0)
+
+    x_axis, y_axis, z_axis = tangent_plane_unit_vectors(longitude, latitude, azimuth)
+
+    assert x_axis.x == pytest.approx(
+        -(math.sin(latitude) * math.cos(longitude) * math.cos(azimuth) + math.sin(longitude) * math.sin(azimuth))
+    )
+    assert x_axis.y == pytest.approx(
+        -(math.sin(latitude) * math.sin(longitude) * math.cos(azimuth) - math.cos(longitude) * math.sin(azimuth))
+    )
+    assert x_axis.z == pytest.approx(math.cos(latitude) * math.cos(azimuth))
+
+    assert y_axis.x == pytest.approx(
+        -(math.sin(latitude) * math.cos(longitude) * math.sin(azimuth) - math.sin(longitude) * math.cos(azimuth))
+    )
+    assert y_axis.y == pytest.approx(
+        -(math.sin(latitude) * math.sin(longitude) * math.sin(azimuth) + math.cos(longitude) * math.cos(azimuth))
+    )
+    assert y_axis.z == pytest.approx(math.cos(latitude) * math.sin(azimuth))
+
+    assert z_axis.x == pytest.approx(math.cos(latitude) * math.cos(longitude))
+    assert z_axis.y == pytest.approx(math.cos(latitude) * math.sin(longitude))
+    assert z_axis.z == pytest.approx(math.sin(latitude))
 ####

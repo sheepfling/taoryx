@@ -219,6 +219,39 @@ def ecfc_to_geocentric_velocity(
 ####
 
 
+def tangent_plane_unit_vectors(
+    longitude_radians: float,
+    latitude_radians: float,
+    azimuth_radians: float,
+) -> tuple[CartesianVector3, CartesianVector3, CartesianVector3]:
+    """Return the tangent-plane east-of-north rotated unit vectors."""
+
+    cos_latitude = math.cos(latitude_radians)
+    sin_latitude = math.sin(latitude_radians)
+    cos_longitude = math.cos(longitude_radians)
+    sin_longitude = math.sin(longitude_radians)
+    cos_azimuth = math.cos(azimuth_radians)
+    sin_azimuth = math.sin(azimuth_radians)
+
+    x_axis = CartesianVector3(
+        -(sin_latitude * cos_longitude * cos_azimuth + sin_longitude * sin_azimuth),
+        -(sin_latitude * sin_longitude * cos_azimuth - cos_longitude * sin_azimuth),
+        cos_latitude * cos_azimuth,
+    )
+    y_axis = CartesianVector3(
+        -(sin_latitude * cos_longitude * sin_azimuth - sin_longitude * cos_azimuth),
+        -(sin_latitude * sin_longitude * sin_azimuth + cos_longitude * cos_azimuth),
+        cos_latitude * sin_azimuth,
+    )
+    z_axis = CartesianVector3(
+        cos_latitude * cos_longitude,
+        cos_latitude * sin_longitude,
+        sin_latitude,
+    )
+    return x_axis, y_axis, z_axis
+####
+
+
 def geodetic_surface_normal_distance(
     equatorial_radius: float,
     eccentricity: float,
