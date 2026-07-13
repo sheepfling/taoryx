@@ -98,3 +98,64 @@ def propulsive_force_vector(
         -thrust_magnitude * sine_ep1 * math.sin(epsilon_2_radians),
     )
 ####
+
+
+def specific_load_vector_from_accelerations(
+    inertial_acceleration: CartesianVector3,
+    gravity_acceleration: CartesianVector3,
+) -> CartesianVector3:
+    """Return the specific-load vector from inertial and gravity accelerations."""
+
+    return CartesianVector3(
+        inertial_acceleration.x - gravity_acceleration.x,
+        inertial_acceleration.y - gravity_acceleration.y,
+        inertial_acceleration.z - gravity_acceleration.z,
+    )
+####
+
+
+def specific_load_vector_from_forces(
+    aerodynamic_force: CartesianVector3,
+    propulsive_force: CartesianVector3,
+    mass: float,
+) -> CartesianVector3:
+    """Return the specific-load vector from aerodynamic and propulsive forces."""
+
+    if mass == 0.0:
+        raise ValueError("mass must be nonzero")
+    ####
+    return CartesianVector3(
+        (aerodynamic_force.x + propulsive_force.x) / mass,
+        (aerodynamic_force.y + propulsive_force.y) / mass,
+        (aerodynamic_force.z + propulsive_force.z) / mass,
+    )
+####
+
+
+def specific_load_components(
+    specific_load_vector: CartesianVector3,
+    body_axes: BodyAxes,
+) -> tuple[float, float, float, float]:
+    """Return the axial, lateral, and total specific-load magnitudes."""
+
+    nx = specific_load_vector.x * body_axes.x.x + specific_load_vector.y * body_axes.x.y + specific_load_vector.z * body_axes.x.z
+    ny = specific_load_vector.x * body_axes.y.x + specific_load_vector.y * body_axes.y.y + specific_load_vector.z * body_axes.y.z
+    nz = specific_load_vector.x * body_axes.z.x + specific_load_vector.y * body_axes.z.y + specific_load_vector.z * body_axes.z.z
+    ntotal = math.sqrt(
+        specific_load_vector.x * specific_load_vector.x
+        + specific_load_vector.y * specific_load_vector.y
+        + specific_load_vector.z * specific_load_vector.z
+    )
+    return nx, ny, nz, ntotal
+####
+
+
+def normal_specific_load_magnitude(
+    specific_load_vector: CartesianVector3,
+    body_axes: BodyAxes,
+) -> float:
+    """Return the normal, or lateral, specific-load magnitude."""
+
+    _, ny, nz, _ = specific_load_components(specific_load_vector, body_axes)
+    return math.sqrt(ny * ny + nz * nz)
+####

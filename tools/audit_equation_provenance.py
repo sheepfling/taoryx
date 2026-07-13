@@ -33,6 +33,7 @@ IMPLEMENTED_EQUATION_IDS = {
     *[f"2-{number}" for number in range(93, 97)],
     *[f"2-{number}" for number in range(97, 107)],
     *[f"2-{number}" for number in range(107, 119)],
+    *[f"2-{number}" for number in range(153, 176)],
     *[f"2-{number}" for number in range(196, 201)],
     *[f"2-{number}" for number in range(123, 141)],
     *[f"2-{number}" for number in range(148, 153)],

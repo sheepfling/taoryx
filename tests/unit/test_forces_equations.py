@@ -12,7 +12,11 @@ from taoryx.equations import (
     aerodynamic_force_from_body_axis_coefficients,
     aerodynamic_force_from_lift_drag_side_coefficients,
     body_windward_meridian_unit_vector,
+    normal_specific_load_magnitude,
     propulsive_force_vector,
+    specific_load_components,
+    specific_load_vector_from_accelerations,
+    specific_load_vector_from_forces,
     wind_body_axes_from_aerodynamic_angles,
 )
 
@@ -79,4 +83,23 @@ def test_lift_drag_side_body_axis_and_propulsive_force_formulas_follow_the_manua
         -100.0 * math.sin(math.radians(20.0)) * math.cos(math.radians(-15.0)),
         -100.0 * math.sin(math.radians(20.0)) * math.sin(math.radians(-15.0)),
     )
+####
+
+
+def test_specific_load_helpers_follow_the_manual_definitions() -> None:
+    _, body_axes = _identity_axes()
+
+    inertial_acceleration = CartesianVector3(9.0, 8.0, 7.0)
+    gravity_acceleration = CartesianVector3(1.0, 2.0, 3.0)
+    aerodynamic_force = CartesianVector3(6.0, -3.0, 9.0)
+    propulsive_force = CartesianVector3(0.0, 6.0, -3.0)
+    specific_load_vector = CartesianVector3(0.0, 5.0, 12.0)
+
+    assert specific_load_vector_from_accelerations(inertial_acceleration, gravity_acceleration) == CartesianVector3(8.0, 6.0, 4.0)
+    assert specific_load_vector_from_forces(aerodynamic_force, propulsive_force, 3.0) == CartesianVector3(2.0, 1.0, 2.0)
+    assert specific_load_components(specific_load_vector, body_axes) == pytest.approx((0.0, 5.0, 12.0, 13.0))
+    assert normal_specific_load_magnitude(specific_load_vector, body_axes) == pytest.approx(13.0)
+
+    with pytest.raises(ValueError, match="mass must be nonzero"):
+        specific_load_vector_from_forces(aerodynamic_force, propulsive_force, 0.0)
 ####
