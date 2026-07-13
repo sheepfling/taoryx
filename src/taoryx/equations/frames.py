@@ -30,6 +30,28 @@ class BodyAxes:
 ####
 
 
+@dataclass(frozen=True, slots=True)
+class WindAxes:
+    """Wind-axis unit vectors expressed in the chosen reference frame."""
+
+    x: CartesianVector3
+    y: CartesianVector3
+    z: CartesianVector3
+####
+
+
+@dataclass(frozen=True, slots=True)
+class AerodynamicAngles:
+    """Aerodynamic angles derived from wind and body axes."""
+
+    alpha_radians: float
+    beta_e_radians: float
+    beta_radians: float
+    total_alpha_radians: float
+    windward_meridian_radians: float
+####
+
+
 def _dot(left: CartesianVector3, right: CartesianVector3) -> float:
     return left.x * right.x + left.y * right.y + left.z * right.z
 ####
@@ -132,6 +154,165 @@ def ecfc_to_ecic_acceleration(force: CartesianVector3, mass: float, rotation_ang
     ####
     return ecfc_to_ecic_position(CartesianVector3(force.x / mass, force.y / mass, force.z / mass), rotation_angle_radians)
 ####
+
+
+def wind_corrected_velocity(vehicle_velocity: CartesianVector3, wind_velocity: CartesianVector3) -> CartesianVector3:
+    """Return the wind-corrected air-relative velocity vector."""
+
+    return CartesianVector3(
+        vehicle_velocity.x - wind_velocity.x,
+        vehicle_velocity.y - wind_velocity.y,
+        vehicle_velocity.z - wind_velocity.z,
+    )
+####
+
+
+def wind_unit_vectors_from_velocity(
+    velocity_vector: CartesianVector3,
+    *,
+    geodetic_up: CartesianVector3,
+    bank_radians: float = 0.0,
+) -> WindAxes:
+    """Return wind axes from a velocity vector and a geodetic up axis."""
+
+    speed = math.sqrt(velocity_vector.x * velocity_vector.x + velocity_vector.y * velocity_vector.y + velocity_vector.z * velocity_vector.z)
+    if speed == 0.0:
+        raise ValueError("wind axes are undefined at zero speed")
+    ####
+    x_axis = CartesianVector3(velocity_vector.x / speed, velocity_vector.y / speed, velocity_vector.z / speed)
+    up_cross = _cross(geodetic_up, x_axis)
+    cross_norm = math.sqrt(up_cross.x * up_cross.x + up_cross.y * up_cross.y + up_cross.z * up_cross.z)
+    if cross_norm == 0.0:
+        raise ValueError("wind axes are undefined when velocity is parallel to the geodetic up axis")
+    ####
+    y_velocity = CartesianVector3(up_cross.x / cross_norm, up_cross.y / cross_norm, up_cross.z / cross_norm)
+    z_velocity = _cross(x_axis, y_velocity)
+    cosine_bank = math.cos(bank_radians)
+    sine_bank = math.sin(bank_radians)
+    y_axis = CartesianVector3(
+        cosine_bank * y_velocity.x + sine_bank * z_velocity.x,
+        cosine_bank * y_velocity.y + sine_bank * z_velocity.y,
+        cosine_bank * y_velocity.z + sine_bank * z_velocity.z,
+    )
+    z_axis = CartesianVector3(
+        -sine_bank * y_velocity.x + cosine_bank * z_velocity.x,
+        -sine_bank * y_velocity.y + cosine_bank * z_velocity.y,
+        -sine_bank * y_velocity.z + cosine_bank * z_velocity.z,
+    )
+    return WindAxes(x_axis, y_axis, z_axis)
+####
+
+
+def geodetic_velocity_axes_from_angles(
+    geodetic_basis: FrameBasis,
+    speed: float,
+    gamma_radians: float,
+    psi_radians: float,
+) -> FrameBasis:
+    """Return the geodetic velocity axes from speed and flight-path angles."""
+
+    _ = speed
+    x_axis = _compose_from_basis(
+        geodetic_basis,
+        CartesianVector3(
+            math.cos(gamma_radians) * math.cos(psi_radians),
+            math.cos(gamma_radians) * math.sin(psi_radians),
+            -math.sin(gamma_radians),
+        ),
+    )
+    y_axis = _compose_from_basis(
+        geodetic_basis,
+        CartesianVector3(-math.sin(psi_radians), math.cos(psi_radians), 0.0),
+    )
+    z_axis = _compose_from_basis(
+        geodetic_basis,
+        CartesianVector3(
+            math.sin(gamma_radians) * math.cos(psi_radians),
+            math.sin(gamma_radians) * math.sin(psi_radians),
+            math.cos(gamma_radians),
+        ),
+    )
+    return x_axis, y_axis, z_axis
+####
+
+
+def wind_axes_from_bank_angle(velocity_axes: FrameBasis, bank_radians: float) -> WindAxes:
+    """Rotate velocity axes into wind axes with a bank angle."""
+
+    x_axis, y_axis, z_axis = velocity_axes
+    cosine_bank = math.cos(bank_radians)
+    sine_bank = math.sin(bank_radians)
+    return WindAxes(
+        x_axis,
+        CartesianVector3(
+            cosine_bank * y_axis.x + sine_bank * z_axis.x,
+            cosine_bank * y_axis.y + sine_bank * z_axis.y,
+            cosine_bank * y_axis.z + sine_bank * z_axis.z,
+        ),
+        CartesianVector3(
+            -sine_bank * y_axis.x + cosine_bank * z_axis.x,
+            -sine_bank * y_axis.y + cosine_bank * z_axis.y,
+            -sine_bank * y_axis.z + cosine_bank * z_axis.z,
+        ),
+    )
+####
+
+
+def wind_body_axes_from_aerodynamic_angles(
+    wind_axes: WindAxes,
+    alpha_radians: float,
+    beta_e_radians: float,
+) -> BodyAxes:
+    """Return body axes from wind axes and aerodynamic angles."""
+
+    cosine_alpha = math.cos(alpha_radians)
+    sine_alpha = math.sin(alpha_radians)
+    cosine_beta = math.cos(beta_e_radians)
+    sine_beta = math.sin(beta_e_radians)
+    x_axis, y_axis, z_axis = wind_axes.x, wind_axes.y, wind_axes.z
+    body_x = _compose_from_basis(
+        (x_axis, y_axis, z_axis),
+        CartesianVector3(
+            cosine_alpha * cosine_beta,
+            -cosine_alpha * sine_beta,
+            -sine_alpha,
+        ),
+    )
+    body_y = _compose_from_basis(
+        (x_axis, y_axis, z_axis),
+        CartesianVector3(sine_beta, cosine_beta, 0.0),
+    )
+    body_z = _compose_from_basis(
+        (x_axis, y_axis, z_axis),
+        CartesianVector3(
+            sine_alpha * cosine_beta,
+            -sine_alpha * sine_beta,
+            cosine_alpha,
+        ),
+    )
+    return BodyAxes(body_x, body_y, body_z)
+####
+
+
+def aerodynamic_angles_from_body_axes(
+    wind_axes: WindAxes,
+    body_axes: BodyAxes,
+) -> AerodynamicAngles:
+    """Recover aerodynamic angles from wind and body axes."""
+
+    x_projection = _decompose_to_basis((wind_axes.x, wind_axes.y, wind_axes.z), body_axes.x)
+    beta_e = math.atan2(_dot(body_axes.y, wind_axes.x), _dot(body_axes.y, wind_axes.y))
+    alpha = math.atan2(-x_projection.z, math.hypot(x_projection.x, x_projection.y))
+    total_alpha = math.atan2(math.hypot(_dot(body_axes.x, wind_axes.y), _dot(body_axes.x, wind_axes.z)), _dot(body_axes.x, wind_axes.x))
+    windward_meridian = math.atan2(-_dot(body_axes.x, wind_axes.y), _dot(body_axes.x, wind_axes.z))
+    if math.isclose(x_projection.x, 0.0, abs_tol=1e-12):
+        beta = math.atan2(_dot(body_axes.y, wind_axes.x), _dot(body_axes.z, wind_axes.x))
+    else:
+        beta = math.atan2(_dot(body_axes.y, wind_axes.x), x_projection.x)
+    return AerodynamicAngles(alpha, beta_e, beta, total_alpha, windward_meridian)
+####
+
+
 
 
 def geodetic_body_axes_from_euler_angles(
