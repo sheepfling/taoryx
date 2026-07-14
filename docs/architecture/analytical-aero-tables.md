@@ -110,4 +110,5 @@ The current implementation already provides the model and CLI foundation in
 [`src/taoryx/aero_drag_tables.py`](../../src/taoryx/aero_drag_tables.py) and
 [`tools/aero_drag_analysis.py`](../../tools/aero_drag_analysis.py). The syntax
 extension remains a future language feature until its grammar and provenance
-contract are reviewed.
+contract are reviewed. The model and claim registry is recorded in
+[`metadata/analytical_aero_tables.yaml`](../../metadata/analytical_aero_tables.yaml).

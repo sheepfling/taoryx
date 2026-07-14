@@ -1,0 +1,34 @@
+schema_version: 1
+status: taoryx_extension_proposal
+historical_claim: none
+manual_traceability:
+  taos_version: "1995/96"
+  status: not_documented_in_historical_manual
+  treatment: opt_in_extension_only
+  source_note: "The historical manual documents user-supplied aerodynamic tables; these analytical generators are a taoryx addition."
+model_registry:
+  - id: sphere
+    axes: [alphat]
+    model_status: synthetic_analysis
+  - id: spheroid
+    axes: [alphat]
+    model_status: synthetic_analysis
+  - id: cylinder
+    axes: [alphat]
+    model_status: synthetic_analysis
+  - id: cone
+    axes: [alphat]
+    model_status: synthetic_analysis
+    notes: "Front and rear aerodynamic anchors remain separate from projected geometry."
+  - id: triaxial-ellipsoid
+    axes: [alphat, phi]
+    model_status: synthetic_analysis
+claims:
+  supports:
+    - deterministic_table_generation
+    - parser_and_lowering_fixtures
+    - analytical_sensitivity_studies
+  does_not_support:
+    - historical_taos_96_runtime_compatibility
+    - validated_cfd_or_wind_tunnel_performance
+    - six_dof_rigid_body_dynamics

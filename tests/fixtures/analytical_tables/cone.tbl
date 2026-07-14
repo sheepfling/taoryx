@@ -1,0 +1,6 @@
+(fixture-cone)
+generate cd(alphat) from shape=cone
+  radius=0.5 height=2.0 reference-area=0.7853981634
+  model=front-broadside-rear cd-front=0.30 cd-broadside=1.10 cd-rear=1.25
+  alphat start=0 stop=180 step=45
+  no-extrap

@@ -1,0 +1,5 @@
+(invalid-cylinder)
+generate cd(alphat) from shape=cylinder
+  radius=0.5 reference-area=0.7853981634
+  alphat start=0 stop=180 step=5
+  no-extrap

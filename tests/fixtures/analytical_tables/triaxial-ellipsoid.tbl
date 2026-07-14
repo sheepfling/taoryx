@@ -1,0 +1,6 @@
+(fixture-triaxial)
+generate cd(alphat,phi) from shape=triaxial-ellipsoid
+  axes=1.0,0.6,0.4 reference-area=0.7539822369
+  alphat start=0 stop=180 step=90
+  phi start=0 stop=360 step=180
+  no-extrap

@@ -1,5 +1,13 @@
 """Canonical TAOS table- and problem-file language support."""
 
+from taoryx.language.analytical_tables import (
+    AnalyticalAxis,
+    AnalyticalParseResult,
+    AnalyticalTableDeclaration,
+    LoweredAnalyticalTable,
+    lower_analytical_table,
+    parse_analytical_table_text,
+)
 from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
 from taoryx.language.ebnf import EbnfGrammar, EbnfReferenceError, EbnfSyntaxError, load_ebnf, parse_ebnf
 from taoryx.language.grammar_contracts import (
@@ -31,6 +39,12 @@ from taoryx.language.table_parser import (
 
 __all__ = [
     "Diagnostic",
+    "AnalyticalAxis",
+    "AnalyticalParseResult",
+    "AnalyticalTableDeclaration",
+    "LoweredAnalyticalTable",
+    "lower_analytical_table",
+    "parse_analytical_table_text",
     "EbnfGrammar",
     "EbnfReferenceError",
     "EbnfSyntaxError",
