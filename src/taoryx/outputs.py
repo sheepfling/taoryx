@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from taoryx.output_catalog import canonical_output_name, output_channel_spec
+
 if TYPE_CHECKING:
     from taoryx.runtime.common import RuntimeProblem
     from taoryx.runtime.engine import ExecutionResult
@@ -300,37 +302,6 @@ def _format_text_value(value: float | None) -> str:
     return "" if value is None else f"{value:g}"
 
 
-_SEMANTIC_NAMES = {
-    "alt": "position.altitude.geodetic",
-    "long": "position.longitude",
-    "latgd": "position.latitude.geodetic",
-    "latgc": "position.latitude.geocentric",
-    "x": "position.ecfc.x",
-    "y": "position.ecfc.y",
-    "z": "position.ecfc.z",
-    "xecfc": "position.ecfc.x",
-    "yecfc": "position.ecfc.y",
-    "zecfc": "position.ecfc.z",
-    "xdt": "velocity.ecfc.x",
-    "ydt": "velocity.ecfc.y",
-    "zdt": "velocity.ecfc.z",
-    "xecfcdt": "velocity.ecfc.x",
-    "yecfcdt": "velocity.ecfc.y",
-    "zecfcdt": "velocity.ecfc.z",
-    "mass": "mass.total",
-    "wt": "mass.total",
-    "mdt": "mass.flow",
-    "wtdt": "mass.flow",
-    "thrust": "propulsion.thrust",
-    "power": "propulsion.throttle_command",
-    "dynprs": "aerodynamics.dynamic_pressure",
-    "alpha": "aerodynamics.angle_of_attack",
-    "beta": "aerodynamics.sideslip",
-    "segment": "phase.segment",
-    "_segment": "phase.segment",
-}
-
-
 def build_run_artifact(
     problem_name: str,
     problem: RuntimeProblem,
@@ -369,14 +340,16 @@ def _build_vehicle_telemetry(vehicle_id: str, vehicle: object, history: Sequence
                 source_names.append(name)
     channels: dict[str, TelemetryChannel] = {}
     for source_name in source_names:
-        semantic_name = _SEMANTIC_NAMES.get(source_name.casefold(), f"taos.{source_name.casefold()}")
+        public_source_name = canonical_output_name(source_name)
+        spec = output_channel_spec(public_source_name)
+        semantic_name = spec.semantic_name if spec is not None else f"taos.{public_source_name.casefold()}"
         if semantic_name in channels:
             continue
         channels[semantic_name] = TelemetryChannel(
-            source_name=source_name,
+            source_name=public_source_name,
             semantic_name=semantic_name,
-            interpolation=_interpolation_for(source_name),
-            values=[_state_value(state, source_name) for state in history],
+            interpolation=spec.interpolation if spec is not None else _interpolation_for(public_source_name),
+            values=[_state_value(state, public_source_name) for state in history],
         )
     segments, events = _segment_metadata(vehicle_id, history, times)
     dynamics = _dynamics_kind(getattr(vehicle, "dynamics_mode", None))
@@ -399,7 +372,10 @@ def _build_vehicle_telemetry(vehicle_id: str, vehicle: object, history: Sequence
 
 
 def _state_value(state: object, source_name: str) -> float | None:
-    value = getattr(state, "named", {}).get(source_name)
+    named = getattr(state, "named", {})
+    value = named.get(source_name)
+    if value is None and source_name.casefold() == "segment":
+        value = named.get("_segment")
     if value is None:
         names = getattr(state, "value_names", ())
         values = getattr(state, "values", ())
@@ -409,12 +385,11 @@ def _state_value(state: object, source_name: str) -> float | None:
 
 
 def _interpolation_for(source_name: str) -> InterpolationKind:
+    spec = output_channel_spec(source_name)
+    if spec is not None:
+        return spec.interpolation
     lowered = source_name.casefold()
-    if lowered in {"segment", "_segment"}:
-        return "step"
-    if lowered in {"alpha", "alphat", "beta", "betae", "bankgc", "bankgd", "gamgc", "gamgd", "yawgc", "yawgd"}:
-        return "angle"
-    return "linear"
+    return "angle" if lowered in {"alphat", "betae", "bankgc", "bankgd", "gamgc", "gamgd", "yawgc", "yawgd"} else "linear"
 
 
 def _dynamics_kind(mode: object) -> DynamicsKind:

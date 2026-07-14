@@ -33,6 +33,17 @@ _SCIPY_METHODS = {
     IntegratorName.SCIPY_LSODA: "LSODA",
 }
 
+_INTEGRATOR_DESCRIPTIONS = {
+    IntegratorName.EULER: "fixed-step, fast smoke tests",
+    IntegratorName.RK4: "fixed-step, recommended for deterministic production runs",
+    IntegratorName.RKF45: "adaptive reference integrator",
+    IntegratorName.SCIPY_RK45: "optional SciPy solve_ivp backend",
+    IntegratorName.SCIPY_DOP853: "optional SciPy solve_ivp backend",
+    IntegratorName.SCIPY_RADAU: "optional SciPy solve_ivp backend",
+    IntegratorName.SCIPY_BDF: "optional SciPy solve_ivp backend",
+    IntegratorName.SCIPY_LSODA: "optional SciPy solve_ivp backend",
+}
+
 
 def normalize_integrator(name: str | IntegratorName) -> IntegratorName:
     """Normalize a public integrator name and reject unsupported values."""
@@ -52,6 +63,13 @@ def available_integrators() -> tuple[IntegratorName, ...]:
     if find_spec("scipy") is not None:
         result.extend(_SCIPY_METHODS)
     return tuple(result)
+####
+
+
+def available_integrator_descriptions() -> tuple[tuple[IntegratorName, str], ...]:
+    """List available integrators paired with their advertised role."""
+
+    return tuple((name, _INTEGRATOR_DESCRIPTIONS[name]) for name in available_integrators())
 ####
 
 

@@ -2035,6 +2035,39 @@ def test_units_format_rejects_malformed_variable_names_with_recovery() -> None:
     ####
 
 
+def test_units_format_rejects_unknown_targets_across_problem_scopes() -> None:
+    result = ingest_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *define heat\n"
+        "    heat=alt;\n"
+        "  *segment 1\n"
+        "    *when time>1 stop\n"
+        "*units/fmt xecfcc km f.2\n"
+        "*end\n",
+        kind=FileKind.PROBLEM,
+    )
+
+    diagnostic = next(item for item in result.diagnostics if item.code == "unknown-units-format-variable")
+    assert diagnostic.location.line == 7
+    assert any(record.code == "unknown-units-format-variable" for record in result.document.recovered_records)
+####
+
+
+def test_units_format_accepts_format_only_for_declared_user_variables() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*define user-distance\n"
+        "user-distance=10;\n"
+        "*units/fmt\n"
+        "user-distance f.2\n"
+        "*end\n"
+    )
+
+    assert not [item for item in document.diagnostics if item.code in {"units-on-user-defined-variable", "unknown-units-format-variable"}]
+####
+
+
 def test_atmosphere_and_earth_headers_and_user_rows_are_typed() -> None:
     document = parse_problem_text(
         "(demo)\n"

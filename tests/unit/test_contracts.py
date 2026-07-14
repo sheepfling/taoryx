@@ -57,12 +57,26 @@ def test_coordinate_records_require_named_order_and_units() -> None:
 
     assert coordinates.as_tuple(CoordinateOrder.LONGITUDE_LATITUDE_ALTITUDE)[0] == Longitude(1.0)
     assert coordinates.as_tuple(CoordinateOrder.LATITUDE_LONGITUDE_ALTITUDE)[0] == Latitude(0.5)
+    assert coordinates.as_longitude_latitude_altitude() == (Longitude(1.0), Latitude(0.5), Quantity(2.0, Unit.KILOMETER))
+    assert coordinates.as_latitude_longitude_altitude() == (Latitude(0.5), Longitude(1.0), Quantity(2.0, Unit.KILOMETER))
     spherical = GeocentricCoordinates(Quantity(6378.137, Unit.KILOMETER), Longitude(1.0), Latitude(0.5))
     assert spherical.as_tuple(CoordinateOrder.RADIUS_LONGITUDE_LATITUDE)[0].unit is Unit.KILOMETER
+    assert spherical.as_radius_longitude_latitude() == (
+        Quantity(6378.137, Unit.KILOMETER),
+        Longitude(1.0),
+        Latitude(0.5),
+    )
     with pytest.raises(ValueError, match="not valid"):
         coordinates.as_tuple(CoordinateOrder.RADIUS_LONGITUDE_LATITUDE)
     with pytest.raises(ValueError, match="length units"):
         GeodeticCoordinates(Longitude(0.0), Latitude(0.0), Quantity(1.0, Unit.SECOND))
+####
+
+
+def test_coordinate_tuple_annotations_remain_explicit() -> None:
+    assert GeodeticCoordinates.as_longitude_latitude_altitude.__annotations__["return"] == "LongitudeLatitudeAltitude"
+    assert GeodeticCoordinates.as_latitude_longitude_altitude.__annotations__["return"] == "LatitudeLongitudeAltitude"
+    assert GeocentricCoordinates.as_radius_longitude_latitude.__annotations__["return"] == "RadiusLongitudeLatitude"
 ####
 
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 from taoryx.language.ingest import ingest_file
@@ -9,6 +10,8 @@ from taoryx.language.table_parser import parse_table_file, table_type_catalog, t
 
 TABLE_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "table_examples_v1"
 HARNESS_ROOT = TABLE_ROOT / "harnesses"
+
+pytestmark = pytest.mark.table
 
 
 def _load_table_catalogs() -> tuple[dict[str, str], dict[str, set[str]]]:
@@ -36,4 +39,3 @@ def test_table_example_harnesses_ingest_cleanly_with_example_tables() -> None:
         result = ingest_file(path, available_tables=table_types, available_table_variables=table_variables)
         assert result.source.render_bytes() == path.read_bytes(), path
         assert result.valid, path
-

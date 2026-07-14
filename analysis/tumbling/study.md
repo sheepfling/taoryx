@@ -68,3 +68,40 @@ Those follow-on plots now live beside this note as:
 - [plot_drag_area_models.py](./plot_drag_area_models.py)
 - [plot_sphere_ellipsoid_sweeps.py](./plot_sphere_ellipsoid_sweeps.py)
 - [plot_isotropic_averages.py](./plot_isotropic_averages.py)
+
+Generated `.tbl` decks now come from:
+
+- [generate_tbl_data.py](./generate_tbl_data.py)
+- [generated/](./generated/)
+
+The ballistic launch workflow now also includes:
+
+- [generate_launch_sweeps.py](./generate_launch_sweeps.py)
+- [simulate_ballistic_cone.py](./simulate_ballistic_cone.py)
+- [generated/ballistic_cone_launch.prb](./generated/ballistic_cone_launch.prb)
+- [generated/ballistic_cone_history.tbl](./generated/ballistic_cone_history.tbl)
+- [artifacts/ballistic_cone_profiles.png](./artifacts/ballistic_cone_profiles.png)
+
+## Four-shape trajectory comparison
+
+The working comparison uses four assumed bodies with the same launch conditions:
+
+- sphere: orientation-independent reference case;
+- cylinder: axisymmetric body with broadside and end-on drag-area anchors;
+- cone: nose-first, broadside, and base-first drag-area anchors;
+- triaxial ellipsoid: non-axisymmetric projected-area surrogate.
+
+Run [simulate_ballistic_shapes.py](./simulate_ballistic_shapes.py) to generate one history table per body under [generated/four_shape_histories/](./generated/four_shape_histories/) and the aligned comparison plot [artifacts/four_shape_ballistic_comparison.png](./artifacts/four_shape_ballistic_comparison.png). Each history includes downrange position, altitude, speed, flight-path angle, tumble orientation `alpha`, dynamic pressure, and `C_D`.
+
+## Coupled attitude prototype
+
+[simulate_coupled_tumble.py](./simulate_coupled_tumble.py) integrates planar position, velocity, attitude `theta`, and angular rate `omega`. It recomputes `alpha` and `C_D` at every integration stage, and records center-of-pressure, rate-damping, optional static-moment, and total torque separately. The model is deliberately illustrative until calibrated coefficient and moment data are supplied.
+
+The reusable full-angle command is [tools/aero_drag_analysis.py](../../tools/aero_drag_analysis.py):
+
+```sh
+python tools/aero_drag_analysis.py --config examples/aero_drag/cone.json --output-dir build/aero-drag/cone
+python tools/aero_drag_analysis.py --shape triaxial-ellipsoid --output-dir build/aero-drag/ellipsoid
+```
+
+Axisymmetric outputs include full-angle CSV data and a `0` to `180 deg` `cd(alphat)` table. Triaxial output uses `cd(alphat,phi)` with `phi` changing fastest in the flattened table values.

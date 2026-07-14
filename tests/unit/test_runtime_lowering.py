@@ -109,6 +109,27 @@ def test_runtime_applies_geodetic_default_for_assignment_form_initial() -> None:
 ####
 
 
+def test_runtime_lowering_triple_aliases_are_explicit() -> None:
+    assert lowering_module.CartesianTriple == tuple[float, float, float]
+    assert lowering_module.PlatformBasis == tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]
+    assert lowering_module._aerodynamic_acceleration.__annotations__["return"] == "CartesianTriple"
+    assert lowering_module._ecfc_propulsive_acceleration.__annotations__["return"] == "CartesianTriple"
+    assert lowering_module._platform_velocity_components.__annotations__["vector"] == "CartesianTriple"
+    assert lowering_module._geodetic_force_rates.__annotations__["return"] == "CartesianTriple | None"
+####
+
+
+def test_output_interpolation_wraps_angle_aliases_and_keeps_step_channels_discrete() -> None:
+    start = RuntimeState(0.0, (0.0,), named={"alpha": math.radians(179.0), "segment": 1.0})
+    end = RuntimeState(1.0, (1.0,), named={"alpha": math.radians(-179.0), "segment": 2.0})
+
+    interpolated = lowering_module._interpolate_output_state(start, end, 0.5, 0.5)
+
+    assert interpolated.named["alpha"] == pytest.approx(math.pi, abs=1.0e-12)
+    assert interpolated.named["segment"] == pytest.approx(1.0)
+####
+
+
 def test_survey_optimization_can_carry_forward_the_previous_optimum(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     problem = tmp_path / "survey-optimize.prb"
     problem.write_text(
@@ -782,6 +803,33 @@ def test_weight_based_rail_launch_clears_static_friction(tmp_path: Path) -> None
 ####
 
 
+def test_weight_based_rail_launch_keeps_mass_and_weight_aliases_in_sync(tmp_path: Path) -> None:
+    problem = tmp_path / "rail-wt-sync.prb"
+    problem.write_text(
+        "(rail-wt-sync)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial geodetic alt=0 long=0 lat=0 vel=0 gama=0 psi=0 time=0 wt=1\n"
+        "  *file rail.dat time mass wt vel\n"
+        "  *segment 1 launch\n"
+        "    *integ dt=0.1\n"
+        "    *prop thrust=1 mdot=0\n"
+        "    *rail launch cfstat=0.5 cfslid=0.1\n"
+        "    *when time>0.2 stop\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+
+    report = run_files(problem, output_dir=tmp_path / "out", max_steps=100)
+
+    assert report.exit_code == 0
+    final = report.results[0].states["1"][-1]
+    assert final.named["vel"] > 0.0
+    assert final.named["mass"] == pytest.approx(final.named["wt"])
+####
+
+
 def test_case_insensitive_table_axes_link_to_normalized_runtime_state(tmp_path: Path) -> None:
     root = ROOT / "tests/fixtures/taos_e2e_v23/cases/positive/p046_case_insensitive_free_field/input"
     report = run_files(next(root.glob("*.prb")), tuple(root.glob("*.tbl")), output_dir=tmp_path, max_steps=100)
@@ -1181,6 +1229,54 @@ def test_optimization_restarts_retry_and_double_final_budget(monkeypatch: pytest
 
     assert report.exit_code == 0
     assert budgets == [4, 4, 8]
+####
+
+
+def test_optimization_splits_static_and_dynamic_trajectories_when_possible(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    problem = tmp_path / "optimize-static-split.prb"
+    problem.write_text(
+        "(optimize-static-split)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 optimized start on 1\n"
+        "  *initial ecfc x=0 y=0 z=0 xdt=opta-1 ydt=0 zdt=0 time=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dt=0.1\n"
+        "    *when time>1 stop\n"
+        "*trajectory 2 static start on 1\n"
+        "  *initial ecfc x=10 y=0 z=0 xdt=0 ydt=0 zdt=0 time=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dt=0.1\n"
+        "    *when time>1 stop\n"
+        "*optimize a for xecfc=max on segment 1, trajectory 1\n"
+        "  constrain yecfc=0 on segment 1, trajectory 2\n"
+        "  par-1=2 lo-1=0 hi-1=4 integ=0 maxitr=1 tol=0.001\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+
+    real_compute_trajectories = lowering_module.compute_trajectories
+    calls: list[tuple[tuple[str, ...], bool]] = []
+
+    def capture_compute_trajectories(problem, *args, **kwargs):
+        calls.append((tuple(sorted(problem.vehicles)), kwargs.get("synchronize_vehicles", True)))
+        return real_compute_trajectories(problem, *args, **kwargs)
+    ####
+
+    class FakeOptimizer:
+        def run(self, initial: tuple[float, ...], *, max_iterations: int) -> OptimizationResult:
+            return OptimizationResult(initial, 0.0, (), (), max_iterations, OptimizationStatus.MAX_ITERATIONS)
+        ####
+    ####
+
+    monkeypatch.setattr(lowering_module, "compute_trajectories", capture_compute_trajectories)
+    monkeypatch.setattr(lowering_module, "resolve_optimize_block", lambda *args, **kwargs: FakeOptimizer())
+
+    report = run_files(problem, output_dir=tmp_path / "out", max_steps=100)
+
+    assert report.exit_code == 0
+    assert (("1",), False) in calls
+    assert (("2",), True) in calls
 ####
 
 
@@ -2122,6 +2218,39 @@ def test_relative_guidance_connects_target_state_to_live_commands(tmp_path: Path
     assert "yawi" in final.named
     assert "pitchi" in final.named
     assert final.named["relrng[2]"] > 0.0
+    assert math.isfinite(final.named["relvel[2]"])
+####
+
+
+def test_relative_guidance_can_target_a_vehicle_declared_later_in_the_file(tmp_path: Path) -> None:
+    problem = tmp_path / "forward-relative-guidance.prb"
+    problem.write_text(
+        "(forward-relative-guidance)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 shooter start on 1\n"
+        "  *initial geodetic alt=0 long=0 lat=0 vel=0 gama=0 psi=0 time=0 mass=1\n"
+        "  *file shooter.dat time yawi pitchi relrng[2] relvel[2]\n"
+        "  *segment 1 guidance\n"
+        "    *integ dt=0.1\n"
+        "    *fly propnav=2\n"
+        "    *when time>0.1 stop\n"
+        "*trajectory 2 target start on 1\n"
+        "  *initial geodetic alt=0 long=0 lat=0 vel=0 gama=0 psi=0 time=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dt=0.1\n"
+        "    *when time>0.1 stop\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+
+    report = run_files(problem, output_dir=tmp_path / "out", max_steps=100)
+
+    assert report.exit_code == 0
+    final = report.results[0].states["1"][-1]
+    assert math.isfinite(final.named["yawi"])
+    assert math.isfinite(final.named["pitchi"])
+    assert math.isfinite(final.named["relrng[2]"])
     assert math.isfinite(final.named["relvel[2]"])
 ####
 

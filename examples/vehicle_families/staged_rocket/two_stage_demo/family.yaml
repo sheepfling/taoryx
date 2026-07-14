@@ -1,0 +1,33 @@
+schema_version: 1
+family: staged_rocket
+case: two_stage_demo
+provenance: synthetic-smoke-test
+description: Minimal two-stage point-mass composition for runtime and table-linking tests.
+claims:
+  - parser-and-lowering coverage
+  - segment transition coverage
+  - mass and thrust invariant coverage
+  - child trajectory initialization coverage
+not_claimed:
+  - engineering vehicle performance
+  - historical TAOS 96.0 numerical compatibility
+  - six-degree-of-freedom rigid-body dynamics
+mission: mission.prb
+tables:
+  - aero.tbl
+  - propulsion.tbl
+segments:
+  - id: 10
+    purpose: first-stage powered flight
+  - id: 20
+    purpose: first-stage separation and coast
+  - id: 30
+    purpose: second-stage powered flight
+  - id: 40
+    purpose: payload coast
+  - id: 50
+    purpose: discarded-stage child trajectory
+oracles:
+  - first_stage_thrust_is_constant
+  - mass_decreases_only_at_separation
+  - payload_inherits_parent_endpoint

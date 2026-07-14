@@ -64,6 +64,7 @@ def render_table_svg(
     value: PreparedTable | float | int,
     *,
     axis_labels: tuple[str, ...] = (),
+    value_label: str = "value",
     title: str = "",
     fixed_axes: dict[AxisKey, float] | None = None,
     max_facets: int = 12,
@@ -73,6 +74,7 @@ def render_table_svg(
     panel = _render_value_panel(
         value,
         axis_labels=_normalize_axis_labels(axis_labels, table_dimension(value)),
+        value_label=value_label,
         title=title,
         fixed_axes=fixed_axes or {},
         max_facets=max_facets,
@@ -85,6 +87,7 @@ def render_table_png(
     value: PreparedTable | float | int,
     *,
     axis_labels: tuple[str, ...] = (),
+    value_label: str = "value",
     title: str = "",
     fixed_axes: dict[AxisKey, float] | None = None,
     max_facets: int = 12,
@@ -96,6 +99,7 @@ def render_table_png(
     figure = _render_value_figure(
         value,
         axis_labels=_normalize_axis_labels(axis_labels, table_dimension(value)),
+        value_label=value_label,
         title=title,
         fixed_axes=fixed_axes or {},
         max_facets=max_facets,
@@ -122,6 +126,7 @@ def _render_value_panel(
     value: PreparedTable | float | int,
     *,
     axis_labels: tuple[str, ...],
+    value_label: str,
     title: str,
     fixed_axes: dict[AxisKey, float],
     max_facets: int,
@@ -137,10 +142,10 @@ def _render_value_panel(
     remaining_labels = tuple(label for index, label in enumerate(axis_labels) if index not in normalized_fixed)
     labels = _normalize_axis_labels(remaining_labels, sliced.dimension)
     if sliced.dimension == 1:
-        return _render_line_panel(sliced, labels, title=title)
+        return _render_line_panel(sliced, labels, value_label=value_label, title=title)
     if sliced.dimension == 2:
-        return _render_heatmap_panel(sliced, labels, title=title)
-    return _render_facet_stack_panel(sliced, labels, title=title, max_facets=max_facets)
+        return _render_heatmap_panel(sliced, labels, value_label=value_label, title=title)
+    return _render_facet_stack_panel(sliced, labels, value_label=value_label, title=title, max_facets=max_facets)
 ####
 
 
@@ -148,6 +153,7 @@ def _render_value_figure(
     value: PreparedTable | float | int,
     *,
     axis_labels: tuple[str, ...],
+    value_label: str,
     title: str,
     fixed_axes: dict[AxisKey, float],
     max_facets: int,
@@ -164,11 +170,11 @@ def _render_value_figure(
     remaining_labels = tuple(label for index, label in enumerate(axis_labels) if index not in normalized_fixed)
     labels = _normalize_axis_labels(remaining_labels, sliced.dimension)
     if sliced.dimension == 1:
-        return _render_line_figure(sliced, labels, title=title, plt=matplotlib)
+        return _render_line_figure(sliced, labels, value_label=value_label, title=title, plt=matplotlib)
     if sliced.dimension == 2:
-        return _render_heatmap_figure(sliced, labels, title=title, plt=matplotlib)
+        return _render_heatmap_figure(sliced, labels, value_label=value_label, title=title, plt=matplotlib)
     if sliced.dimension == 3:
-        return _render_facet_stack_figure(sliced, labels, title=title, max_facets=max_facets, plt=matplotlib)
+        return _render_facet_stack_figure(sliced, labels, value_label=value_label, title=title, max_facets=max_facets, plt=matplotlib)
     raise ValueError("render_table_png requires fixed axes that reduce tables to at most three dimensions")
 ####
 
@@ -184,13 +190,13 @@ def _render_scalar_figure(value: float, *, title: str, plt: Any) -> Any:
 ####
 
 
-def _render_line_figure(table: PreparedTable, labels: tuple[str, ...], *, title: str, plt: Any) -> Any:
+def _render_line_figure(table: PreparedTable, labels: tuple[str, ...], *, value_label: str, title: str, plt: Any) -> Any:
     figure, axis = plt.subplots(figsize=(7.2, 3.6), layout="constrained")
     figure.patch.set_facecolor("white")
     axis_x = table.axes[0]
     axis.plot(axis_x, table.values, color="#2563eb", linewidth=2.2, marker="o", markersize=4)
     axis.set_xlabel(labels[0])
-    axis.set_ylabel("value")
+    axis.set_ylabel(value_label)
     if title:
         axis.set_title(title, loc="left", fontsize=13, fontweight="semibold")
     axis.grid(True, color="#cbd5e1", linewidth=0.8)
@@ -199,7 +205,7 @@ def _render_line_figure(table: PreparedTable, labels: tuple[str, ...], *, title:
 ####
 
 
-def _render_heatmap_figure(table: PreparedTable, labels: tuple[str, ...], *, title: str, plt: Any) -> Any:
+def _render_heatmap_figure(table: PreparedTable, labels: tuple[str, ...], *, value_label: str, title: str, plt: Any) -> Any:
     figure, axis = plt.subplots(figsize=(7.2, 4.4), layout="constrained")
     figure.patch.set_facecolor("white")
     matrix = _reshape_values(table)
@@ -213,16 +219,17 @@ def _render_heatmap_figure(table: PreparedTable, labels: tuple[str, ...], *, tit
     )
     axis.set_xlabel(labels[0])
     axis.set_ylabel(labels[1])
+    colorbar = figure.colorbar(mesh, ax=axis, shrink=0.88)
+    colorbar.ax.set_ylabel(value_label, rotation=270, labelpad=12)
     if title:
         axis.set_title(title, loc="left", fontsize=13, fontweight="semibold")
-    colorbar = figure.colorbar(mesh, ax=axis, shrink=0.88)
     colorbar.ax.tick_params(labelsize=8)
     axis.tick_params(labelsize=9)
     return figure
 ####
 
 
-def _render_facet_stack_figure(table: PreparedTable, labels: tuple[str, ...], *, title: str, max_facets: int, plt: Any) -> Any:
+def _render_facet_stack_figure(table: PreparedTable, labels: tuple[str, ...], *, value_label: str, title: str, max_facets: int, plt: Any) -> Any:
     facet_values = table.axes[0]
     if len(facet_values) > max_facets:
         raise ValueError(f"table facet axis {labels[0]!r} has {len(facet_values)} slices; limit is {max_facets}")
@@ -240,7 +247,7 @@ def _render_facet_stack_figure(table: PreparedTable, labels: tuple[str, ...], *,
         if child.dimension == 1:
             axis.plot(child.axes[0], child.values, color="#2563eb", linewidth=2.0, marker="o", markersize=3)
             axis.set_xlabel(child_labels[0])
-            axis.set_ylabel("value")
+            axis.set_ylabel(value_label)
             axis.set_title(child_title, loc="left", fontsize=10, fontweight="semibold")
             axis.grid(True, color="#cbd5e1", linewidth=0.7)
         elif child.dimension == 2:
@@ -255,7 +262,8 @@ def _render_facet_stack_figure(table: PreparedTable, labels: tuple[str, ...], *,
             axis.set_xlabel(child_labels[0])
             axis.set_ylabel(child_labels[1])
             axis.set_title(child_title, loc="left", fontsize=10, fontweight="semibold")
-            figure.colorbar(mesh, ax=axis, shrink=0.85)
+            colorbar = figure.colorbar(mesh, ax=axis, shrink=0.85)
+            colorbar.ax.set_ylabel(value_label, rotation=270, labelpad=10)
         else:
             raise ValueError("facet rendering expects slices to reduce to one or two dimensions")
         axis.tick_params(labelsize=8)
@@ -279,7 +287,7 @@ def _render_scalar_panel(value: float, *, title: str) -> RenderedSvgPanel:
 ####
 
 
-def _render_line_panel(table: PreparedTable, labels: tuple[str, ...], *, title: str) -> RenderedSvgPanel:
+def _render_line_panel(table: PreparedTable, labels: tuple[str, ...], *, value_label: str, title: str) -> RenderedSvgPanel:
     width = 720
     height = 360
     left = 78
@@ -312,7 +320,7 @@ def _render_line_panel(table: PreparedTable, labels: tuple[str, ...], *, title: 
         f'<rect x="0" y="0" width="{width}" height="{height}" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2" rx="10" ry="10" />',
         f'<text x="{left}" y="26" font-size="18" font-family="sans-serif" font-weight="700" fill="#0f172a">{escape(title)}</text>' if title else "",
         f'<text x="{left}" y="{height - 18}" font-size="13" font-family="sans-serif" fill="#334155">{escape(labels[0])}</text>',
-        f'<text x="14" y="{top - 6}" font-size="13" font-family="sans-serif" fill="#334155" transform="rotate(-90 14 {top - 6})">{escape("value")}</text>',
+        f'<text x="14" y="{top - 6}" font-size="13" font-family="sans-serif" fill="#334155" transform="rotate(-90 14 {top - 6})">{escape(value_label)}</text>',
         f'<line x1="{left}" y1="{top}" x2="{left}" y2="{top + plot_height}" stroke="#94a3b8" stroke-width="1" />',
         f'<line x1="{left}" y1="{top + plot_height}" x2="{left + plot_width}" y2="{top + plot_height}" stroke="#94a3b8" stroke-width="1" />',
         f'<polyline fill="none" stroke="#2563eb" stroke-width="2.5" points="{" ".join(points)}" />',
@@ -339,7 +347,7 @@ def _render_line_panel(table: PreparedTable, labels: tuple[str, ...], *, title: 
 ####
 
 
-def _render_heatmap_panel(table: PreparedTable, labels: tuple[str, ...], *, title: str) -> RenderedSvgPanel:
+def _render_heatmap_panel(table: PreparedTable, labels: tuple[str, ...], *, value_label: str, title: str) -> RenderedSvgPanel:
     width = 720
     height = 420
     left = 84
@@ -363,6 +371,7 @@ def _render_heatmap_panel(table: PreparedTable, labels: tuple[str, ...], *, titl
         f'<text x="{left}" y="28" font-size="18" font-family="sans-serif" font-weight="700" fill="#0f172a">{escape(title)}</text>' if title else "",
         f'<text x="{left + plot_width / 2:.2f}" y="{height - 16}" text-anchor="middle" font-size="13" font-family="sans-serif" fill="#334155">{escape(labels[0])}</text>',
         f'<text x="18" y="{top + plot_height / 2:.2f}" text-anchor="middle" font-size="13" font-family="sans-serif" fill="#334155" transform="rotate(-90 18 {top + plot_height / 2:.2f})">{escape(labels[1])}</text>',
+        f'<text x="{width - 18}" y="{top + 14}" text-anchor="end" font-size="12" font-family="sans-serif" fill="#475569">{escape(value_label)}</text>',
         f'<line x1="{left}" y1="{top}" x2="{left}" y2="{top + plot_height}" stroke="#94a3b8" stroke-width="1" />',
         f'<line x1="{left}" y1="{top + plot_height}" x2="{left + plot_width}" y2="{top + plot_height}" stroke="#94a3b8" stroke-width="1" />',
     ]
@@ -394,6 +403,7 @@ def _render_facet_stack_panel(
     table: PreparedTable,
     labels: tuple[str, ...],
     *,
+    value_label: str,
     title: str,
     max_facets: int,
 ) -> RenderedSvgPanel:
@@ -409,7 +419,14 @@ def _render_facet_stack_panel(
         assert isinstance(child, PreparedTable)
         child_labels = labels[1:]
         child_title = f"{labels[0]} = {_format_number(coordinate)}"
-        panel = _render_value_panel(child, axis_labels=child_labels, title=child_title, fixed_axes={}, max_facets=max_facets)
+        panel = _render_value_panel(
+            child,
+            axis_labels=child_labels,
+            value_label=value_label,
+            title=child_title,
+            fixed_axes={},
+            max_facets=max_facets,
+        )
         children.append((coordinate, panel))
         child_width = max(child_width, panel.width)
         child_height += panel.height + 24

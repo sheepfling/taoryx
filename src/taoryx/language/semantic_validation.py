@@ -15,7 +15,21 @@ from taoryx.language.expressions import (
     TableReferenceExpression,
 )
 from taoryx.language.grammar_contracts import DOCUMENTED_STATE_VARIABLES
-from taoryx.language.models import OptimizeBlock, OptimizeEndpoint, ProblemDocument, SearchBlock, SurveyBlock, TableDocument, WhenBlock
+from taoryx.language.models import (
+    DefineBlock,
+    EgsBlock,
+    FileBlock,
+    OptimizeBlock,
+    OptimizeEndpoint,
+    PrintBlock,
+    ProblemDocument,
+    SearchBlock,
+    SurveyBlock,
+    TableDocument,
+    UnitsFormatBlock,
+    WhenBlock,
+)
+from taoryx.runtime.units import variable_dimension
 
 TABLE_TYPE_REFERENCES = frozenset(
     {
@@ -93,6 +107,42 @@ def _walk_model_expressions(value: object, location: object) -> Iterator[tuple[E
             yield from _walk_model_expressions(child, location)
         ####
     ####
+
+
+def _normalize_variable_name(name: str) -> str:
+    return name.casefold().split("[", 1)[0]
+####
+
+
+def _collect_known_output_variable_names(problem) -> set[str]:
+    known = {
+        _normalize_variable_name(block.variable)
+        for block in problem.blocks
+        if isinstance(block, DefineBlock) and block.variable is not None
+    }
+    for block in problem.blocks:
+        if isinstance(block, (FileBlock, EgsBlock, PrintBlock)):
+            known.update(_normalize_variable_name(variable) for variable in block.variables)
+        ####
+    for trajectory in problem.trajectories:
+        for block in trajectory.blocks:
+            if isinstance(block, DefineBlock) and block.variable is not None:
+                known.add(_normalize_variable_name(block.variable))
+            elif isinstance(block, (FileBlock, EgsBlock, PrintBlock)):
+                known.update(_normalize_variable_name(variable) for variable in block.variables)
+            ####
+        for segment in trajectory.segments:
+            for block in segment.blocks:
+                if isinstance(block, DefineBlock) and block.variable is not None:
+                    known.add(_normalize_variable_name(block.variable))
+                elif isinstance(block, (FileBlock, EgsBlock, PrintBlock)):
+                    known.update(_normalize_variable_name(variable) for variable in block.variables)
+                ####
+            ####
+        ####
+    ####
+    return known
+####
 ####
 
 
@@ -117,6 +167,7 @@ def validate_problem(
         for name, variables in (available_table_variables or {}).items()
     }
     for problem in document.problems:
+        known_output_variables = _collect_known_output_variable_names(problem)
         for expression, location in _walk_model_expressions(problem, problem.location):
             table_name = None
             if isinstance(expression, TableReferenceExpression):
@@ -137,6 +188,26 @@ def validate_problem(
                         location=location,
                     )
                 )
+            ####
+        ####
+        for block in problem.blocks:
+            if not isinstance(block, UnitsFormatBlock):
+                continue
+            for setting in block.settings:
+                variable = _normalize_variable_name(setting.variable)
+                if variable_dimension(setting.variable) is None and variable not in known_output_variables:
+                    diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="unknown-units-format-variable",
+                            message=(
+                                f"Units/format target {setting.variable!r} does not match a documented output variable "
+                                "or user-defined variable in this problem."
+                            ),
+                            location=setting.location,
+                        )
+                    )
+                ####
             ####
         ####
         survey_blocks = [block for block in problem.blocks if isinstance(block, SurveyBlock) and block.survey_id is not None]

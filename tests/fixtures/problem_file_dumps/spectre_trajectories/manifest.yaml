@@ -4,7 +4,7 @@ leaf: spectre_trajectories
 source_bundle: ../../spectre_simple_aero_v1
 generated_spec: spec.yaml
 translation_style: synthetic_taos_trajectories
-description: Full Spectre-like trajectory workspace covering the simple-aero maneuver families.
+description: Full Spectre-like trajectory workspace covering the simple-aero maneuver families with a shared launch/target pattern and structured solution metadata.
 files:
   - ballistic.prb
   - cbcr_left.prb

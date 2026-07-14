@@ -1,0 +1,13 @@
+{
+  "name": "cylinder",
+  "shape": "cylinder",
+  "reference_area_m2": 0.7853981633974483,
+  "parameters": {
+    "radius_m": 0.5,
+    "length_m": 2.0,
+    "cd_front": 1.0,
+    "cd_broadside": 1.1,
+    "cd_rear": 1.0,
+    "blend_exponent": 3.0
+  }
+}

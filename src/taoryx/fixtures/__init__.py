@@ -9,6 +9,7 @@ from .spectre_dumps import (
     write_workspace,
 )
 from .spectre_trajectories import (
+    SpectreSolutionMetadata,
     SpectreTrajectoryProblemSpec,
     SpectreTrajectorySpec,
     SpectreTrajectoryWorkspaceSpec,
@@ -25,6 +26,7 @@ from .spectre_trajectories import (
 from .spectre_trajectories import (
     write_workspace as write_trajectory_workspace,
 )
+from .table_example_artifacts import TableArtifactPlotSeries, build_run_plot_series
 
 __all__ = [
     "SpectreProblemSpec",
@@ -32,12 +34,15 @@ __all__ = [
     "SpectreTrajectoryProblemSpec",
     "SpectreTrajectorySpec",
     "SpectreTrajectoryWorkspaceSpec",
+    "SpectreSolutionMetadata",
     "load_spec",
     "load_trajectory_spec",
     "render_problem_file",
     "render_workspace",
     "render_trajectory_problem_file",
     "render_trajectory_workspace",
+    "TableArtifactPlotSeries",
+    "build_run_plot_series",
     "write_workspace",
     "write_trajectory_workspace",
 ]

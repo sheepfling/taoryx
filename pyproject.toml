@@ -47,6 +47,7 @@ markers = [
   "grammar: parser, lexer, EBNF, corpus, and language-validation view",
   "equations: equation catalog, implementation, provenance, and verification view",
   "algorithms: algorithm catalog, runtime bindings, and algorithm-verification view",
+  "table: table parser, table fixtures, table artifacts, and table-visualization view",
   "slow: long-running tests that are excluded from the fast development loop",
   "artifact: tests that intentionally write human-readable artifacts under artifacts/",
   "spectre: end-to-end or fixture tests for the Spectre problem/segment trajectory corpus",

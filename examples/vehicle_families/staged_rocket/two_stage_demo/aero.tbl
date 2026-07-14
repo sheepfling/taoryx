@@ -1,0 +1,24 @@
+(sr-a-stage1-on)
+table ca(mach) no-extrap sref=1
+mach=0,1,5,10
+ca=0.20,0.18,0.12,0.10
+
+(sr-a-stage1-off)
+table ca(mach) no-extrap sref=1
+mach=0,1,5,10
+ca=0.12,0.11,0.08,0.06
+
+(sr-a-stage2-on)
+table ca(mach) no-extrap sref=1
+mach=0,1,5,10
+ca=0.16,0.14,0.10,0.08
+
+(sr-a-stage2-off)
+table ca(mach) no-extrap sref=1
+mach=0,1,5,10
+ca=0.10,0.09,0.06,0.05
+
+(sr-a-booster-tumble)
+table ca(mach) no-extrap sref=1
+mach=0,1,5,10
+ca=0.25,0.22,0.16,0.12

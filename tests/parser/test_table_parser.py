@@ -7,6 +7,8 @@ from taoryx.language.table_parser import parse_table_file, parse_table_text
 
 FIXTURES = sorted(Path("examples/chapter03").glob("*.tbl")) + sorted(Path("examples/chapter04").glob("*.tbl"))
 
+pytestmark = pytest.mark.table
+
 
 @pytest.mark.parametrize("path", FIXTURES)
 def test_manual_table_fixture_parses(path: Path) -> None:

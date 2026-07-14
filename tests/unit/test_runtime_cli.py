@@ -66,7 +66,10 @@ def test_cli_run_ingests_problem_and_table_and_writes_report(tmp_path: Path, cap
 
 def test_cli_lists_available_integrators(capsys) -> None:
     assert main(["integrators", "list"]) == 0
-    assert "rkf45" in capsys.readouterr().out
+    output = capsys.readouterr().out
+    assert "euler\tfixed-step, fast smoke tests" in output
+    assert "rk4\tfixed-step, recommended for deterministic production runs" in output
+    assert "rkf45\tadaptive reference integrator" in output
 ####
 
 

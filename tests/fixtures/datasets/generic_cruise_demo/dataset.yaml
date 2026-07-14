@@ -1,0 +1,68 @@
+schema_version: 1
+dataset_id: generic_cruise_demo
+title: Generic subsonic cruise vehicle
+classification: synthetic_engineering_example
+target_format: taoryx_tbl
+target_unit_system: taoryx_legacy
+conventions:
+  body_axes: x_forward_y_right_z_down
+  angle_unit: deg
+  mdot_sign: positive_consumption
+  coefficients: wind_axes
+  interpolation: multilinear
+tables:
+  - id: demo-clean-cl
+    type: cl
+    source: source/clean_aero.csv
+    axes: [mach, alpha_deg]
+    value_column: cl
+    extrapolation: no-extrap
+  - id: demo-clean-cd
+    type: cd
+    source: source/clean_aero.csv
+    axes: [mach, alpha_deg]
+    value_column: cd
+    extrapolation: no-extrap
+  - id: demo-flap-dcl
+    type: cl
+    source: source/flap_increments.csv
+    axes: [mach, alpha_deg, flaps]
+    value_column: delta_cl
+    extrapolation: no-extrap
+  - id: demo-flap-dcd
+    type: cd
+    source: source/flap_increments.csv
+    axes: [mach, alpha_deg, flaps]
+    value_column: delta_cd
+    extrapolation: no-extrap
+  - id: demo-speedbrake-dcd
+    type: cd
+    source: source/speedbrake_increments.csv
+    axes: [mach, speedbrake]
+    value_column: delta_cd
+    extrapolation: no-extrap
+  - id: demo-jet-thrust
+    type: thrust
+    source: source/engine_deck.csv
+    axes: [alt, mach, throttle]
+    value_column: thrust_n
+    units: n
+    extrapolation: no-extrap
+  - id: demo-jet-mdot
+    type: mdot
+    source: source/engine_deck.csv
+    axes: [alt, mach, throttle]
+    value_column: mdot_kg_s
+    units: kg/sec
+    extrapolation: no-extrap
+  - id: demo-cg
+    type: cg
+    source: source/cg.csv
+    axes: [wt]
+    value_column: cg_x_m
+    extrapolation: no-extrap
+provenance:
+  generated_by: taoryx-dataset-compiler
+  source_kind: synthetic
+  flight_qualified: false
+  notes: [software_testing, demonstration, 3dof_force_model]

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 from taoryx.language.ingest import ingest_file
@@ -9,6 +10,8 @@ from taoryx.language.semantic_validation import validate_table_file
 from taoryx.language.table_parser import parse_table_file
 
 ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "table_examples_v1"
+
+pytestmark = pytest.mark.table
 
 
 def test_table_examples_manifest_lists_every_example_table() -> None:

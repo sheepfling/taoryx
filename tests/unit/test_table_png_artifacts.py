@@ -10,8 +10,9 @@ from taoryx.visualization import render_table_png
 
 ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "table_examples_v1"
 
+pytestmark = [pytest.mark.table, pytest.mark.artifact]
 
-@pytest.mark.artifact
+
 def test_table_example_workspace_renders_png_artifacts(artifact_dir: Path) -> None:
     output_root = artifact_dir / "table-plots"
     generated: list[Path] = []

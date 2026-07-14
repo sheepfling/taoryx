@@ -30,6 +30,15 @@ VIEW_FILES: dict[str, frozenset[str]] = {
             "tests/unit/test_verification_baseline.py",
         }
     ),
+    "table": frozenset(
+        {
+            "tests/parser/test_table_parser.py",
+            "tests/unit/test_table_examples_problem_harnesses.py",
+            "tests/unit/test_table_examples_runtime_harnesses.py",
+            "tests/unit/test_table_examples_workspace.py",
+            "tests/unit/test_table_png_artifacts.py",
+        }
+    ),
     "algorithms": frozenset(
         {
             "tests/unit/test_algorithm_catalog.py",
@@ -77,6 +86,8 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
         relative_path = str(Path(str(item.fspath)).resolve().relative_to(ROOT))
         if relative_path.startswith("tests/parser/"):
             item.add_marker("grammar")
+        if relative_path.startswith("tests/parser/test_table_parser.py"):
+            item.add_marker("table")
         for view, paths in VIEW_FILES.items():
             if relative_path in paths:
                 item.add_marker(view)

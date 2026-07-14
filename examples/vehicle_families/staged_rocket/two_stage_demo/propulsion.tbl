@@ -1,0 +1,24 @@
+(sr-a-stage1-thrust)
+table thrust(tmark) no-extrap units=lb
+tmark=0,1,4
+thrust=2000,2000,0
+
+(sr-a-stage1-mdot)
+table mdot(tmark) no-extrap units=lb/sec
+tmark=0,1,4
+mdot=10,10,0
+
+(sr-a-stage2-thrust)
+table thrust(tmark) no-extrap units=lb
+tmark=0,1,3
+thrust=800,800,0
+
+(sr-a-stage2-mdot)
+table mdot(tmark) no-extrap units=lb/sec
+tmark=0,1,3
+mdot=4,4,0
+
+(sr-a-zero-mdot)
+table mdot(tmark) no-extrap units=lb/sec
+tmark=0,10
+mdot=0,0

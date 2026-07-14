@@ -4,9 +4,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import TypeAlias
 
 from .angles import Latitude, Longitude
 from .units import Quantity
+
+LongitudeLatitudeAltitude: TypeAlias = tuple[Longitude, Latitude, Quantity]
+LatitudeLongitudeAltitude: TypeAlias = tuple[Latitude, Longitude, Quantity]
+RadiusLongitudeLatitude: TypeAlias = tuple[Quantity, Longitude, Latitude]
+####
 
 
 class CoordinateOrder(StrEnum):
@@ -31,7 +37,7 @@ class GeodeticCoordinates:
             raise ValueError("geodetic altitude must have length units")
         ####
 
-    def as_tuple(self, order: CoordinateOrder) -> tuple[object, object, object]:
+    def as_tuple(self, order: CoordinateOrder) -> LongitudeLatitudeAltitude | LatitudeLongitudeAltitude:
         """Serialize only after the caller chooses a named coordinate order."""
 
         if order is CoordinateOrder.LONGITUDE_LATITUDE_ALTITUDE:
@@ -39,6 +45,18 @@ class GeodeticCoordinates:
         if order is CoordinateOrder.LATITUDE_LONGITUDE_ALTITUDE:
             return self.latitude, self.longitude, self.altitude
         raise ValueError(f"order {order} is not valid for geodetic coordinates")
+    ####
+
+    def as_longitude_latitude_altitude(self) -> LongitudeLatitudeAltitude:
+        """Return the documented longitude/latitude/altitude ordering."""
+
+        return self.longitude, self.latitude, self.altitude
+    ####
+
+    def as_latitude_longitude_altitude(self) -> LatitudeLongitudeAltitude:
+        """Return the alternate latitude/longitude/altitude ordering explicitly."""
+
+        return self.latitude, self.longitude, self.altitude
     ####
 
 
@@ -55,9 +73,15 @@ class GeocentricCoordinates:
             raise ValueError("geocentric radius must have length units")
         ####
 
-    def as_tuple(self, order: CoordinateOrder) -> tuple[object, object, object]:
+    def as_tuple(self, order: CoordinateOrder) -> RadiusLongitudeLatitude:
         if order is not CoordinateOrder.RADIUS_LONGITUDE_LATITUDE:
             raise ValueError(f"order {order} is not valid for geocentric coordinates")
+        return self.radius, self.longitude, self.latitude
+    ####
+
+    def as_radius_longitude_latitude(self) -> RadiusLongitudeLatitude:
+        """Return the canonical radius/longitude/latitude ordering explicitly."""
+
         return self.radius, self.longitude, self.latitude
     ####
 ####

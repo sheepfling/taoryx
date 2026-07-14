@@ -7,7 +7,7 @@ import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import cast
+from typing import TypeAlias, cast
 
 from pydantic import BaseModel
 
@@ -80,6 +80,7 @@ from taoryx.language.models import (
 from taoryx.modes import DynamicsMode, Kinematic6DofState
 from taoryx.numeric import DifferenceMode
 from taoryx.optimization import build_optimization_problem, redistribute_control_history
+from taoryx.output_catalog import output_channel_spec
 from taoryx.searches import golden_section_minimize, parabolic_minimize, parabolic_root, secant_bracketed_root
 from taoryx.tables import (
     ExtrapolationMode,
@@ -101,7 +102,10 @@ from .surveys import generate_survey_cases
 from .units import format_number, from_internal, selected_setting, to_internal
 
 _TABLE_EVALUATOR_CACHE: dict[int, tuple[Mapping[str, RuntimeTable], dict[str, Callable[[Mapping[str, float]], float]]]] = {}
-PlatformBasis = tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]
+CartesianTriple: TypeAlias = tuple[float, float, float]
+PlatformBasis: TypeAlias = tuple[CartesianTriple, CartesianTriple, CartesianTriple]
+SurveySpan: TypeAlias = CartesianTriple
+####
 
 
 def _contains_indexed_expression(value: object) -> bool:
@@ -1366,7 +1370,7 @@ def _aerodynamic_acceleration(
     tables: Mapping[str, RuntimeTable],
     parameters: Mapping[str, float],
     mass: float,
-) -> tuple[float, float, float]:
+) -> CartesianTriple:
     """Resolve axial drag from active ``ca`` tables in the current segment."""
 
     speed = math.sqrt(sum(named.get(name, 0.0) ** 2 for name in ("xdt", "ydt", "zdt")))
@@ -1401,7 +1405,7 @@ def _ecfc_propulsive_acceleration(
     tables: Mapping[str, RuntimeTable],
     parameters: Mapping[str, float],
     mass: float,
-) -> tuple[float, float, float]:
+) -> CartesianTriple:
     """Assemble thrust vectors in ECFC axes from active propulsion blocks."""
 
     if segment is None:
@@ -1451,7 +1455,7 @@ def _ecfc_aerodynamic_acceleration(
     tables: Mapping[str, RuntimeTable],
     parameters: Mapping[str, float],
     mass: float,
-) -> tuple[float, float, float]:
+) -> CartesianTriple:
     """Accumulate aerodynamic coefficient families in ECFC components."""
 
     velocity = Vector3(named.get("xdt", 0.0), named.get("ydt", 0.0), named.get("zdt", 0.0))
@@ -1540,9 +1544,9 @@ def _geodetic_force_rates(
     rotation_rate: float = 0.0,
     j2_coefficient: float = 0.0,
     harmonic_coefficients: Mapping[tuple[int, int], tuple[float, float]] | None = None,
-    propulsive_acceleration: tuple[float, float, float] | None = None,
-    guidance_acceleration: tuple[float, float, float] = (0.0, 0.0, 0.0),
-) -> tuple[float, float, float] | None:
+    propulsive_acceleration: CartesianTriple | None = None,
+    guidance_acceleration: CartesianTriple = (0.0, 0.0, 0.0),
+) -> CartesianTriple | None:
     """Project geodetic force, gravity, and rotating-frame terms into rates."""
 
     longitude_name = "long" if "long" in named else "lon" if "lon" in named else None
@@ -1660,7 +1664,7 @@ def _geodetic_propulsive_acceleration(
     tables: Mapping[str, RuntimeTable],
     parameters: Mapping[str, float],
     mass: float,
-) -> tuple[float, float, float] | None:
+) -> CartesianTriple | None:
     """Resolve propulsion vectors in the active geodetic-horizon basis."""
 
     if segment is None:
@@ -1811,7 +1815,7 @@ def _inertial_platform_observables(
     basis_value = platform.get("basis")
     if not isinstance(origin_value, tuple) or not isinstance(basis_value, tuple) or len(origin_value) != 3 or len(basis_value) != 3:
         return {}
-    origin = cast(tuple[float, float, float], origin_value)
+    origin = cast(CartesianTriple, origin_value)
     basis = cast(PlatformBasis, basis_value)
     time = values.get("time", 0.0)
     position_ecic = _rotate_ecfc_to_ecic((values.get("x", 0.0), values.get("y", 0.0), values.get("z", 0.0)), earth_rotation_rate, time)
@@ -1832,7 +1836,7 @@ def _inertial_platform_observables(
 ####
 
 
-def _platform_velocity_components(vector: tuple[float, float, float], basis: PlatformBasis) -> dict[str, float]:
+def _platform_velocity_components(vector: CartesianTriple, basis: PlatformBasis) -> dict[str, float]:
     return {name: _dot_tuple(vector, axis) for name, axis in zip(("xipdt", "yipdt", "zipdt"), basis, strict=True)}
 ####
 
@@ -1890,7 +1894,7 @@ def _velocity_platform_basis(values: Mapping[str, float], wind: bool) -> Platfor
 ####
 
 
-def _platform_assignment_vector(assignments: Mapping[str, float], prefix: str, default: tuple[float, float, float]) -> tuple[float, float, float]:
+def _platform_assignment_vector(assignments: Mapping[str, float], prefix: str, default: CartesianTriple) -> CartesianTriple:
     return (
         assignments.get(f"{prefix}x", default[0]),
         assignments.get(f"{prefix}y", default[1]),
@@ -1899,7 +1903,7 @@ def _platform_assignment_vector(assignments: Mapping[str, float], prefix: str, d
 ####
 
 
-def _rotate_ecfc_to_ecic(vector: tuple[float, float, float], rotation_rate: float, time: float) -> tuple[float, float, float]:
+def _rotate_ecfc_to_ecic(vector: CartesianTriple, rotation_rate: float, time: float) -> CartesianTriple:
     angle = rotation_rate * time
     cosine, sine = math.cos(angle), math.sin(angle)
     return (vector[0] * cosine - vector[1] * sine, vector[0] * sine + vector[1] * cosine, vector[2])
@@ -1907,11 +1911,11 @@ def _rotate_ecfc_to_ecic(vector: tuple[float, float, float], rotation_rate: floa
 
 
 def _rotate_ecfc_velocity_to_ecic(
-    position: tuple[float, float, float],
-    velocity: tuple[float, float, float],
+    position: CartesianTriple,
+    velocity: CartesianTriple,
     rotation_rate: float,
     time: float,
-) -> tuple[float, float, float]:
+) -> CartesianTriple:
     angle = rotation_rate * time
     cosine, sine = math.cos(angle), math.sin(angle)
     return (
@@ -1922,27 +1926,27 @@ def _rotate_ecfc_velocity_to_ecic(
 ####
 
 
-def _dot_tuple(left: tuple[float, float, float], right: tuple[float, float, float]) -> float:
+def _dot_tuple(left: CartesianTriple, right: CartesianTriple) -> float:
     return sum(a * b for a, b in zip(left, right, strict=True))
 ####
 
 
-def _cross_tuple(left: tuple[float, float, float], right: tuple[float, float, float]) -> tuple[float, float, float]:
+def _cross_tuple(left: CartesianTriple, right: CartesianTriple) -> CartesianTriple:
     return (left[1] * right[2] - left[2] * right[1], left[2] * right[0] - left[0] * right[2], left[0] * right[1] - left[1] * right[0])
 ####
 
 
-def _subtract_tuple(left: tuple[float, float, float], right: tuple[float, float, float]) -> tuple[float, float, float]:
+def _subtract_tuple(left: CartesianTriple, right: CartesianTriple) -> CartesianTriple:
     return (left[0] - right[0], left[1] - right[1], left[2] - right[2])
 ####
 
 
-def _scale_tuple(vector: tuple[float, float, float], factor: float) -> tuple[float, float, float]:
+def _scale_tuple(vector: CartesianTriple, factor: float) -> CartesianTriple:
     return (vector[0] * factor, vector[1] * factor, vector[2] * factor)
 ####
 
 
-def _normalize_tuple(vector: tuple[float, float, float]) -> tuple[float, float, float]:
+def _normalize_tuple(vector: CartesianTriple) -> CartesianTriple:
     norm = math.sqrt(sum(value * value for value in vector))
     if norm <= 1e-12:
         raise ValueError("inertial platform axis must be nonzero")
@@ -2108,10 +2112,10 @@ def _vehicle_environment_evaluator(
         for name, values_for_name in coefficients.items():
             if values_for_name:
                 result[name] = sum(values_for_name)
-        if thrust:
-            result["thrust"] = thrust
-        if mdot:
-            result["mdot"] = mdot
+        # Publish transient propulsion observables every sample so coast and
+        # post-burn states cannot inherit stale values from the prior segment.
+        result["thrust"] = thrust
+        result["mdot"] = mdot
         if include_specific_loads_in_derivative or values.get("_runtime_derivative_stage", 0.0) < 0.5:
             result.update(_specific_load_observables(segment, {**values, **result}, tables, parameters))
         result.update(_evaluate_definition_blocks(definition_blocks, {**values, **result}, parameters, tables))
@@ -2522,7 +2526,7 @@ def _evaluate_range_insensitive_guidance(
     flight_path = math.radians(float(values.get("gama", values.get("gamgd", 0.0))))
     altitude_change = altitude - impact_altitude
 
-    def impact_projection(yaw: float, pitch: float) -> tuple[float, float, float]:
+    def impact_projection(yaw: float, pitch: float) -> CartesianTriple:
         vertical_speed = speed * math.sin(pitch)
         discriminant = max(vertical_speed * vertical_speed + 2.0 * gravity * altitude_change, 0.0)
         impact_time = (vertical_speed + math.sqrt(discriminant)) / gravity
@@ -2941,11 +2945,11 @@ def _apply_segment_updates(
 
 
 def _full_gravity_ecfc(
-    position: tuple[float, float, float],
+    position: CartesianTriple,
     coefficients: Mapping[tuple[int, int], tuple[float, float]],
     gravitational_parameter: float,
     reference_radius: float = 20_902_646.3255,
-) -> tuple[float, float, float]:
+) -> CartesianTriple:
     """Evaluate configured degree-four harmonics and convert back to English units."""
 
     radius = math.sqrt(sum(component * component for component in position))
@@ -3033,8 +3037,8 @@ def _table_evaluators(tables: Mapping[str, RuntimeTable]) -> dict[str, Callable[
 ####
 
 
-def _survey_parameters(problem: Problem) -> dict[str, Sequence[float] | tuple[float, float, float]]:
-    result: dict[str, Sequence[float] | tuple[float, float, float]] = {}
+def _survey_parameters(problem: Problem) -> dict[str, Sequence[float] | SurveySpan]:
+    result: dict[str, Sequence[float] | SurveySpan] = {}
     for block in problem.blocks:
         if not isinstance(block, SurveyBlock):
             continue
@@ -3770,8 +3774,6 @@ def _optimization_static_trajectory_names(
 ) -> frozenset[str]:
     """Return qualified endpoint trajectories independent of optimization inputs."""
 
-    if _contains_optimization_parameter(tuple(problem.blocks)):
-        return frozenset()
     trajectories = {str(trajectory.number): trajectory for trajectory in problem.trajectories}
     return frozenset(
         name
@@ -4357,16 +4359,43 @@ def _next_print_tick(time: float, interval: float | None) -> float:
 
 
 def _interpolate_output_state(start: RuntimeState, end: RuntimeState, fraction: float, time: float) -> RuntimeState:
-    """Linearly interpolate numeric output values between accepted states."""
+    """Interpolate scheduled outputs according to their channel semantics."""
 
     values = tuple(left + fraction * (right - left) for left, right in zip(start.values, end.values, strict=True))
     names = set(start.named) | set(end.named)
-    named = {
-        name: start.named.get(name, end.named.get(name, 0.0)) + fraction * (end.named.get(name, start.named.get(name, 0.0)) - start.named.get(name, end.named.get(name, 0.0)))
-        for name in names
-    }
+    named = {name: _interpolate_named_value(name, start.named, end.named, fraction) for name in names}
     named["time"] = time
     return RuntimeState(time, values, end.frame, named, end.value_names, end.segment_endpoints)
+####
+
+
+def _interpolate_named_value(name: str, start: Mapping[str, float], end: Mapping[str, float], fraction: float) -> float:
+    """Apply step or shortest-angle semantics to a named output channel."""
+
+    left = start.get(name, end.get(name, 0.0))
+    right = end.get(name, start.get(name, 0.0))
+    interpolation = _output_interpolation_kind(name)
+    if interpolation in {"step", "event"}:
+        return left if fraction < 1.0 else right
+    if interpolation == "angle":
+        delta = (right - left + math.pi) % (2.0 * math.pi) - math.pi
+        return _wrap_angle_radians(left + fraction * delta)
+    return left + fraction * (right - left)
+####
+
+
+def _output_interpolation_kind(name: str) -> str:
+    spec = output_channel_spec(name)
+    if spec is not None:
+        return spec.interpolation
+    lowered = name.casefold()
+    return "angle" if lowered in {"alphat", "betae", "bankgc", "bankgd", "gamgc", "gamgd", "yawgc", "yawgd"} else "linear"
+####
+
+
+def _wrap_angle_radians(value: float) -> float:
+    wrapped = ((value + math.pi) % (2.0 * math.pi)) - math.pi
+    return math.pi if math.isclose(wrapped, -math.pi, rel_tol=0.0, abs_tol=1.0e-12) else wrapped
 ####
 
 

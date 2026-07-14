@@ -42,3 +42,19 @@ def test_spectre_trajectory_problem_files_are_minimally_structured() -> None:
         assert nonblank[-1] == "*end"
         assert any(line.startswith("# Synthetic TAOS trajectory translation") for line in nonblank)
 ####
+
+
+def test_spectre_trajectory_metadata_is_structured() -> None:
+    spec = load_spec(SPEC)
+    by_name = {Path(problem.path).name: problem.spectre_metadata for problem in spec.problems}
+
+    assert by_name["ballistic.prb"].family == "Ballistic"
+    assert by_name["cbcr_left.prb"].family == "CBCR"
+    assert by_name["cbcr_left.prb"].direction == "left"
+    assert by_name["cbcr_right.prb"].direction == "right"
+    assert by_name["crossrange.prb"].initial_heading_error_deg == 15.0
+    assert by_name["marv.prb"].maneuver_begin_time_to_go_s == 60.0
+    assert by_name["phugoid.prb"].phugoid_frequency_Hz == 0.015
+    assert by_name["skip.prb"].maneuver_begin_time_to_go_s == 400.0
+    assert by_name["propnav.prb"].terminal_handoff_range_km == 20.0
+####

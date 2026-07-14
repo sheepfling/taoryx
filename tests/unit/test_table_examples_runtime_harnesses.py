@@ -5,10 +5,15 @@ from pathlib import Path
 import pytest
 import yaml
 
+from taoryx.fixtures.table_example_artifacts import build_run_plot_series
 from taoryx.runtime.runner import run_files
+from taoryx.tables import prepare_table
+from taoryx.visualization import render_table_png
 
 TABLE_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "table_examples_v1"
 RUNTIME_ROOT = TABLE_ROOT / "runtime"
+
+pytestmark = pytest.mark.table
 
 
 def test_table_example_runtime_manifest_lists_every_harness() -> None:
@@ -32,6 +37,46 @@ def test_table_example_runtime_harnesses_execute(problem_name: str, tmp_path: Pa
     assert report.cases >= 1
     assert report.outputs, problem_name
     assert report.results and all(result.completed for result in report.results), problem_name
+    ####
+
+
+@pytest.mark.artifact
+def test_table_example_runtime_harnesses_render_standard_png_artifacts(artifact_dir: Path) -> None:
+    output_root = artifact_dir / "table-runtime-plots"
+    generated: list[Path] = []
+    manifest = yaml.safe_load((RUNTIME_ROOT / "manifest.yaml").read_text(encoding="utf-8"))
+
+    for problem_name in sorted(path.name for path in RUNTIME_ROOT.glob("*.prb")):
+        entry = next(item for item in manifest["harnesses"] if item["problem_file"] == problem_name)
+        problem = RUNTIME_ROOT / problem_name
+        tables = tuple(TABLE_ROOT / relative for relative in entry["tables"])
+
+        report = run_files(problem, tables, output_dir=artifact_dir / problem.stem / "runtime", max_steps=200)
+        assert report.exit_code == 0, [(item.code, item.message) for item in report.diagnostics]
+
+        for case_index, artifact in enumerate(report.artifacts, start=1):
+            problem_root = output_root / Path(artifact.problem).stem / f"case-{case_index}"
+            for series in build_run_plot_series(artifact):
+                output_path = problem_root / series.filename
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                table = prepare_table((series.axis,), series.values)
+                output_path.write_bytes(
+                    render_table_png(
+                        table,
+                        axis_labels=(series.axis_label,),
+                        value_label=series.value_label,
+                        title=series.title,
+                    )
+                )
+                generated.append(output_path)
+    ####
+
+    index = output_root / "manifest.txt"
+    index.write_text("\n".join(str(path.relative_to(output_root)) for path in sorted(generated)), encoding="utf-8")
+
+    assert generated
+    assert all(path.exists() for path in generated)
+    assert index.exists()
     ####
 
 
