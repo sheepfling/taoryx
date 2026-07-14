@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from taoryx.language.diagnostics import Diagnostic, SourceLocation
 from taoryx.language.expressions import ExpressionType
+from taoryx.language.grammar_contracts import GrammarProfile
 
 
 class Assignment(BaseModel):
@@ -87,6 +88,20 @@ class ModeBlock(BlockBase):
 
     keyword: Literal["mode"] = "mode"
     mode: str | None = None
+
+
+class RandomBlock(BlockBase):
+    """taoryx extension declaring seeded random inputs for one problem."""
+
+    keyword: Literal["random"] = "random"
+    seed: int | None = None
+
+
+class DofDirectiveBlock(BlockBase):
+    """TAORYX top-level directive selecting the translational state model."""
+
+    keyword: Literal["3dof", "6dof"]
+    mode: Literal["point-mass", "rigid-body-6dof"]
 ####
 
 
@@ -355,11 +370,13 @@ ProblemBlock = Annotated[
     | OptimizeBlock
     | PrintBlock
     | RadarBlock
+    | RandomBlock
     | SearchBlock
     | SummarizeBlock
     | SurveyBlock
     | TitleBlock
     | ModeBlock
+    | DofDirectiveBlock
     | UnitsFormatBlock
     | WindBlock,
     Field(discriminator="keyword"),
@@ -437,6 +454,7 @@ class Problem(BaseModel):
 
 
 class ProblemDocument(BaseModel):
+    grammar_profile: GrammarProfile = GrammarProfile.TAOS96
     problems: list[Problem] = Field(default_factory=list)
     diagnostics: list[Diagnostic] = Field(default_factory=list)
     recovered_records: list[RecoveredRecord] = Field(default_factory=list)

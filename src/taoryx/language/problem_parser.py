@@ -24,6 +24,7 @@ from taoryx.language.grammar_contracts import (
     SUPPORTED_SEGMENT_BLOCKS,
     SUPPORTED_TAORYX_PROBLEM_BLOCKS,
     SUPPORTED_TRAJECTORY_BLOCKS,
+    GrammarProfile,
 )
 from taoryx.language.models import (
     AeroBlock,
@@ -34,6 +35,7 @@ from taoryx.language.models import (
     DefineAssignmentStatement,
     DefineBlock,
     DefineControlStatement,
+    DofDirectiveBlock,
     DownrangeCrossrangeBlock,
     EarthBlock,
     EgsBlock,
@@ -57,6 +59,7 @@ from taoryx.language.models import (
     PropulsionBlock,
     RadarBlock,
     RailBlock,
+    RandomBlock,
     RawStatement,
     RecoveredRecord,
     ResetBlock,
@@ -489,6 +492,16 @@ def _assignments(
                     )
                 )
             ####
+            return [Assignment(name=statement.group("name"), operator=statement.group("op"), value=value, location=_location(path, line))]
+        ####
+    elif allow_functions:
+        statement = _STATEMENT_ASSIGN_RE.fullmatch(text)
+        if statement is not None:
+            try:
+                value = _parse_value(statement.group("value"))
+            except ExpressionSyntaxError as exc:
+                diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-expression", message=str(exc), location=_location(path, line)))
+                return []
             return [Assignment(name=statement.group("name"), operator=statement.group("op"), value=value, location=_location(path, line))]
         ####
     result: list[Assignment] = []
@@ -2131,6 +2144,7 @@ def _make_block(
     source_text: str | None = None,
 ):
     common: dict[str, Any] = {
+        "keyword": keyword,
         "scope": scope,
         "location": _location(path, line),
         "header": header.strip(),
@@ -2154,11 +2168,14 @@ def _make_block(
         "earth": EarthBlock,
         "title": TitleBlock,
         "mode": ModeBlock,
+        "3dof": DofDirectiveBlock,
+        "6dof": DofDirectiveBlock,
         "define": DefineBlock,
         "egs": EgsBlock,
         "file": FileBlock,
         "print": PrintBlock,
         "radar": RadarBlock,
+        "random": RandomBlock,
         "optimize": OptimizeBlock,
         "search": SearchBlock,
         "summarize": SummarizeBlock,
@@ -2213,6 +2230,8 @@ def _make_block(
                     location=_location(path, line),
                 )
             )
+    elif keyword in {"3dof", "6dof"}:
+        extra["mode"] = "point-mass" if keyword == "3dof" else "rigid-body-6dof"
     elif keyword == "define":
         integral_match = re.fullmatch(r"\s*integral\s+([A-Za-z_][A-Za-z0-9_.-]*)\s*=\s*(.+?)\s*", header, re.IGNORECASE)
         if integral_match:
@@ -2249,6 +2268,33 @@ def _make_block(
     elif keyword == "print":
         extra["variables"] = words
         _validate_output_variables(keyword, words, path, line, diagnostics, scope=scope)
+    elif keyword == "random":
+        _validate_named_header("random", header, common["assignments"], {"seed"}, path, line, diagnostics)
+        if common["assignments"]:
+            seed_assignments = [assignment for assignment in common["assignments"] if assignment.name.casefold() == "seed"]
+            if len(seed_assignments) > 1:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="duplicate-random-seed",
+                        message="The '*random' header may declare at most one seed value.",
+                        location=seed_assignments[-1].location,
+                    )
+                )
+            elif seed_assignments:
+                seed_assignment = seed_assignments[0]
+                if isinstance(seed_assignment.value, NumberExpression) and float(seed_assignment.value.value).is_integer():
+                    extra["seed"] = int(seed_assignment.value.value)
+                else:
+                    diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="invalid-random-seed",
+                            message="The '*random seed' setting must be an integer literal.",
+                            location=seed_assignment.location,
+                        )
+                    )
+        common["assignments"] = []
     elif keyword == "survey":
         match = re.fullmatch(r"\s*(\d+)\s+(\S+)(?:\s+(.*?))?\s*", header)
         if match:
@@ -2420,8 +2466,8 @@ def _make_block(
 ####
 
 
-def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
-    document = ProblemDocument()
+def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarProfile | str = GrammarProfile.TAOS96) -> ProblemDocument:
+    document = ProblemDocument(grammar_profile=GrammarProfile(profile))
     current_problem: Problem | None = None
     current_trajectory: Trajectory | None = None
     current_segment: Segment | None = None
@@ -2709,6 +2755,16 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 scope = "problem"
                 current_segment = None
                 current_trajectory = None
+                if keyword in {"3dof", "6dof", "random"} and document.grammar_profile is GrammarProfile.TAOS96:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="taoryx-extension-requires-profile",
+                            message=f"*{keyword} is a TAORYX extension; parse with profile=taoryx.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "taoryx-extension-requires-profile", number)
             elif keyword in trajectory_keywords:
                 scope = "trajectory"
                 current_segment = None
@@ -3063,6 +3119,21 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                     _validate_wind(current_block.assignments, path, number, document.diagnostics)
                     if len(document.diagnostics) > before:
                         recover(line, document.diagnostics[-1].code, number)
+            elif isinstance(current_block, RandomBlock):
+                diagnostic_start = len(document.diagnostics)
+                assignments = _assignments(line, path, number, document.diagnostics, allow_functions=True)
+                recover_assignment_diagnostics(diagnostic_start, number, line)
+                if not assignments and len(document.diagnostics) == diagnostic_start:
+                    document.diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="invalid-random-body",
+                            message="Expected one or more random-variable assignments in '*random'.",
+                            location=_location(path, number),
+                        )
+                    )
+                    recover(line, "invalid-random-body", number)
+                current_block.assignments.extend(assignments)
             elif isinstance(current_block, FlyBlock):
                 if current_block.reference is None:
                     document.diagnostics.append(
@@ -3452,8 +3523,8 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
 ####
 
 
-def parse_problem_file(path: str | Path) -> ProblemDocument:
+def parse_problem_file(path: str | Path, *, profile: GrammarProfile | str = GrammarProfile.TAOS96) -> ProblemDocument:
     source = Path(path)
     text = source.read_bytes().decode("utf-8", errors="surrogateescape")
-    return parse_problem_text(text, str(source))
+    return parse_problem_text(text, str(source), profile=profile)
 ####

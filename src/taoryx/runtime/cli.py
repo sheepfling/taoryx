@@ -25,6 +25,7 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--report", type=Path)
     run.add_argument("--json", action="store_true")
     run.add_argument("--max-steps", type=int, default=100000)
+    run.add_argument("--seed", type=int, help="base seed for *random sampling")
     run.add_argument(
         "--integrator",
         choices=tuple(item.value for item in available_integrators()),
@@ -66,6 +67,7 @@ def main(argv: list[str] | None = None) -> int:
         output_dir=arguments.output_dir,
         max_steps=arguments.max_steps,
         integrator=arguments.integrator,
+        seed=arguments.seed,
     )
     if arguments.report:
         try:

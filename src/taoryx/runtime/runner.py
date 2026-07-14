@@ -59,6 +59,7 @@ def run_files(
     output_dir: str | Path = ".",
     max_steps: int = 100000,
     integrator: str | None = None,
+    seed: int | None = None,
 ) -> RunReport:
     """Ingest, lower, execute, and write products for one `.prb` file."""
 
@@ -119,7 +120,7 @@ def run_files(
     try:
         unit_settings, _ = problem_unit_settings(problem_document)
         tables = {name: table for document in table_documents for name, table in lower_tables(document, unit_settings).items()}
-        lowered = lower_problem_document(problem_document, tables)
+        lowered = lower_problem_document(problem_document, tables, seed=seed)
         unsafe_output = _unsafe_output_path(lowered, destination)
         if unsafe_output is not None:
             diagnostics.append(_error(problem, "unsafe-output-path", unsafe_output))

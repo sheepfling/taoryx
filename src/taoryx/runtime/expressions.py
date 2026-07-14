@@ -62,6 +62,7 @@ def evaluate_expression(
     parameters: Mapping[str, float] = {},
     resolver: Callable[[str], float] | None = None,
     tables: Mapping[str, Callable[[Mapping[str, float]], float]] | None = None,
+    call_handler: Callable[[str, Sequence[float]], float] | None = None,
 ) -> float:
     """Evaluate one parser expression with TAOS scalar operators."""
 
@@ -114,6 +115,8 @@ def evaluate_expression(
                 raise ValueError(f"table {table_name!r} does not support argumented lookup")
             return float(evaluate_call(values, arguments))
         arguments = [evaluate_expression(arg, values, parameters, resolver, tables) for arg in expression.arguments]
+        if call_handler is not None:
+            return float(call_handler(expression.function, arguments))
         return _call(expression.function, arguments)
     raise TypeError(f"unsupported expression: {type(expression).__name__}")
 ####

@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib
 import json
 import math
+import random
 from pathlib import Path
 
 import pytest
@@ -20,6 +21,7 @@ from taoryx.language.models import (
     OptimizeEndpoint,
     Problem,
     ProblemDocument,
+    RandomBlock,
     SearchBlock,
     SearchObjective,
     Segment,
@@ -106,6 +108,45 @@ def test_runtime_applies_geodetic_default_for_assignment_form_initial() -> None:
     assert document.problems[0].defaults.initial_coordinate_system == "geodetic"
     assert state.named["x"] == pytest.approx(20925746.3255)
     assert state.named["ydt"] == pytest.approx(10.0)
+
+
+def test_problem_random_block_parses_under_taoryx_profile() -> None:
+    document = parse_problem_text(
+        "(random-demo)\n"
+        "*random seed=7\n"
+        "  bias = uniform(0.0, 1.0)\n"
+        "*end\n",
+        profile=grammar_contracts.GrammarProfile.TAORYX,
+    )
+
+    block = document.problems[0].blocks[0]
+    assert isinstance(block, RandomBlock)
+    assert block.seed == 7
+    assert block.assignments[0].name == "bias"
+    assert not [diagnostic for diagnostic in document.diagnostics if diagnostic.severity.value == "error"]
+
+
+def test_runtime_samples_random_block_once_per_case() -> None:
+    document = parse_problem_text(
+        "(random-demo)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*random seed=7\n"
+        "  bias = uniform(0.0, 1.0)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecfc x=0 y=0 z=0 xdt=bias ydt=0 zdt=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *when time>0.1 stop\n"
+        "*end\n",
+        profile=grammar_contracts.GrammarProfile.TAORYX,
+    )
+
+    lowered = lower_problem_document(document)
+    expected = random.Random(7).uniform(0.0, 1.0)
+
+    assert lowered.cases[0].parameters["bias"] == pytest.approx(expected)
+    assert lowered.cases[0].problem.metadata["parameters"]["bias"] == pytest.approx(expected)
+    assert lowered.cases[0].problem.vehicles["1"].state.named["xdt"] == pytest.approx(expected)
 ####
 
 

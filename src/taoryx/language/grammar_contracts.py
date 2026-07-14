@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
@@ -16,6 +17,18 @@ class GrammarContract(BaseModel):
     status: Literal["supported-subset"]
     evidence_ids: tuple[str, ...]
     description: str
+
+
+class GrammarProfile(StrEnum):
+    """Selectable language claims for source parsing and validation."""
+
+    TAOS96 = "taos96"
+    TAORYX = "taoryx"
+####
+
+
+TAOS96_GRAMMAR_PROFILE = GrammarProfile.TAOS96
+TAORYX_GRAMMAR_PROFILE = GrammarProfile.TAORYX
 
 
 TAOS96_FREE_FIELD_CONTRACT = GrammarContract(
@@ -52,7 +65,7 @@ TAORYX_MODE_CONTRACT = GrammarContract(
 SUPPORTED_PROBLEM_BLOCKS = frozenset(
     {"atmos", "define", "earth", "egs", "file", "optimize", "print", "radar", "search", "summarize", "survey", "title", "units/fmt", "wind"}
 )
-SUPPORTED_TAORYX_PROBLEM_BLOCKS = frozenset({"mode"})
+SUPPORTED_TAORYX_PROBLEM_BLOCKS = frozenset({"mode", "3dof", "6dof", "random"})
 SUPPORTED_TRAJECTORY_BLOCKS = frozenset({"define", "dwn/crs", "file", "iip", "initial", "print", "tangent"})
 SUPPORTED_SEGMENT_BLOCKS = frozenset({"aero", "constants", "cg", "fly", "increment", "inertial", "integ", "limits", "prop", "rail", "reset", "when"})
 SUPPORTED_FLY_GUIDANCE_RULES = frozenset(
@@ -79,3 +92,8 @@ SUPPORTED_GRAMMAR_CONTRACTS = (
     TAOS96_HIERARCHY_CONTRACT,
     TAOS96_PROBLEM_CATALOG_CONTRACT,
 )
+
+GRAMMAR_PROFILE_DESCRIPTIONS = {
+    GrammarProfile.TAOS96: "Manual-bounded TAOS Version 96.0 syntax and semantics.",
+    GrammarProfile.TAORYX: "TAOS 96.0 syntax plus explicitly documented TAORYX extensions.",
+}

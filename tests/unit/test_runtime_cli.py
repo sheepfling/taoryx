@@ -92,6 +92,27 @@ def test_cli_accepts_selected_integrator(tmp_path: Path, capsys) -> None:
 
     assert exit_code == 0
     assert "executed 1 case" in capsys.readouterr().out
+
+
+def test_cli_accepts_random_seed_option(tmp_path: Path, capsys) -> None:
+    problem, table = _write_runtime_inputs(tmp_path)
+
+    exit_code = main(
+        [
+            "run",
+            str(problem),
+            str(table),
+            "--seed",
+            "7",
+            "--output-dir",
+            str(tmp_path / "output"),
+            "--max-steps",
+            "20",
+        ]
+    )
+
+    assert exit_code == 0
+    assert "executed 1 case" in capsys.readouterr().out
 ####
 
 

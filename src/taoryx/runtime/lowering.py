@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import random
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -39,6 +40,7 @@ from taoryx.language.models import (
     DefineAssignmentStatement,
     DefineBlock,
     DefineControlStatement,
+    DofDirectiveBlock,
     DownrangeCrossrangeBlock,
     EarthBlock,
     EgsBlock,
@@ -61,6 +63,7 @@ from taoryx.language.models import (
     PropulsionBlock,
     RadarBlock,
     RailBlock,
+    RandomBlock,
     ResetBlock,
     SearchBlock,
     Segment,
@@ -77,10 +80,11 @@ from taoryx.language.models import (
     WhenBlock,
     WindBlock,
 )
-from taoryx.modes import DynamicsMode, Kinematic6DofState
+from taoryx.modes import DynamicsMode, Kinematic6DofState, Quaternion
 from taoryx.numeric import DifferenceMode
 from taoryx.optimization import build_optimization_problem, redistribute_control_history
 from taoryx.output_catalog import output_channel_spec
+from taoryx.rigid_body import RigidBody6DofModel, RigidBody6DofState, RigidBodyForceMoment
 from taoryx.searches import golden_section_minimize, parabolic_minimize, parabolic_root, secant_bracketed_root
 from taoryx.tables import (
     ExtrapolationMode,
@@ -97,6 +101,7 @@ from .common import EventCondition, RuntimeProblem, RuntimeState, RuntimeVehicle
 from .engine import ExecutionResult, compute_trajectories
 from .expressions import evaluate_definition_program, evaluate_expression
 from .optimization_runtime import resolve_optimize_block
+from .rigid_body import rigid_body_vehicle
 from .summaries import evaluate_summary
 from .surveys import generate_survey_cases
 from .units import format_number, from_internal, selected_setting, to_internal
@@ -170,10 +175,11 @@ class RuntimeTable:
     skewed: PreparedSkewedTable | None = None
 
     def evaluate(self, values: Mapping[str, float], tables: Mapping[str, RuntimeTable] | None = None) -> float:
+        query_values = _table_query_values(values, self.independent_variables)
         if self.skewed is not None:
             from taoryx.tables import interpolate_skewed
 
-            return interpolate_skewed(self.skewed, tuple(values[name] for name in self.independent_variables))
+            return interpolate_skewed(self.skewed, tuple(query_values[name] for name in self.independent_variables))
         if self.prepared is None:
             prepared_tables = {name: table.prepared for name, table in (tables or {}).items() if table.prepared is not None}
             evaluators = {
@@ -183,7 +189,7 @@ class RuntimeTable:
             return evaluate_full_table(self.operations, TableEvaluationContext.from_values(values, prepared_tables, evaluators)).value
         from taoryx.tables import interpolate_nd
 
-        return interpolate_nd(self.prepared, tuple(values[name] for name in self.independent_variables))
+        return interpolate_nd(self.prepared, tuple(query_values[name] for name in self.independent_variables))
     ####
 ####
 
@@ -350,6 +356,90 @@ def _prepare_skewed_runtime_table(
         or any(str(value).casefold() == "no-extrap" for value in definition.options.values())
     ) else ExtrapolationMode.LINEAR
     return arguments, output_name, prepare_skewed_table(slices, extrapolation=mode)
+
+
+def _random_case_seed(problem: Problem, case_index: int, seed_override: int | None) -> int:
+    """Pick the deterministic seed for one lowered case."""
+
+    if seed_override is not None:
+        return seed_override + case_index - 1
+    seed = next((block.seed for block in reversed(problem.blocks) if isinstance(block, RandomBlock) and block.seed is not None), 0)
+    return seed + case_index - 1
+
+
+def _sample_random_call(function: str, arguments: Sequence[float], rng: random.Random) -> float:
+    """Evaluate one supported stochastic distribution."""
+
+    name = function.casefold().replace("-", "_")
+    if name == "uniform":
+        if len(arguments) != 2:
+            raise ValueError("uniform() requires two arguments")
+        return rng.uniform(arguments[0], arguments[1])
+    if name in {"normal", "gaussian"}:
+        if len(arguments) != 2:
+            raise ValueError("normal() requires two arguments")
+        return rng.normalvariate(arguments[0], arguments[1])
+    if name in {"exponential", "exp"}:
+        if len(arguments) != 1:
+            raise ValueError("exponential() requires one argument")
+        scale = arguments[0]
+        if scale <= 0.0:
+            raise ValueError("exponential() requires a positive scale")
+        return rng.expovariate(1.0 / scale)
+    if name == "rayleigh":
+        if len(arguments) != 1:
+            raise ValueError("rayleigh() requires one argument")
+        scale = arguments[0]
+        if scale <= 0.0:
+            raise ValueError("rayleigh() requires a positive scale")
+        return scale * math.sqrt(-2.0 * math.log(max(1.0 - rng.random(), 1.0e-15)))
+    if name in {"student_t", "studentt", "student-t", "t"}:
+        if len(arguments) not in {1, 2, 3}:
+            raise ValueError("student_t() requires one to three arguments")
+        df = arguments[0]
+        loc = arguments[1] if len(arguments) >= 2 else 0.0
+        scale = arguments[2] if len(arguments) >= 3 else 1.0
+        if df <= 0.0:
+            raise ValueError("student_t() requires a positive degrees-of-freedom value")
+        if scale <= 0.0:
+            raise ValueError("student_t() requires a positive scale")
+        z = rng.normalvariate(0.0, 1.0)
+        chi_square = rng.gammavariate(df / 2.0, 2.0)
+        return loc + scale * z / math.sqrt(chi_square / df)
+    raise ValueError(f"unsupported random function: {function}")
+
+
+def _sample_problem_random_parameters(
+    problem: Problem,
+    parameters: Mapping[str, float],
+    case_index: int,
+    tables: Mapping[str, RuntimeTable],
+    *,
+    seed: int | None = None,
+) -> dict[str, float]:
+    """Apply any problem-level stochastic declarations once for one case."""
+
+    random_blocks = tuple(block for block in problem.blocks if isinstance(block, RandomBlock))
+    if not random_blocks:
+        return dict(parameters)
+
+    rng = random.Random(_random_case_seed(problem, case_index, seed))
+    working = dict(parameters)
+    table_evaluators = _table_evaluators(tables)
+
+    def call_handler(function: str, arguments: Sequence[float]) -> float:
+        return _sample_random_call(function, arguments, rng)
+
+    for block in random_blocks:
+        for assignment in block.assignments:
+            working[assignment.name.casefold()] = evaluate_expression(
+                assignment.value,
+                working,
+                working,
+                tables=table_evaluators,
+                call_handler=call_handler,
+            )
+    return working
 ####
 
 
@@ -370,7 +460,12 @@ def problem_unit_settings(document: ProblemDocument) -> tuple[dict[str, str | No
 ####
 
 
-def lower_problem_document(document: ProblemDocument, tables: Mapping[str, RuntimeTable] | None = None) -> LoweredDocument:
+def lower_problem_document(
+    document: ProblemDocument,
+    tables: Mapping[str, RuntimeTable] | None = None,
+    *,
+    seed: int | None = None,
+) -> LoweredDocument:
     """Lower every parsed problem and its survey combinations in source order."""
 
     if not document.problems:
@@ -409,7 +504,19 @@ def lower_problem_document(document: ProblemDocument, tables: Mapping[str, Runti
         search_seed = _search_seed_parameters(problem)
         optimize_seed = _optimize_seed_parameters(problem)
         cases.extend(
-            _lower_case(problem, {**search_seed, **optimize_seed, **parameters}, index, tables or {}, unit_settings)
+            _lower_case(
+                problem,
+                _sample_problem_random_parameters(
+                    problem,
+                    {**search_seed, **optimize_seed, **parameters},
+                    index,
+                    tables or {},
+                    seed=seed,
+                ),
+                index,
+                tables or {},
+                unit_settings,
+            )
             for index, parameters in enumerate(survey_cases, start=case_index)
         )
         case_index += len(survey_cases)
@@ -515,6 +622,9 @@ def _lower_case(
     tables: Mapping[str, RuntimeTable],
     unit_settings: Mapping[str, str | None] = {},
 ) -> RuntimeCase:
+    if _dynamics_mode(problem) is DynamicsMode.RIGID_BODY_6DOF:
+        return _lower_rigid_body_case(problem, parameters, index, tables, unit_settings)
+    ####
     earth_mu, earth_omega, earth_j2, earth_coefficients = _earth_parameters(problem, parameters)
     environment_evaluator = _atmosphere_evaluator(problem)
     trajectories = {trajectory.number: trajectory for trajectory in problem.trajectories}
@@ -954,6 +1064,106 @@ def _lower_case(
 ####
 
 
+def _lower_rigid_body_case(
+    problem: Problem,
+    parameters: Mapping[str, float],
+    index: int,
+    tables: Mapping[str, RuntimeTable],
+    unit_settings: Mapping[str, str | None],
+) -> RuntimeCase:
+    """Lower the first executable TAORYX rigid-body problem subset.
+
+    This deliberately starts with explicit ECIC initial conditions and a
+    body-x propulsion assignment. It establishes the runtime seam without
+    guessing how historical geodetic or body-aerodynamic syntax should map to
+    the successor model.
+    """
+
+    earth_mu, _, _, _ = _earth_parameters(problem, parameters)
+    if not problem.trajectories:
+        raise ValueError("rigid-body mode requires at least one trajectory")
+    trajectory = problem.trajectories[0]
+    initial = next((block for block in trajectory.blocks if isinstance(block, InitialBlock)), None)
+    if initial is None or initial.coordinate_system != "ecic":
+        raise ValueError("rigid-body mode currently requires '*initial ecic' coordinates")
+    _, _, named, start_time = _initial_values(initial, parameters, tables, unit_settings)
+    required = ("x", "y", "z", "xdt", "ydt", "zdt", "mass")
+    missing = tuple(name for name in required if name not in named)
+    if missing:
+        raise ValueError(f"rigid-body initial state is missing: {', '.join(missing)}")
+    body_rate = Vector3(named.get("wx", 0.0), named.get("wy", 0.0), named.get("wz", 0.0))
+    initial_state = RigidBody6DofState(
+        start_time,
+        FrameVector3(Vector3(named["x"], named["y"], named["z"]), Frame.ECIC),
+        FrameVector3(Vector3(named["xdt"], named["ydt"], named["zdt"]), Frame.ECIC),
+        Quaternion.identity(),
+        body_rate,
+        named["mass"],
+        named.get("propellant_mass", named["mass"]),
+        named.get("heat_load", 0.0),
+        named.get("peak_heat_rate", 0.0),
+    )
+    segment = trajectory.segments[0] if trajectory.segments else None
+    step = _segment_step_size(segment, parameters, 0.01)
+
+    def force_moment(state: RigidBody6DofState) -> RigidBodyForceMoment:
+        thrust = 0.0
+        mass_rate = 0.0
+        if segment is not None:
+            for block in segment.blocks:
+                if not isinstance(block, PropulsionBlock):
+                    continue
+                assignments = {assignment.name.casefold(): assignment.value for assignment in block.assignments}
+                if "thrust" in assignments:
+                    thrust += evaluate_expression(assignments["thrust"], {"time": state.time, "mass": state.mass}, parameters, tables=_table_evaluators(tables))
+                if "mdot" in assignments:
+                    mass_rate += evaluate_expression(assignments["mdot"], {"time": state.time, "mass": state.mass}, parameters, tables=_table_evaluators(tables))
+        return RigidBodyForceMoment(Vector3(thrust, 0.0, 0.0), Vector3(0.0, 0.0, 0.0), mass_rate)
+    ####
+
+    def gravity(state: RigidBody6DofState) -> Vector3:
+        radius = state.position.vector.norm()
+        return state.position.vector.scaled(-earth_mu / max(radius**3, 1.0))
+    ####
+
+    model = RigidBody6DofModel(
+        Vector3(1.0, 1.0, 1.0),
+        force_moment,
+        gravity,
+        dry_mass=named["mass"] - named.get("propellant_mass", 0.0),
+    )
+    vehicle = rigid_body_vehicle(str(trajectory.number), initial_state, model, step_size=step, integrator="rk4")
+    if segment is not None:
+        events: list[EventCondition] = []
+        for block in segment.blocks:
+            if not isinstance(block, WhenBlock) or block.condition is None:
+                continue
+            expression = block.condition
+
+            def condition_function(state: RuntimeState, expression: ExpressionType = expression) -> float:
+                return _event_residual(expression, state.named, parameters, tables)
+            ####
+
+            def condition_predicate(state: RuntimeState, expression: ExpressionType = expression) -> bool:
+                return _event_satisfied(expression, state.named, parameters, tables)
+            ####
+
+            events.append(
+                EventCondition(
+                    f"trajectory-{trajectory.number}-when-{segment.number}-{len(events) + 1}",
+                    condition_function,
+                    block.action or "stop",
+                    condition_predicate,
+                )
+            )
+        vehicle.events = tuple(events)
+    runtime = RuntimeProblem({vehicle.name: vehicle})
+    runtime.metadata["dynamics_mode"] = DynamicsMode.RIGID_BODY_6DOF.value
+    runtime.metadata["parameters"] = dict(parameters)
+    return RuntimeCase(index, parameters, runtime)
+####
+
+
 def _apply_integrator_override(case: RuntimeCase, integrator: IntegratorName | None) -> RuntimeCase:
     """Apply one runtime-selected integrator to every vehicle in a case."""
 
@@ -986,7 +1196,8 @@ def _initial_values(
 ) -> tuple[tuple[str, ...], tuple[float, ...], dict[str, float], float]:
     # ``time`` is available as the zero-time default even when the source
     # assigns it later in the initial block.
-    named: dict[str, float] = {"time": 0.0}
+    named: dict[str, float] = dict(parameters)
+    named["time"] = 0.0
     for assignment in block.assignments:
         value = evaluate_expression(
             assignment.value,
@@ -2655,20 +2866,28 @@ def _wind_observables(
         return {"vair": abs(speed)}
     block = wind_blocks[-1]
     assignments = {assignment.name.casefold(): assignment.value for assignment in block.assignments}
-    wind_speed = evaluate_expression(assignments["windv"], values, parameters, tables=_table_evaluators(tables)) if "windv" in assignments else 0.0
-    wind_heading = math.radians(evaluate_expression(assignments["windh"], values, parameters, tables=_table_evaluators(tables))) if "windh" in assignments else 0.0
-    wind_down = evaluate_expression(assignments["windd"], values, parameters, tables=_table_evaluators(tables)) if "windd" in assignments else 0.0
+    evaluators = _table_evaluators(tables)
+    if "winde" in assignments or "windn" in assignments:
+        if "winde" not in assignments or "windn" not in assignments:
+            raise ValueError("component wind requires both winde and windn")
+        east = evaluate_expression(assignments["winde"], values, parameters, tables=evaluators)
+        north = evaluate_expression(assignments["windn"], values, parameters, tables=evaluators)
+        wind_vector = (east, north, evaluate_expression(assignments["windd"], values, parameters, tables=evaluators) if "windd" in assignments else 0.0)
+    else:
+        wind_down = math.radians(evaluate_expression(assignments["windd"], values, parameters, tables=evaluators)) if "windd" in assignments else 0.0
+        wind_speed = evaluate_expression(assignments["windv"], values, parameters, tables=evaluators) if "windv" in assignments else 0.0
+        wind_heading = math.radians(evaluate_expression(assignments["windh"], values, parameters, tables=evaluators)) if "windh" in assignments else 0.0
+        wind_vector = (
+            wind_speed * math.cos(wind_down) * math.sin(wind_heading),
+            wind_speed * math.cos(wind_down) * math.cos(wind_heading),
+            wind_speed * math.sin(wind_down),
+        )
     heading = math.radians(values.get("psi", 0.0))
     gamma = math.radians(values.get("gama", 0.0))
     velocity = (
         speed * math.cos(gamma) * math.sin(heading),
         speed * math.cos(gamma) * math.cos(heading),
         speed * math.sin(gamma),
-    )
-    wind_vector = (
-        wind_speed * math.cos(wind_down) * math.sin(wind_heading),
-        wind_speed * math.cos(wind_down) * math.cos(wind_heading),
-        wind_speed * math.sin(wind_down),
     )
     relative = tuple(left - right for left, right in zip(velocity, wind_vector, strict=True))
     return {"vair": math.sqrt(sum(component * component for component in relative))}
@@ -3037,6 +3256,27 @@ def _table_evaluators(tables: Mapping[str, RuntimeTable]) -> dict[str, Callable[
 ####
 
 
+def _table_query_values(values: Mapping[str, float], independent_variables: Sequence[str]) -> dict[str, float]:
+    """Add only explicit degree-suffixed aliases used by analysis datasets.
+
+    The TAOS aerodynamic vocabulary names angle of attack ``alpha``. Some
+    TAORYX analysis packs use ``alpha_deg`` to make units visible in source
+    data. This boundary alias preserves that source naming without changing
+    the canonical runtime state or silently guessing arbitrary variable names.
+    """
+
+    query = dict(values)
+    for name in independent_variables:
+        if name in query:
+            continue
+        if name == "alpha_deg" and "alpha" in query:
+            query[name] = query["alpha"]
+        elif name == "alpha" and "alpha_deg" in query:
+            query[name] = query["alpha_deg"]
+    return query
+####
+
+
 def _survey_parameters(problem: Problem) -> dict[str, Sequence[float] | SurveySpan]:
     result: dict[str, Sequence[float] | SurveySpan] = {}
     for block in problem.blocks:
@@ -3119,7 +3359,8 @@ def _unsupported_features(problem: Problem) -> tuple[str, ...]:
         features.append("search")
     if any(not _is_supported_optimization(block) for block in problem.blocks if isinstance(block, OptimizeBlock)):
         features.append("optimize")
-    if _dynamics_mode(problem) is DynamicsMode.RIGID_BODY_6DOF:
+    has_successor_directive = any(isinstance(block, DofDirectiveBlock) for block in problem.blocks)
+    if _dynamics_mode(problem) is DynamicsMode.RIGID_BODY_6DOF and not has_successor_directive:
         features.append("mode rigid-body-6dof")
     return tuple(dict.fromkeys(features))
 
@@ -3128,6 +3369,8 @@ def _dynamics_mode(problem: Problem) -> DynamicsMode:
     """Return the selected mode, defaulting to manual-compatible point mass."""
 
     selected = next((block.mode for block in problem.blocks if isinstance(block, ModeBlock) and block.mode), None)
+    directive = next((block.mode for block in problem.blocks if isinstance(block, DofDirectiveBlock)), None)
+    selected = directive or selected
     return DynamicsMode(selected or DynamicsMode.POINT_MASS)
 ####
 
