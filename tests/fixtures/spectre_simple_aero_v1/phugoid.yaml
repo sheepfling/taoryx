@@ -1,0 +1,19 @@
+# Spectre simple_aero example: phugoid
+name: phugoid
+segment_family: phugoid
+integration_timestep: 0.1
+trajectory:
+  launch_point:
+    latitude_deg: 35.8766
+    longitude_deg: 14.4425
+  aimpoint:
+    latitude_deg: 11.55286
+    longitude_deg: 43.18607
+  initial_altitude_m: 0.0
+  initial_speed_mps: 10.0
+solution:
+  type: Phugoid
+  start_range_to_go_km: null
+  phugoid_amplitude_deg: 2.0
+  phugoid_frequency_Hz: 0.015
+  maneuver_roll_deg: 45.0

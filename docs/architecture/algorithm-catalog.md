@@ -19,8 +19,8 @@ compatibility.
    queries without forcing the proposed `taos_math` / `taos_runtime` names into
    the current package layout.
 4. `taoryx.equations`, `taoryx.language`, and `taoryx.simulation` remain the
-   current implementation packages. A catalog target is an intended binding,
-   not evidence that the symbol exists or that the algorithm is complete.
+   current implementation packages. A promoted catalog target is an executable
+   typed contract with unit verification, not evidence of historical equivalence.
 
 ## Promotion rule
 

@@ -120,6 +120,7 @@ ipython_config.py
 # pixi
 /INBOX/
 /qa/
+/artifacts/
 #   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
 # pixi.lock
 #   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one

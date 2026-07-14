@@ -95,6 +95,15 @@ def test_status_distinguishes_roadmap_completion_from_unit_verification() -> Non
         "TAOS-ALG-DYN-001",
         "TAOS-ALG-DYN-002",
         "TAOS-ALG-DYN-003",
+        "TAOS-ALG-DYN-004",
+        "TAOS-ALG-DYN-005",
+        "TAOS-ALG-DYN-006",
+        "TAOS-ALG-DYN-007",
+        "TAOS-ALG-DYN-008",
+        "TAOS-ALG-DYN-009",
+        "TAOS-ALG-DYN-010",
+        "TAOS-ALG-DYN-011",
+        "TAOS-ALG-DYN-012",
         "TAOS-ALG-ENV-002",
         "TAOS-ALG-ENV-003",
         "TAOS-ALG-ENV-004",
@@ -127,6 +136,7 @@ def test_status_distinguishes_roadmap_completion_from_unit_verification() -> Non
         "TAOS-ALG-TABLE-003",
         "TAOS-ALG-TABLE-004",
         "TAOS-ALG-TABLE-005",
+        "TAOS-ALG-TABLE-006",
         "TAOS-ALG-TABLE-007",
         "TAOS-ALG-TABLE-008",
         "TAOS-ALG-TABLE-009",
@@ -144,11 +154,38 @@ def test_status_distinguishes_roadmap_completion_from_unit_verification() -> Non
         "TAOS-ALG-SEARCH-003",
         "TAOS-ALG-SEARCH-004",
         "TAOS-ALG-SEARCH-005",
+        "TAOS-ALG-COORD-018",
+        "TAOS-ALG-COORD-019",
+        "TAOS-ALG-ENV-005",
+        "TAOS-ALG-ENV-001",
+        "TAOS-ALG-FORCE-004",
+        "TAOS-ALG-FORCE-005",
+        "TAOS-ALG-GRAV-001",
+        "TAOS-ALG-GRAV-004",
+        "TAOS-ALG-OUT-001",
+        "TAOS-ALG-GEO-001",
+        "TAOS-ALG-GEO-002",
+        "TAOS-ALG-GEO-003",
+        "TAOS-ALG-RADAR-001",
+        "TAOS-ALG-REL-001",
+        "TAOS-ALG-IIP-001",
+        "TAOS-ALG-IIP-002",
+        "TAOS-ALG-IIP-003",
+        "TAOS-ALG-AERO-001",
+        "TAOS-ALG-AERO-002",
+        "TAOS-ALG-GUID-001",
+        "TAOS-ALG-GUID-002",
+        "TAOS-ALG-GUID-006",
+        "TAOS-ALG-GUID-007",
+        "TAOS-ALG-GUID-009",
+        "TAOS-ALG-OPT-002",
+        "TAOS-ALG-OPT-003",
+        "TAOS-ALG-OPT-005",
     }
     assert {row["id"] for row in rows.values() if row["roadmap_status"] == "complete"} == promoted
-    assert sum(row["roadmap_status"] == "complete" for row in rows.values()) == 70
-    assert sum(row["roadmap_status"] == "planned" for row in rows.values()) == 37
-    assert rows["TAOS-ALG-TABLE-006"]["roadmap_status"] == "planned"
+    assert sum(row["roadmap_status"] == "complete" for row in rows.values()) == 107
+    assert sum(row["roadmap_status"] == "planned" for row in rows.values()) == 0
+    assert rows["TAOS-ALG-TABLE-006"]["roadmap_status"] == "complete"
     assert rows["TAOS-ALG-TABLE-008"]["roadmap_status"] == "complete"
     assert all(row["implementation_stage"] == "unit_verified" for row in rows.values())
 ####

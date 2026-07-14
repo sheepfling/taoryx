@@ -1,0 +1,51 @@
+(aerodynamics-harness)
+*title Aerodynamics table harness
+*atmos standard
+*earth wgs-84 omega=0
+*trajectory 1 vehicle start on 1
+  *initial geodetic alt=0.0 long=0.0 lat=0.0 vel=250.0 gama=0.0 psi=0.0 time=0.0 mass=100.0
+  *define elevator_deg
+    elevator_deg = 10.0;
+  *define aileron_deg
+    aileron_deg = 10.0;
+  *define rudder_deg
+    rudder_deg = 10.0;
+  *define flap_deg
+    flap_deg = 20.0;
+  *define spoiler_deg
+    spoiler_deg = 10.0;
+  *define canard_deg
+    canard_deg = 5.0;
+  *define pitch_cmd_deg
+    pitch_cmd_deg = 10.0;
+  *define yaw_cmd_deg
+    yaw_cmd_deg = 10.0;
+  *define roll_cmd_deg
+    roll_cmd_deg = 10.0;
+  *define canard_bias_deg
+    canard_bias_deg = 5.0;
+  *define elevator_dcm
+    elevator_dcm = table(elevator-dcm);
+  *define aileron_dcl
+    aileron_dcl = table(aileron-dcl);
+  *define rudder_dcn
+    rudder_dcn = table(rudder-dcn);
+  *define flap_dcl
+    flap_dcl = table(flap-dcl);
+  *define spoiler_dcd
+    spoiler_dcd = table(spoiler-dcd);
+  *define canard_dcm
+    canard_dcm = table(canard-dcm);
+  *define fin_mix_pitch
+    fin_mix_pitch = table(fin-mix-pitch);
+  *define fin_mix_yaw
+    fin_mix_yaw = table(fin-mix-yaw);
+  *define fin_mix_roll
+    fin_mix_roll = table(fin-mix-roll);
+  *file aerodynamics.dat time cd elevator_dcm aileron_dcl rudder_dcn flap_dcl spoiler_dcd canard_dcm fin_mix_pitch fin_mix_yaw fin_mix_roll
+  *segment 1 coast
+    *integ dtprnt=0.1 dt=0.1
+    *aero cd=(clean-cd)
+    *when time>0.2 stop
+*end
+

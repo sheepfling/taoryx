@@ -1,0 +1,18 @@
+id: table_examples_v1_harnesses
+title: TAORYX table example problem harnesses
+kind: research
+path: tests/fixtures/table_examples_v1/harnesses
+source_workspace: tests/fixtures/table_examples_v1
+provenance:
+  classification: mixed
+  notes:
+    - synthetic
+    - source-faithful
+    - generated
+problem_files:
+  - aerodynamics.prb
+  - mass.prb
+  - propulsion_air_breathing.prb
+  - propulsion_rocket.prb
+  - wind_output.prb
+

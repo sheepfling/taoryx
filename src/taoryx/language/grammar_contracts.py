@@ -42,10 +42,17 @@ TAOS96_PROBLEM_CATALOG_CONTRACT = GrammarContract(
     evidence_ids=("taos96-scan-215-p4-48",),
     description="The supported problem-level block catalog is explicit; unknown names are errors.",
 )
+TAORYX_MODE_CONTRACT = GrammarContract(
+    contract_id="taoryx.dynamics-mode",
+    status="supported-subset",
+    evidence_ids=("taoryx-mode-extension",),
+    description="taoryx problem files may select point-mass or explicitly named successor dynamics modes.",
+)
 
 SUPPORTED_PROBLEM_BLOCKS = frozenset(
     {"atmos", "define", "earth", "egs", "file", "optimize", "print", "radar", "search", "summarize", "survey", "title", "units/fmt", "wind"}
 )
+SUPPORTED_TAORYX_PROBLEM_BLOCKS = frozenset({"mode"})
 SUPPORTED_TRAJECTORY_BLOCKS = frozenset({"define", "dwn/crs", "file", "iip", "initial", "print", "tangent"})
 SUPPORTED_SEGMENT_BLOCKS = frozenset({"aero", "constants", "cg", "fly", "increment", "inertial", "integ", "limits", "prop", "rail", "reset", "when"})
 SUPPORTED_FLY_GUIDANCE_RULES = frozenset(

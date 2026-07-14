@@ -1,0 +1,5 @@
+(fin-mix-roll)
+table output(roll_cmd_deg,canard_bias_deg) no-extrap
+roll_cmd_deg=-10,0,10
+canard_bias_deg=-5,0,5
+output=-0.25,0.00,0.25,-0.20,0.00,0.20,-0.25,0.00,0.25

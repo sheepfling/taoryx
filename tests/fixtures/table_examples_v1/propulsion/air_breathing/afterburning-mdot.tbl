@@ -1,0 +1,6 @@
+(afterburning-mdot)
+table mdot(mach,alt,throttle) no-extrap units=kg/sec
+mach=0.2,0.8,1.2
+alt=0,10000
+throttle=0.0,0.5,1.0
+mdot=0.025,0.066,0.140,0.023,0.061,0.132,0.021,0.057,0.125,0.022,0.058,0.129,0.020,0.055,0.120,0.021,0.056,0.123

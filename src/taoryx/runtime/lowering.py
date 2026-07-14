@@ -9,13 +9,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast
 
+from pydantic import BaseModel
+
 from taoryx.aerodynamics import maximum_lift_to_drag
 from taoryx.attitude import EulerAngles, euler_angles_to_body_basis
-from taoryx.contracts import Angle, Basis3, Frame, Latitude, Longitude, Vector3
+from taoryx.contracts import Angle, Basis3, Frame, FrameVector3, Latitude, Longitude, Vector3
 from taoryx.coordinates import geocentric_unit_vectors, geodetic_unit_vectors
+from taoryx.dynamics import ConstraintMode, apply_rail_constraint
 from taoryx.equations.geodesy import CartesianVector3
 from taoryx.equations.gravity import gravity_full_geocentric_components
 from taoryx.guidance import predictive_intercept, proportional_navigation, range_insensitive_axis, solve_guidance
+from taoryx.integration import IntegratorName, normalize_integrator
 from taoryx.language.expressions import (
     BinaryExpression,
     ExpressionType,
@@ -47,6 +51,7 @@ from taoryx.language.models import (
     IntegrationBlock,
     Limit,
     LimitsBlock,
+    ModeBlock,
     OptimizeBlock,
     OptimizeConstraint,
     OptimizeEndpoint,
@@ -72,6 +77,7 @@ from taoryx.language.models import (
     WhenBlock,
     WindBlock,
 )
+from taoryx.modes import DynamicsMode, Kinematic6DofState
 from taoryx.numeric import DifferenceMode
 from taoryx.optimization import build_optimization_problem, redistribute_control_history
 from taoryx.searches import golden_section_minimize, parabolic_minimize, parabolic_root, secant_bracketed_root
@@ -96,6 +102,54 @@ from .units import format_number, from_internal, selected_setting, to_internal
 
 _TABLE_EVALUATOR_CACHE: dict[int, tuple[Mapping[str, RuntimeTable], dict[str, Callable[[Mapping[str, float]], float]]]] = {}
 PlatformBasis = tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]
+
+
+def _contains_indexed_expression(value: object) -> bool:
+    """Return whether a parsed block tree requires indexed trajectory aliases."""
+
+    if isinstance(value, IndexedExpression):
+        return True
+    if isinstance(value, BaseModel):
+        return any(_contains_indexed_expression(child) for child in value.__dict__.values())
+    if isinstance(value, Mapping):
+        return any(_contains_indexed_expression(child) for child in value.values())
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return any(_contains_indexed_expression(child) for child in value)
+    return False
+####
+
+
+def _contains_named_expression(value: object, names: frozenset[str]) -> bool:
+    """Return whether a typed block tree refers to one of the requested names."""
+
+    if isinstance(value, str):
+        return value.casefold() in names
+    if isinstance(value, NameExpression):
+        return value.name.casefold() in names
+    if isinstance(value, BaseModel):
+        return any(_contains_named_expression(child, names) for child in value.__dict__.values())
+    if isinstance(value, Mapping):
+        return any(_contains_named_expression(child, names) for child in value.values())
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return any(_contains_named_expression(child, names) for child in value)
+    return False
+####
+
+
+def _contains_derived_rate_reference(value: object) -> bool:
+    """Return whether a typed block tree requests a non-state rate alias."""
+
+    if isinstance(value, str):
+        name = value.casefold()
+        return name.endswith("dt") and name not in {"dt", "dtprnt", "xdt", "ydt", "zdt"}
+    if isinstance(value, BaseModel):
+        return any(_contains_derived_rate_reference(child) for child in value.__dict__.values())
+    if isinstance(value, Mapping):
+        return any(_contains_derived_rate_reference(child) for child in value.values())
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return any(_contains_derived_rate_reference(child) for child in value)
+    return False
+####
 
 
 @dataclass(frozen=True, slots=True)
@@ -384,7 +438,13 @@ def lower_problem_document(document: ProblemDocument, tables: Mapping[str, Runti
 ####
 
 
-def execute_lowered(document: LoweredDocument, *, output_dir: str = ".", max_steps: int = 100000) -> tuple[ExecutionResult, ...]:
+def execute_lowered(
+    document: LoweredDocument,
+    *,
+    output_dir: str = ".",
+    max_steps: int = 100000,
+    integrator: str | None = None,
+) -> tuple[ExecutionResult, ...]:
     """Execute cases in order and emit declared output products."""
 
     from pathlib import Path
@@ -394,9 +454,10 @@ def execute_lowered(document: LoweredDocument, *, output_dir: str = ".", max_ste
     results: list[ExecutionResult] = []
     summary_rows: dict[int, list[tuple[Mapping[str, float], Mapping[str, float]]]] = {}
     survey_optima: dict[int, dict[str, float]] = {}
+    normalized_integrator = normalize_integrator(integrator) if integrator is not None else None
     for case_position, case in enumerate(document.cases):
         problem_index = document.case_problem_indices[case_position] if document.case_problem_indices else 0
-        executable_case = case
+        executable_case = _apply_integrator_override(case, normalized_integrator)
         if any(
             _control_value(optimize.controls, "surveys", case.parameters, 0.0) != 0.0
             for optimize in document.optimizations
@@ -404,20 +465,27 @@ def execute_lowered(document: LoweredDocument, *, output_dir: str = ".", max_ste
             carried = {**case.parameters, **survey_optima[problem_index]}
             if document.source_problem is None:
                 raise ValueError("survey optimization requires one source problem")
-            executable_case = _lower_case(
+            executable_case = _apply_integrator_override(_lower_case(
                 document.source_problem,
                 carried,
                 case.index,
                 document.tables,
                 document.unit_settings,
-            )
+            ), normalized_integrator)
         for search in document.searches:
             search_trials: list[ExecutionResult] = []
-            executable_case = _resolve_search_case(executable_case, document, search, max_steps=max_steps, trial_results=search_trials)
+            executable_case = _resolve_search_case(
+                executable_case,
+                document,
+                search,
+                max_steps=max_steps,
+                trial_results=search_trials,
+                integrator=normalized_integrator,
+            )
             if _control_value(search.controls, "print", executable_case.parameters, 0.0) != 0.0:
                 _write_search_trials(executable_case.index, search.search_id or 0, search_trials, document, destination)
         for optimize in document.optimizations:
-            executable_case = _resolve_optimize_case(executable_case, document, optimize, max_steps=max_steps)
+            executable_case = _resolve_optimize_case(executable_case, document, optimize, max_steps=max_steps, integrator=normalized_integrator)
             if _control_value(optimize.controls, "surveys", executable_case.parameters, 0.0) != 0.0:
                 survey_optima[problem_index] = {
                     name: value
@@ -505,6 +573,21 @@ def _lower_case(
         platform_state: dict[str, object] = {}
         _align_inertial_platform(platform_state, initial_segment, named, parameters, tables, earth_omega)
         event_targets: dict[str, int | None] = {}
+        radar_blocks = tuple(block for block in problem.blocks if isinstance(block, RadarBlock))
+        reference_blocks = tuple(problem.blocks) + tuple(trajectory.blocks) + tuple(
+            block for segment in trajectory.segments for block in segment.blocks
+        )
+        include_trajectory_references = bool(radar_blocks) or _contains_indexed_expression(reference_blocks)
+        derivative_blocks = tuple(
+            block
+            for block in reference_blocks
+            if not isinstance(block, (EgsBlock, FileBlock, PrintBlock, SummarizeBlock, SurveyBlock))
+        )
+        include_specific_loads_in_derivative = _contains_named_expression(
+            derivative_blocks,
+            frozenset({"nx", "ny", "nz", "ntotal"}),
+        )
+        publish_derived_rates = _contains_derived_rate_reference(reference_blocks)
         vehicle_environment = _vehicle_environment_evaluator(
             environment_evaluator,
             segment_by_number,
@@ -517,10 +600,12 @@ def _lower_case(
             guidance_interval,
             earth_mu,
             trajectory.blocks,
-            tuple(block for block in problem.blocks if isinstance(block, RadarBlock)),
+            radar_blocks,
             tuple(block for block in problem.blocks if isinstance(block, WindBlock)),
             platform_state,
             earth_omega,
+            include_trajectory_references,
+            include_specific_loads_in_derivative,
         )
         for segment in trajectory.segments:
             segment_conditions: list[EventCondition] = []
@@ -668,20 +753,30 @@ def _lower_case(
                 value + state.named.get(f"_guidance_a{axis}", 0.0)
                 for value, axis in zip(ecfc_total_acceleration, ("x", "y", "z"), strict=True)
             )
+            if segment is not None:
+                platform_axes = _body_platform_basis(state.named)
+                body_axes = (Vector3(*platform_axes[0]), Vector3(*platform_axes[1]), Vector3(*platform_axes[2]))
+                constrained = _apply_runtime_rail_constraint(
+                    segment,
+                    state.named,
+                    Vector3(*ecfc_total_acceleration),
+                    parameters,
+                    body_axes,
+                )
+                ecfc_total_acceleration = (constrained.x, constrained.y, constrained.z)
             available_acceleration = geodetic_force_rates[0] if geodetic_force_rates is not None else ecfc_total_acceleration[0]
-            rail_correction = _rail_acceleration_correction(segment, state.named, available_acceleration, parameters) if segment is not None else 0.0
             if geodetic_force_rates is not None:
                 if "vel" in rates:
-                    rates["vel"] = geodetic_force_rates[0] + rail_correction
+                    rates["vel"] = geodetic_force_rates[0]
                 if "gama" in rates:
                     rates["gama"] = geodetic_force_rates[1]
                 if "psi" in rates:
                     rates["psi"] = geodetic_force_rates[2]
             elif "vel" in rates:
-                rates["vel"] = available_acceleration + rail_correction
+                rates["vel"] = available_acceleration
             for name, value in zip(("xdt", "ydt", "zdt"), aero_acceleration, strict=True):
                 if name in rates and geodetic_force_rates is None:
-                    rates[name] += ecfc_total_acceleration[({"xdt": 0, "ydt": 1, "zdt": 2})[name]] + (rail_correction if name == "xdt" else 0.0)
+                    rates[name] = ecfc_total_acceleration[({"xdt": 0, "ydt": 1, "zdt": 2})[name]]
             if "wt" in rates:
                 rates["wt"] = -mass_rate
             if "mass" in rates:
@@ -709,6 +804,33 @@ def _lower_case(
                 condition.predicate(state) if condition.predicate is not None else condition.function(state) >= 0.0
                 for condition in event_conditions
             )
+        ####
+
+        def stall_detector(
+            state: RuntimeState,
+            segments: Mapping[int, Segment] = segment_by_number,
+            active_segment_ref: dict[str, int] = active_segment,
+            state_names: tuple[str, ...] = names,
+            derivative_ref: Callable[[RuntimeState], tuple[float, ...]] = derivative,
+        ) -> bool:
+            """Detect an impossible stationary rail launch before timeout."""
+
+            segment = segments.get(active_segment_ref["number"])
+            rail = next((block for block in segment.blocks if isinstance(block, RailBlock)), None) if segment is not None else None
+            if rail is None or (rail.mode or "").casefold() != "launch":
+                return False
+            geodetic = "_geodetic_state" in state.named
+            speed = abs(state.named.get("vel", 0.0))
+            if not geodetic and {"xdt", "ydt", "zdt"}.issubset(state.named):
+                speed = math.sqrt(sum(state.named[name] ** 2 for name in ("xdt", "ydt", "zdt")))
+            if speed > 0.001:
+                return False
+            rates = derivative_ref(state)
+            if geodetic:
+                if "vel" not in state.value_names:
+                    return False
+                return rates[state.value_names.index("vel")] <= 0.0
+            return math.sqrt(sum(rates[state_names.index(name)] ** 2 for name in ("xdt", "ydt", "zdt") if name in state_names)) <= 0.0
         ####
 
         def definition_evaluator(
@@ -760,6 +882,10 @@ def _lower_case(
             environment_evaluator=vehicle_environment,
             event_handlers=event_handlers,
             activation_handler=activation_handler,
+            dynamics_mode=_dynamics_mode(problem),
+            publish_derived_rates=publish_derived_rates,
+            kinematic_state=_kinematic_state(initial_state) if _dynamics_mode(problem) is DynamicsMode.KINEMATIC_6DOF else None,
+            stall_detector=stall_detector,
         )
         vehicle_ref.append(vehicle)
         initial_named = dict(vehicle.state.named)
@@ -808,9 +934,43 @@ def _lower_case(
         )
         vehicle.history[0] = vehicle.state
     runtime = RuntimeProblem({vehicle.name: vehicle for vehicle in vehicles})
+    runtime.metadata["dynamics_mode"] = _dynamics_mode(problem).value
     runtime.metadata["parameters"] = dict(parameters)
     runtime.metadata["tables"] = tables
+    runtime.metadata["coupled_trajectories"] = any(
+        isinstance(block, RadarBlock)
+        for block in problem.blocks
+    ) or any(
+        isinstance(block, FlyBlock) and (block.guidance_variable or "").casefold() in {"intercept", "propnav"}
+        for trajectory in problem.trajectories
+        for segment in trajectory.segments
+        for block in segment.blocks
+    )
     return RuntimeCase(index, parameters, runtime)
+####
+
+
+def _apply_integrator_override(case: RuntimeCase, integrator: IntegratorName | None) -> RuntimeCase:
+    """Apply one runtime-selected integrator to every vehicle in a case."""
+
+    if integrator is not None:
+        for vehicle in case.problem.vehicles.values():
+            vehicle.integrator = integrator.value
+    return case
+####
+
+
+def _lower_case_for_runtime(
+    problem: Problem,
+    parameters: Mapping[str, float],
+    index: int,
+    tables: Mapping[str, RuntimeTable],
+    unit_settings: Mapping[str, str | None],
+    integrator: IntegratorName | None,
+) -> RuntimeCase:
+    """Lower a candidate and apply the caller-selected integrator."""
+
+    return _apply_integrator_override(_lower_case(problem, parameters, index, tables, unit_settings), integrator)
 ####
 
 
@@ -1399,6 +1559,9 @@ def _geodetic_force_rates(
 
     pitch = math.radians(named.get("pitchi", named.get("pitchgd", named["gama"])))
     yaw = math.radians(named.get("yawi", named.get("yawgd", named["psi"])))
+    roll = math.radians(named.get("rolli", named.get("rollgd", 0.0)))
+    body_y = side.scaled(math.cos(roll)) + normal.scaled(math.sin(roll))
+    body_z = side.scaled(-math.sin(roll)) + normal.scaled(math.cos(roll))
     if propulsive_acceleration is None:
         commanded_horizontal = north.scaled(math.cos(yaw)) + east.scaled(math.sin(yaw))
         commanded = commanded_horizontal.scaled(math.cos(pitch)) + up.scaled(math.sin(pitch))
@@ -1477,6 +1640,7 @@ def _geodetic_force_rates(
             }[name]
         ####
     ####
+    total = _apply_runtime_rail_constraint(segment, named, total, parameters, (forward, body_y, body_z))
     speed_rate = total.dot(forward)
     if speed <= 1e-8:
         # Flight-path and heading rates are undefined at rest; the rail
@@ -1786,21 +1950,36 @@ def _normalize_tuple(vector: tuple[float, float, float]) -> tuple[float, float, 
 ####
 
 
-def _rail_acceleration_correction(segment: Segment, named: Mapping[str, float], available_acceleration: float, parameters: Mapping[str, float]) -> float:
-    """Apply static/sliding rail resistance in the scalar flight direction."""
+def _apply_runtime_rail_constraint(
+    segment: Segment,
+    named: Mapping[str, float],
+    total_acceleration: Vector3,
+    parameters: Mapping[str, float],
+    body_axes: tuple[Vector3, Vector3, Vector3],
+) -> Vector3:
+    """Apply the manual's vector rail/sled constraint in the runtime path."""
 
     rail = next((block for block in segment.blocks if isinstance(block, RailBlock)), None)
     if rail is None:
-        return 0.0
+        return total_acceleration
     controls = {
         assignment.name.casefold(): evaluate_expression(assignment.value, named, parameters)
         for assignment in rail.assignments
     }
-    coefficient = controls.get("cfstat", 0.0) if abs(named.get("vel", 0.0)) <= 1e-12 else controls.get("cfslid", controls.get("cfstat", 0.0))
-    resistance = max(0.0, coefficient) * 32.174
-    if abs(named.get("vel", 0.0)) <= 1e-12:
-        return -available_acceleration if available_acceleration <= resistance else -resistance
-    return -math.copysign(resistance, named.get("vel", 0.0))
+    speed = abs(named.get("vel", 0.0))
+    if {"xdt", "ydt", "zdt"}.issubset(named):
+        speed = math.sqrt(named["xdt"] ** 2 + named["ydt"] ** 2 + named["zdt"] ** 2)
+    basis = Basis3(body_axes[0], body_axes[1], body_axes[2], Frame.ECFC, Frame.BODY)
+    result = apply_rail_constraint(
+        FrameVector3(total_acceleration, Frame.ECFC),
+        basis,
+        speed,
+        max(0.0, controls.get("cfstat", 0.0)),
+        max(0.0, controls.get("cfslid", controls.get("cfstat", 0.0))),
+        mode=ConstraintMode.SLED if (rail.mode or "").casefold() == "sled" else ConstraintMode.RAIL,
+        static_speed_threshold=0.001,
+    )
+    return result.acceleration.vector
 ####
 
 
@@ -1820,6 +1999,8 @@ def _vehicle_environment_evaluator(
     wind_blocks: Sequence[WindBlock] = (),
     platform_state: dict[str, object] | None = None,
     earth_rotation_rate: float = 0.0,
+    include_trajectory_references: bool = True,
+    include_specific_loads_in_derivative: bool = True,
 ) -> Callable[[Mapping[str, float]], Mapping[str, float]]:
     """Combine atmosphere refresh with active-segment force observables."""
 
@@ -1827,7 +2008,8 @@ def _vehicle_environment_evaluator(
         result = dict(base_evaluator(values) if base_evaluator is not None else {})
         if platform_state is not None:
             result.update(_inertial_platform_observables({**values, **result}, platform_state, earth_rotation_rate))
-        result.update(_trajectory_reference_values(vehicles))
+        if include_trajectory_references:
+            result.update(_trajectory_reference_values(vehicles))
         result.update(_wind_observables(values, result, wind_blocks, parameters, tables))
         if "vair" in result and result.get("sndspd", 0.0) > 0.0:
             result["mach"] = result["vair"] / result["sndspd"]
@@ -1930,7 +2112,8 @@ def _vehicle_environment_evaluator(
             result["thrust"] = thrust
         if mdot:
             result["mdot"] = mdot
-        result.update(_specific_load_observables(segment, {**values, **result}, tables, parameters))
+        if include_specific_loads_in_derivative or values.get("_runtime_derivative_stage", 0.0) < 0.5:
+            result.update(_specific_load_observables(segment, {**values, **result}, tables, parameters))
         result.update(_evaluate_definition_blocks(definition_blocks, {**values, **result}, parameters, tables))
         result.update(_trajectory_observables(trajectory_blocks, {**values, **result}, parameters, gravitational_parameter, tables))
         result.update(_relative_observables(values, vehicles, vehicle_name, radar_blocks, parameters))
@@ -2932,7 +3115,30 @@ def _unsupported_features(problem: Problem) -> tuple[str, ...]:
         features.append("search")
     if any(not _is_supported_optimization(block) for block in problem.blocks if isinstance(block, OptimizeBlock)):
         features.append("optimize")
+    if _dynamics_mode(problem) is DynamicsMode.RIGID_BODY_6DOF:
+        features.append("mode rigid-body-6dof")
     return tuple(dict.fromkeys(features))
+
+
+def _dynamics_mode(problem: Problem) -> DynamicsMode:
+    """Return the selected mode, defaulting to manual-compatible point mass."""
+
+    selected = next((block.mode for block in problem.blocks if isinstance(block, ModeBlock) and block.mode), None)
+    return DynamicsMode(selected or DynamicsMode.POINT_MASS)
+####
+
+
+def _kinematic_state(state: RuntimeState) -> Kinematic6DofState:
+    """Build the kinematic attitude sidecar from an ECFC Cartesian state."""
+
+    required = ("x", "y", "z", "xdt", "ydt", "zdt")
+    if not all(name in state.named for name in required):
+        raise ValueError("kinematic-6dof mode requires x, y, z, xdt, ydt, and zdt state variables")
+    return Kinematic6DofState(
+        time=state.time,
+        position=FrameVector3(Vector3(*(state.named[name] for name in ("x", "y", "z"))), Frame.ECFC),
+        velocity=FrameVector3(Vector3(*(state.named[name] for name in ("xdt", "ydt", "zdt"))), Frame.ECFC),
+    )
 ####
 
 
@@ -2978,7 +3184,11 @@ def _is_supported_optimization(block: OptimizeBlock) -> bool:
 
 
 def _is_supported_search(block: SearchBlock) -> bool:
-    """Return whether a search has the bounded root controls implemented here."""
+    """Return whether a search has the bounded root controls implemented here.
+
+    The manual requires only the initial estimate, interval, and bounds;
+    convergence and reporting controls have documented defaults.
+    """
 
     controls = {assignment.name.casefold() for assignment in block.controls}
     return (
@@ -2987,7 +3197,7 @@ def _is_supported_search(block: SearchBlock) -> bool:
         and block.objective.operator in {"=", "<", ">"}
         and block.objective.left.expression is not None
         and block.objective.right is not None
-        and {"xlo", "xhi", "tol", "maxitr"}.issubset(controls)
+        and {"xlo", "xhi", "xest", "dx"}.issubset(controls)
     )
 ####
 
@@ -2999,6 +3209,7 @@ def _resolve_search_case(
     *,
     max_steps: int,
     trial_results: list[ExecutionResult] | None = None,
+    integrator: IntegratorName | None = None,
 ) -> RuntimeCase:
     """Find one bounded search boundary using the parameters resolved before it."""
 
@@ -3009,7 +3220,17 @@ def _resolve_search_case(
     if search.search_id is None or objective is None or objective.operator not in {"=", "<", ">"}:
         raise ValueError("runtime search requires one equality or inequality objective")
     controls = {assignment.name.casefold(): evaluate_expression(assignment.value, {}, case.parameters) for assignment in search.controls}
-    required = ("xlo", "xhi", "xest", "dx", "tol", "maxitr")
+    for name, default in (
+        ("tol", 1.0e-6),
+        ("maxitr", 20.0),
+        ("xref", 1.0),
+        ("fref", 1.0),
+        ("integ", 1.0),
+        ("print", 0.0),
+    ):
+        controls.setdefault(name, default)
+    ####
+    required = ("xlo", "xhi", "xest", "dx")
     if any(name not in controls for name in required):
         raise ValueError(f"search requires controls {required!r}")
     max_iterations = int(controls["maxitr"])
@@ -3038,7 +3259,7 @@ def _resolve_search_case(
         trial = RuntimeCase(
             case.index,
             parameters,
-            _lower_case(source_problem, parameters, case.index, document.tables, document.unit_settings).problem,
+            _lower_case_for_runtime(source_problem, parameters, case.index, document.tables, document.unit_settings, integrator).problem,
         )
         _apply_trial_integration_mode(trial.problem, endpoint_requirements, integration_mode)
         result = compute_trajectories(
@@ -3083,7 +3304,7 @@ def _resolve_search_case(
         return RuntimeCase(
             case.index,
             parameters,
-            _lower_case(source_problem, parameters, case.index, document.tables, document.unit_settings).problem,
+            _lower_case_for_runtime(source_problem, parameters, case.index, document.tables, document.unit_settings, integrator).problem,
         )
 
     def residual(normalized_candidate: float) -> float:
@@ -3119,12 +3340,19 @@ def _resolve_search_case(
     return RuntimeCase(
         case.index,
         parameters,
-        _lower_case(source_problem, parameters, case.index, document.tables, document.unit_settings).problem,
+        _lower_case_for_runtime(source_problem, parameters, case.index, document.tables, document.unit_settings, integrator).problem,
     )
 ####
 
 
-def _resolve_optimize_case(case: RuntimeCase, document: LoweredDocument, optimize: OptimizeBlock, *, max_steps: int) -> RuntimeCase:
+def _resolve_optimize_case(
+    case: RuntimeCase,
+    document: LoweredDocument,
+    optimize: OptimizeBlock,
+    *,
+    max_steps: int,
+    integrator: IntegratorName | None = None,
+) -> RuntimeCase:
     """Find a bounded optimum by recomputing the trajectory for each candidate."""
 
     source_problem = document.source_problem
@@ -3153,10 +3381,10 @@ def _resolve_optimize_case(case: RuntimeCase, document: LoweredDocument, optimiz
         references=(objective_reference,),
     )
     case.problem.metadata["optimization_program"] = program
-    derivative_step = controls.get("dx", 1.0e-6)
+    derivative_step = controls.get("dx", 1.0e-8)
     if derivative_step <= 0.0:
         raise ValueError("optimization dx must be positive")
-    max_iterations = int(controls.get("maxitr", 100))
+    max_iterations = int(controls.get("maxitr", 50))
     if max_iterations < 0:
         raise ValueError("optimization maxitr must be non-negative")
     restart_count = int(controls.get("restarts", 0.0))
@@ -3182,12 +3410,35 @@ def _resolve_optimize_case(case: RuntimeCase, document: LoweredDocument, optimiz
     integration_mode = int(controls.get("integ", 1.0))
     candidate_cache: dict[tuple[float, ...], tuple[ExecutionResult, Mapping[str, float]]] = {}
     base_parameters: dict[str, float] = dict(case.parameters)
+    static_trajectory_names = _optimization_static_trajectory_names(source_problem, endpoint_requirements) if integration_mode == 0 and _can_integrate_optimization_independently(case.problem) else frozenset()
+    static_requirements = tuple(item for item in endpoint_requirements if item[0] in static_trajectory_names)
+    dynamic_requirements = tuple(item for item in endpoint_requirements if item[0] not in static_trajectory_names)
+    static_result: ExecutionResult | None = None
+    adaptive_trial_steps: int | None = None
+    consecutive_incomplete_trials = 0
+    if static_requirements:
+        fixed_trial = RuntimeCase(
+            case.index,
+            base_parameters,
+            _lower_case_for_runtime(source_problem, base_parameters, case.index, document.tables, document.unit_settings, integrator).problem,
+        )
+        _apply_trial_integration_mode(fixed_trial.problem, static_requirements, integration_mode)
+        fixed_problem = _restrict_optimization_problem(fixed_trial.problem, static_requirements)
+        static_result = compute_trajectories(
+            fixed_problem,
+            max_steps=max_steps,
+            stop_when=_optimization_endpoint_stop_when(static_requirements),
+        )
+        if not static_result.completed:
+            raise RuntimeError("fixed optimization trajectory did not reach its qualified endpoint")
 
-    def execute_candidate(candidate: Sequence[float]) -> tuple[ExecutionResult, Mapping[str, float]]:
+    def execute_candidate(candidate: Sequence[float], *, accurate: bool = False) -> tuple[ExecutionResult, Mapping[str, float]]:
+        nonlocal adaptive_trial_steps, consecutive_incomplete_trials
         point = tuple(float(value) for value in candidate)
-        cached = candidate_cache.get(point)
-        if cached is not None:
-            return cached
+        if not accurate:
+            cached = candidate_cache.get(point)
+            if cached is not None:
+                return cached
         loop = optimize.loop.casefold() if optimize.loop is not None else ""
         updates = {f"optimize-{loop}-{index}": value for index, value in zip(indices, point, strict=True)}
         updates.update({f"optimize-{index}": value for index, value in zip(indices, point, strict=True)})
@@ -3195,18 +3446,48 @@ def _resolve_optimize_case(case: RuntimeCase, document: LoweredDocument, optimiz
         trial = RuntimeCase(
             case.index,
             parameters,
-            _lower_case(source_problem, parameters, case.index, document.tables, document.unit_settings).problem,
+            _lower_case_for_runtime(source_problem, parameters, case.index, document.tables, document.unit_settings, integrator).problem,
         )
-        _apply_trial_integration_mode(trial.problem, endpoint_requirements, integration_mode)
-        cached = (
-            compute_trajectories(
-                trial.problem,
-                max_steps=max_steps,
-                stop_when=_optimization_endpoint_stop_when(endpoint_requirements),
-            ),
-            parameters,
+        _apply_trial_integration_mode(trial.problem, dynamic_requirements or endpoint_requirements, integration_mode)
+        dynamic_requirements_for_run = dynamic_requirements or endpoint_requirements
+        dynamic_problem = trial.problem
+        if not dynamic_problem.metadata.get("coupled_trajectories", False):
+            dynamic_problem = _restrict_optimization_problem(dynamic_problem, dynamic_requirements_for_run)
+        if not accurate:
+            # Optimization trials only rank nearby candidates. Use the existing
+            # fixed-step integrator for those repeated evaluations; the chosen
+            # point is rerun below with the production RKF45 path.
+            for vehicle in dynamic_problem.vehicles.values():
+                if vehicle.integrator.casefold() == "rkf45":
+                    vehicle.integrator = "rk4"
+        trial_steps = max_steps if adaptive_trial_steps is None else min(max_steps, adaptive_trial_steps)
+        dynamic_result = compute_trajectories(
+            dynamic_problem,
+            max_steps=trial_steps,
+            stop_when=_optimization_endpoint_stop_when(dynamic_requirements_for_run),
+            synchronize_vehicles=not _can_integrate_optimization_independently(dynamic_problem),
         )
-        candidate_cache[point] = cached
+        if dynamic_result.completed and adaptive_trial_steps is None:
+            observed_steps = max((len(states) for states in dynamic_result.states.values()), default=0)
+            adaptive_trial_steps = min(max_steps, observed_steps + 256)
+        if dynamic_result.completed:
+            consecutive_incomplete_trials = 0
+        else:
+            consecutive_incomplete_trials += 1
+            if consecutive_incomplete_trials >= 5:
+                raise RuntimeError("optimization produced five consecutive trials without reaching its qualified endpoint")
+        ####
+        if static_result is None:
+            result = dynamic_result
+        else:
+            result = ExecutionResult(
+                states={**static_result.states, **dynamic_result.states},
+                completed=static_result.completed and dynamic_result.completed,
+                stop_reason=dynamic_result.stop_reason,
+            )
+        cached = (result, parameters)
+        if not accurate:
+            candidate_cache[point] = cached
         return cached
 
     def objective(candidate: tuple[float, ...]) -> float:
@@ -3233,6 +3514,8 @@ def _resolve_optimize_case(case: RuntimeCase, document: LoweredDocument, optimiz
             right_endpoint: OptimizeEndpoint = right_endpoint,
         ) -> float:
             result, candidate_parameters = execute_candidate(candidate)
+            if result.stop_reason == "state_stall":
+                raise RuntimeError("optimization trial stalled before reaching a qualified endpoint")
             try:
                 left = _endpoint_value(left_endpoint, result, candidate_parameters, prefer_boundary=True)
                 right = _endpoint_value(right_endpoint, result, candidate_parameters, prefer_boundary=True)
@@ -3257,12 +3540,15 @@ def _resolve_optimize_case(case: RuntimeCase, document: LoweredDocument, optimiz
         base_parameters.get(f"optimize-{loop}-{index}", controls[f"par-{index}"])
         for index in indices
     )
+    # Calibrate the candidate budget from the documented starting trajectory;
+    # SciPy is free to request another point before evaluating its nominal x0.
+    execute_candidate(initial)
     optimizer = resolve_optimize_block(
         objective,
         bounds,
         equality_constraints=equality_constraints,
         inequality_constraints=inequality_constraints,
-        tolerance=controls.get("tol", 1e-7),
+        tolerance=controls.get("tol", 1e-6),
         derivative_step=derivative_step,
         difference_mode=difference_mode,
     )
@@ -3295,7 +3581,7 @@ def _resolve_optimize_case(case: RuntimeCase, document: LoweredDocument, optimiz
                 bounds,
                 merit,
                 max_sweeps=iteration_budget,
-                tolerance=controls.get("tol", 1e-7),
+                tolerance=controls.get("tol", 1e-6),
             )
             converged = False
         else:
@@ -3324,9 +3610,13 @@ def _resolve_optimize_case(case: RuntimeCase, document: LoweredDocument, optimiz
                 )
             ####
         ####
+    # Re-evaluate the selected point with the production integrator before
+    # checking constraints or returning the resolved case.
+    candidate_cache.pop(tuple(candidate), None)
+    candidate_cache[tuple(candidate)] = execute_candidate(candidate, accurate=True)
     updates = {f"optimize-{loop}-{index}": value for index, value in zip(indices, candidate, strict=True)}
     updates.update({f"optimize-{index}": value for index, value in zip(indices, candidate, strict=True)})
-    constraint_tolerance = max(10.0 * controls.get("tol", 1e-7), 1e-6)
+    constraint_tolerance = max(10.0 * controls.get("tol", 1e-6), 1e-6)
     equality_residuals = tuple(function(candidate) for function in equality_constraints)
     inequality_residuals = tuple(function(candidate) for function in inequality_constraints)
     if any(abs(residual) > constraint_tolerance for residual in equality_residuals):
@@ -3338,7 +3628,7 @@ def _resolve_optimize_case(case: RuntimeCase, document: LoweredDocument, optimiz
             f"optimization {loop or '<unnamed>'} did not satisfy inequality constraints: {inequality_residuals!r}"
         )
     parameters = {**case.parameters, **updates}
-    resolved = _lower_case(source_problem, parameters, case.index, document.tables, document.unit_settings).problem
+    resolved = _lower_case_for_runtime(source_problem, parameters, case.index, document.tables, document.unit_settings, integrator).problem
     resolved.metadata["optimization_program"] = program
     return RuntimeCase(
         case.index,
@@ -3381,7 +3671,17 @@ def _coordinate_search(
     if max_sweeps <= 0 or tolerance <= 0.0:
         return candidate
     steps = [max((float(upper) - float(lower)) / 4.0, tolerance) for lower, upper in bounds]
-    current = objective(candidate)
+    score_cache: dict[tuple[float, ...], float] = {}
+
+    def score(point: tuple[float, ...]) -> float:
+        cached = score_cache.get(point)
+        if cached is None:
+            cached = objective(point)
+            score_cache[point] = cached
+        return cached
+    ####
+
+    current = score(candidate)
     for _ in range(max_sweeps):
         changed = False
         for position, (lower, upper) in enumerate(bounds):
@@ -3393,10 +3693,10 @@ def _coordinate_search(
                 candidate[:position] + (min(max(candidate[position] - span, float(lower)), float(upper)),) + candidate[position + 1:],
                 candidate[:position] + (min(max(candidate[position] + span, float(lower)), float(upper)),) + candidate[position + 1:],
             }
-            best = min(points, key=objective)
-            score = objective(best)
-            if score < current:
-                candidate, current = best, score
+            best = min(points, key=score)
+            best_score = score(best)
+            if best_score < current:
+                candidate, current = best, best_score
                 changed = True
             else:
                 steps[position] *= 0.5
@@ -3404,6 +3704,80 @@ def _coordinate_search(
             if max(steps, default=0.0) <= tolerance:
                 break
     return candidate
+####
+
+
+def _can_integrate_optimization_independently(problem: RuntimeProblem) -> bool:
+    """Guard the optimizer-only independent execution path.
+
+    Cross-trajectory dependencies and guidance/radar evaluators require the
+    synchronized engine because their derivatives can observe another vehicle.
+    """
+
+    return not any(vehicle.dependencies for vehicle in problem.vehicles.values()) and not problem.metadata.get("coupled_trajectories", False)
+####
+
+
+def _restrict_optimization_problem(
+    problem: RuntimeProblem,
+    requirements: Sequence[tuple[str, int]],
+) -> RuntimeProblem:
+    """Keep only endpoint trajectories and their activation dependencies."""
+
+    required = {name for name, _ in requirements}
+    while True:
+        dependencies = {
+            dependency
+            for name in required
+            for dependency in problem.vehicles[name].dependencies
+            if dependency in problem.vehicles
+        }
+        expanded = required | dependencies
+        if expanded == required:
+            break
+        required = expanded
+    ####
+    if len(required) == len(problem.vehicles):
+        return problem
+    return RuntimeProblem(
+        vehicles={name: problem.vehicles[name] for name in required},
+        print_times=problem.print_times,
+        table_knots=problem.table_knots,
+        final_time=problem.final_time,
+        metadata=dict(problem.metadata),
+    )
+####
+
+
+def _contains_optimization_parameter(value: object) -> bool:
+    """Find optimize placeholders in a typed model without flattening expressions."""
+
+    if isinstance(value, ParameterExpression):
+        return value.family.casefold() == "optimize"
+    if isinstance(value, BaseModel):
+        return any(_contains_optimization_parameter(child) for child in value.__dict__.values())
+    if isinstance(value, Mapping):
+        return any(_contains_optimization_parameter(child) for child in value.values())
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return any(_contains_optimization_parameter(child) for child in value)
+    return False
+####
+
+
+def _optimization_static_trajectory_names(
+    problem: Problem,
+    requirements: Sequence[tuple[str, int]],
+) -> frozenset[str]:
+    """Return qualified endpoint trajectories independent of optimization inputs."""
+
+    if _contains_optimization_parameter(tuple(problem.blocks)):
+        return frozenset()
+    trajectories = {str(trajectory.number): trajectory for trajectory in problem.trajectories}
+    return frozenset(
+        name
+        for name, _ in requirements
+        if name in trajectories and not _contains_optimization_parameter(trajectories[name])
+    )
 ####
 
 

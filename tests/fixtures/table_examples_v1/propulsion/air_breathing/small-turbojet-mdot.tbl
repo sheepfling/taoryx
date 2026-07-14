@@ -1,0 +1,6 @@
+(small-turbojet-mdot)
+table mdot(mach,alt,throttle) no-extrap units=kg/sec
+mach=0.0,0.8
+alt=0,10000
+throttle=0.0,0.5,1.0
+mdot=0.018,0.055,0.115,0.017,0.051,0.108,0.016,0.046,0.101,0.015,0.042,0.096

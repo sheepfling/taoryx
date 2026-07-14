@@ -1,0 +1,5 @@
+(spoiler-dcd)
+table output(mach,spoiler_deg) no-extrap
+mach=0.3,0.7
+spoiler_deg=0,10,20,40
+output=0.000,0.025,0.070,0.190,0.000,0.022,0.063,0.175

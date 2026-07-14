@@ -40,6 +40,7 @@ def test_runtime_case(case) -> None:
 
 @pytest.mark.runtime
 @pytest.mark.historical
+@pytest.mark.slow
 @pytest.mark.parametrize("case", SPECIAL, ids=lambda item: item.id)
 def test_special_runtime_case(case) -> None:
     if taos_executable() is None:
@@ -56,6 +57,7 @@ def test_special_runtime_case(case) -> None:
 
 @pytest.mark.runtime
 @pytest.mark.stress
+@pytest.mark.slow
 @pytest.mark.parametrize("case", STRESS, ids=lambda item: item.id)
 def test_stress_runtime_case(case) -> None:
     if taos_executable() is None:

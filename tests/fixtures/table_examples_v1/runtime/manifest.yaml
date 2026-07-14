@@ -1,0 +1,47 @@
+id: table_examples_v1_runtime
+title: TAORYX table example runtime harnesses
+kind: research
+path: tests/fixtures/table_examples_v1/runtime
+source_workspace: tests/fixtures/table_examples_v1
+provenance:
+  classification: mixed
+  notes:
+    - synthetic
+    - source-faithful
+    - generated
+harnesses:
+  - problem_file: drag_runtime.prb
+    tables:
+      - aero/clean-cd.tbl
+  - problem_file: mass_cg_runtime.prb
+    tables:
+      - mass/weight-cg.tbl
+      - mass/mass-history.tbl
+      - mass/cg-history.tbl
+  - problem_file: rocket_burn_runtime.prb
+    tables:
+      - propulsion/constant-thrust.tbl
+      - propulsion/burn-mdot.tbl
+  - problem_file: wind_runtime.prb
+    tables:
+      - wind/wind-speed.tbl
+  - problem_file: air_breathing_runtime.prb
+    tables:
+      - propulsion/air_breathing/small-turbojet-thrust.tbl
+      - propulsion/air_breathing/small-turbojet-mdot.tbl
+      - propulsion/air_breathing/throttle-limited-thrust.tbl
+      - propulsion/air_breathing/throttle-limited-mdot.tbl
+      - propulsion/air_breathing/afterburning-thrust.tbl
+      - propulsion/air_breathing/afterburning-mdot.tbl
+      - propulsion/air_breathing/inlet-recovery.tbl
+  - problem_file: control_surfaces_runtime.prb
+    tables:
+      - aerodynamics/aileron-dcl.tbl
+      - aerodynamics/rudder-dcn.tbl
+      - aerodynamics/spoiler-dcd.tbl
+      - aerodynamics/elevator-dcm.tbl
+      - aerodynamics/flap-dcl.tbl
+      - aerodynamics/canard-dcm.tbl
+      - aerodynamics/fin-mix-pitch.tbl
+      - aerodynamics/fin-mix-yaw.tbl
+      - aerodynamics/fin-mix-roll.tbl

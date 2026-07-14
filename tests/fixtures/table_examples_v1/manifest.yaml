@@ -1,0 +1,41 @@
+id: table_examples_v1
+title: TAORYX table examples workspace
+kind: research
+path: tests/fixtures/table_examples_v1
+provenance:
+  classification: mixed
+  notes:
+    - synthetic
+    - source-faithful
+    - generated
+table_families:
+  - aero
+  - propulsion
+  - mass
+  - wind
+  - output
+tables:
+  - aero/clean-cd.tbl
+  - aerodynamics/aileron-dcl.tbl
+  - aerodynamics/canard-dcm.tbl
+  - aerodynamics/elevator-dcm.tbl
+  - aerodynamics/fin-mix-pitch.tbl
+  - aerodynamics/fin-mix-roll.tbl
+  - aerodynamics/fin-mix-yaw.tbl
+  - aerodynamics/flap-dcl.tbl
+  - aerodynamics/rudder-dcn.tbl
+  - aerodynamics/spoiler-dcd.tbl
+  - mass/cg-history.tbl
+  - mass/mass-history.tbl
+  - mass/weight-cg.tbl
+  - output/example-output.tbl
+  - propulsion/air_breathing/afterburning-mdot.tbl
+  - propulsion/air_breathing/afterburning-thrust.tbl
+  - propulsion/air_breathing/inlet-recovery.tbl
+  - propulsion/air_breathing/small-turbojet-mdot.tbl
+  - propulsion/air_breathing/small-turbojet-thrust.tbl
+  - propulsion/air_breathing/throttle-limited-mdot.tbl
+  - propulsion/air_breathing/throttle-limited-thrust.tbl
+  - propulsion/burn-mdot.tbl
+  - propulsion/constant-thrust.tbl
+  - wind/wind-speed.tbl

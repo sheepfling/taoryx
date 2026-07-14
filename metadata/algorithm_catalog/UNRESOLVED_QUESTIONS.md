@@ -30,3 +30,18 @@ or access to historical TAOS code/output before exact behavior can be claimed.
 ## TAOS-ALG-TABLE-008 — Skewed Tabulated-Data Evaluation
 
 - **Question:** The manual describes data organization but not a unique interpolation order for all possible sparse outer grids; document the chosen recursive semantics.
+
+## Successor data-model questions
+
+These are not historical TAOS gaps. They are backlog items for the richer
+vehicle-data layer described in `docs/architecture/vehicle-data-model.md`.
+
+- **Question:** How should air-breathing engine decks represent installed thrust,
+  fuel flow, engine state, and operating-envelope failures in a way that remains
+  distinct from the legacy rocket thrust table?
+- **Question:** Which control-effectors should be modeled as linear derivatives
+  first, and which should be promoted directly to nonlinear increment tables or
+  full configuration-specific aerodynamics?
+- **Question:** What manifest format should aggregate geometry, mass properties,
+  propulsion, and effectors while preserving provenance for synthetic versus
+  measured data?

@@ -6,24 +6,10 @@ from taoryx.runtime.runner import run_files
 
 from .support.loader import case_directory, load_manifest
 
-LOCAL_RUNTIME_CASE_IDS = frozenset(
-    {
-        "p001_linear_ecfc_zero_force",
-        "p010_output_define_full_table",
-        "p011_skewed_aero_table",
-        "p021_search_linear_target",
-        "p022_optimize_linear_boundary",
-        "p024_guidance_table",
-        "p031_multi_problem_document",
-        "p039_table_driven_thrust_vector",
-        "p048_problem_level_outputs_and_egs",
-    }
-)
-
 LOCAL_RUNTIME_CASES = tuple(
     case
     for case in load_manifest()
-    if case.id in LOCAL_RUNTIME_CASE_IDS
+    if case.id.startswith("p") and case.id[1:4].isdigit() and int(case.id[1:4]) <= 32
 )
 
 

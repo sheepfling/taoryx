@@ -1,0 +1,19 @@
+# Spectre simple_aero example: CBCR left turn
+name: cbcr-left
+segment_family: cbcr
+integration_timestep: 0.1
+trajectory:
+  launch_point:
+    latitude_deg: 35.8766
+    longitude_deg: 14.4425
+  aimpoint:
+    latitude_deg: 36.000975
+    longitude_deg: -5.60999
+  initial_altitude_m: 0.0
+  initial_speed_mps: 10.0
+solution:
+  type: CBCR
+  go_left: true
+  maneuver_altitude_start_km: 40.0
+  maneuver_duration_s: 35.0
+  min_time_to_go_s: 60.0

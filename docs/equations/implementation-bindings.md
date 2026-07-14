@@ -89,7 +89,7 @@ that every downstream algorithm depending on it is complete.
 | `TAOS-ALG-TABLE-003` | Chapter 3 full-table operations | `taoryx.tables.evaluate_full_table` | `tests/unit/test_tables.py` |
 | `TAOS-ALG-TABLE-004` | Chapter 3 operand resolution | `taoryx.tables.resolve_table_operand` | `tests/unit/test_tables.py` |
 | `TAOS-ALG-TABLE-005` | Chapter 3 math-operation dispatch | `taoryx.tables.apply_table_operation` | `tests/unit/test_tables.py` |
-| `TAOS-ALG-TABLE-006` | Chapter 3 storage variables | `taoryx.tables.TableEvaluationContext` | `tests/unit/test_tables.py` |
+| `TAOS-ALG-TABLE-006` | Chapter 3 storage variables | `taoryx.tables.clear_and_store` | `tests/unit/test_tables.py` |
 | `TAOS-ALG-TABLE-007` | Chapter 3 if/goto control flow | `taoryx.tables.evaluate_full_table` | `tests/unit/test_tables.py` |
 | `TAOS-ALG-TABLE-008` | Chapter 3 skewed tabulated data | `taoryx.tables.interpolate_skewed` | `tests/unit/test_tables.py` |
 | `TAOS-ALG-TABLE-009` | Chapter 3 multiple-table accumulation | `taoryx.tables.accumulate_table_values` | `tests/unit/test_tables.py` |

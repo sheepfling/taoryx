@@ -1,0 +1,6 @@
+(small-turbojet-thrust)
+table thrust(mach,alt,throttle) no-extrap units=n
+mach=0.0,0.8
+alt=0,10000
+throttle=0.0,0.5,1.0
+thrust=240,1400,5200,180,1200,4300,120,950,3850,100,820,3200

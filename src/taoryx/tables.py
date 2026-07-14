@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 import re
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping, MutableMapping, Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 from itertools import product
@@ -188,6 +188,22 @@ def evaluate_full_table(
 ####
 
 
+def clear_and_store(storage: MutableMapping[str, float], name: str, value: float) -> float:
+    """Store one full-table value and return the cleared accumulator."""
+
+    key = name.casefold().strip()
+    if not key:
+        raise ValueError("storage variable name must not be empty")
+    if key in storage:
+        raise ValueError(f"duplicate storage variable: {name}")
+    stored = float(value)
+    if not math.isfinite(stored):
+        raise ValueError("stored table values must be finite")
+    storage[key] = stored
+    return 0.0
+####
+
+
 def resolve_table_operand(
     operand: str | float | TableCall,
     context: TableEvaluationContext,
@@ -365,8 +381,7 @@ def _apply_operation(operation: TableOperation, accumulator: float, context: Tab
     if operator == "csto":
         if not isinstance(operation.operand, str):
             raise ValueError("csto requires a storage name")
-        context.storage[operation.operand.casefold()] = accumulator
-        return 0.0
+        return clear_and_store(context.storage, operation.operand, accumulator)
     operand = None if operation.operand is None else resolve_table_operand(operation.operand, context, assignments=operation.assignments)
     return apply_table_operation(accumulator, operator, operand)
 ####

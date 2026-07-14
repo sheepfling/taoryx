@@ -36,6 +36,7 @@ class PointMassState:
         "path_length",
         "ground_range",
     )
+    CORE_STATE_NAMES: ClassVar[tuple[str, ...]] = STATE_NAMES[:6]
 
     time: float
     position: FrameVector3
@@ -66,6 +67,21 @@ class PointMassState:
         position = self.position.vector
         velocity = self.earth_relative_velocity.vector
         return (position.x, position.y, position.z, velocity.x, velocity.y, velocity.z, self.mass, self.path_length, self.ground_range)
+        ####
+
+    def to_core_values(self) -> tuple[float, ...]:
+        """Pack only the translational 3+3 state."""
+
+        return self.to_values()[:6]
+        ####
+
+    @classmethod
+    def from_core_values(cls, time: float, values: tuple[float, ...] | list[float], *, mass: float) -> PointMassState:
+        """Build an augmented state from position and velocity only."""
+
+        if len(values) != len(cls.CORE_STATE_NAMES):
+            raise ValueError(f"TAOS translational state requires {len(cls.CORE_STATE_NAMES)} values")
+        return cls.from_values(time, [*values, mass, 0.0, 0.0])
         ####
 
     def to_simulation_state(self) -> SimulationState:
@@ -117,6 +133,12 @@ class PointMassRates:
         velocity = self.velocity_derivative.vector
         acceleration = self.acceleration_derivative.vector
         return (velocity.x, velocity.y, velocity.z, acceleration.x, acceleration.y, acceleration.z, self.mass_rate, self.path_length_rate, self.ground_range_rate)
+        ####
+
+    def to_core_values(self) -> tuple[float, ...]:
+        """Pack only the translational 3+3 derivative."""
+
+        return self.to_values()[:6]
         ####
 
     def __post_init__(self) -> None:

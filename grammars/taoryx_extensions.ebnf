@@ -1,0 +1,2 @@
+(* taoryx-specific extensions; these are not claims about the 1995 manual. *)
+mode-block = "*mode" , ( "point-mass" | "kinematic-6dof" | "rigid-body-6dof" ) ;

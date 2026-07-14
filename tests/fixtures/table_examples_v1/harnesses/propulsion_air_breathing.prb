@@ -1,0 +1,29 @@
+(air-breathing-propulsion-harness)
+*title Air-breathing propulsion table harness
+*atmos standard
+*earth wgs-84 omega=0
+*trajectory 1 vehicle start on 1
+  *initial geodetic alt=5000.0 long=0.0 lat=0.0 vel=250.0 gama=0.0 psi=0.0 time=0.0 mass=1200.0
+  *define throttle
+    throttle = 0.5;
+  *define inlet_recovery
+    inlet_recovery = table(inlet-recovery);
+  *define cruise_thrust
+    cruise_thrust = table(small-turbojet-thrust);
+  *define cruise_mdot
+    cruise_mdot = table(small-turbojet-mdot);
+  *define limited_thrust
+    limited_thrust = table(throttle-limited-thrust);
+  *define limited_mdot
+    limited_mdot = table(throttle-limited-mdot);
+  *define afterburn_thrust
+    afterburn_thrust = table(afterburning-thrust);
+  *define afterburn_mdot
+    afterburn_mdot = table(afterburning-mdot);
+  *file airbreath.dat time throttle inlet_recovery cruise_thrust cruise_mdot limited_thrust limited_mdot afterburn_thrust afterburn_mdot
+  *segment 1 cruise
+    *integ dtprnt=0.1 dt=0.1
+    *prop thrust=(small-turbojet-thrust) mdot=(small-turbojet-mdot)
+    *when time>0.2 stop
+*end
+

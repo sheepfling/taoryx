@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from .contracts import Basis3, EarthModel, Frame, FrameVector3, Vector3
+from .state import PointMassRates, PointMassState
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,6 +142,39 @@ def assemble_state_derivatives(
         earth,
     )
     return AugmentedTrajectoryDerivatives(
+        derivatives.position_derivative,
+        derivatives.velocity_derivative,
+        mass_rate,
+        state.earth_relative_velocity.vector.norm(),
+        ground_speed,
+    )
+####
+
+
+def assemble_point_mass_rates(
+    state: PointMassState,
+    total_force: FrameVector3,
+    mass_rate: float,
+    ground_speed: float,
+    earth: EarthModel,
+) -> PointMassRates:
+    """Evaluate the canonical 3+3 TAOS state derivative and augmentation.
+
+    This is the typed physics entry point for the generic RK4/RKF45
+    integrators.  Attitude is consumed by the force producer; it is not part
+    of this state or derivative.
+    """
+
+    derivatives = earth_fixed_derivatives(
+        state.position,
+        state.earth_relative_velocity,
+        total_force,
+        state.mass,
+        earth,
+    )
+    if not math.isfinite(mass_rate) or not math.isfinite(ground_speed) or ground_speed < 0.0:
+        raise ValueError("mass_rate must be finite and ground_speed must be finite and non-negative")
+    return PointMassRates(
         derivatives.position_derivative,
         derivatives.velocity_derivative,
         mass_rate,

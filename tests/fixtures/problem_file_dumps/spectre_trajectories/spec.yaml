@@ -1,0 +1,268 @@
+schema_version: 1
+source_bundle: ../../spectre_simple_aero_v1
+translation_style: synthetic_taos_trajectories
+problems:
+  - path: ballistic.prb
+    problem_name: spectre-ballistic
+    title: Spectre-like ballistic trajectory
+    source_bundle: ../../spectre_simple_aero_v1/ballistic.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/ballistic.yaml"
+      - "Working set: boost followed by passive coast"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+        file_line: "*file ballistic.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: boost
+            phase: boost
+            body:
+              - "*integ dtprnt=0.1 dt=0.01"
+              - "*prop thrust=(stage1-thrust) mdot=(stage1-mdot)"
+              - "*when tseg=5 goto 2"
+          - number: 2
+            title: coast
+            phase: coast
+            body:
+              - "*integ dtprnt=0.5 dt=0.05"
+              - "*aero ca=(coast-ca) cn=(coast-cn)"
+              - "*when alt<0 stop"
+  - path: cbcr_left.prb
+    problem_name: spectre-cbcr-left
+    title: Spectre-like CBCR left turn
+    source_bundle: ../../spectre_simple_aero_v1/cbcr.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/cbcr.yaml"
+      - "Working set: left-hand CBCR maneuver"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+        file_line: "*file cbcr-left.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: cbcr-left
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=15.0"
+              - "*when time=35 stop"
+  - path: cbcr_right.prb
+    problem_name: spectre-cbcr-right
+    title: Spectre-like CBCR right turn
+    source_bundle: ../../spectre_simple_aero_v1/cbcr.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/cbcr.yaml"
+      - "Working set: right-hand CBCR maneuver"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+        file_line: "*file cbcr-right.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: cbcr-right
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=-15.0"
+              - "*when time=35 stop"
+  - path: crossrange.prb
+    problem_name: spectre-crossrange
+    title: Spectre-like crossrange trajectory
+    source_bundle: ../../spectre_simple_aero_v1/crossrange.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/crossrange.yaml"
+      - "Working set: a banked crossrange steering case"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=105.0 time=0.0 wt=1000.0"
+        file_line: "*file crossrange.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: crossrange
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=15.0"
+              - "*when time=60 stop"
+  - path: marv.prb
+    problem_name: spectre-marv
+    title: Spectre-like MARV trajectory
+    source_bundle: ../../spectre_simple_aero_v1/marv.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/marv.yaml"
+      - "Working set: a fixed-bank maneuver example"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+        file_line: "*file marv.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: marv
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=0.0"
+              - "*when tseg=60 stop"
+  - path: phugoid.prb
+    problem_name: spectre-phugoid-trajectory
+    title: Spectre-like phugoid trajectory
+    source_bundle: ../../spectre_simple_aero_v1/phugoid.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/phugoid.yaml"
+      - "Working set: oscillatory alpha table with a maneuver roll"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+        file_line: "*file phugoid.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: phugoid
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly alpha vrs tseg"
+              - "  0.0 0.0"
+              - "  10.0 2.0"
+              - "  20.0 -2.0"
+              - "  30.0 0.0"
+              - "*fly bankgd=45.0"
+              - "*when time=60 stop"
+  - path: range_extension.prb
+    problem_name: spectre-range-extension
+    title: Spectre-like range extension trajectory
+    source_bundle: ../../spectre_simple_aero_v1/range_extension.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/range_extension.yaml"
+      - "Working set: passive range-extension glide"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+        file_line: "*file range-extension.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: range_extension
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly alpha=0.0"
+              - "*when time=60 stop"
+  - path: skip.prb
+    problem_name: spectre-skip
+    title: Spectre-like skip trajectory
+    source_bundle: ../../spectre_simple_aero_v1/skip.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/skip.yaml"
+      - "Working set: skip-flight steering"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+        file_line: "*file skip.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: skip
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=0.0"
+              - "*when tseg=400 stop"
+  - path: slalom.prb
+    problem_name: spectre-slalom
+    title: Spectre-like slalom trajectory
+    source_bundle: ../../spectre_simple_aero_v1/slalom.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/slalom.yaml"
+      - "Working set: alternating-bank slalom guidance"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+        file_line: "*file slalom.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: slalom
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly alpha=0.0"
+              - "*when time=60 stop"
+  - path: weave.prb
+    problem_name: spectre-weave
+    title: Spectre-like weave trajectory
+    source_bundle: ../../spectre_simple_aero_v1/weave.yaml
+    comments:
+      - "Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/weave.yaml"
+      - "Working set: alternating weave guidance"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 vehicle start on 1"
+        initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0"
+        file_line: "*file weave.dat time alt vel gamgd alpha bankgd thrust"
+        segments:
+          - number: 1
+            title: weave
+            phase: maneuver
+            body:
+              - "*integ dtprnt=0.1 dt=0.1"
+              - "*aero ca=0.0 cn=0.0"
+              - "*fly bankgd=0.0"
+              - "*when time=60 stop"
+  - path: propnav.prb
+    problem_name: spectre-propnav
+    title: Spectre-like propnav intercept
+    source_bundle: ../../taos_e2e_v23/cases/positive/p027_proportional_navigation/input/p027_proportional_navigation.prb
+    comments:
+      - "Synthetic TAOS trajectory translation of the proportional-navigation e2e case"
+      - "Working set: a two-trajectory interceptor/target pair"
+    atmosphere: none
+    earth: spherical gm=0 omega=0
+    trajectories:
+      - trajectory_line: "*trajectory 1 interceptor start on 1"
+        initial_line: "*initial ecfc x=20925646.3255 y=0 z=0 xdt=0 ydt=0 zdt=0 time=0 mass=5"
+        file_line: "*file interceptor.dat time xecfc yecfc relrng[2] relvel[2] yawi pitchi"
+        segments:
+          - number: 1
+            title: chase
+            phase: final_pronav
+            body:
+              - "*integ dtprnt=0.25 dt=0.025 dtguid=3"
+              - "*inertial ecfc"
+              - "*prop thrust=(interceptor-thrust) mdot=(zero-mdot)"
+              - "*fly propnav=2"
+              - "*when time=20 stop"
+      - trajectory_line: "*trajectory 2 target start on 1"
+        initial_line: "*initial ecfc x=20925646.3255 y=1000 z=0 xdt=0 ydt=10 zdt=0 time=0 mass=1"
+        file_line: "*file target.dat time xecfc yecfc"
+        segments:
+          - number: 1
+            title: coast
+            phase: coast
+            body:
+              - "*integ dtprnt=0.25 dt=0.025"
+              - "*when time=20 stop"

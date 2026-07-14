@@ -33,6 +33,11 @@ shapes are diagnosed rather than silently executed.
   catalog as an architecture layer, not as a second equation registry.
 - [`docs/architecture/state-model.md`](state-model.md) defines the canonical
   ECFC point-mass state and its runtime/integrator boundaries.
+- [`docs/architecture/vehicle-data-model.md`](vehicle-data-model.md) groups
+  the successor-side geometry, mass, propulsion, and effector data families
+  that sit above the current TAOS `.tbl` abstraction.
+- [`docs/architecture/telemetry.md`](telemetry.md) defines the structured
+  runtime artifact consumed by reports and visualization backends.
 
 ## Execution shape
 
@@ -58,8 +63,10 @@ parse → validate → resolve scenario
 ## Implementation order
 
 1. Extend typed parser defaults and cross-block validation.
-2. Complete the planned P1/P2 algorithm catalog entries.
-3. Expand trajectory-level regression baselines and independent equation tests.
+2. Complete remaining unit-dimension projections and parser/runtime semantic
+   coverage while preserving the lossless source boundary.
+3. Expand trajectory-level regression baselines and resolve large synthetic
+   optimization performance.
 4. Establish historical comparison evidence when a trusted TAOS 96.0
    executable or output corpus is available.
 

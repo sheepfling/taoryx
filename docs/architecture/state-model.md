@@ -31,6 +31,23 @@ requests a rate outcome; it does not add a rotational differential equation.
 Consequently, adding Euler angles or angular rates to `PointMassState` would be
 a 6-DOF product change, not an implementation detail.
 
+## Successor dynamics modes
+
+taoryx problem files may opt into an explicit successor mode:
+
+```text
+*mode point-mass
+*mode kinematic-6dof
+*mode rigid-body-6dof
+```
+
+`point-mass` is the default and is the only mode claimed as TAOS-manual
+compatible. `kinematic-6dof` is controller-driven: its attitude is propagated
+from supplied body angular rates using a quaternion, while translation still
+uses the point-mass force model. `rigid-body-6dof` is reserved for the future
+moment/inertia implementation and is rejected by the current runtime rather
+than silently falling back to point-mass behavior.
+
 ## Runtime connection
 
 The generic RK4/RKF45 code consumes `SimulationState` numeric vectors. The
@@ -56,6 +73,17 @@ problem input
 
 This keeps parser semantics, physical state ordering, and numerical integration
 separate and testable.
+
+## Rail and sled segments
+
+`*rail launch` and `*rail sled` do not select a different state layout. They
+select a constraint applied to the acceleration derivative. The runtime uses
+the body-axis basis to project total ECFC acceleration onto body `x`, computes
+the normal body `y/z` acceleration, applies static or sliding friction, and
+projects the constrained result back into ECFC components. Launch rails clamp
+negative along-track acceleration to zero; sleds retain signed acceleration so
+they can decelerate. The coefficient switch occurs at the documented
+`0.001 ft/s` speed threshold.
 
 ## Source boundary
 

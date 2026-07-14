@@ -1,0 +1,6 @@
+(afterburning-thrust)
+table thrust(mach,alt,throttle) no-extrap units=n
+mach=0.2,0.8,1.2
+alt=0,10000
+throttle=0.0,0.5,1.0
+thrust=340,1700,6100,300,1550,5600,260,1400,5200,280,1450,5400,245,1280,5000,260,1320,5200

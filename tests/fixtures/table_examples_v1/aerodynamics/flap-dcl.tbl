@@ -1,0 +1,5 @@
+(flap-dcl)
+table output(mach,flap_deg) no-extrap
+mach=0.2,0.5
+flap_deg=0,10,20,30,40
+output=0.000,0.240,0.470,0.650,0.730,0.000,0.210,0.410,0.565,0.680

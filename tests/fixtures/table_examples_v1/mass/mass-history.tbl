@@ -1,0 +1,5 @@
+(mass-history)
+table output(time,stage) no-extrap
+time=0,6.2,6.21
+stage=1,2
+output=620,168,422,168,168,64

@@ -1,0 +1,5 @@
+(elevator-dcm)
+table output(mach,elevator_deg) no-extrap
+mach=0.3,0.8,1.5
+elevator_deg=-20,-10,0,10,20
+output=0.390,0.205,0.000,-0.210,-0.405,0.330,0.175,0.000,-0.180,-0.345,0.280,0.145,0.000,-0.155,-0.300

@@ -10,6 +10,7 @@ from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import ProblemDocument, TableDocument
 from taoryx.language.table_parser import table_type_catalog
+from taoryx.outputs import RunArtifact, build_run_artifact
 
 from .engine import ExecutionResult
 from .lowering import execute_lowered, lower_problem_document, lower_tables, problem_unit_settings
@@ -25,6 +26,7 @@ class RunReport:
     results: tuple[ExecutionResult, ...]
     diagnostics: tuple[Diagnostic, ...]
     outputs: tuple[str, ...]
+    artifacts: tuple[RunArtifact, ...] = ()
 
     @property
     def exit_code(self) -> int:
@@ -43,13 +45,21 @@ class RunReport:
             "results": [{"completed": result.completed, "stop_reason": result.stop_reason, "vehicles": list(result.states)} for result in self.results],
             "diagnostics": [item.model_dump(mode="json") for item in self.diagnostics],
             "outputs": list(self.outputs),
+            "artifacts": [artifact.model_dump(mode="json") for artifact in self.artifacts],
             "exit_code": self.exit_code,
         }
     ####
 ####
 
 
-def run_files(problem_path: str | Path, table_paths: tuple[str | Path, ...] = (), *, output_dir: str | Path = ".", max_steps: int = 100000) -> RunReport:
+def run_files(
+    problem_path: str | Path,
+    table_paths: tuple[str | Path, ...] = (),
+    *,
+    output_dir: str | Path = ".",
+    max_steps: int = 100000,
+    integrator: str | None = None,
+) -> RunReport:
     """Ingest, lower, execute, and write products for one `.prb` file."""
 
     problem = Path(problem_path)
@@ -118,7 +128,7 @@ def run_files(problem_path: str | Path, table_paths: tuple[str | Path, ...] = ()
             for feature in lowered.unsupported_features:
                 diagnostics.append(_error(problem, "unsupported-runtime-feature", f"runtime execution does not yet implement *{feature} semantics"))
             return RunReport(str(problem), tuple(map(str, table_paths)), len(lowered.cases), (), tuple(diagnostics), ())
-        results = execute_lowered(lowered, output_dir=str(destination), max_steps=max_steps)
+        results = execute_lowered(lowered, output_dir=str(destination), max_steps=max_steps, integrator=integrator)
         incomplete = tuple(result.stop_reason for result in results if not result.completed)
         if incomplete:
             diagnostics.append(
@@ -143,7 +153,16 @@ def run_files(problem_path: str | Path, table_paths: tuple[str | Path, ...] = ()
         diagnostics.append(_error(destination, "output-discovery-failed", str(error)))
         return RunReport(str(problem), tuple(map(str, table_paths)), len(lowered.cases), results, tuple(diagnostics), ())
     ####
-    return RunReport(str(problem), tuple(map(str, table_paths)), len(lowered.cases), results, tuple(diagnostics), outputs)
+    artifacts = tuple(
+        build_run_artifact(
+            str(problem),
+            case.problem,
+            result,
+            vehicle_kinds={vehicle_id: vehicle.vehicle_kind for vehicle_id, vehicle in case.problem.vehicles.items()},
+        )
+        for case, result in zip(lowered.cases, results, strict=True)
+    )
+    return RunReport(str(problem), tuple(map(str, table_paths)), len(lowered.cases), results, tuple(diagnostics), outputs, artifacts)
 ####
 
 

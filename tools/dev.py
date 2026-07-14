@@ -69,8 +69,34 @@ def typecheck() -> None:
 
 
 def test() -> None:
-    run([project_python(), "-m", "pytest"])
-####
+    run([project_python(), "-m", "pytest", "-m", "not slow and not artifact and not spectre"])
+    ####
+
+
+def test_all() -> None:
+    """Run every pytest category, including opt-in and artifact tests."""
+    run([project_python(), "-m", "pytest", "-m", ""])
+    ####
+
+
+def test_category(marker: str) -> None:
+    """Run one explicitly selected pytest marker."""
+    run([project_python(), "-m", "pytest", "-m", marker])
+    ####
+
+
+def test_views() -> None:
+    """Print the supported pytest views and cost-category selections."""
+    print("Overlapping test views:")
+    print("  grammar      parser, lexer, EBNF, corpus, and language validation")
+    print("  equations    equation catalog, implementations, provenance, verification")
+    print("  algorithms   algorithm catalog, runtime bindings, verification")
+    print("Cost/output categories:")
+    print("  slow         long-running or historical/stress tests")
+    print("  artifact     human-readable outputs written below artifacts/")
+    print("  spectre      Spectre problem/segment/trajectory corpus")
+    print("Commands: test-grammar, test-equations, test-algorithms, test-slow, test-artifacts, test-spectre")
+    ####
 
 
 def grammar() -> None:
@@ -176,6 +202,14 @@ TASKS: dict[str, Callable[[], None]] = {
     "legacy-audit": legacy_audit,
     "legacy-close-check": legacy_close_check,
     "test": test,
+    "test-all": test_all,
+    "test-artifacts": lambda: test_category("artifact"),
+    "test-algorithms": lambda: test_category("algorithms"),
+    "test-equations": lambda: test_category("equations"),
+    "test-grammar": lambda: test_category("grammar"),
+    "test-slow": lambda: test_category("slow"),
+    "test-spectre": lambda: test_category("spectre"),
+    "test-views": test_views,
     "e2e": e2e,
     "manual": manual,
     "equation-audit": equation_audit,

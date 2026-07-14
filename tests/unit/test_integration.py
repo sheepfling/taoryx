@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from taoryx.integration import RK4Integrator, rk4_step, rkf45_step
+from taoryx.integration import IntegratorName, RK4Integrator, available_integrators, euler_step, normalize_integrator, rk4_step, rkf45_step, scipy_ivp_step
 from taoryx.simulation import SimulationState
 
 
@@ -23,6 +23,17 @@ def test_rk4_step_integrates_constant_derivative_and_preserves_frame() -> None:
     assert result.frame == "ecfc"
     assert len(calls) == 4
     assert [call.time for call in calls] == pytest.approx([2.0, 2.125, 2.125, 2.25])
+####
+
+
+def test_euler_step_is_fast_first_order_reference_and_preserves_frame() -> None:
+    state = SimulationState(2.0, (1.0, -3.0), "ecfc")
+
+    result = euler_step(lambda _: (4.0, -2.0), state, 0.25)
+
+    assert result.time == pytest.approx(2.25)
+    assert result.values == pytest.approx((2.0, -3.5))
+    assert result.frame == "ecfc"
 ####
 
 
@@ -64,3 +75,32 @@ def test_rkf45_step_adapts_and_preserves_state_frame() -> None:
     assert result.state.values[0] == pytest.approx(math.exp(result.accepted_step), rel=1e-6)
     assert result.error_norm <= 1.0
     assert result.next_step > 0.0
+####
+
+
+def test_integrator_selection_names_are_explicit() -> None:
+    assert normalize_integrator("RKF45") is IntegratorName.RKF45
+    assert normalize_integrator(IntegratorName.RK4) is IntegratorName.RK4
+    assert IntegratorName.RK4 in available_integrators()
+    assert IntegratorName.EULER in available_integrators()
+    with pytest.raises(ValueError, match="unknown integrator"):
+        normalize_integrator("not-an-integrator")
+####
+
+
+def test_scipy_ivp_dop853_matches_reference_for_exponential_growth() -> None:
+    pytest.importorskip("scipy")
+    state = SimulationState(0.0, (1.0,), "ecfc")
+    result = scipy_ivp_step(
+        lambda current: (current.values[0],),
+        state,
+        0.5,
+        1e-10,
+        1e-8,
+        method="DOP853",
+    )
+
+    assert result.frame == state.frame
+    assert result.time == pytest.approx(0.5)
+    assert result.values[0] == pytest.approx(math.exp(0.5), rel=1e-8)
+####

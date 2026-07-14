@@ -61,6 +61,21 @@ def test_rqp_propagates_the_configured_difference_mode(monkeypatch: pytest.Monke
 ####
 
 
+def test_rqp_memoizes_repeated_candidate_evaluations() -> None:
+    calls: list[tuple[float, ...]] = []
+
+    def objective(point: tuple[float, ...]) -> float:
+        calls.append(point)
+        return (point[0] - 3.0) ** 2
+    ####
+
+    result = han_powell_rqp(objective, (0.0,), ((-5.0, 5.0),), max_iterations=0)
+
+    assert result.status is OptimizationStatus.MAX_ITERATIONS
+    assert calls.count((0.0,)) == 1
+####
+
+
 def test_path_violation_integral_and_control_redistribution() -> None:
     assert path_violation_integral((-2.0, 0.0, 2.0), lower=-1.0, upper=1.0) == pytest.approx(2.0)
     result = redistribute_control_history((0.0, 1.0), ((0.0, 10.0), (10.0, 20.0)), (0.25, 0.75))

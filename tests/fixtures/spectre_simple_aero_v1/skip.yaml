@@ -1,0 +1,16 @@
+# Spectre simple_aero example: skip
+name: skip
+segment_family: skip
+integration_timestep: 0.1
+trajectory:
+  launch_point:
+    latitude_deg: 35.8766
+    longitude_deg: 14.4425
+  aimpoint:
+    latitude_deg: 36.000975
+    longitude_deg: -5.60999
+  initial_altitude_m: 0.0
+  initial_speed_mps: 10.0
+solution:
+  type: Skip
+  maneuver_begin_time_to_go_s: 400.0

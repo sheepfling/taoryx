@@ -1,0 +1,21 @@
+(control-surfaces-runtime-harness)
+*title Control-surface deck runtime harness
+*atmos standard
+*earth wgs-84 omega=0
+*trajectory 1 vehicle start on 1
+  *initial geodetic alt=0.0 long=0.0 lat=0.0 vel=550.0 gama=0.0 psi=0.0 time=0.0 mass=1200.0
+  *define elevator_sample
+    elevator_sample = table(elevator-dcm);
+    flap_sample = table(flap-dcl);
+    canard_sample = table(canard-dcm);
+    fin_pitch_sample = table(fin-mix-pitch);
+    fin_yaw_sample = table(fin-mix-yaw);
+    fin_roll_sample = table(fin-mix-roll);
+  *file control-surfaces-runtime.dat time mach aileron_deg rudder_deg spoiler_deg elevator_deg flap_deg canard_deg pitch_cmd_deg yaw_cmd_deg roll_cmd_deg canard_bias_deg cl cs cd elevator_sample flap_sample canard_sample fin_pitch_sample fin_yaw_sample fin_roll_sample xecfcdt
+  *segment 1 maneuver
+    *integ dtprnt=0.1 dt=0.1
+    *constants aileron_deg=10.0 rudder_deg=15.0 spoiler_deg=20.0 elevator_deg=10.0 flap_deg=20.0 canard_deg=5.0 pitch_cmd_deg=10.0 yaw_cmd_deg=10.0 roll_cmd_deg=10.0 canard_bias_deg=5.0
+    *fly mach=0.5
+    *aero cl=(aileron-dcl) cs=(rudder-dcn) cd=(spoiler-dcd)
+    *when time>0.2 stop
+*end

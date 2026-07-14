@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from taoryx.language.diagnostics import Diagnostic, SourceLocation
 from taoryx.language.expressions import ExpressionType
@@ -79,6 +79,14 @@ class EarthBlock(BlockBase):
 class TitleBlock(BlockBase):
     keyword: Literal["title"] = "title"
     title: str = ""
+####
+
+
+class ModeBlock(BlockBase):
+    """taoryx extension selecting the translational/attitude integration mode."""
+
+    keyword: Literal["mode"] = "mode"
+    mode: str | None = None
 ####
 
 
@@ -351,6 +359,7 @@ ProblemBlock = Annotated[
     | SummarizeBlock
     | SurveyBlock
     | TitleBlock
+    | ModeBlock
     | UnitsFormatBlock
     | WindBlock,
     Field(discriminator="keyword"),
@@ -400,6 +409,22 @@ class Trajectory(BaseModel):
 ####
 
 
+class ProblemDefaults(BaseModel):
+    """Evidence-bounded defaults applied when TAOS omits optional controls."""
+
+    model_config = ConfigDict(frozen=True)
+
+    initial_coordinate_system: Literal["geodetic"] = "geodetic"
+    dynamics_mode: Literal["point-mass"] = "point-mass"
+    atmosphere_model: Literal["none"] = "none"
+    initial_time: float = 0.0
+    integration_step: float = 1.0
+    output_interval: Literal["integration-step"] = "integration-step"
+    guidance_interval: Literal["integration-step"] = "integration-step"
+    unit_system: Literal["english"] = "english"
+####
+
+
 class Problem(BaseModel):
     name: str
     location: SourceLocation
@@ -407,6 +432,7 @@ class Problem(BaseModel):
     blocks: list[ProblemBlock] = Field(default_factory=list)
     trajectories: list[Trajectory] = Field(default_factory=list)
     ended: bool = False
+    defaults: ProblemDefaults = Field(default_factory=ProblemDefaults)
 ####
 
 

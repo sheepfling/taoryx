@@ -40,6 +40,7 @@ from taoryx.runtime.lowering import (
     _geodetic_force_rates,
     _optimization_endpoint_requirements,
     _optimization_endpoint_stop_when,
+    _restrict_optimization_problem,
     _standard_atmosphere_properties,
     _table_evaluators,
     _trajectory_observables,
@@ -52,6 +53,23 @@ from taoryx.runtime.runner import RunReport, run_files
 ROOT = Path(__file__).resolve().parents[2]
 PROBLEM = ROOT / "examples/chapter04/ballistic-reentry.prb"
 TABLE = ROOT / "examples/chapter04/ballistic-reentry.tbl"
+
+
+def test_optimization_problem_pruning_keeps_only_required_dependency_closure() -> None:
+    target = RuntimeVehicle("target", RuntimeState(0.0, (0.0,)), lambda state: (0.0,))
+    dependent = RuntimeVehicle(
+        "dependent",
+        RuntimeState(0.0, (0.0,)),
+        lambda state: (0.0,),
+        dependencies=("target",),
+    )
+    unrelated = RuntimeVehicle("unrelated", RuntimeState(0.0, (0.0,)), lambda state: (0.0,))
+    problem = RuntimeProblem({"target": target, "dependent": dependent, "unrelated": unrelated})
+
+    pruned = _restrict_optimization_problem(problem, (("dependent", 3),))
+
+    assert set(pruned.vehicles) == {"dependent", "target"}
+####
 
 
 @pytest.fixture(autouse=True)
@@ -68,6 +86,26 @@ def test_lowering_expands_surveys_and_prepares_tables() -> None:
     assert len(lowered.cases) == 16
     assert lowered.tables["ca-ex-1"].evaluate({"mach": 8.0}) == 0.0742
     assert lowered.cases[0].problem.vehicles["1"].state.named["vel"] == 15000.0
+####
+
+
+def test_runtime_applies_geodetic_default_for_assignment_form_initial() -> None:
+    document = parse_problem_text(
+        "(default-initial)\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*initial alt=100 lat=0 long=0 vel=10 gama=0 psi=90 wt=1\n"
+        "*segment 1\n"
+        "  *integ dt=0.1\n"
+        "  *when time>0.2 stop\n"
+        "*end\n"
+    )
+
+    lowered = lower_problem_document(document)
+    state = lowered.cases[0].problem.vehicles["1"].state
+    assert document.problems[0].defaults.initial_coordinate_system == "geodetic"
+    assert state.named["x"] == pytest.approx(20925746.3255)
+    assert state.named["ydt"] == pytest.approx(10.0)
 ####
 
 
@@ -174,7 +212,7 @@ def test_high_dimensional_coordinate_search_is_bounded_and_deterministic() -> No
     result = _coordinate_search((0.0,) * 5, ((-2.0, 2.0),) * 5, objective, max_sweeps=1)
 
     assert result == _coordinate_search((0.0,) * 5, ((-2.0, 2.0),) * 5, lambda point: sum((value - 1.0) ** 2 for value in point), max_sweeps=1)
-    assert len(calls) <= 1 + 4 * 5
+    assert len(calls) <= 1 + 2 * 5
     assert sum(value * value for value in result) > 0.0
 ####
 
@@ -576,6 +614,20 @@ def test_ground_intercept_file_drives_predictive_guidance_and_limits(tmp_path: P
 ####
 
 
+def test_infeasible_fixed_optimization_target_reports_state_stall(tmp_path: Path) -> None:
+    root = ROOT / "tests/fixtures/taos_e2e_v23/cases/positive/p034_manual_air_intercept_synthetic/input"
+    report = run_files(
+        root / "p034_manual_air_intercept_synthetic.prb",
+        tuple(root.glob("*.tbl")),
+        output_dir=tmp_path,
+        max_steps=20000,
+    )
+
+    assert report.exit_code == 2
+    assert any("fixed optimization trajectory did not reach its qualified endpoint" in item.message for item in report.diagnostics)
+####
+
+
 def test_multiple_problems_execute_sequentially_without_output_cross_talk(tmp_path: Path) -> None:
     problem = ROOT / "tests/fixtures/taos_e2e_v23/cases/positive/p031_multi_problem_document/input/p031_multi_problem_document.prb"
     report = run_files(problem, output_dir=tmp_path, max_steps=100)
@@ -898,6 +950,30 @@ def test_optimize_fixture_recomputes_scalar_boundary(tmp_path: Path) -> None:
 ####
 
 
+def test_optimize_applies_documented_defaults_for_optional_controls(tmp_path: Path) -> None:
+    problem = tmp_path / "optimize-defaults.prb"
+    problem.write_text(
+        "(optimize-defaults)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecfc x=0 y=0 z=0 xdt=opta-1 ydt=0 zdt=0 time=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dt=0.1\n"
+        "    *when time>1 stop\n"
+        "*optimize a for xecfc=max on segment 1, trajectory 1\n"
+        "  par-1=5 lo-1=5 hi-1=5\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+
+    report = run_files(problem, output_dir=tmp_path / "out", max_steps=100)
+
+    assert report.exit_code == 0
+    assert report.results[0].states["1"][-1].named["xdt"] == pytest.approx(5.0)
+####
+
+
 def test_search_uses_qualified_segment_endpoint(tmp_path: Path) -> None:
     problem = tmp_path / "search-segment.prb"
     problem.write_text(
@@ -923,6 +999,32 @@ def test_search_uses_qualified_segment_endpoint(tmp_path: Path) -> None:
     final = report.results[0].states["1"][-1]
     assert final.named["xdt"] == pytest.approx(10.0, abs=1e-3)
     assert final.named["x"] == pytest.approx(20.0, abs=0.05)
+####
+
+
+def test_search_applies_documented_defaults_for_optional_controls(tmp_path: Path) -> None:
+    problem = tmp_path / "search-defaults.prb"
+    problem.write_text(
+        "(search-defaults)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecfc x=0 y=0 z=0 xdt=srch-1 ydt=0 zdt=0 time=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dt=0.1\n"
+        "    *when time>1 stop\n"
+        "*search 1 vary x-velocity until xecfc=9 on segment 1, trajectory 1\n"
+        "  xlo=0 xhi=20 xest=5 dx=1\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+
+    report = run_files(problem, output_dir=tmp_path / "out", max_steps=100)
+
+    assert report.exit_code == 0
+    final = report.results[0].states["1"][-1]
+    assert final.named["xdt"] == pytest.approx(9.0, abs=1e-3)
+    assert final.named["x"] == pytest.approx(9.0, abs=1e-3)
 ####
 
 
@@ -2081,7 +2183,34 @@ def test_rail_static_and_sliding_resistance_affect_motion(tmp_path: Path) -> Non
 
     assert report.exit_code == 0
     final = report.results[0].states["1"][-1]
-    assert final.named["vel"] == pytest.approx(0.0, abs=1e-10)
+    # Friction is mu * normal acceleration, not mu * standard gravity.  With
+    # the documented vector constraint this launch retains 0.2 velocity units.
+    assert final.named["vel"] == pytest.approx(0.2, abs=1e-10)
+
+
+def test_runtime_sled_allows_signed_constrained_acceleration(tmp_path: Path) -> None:
+    problem = tmp_path / "sled.prb"
+    problem.write_text(
+        "(sled)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial geodetic alt=0 long=0 lat=0 vel=1 gama=0 psi=0 time=0 mass=1\n"
+        "  *file sled.dat time vel\n"
+        "  *segment 1 sled\n"
+        "    *integ dt=0.1\n"
+        "    *prop thrust=-1 mdot=0\n"
+        "    *rail sled cfstat=0 cfslid=0\n"
+        "    *when time>0.1 stop\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+
+    report = run_files(problem, output_dir=tmp_path / "out", max_steps=100)
+
+    assert report.exit_code == 0
+    final = report.results[0].states["1"][-1]
+    assert final.named["vel"] < 1.0
 ####
 
 

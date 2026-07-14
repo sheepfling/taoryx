@@ -1,0 +1,17 @@
+# Spectre simple_aero example: crossrange
+name: crossrange
+segment_family: crossrange
+integration_timestep: 0.1
+trajectory:
+  launch_point:
+    latitude_deg: 35.8766
+    longitude_deg: 14.4425
+  aimpoint:
+    latitude_deg: 11.55286
+    longitude_deg: 43.18607
+  initial_altitude_m: 0.0
+  initial_speed_mps: 10.0
+solution:
+  type: Crossrange
+  min_time_to_go_s: 60.0
+  initial_heading_error_deg: 15.0

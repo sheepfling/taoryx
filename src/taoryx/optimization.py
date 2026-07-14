@@ -93,6 +93,9 @@ def han_powell_rqp(
         raise ValueError("max_iterations must be nonnegative")
     parameters = _project(parameters, limits)
     penalty = 10.0
+    objective = _cached_point_function(objective)
+    equality_constraints = tuple(_cached_point_function(function) for function in equality_constraints)
+    inequality_constraints = tuple(_cached_point_function(function) for function in inequality_constraints)
     for iteration in range(max_iterations + 1):
         objective_value = _evaluate(objective, parameters)
         equalities = tuple(_evaluate(function, parameters) for function in equality_constraints)
@@ -214,4 +217,19 @@ def _linear_interpolate(times: tuple[float, ...], values: tuple[float, ...], tar
     index = next(index for index in range(len(times) - 1) if times[index] <= target <= times[index + 1])
     fraction = (target - times[index]) / (times[index + 1] - times[index])
     return values[index] + fraction * (values[index + 1] - values[index])
+####
+
+
+def _cached_point_function(function: Callable[[tuple[float, ...]], float]) -> Callable[[tuple[float, ...]], float]:
+    """Memoize repeated scalar evaluations at the same candidate point."""
+
+    cache: dict[tuple[float, ...], float] = {}
+
+    def cached(point: tuple[float, ...]) -> float:
+        if point not in cache:
+            cache[point] = _evaluate(function, point)
+        return cache[point]
+    ####
+
+    return cached
 ####

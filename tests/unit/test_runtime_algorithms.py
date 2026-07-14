@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from taoryx.contracts import Frame, Quantity, Unit, Vector3
+from taoryx.contracts import Frame, FrameVector3, Quantity, Unit, Vector3
 from taoryx.language.expressions import parse_expression
-from taoryx.runtime.common import EventCondition, RuntimeState, RuntimeVehicle
+from taoryx.runtime.common import EventCondition, RuntimeProblem, RuntimeState, RuntimeVehicle
 from taoryx.runtime.engine import compute_trajectories, get_next_time_step
 from taoryx.runtime.environment_runtime import evaluate_wind
 from taoryx.runtime.events import apply_state_discontinuity, refine_segment_final_condition
@@ -17,7 +17,8 @@ from taoryx.runtime.optimization_runtime import (
 )
 from taoryx.runtime.runtime_model import build_runtime_problem
 from taoryx.runtime.surveys import generate_survey_cases
-from taoryx.runtime.units import from_internal, resolve_units_and_formats, selected_setting, to_internal
+from taoryx.runtime.units import from_internal, resolve_units_and_formats, selected_setting, to_internal, unit_scale
+from taoryx.state import PointMassRates, PointMassState
 
 
 def test_runtime_graph_rejects_cycles_and_steps_at_boundaries() -> None:
@@ -54,6 +55,68 @@ def test_expression_min_and_max_accept_variadic_arguments() -> None:
     ####
 
 
+def test_engine_integrates_typed_point_mass_derivative() -> None:
+    state = PointMassState(
+        0.0,
+        FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECFC),
+        FrameVector3(Vector3(1.0, 0.0, 0.0), Frame.ECFC),
+        2.0,
+    )
+
+    def derivative(item: PointMassState) -> PointMassRates:
+        return PointMassRates(
+            FrameVector3(item.earth_relative_velocity.vector, Frame.ECFC),
+            FrameVector3(Vector3(2.0, 0.0, 0.0), Frame.ECFC),
+            0.0,
+            item.earth_relative_velocity.vector.norm(),
+            item.earth_relative_velocity.vector.norm(),
+        )
+    ####
+
+    vehicle = RuntimeVehicle(
+        "typed",
+        RuntimeState.from_point_mass_state(state),
+        step_size=0.1,
+        integrator="rk4",
+        point_mass_derivative=derivative,
+    )
+    result = compute_trajectories(RuntimeProblem({"typed": vehicle}, final_time=0.1))
+
+    assert result.completed
+    final = result.states["typed"][-1].to_point_mass_state()
+    assert final.position.vector.x == pytest.approx(0.11)
+    assert final.earth_relative_velocity.vector.x == pytest.approx(1.2)
+####
+
+
+def test_engine_can_integrate_uncoupled_vehicles_without_shared_step_throttling() -> None:
+    fast = RuntimeVehicle("fast", RuntimeState(0.0, (0.0,)), lambda state: (1.0,), step_size=1.0)
+    slow = RuntimeVehicle("slow", RuntimeState(0.0, (0.0,)), lambda state: (1.0,), step_size=0.1)
+
+    result = compute_trajectories(RuntimeProblem({"fast": fast, "slow": slow}, final_time=1.0), synchronize_vehicles=False)
+
+    assert result.completed
+    assert len(result.states["fast"]) == 2
+    assert len(result.states["slow"]) == 11
+####
+
+
+def test_engine_reports_a_declared_state_stall_before_consuming_step_budget() -> None:
+    vehicle = RuntimeVehicle(
+        "stalled",
+        RuntimeState(0.0, (0.0,)),
+        lambda state: (0.0,),
+        stall_detector=lambda state: True,
+    )
+
+    result = compute_trajectories(RuntimeProblem({"stalled": vehicle}), max_steps=10000)
+
+    assert not result.completed
+    assert result.stop_reason == "state_stall"
+    assert len(result.states["stalled"]) == 1
+####
+
+
 def test_units_and_formats_resolve_canonical_and_historical_aliases() -> None:
     settings = {"x": "km", "xecfcdt": "m/sec"}
     formats = {"x": "f.2", "xecfcdt": "f.3"}
@@ -62,6 +125,33 @@ def test_units_and_formats_resolve_canonical_and_historical_aliases() -> None:
     assert to_internal(1.0, "xecfc", settings) == pytest.approx(3280.839895013123)
     assert from_internal(3280.839895013123, "x", settings) == pytest.approx(1.0)
     assert selected_setting("xdt", formats) == "f.3"
+    ####
+
+
+@pytest.mark.parametrize(
+    ("unit", "dimension"),
+    [
+        ("m/min", "speed"),
+        ("rpm", "angular_rate"),
+        ("g", "acceleration"),
+        ("kg/sec", "mass_rate"),
+        ("psi", "pressure"),
+        ("1/ft", "inverse_length"),
+        ("m2/sec", "kinematic_viscosity"),
+        ("kg/m3", "density"),
+    ],
+)
+def test_runtime_units_cover_the_documented_dimension_families(unit: str, dimension: str) -> None:
+    assert unit_scale(unit, dimension) > 0.0
+
+
+def test_runtime_units_convert_acceleration_and_pressure_with_dimension_checks() -> None:
+    assert to_internal(1.0, "nx", {"nx": "g"}) == pytest.approx(32.17404855643044)
+    assert to_internal(1.0, "dynprs", {"dynprs": "psi"}) == pytest.approx(144.0)
+    assert from_internal(1.0, "rho", {"rho": "kg/m3"}) == pytest.approx(16.01846337396)
+    with pytest.raises(ValueError, match="incompatible"):
+        unit_scale("sec", "speed")
+    assert to_internal(144.0, "sref", {"sref": "in"}) == pytest.approx(1.0)
     ####
 
 

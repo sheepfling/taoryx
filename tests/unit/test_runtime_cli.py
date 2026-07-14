@@ -61,6 +61,35 @@ def test_cli_run_ingests_problem_and_table_and_writes_report(tmp_path: Path, cap
     assert report["exit_code"] == 0
     assert (output_dir / "result.dat").exists()
     assert json.loads(capsys.readouterr().out)["outputs"]
+####
+
+
+def test_cli_lists_available_integrators(capsys) -> None:
+    assert main(["integrators", "list"]) == 0
+    assert "rkf45" in capsys.readouterr().out
+####
+
+
+def test_cli_accepts_selected_integrator(tmp_path: Path, capsys) -> None:
+    problem, table = _write_runtime_inputs(tmp_path)
+
+    exit_code = main(
+        [
+            "run",
+            str(problem),
+            str(table),
+            "--integrator",
+            "rkf45",
+            "--output-dir",
+            str(tmp_path / "output"),
+            "--max-steps",
+            "20",
+        ]
+    )
+
+    assert exit_code == 0
+    assert "executed 1 case" in capsys.readouterr().out
+####
 
 
 def test_cli_run_rejects_output_that_escapes_output_directory(tmp_path: Path, capsys) -> None:

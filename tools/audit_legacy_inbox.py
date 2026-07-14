@@ -16,7 +16,7 @@ DEFAULT_OUTPUT = ROOT / "metadata" / "legacy_inbox_manifest.json"
 GRAMMAR_REGISTRY = ROOT / "metadata" / "legacy_grammar_registry.json"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class InventoryEntry:
     path: str
     size: int

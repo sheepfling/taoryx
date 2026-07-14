@@ -3,9 +3,71 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
+from enum import StrEnum
+from importlib.util import find_spec
 
 from .simulation.contracts import DerivativeModel, SimulationState
+
+
+class IntegratorName(StrEnum):
+    """Stable runtime names for reference and optional numerical integrators."""
+
+    EULER = "euler"
+    RK4 = "rk4"
+    RKF45 = "rkf45"
+    SCIPY_RK45 = "scipy-rk45"
+    SCIPY_DOP853 = "scipy-dop853"
+    SCIPY_RADAU = "scipy-radau"
+    SCIPY_BDF = "scipy-bdf"
+    SCIPY_LSODA = "scipy-lsoda"
+####
+
+
+_SCIPY_METHODS = {
+    IntegratorName.SCIPY_RK45: "RK45",
+    IntegratorName.SCIPY_DOP853: "DOP853",
+    IntegratorName.SCIPY_RADAU: "Radau",
+    IntegratorName.SCIPY_BDF: "BDF",
+    IntegratorName.SCIPY_LSODA: "LSODA",
+}
+
+
+def normalize_integrator(name: str | IntegratorName) -> IntegratorName:
+    """Normalize a public integrator name and reject unsupported values."""
+
+    try:
+        return name if isinstance(name, IntegratorName) else IntegratorName(name.casefold())
+    except ValueError as error:
+        choices = ", ".join(item.value for item in IntegratorName)
+        raise ValueError(f"unknown integrator {name!r}; choose one of: {choices}") from error
+####
+
+
+def available_integrators() -> tuple[IntegratorName, ...]:
+    """List public integrators and SciPy methods available in this environment."""
+
+    result = [IntegratorName.EULER, IntegratorName.RK4, IntegratorName.RKF45]
+    if find_spec("scipy") is not None:
+        result.extend(_SCIPY_METHODS)
+    return tuple(result)
+####
+
+
+def euler_step(model: DerivativeModel, state: SimulationState, step_size: float) -> SimulationState:
+    """Advance one state with explicit Euler.
+
+    This is intentionally exposed for fast smoke tests and transparent
+    derivative-pipeline checks, not as the recommended production method.
+    """
+
+    if not math.isfinite(step_size) or step_size <= 0.0:
+        raise ValueError("step_size must be positive and finite")
+    rates = _evaluate(model, state)
+    values = tuple(value + step_size * rate for value, rate in zip(state.values, rates, strict=True))
+    return SimulationState(state.time + step_size, values, state.frame)
+####
 
 
 def rk4_step(model: DerivativeModel, state: SimulationState, step_size: float) -> SimulationState:
@@ -39,6 +101,54 @@ class RK4Integrator:
 
     def step(self, model: DerivativeModel, state: SimulationState, step_size: float) -> SimulationState:
         return rk4_step(model, state, step_size)
+####
+
+
+def scipy_ivp_step(
+    model: DerivativeModel,
+    state: SimulationState,
+    step_size: float,
+    absolute_tolerance: float,
+    relative_tolerance: float,
+    *,
+    method: str,
+) -> SimulationState:
+    """Advance one engine step with an optional SciPy ``solve_ivp`` method.
+
+    The runtime still owns segment boundaries and event refinement. SciPy is
+    therefore constrained to the current engine step rather than replacing the
+    scheduling contract with its own event loop.
+    """
+
+    if not math.isfinite(step_size) or step_size <= 0.0:
+        raise ValueError("step_size must be positive and finite")
+    if not math.isfinite(absolute_tolerance) or absolute_tolerance <= 0.0:
+        raise ValueError("absolute_tolerance must be positive and finite")
+    if not math.isfinite(relative_tolerance) or relative_tolerance < 0.0:
+        raise ValueError("relative_tolerance must be finite and nonnegative")
+    try:
+        from scipy.integrate import solve_ivp
+    except ImportError as error:
+        raise RuntimeError("SciPy integrators require the optional 'scipy' dependency") from error
+
+    def wrapped(time: float, values: Sequence[float]) -> tuple[float, ...]:
+        current = SimulationState(time, tuple(float(value) for value in values), state.frame)
+        return tuple(float(value) for value in model(current))
+    ####
+
+    result = solve_ivp(
+        wrapped,
+        (state.time, state.time + step_size),
+        state.values,
+        method=method,
+        rtol=relative_tolerance,
+        atol=absolute_tolerance,
+        max_step=step_size,
+        t_eval=(state.time + step_size,),
+    )
+    if not result.success or result.y.shape[1] == 0:
+        raise RuntimeError(f"SciPy {method} integration failed: {result.message}")
+    return SimulationState(state.time + step_size, tuple(float(value) for value in result.y[:, -1]), state.frame)
 ####
 
 

@@ -1,0 +1,4 @@
+(example-output)
+table output(time) no-extrap
+time=0,1
+output=0,1

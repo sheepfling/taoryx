@@ -1,0 +1,25 @@
+(spectre-ballistic)
+
+# Synthetic TAOS trajectory translation of INBOX/spectre-snippet-v1/simple_aero/ballistic.yaml
+# Working set: boost followed by passive coast
+
+*title Spectre-like ballistic trajectory
+
+*atmos standard
+*earth wgs-84 omega=0
+
+*trajectory 1 vehicle start on 1
+
+  *initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 wt=1000.0
+
+  *file ballistic.dat time alt vel gamgd alpha bankgd thrust
+  *segment 1 boost
+    *integ dtprnt=0.1 dt=0.01
+    *prop thrust=(stage1-thrust) mdot=(stage1-mdot)
+    *when tseg=5 goto 2
+  *segment 2 coast
+    *integ dtprnt=0.5 dt=0.05
+    *aero ca=(coast-ca) cn=(coast-cn)
+    *when alt<0 stop
+
+*end

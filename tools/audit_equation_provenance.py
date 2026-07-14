@@ -55,7 +55,7 @@ IMPLEMENTED_EQUATION_IDS = {
 }
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class SourceLocation:
     label: str
     tex_file: str
@@ -66,7 +66,7 @@ class SourceLocation:
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class AuxRecord:
     label: str
     equation: str
@@ -76,7 +76,7 @@ class AuxRecord:
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EquationRecord:
     equation: str
     latex_label: str

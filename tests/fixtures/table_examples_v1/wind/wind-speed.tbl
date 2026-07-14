@@ -1,0 +1,4 @@
+(wind-speed)
+table windv(alt) no-extrap
+alt=0,10000
+windv=0,25

@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EbnfLocation:
     path: str
     line: int
@@ -42,39 +42,39 @@ class EbnfReferenceError(ValueError):
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EbnfLiteral:
     value: str
     location: EbnfLocation
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EbnfReference:
     name: str
     location: EbnfLocation
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EbnfSequence:
     items: tuple["EbnfExpression", ...]
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EbnfChoice:
     alternatives: tuple["EbnfExpression", ...]
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EbnfOptional:
     expression: "EbnfExpression"
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EbnfRepeat:
     expression: "EbnfExpression"
 ####
@@ -83,7 +83,7 @@ class EbnfRepeat:
 EbnfExpression = EbnfLiteral | EbnfReference | EbnfSequence | EbnfChoice | EbnfOptional | EbnfRepeat
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EbnfRule:
     name: str
     expression: EbnfExpression
@@ -91,7 +91,7 @@ class EbnfRule:
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class EbnfGrammar:
     path: str
     rules: tuple[EbnfRule, ...]
@@ -131,7 +131,7 @@ class EbnfGrammar:
 ####
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class _Token:
     kind: str
     value: str

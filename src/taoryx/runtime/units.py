@@ -47,6 +47,39 @@ _UNIT_TO_SI: dict[str, tuple[str, float]] = {
     "kn": ("force", 1000.0),
 }
 
+_UNIT_TO_SI.update(
+    {
+        "in/min": ("speed", 0.0254 / 60.0), "in/hr": ("speed", 0.0254 / 3600.0),
+        "mi/sec": ("speed", 1609.344), "mi/min": ("speed", 1609.344 / 60.0), "mi/hr": ("speed", 1609.344 / 3600.0),
+        "m/min": ("speed", 1.0 / 60.0), "m/hr": ("speed", 1.0 / 3600.0),
+        "km/min": ("speed", 1000.0 / 60.0), "km/hr": ("speed", 1000.0 / 3600.0),
+        "deg/sec": ("angular_rate", 3.141592653589793 / 180.0),
+        "deg/min": ("angular_rate", 3.141592653589793 / 180.0 / 60.0),
+        "deg/hr": ("angular_rate", 3.141592653589793 / 180.0 / 3600.0),
+        "rad/sec": ("angular_rate", 1.0), "rad/min": ("angular_rate", 1.0 / 60.0), "rad/hr": ("angular_rate", 1.0 / 3600.0),
+        "rev/sec": ("angular_rate", 2.0 * 3.141592653589793), "rpm": ("angular_rate", 2.0 * 3.141592653589793 / 60.0),
+        "ft/sec2": ("acceleration", 0.3048), "ft/min2": ("acceleration", 0.3048 / 3600.0), "ft/hr2": ("acceleration", 0.3048 / 12960000.0),
+        "in/sec2": ("acceleration", 0.0254), "in/min2": ("acceleration", 0.0254 / 3600.0), "in/hr2": ("acceleration", 0.0254 / 12960000.0),
+        "mi/sec2": ("acceleration", 1609.344), "mi/min2": ("acceleration", 1609.344 / 3600.0), "mi/hr2": ("acceleration", 1609.344 / 12960000.0),
+        "nm/hr2": ("acceleration", 1852.0 / 12960000.0), "m/sec2": ("acceleration", 1.0), "m/min2": ("acceleration", 1.0 / 3600.0),
+        "m/hr2": ("acceleration", 1.0 / 12960000.0), "km/sec2": ("acceleration", 1000.0), "km/min2": ("acceleration", 1000.0 / 3600.0),
+        "km/hr2": ("acceleration", 1000.0 / 12960000.0), "deg/sec2": ("acceleration", 3.141592653589793 / 180.0),
+        "deg/min2": ("acceleration", 3.141592653589793 / 180.0 / 3600.0), "deg/hr2": ("acceleration", 3.141592653589793 / 180.0 / 12960000.0),
+        "rad/sec2": ("acceleration", 1.0), "rad/min2": ("acceleration", 1.0 / 3600.0), "rad/hr2": ("acceleration", 1.0 / 12960000.0),
+        "rev/sec2": ("acceleration", 2.0 * 3.141592653589793), "rev/min2": ("acceleration", 2.0 * 3.141592653589793 / 3600.0), "rev/hr2": ("acceleration", 2.0 * 3.141592653589793 / 12960000.0),
+        "g": ("acceleration", 9.80665),
+        "lb/sec": ("mass_rate", 0.45359237), "lb/min": ("mass_rate", 0.45359237 / 60.0), "lb/hr": ("mass_rate", 0.45359237 / 3600.0),
+        "slugs/sec": ("mass_rate", 14.59390294), "slugs/min": ("mass_rate", 14.59390294 / 60.0), "slugs/hr": ("mass_rate", 14.59390294 / 3600.0),
+        "g/sec": ("mass_rate", 0.001), "g/min": ("mass_rate", 0.001 / 60.0), "g/hr": ("mass_rate", 0.001 / 3600.0),
+        "kg/sec": ("mass_rate", 1.0), "kg/min": ("mass_rate", 1.0 / 60.0), "kg/hr": ("mass_rate", 1.0 / 3600.0),
+        "lbf/ft2": ("pressure", 4.4482216152605 / 0.3048**2), "psi": ("pressure", 6894.757293168), "pascal": ("pressure", 1.0), "kpascal": ("pressure", 1000.0),
+        "1/in": ("inverse_length", 1.0 / 0.0254), "1/ft": ("inverse_length", 1.0 / 0.3048), "1/m": ("inverse_length", 1.0),
+        "ft2/sec": ("kinematic_viscosity", 0.3048**2), "m2/sec": ("kinematic_viscosity", 1.0),
+        "lb/ft3": ("density", 0.45359237 / 0.3048**3), "lb/m3": ("density", 0.45359237), "g/cm3": ("density", 1000.0), "kg/m3": ("density", 1.0),
+        "ft2": ("area", 0.3048**2), "m2": ("area", 1.0),
+    }
+)
+
 _ALIASES = {
     "xecfc": "x", "yecfc": "y", "zecfc": "z",
     "xecfcdt": "xdt", "yecfcdt": "ydt", "zecfcdt": "zdt",
@@ -59,6 +92,15 @@ _CANONICAL_UNITS = {
     "time": "sec",
     "angle": "deg",
     "mass": "lb",
+    "mass_rate": "lb/sec",
+    "acceleration": "ft/sec2",
+    "angular_rate": "deg/sec",
+    "force": "lbf",
+    "pressure": "lbf/ft2",
+    "inverse_length": "1/ft",
+    "kinematic_viscosity": "ft2/sec",
+    "density": "lb/ft3",
+    "area": "ft2",
 }
 
 
@@ -87,12 +129,24 @@ def variable_dimension(variable: str) -> str | None:
         return "length"
     if name in {"vel", "vair", "xdt", "ydt", "zdt", "ground_speed", "iip_rng_rate"}:
         return "speed"
+    if name in {"nx", "ny", "nz", "accel", "gaccel"}:
+        return "acceleration"
     if name in {"time", "tseg", "tmark", "iip_time"}:
         return "time"
     if name in {"lat", "long", "lon", "gama", "psi", "alpha", "alphat", "beta", "betae", "pitch", "pitchi", "pitchgd", "yaw", "yawi", "yawgd", "roll", "rolli", "rollgd", "azm", "bankgc", "bankgd"}:
         return "angle"
     if name in {"wt", "mass", "fuel"}:
         return "mass"
+    if name in {"thrust", "force"}:
+        return "force"
+    if name in {"pres", "dynprs", "pressure"}:
+        return "pressure"
+    if name in {"rho", "density"}:
+        return "density"
+    if name in {"nu", "kinematic_viscosity"}:
+        return "kinematic_viscosity"
+    if name in {"sref", "area"}:
+        return "area"
     return None
 ####
 
@@ -107,6 +161,8 @@ def unit_scale(unit: str | None, dimension: str | None) -> float:
         selected_dimension, scale = _UNIT_TO_SI[normalized]
     except KeyError as error:
         raise ValueError(f"unsupported runtime unit: {unit}") from error
+    if dimension == "area" and selected_dimension == "length":
+        return scale**2
     if selected_dimension != dimension:
         raise ValueError(f"unit {unit!r} is incompatible with {dimension}")
     return scale

@@ -1,0 +1,5 @@
+(fin-mix-pitch)
+table output(pitch_cmd_deg,yaw_cmd_deg) no-extrap
+pitch_cmd_deg=-10,0,10
+yaw_cmd_deg=-10,0,10
+output=-0.50,0.00,0.50,-0.50,0.00,0.50,-0.50,0.00,0.50

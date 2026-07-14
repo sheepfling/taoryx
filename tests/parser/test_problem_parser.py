@@ -155,6 +155,24 @@ def test_complete_search_requires_the_four_mandatory_controls() -> None:
     assert all(item.location.line == 2 for item in diagnostics)
 
 
+def test_semantic_validation_rejects_unknown_search_endpoint_segment() -> None:
+    document = parse_problem_text(
+        """(endpoint-check)
+*search 1 vary alpha until alt=10 on segment 9, trajectory 1
+  xlo=0 xhi=1 xest=0.5 dx=0.1
+*trajectory 1 Test start on 1
+  *initial geodetic
+    long=0 lat=0 alt=0 vel=1 gama=0 psi=0 time=0 wt=1
+  *segment 1
+    *when time>1 stop
+*end
+"""
+    )
+
+    diagnostics = validate_problem(document)
+    assert any(item.code == "unknown-endpoint-segment" for item in diagnostics)
+
+
 def test_search_accepts_every_documented_control_variable() -> None:
     result = ingest_text(
         """(search-controls)

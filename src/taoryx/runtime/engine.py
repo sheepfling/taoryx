@@ -7,10 +7,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from taoryx.integration import rk4_step, rkf45_step
+from taoryx.contracts import Frame, FrameVector3, Vector3
+from taoryx.integration import IntegratorName, euler_step, normalize_integrator, rk4_step, rkf45_step, scipy_ivp_step
+from taoryx.modes import DynamicsMode
 from taoryx.simulation.contracts import DerivativeModel, SimulationState
 
-from .common import DerivativePipeline, RuntimeProblem, RuntimeState, RuntimeVehicle, SearchRestart
+from .common import Derivative, DerivativePipeline, RuntimeProblem, RuntimeState, RuntimeVehicle, SearchRestart
 from .events import EventCrossing, refine_segment_final_condition
 from .expressions import evaluate_definition_program
 
@@ -54,40 +56,85 @@ def _integrate_vehicle(vehicle: RuntimeVehicle, step: float) -> None:
 
     if step <= 0.0:
         raise ValueError("integration step must be positive")
-    if vehicle.derivative is None:
+    if vehicle.derivative is None and vehicle.point_mass_derivative is None:
         candidate = vehicle.state.with_values(vehicle.state.values, time=vehicle.state.time + step)
     else:
         start = vehicle.state
         derivative = vehicle.derivative
-        assert derivative is not None
+        point_mass_derivative = vehicle.point_mass_derivative
+        if derivative is None and point_mass_derivative is None:
+            raise ValueError(f"vehicle {vehicle.name} has no derivative callback")
 
         def model(simulation_state: SimulationState) -> tuple[float, ...]:
             staged = start.with_values(simulation_state.values, time=simulation_state.time)
             staged = _refresh_runtime_state(vehicle, staged, publish_rates=False)
-            return tuple(float(value) for value in derivative(staged))
+            if point_mass_derivative is not None:
+                return point_mass_derivative(staged.to_point_mass_state()).to_values()
+            return tuple(float(value) for value in cast(Derivative, derivative)(staged))
         ####
 
         simulation = SimulationState(start.time, start.values, str(start.frame))
-        if vehicle.integrator.casefold() == "rkf45":
+        integrator = normalize_integrator(vehicle.integrator)
+        if integrator is IntegratorName.EULER:
+            integrated = euler_step(cast(DerivativeModel, model), simulation, step)
+            candidate = start.with_values(integrated.values, time=integrated.time)
+        elif integrator is IntegratorName.RKF45:
             adaptive = rkf45_step(cast(DerivativeModel, model), simulation, step, vehicle.absolute_tolerance, vehicle.relative_tolerance)
             candidate = start.with_values(adaptive.state.values, time=adaptive.state.time)
             vehicle.step_size = min(adaptive.next_step, vehicle.max_step_size or adaptive.next_step)
-        elif vehicle.integrator.casefold() == "rk4":
+        elif integrator is IntegratorName.RK4:
             integrated = rk4_step(cast(DerivativeModel, model), simulation, step)
             candidate = start.with_values(integrated.values, time=integrated.time)
         else:
-            rates = tuple(float(value) for value in derivative(start))
-            if len(rates) != len(start.values):
-                raise ValueError(f"derivative dimension mismatch for {vehicle.name}")
-            candidate = start.with_values(tuple(value + step * rate for value, rate in zip(start.values, rates, strict=True)), time=start.time + step)
+            if point_mass_derivative is not None:
+                raise ValueError("SciPy integrators require a generic derivative callback, not point_mass_derivative")
+            candidate = start.with_values(
+                scipy_ivp_step(
+                    cast(DerivativeModel, model),
+                    simulation,
+                    step,
+                    vehicle.absolute_tolerance,
+                    vehicle.relative_tolerance,
+                    method={
+                        IntegratorName.SCIPY_RK45: "RK45",
+                        IntegratorName.SCIPY_DOP853: "DOP853",
+                        IntegratorName.SCIPY_RADAU: "Radau",
+                        IntegratorName.SCIPY_BDF: "BDF",
+                        IntegratorName.SCIPY_LSODA: "LSODA",
+                    }[integrator],
+                ).values,
+                time=start.time + step,
+            )
     candidate = _refresh_runtime_state(vehicle, candidate)
+    if vehicle.dynamics_mode is DynamicsMode.KINEMATIC_6DOF and vehicle.kinematic_state is not None:
+        body_rate = vehicle.body_rate_provider(candidate) if vehicle.body_rate_provider is not None else Vector3(0.0, 0.0, 0.0)
+        try:
+            translational = candidate.to_point_mass_state()
+        except ValueError:
+            vehicle.kinematic_state = vehicle.kinematic_state.with_attitude_rate(body_rate, step)
+        else:
+            vehicle.kinematic_state = vehicle.kinematic_state.advance(
+                FrameVector3(translational.position.vector, Frame.ECFC),
+                FrameVector3(translational.earth_relative_velocity.vector, Frame.ECFC),
+                body_rate,
+                step,
+            )
     vehicle.state = candidate
     vehicle.history.append(candidate)
 ####
 
 
-def compute_trajectories(problem: RuntimeProblem, *, max_steps: int = 10000, stop_when: Callable[[RuntimeProblem], bool] | None = None) -> ExecutionResult:
+def compute_trajectories(
+    problem: RuntimeProblem,
+    *,
+    max_steps: int = 10000,
+    stop_when: Callable[[RuntimeProblem], bool] | None = None,
+    synchronize_vehicles: bool = True,
+) -> ExecutionResult:
     """Synchronously advance active trajectories until completion or stop."""
+
+    if not synchronize_vehicles:
+        return _compute_independent_trajectories(problem, max_steps=max_steps)
 
     for vehicle in problem.active_vehicles():
         vehicle.state = _refresh_runtime_state(vehicle, vehicle.state)
@@ -101,6 +148,11 @@ def compute_trajectories(problem: RuntimeProblem, *, max_steps: int = 10000, sto
             if any(vehicle.activation_pending for vehicle in problem.vehicles.values()):
                 return ExecutionResult(_histories(problem), False, "dependency_unresolved")
             return ExecutionResult(_histories(problem), True)
+        stalled = tuple(vehicle for vehicle in active if vehicle.stall_detector is not None and vehicle.stall_detector(vehicle.state))
+        if stalled:
+            for vehicle in stalled:
+                vehicle.active = False
+            return ExecutionResult(_histories(problem), False, "state_stall")
         immediate_crossings = {
             vehicle.name: _current_event_crossings(vehicle)
             for vehicle in active
@@ -161,6 +213,27 @@ def compute_trajectories(problem: RuntimeProblem, *, max_steps: int = 10000, sto
 ####
 
 
+def _compute_independent_trajectories(problem: RuntimeProblem, *, max_steps: int) -> ExecutionResult:
+    """Advance independent vehicles separately so one tiny step cannot throttle all.
+
+    This mode is intentionally opt-in.  Callers must establish that vehicles do
+    not exchange state during integration; the ordinary synchronized path remains
+    the default for coupled trajectories.
+    """
+
+    vehicle_names = tuple(vehicle.name for vehicle in problem.active_vehicles())
+    completed = True
+    for name in vehicle_names:
+        for vehicle in problem.vehicles.values():
+            vehicle.active = vehicle.name == name
+            vehicle.activation_pending = False
+        result = compute_trajectories(problem, max_steps=max_steps)
+        completed = completed and result.completed
+        problem.vehicles[name].active = False
+    return ExecutionResult(_histories(problem), completed, None if completed else "max_steps")
+####
+
+
 def _current_event_crossings(vehicle: RuntimeVehicle) -> tuple[EventCrossing, ...]:
     """Return events already satisfied at the vehicle's current state."""
 
@@ -199,6 +272,7 @@ def run_taos(
     *,
     output_dir: str | Path = ".",
     max_steps: int = 10000,
+    integrator: str | None = None,
 ) -> ExecutionResult | RunReport:
     """Run a resolved graph or ingest and execute a TAOS problem file.
 
@@ -209,10 +283,14 @@ def run_taos(
     if isinstance(problem, RuntimeProblem):
         if table_paths:
             raise ValueError("table paths are only valid when running a problem file")
+        if integrator is not None:
+            selected = normalize_integrator(integrator).value
+            for vehicle in problem.vehicles.values():
+                vehicle.integrator = selected
         return compute_trajectories(problem, max_steps=max_steps)
     from .runner import run_files
 
-    return run_files(problem, tuple(table_paths), output_dir=output_dir, max_steps=max_steps)
+    return run_files(problem, tuple(table_paths), output_dir=output_dir, max_steps=max_steps, integrator=integrator)
 ####
 
 
@@ -278,7 +356,10 @@ def _refresh_runtime_state(vehicle: RuntimeVehicle, state: RuntimeState, *, publ
 
     named = dict(state.named)
     if vehicle.environment_evaluator is not None:
-        named.update(vehicle.environment_evaluator(named))
+        environment_values = named
+        if not publish_rates:
+            environment_values = {**named, "_runtime_derivative_stage": 1.0}
+        named.update(vehicle.environment_evaluator(environment_values))
     if vehicle.derived_definitions:
         named = evaluate_definition_program(
             vehicle.derived_definitions,
@@ -290,7 +371,7 @@ def _refresh_runtime_state(vehicle: RuntimeVehicle, state: RuntimeState, *, publ
         named.update(vehicle.definition_evaluator(named))
     named["time"] = state.time
     refreshed = RuntimeState(state.time, state.values, state.frame, named, state.value_names, state.segment_endpoints)
-    if publish_rates and vehicle.derivative is not None:
+    if publish_rates and vehicle.publish_derived_rates and vehicle.derivative is not None:
         try:
             rates = tuple(float(value) for value in vehicle.derivative(refreshed))
         except (KeyError, TypeError, ValueError, ZeroDivisionError):

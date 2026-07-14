@@ -1,0 +1,19 @@
+(mass-harness)
+*title Mass and CG table harness
+*earth spherical gm=0 omega=0
+*trajectory 1 vehicle start on 1
+  *initial ecfc x=0.0 y=0.0 z=0.0 xdt=0.0 ydt=0.0 zdt=0.0 time=0.0 mass=620.0
+  *define stage
+    stage = 1.0;
+  *define config
+    config = 1.0;
+  *define mass_history
+    mass_history = table(mass-history);
+  *define cg_history
+    cg_history = table(cg-history);
+  *file mass.dat time mass_history cg_history cg
+  *segment 1 coast
+    *integ dtprnt=0.1 dt=0.1
+    *cg cg=(weight-cg)
+    *when time>0.2 stop
+*end

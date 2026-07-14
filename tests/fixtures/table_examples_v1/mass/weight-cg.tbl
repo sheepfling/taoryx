@@ -1,0 +1,5 @@
+(weight-cg)
+table cg(wt,config) no-extrap
+wt=1000,2000
+config=1,2
+cg=0.40,0.70,0.45,0.75

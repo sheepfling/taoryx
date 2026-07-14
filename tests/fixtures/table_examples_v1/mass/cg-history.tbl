@@ -1,0 +1,5 @@
+(cg-history)
+table cg(time,stage) no-extrap
+time=0,6.2,6.21
+stage=1,2
+cg=3.680,1.420,3.090,1.420,1.420,1.360

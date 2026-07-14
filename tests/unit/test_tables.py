@@ -9,6 +9,7 @@ from taoryx.tables import (
     TableEvaluationContext,
     accumulate_table_values,
     apply_table_operation,
+    clear_and_store,
     evaluate_full_table,
     interpolate_nd,
     interpolate_skewed,
@@ -75,6 +76,16 @@ def test_full_table_accumulator_dispatch_and_storage() -> None:
     assert result.value == pytest.approx(0.25)
     assert result.storage[0][0] == "saved"
     assert result.storage[0][1] == pytest.approx(0.25)
+
+
+def test_clear_and_store_has_explicit_runtime_contract() -> None:
+    storage: dict[str, float] = {}
+
+    assert clear_and_store(storage, "Saved", 3.5) == 0.0
+    assert storage == {"saved": 3.5}
+    with pytest.raises(ValueError, match="duplicate storage"):
+        clear_and_store(storage, "SAVED", 4.0)
+####
 
 
 def test_full_table_goto_and_multi_table_accumulation() -> None:

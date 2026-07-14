@@ -123,11 +123,11 @@ Before the first catalog item, define:
   - Target: `taos_math.attitude.resolve_aerodynamic_attitude`
   - Priority / complexity: P0 / very_high
   - Dependencies: TAOS-ALG-COORD-016
-- [ ] **TAOS-ALG-COORD-018 — Inertial Platform Coordinate Evaluation**
+- [x] **TAOS-ALG-COORD-018 — Inertial Platform Coordinate Evaluation**
   - Target: `taos_math.coordinates.inertial_platform_coordinates`
   - Priority / complexity: P1 / low
   - Dependencies: none
-- [ ] **TAOS-ALG-COORD-019 — Tangent-Plane Basis and Coordinates**
+- [x] **TAOS-ALG-COORD-019 — Tangent-Plane Basis and Coordinates**
   - Target: `taos_math.coordinates.tangent_plane_coordinates`
   - Priority / complexity: P1 / medium
   - Dependencies: TAOS-ALG-COORD-010
@@ -158,25 +158,25 @@ Before the first catalog item, define:
   - Target: `taos_math.gravity.gravity_acceleration_j2`
   - Priority / complexity: P0 / medium
   - Dependencies: TAOS-ALG-COORD-002
-- [ ] **TAOS-ALG-ENV-005 — High-Altitude Atmosphere Interpolation**
+- [x] **TAOS-ALG-ENV-005 — High-Altitude Atmosphere Interpolation**
   - Target: `taos_math.atmosphere.high_altitude_atmosphere`
   - Priority / complexity: P1 / medium
   - Dependencies: TAOS-ALG-TABLE-002
   - Resolve first: The manual does not specify extrapolation behavior above 1000 km.
-- [ ] **TAOS-ALG-GEO-001 — Sodano Inverse Ellipsoidal Geodesic**
+- [x] **TAOS-ALG-GEO-001 — Sodano Inverse Ellipsoidal Geodesic**
   - Target: `taos_math.geodesy.sodano_inverse`
   - Priority / complexity: P1 / very_high
   - Dependencies: TAOS-ALG-COORD-007
   - Resolve first: Document numerical behavior near antipodal configurations, which the manual does not discuss.
-- [ ] **TAOS-ALG-GEO-003 — Sodano Direct Ellipsoidal Geodesic**
+- [x] **TAOS-ALG-GEO-003 — Sodano Direct Ellipsoidal Geodesic**
   - Target: `taos_math.geodesy.sodano_direct`
   - Priority / complexity: P1 / very_high
   - Dependencies: TAOS-ALG-COORD-007
-- [ ] **TAOS-ALG-GRAV-001 — Geopotential Spherical-Harmonic Expansion**
+- [x] **TAOS-ALG-GRAV-001 — Geopotential Spherical-Harmonic Expansion**
   - Target: `taos_math.gravity.geopotential`
   - Priority / complexity: P1 / high
   - Dependencies: TAOS-ALG-GRAV-002, TAOS-ALG-GRAV-003
-- [ ] **TAOS-ALG-GRAV-004 — Degree-Four Spherical-Harmonic Gravity Acceleration**
+- [x] **TAOS-ALG-GRAV-004 — Degree-Four Spherical-Harmonic Gravity Acceleration**
   - Target: `taos_math.gravity.gravity_acceleration_full`
   - Priority / complexity: P1 / very_high
   - Dependencies: TAOS-ALG-GRAV-001, TAOS-ALG-COORD-006
@@ -211,91 +211,91 @@ Before the first catalog item, define:
   - Target: `taos_math.aerodynamics.force_from_body_coefficients`
   - Priority / complexity: P0 / low
   - Dependencies: TAOS-ALG-COORD-014
-- [ ] **TAOS-ALG-DYN-004 — Rail Launch and Sled Constraint Model**
+- [x] **TAOS-ALG-DYN-004 — Rail Launch and Sled Constraint Model**
   - Target: `taos_math.dynamics.apply_rail_constraint`
   - Priority / complexity: P1 / medium
   - Dependencies: TAOS-ALG-COORD-014, TAOS-ALG-DYN-001
-- [ ] **TAOS-ALG-DYN-005 — Longitude and Geocentric Latitude Rates**
+- [x] **TAOS-ALG-DYN-005 — Longitude and Geocentric Latitude Rates**
   - Target: `taos_math.state_rates.longitude_and_geocentric_latitude_rates`
   - Priority / complexity: P1 / medium
   - Dependencies: TAOS-ALG-COORD-002, TAOS-ALG-COORD-004
-- [ ] **TAOS-ALG-DYN-006 — Geodetic Latitude and Altitude Rates**
+- [x] **TAOS-ALG-DYN-006 — Geodetic Latitude and Altitude Rates**
   - Target: `taos_math.state_rates.geodetic_latitude_and_altitude_rates`
   - Priority / complexity: P1 / high
   - Dependencies: TAOS-ALG-COORD-008, TAOS-ALG-COORD-009, TAOS-ALG-COORD-011
-- [ ] **TAOS-ALG-DYN-007 — Geodetic Altitude Acceleration**
+- [x] **TAOS-ALG-DYN-007 — Geodetic Altitude Acceleration**
   - Target: `taos_math.state_rates.altitude_acceleration`
   - Priority / complexity: P1 / high
   - Dependencies: TAOS-ALG-DYN-005, TAOS-ALG-DYN-006
-- [ ] **TAOS-ALG-DYN-010 — Ground Speed and Ground-Range Integration**
+- [x] **TAOS-ALG-DYN-010 — Ground Speed and Ground-Range Integration**
   - Target: `taos_math.state_rates.ground_speed`
   - Priority / complexity: P1 / high
   - Dependencies: TAOS-ALG-DYN-006, TAOS-ALG-COORD-012
-- [ ] **TAOS-ALG-DYN-011 — Geocentric and Geodetic Flight-Path-Angle Rates**
+- [x] **TAOS-ALG-DYN-011 — Geocentric and Geodetic Flight-Path-Angle Rates**
   - Target: `taos_math.state_rates.flight_path_angle_rates`
   - Priority / complexity: P1 / very_high
   - Dependencies: TAOS-ALG-COORD-016, TAOS-ALG-DYN-005, TAOS-ALG-DYN-006
-- [ ] **TAOS-ALG-DYN-012 — Specific Load and Body-Axis Load Factors**
+- [x] **TAOS-ALG-DYN-012 — Specific Load and Body-Axis Load Factors**
   - Target: `taos_math.dynamics.specific_load_factors`
   - Priority / complexity: P1 / medium
   - Dependencies: TAOS-ALG-COORD-020, TAOS-ALG-GRAV-004
-- [ ] **TAOS-ALG-ENV-001 — Acceleration Contribution Decomposition**
+- [x] **TAOS-ALG-ENV-001 — Acceleration Contribution Decomposition**
   - Target: `taos_math.dynamics.combine_acceleration_contributions`
   - Priority / complexity: P1 / low
   - Dependencies: TAOS-ALG-DYN-001, TAOS-ALG-FORCE-001, TAOS-ALG-FORCE-004, TAOS-ALG-GRAV-004
-- [ ] **TAOS-ALG-FORCE-004 — Aerodynamic Table Evaluation and Force Accumulation**
+- [x] **TAOS-ALG-FORCE-004 — Aerodynamic Table Evaluation and Force Accumulation**
   - Target: `taos_math.aerodynamics.evaluate_aerodynamic_forces`
   - Priority / complexity: P1 / high
   - Dependencies: TAOS-ALG-FORCE-001, TAOS-ALG-FORCE-002, TAOS-ALG-FORCE-003, TAOS-ALG-TABLE-003
-- [ ] **TAOS-ALG-FORCE-005 — Propulsive Force Vector and Accumulation**
+- [x] **TAOS-ALG-FORCE-005 — Propulsive Force Vector and Accumulation**
   - Target: `taos_math.propulsion.evaluate_propulsive_forces`
   - Priority / complexity: P1 / medium
   - Dependencies: TAOS-ALG-COORD-020
-- [ ] **TAOS-ALG-DYN-008 — Dynamic-Pressure Rate and Acceleration**
+- [x] **TAOS-ALG-DYN-008 — Dynamic-Pressure Rate and Acceleration**
   - Target: `taos_math.state_rates.dynamic_pressure_derivatives`
   - Priority / complexity: P2 / high
   - Dependencies: TAOS-ALG-DYN-006, TAOS-ALG-DYN-007, TAOS-ALG-ENV-004
-- [ ] **TAOS-ALG-DYN-009 — Mach-Number Rate**
+- [x] **TAOS-ALG-DYN-009 — Mach-Number Rate**
   - Target: `taos_math.state_rates.mach_rate`
   - Priority / complexity: P2 / medium
   - Dependencies: TAOS-ALG-DYN-006, TAOS-ALG-ENV-004
 
 ## M4-output-models
 
-- [ ] **TAOS-ALG-IIP-002 — Fehlberg Adaptive Runge-Kutta 4/5 Integration**
+- [x] **TAOS-ALG-IIP-002 — Fehlberg Adaptive Runge-Kutta 4/5 Integration**
   - Target: `taos_math.integration.rkf45_step`
   - Priority / complexity: P1 / very_high
   - Dependencies: TAOS-ALG-IIP-001
   - Resolve first: The manual cites Fehlberg but does not print the exact embedded tableau; select and document the historical variant used.
-- [ ] **TAOS-ALG-RADAR-001 — Radar Observation Geometry and Derivatives**
+- [x] **TAOS-ALG-RADAR-001 — Radar Observation Geometry and Derivatives**
   - Target: `taos_math.radar.radar_observations`
   - Priority / complexity: P1 / very_high
   - Dependencies: TAOS-ALG-COORD-008, TAOS-ALG-COORD-010
-- [ ] **TAOS-ALG-REL-001 — Relative Vehicle Observation Geometry**
+- [x] **TAOS-ALG-REL-001 — Relative Vehicle Observation Geometry**
   - Target: `taos_math.relative_motion.relative_vehicle_observations`
   - Priority / complexity: P1 / medium
   - Dependencies: TAOS-ALG-COORD-020
-- [ ] **TAOS-ALG-AERO-001 — Ballistic Coefficient and Lift-to-Drag Ratio**
+- [x] **TAOS-ALG-AERO-001 — Ballistic Coefficient and Lift-to-Drag Ratio**
   - Target: `taos_math.aerodynamics.aerodynamic_performance_metrics`
   - Priority / complexity: P2 / low
   - Dependencies: none
-- [ ] **TAOS-ALG-AERO-002 — Maximum Lift-to-Drag Angle Search**
+- [x] **TAOS-ALG-AERO-002 — Maximum Lift-to-Drag Angle Search**
   - Target: `taos_math.aerodynamics.maximum_lift_to_drag`
   - Priority / complexity: P2 / medium
   - Dependencies: TAOS-ALG-SEARCH-004, TAOS-ALG-FORCE-004, TAOS-ALG-AERO-001
-- [ ] **TAOS-ALG-GEO-002 — Downrange and Crossrange Projection Search**
+- [x] **TAOS-ALG-GEO-002 — Downrange and Crossrange Projection Search**
   - Target: `taos_math.geodesy.downrange_crossrange`
   - Priority / complexity: P2 / very_high
   - Dependencies: TAOS-ALG-GEO-001, TAOS-ALG-GEO-003, TAOS-ALG-SEARCH-001
-- [ ] **TAOS-ALG-IIP-001 — Initial Impact Point Ballistic Derivatives**
+- [x] **TAOS-ALG-IIP-001 — Initial Impact Point Ballistic Derivatives**
   - Target: `taos_math.iip.iip_derivatives`
   - Priority / complexity: P2 / high
   - Dependencies: TAOS-ALG-DYN-001, TAOS-ALG-ENV-004, TAOS-ALG-GRAV-004
-- [ ] **TAOS-ALG-IIP-003 — Initial Impact Point Propagation and Output**
+- [x] **TAOS-ALG-IIP-003 — Initial Impact Point Propagation and Output**
   - Target: `taos_math.iip.initial_impact_point`
   - Priority / complexity: P2 / very_high
   - Dependencies: TAOS-ALG-IIP-001, TAOS-ALG-IIP-002, TAOS-ALG-COORD-011, TAOS-ALG-GEO-001
-- [ ] **TAOS-ALG-OUT-001 — On-Demand Output-Variable Dispatch**
+- [x] **TAOS-ALG-OUT-001 — On-Demand Output-Variable Dispatch**
   - Target: `taos_runtime.outputs.build_output_evaluation_plan`
   - Priority / complexity: P2 / high
   - Dependencies: TAOS-ALG-EXEC-009
@@ -314,23 +314,23 @@ Before the first catalog item, define:
   - Target: `taos_math.numeric.newton_system`
   - Priority / complexity: P0 / high
   - Dependencies: TAOS-ALG-OPT-004
-- [ ] **TAOS-ALG-GUID-001 — Guidance Rule Classification and Control-Set Selection**
+- [x] **TAOS-ALG-GUID-001 — Guidance Rule Classification and Control-Set Selection**
   - Target: `taos_math.guidance.classify_guidance_rules`
   - Priority / complexity: P1 / high
   - Dependencies: none
-- [ ] **TAOS-ALG-GUID-002 — Iterative Guidance Loop**
+- [x] **TAOS-ALG-GUID-002 — Iterative Guidance Loop**
   - Target: `taos_math.guidance.solve_guidance`
   - Priority / complexity: P1 / very_high
   - Dependencies: TAOS-ALG-GUID-001, TAOS-ALG-GUID-005, TAOS-ALG-FORCE-004, TAOS-ALG-FORCE-005, TAOS-ALG-DYN-011
-- [ ] **TAOS-ALG-GUID-006 — Predictive Intercept Guidance**
+- [x] **TAOS-ALG-GUID-006 — Predictive Intercept Guidance**
   - Target: `taos_math.guidance.predictive_intercept`
   - Priority / complexity: P2 / medium
   - Dependencies: TAOS-ALG-COORD-012
-- [ ] **TAOS-ALG-GUID-007 — Proportional Navigation Guidance**
+- [x] **TAOS-ALG-GUID-007 — Proportional Navigation Guidance**
   - Target: `taos_math.guidance.proportional_navigation`
   - Priority / complexity: P2 / very_high
   - Dependencies: TAOS-ALG-DYN-011, TAOS-ALG-GUID-005
-- [ ] **TAOS-ALG-GUID-009 — Flight-Path Limit Arbitration**
+- [x] **TAOS-ALG-GUID-009 — Flight-Path Limit Arbitration**
   - Target: `taos_math.guidance.apply_flight_path_limits`
   - Priority / complexity: P2 / high
   - Dependencies: none
@@ -338,6 +338,32 @@ Before the first catalog item, define:
   - Target: `taos_math.guidance.range_insensitive_axis`
   - Priority / complexity: P3 / very_high
   - Dependencies: TAOS-ALG-IIP-003, TAOS-ALG-GUID-005
+
+## Successor-data-model backlog
+
+These items are research and digestion work rather than historical TAOS
+algorithms. They should be tracked separately from the reviewed catalog until
+their data shapes and provenance rules are stable.
+
+- Air-breathing propulsion deck model
+  - Define a shared propulsion-output interface that can represent rockets and
+    air-breathing engines without collapsing them into the same table shape.
+  - Specify installed thrust, fuel flow, engine-state dynamics, and operating
+    envelope handling.
+  - Preserve provenance for steady-state decks, generated decks, and measured
+    data.
+- Control-surface effectors
+  - Define incremental coefficient decks for elevator, aileron, rudder, flaps,
+    slats, spoilers, speed brakes, and fin mixers.
+  - Support both linear derivatives near trim and nonlinear increment tables
+    for large deflections or configuration changes.
+  - Decide how to encode actuator limits, rate limits, and configuration
+    transit times.
+- Vehicle manifest bundling
+  - Determine whether geometry, mass properties, propulsion, and effectors
+    should be shipped as a single manifest or as a directory of linked files.
+  - Keep synthetic reference data, generated decks, and measured datasets
+    distinguishable at import time.
 
 ## M6-execution-engine
 
@@ -420,11 +446,11 @@ Before the first catalog item, define:
   - Target: `taos_runtime.guidance.resolve_fly_rules`
   - Priority / complexity: P1 / very_high
   - Dependencies: TAOS-ALG-GUID-001, TAOS-ALG-TABLE-009
-- [ ] **TAOS-ALG-TABLE-006 — Full-Table Storage Variable Semantics**
+- [x] **TAOS-ALG-TABLE-006 — Full-Table Storage Variable Semantics**
   - Target: `taos_runtime.tables.clear_and_store`
   - Priority / complexity: P1 / low
   - Dependencies: none
-  - Resolve first: The manual requires unique names but does not describe recovery from duplicate csto labels.
+  - Duplicate storage names are rejected deterministically; the parser already diagnoses them before runtime.
 - [x] **TAOS-ALG-TABLE-007 — Full-Table If/Label/Goto Control Flow**
   - Target: `taos_runtime.tables.execute_table_control_flow`
   - Priority / complexity: P1 / high
@@ -457,7 +483,7 @@ Before the first catalog item, define:
   - Target: `taos_math.optimization.build_optimization_problem`
   - Priority / complexity: P2 / high
   - Dependencies: none
-- [ ] **TAOS-ALG-OPT-003 — Path-Integrated Optimization Constraint Variables**
+- [x] **TAOS-ALG-OPT-003 — Path-Integrated Optimization Constraint Variables**
   - Target: `taos_math.optimization.path_violation_integral`
   - Priority / complexity: P2 / medium
   - Dependencies: TAOS-ALG-DYN-002, TAOS-ALG-PRB-002
@@ -465,12 +491,12 @@ Before the first catalog item, define:
   - Target: `taos_runtime.optimization_runtime.resolve_optimize_block`
   - Priority / complexity: P2 / very_high
   - Dependencies: TAOS-ALG-PRB-001, TAOS-ALG-OPT-001
-- [ ] **TAOS-ALG-OPT-002 — Han-Powell Recursive Quadratic Programming**
+- [x] **TAOS-ALG-OPT-002 — Han-Powell Recursive Quadratic Programming**
   - Target: `taos_math.optimization.han_powell_rqp`
   - Priority / complexity: P3 / very_high
   - Dependencies: TAOS-ALG-OPT-001, TAOS-ALG-OPT-004
   - Resolve first: The manual gives an overview but not the full vf02ad source algorithm; obtain or independently reimplement the referenced method.
-- [ ] **TAOS-ALG-OPT-005 — Trajectory-Shaping Time-Grid Redistribution**
+- [x] **TAOS-ALG-OPT-005 — Trajectory-Shaping Time-Grid Redistribution**
   - Target: `taos_math.optimization.redistribute_control_history`
   - Priority / complexity: P3 / high
   - Dependencies: TAOS-ALG-TABLE-002, TAOS-ALG-OPT-002

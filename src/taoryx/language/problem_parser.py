@@ -22,6 +22,7 @@ from taoryx.language.grammar_contracts import (
     DOCUMENTED_STATE_VARIABLES,
     SUPPORTED_PROBLEM_BLOCKS,
     SUPPORTED_SEGMENT_BLOCKS,
+    SUPPORTED_TAORYX_PROBLEM_BLOCKS,
     SUPPORTED_TRAJECTORY_BLOCKS,
 )
 from taoryx.language.models import (
@@ -46,6 +47,7 @@ from taoryx.language.models import (
     IntegrationBlock,
     Limit,
     LimitsBlock,
+    ModeBlock,
     OptimizeBlock,
     OptimizeConstraint,
     OptimizeEndpoint,
@@ -223,12 +225,13 @@ _UNIT_DIMENSIONS = {
 }
 _VARIABLE_DIMENSIONS = {
     **{name: "length" for name in {"alt", "range", "rcm", "grmark", "grseg", "plength", "plmark", "plseg"}},
-    **{name: "speed" for name in {"altdt", "latgcdt", "latgddt", "longdt", "rcmdt", "vel", "vair", "vgr"}},
+    **{name: "speed" for name in {"altdt", "latgcdt", "latgddt", "rcmdt", "vel", "vair", "vgr", "xdt", "ydt", "zdt"}},
     **{name: "time" for name in {"time", "tmark", "tseg"}},
     **{name: "angle" for name in {"alpha", "alphat", "bankgc", "bankgd", "beta", "betae", "gamgc", "gamgd", "latgc", "latgd", "long", "phi", "pitchgc", "pitchgd", "pitchi", "psigc", "psigd", "rollgc", "rollgd", "rolli", "yawgc", "yawgd", "yawi", "ep1", "ep2"}},
     **{name: "angular_rate" for name in {"longdt"}},
     **{name: "acceleration" for name in {"nx", "ny", "nz"}},
     **{name: "mass" for name in {"mass", "wt"}},
+    "mdot": "mass_rate",
     **{name: "force" for name in {"thrust"}},
     **{name: "pressure" for name in {"pres", "dynprs"}},
     **{name: "density" for name in {"rho"}},
@@ -2150,6 +2153,7 @@ def _make_block(
         "atmos": AtmosBlock,
         "earth": EarthBlock,
         "title": TitleBlock,
+        "mode": ModeBlock,
         "define": DefineBlock,
         "egs": EgsBlock,
         "file": FileBlock,
@@ -2198,6 +2202,17 @@ def _make_block(
                 _validate_named_header("earth", header[len(words[0]) :].strip(), common["assignments"], _EARTH_PARAMETER_NAMES, path, line, diagnostics)
     elif keyword == "title":
         extra["title"] = header.strip()
+    elif keyword == "mode":
+        extra["mode"] = words[0].casefold() if len(words) == 1 else None
+        if extra["mode"] not in {"point-mass", "kinematic-6dof", "rigid-body-6dof"}:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="invalid-dynamics-mode",
+                    message="Expected '*mode point-mass', '*mode kinematic-6dof', or '*mode rigid-body-6dof'.",
+                    location=_location(path, line),
+                )
+            )
     elif keyword == "define":
         integral_match = re.fullmatch(r"\s*integral\s+([A-Za-z_][A-Za-z0-9_.-]*)\s*=\s*(.+?)\s*", header, re.IGNORECASE)
         if integral_match:
@@ -2296,8 +2311,11 @@ def _make_block(
         elif words and coordinate is None and not re.match(r"[A-Za-z_][A-Za-z0-9_.-]*\s*(?:=|<|>)", header):
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-initial-header", message="Expected a coordinate system or 'from segment N, trajectory M'.", location=_location(path, line)))
         else:
-            extra["mode"] = coordinate
-            extra["coordinate_system"] = coordinate
+            # Assignment-form *initial uses the documented geodetic default;
+            # retain it in the typed model so runtime lowering applies it too.
+            resolved_coordinate = coordinate or "geodetic"
+            extra["mode"] = resolved_coordinate
+            extra["coordinate_system"] = resolved_coordinate
         ####
     elif keyword == "dwn/crs":
         _validate_named_header(keyword, header, common["assignments"], {"latgd", "long", "azm"}, path, line, diagnostics)
@@ -2685,7 +2703,7 @@ def parse_problem_text(text: str, path: str = "<memory>") -> ProblemDocument:
                 current_block = None
                 continue
             ####
-            problem_keywords = SUPPORTED_PROBLEM_BLOCKS - {"define", "file", "print"}
+            problem_keywords = (SUPPORTED_PROBLEM_BLOCKS | SUPPORTED_TAORYX_PROBLEM_BLOCKS) - {"define", "file", "print"}
             trajectory_keywords = SUPPORTED_TRAJECTORY_BLOCKS - {"define", "file", "print"}
             if keyword in problem_keywords:
                 scope = "problem"

@@ -5,9 +5,11 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 
-from taoryx.contracts import Frame
+from taoryx.contracts import Frame, Vector3
 from taoryx.language.expressions import ExpressionType
-from taoryx.state import PointMassState
+from taoryx.modes import DynamicsMode, Kinematic6DofState
+from taoryx.outputs import VehicleKind
+from taoryx.state import PointMassRates, PointMassState
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +59,9 @@ class RuntimeState:
 
 
 Derivative = Callable[[RuntimeState], Sequence[float]]
+PointMassDerivative = Callable[[PointMassState], PointMassRates]
+BodyRateProvider = Callable[[RuntimeState], Vector3]
+StallDetector = Callable[[RuntimeState], bool]
 
 
 @dataclass(slots=True)
@@ -86,12 +91,23 @@ class RuntimeVehicle:
     environment_evaluator: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
     event_handlers: Mapping[str, Callable[[RuntimeState], RuntimeState]] = field(default_factory=dict)
     activation_handler: Callable[[RuntimeState], RuntimeState] | None = None
+    point_mass_derivative: PointMassDerivative | None = None
+    dynamics_mode: DynamicsMode = DynamicsMode.POINT_MASS
+    publish_derived_rates: bool = True
+    kinematic_state: Kinematic6DofState | None = None
+    body_rate_provider: BodyRateProvider | None = None
+    stall_detector: StallDetector | None = None
+    vehicle_kind: VehicleKind = VehicleKind.GENERIC
 
     def __post_init__(self) -> None:
         if self.step_size <= 0.0:
             raise ValueError("vehicle step_size must be positive")
         if self.active:
             self.activation_pending = False
+        if self.dynamics_mode is DynamicsMode.KINEMATIC_6DOF and self.kinematic_state is None:
+            raise ValueError("kinematic-6dof vehicles require a kinematic state sidecar")
+        if self.dynamics_mode is not DynamicsMode.KINEMATIC_6DOF and self.kinematic_state is not None:
+            raise ValueError("kinematic state sidecars require kinematic-6dof mode")
         if not self.history:
             self.history.append(self.state)
         ####

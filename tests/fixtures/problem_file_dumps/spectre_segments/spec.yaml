@@ -1,0 +1,216 @@
+schema_version: 1
+source_bundle: ../../spectre_simple_aero_v1
+translation_style: synthetic_taos_problem_files
+problems:
+  - path: ballistic.prb
+    problem_name: spectre-ballistic
+    title: Spectre translation ballistic
+    source_bundle: ../../spectre_simple_aero_v1/ballistic.yaml
+    comments:
+      - "Synthetic TAOS translation of INBOX/spectre-snippet-v1/simple_aero/ballistic.yaml"
+      - "Spectre family: ballistic"
+      - "Start controls: launch_point, aimpoint, initial_altitude_m, initial_speed_mps"
+      - "Stop controls: coast_time_s, optimization termination"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectory_line: "*trajectory 1 vehicle start on 1"
+    initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=350.0"
+    file_line: "*file ballistic.dat time alt vel gamgd alpha bankgd thrust"
+    segments:
+      - number: 1
+        title: ballistic
+        phase: boost
+        body:
+          - "*integ dtprnt=0.1 dt=0.1"
+          - "*aero ca=0.0 cn=0.0"
+          - "*prop thrust=609406.359 mdot=226.796"
+          - "*when time=60.0 stop"
+  - path: cbcr.prb
+    problem_name: spectre-cbcr
+    title: Spectre translation cbcr left turn
+    source_bundle: ../../spectre_simple_aero_v1/cbcr.yaml
+    comments:
+      - "Synthetic TAOS translation of INBOX/spectre-snippet-v1/simple_aero/cbcr.yaml"
+      - "Spectre family: cbcr"
+      - "Start controls: go_left, maneuver_altitude_start_km"
+      - "Stop controls: maneuver_duration_s, min_time_to_go_s"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectory_line: "*trajectory 1 vehicle start on 1"
+    initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0"
+    file_line: "*file cbcr.dat time alt vel gamgd alpha bankgd thrust"
+    segments:
+      - number: 1
+        title: cbcr
+        phase: maneuver
+        body:
+          - "*integ dtprnt=0.1 dt=0.1"
+          - "*aero ca=0.0 cn=0.0"
+          - "*fly bankgd=-15.0"
+          - "*when time=35.0 stop"
+  - path: crossrange.prb
+    problem_name: spectre-crossrange
+    title: Spectre translation crossrange
+    source_bundle: ../../spectre_simple_aero_v1/crossrange.yaml
+    comments:
+      - "Synthetic TAOS translation of INBOX/spectre-snippet-v1/simple_aero/crossrange.yaml"
+      - "Spectre family: crossrange"
+      - "Start controls: initial_heading_error_deg"
+      - "Stop controls: min_time_to_go_s"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectory_line: "*trajectory 1 vehicle start on 1"
+    initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=105.0 time=0.0 mass=100.0"
+    file_line: "*file crossrange.dat time alt vel gamgd alpha bankgd thrust"
+    segments:
+      - number: 1
+        title: crossrange
+        phase: maneuver
+        body:
+          - "*integ dtprnt=0.1 dt=0.1"
+          - "*aero ca=0.0 cn=0.0"
+          - "*fly bankgd=15.0"
+          - "*when time=60.0 stop"
+  - path: marv.prb
+    problem_name: spectre-marv
+    title: Spectre translation marv
+    source_bundle: ../../spectre_simple_aero_v1/marv.yaml
+    comments:
+      - "Synthetic TAOS translation of INBOX/spectre-snippet-v1/simple_aero/marv.yaml"
+      - "Spectre family: marv"
+      - "Start controls: maneuver_begin_time_to_go_s"
+      - "Stop controls: min_time_to_go_s"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectory_line: "*trajectory 1 vehicle start on 1"
+    initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0"
+    file_line: "*file marv.dat time alt vel gamgd alpha bankgd thrust"
+    segments:
+      - number: 1
+        title: marv
+        phase: maneuver
+        body:
+          - "*integ dtprnt=0.1 dt=0.1"
+          - "*aero ca=0.0 cn=0.0"
+          - "*fly bankgd=0.0"
+          - "*when tseg=60.0 stop"
+  - path: phugoid.prb
+    problem_name: spectre-phugoid
+    title: Spectre translation phugoid
+    source_bundle: ../../spectre_simple_aero_v1/phugoid.yaml
+    comments:
+      - "Synthetic TAOS translation of INBOX/spectre-snippet-v1/simple_aero/phugoid.yaml"
+      - "Spectre family: phugoid"
+      - "Start controls: start_range_to_go_km, phugoid_amplitude_deg, phugoid_frequency_Hz"
+      - "Stop controls: maneuver_roll_deg, implicit solution termination"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectory_line: "*trajectory 1 vehicle start on 1"
+    initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0"
+    file_line: "*file phugoid.dat time alt vel gamgd alpha bankgd thrust"
+    segments:
+      - number: 1
+        title: phugoid
+        phase: maneuver
+        body:
+          - "*integ dtprnt=0.1 dt=0.1"
+          - "*aero ca=0.0 cn=0.0"
+          - "*fly alpha vrs tseg"
+          - "  0.0 0.0"
+          - "  10.0 2.0"
+          - "  20.0 -2.0"
+          - "  30.0 0.0"
+          - "*fly bankgd=45.0"
+          - "*when time=60.0 stop"
+  - path: range_extension.prb
+    problem_name: spectre-range-extension
+    title: Spectre translation range extension
+    source_bundle: ../../spectre_simple_aero_v1/range_extension.yaml
+    comments:
+      - "Synthetic TAOS translation of INBOX/spectre-snippet-v1/simple_aero/range_extension.yaml"
+      - "Spectre family: range_extension"
+      - "Start controls: min_time_to_go_s"
+      - "Stop controls: minimum range-to-go gating"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectory_line: "*trajectory 1 vehicle start on 1"
+    initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0"
+    file_line: "*file range-extension.dat time alt vel gamgd alpha bankgd thrust"
+    segments:
+      - number: 1
+        title: range_extension
+        phase: maneuver
+        body:
+          - "*integ dtprnt=0.1 dt=0.1"
+          - "*aero ca=0.0 cn=0.0"
+          - "*fly alpha=0.0"
+          - "*when time=60.0 stop"
+  - path: skip.prb
+    problem_name: spectre-skip
+    title: Spectre translation skip
+    source_bundle: ../../spectre_simple_aero_v1/skip.yaml
+    comments:
+      - "Synthetic TAOS translation of INBOX/spectre-snippet-v1/simple_aero/skip.yaml"
+      - "Spectre family: skip"
+      - "Start controls: maneuver_begin_time_to_go_s"
+      - "Stop controls: maneuver logic and trajectory termination"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectory_line: "*trajectory 1 vehicle start on 1"
+    initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0"
+    file_line: "*file skip.dat time alt vel gamgd alpha bankgd thrust"
+    segments:
+      - number: 1
+        title: skip
+        phase: maneuver
+        body:
+          - "*integ dtprnt=0.1 dt=0.1"
+          - "*aero ca=0.0 cn=0.0"
+          - "*fly bankgd=0.0"
+          - "*when tseg=400.0 stop"
+  - path: slalom.prb
+    problem_name: spectre-slalom
+    title: Spectre translation slalom
+    source_bundle: ../../spectre_simple_aero_v1/slalom.yaml
+    comments:
+      - "Synthetic TAOS translation of INBOX/spectre-snippet-v1/simple_aero/slalom.yaml"
+      - "Spectre family: slalom"
+      - "Start controls: start_range_to_go_km"
+      - "Stop controls: end_range_to_go_km, min_time_to_go_s"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectory_line: "*trajectory 1 vehicle start on 1"
+    initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0"
+    file_line: "*file slalom.dat time alt vel gamgd alpha bankgd thrust"
+    segments:
+      - number: 1
+        title: slalom
+        phase: maneuver
+        body:
+          - "*integ dtprnt=0.1 dt=0.1"
+          - "*aero ca=0.0 cn=0.0"
+          - "*fly alpha=0.0"
+          - "*when time=60.0 stop"
+  - path: weave.prb
+    problem_name: spectre-weave
+    title: Spectre translation weave
+    source_bundle: ../../spectre_simple_aero_v1/weave.yaml
+    comments:
+      - "Synthetic TAOS translation of INBOX/spectre-snippet-v1/simple_aero/weave.yaml"
+      - "Spectre family: weave"
+      - "Start controls: weave_end_range_to_go_km"
+      - "Stop controls: min_time_to_go_s"
+    atmosphere: standard
+    earth: wgs-84 omega=0
+    trajectory_line: "*trajectory 1 vehicle start on 1"
+    initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0"
+    file_line: "*file weave.dat time alt vel gamgd alpha bankgd thrust"
+    segments:
+      - number: 1
+        title: weave
+        phase: maneuver
+        body:
+          - "*integ dtprnt=0.1 dt=0.1"
+          - "*aero ca=0.0 cn=0.0"
+          - "*fly bankgd=0.0"
+          - "*when time=60.0 stop"

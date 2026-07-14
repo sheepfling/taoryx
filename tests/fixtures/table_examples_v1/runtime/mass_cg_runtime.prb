@@ -1,0 +1,13 @@
+(mass-cg-runtime-harness)
+*title Mass and CG runtime harness
+*earth spherical gm=0 omega=0
+*trajectory 1 vehicle start on 1
+  *initial ecfc x=0.0 y=0.0 z=0.0 xdt=0.0 ydt=0.0 zdt=0.0 time=0.0 mass=1500.0
+  *file mass-cg-runtime.dat time wt config cg
+  *segment 1 coast
+    *integ dtprnt=0.1 dt=0.1
+    *constants config=1.0
+    *cg cg=(weight-cg)
+    *when time>0.2 stop
+*end
+

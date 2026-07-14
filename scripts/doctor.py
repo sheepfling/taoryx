@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Check:
     label: str
     ok: bool

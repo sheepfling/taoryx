@@ -6,6 +6,8 @@ import argparse
 import json
 from pathlib import Path
 
+from taoryx.integration import available_integrators
+
 from .optimization_runtime import available_optimizers
 from .runner import run_files
 
@@ -20,17 +22,31 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--report", type=Path)
     run.add_argument("--json", action="store_true")
     run.add_argument("--max-steps", type=int, default=100000)
+    run.add_argument("--integrator", choices=tuple(item.value for item in available_integrators()))
     optimizers = subparsers.add_parser("optimizers", help="inspect available numerical backends")
     optimizers_subparsers = optimizers.add_subparsers(dest="optimizer_command", required=True)
     optimizers_subparsers.add_parser("list", help="list installed optimization backends")
+    integrators = subparsers.add_parser("integrators", help="inspect available integration backends")
+    integrators_subparsers = integrators.add_subparsers(dest="integrator_command", required=True)
+    integrators_subparsers.add_parser("list", help="list installed integration backends")
     arguments = parser.parse_args(argv)
     if arguments.command == "optimizers":
         for backend in available_optimizers():
             print(backend.value)
         return 0
+    if arguments.command == "integrators":
+        for integrator_name in available_integrators():
+            print(integrator_name.value)
+        return 0
     if arguments.max_steps <= 0:
         parser.error("--max-steps must be positive")
-    report = run_files(arguments.problem, tuple(arguments.tables), output_dir=arguments.output_dir, max_steps=arguments.max_steps)
+    report = run_files(
+        arguments.problem,
+        tuple(arguments.tables),
+        output_dir=arguments.output_dir,
+        max_steps=arguments.max_steps,
+        integrator=arguments.integrator,
+    )
     if arguments.report:
         try:
             arguments.report.parent.mkdir(parents=True, exist_ok=True)

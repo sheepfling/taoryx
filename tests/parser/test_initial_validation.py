@@ -1,5 +1,6 @@
 from taoryx.language.models import InitialBlock
 from taoryx.language.problem_parser import parse_problem_text
+from taoryx.language.semantic_validation import validate_problem
 
 
 def test_initial_accepts_authoritative_segment_trajectory_copy_form() -> None:
@@ -53,4 +54,24 @@ def test_initial_assignment_form_defaults_to_geodetic() -> None:
 
     block = document.problems[0].trajectories[0].blocks[0]
     assert isinstance(block, InitialBlock)
+    assert block.coordinate_system == "geodetic"
     assert not document.diagnostics
+
+
+def test_semantic_validation_rejects_unknown_initial_source_segment() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*initial ecfc\n"
+        "x=0 y=0 z=0 wt=1\n"
+        "*segment 1\n"
+        "*when time>1 stop\n"
+        "*trajectory 2 vehicle start on 1\n"
+        "*initial from segment 9, trajectory 1\n"
+        "*segment 1\n"
+        "*when time>1 stop\n"
+        "*end\n"
+    )
+
+    diagnostics = validate_problem(document)
+    assert any(item.code == "unknown-initial-segment" for item in diagnostics)

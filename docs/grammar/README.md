@@ -11,6 +11,8 @@ require unsupported inference.
 
 - [Table EBNF](../../grammars/taos_table.ebnf) — documentary grammar for `.tbl` files
 - [Problem EBNF](../../grammars/taos_problem.ebnf) — documentary grammar for `.prb` files
+- [taoryx extensions](../../grammars/taoryx_extensions.ebnf) — successor-only mode syntax,
+  explicitly separate from the 1995 TAOS grammar
 - `src/taoryx/language/` — parser, AST models, diagnostics, and semantic validation
 - `examples/chapter03/` and `examples/chapter04/` — extracted manual fixtures
 - `metadata/fixture_provenance.yaml` — fixture provenance and expected status
@@ -415,6 +417,6 @@ provenance together. Do not silently rewrite established manual examples to fit 
 
 - turn the EBNF into an executable grammar or generate parser checks from it;
 - add positive and negative grammar fixtures independent of manual examples;
-- model units and defaults explicitly;
-- deepen typed projections, defaults, and runtime semantics without weakening the
+- extend the explicit unit-dimension registry to newly recovered state variables;
+- deepen typed projections and runtime semantics without weakening the
   source-preserving acceptance boundary.

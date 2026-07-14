@@ -69,6 +69,23 @@ python -m pip install -e '.[dev]'
 
 The repository uses `pyproject.toml` as the single dependency source.
 
+The dependency-free runtime uses the TAOS reference integrators by default.
+Explicit Euler is available as `--integrator euler` for fast smoke tests and
+diagnostic runs; use RK4 for fixed-step production work. To
+enable optional SciPy `solve_ivp` backends for performance comparisons, install
+the extra and inspect the available methods:
+
+```bash
+python -m pip install -e '.[scipy]'
+taoryx integrators list
+taoryx run path/to/problem.prb --integrator scipy-dop853
+```
+
+SciPy is optional and does not replace the reference integrator in validation
+or historical-equivalence claims. The current adapter preserves the runtime's
+step and event boundaries, so it is a method-comparison backend rather than a
+guaranteed performance improvement.
+
 ## Development task runner
 
 The portable task runner is the authoritative interface:
@@ -78,12 +95,16 @@ python3 tools/dev.py doctor
 python3 tools/dev.py lint
 python3 tools/dev.py typecheck
 python3 tools/dev.py test
+python3 tools/dev.py test-views
 python3 tools/dev.py manual
 python3 tools/dev.py check
 ```
 
 The older, source-heavy validation workflow remains available as
 `python tools/dev.py check`.
+
+For selective pytest runs, including the `slow`, `artifact`, and `spectre`
+markers, see [BUILDING_TESTS.md](BUILDING_TESTS.md).
 
 ## Build the manual
 

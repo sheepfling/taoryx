@@ -12,6 +12,7 @@ CASES = {item.id: item for item in load_manifest()}
 
 @pytest.mark.runtime
 @pytest.mark.metamorphic
+@pytest.mark.slow
 @pytest.mark.parametrize("group", load_metamorphic(), ids=lambda item: item.id)
 def test_metamorphic_group(group) -> None:
     if taos_executable() is None:

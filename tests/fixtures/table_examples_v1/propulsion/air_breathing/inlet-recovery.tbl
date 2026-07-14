@@ -1,0 +1,5 @@
+(inlet-recovery)
+table output(mach,alpha_deg) no-extrap
+mach=0.3,0.7,0.9,1.1
+alpha_deg=0,10
+output=0.990,0.975,0.985,0.955,0.975,0.925,0.940,0.850

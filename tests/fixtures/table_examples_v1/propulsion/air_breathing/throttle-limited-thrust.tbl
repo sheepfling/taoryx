@@ -1,0 +1,6 @@
+(throttle-limited-thrust)
+table thrust(mach,alt,throttle) no-extrap units=n
+mach=0.0,0.6,0.9
+alt=0,5000
+throttle=0.0,0.5,1.0
+thrust=260,2500,3900,240,2400,3720,225,2260,3450,240,2350,3650,220,2240,3360,210,2120,3200

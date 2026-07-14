@@ -15,7 +15,7 @@ from taoryx.language.expressions import (
     TableReferenceExpression,
 )
 from taoryx.language.grammar_contracts import DOCUMENTED_STATE_VARIABLES
-from taoryx.language.models import OptimizeBlock, ProblemDocument, SearchBlock, SurveyBlock, TableDocument, WhenBlock
+from taoryx.language.models import OptimizeBlock, OptimizeEndpoint, ProblemDocument, SearchBlock, SurveyBlock, TableDocument, WhenBlock
 
 TABLE_TYPE_REFERENCES = frozenset(
     {
@@ -202,6 +202,58 @@ def validate_problem(
                 ####
             ####
         ####
+        trajectory_by_number = {trajectory.number: trajectory for trajectory in problem.trajectories}
+
+        def validate_endpoint(endpoint, location: object, *, default_trajectory: int | None = None) -> None:
+            """Validate an explicitly qualified search/optimization endpoint."""
+            trajectory_number = endpoint.trajectory or endpoint.trajectory_subscript or default_trajectory
+            if trajectory_number is None or endpoint.segment is None:
+                return
+            trajectory = trajectory_by_number.get(trajectory_number)
+            if trajectory is None:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="unknown-endpoint-trajectory",
+                        message=f"Endpoint references undefined trajectory {trajectory_number}.",
+                        location=location,
+                    )
+                )
+                return
+            if endpoint.segment not in {segment.number for segment in trajectory.segments}:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="unknown-endpoint-segment",
+                        message=(
+                            f"Endpoint references undefined segment {endpoint.segment} "
+                            f"in trajectory {trajectory_number}."
+                        ),
+                        location=location,
+                    )
+                )
+            ####
+        ####
+        for block in problem.blocks:
+            if isinstance(block, SearchBlock) and block.objective is not None:
+                validate_endpoint(block.objective.left, block.location)
+                if block.objective.right is not None:
+                    validate_endpoint(block.objective.right, block.location)
+            elif isinstance(block, OptimizeBlock):
+                validate_endpoint(
+                    OptimizeEndpoint(
+                        text=block.objective_variable or "",
+                        segment=block.segment,
+                        trajectory=block.trajectory,
+                    ),
+                    block.location,
+                )
+                for constraint in block.constraints:
+                    validate_endpoint(constraint.left, constraint.location, default_trajectory=block.trajectory)
+                    validate_endpoint(constraint.right, constraint.location, default_trajectory=block.trajectory)
+                ####
+            ####
+        ####
         optimize_loop_counts: dict[str, int] = {}
         optimize_blocks = [block for block in problem.blocks if isinstance(block, OptimizeBlock)]
         for block in optimize_blocks[5:]:
@@ -352,8 +404,23 @@ def validate_problem(
                 ####
             ####
             for block in trajectory.blocks:
-                if block.keyword == "initial" and block.source_trajectory is not None and block.source_trajectory not in trajectory_set:
+                if block.keyword != "initial" or block.source_trajectory is None:
+                    continue
+                source = trajectory_by_number.get(block.source_trajectory)
+                if source is None:
                     diagnostics.append(Diagnostic(severity=Severity.ERROR, code="unknown-initial-trajectory", message=f"Initial state references undefined trajectory {block.source_trajectory}.", location=block.location))
+                elif block.source_segment is not None and block.source_segment not in {segment.number for segment in source.segments}:
+                    diagnostics.append(
+                        Diagnostic(
+                            severity=Severity.ERROR,
+                            code="unknown-initial-segment",
+                            message=(
+                                f"Initial state references undefined segment {block.source_segment} "
+                                f"in trajectory {block.source_trajectory}."
+                            ),
+                            location=block.location,
+                        )
+                    )
                 ####
             ####
             for segment in trajectory.segments:
