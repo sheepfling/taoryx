@@ -1,5 +1,9 @@
 # Building and validating the TAOS reconstruction
 
+This page is the practical command reference for rebuilding the manual,
+auditing equations, and running the validation routes that keep the source,
+grammar, runtime, and analysis layers aligned.
+
 ## System dependencies
 
 The complete documentation and QA workflow uses:
@@ -12,7 +16,7 @@ The complete documentation and QA workflow uses:
 
 A typical Debian/Ubuntu installation requires TeX Live's recommended, science, pictures, and extra collections in addition to the PDF and Python tools.
 
-## Python environment
+## First setup
 
 The portable bootstrap path is:
 
@@ -25,11 +29,11 @@ On macOS/Linux, activate with `source .venv/bin/activate`; on Windows, use
 `.venv\\Scripts\\activate`.
 
 This creates `.venv` and attempts to install the package with all development,
-parser, manual-QA, and packaging dependencies from `pyproject.toml`. When the
-network is unavailable, the bootstrap falls back to an offline editable install
-that reuses the system site packages already present on the machine.
-Once `.venv` exists, `tools/dev.py` prefers it automatically even if you do not
-activate it first.
+parser, manual-QA, packaging, and analysis dependencies from `pyproject.toml`.
+When the network is unavailable, the bootstrap falls back to an offline
+editable install that reuses the system site packages already present on the
+machine. Once `.venv` exists, `tools/dev.py` prefers it automatically even if
+you do not activate it first.
 
 ## Source PDF
 
@@ -86,7 +90,7 @@ or historical-equivalence claims. The current adapter preserves the runtime's
 step and event boundaries, so it is a method-comparison backend rather than a
 guaranteed performance improvement.
 
-## Development task runner
+## Common routes
 
 The portable task runner is the authoritative interface:
 
@@ -106,7 +110,18 @@ The older, source-heavy validation workflow remains available as
 For selective pytest runs, including the `slow`, `artifact`, and `spectre`
 markers, see [BUILDING_TESTS.md](BUILDING_TESTS.md).
 
-## Build the manual
+For the most common project entry points:
+
+```bash
+python tools/dev.py grammar          # parser, lexer, corpus, EBNF, and manual-fixture validation
+python tools/dev.py test-spectre     # Spectre problem / segment / trajectory corpus
+python tools/dev.py test-equations   # equation catalog and provenance checks
+python tools/dev.py test-algorithms  # algorithm catalog and runtime binding checks
+taoryx-validate examples/chapter04/ballistic-reentry.prb
+taoryx table inspect examples/chapter03/stmi-full.tbl --html build/table.html
+```
+
+## Rebuild the manual
 
 ```bash
 python tools/dev.py manual
@@ -120,7 +135,8 @@ The normalized document is written to `build/manual.pdf`.
 python tools/dev.py equation-audit
 ```
 
-This verifies all 326 numbered equations against the compiled AUX file, the TeX sources, the 307-page source registry, and the original PDF. It regenerates:
+This verifies all 326 numbered equations against the compiled AUX file, the TeX
+sources, the 307-page source registry, and the original PDF. It regenerates:
 
 - `metadata/equations_provenance.csv`
 - `metadata/equations_provenance.json`
@@ -135,7 +151,9 @@ python tools/dev.py check
 python -m pytest
 ```
 
-The validation suite covers the reconstructed manual, source-page and figure registries, parser fixtures, equation provenance, PDF interoperability, and selected numerical relationships.
+The validation suite covers the reconstructed manual, source-page and figure
+registries, parser fixtures, equation provenance, PDF interoperability, and
+selected numerical relationships.
 
 ## Build the parser wheel
 
@@ -151,4 +169,6 @@ The current wheel is also distributed under `dist/`.
 python tools/dev.py handoff
 ```
 
-The handoff script creates a clean, checksum-manifested ZIP containing source data, LaTeX, metadata, parser code, tests, tools, QA assets, build products, and final deliverables.
+The handoff script creates a clean, checksum-manifested ZIP containing source
+data, LaTeX, metadata, parser code, tests, tools, QA assets, build products,
+and final deliverables.

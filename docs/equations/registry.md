@@ -4,6 +4,11 @@ The canonical equation catalog is loaded from
 `metadata/equations_provenance.csv` and exposed by
 `src/taoryx/equations/registry.py`.
 
+Use this page when you want to answer two questions:
+
+- where a formula came from in the reconstructed manual; and
+- which equation number or LaTeX label should be used by code or tests.
+
 The registry is keyed by the TAOS equation number, such as `1-1` or `4-8`,
 and also exposes lookups by LaTeX label.
 

@@ -5,6 +5,11 @@ plotting command. The parser remains the source-faithful layer; the explorer
 adds a renderer-independent artifact that can be consumed by terminal, JSON,
 HTML, notebook, and static-plot views.
 
+This is the closest thing the repository has to a table plotter. The command
+line entry point inspects a `.tbl` file, exposes the parsed catalog, and can
+emit a standalone HTML page with a plot-ready table rendering when the table is
+prepared.
+
 ```text
 .tbl source
     -> TableDocument
@@ -32,6 +37,10 @@ from taoryx.table_explorer import inspect_table_file
 artifact = inspect_table_file("vehicle.tbl")
 print(artifact.format_catalog())
 payload = artifact.to_dict()  # suitable for JSON serialization
+```
+
+```bash
+taoryx table inspect examples/chapter03/stmi-full.tbl --html build/table-explorer.html
 ```
 
 ## Status semantics

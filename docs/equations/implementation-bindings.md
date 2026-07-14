@@ -4,6 +4,10 @@ This page records executable bindings from the algorithm catalog. A binding
 means the named `taoryx` symbol exists and has focused tests; it does not imply
 that every downstream algorithm depending on it is complete.
 
+Use it together with the algorithm catalog and the runtime architecture pages
+when you want to understand which formulas are only transcribed, which ones
+have executable bindings, and which tests prove the binding exists.
+
 | Catalog ID | Manual equations | Executable binding | Verification |
 | --- | --- | --- | --- |
 | `TAOS-ALG-COORD-020` | 2-93 through 2-96 | `taoryx.linalg.transform_vector` | `tests/unit/test_contracts.py` |

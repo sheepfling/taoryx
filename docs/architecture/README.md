@@ -5,6 +5,9 @@ The manual describes a trajectory-analysis system with several distinct
 responsibilities; the replacement should preserve those boundaries instead of
 turning the `.prb` parser into the simulator.
 
+Use this section when you want the runtime shape, the table explorer / plotter
+boundary, the telemetry contract, or the analysis workspace in one place.
+
 ## System layers
 
 | Layer | Manual source | Planned package boundary |
@@ -38,6 +41,10 @@ shapes are diagnosed rather than silently executed.
   that sit above the current TAOS `.tbl` abstraction.
 - [`docs/architecture/telemetry.md`](telemetry.md) defines the structured
   runtime artifact consumed by reports and visualization backends.
+- [`docs/architecture/table-explorer.md`](table-explorer.md) explains the
+  renderer-independent table inspection and plotting boundary.
+- [`../../analysis/tumbling/README.md`](../../analysis/tumbling/README.md)
+  collects the current aerodynamic-analysis workspace and generated studies.
 
 ## Execution shape
 

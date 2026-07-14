@@ -7,6 +7,15 @@ accepted, source-preserved, and diagnosed within their evidence-backed
 boundaries; complex bodies may remain raw statements when typed semantics would
 require unsupported inference.
 
+For the fastest route into the validator and parser corpus:
+
+```bash
+python tools/dev.py grammar
+taoryx-validate examples/chapter04/ballistic-reentry.prb
+python tools/dev.py test-grammar
+python tools/dev.py test-spectre
+```
+
 ## Sources of truth
 
 - [Table EBNF](../../grammars/taos_table.ebnf) — documentary grammar for `.tbl` files
@@ -86,6 +95,17 @@ Full-table `csto` storage names are checked against the documented state-variabl
 reserved state name is diagnosed, while the original operation remains parsed and recoverable.
 The legacy EBNF registry remains an archived research record; it does not expand the accepted
 grammar automatically.
+
+## User-facing entry points
+
+- `taoryx-validate` is the direct problem/table validator.
+- `python tools/dev.py grammar` runs the parser, fixture, and manual-corpus
+  checks together.
+- `python tools/dev.py test-grammar` runs the grammar view from pytest.
+- `python tools/dev.py test-spectre` runs the Spectre corpus that exercises
+  problem, segment, and trajectory coverage.
+- `tests/fixtures/grammar_baseline/` contains the smallest independent syntax
+  fixtures for positive and negative grammar checks.
 
 The parser must preserve documentation-only fixtures that contain omissions or historical printout
 excerpts. “Parses successfully” and “executable-complete” are intentionally separate outcomes.
