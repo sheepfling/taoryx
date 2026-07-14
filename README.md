@@ -5,6 +5,21 @@ typed `.tbl` / `.prb` toolchain that grows out of it. The repository keeps the
 manual, equation provenance, grammar, runtime, analysis tools, and tests tied
 together so each layer can be rebuilt and checked from the same source tree.
 
+## Big Picture
+
+The project is larger than a manual rebuild. The manual is the historical
+anchor, but the active work is to turn that source into a typed, testable, and
+evidence-bounded toolchain that can:
+
+- reconstruct the manual as editable LaTeX with provenance;
+- parse and validate `.tbl` and `.prb` files with source-located diagnostics;
+- map equations and algorithms to executable Python bindings;
+- provide runtime, inspection, and analysis entry points for real workflows;
+- keep regression coverage around the parser, runtime, Spectre corpus, and
+  numeric helpers; and
+- preserve the boundary between what is documented, what is executable, and
+  what still needs historical confirmation.
+
 ## What lives here
 
 - `manual/` - canonical editable LaTeX for the reconstructed manual
@@ -34,12 +49,6 @@ If you already have a working environment, the portable runner will use `.venv`
 automatically when it exists.
 
 ## Core Workflows
-
-Rebuild the reconstructed manual:
-
-```bash
-python tools/dev.py manual
-```
 
 Audit the equation provenance registry:
 
@@ -74,6 +83,13 @@ fixtures:
 
 ```bash
 python tools/dev.py test-spectre
+```
+
+Rebuild the reconstructed manual when you need the published PDF or want to
+refresh the page-normalized source build:
+
+```bash
+python tools/dev.py manual
 ```
 
 Use the analysis tree for focused studies and generated helpers:
