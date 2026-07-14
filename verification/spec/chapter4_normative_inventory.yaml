@@ -1,0 +1,165 @@
+schema_version: 1
+description: Master inventory for Chapter 4 normative coverage and requirement IDs.
+chapters:
+  - id: TAOS-CH4-0001
+    section: 4.0-4.1
+    source:
+      manual_text:
+        - manual/chapters/chapter04/00_introduction.tex
+        - manual/chapters/chapter04/01_file_format.tex
+    requirement_ids:
+      - TAOS-REQ-PRB-0001
+      - TAOS-REQ-GRAMMAR-0001
+      - TAOS-REQ-GRAMMAR-0003
+    tests:
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_problem_parser.py
+      - tests/parser/test_lossless_baseline.py
+      - tests/unit/test_verification_baseline.py
+    note: Introductory file-format rules are grouped with parser boundary rules because they establish the input-language contract.
+  - id: TAOS-CH4-0002
+    section: 4.2
+    source:
+      manual_text:
+        - manual/chapters/chapter04/02_segment_overview.tex
+        - manual/chapters/chapter04/02_01_aero.tex
+        - manual/chapters/chapter04/02_02_constants.tex
+        - manual/chapters/chapter04/02_03_cg.tex
+        - manual/chapters/chapter04/02_04_fly.tex
+        - manual/chapters/chapter04/02_05_increment.tex
+        - manual/chapters/chapter04/02_06_inertial.tex
+        - manual/chapters/chapter04/02_07_integ.tex
+        - manual/chapters/chapter04/02_08_limits.tex
+        - manual/chapters/chapter04/02_09_prop.tex
+        - manual/chapters/chapter04/02_10_rail.tex
+        - manual/chapters/chapter04/02_11_reset.tex
+        - manual/chapters/chapter04/02_12_when.tex
+    requirement_ids:
+      - TAOS-REQ-CH4-SEG-0001
+      - TAOS-REQ-AERO-0001
+      - TAOS-REQ-BRANCH-0001
+      - TAOS-REQ-FRAME-0008
+      - TAOS-REQ-INIT-0001
+      - TAOS-REQ-INIT-0002
+      - TAOS-REQ-INIT-0003
+    tests:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_runtime_lowering.py
+      - tests/unit/test_verification_baseline.py
+    note: Segment data blocks are grouped as one inventory family because the manual presents them as the shared segment-level runtime contract.
+  - id: TAOS-CH4-0003
+    section: 4.3
+    source:
+      manual_text:
+        - manual/chapters/chapter04/03_trajectory_overview.tex
+        - manual/chapters/chapter04/03_01_define.tex
+        - manual/chapters/chapter04/03_02_dwn_crs.tex
+        - manual/chapters/chapter04/03_03_file.tex
+        - manual/chapters/chapter04/03_04_iip.tex
+        - manual/chapters/chapter04/03_05_initial.tex
+        - manual/chapters/chapter04/03_06_print.tex
+        - manual/chapters/chapter04/03_07_tangent.tex
+    requirement_ids:
+      - TAOS-REQ-CH4-TRAJ-0001
+      - TAOS-REQ-INIT-0001
+      - TAOS-REQ-PRT-0001
+      - TAOS-REQ-UFMT-0001
+    tests:
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_output_blocks.py
+      - tests/parser/test_problem_parser.py
+      - tests/unit/test_runtime_lowering.py
+      - tests/unit/test_verification_baseline.py
+    note: Trajectory data blocks are grouped together because they share initialization, coordinate, and output semantics.
+  - id: TAOS-CH4-0004
+    section: 4.4
+    source:
+      manual_text:
+        - manual/chapters/chapter04/04_problem_overview.tex
+        - manual/chapters/chapter04/04_01_atmos.tex
+        - manual/chapters/chapter04/04_02_define.tex
+        - manual/chapters/chapter04/04_03_earth.tex
+        - manual/chapters/chapter04/04_04_egs.tex
+    requirement_ids:
+      - TAOS-REQ-CH4-PROB-0001
+      - TAOS-REQ-ATM-0001
+      - TAOS-REQ-ATM-0002
+      - TAOS-REQ-ATM-0003
+      - TAOS-REQ-GRAV-0004
+      - TAOS-REQ-GRAV-0005
+      - TAOS-REQ-GRAV-0006
+      - TAOS-REQ-GRAV-0007
+    tests:
+      - tests/parser/test_problem_framing.py
+      - tests/unit/test_atmosphere.py
+      - tests/unit/test_atmosphere_equations.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_gravity_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Problem-level blocks are grouped with atmosphere and earth because they define the top-level runtime environment for a problem file.
+  - id: TAOS-CH4-0005
+    section: 4.5-4.8
+    source:
+      manual_text:
+        - manual/chapters/chapter04/04_05_file.tex
+        - manual/chapters/chapter04/04_06_optimize.tex
+        - manual/chapters/chapter04/04_07_print.tex
+        - manual/chapters/chapter04/04_08_radar.tex
+    requirement_ids:
+      - TAOS-REQ-FILE-0001
+      - TAOS-REQ-OPT-0002
+      - TAOS-REQ-PRT-0001
+      - TAOS-REQ-RADAR-0001
+    tests:
+      - tests/parser/test_output_blocks.py
+      - tests/parser/test_problem_framing.py
+      - tests/unit/test_verification_baseline.py
+    note: File, optimize, print, and radar blocks are grouped because they are all problem-level output or search side effects.
+  - id: TAOS-CH4-0006
+    section: 4.9-4.14
+    source:
+      manual_text:
+        - manual/chapters/chapter04/04_09_search.tex
+        - manual/chapters/chapter04/04_10_summarize.tex
+        - manual/chapters/chapter04/04_11_survey.tex
+        - manual/chapters/chapter04/04_12_title.tex
+        - manual/chapters/chapter04/04_13_units_fmt.tex
+        - manual/chapters/chapter04/04_14_wind.tex
+    requirement_ids:
+      - TAOS-REQ-OPT-0003
+      - TAOS-REQ-SUM-0001
+      - TAOS-REQ-SUMM-0001
+      - TAOS-REQ-SURVEY-0001
+      - TAOS-REQ-TITLE-0001
+      - TAOS-REQ-UFMT-0001
+      - TAOS-REQ-WIND-0001
+    tests:
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_output_blocks.py
+      - tests/parser/test_summarize_parser.py
+      - tests/unit/test_verification_baseline.py
+    note: Later Chapter 4 blocks are grouped by parser/runtime semantics and their associated recovery tests.
+  - id: TAOS-CH4-0007
+    section: 5.0-5.4
+    source:
+      manual_text:
+        - manual/chapters/chapter04/05_examples_intro.tex
+        - manual/chapters/chapter04/05_01_ballistic_reentry.tex
+        - manual/chapters/chapter04/05_02_ballistic_rocket.tex
+        - manual/chapters/chapter04/05_03_air_intercept.tex
+        - manual/chapters/chapter04/05_04_ground_intercept.tex
+    requirement_ids:
+      - TAOS-REQ-REG-0001
+      - TAOS-REQ-SCEN-0001
+      - TAOS-REQ-SCEN-0002
+      - TAOS-REQ-SCEN-0003
+      - TAOS-REQ-SCEN-0004
+    tests:
+      - tests/e2e/test_documented_coverage.py
+      - tests/e2e/test_static_corpus.py
+      - tests/e2e/test_metamorphic.py
+      - tests/unit/test_verification_baseline.py
+    note: Examples are grouped with regression anchors because they exercise the end-to-end scenario corpus.
+####

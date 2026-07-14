@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import math
 import re
-from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass, field
 from enum import StrEnum
 from itertools import product
 
@@ -43,14 +43,16 @@ class TableEvaluationContext:
     values: Mapping[str, float]
     tables: Mapping[str, PreparedTable]
     storage: dict[str, float]
+    evaluators: Mapping[str, Callable[[Mapping[str, float]], float]] = field(default_factory=dict)
 
     @classmethod
     def from_values(
         cls,
         values: Mapping[str, float],
         tables: Mapping[str, PreparedTable] | None = None,
+        evaluators: Mapping[str, Callable[[Mapping[str, float]], float]] | None = None,
     ) -> "TableEvaluationContext":
-        return cls(values, tables or {}, {})
+        return cls(values, tables or {}, {}, evaluators or {})
 ####
 
 
@@ -169,7 +171,13 @@ def evaluate_full_table(
             if operation.condition is None:
                 raise ValueError("if operation requires a condition")
             if _evaluate_condition(operation.condition, context, accumulator) and operation.nested is not None:
-                accumulator = _apply_operation(operation.nested, accumulator, context)
+                nested = operation.nested
+                if nested.operator.casefold() == "goto":
+                    if not isinstance(nested.operand, str) or nested.operand.casefold() not in labels:
+                        raise ValueError("goto target is undefined")
+                    index = labels[nested.operand.casefold()]
+                    continue
+                accumulator = _apply_operation(nested, accumulator, context)
             index += 1
             continue
         accumulator = _apply_operation(operation, accumulator, context)
@@ -191,11 +199,22 @@ def resolve_table_operand(
     if isinstance(operand, (int, float)):
         return float(operand)
     if isinstance(operand, TableCall):
+        evaluator = context.evaluators.get(operand.name.casefold())
+        query = tuple(_resolve_name(argument, context) for argument in operand.arguments)
+        if evaluator is not None:
+            evaluate_call = getattr(evaluator, "evaluate_call", None)
+            if evaluate_call is not None:
+                return float(evaluate_call(context.values, query))
+            if query:
+                raise ValueError(f"table {operand.name!r} does not support lookup arguments")
+            return float(evaluator(context.values))
         table = context.tables.get(operand.name.casefold())
         if table is None:
             table = _inline_table(operand, assignments)
-        query = tuple(_resolve_name(argument, context) for argument in operand.arguments)
         return interpolate_nd(table, query)
+    evaluator = context.evaluators.get(operand.casefold())
+    if evaluator is not None:
+        return float(evaluator(context.values))
     return _resolve_name(operand, context)
 ####
 
@@ -228,9 +247,9 @@ def apply_table_operation(
     if name == "iexp":
         return _require_operand(operand, name) ** accumulator
     if name == "max":
-        return min(accumulator, _require_operand(operand, name))
-    if name == "min":
         return max(accumulator, _require_operand(operand, name))
+    if name == "min":
+        return min(accumulator, _require_operand(operand, name))
     if name == "set":
         return _require_operand(operand, name)
     if name == "abs":
@@ -293,9 +312,8 @@ def prepare_skewed_table(
     if not normalized:
         raise ValueError("skewed table requires at least one slice")
     outer_dimension = len(normalized[0].outer_coordinates)
-    expected = math.prod(len({item.outer_coordinates[index] for item in normalized}) for index in range(outer_dimension))
-    if outer_dimension < 1 or len(normalized) != expected:
-        raise ValueError("skewed table slices must form a complete outer grid")
+    if outer_dimension < 1:
+        raise ValueError("skewed table slices require at least one outer coordinate")
     if len({item.outer_coordinates for item in normalized}) != len(normalized):
         raise ValueError("skewed table outer coordinates must be unique")
     for item in normalized:
@@ -322,13 +340,23 @@ def interpolate_skewed(table: PreparedSkewedTable, query: Sequence[float]) -> fl
     point = tuple(float(value) for value in query)
     if len(point) != len(table.outer_axes) + 1 or any(not math.isfinite(value) for value in point):
         raise ValueError("skewed query dimension must match the table")
-    outer_values: list[float] = []
-    for coordinates in _outer_grid(table.outer_axes):
-        item = next(slice_ for slice_ in table.slices if slice_.outer_coordinates == coordinates)
-        inner = prepare_table((item.axis,), item.values, extrapolation=table.extrapolation)
-        outer_values.append(interpolate_nd(inner, (point[-1],)))
-    outer_table = prepare_table(table.outer_axes, outer_values, extrapolation=table.extrapolation)
-    return interpolate_nd(outer_table, point[:-1])
+    def evaluate_level(slices: tuple[SkewedTableSlice, ...], level: int) -> float:
+        if level == len(table.outer_axes):
+            if len(slices) != 1:
+                raise ValueError("skewed table contains duplicate nested slices")
+            item = slices[0]
+            inner = prepare_table((item.axis,), item.values, extrapolation=table.extrapolation)
+            return interpolate_nd(inner, (point[-1],))
+        grouped: dict[float, list[SkewedTableSlice]] = {}
+        for item in slices:
+            grouped.setdefault(item.outer_coordinates[level], []).append(item)
+        axis = tuple(sorted(grouped))
+        values = tuple(evaluate_level(tuple(grouped[coordinate]), level + 1) for coordinate in axis)
+        outer = prepare_table((axis,), values, extrapolation=table.extrapolation)
+        return interpolate_nd(outer, (point[level],))
+    ####
+
+    return evaluate_level(table.slices, 0)
 ####
 
 
@@ -351,6 +379,10 @@ def _resolve_name(name: str, context: TableEvaluationContext) -> float:
     for source_name, value in context.values.items():
         if source_name.casefold() == key:
             return float(value)
+    try:
+        return float(name)
+    except ValueError:
+        pass
     raise KeyError(f"undefined table operand: {name}")
 ####
 

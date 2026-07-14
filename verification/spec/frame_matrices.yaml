@@ -1,0 +1,68 @@
+schema_version: 1
+description: Frame-convention matrix tying the reviewed coordinate cards to anchor-based verification.
+frames:
+  - id: TAOS-FRAME-0001
+    category: earth_fixed_and_inertial
+    source:
+      manual_sections: [2.1.1, 2.1.2]
+      manual_pages: [2-5, 2-9]
+      registry: verification/spec/frames.yaml
+      anchors: verification/spec/anchors.yaml
+    frame_ids:
+      - ecfc
+      - ecic
+    tests:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Earth-fixed and inertial conventions remain explicit and linked to the reviewed frame cards.
+  - id: TAOS-FRAME-0002
+    category: local_horizon_and_geodesy
+    source:
+      manual_sections: [2.1.3, 2.1.4, 2.1.5, 2.1.6]
+      manual_pages: [2-13, 2-18]
+      registry: verification/spec/frames.yaml
+      anchors: verification/spec/anchors.yaml
+    frame_ids:
+      - local_geocentric_horizon
+      - local_geodetic_horizon
+      - geocentric
+      - geodetic
+    tests:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_geodesy_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Local-horizon and geodesy conventions remain explicit across the reviewed basis cards.
+  - id: TAOS-FRAME-0003
+    category: body_and_wind
+    source:
+      manual_sections: [2.1.7, 2.1.8, 2.1.9]
+      manual_pages: [2-19, 2-24, 2-26, 2-31, 2-34]
+      registry: verification/spec/frames.yaml
+      anchors: verification/spec/anchors.yaml
+    frame_ids:
+      - body_fixed
+      - wind
+      - velocity
+    tests:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Body, wind, and velocity conventions remain explicit through the branch and singularity boundaries.
+  - id: TAOS-FRAME-0004
+    category: tangent_plane
+    source:
+      manual_sections: [2.1.10, 2.1.11]
+      manual_pages: [2-31, 2-34]
+      registry: verification/spec/frames.yaml
+      anchors: verification/spec/anchors.yaml
+    frame_ids:
+      - tangent_plane
+      - inertial_platform
+    tests:
+      - tests/unit/test_geodesy_equations.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+    note: Tangent-plane and inertial-platform conventions remain explicit and checked against anchor vectors.
+####

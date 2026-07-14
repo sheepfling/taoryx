@@ -311,11 +311,13 @@ def aerodynamic_angles_from_body_axes(
     beta_e = math.atan2(_dot(body_axes.y, wind_axes.x), _dot(body_axes.y, wind_axes.y))
     alpha = math.atan2(-x_projection.z, math.hypot(x_projection.x, x_projection.y))
     total_alpha = math.atan2(math.hypot(_dot(body_axes.x, wind_axes.y), _dot(body_axes.x, wind_axes.z)), _dot(body_axes.x, wind_axes.x))
-    windward_meridian = math.atan2(-_dot(body_axes.x, wind_axes.y), _dot(body_axes.x, wind_axes.z))
     if math.isclose(x_projection.x, 0.0, abs_tol=1e-12):
         beta = math.atan2(_dot(body_axes.y, wind_axes.x), _dot(body_axes.z, wind_axes.x))
     else:
         beta = math.atan2(_dot(body_axes.y, wind_axes.x), x_projection.x)
+    windward_meridian = math.atan2(-_dot(body_axes.x, wind_axes.y), _dot(body_axes.x, wind_axes.z))
+    if math.isclose(abs(alpha), math.pi / 2.0, abs_tol=1e-12):
+        windward_meridian = -beta
     return AerodynamicAngles(alpha, beta_e, beta, total_alpha, windward_meridian)
 ####
 

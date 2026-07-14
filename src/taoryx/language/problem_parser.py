@@ -296,12 +296,17 @@ def _validate_expression_functions(expression: Any, path: str, line: int, diagno
             )
         else:
             expected_arity = _DOCUMENTED_DEFINE_FUNCTION_ARITY[function]
-            if len(expression.arguments) != expected_arity:
+            valid_arity = len(expression.arguments) >= 1 if function == "table" else len(expression.arguments) == expected_arity
+            if not valid_arity:
                 diagnostics.append(
                     Diagnostic(
                         severity=Severity.ERROR,
                         code="invalid-define-function-arity",
-                        message=f"Function {expression.function!r} requires {expected_arity} argument(s); source text was preserved.",
+                        message=(
+                            f"Function {expression.function!r} requires at least one argument(s); source text was preserved."
+                            if function == "table"
+                            else f"Function {expression.function!r} requires {expected_arity} argument(s); source text was preserved."
+                        ),
                         location=_location(path, line),
                     )
                 )
@@ -310,7 +315,7 @@ def _validate_expression_functions(expression: Any, path: str, line: int, diagno
                     Diagnostic(
                         severity=Severity.ERROR,
                         code="invalid-define-table-argument",
-                        message="The documented table(id) form requires one table-identification name; source text was preserved.",
+                        message="The documented table(id, query...) form requires a table-identification name first; source text was preserved.",
                         location=_location(path, line),
                     )
                 )
@@ -359,7 +364,7 @@ def _contains_nested_relationship(expression: Any) -> bool:
 def _is_documented_when_relationship(expression: Any) -> bool:
     """Check the manual's single relationship form used by ``*when``."""
 
-    return isinstance(expression, BinaryExpression) and expression.operator in {"=", "<", ">"} and not _contains_nested_relationship(expression.left) and not _contains_nested_relationship(expression.right)
+    return isinstance(expression, BinaryExpression) and expression.operator in {"=", "==", "!=", "<", "<=", ">", ">="} and not _contains_nested_relationship(expression.left) and not _contains_nested_relationship(expression.right)
 ####
 
 
@@ -2131,6 +2136,11 @@ def _make_block(
     }
     if keyword == "when":
         common["assignments"] = []
+    elif keyword == "search":
+        # The relationship in a search header is an objective, not a named
+        # assignment.  Keep it out of the generic assignment validator so
+        # documented '<' and '>' objectives are not rejected as assignments.
+        common["assignments"] = []
     elif keyword == "limits":
         common["assignments"] = []
     elif keyword == "fly":
@@ -2378,7 +2388,7 @@ def _make_block(
                         Diagnostic(
                             severity=Severity.ERROR,
                             code="unsupported-when-condition",
-                            message="*when requires one documented relationship using '=', '<', or '>'; compound conditions were preserved.",
+                            message="*when requires one documented relationship using '=', '!=', '<', '<=', '>', or '>='; compound conditions were preserved.",
                             location=_location(path, line),
                         )
                     )

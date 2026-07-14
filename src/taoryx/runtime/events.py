@@ -21,13 +21,13 @@ def refine_segment_final_condition(start: RuntimeState, end: RuntimeState, condi
 
     if end.time < start.time or tolerance <= 0.0:
         raise ValueError("event interval and tolerance must be valid")
-    crossings: list[EventCrossing] = []
-    for condition in conditions:
+    crossings: list[tuple[int, EventCrossing]] = []
+    for condition_index, condition in enumerate(conditions):
         left_value, right_value = condition.function(start), condition.function(end)
         if abs(left_value) <= tolerance:
             if right_value <= left_value and abs(right_value) <= tolerance:
                 continue
-            crossings.append(EventCrossing(condition.name, start.time, left_value, condition.action))
+            crossings.append((condition_index, EventCrossing(condition.name, start.time, left_value, condition.action)))
             continue
         if left_value * right_value > 0.0:
             continue
@@ -44,8 +44,8 @@ def refine_segment_final_condition(start: RuntimeState, end: RuntimeState, condi
                 hi, hi_value = mid, mid_value
             else:
                 lo, lo_value = mid, mid_value
-        crossings.append(EventCrossing(condition.name, mid.time, mid_value, condition.action))
-    return tuple(sorted(crossings, key=lambda event: (event.time, event.name)))
+        crossings.append((condition_index, EventCrossing(condition.name, round(mid.time, 12), mid_value, condition.action)))
+    return tuple(event for _, event in sorted(crossings, key=lambda item: (item[1].time, item[0])))
 ####
 
 
@@ -54,9 +54,12 @@ def apply_state_discontinuity(state: RuntimeState, increments: Sequence[float], 
 
     if len(increments) != len(state.values):
         raise ValueError("state increment dimension does not match state")
+    values = tuple(a + b for a, b in zip(state.values, increments, strict=True))
     named = dict(state.named)
+    for name, value in zip(state.value_names, values, strict=False):
+        named[name] = value
     named.update(named_updates or {})
-    return RuntimeState(state.time, tuple(a + b for a, b in zip(state.values, increments, strict=True)), state.frame, named)
+    return RuntimeState(state.time, values, state.frame, named, state.value_names, state.segment_endpoints)
 ####
 
 

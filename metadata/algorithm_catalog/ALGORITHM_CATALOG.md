@@ -1,8 +1,12 @@
 # TAOS Algorithm Catalog, Version 1
 
-This catalog decomposes the 1995 TAOS manual into implementation-sized algorithms.
-It is designed as a work queue for a modern, traceable implementation rather than as
-a claim that the historical TAOS 96.0 executable has been reproduced.
+This is the reviewed planning catalog for the 1995 TAOS manual. It decomposes
+the manual into implementation-sized algorithms and is designed as a work queue
+for a modern, traceable implementation rather than as a claim that the
+historical TAOS 96.0 executable has been reproduced.
+
+For the architecture-level explanation of the catalog boundaries, see
+[`docs/architecture/algorithm-catalog.md`](../../docs/architecture/algorithm-catalog.md).
 
 ## Coverage
 

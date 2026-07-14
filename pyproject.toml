@@ -26,9 +26,11 @@ dev = [
   "PyYAML>=6.0",
   "rapidfuzz>=3.9",
   "reportlab>=4.2",
+  "scipy>=1.13",
   "ruff>=0.9",
   "mypy>=1.14",
 ]
+scipy = ["scipy>=1.13"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

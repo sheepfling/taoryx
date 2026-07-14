@@ -1,0 +1,728 @@
+schema_version: 1
+description: Initial requirement-to-evidence map; coverage is scoped, not a release claim.
+requirements:
+  TAOS-REQ-SCOPE-0001:
+    evidence:
+      - tests/unit/test_dynamics.py
+      - tests/unit/test_coordinates.py
+    evidence_type: mathematical_kernel
+    status: partial
+  TAOS-REQ-FRAME-0001:
+    evidence:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_coordinates.py
+      - metadata/coordinate_systems_chapter2.yaml
+    evidence_type: source_linked_and_numerical
+    status: partial
+    gaps: [independent_basis_implementation, mutation_gate, explicit_tolerance_record]
+  TAOS-REQ-FRAME-0002:
+    evidence:
+      - verification/spec/frames.yaml
+      - metadata/coordinate_systems_chapter2.yaml
+      - tests/unit/test_verification_baseline.py
+    evidence_type: registry_completeness
+    status: partial
+    gaps: [independent_handedness_review, all_anchor_vectors]
+  TAOS-REQ-NUM-0001:
+    evidence:
+      - verification/spec/tolerances.yaml
+      - tests/unit/test_verification_baseline.py
+    evidence_type: tolerance_policy
+    status: adopted
+    gaps: [scenario_specific_regression_thresholds]
+  TAOS-REQ-NUM-0002:
+    evidence:
+      - tests/e2e/test_static_corpus.py
+      - tests/unit/test_verification_baseline.py
+      - tests/fixtures/taos_e2e_v23/manifest.json
+    evidence_type: scenario_threshold_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-GRAV-0001:
+    evidence:
+      - verification/spec/constants.yaml
+      - tests/unit/test_verification_baseline.py
+    evidence_type: constant_registry_seed
+    status: partial
+    gaps: [external_source_page_verification, reviewer_approval]
+  TAOS-REQ-GRAV-0002:
+    evidence:
+      - verification/spec/constants.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_gravity_equations.py
+    evidence_type: full_degree4_coefficient_registry
+    status: partial
+    gaps: [external_source_page_verification, reviewer_approval]
+  TAOS-REQ-GRAV-0003:
+    evidence:
+      - verification/spec/constants.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_gravity_equations.py
+    evidence_type: full_degree4_gemt1_coefficient_registry
+    status: partial
+    gaps: [external_source_page_verification, reviewer_approval]
+  TAOS-REQ-FRAME-0003:
+    evidence:
+      - verification/spec/anchors.yaml
+      - tests/unit/test_verification_baseline.py
+    evidence_type: independent_anchor_vectors
+    status: partial
+    gaps: [mutation_gate]
+  TAOS-REQ-FRAME-0006:
+    evidence:
+      - verification/spec/anchors.yaml
+      - tests/unit/test_verification_baseline.py
+    evidence_type: anchor_mutation_gate
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-FRAME-0004:
+    evidence:
+      - tests/unit/test_attitude.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/01_07_body_fixed.tex
+      - manual/chapters/chapter02/01_09_wind.tex
+      - manual/chapters/chapter02/01_11_tangent_plane.tex
+    evidence_type: diagnostic_contract
+    status: partial
+    gaps: [source-located_exception_messages, additional_boundary_cases]
+  TAOS-REQ-FRAME-0005:
+    evidence:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/01_09_wind.tex
+    evidence_type: aerodynamic_branch_contract
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-EQ-0001:
+    evidence:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/01_02_ecic.tex
+      - manual/chapters/chapter02/01_09_wind.tex
+    evidence_type: equation_label_and_round_trip
+    status: partial
+    gaps: [independent_derivation_registry, additional_equation_labels]
+  TAOS-REQ-EQ-0002:
+    evidence:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/01_09_wind.tex
+    evidence_type: aerodynamic_equation_label_and_round_trip
+    status: partial
+    gaps: [independent_derivation_registry, additional_equation_labels]
+  TAOS-REQ-EQ-0003:
+    evidence:
+      - tests/unit/test_atmosphere_equations.py
+      - tests/unit/test_atmosphere.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/03_01_atmosphere.tex
+    evidence_type: atmosphere_equation_label_and_round_trip
+    status: partial
+    gaps: [independent_derivation_registry, additional_equation_labels]
+  TAOS-REQ-EQ-0004:
+    evidence:
+      - tests/unit/test_geodesy_equations.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/01_04_geocentric.tex
+      - manual/chapters/chapter02/01_05_local_geodetic.tex
+      - manual/chapters/chapter02/01_06_geodetic.tex
+    evidence_type: geodesy_equation_label_and_round_trip
+    status: partial
+    gaps: [independent_derivation_registry, additional_equation_labels]
+  TAOS-REQ-EQ-0005:
+    evidence:
+      - tests/unit/test_gravity_equations.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/03_04_gravity_model.tex
+    evidence_type: gravity_equation_label_and_round_trip
+    status: partial
+    gaps: [independent_derivation_registry, additional_equation_labels]
+  TAOS-REQ-EQ-0006:
+    evidence:
+      - tests/unit/test_search_optimization_equations.py
+      - tests/unit/test_optimization.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/05_01_control_variable_solution.tex
+      - manual/chapters/chapter02/06_02_search_methods.tex
+      - manual/chapters/chapter02/06_03_optimization.tex
+    evidence_type: optimization_equation_label_and_round_trip
+    status: partial
+    gaps: [independent_derivation_registry, additional_equation_labels]
+  TAOS-REQ-FRAME-0007:
+    evidence:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/01_01_ecfc.tex
+      - manual/chapters/chapter02/01_02_ecic.tex
+      - manual/chapters/chapter02/01_03_local_geocentric.tex
+      - manual/chapters/chapter02/01_05_local_geodetic.tex
+      - manual/chapters/chapter02/01_07_body_fixed.tex
+      - manual/chapters/chapter02/01_09_wind.tex
+      - manual/chapters/chapter02/01_11_tangent_plane.tex
+    evidence_type: frame_equation_label_and_round_trip
+    status: partial
+    gaps: [independent_derivation_registry, additional_equation_labels]
+  TAOS-REQ-GRAV-0004:
+    evidence:
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_03_earth.tex
+      - verification/spec/constants.yaml
+    evidence_type: constant_table_anchor
+    status: partial
+    gaps: [table_anchor_matrix, reviewer_approval]
+  TAOS-REQ-ATM-0001:
+    evidence:
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_atmosphere.py
+      - tests/unit/test_atmosphere_equations.py
+      - manual/chapters/chapter04/04_01_atmos.tex
+      - verification/spec/constants.yaml
+    evidence_type: atmosphere_table_anchor
+    status: partial
+    gaps: [table_anchor_matrix, reviewer_approval]
+  TAOS-REQ-ATM-0002:
+    evidence:
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_lossless_baseline.py
+      - manual/chapters/chapter04/04_01_atmos.tex
+    evidence_type: atmosphere_diagnostic_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-ATM-0003:
+    evidence:
+      - tests/unit/test_atmosphere.py
+      - tests/unit/test_atmosphere_equations.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/03_01_atmosphere.tex
+      - manual/chapters/chapter04/04_01_atmos.tex
+      - verification/spec/constants.yaml
+    evidence_type: atmosphere_constant_registry_seed
+    status: partial
+    gaps: [external_source_page_verification, reviewer_approval]
+  TAOS-REQ-WIND-0001:
+    evidence:
+      - tests/parser/test_output_blocks.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_14_wind.tex
+    evidence_type: wind_block_direction_and_component_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-PRT-0001:
+    evidence:
+      - tests/parser/test_output_blocks.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_07_print.tex
+    evidence_type: print_block_scope_and_limit_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-UFMT-0001:
+    evidence:
+      - tests/parser/test_problem_framing.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_13_units_fmt.tex
+      - verification/spec/constants.yaml
+    evidence_type: units_format_dimension_and_scope_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-SURVEY-0001:
+    evidence:
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_problem_parser.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_11_survey.tex
+    evidence_type: survey_placeholder_and_value_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-TITLE-0001:
+    evidence:
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_lexical.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_12_title.tex
+    evidence_type: title_block_continuation_and_boundary_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-SUM-0001:
+    evidence:
+      - tests/parser/test_summarize_parser.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_10_summarize.tex
+    evidence_type: summarize_operation_and_operand_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-SUMM-0001:
+    evidence:
+      - tests/parser/test_summarize_parser.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_10_summarize.tex
+    evidence_type: summarize_special_function_and_reference_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-FILE-0001:
+    evidence:
+      - tests/parser/test_output_blocks.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_05_file.tex
+    evidence_type: file_block_scope_and_related_output_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-AERO-0001:
+    evidence:
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/03_02_aerodynamic_forces.tex
+    evidence_type: aerodynamic_force_equation_and_singularity_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-RADAR-0001:
+    evidence:
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_manual_snippet_corpus.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_08_radar.tex
+    evidence_type: radar_block_geometry_and_override_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-PRB-0001:
+    evidence:
+      - tests/parser/test_problem_framing.py
+      - manual/chapters/chapter04/04_problem_overview.tex
+    evidence_type: framing_diagnostic_contract
+    status: partial
+    gaps: [stale_context_matrix, reviewer_approval]
+  TAOS-REQ-SCEN-0001:
+    evidence:
+      - tests/e2e/test_static_corpus.py
+      - tests/fixtures/taos_e2e_v23/manifest.yaml
+      - tests/fixtures/taos_e2e_v23/cases/positive/p001_linear_ecfc_zero_force/case.yaml
+    evidence_type: canonical_e2e_regression_anchor
+    status: partial
+    gaps: [oracles_vs_runtime, reviewer_approval]
+  TAOS-REQ-SCEN-0002:
+    evidence:
+      - tests/e2e/test_static_corpus.py
+      - tests/fixtures/taos_e2e_v23/manifest.yaml
+      - tests/fixtures/taos_e2e_v23/cases/positive/p043_wgs84_gravity_drop/case.yaml
+    evidence_type: gravity_e2e_regression_anchor
+    status: partial
+    gaps: [oracles_vs_runtime, reviewer_approval]
+  TAOS-REQ-SCEN-0003:
+    evidence:
+      - tests/e2e/test_static_corpus.py
+      - tests/fixtures/taos_e2e_v23/manifest.yaml
+      - tests/fixtures/taos_e2e_v23/cases/positive/p022_optimize_linear_boundary/case.yaml
+    evidence_type: optimization_e2e_regression_anchor
+    status: partial
+    gaps: [oracles_vs_runtime, reviewer_approval]
+  TAOS-REQ-GRAMMAR-0001:
+    evidence:
+      - tests/e2e/test_static_corpus.py
+      - tests/unit/test_problem_parser.py
+      - docs/grammar/README.md
+    evidence_type: parser_fixture_and_recovery
+    status: partial
+  TAOS-REQ-GRAMMAR-0002:
+    evidence:
+      - tools/build_e2e_documented_coverage.py
+      - tests/e2e/test_documented_coverage.py
+      - tests/unit/test_verification_baseline.py
+      - tests/fixtures/taos_e2e_v23/manifest.json
+      - tests/fixtures/taos_e2e_v23/cases/positive
+    evidence_type: documented_surface_coverage_matrix
+    status: partial
+    gaps: [manual_surface_audit, reviewer_approval]
+  TAOS-REQ-GRAMMAR-0003:
+    evidence:
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_lossless_baseline.py
+      - tests/unit/test_verification_baseline.py
+    evidence_type: lossless_parser_recovery_contract
+    status: partial
+    gaps: [ambiguous_source_matrix, reviewer_approval]
+  TAOS-REQ-AMB-0001:
+    evidence:
+      - verification/spec/ambiguities.yaml
+      - tests/unit/test_verification_baseline.py
+    evidence_type: ambiguity_registry_contract
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-OPT-0001:
+    evidence:
+      - tests/unit/test_optimization.py
+      - tests/unit/test_runtime_algorithms.py
+      - metadata/optimization_model_chapter2.yaml
+    evidence_type: algorithm_and_backend_selection
+    status: partial
+    gaps: [historical_oracle, infeasibility_matrix, restart_trace_comparison]
+  TAOS-REQ-OPT-0002:
+    evidence:
+      - tests/parser/test_problem_parser.py
+      - tests/parser/test_problem_framing.py
+      - manual/chapters/chapter04/04_06_optimize.tex
+    evidence_type: optimize_diagnostic_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-OPT-0003:
+    evidence:
+      - tests/parser/test_problem_parser.py
+      - tests/parser/test_problem_framing.py
+      - manual/chapters/chapter04/04_09_search.tex
+    evidence_type: search_diagnostic_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-FRAME-0008:
+    evidence:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/01_08_velocity.tex
+      - manual/chapters/chapter02/02_05_flight_path_rates.tex
+    evidence_type: velocity_singularity_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-GRAV-0005:
+    evidence:
+      - tests/unit/test_gravity_equations.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/03_04_gravity_model.tex
+      - verification/spec/constants.yaml
+    evidence_type: gravity_wrapper_contract
+    status: partial
+    gaps: [specific_error_matrix, reviewer_approval]
+  TAOS-REQ-GRAV-0006:
+    evidence:
+      - verification/spec/constants.yaml
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_03_earth.tex
+    evidence_type: gravity_model_registry_provenance
+    status: partial
+    gaps: [external_source_page_verification, reviewer_approval]
+  TAOS-REQ-GRAV-0007:
+    evidence:
+      - verification/spec/constant_matrices.yaml
+      - verification/spec/constants.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_atmosphere.py
+      - tests/unit/test_atmosphere_equations.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_gravity_equations.py
+      - manual/chapters/chapter02/03_01_atmosphere.tex
+      - manual/chapters/chapter04/04_03_earth.tex
+    evidence_type: family_constant_provenance_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-EQMAT-0001:
+    evidence:
+      - verification/spec/equation_matrices.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_atmosphere_equations.py
+      - tests/unit/test_geodesy_equations.py
+      - tests/unit/test_gravity_equations.py
+      - tests/unit/test_search_optimization_equations.py
+      - manual/chapters/chapter02/01_01_ecfc.tex
+      - manual/chapters/chapter02/01_09_wind.tex
+      - manual/chapters/chapter02/03_01_atmosphere.tex
+      - manual/chapters/chapter02/01_04_geocentric.tex
+      - manual/chapters/chapter02/03_04_gravity_model.tex
+      - manual/chapters/chapter02/06_03_optimization.tex
+    evidence_type: topic_equation_derivation_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-REG-0001:
+    evidence:
+      - verification/spec/regression_matrices.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_runtime_lowering.py
+      - tests/unit/test_outputs.py
+      - tests/parser/test_manual_snippet_corpus.py
+      - tests/e2e/test_static_corpus.py
+      - tests/fixtures/taos_e2e_v23/manifest.yaml
+      - tests/fixtures/taos_manual_corpus_v22/manifest.yaml
+      - manual/chapters/chapter04/05_examples_intro.tex
+      - manual/chapters/chapter04/05_01_ballistic_reentry.tex
+      - manual/chapters/chapter04/05_02_ballistic_rocket.tex
+      - manual/chapters/chapter04/05_03_air_intercept.tex
+      - manual/chapters/chapter04/05_04_ground_intercept.tex
+      - examples/chapter04/ballistic-reentry-printout.txt
+      - examples/chapter04/ballistic-reentry-summary.txt
+      - examples/chapter04/problem-output-example.txt
+    evidence_type: source_linked_regression_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-DIAG-0001:
+    evidence:
+      - verification/spec/diagnostic_matrices.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_forces_equations.py
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_output_blocks.py
+      - tests/parser/test_manual_snippet_corpus.py
+      - manual/chapters/chapter02/01_07_body_fixed.tex
+      - manual/chapters/chapter02/01_08_velocity.tex
+      - manual/chapters/chapter02/03_01_atmosphere.tex
+      - manual/chapters/chapter04/04_problem_overview.tex
+      - manual/chapters/chapter04/04_05_file.tex
+    evidence_type: source_linked_diagnostic_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-DIAG-0002:
+    evidence:
+      - verification/spec/diagnostic_matrices.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/parser/test_manual_snippet_corpus.py
+      - tests/fixtures/taos_manual_corpus_v22/wrappers/chapter03/ch3-035__wrapped.tbl
+      - tests/fixtures/taos_manual_corpus_v22/grammar_reference/fixture_provenance.yaml
+    evidence_type: source_linked_diagnostic_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-AMBMAT-0001:
+    evidence:
+      - verification/spec/ambiguity_matrices.yaml
+      - verification/spec/ambiguities.yaml
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter02/01_04_geocentric.tex
+      - manual/chapters/chapter02/01_07_body_fixed.tex
+      - manual/chapters/chapter02/01_09_wind.tex
+      - manual/chapters/chapter02/03_01_atmosphere.tex
+      - manual/chapters/chapter04/04_03_earth.tex
+    evidence_type: source_linked_ambiguity_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-SIGN-0001:
+    evidence:
+      - verification/spec/sign_matrices.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_geodesy_equations.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_gravity_equations.py
+      - manual/chapters/chapter02/01_01_ecfc.tex
+      - manual/chapters/chapter02/01_03_local_geocentric.tex
+      - manual/chapters/chapter02/01_07_body_fixed.tex
+      - manual/chapters/chapter02/01_09_wind.tex
+      - manual/chapters/chapter02/03_04_gravity_model.tex
+    evidence_type: source_linked_sign_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-FRAME-0009:
+    evidence:
+      - verification/spec/frame_matrices.yaml
+      - verification/spec/frames.yaml
+      - verification/spec/anchors.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_geodesy_equations.py
+      - tests/unit/test_forces_equations.py
+      - manual/chapters/chapter02/01_01_ecfc.tex
+      - manual/chapters/chapter02/01_03_local_geocentric.tex
+      - manual/chapters/chapter02/01_05_local_geodetic.tex
+      - manual/chapters/chapter02/01_07_body_fixed.tex
+      - manual/chapters/chapter02/01_09_wind.tex
+      - manual/chapters/chapter02/01_11_tangent_plane.tex
+    evidence_type: source_linked_frame_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-MATRIX-0001:
+    evidence:
+      - verification/spec/matrix_inventory.yaml
+      - verification/spec/frame_matrices.yaml
+      - verification/spec/sign_matrices.yaml
+      - verification/spec/branch_matrices.yaml
+      - verification/spec/constant_matrices.yaml
+      - verification/spec/equation_matrices.yaml
+      - verification/spec/regression_matrices.yaml
+      - verification/spec/diagnostic_matrices.yaml
+      - verification/spec/ambiguity_matrices.yaml
+      - tests/unit/test_verification_baseline.py
+    evidence_type: matrix_inventory
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-CH4-0001:
+    evidence:
+      - verification/spec/chapter4_normative_inventory.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_output_blocks.py
+      - tests/parser/test_summarize_parser.py
+      - tests/unit/test_runtime_lowering.py
+      - manual/chapters/chapter04/04_problem_overview.tex
+      - manual/chapters/chapter04/04_01_atmos.tex
+      - manual/chapters/chapter04/04_03_earth.tex
+      - manual/chapters/chapter04/04_05_file.tex
+      - manual/chapters/chapter04/04_06_optimize.tex
+      - manual/chapters/chapter04/04_07_print.tex
+      - manual/chapters/chapter04/04_08_radar.tex
+      - manual/chapters/chapter04/04_09_search.tex
+      - manual/chapters/chapter04/04_10_summarize.tex
+      - manual/chapters/chapter04/04_11_survey.tex
+      - manual/chapters/chapter04/04_12_title.tex
+      - manual/chapters/chapter04/04_13_units_fmt.tex
+      - manual/chapters/chapter04/04_14_wind.tex
+    evidence_type: chapter4_normative_inventory
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-CH4-SEG-0001:
+    evidence:
+      - verification/spec/chapter4_normative_inventory.yaml
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/02_segment_overview.tex
+      - manual/chapters/chapter04/02_01_aero.tex
+      - manual/chapters/chapter04/02_02_constants.tex
+      - manual/chapters/chapter04/02_03_cg.tex
+      - manual/chapters/chapter04/02_04_fly.tex
+      - manual/chapters/chapter04/02_05_increment.tex
+      - manual/chapters/chapter04/02_06_inertial.tex
+      - manual/chapters/chapter04/02_07_integ.tex
+      - manual/chapters/chapter04/02_08_limits.tex
+      - manual/chapters/chapter04/02_09_prop.tex
+      - manual/chapters/chapter04/02_10_rail.tex
+      - manual/chapters/chapter04/02_11_reset.tex
+      - manual/chapters/chapter04/02_12_when.tex
+    evidence_type: chapter4_section_inventory
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-CH4-TRAJ-0001:
+    evidence:
+      - verification/spec/chapter4_normative_inventory.yaml
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/03_trajectory_overview.tex
+      - manual/chapters/chapter04/03_01_define.tex
+      - manual/chapters/chapter04/03_02_dwn_crs.tex
+      - manual/chapters/chapter04/03_03_file.tex
+      - manual/chapters/chapter04/03_04_iip.tex
+      - manual/chapters/chapter04/03_05_initial.tex
+      - manual/chapters/chapter04/03_06_print.tex
+      - manual/chapters/chapter04/03_07_tangent.tex
+    evidence_type: chapter4_section_inventory
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-CH4-PROB-0001:
+    evidence:
+      - verification/spec/chapter4_normative_inventory.yaml
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_problem_overview.tex
+      - manual/chapters/chapter04/04_01_atmos.tex
+      - manual/chapters/chapter04/04_02_define.tex
+      - manual/chapters/chapter04/04_03_earth.tex
+      - manual/chapters/chapter04/04_04_egs.tex
+      - manual/chapters/chapter04/04_05_file.tex
+      - manual/chapters/chapter04/04_06_optimize.tex
+      - manual/chapters/chapter04/04_07_print.tex
+      - manual/chapters/chapter04/04_08_radar.tex
+      - manual/chapters/chapter04/04_09_search.tex
+      - manual/chapters/chapter04/04_10_summarize.tex
+      - manual/chapters/chapter04/04_11_survey.tex
+      - manual/chapters/chapter04/04_12_title.tex
+      - manual/chapters/chapter04/04_13_units_fmt.tex
+      - manual/chapters/chapter04/04_14_wind.tex
+    evidence_type: chapter4_section_inventory
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-CH4-EX-0001:
+    evidence:
+      - verification/spec/chapter4_normative_inventory.yaml
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/05_examples_intro.tex
+      - manual/chapters/chapter04/05_01_ballistic_reentry.tex
+      - manual/chapters/chapter04/05_02_ballistic_rocket.tex
+      - manual/chapters/chapter04/05_03_air_intercept.tex
+      - manual/chapters/chapter04/05_04_ground_intercept.tex
+      - tests/e2e/test_static_corpus.py
+      - tests/e2e/test_documented_coverage.py
+    evidence_type: chapter4_section_inventory
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-REVIEW-0001:
+    evidence:
+      - verification/spec/review_inventory.yaml
+      - tests/unit/test_verification_baseline.py
+      - verification/review_policy.md
+      - verification/baseline-v1.md
+    evidence_type: reviewer_role_inventory
+    status: partial
+    gaps: [approvals_pending]
+  TAOS-REQ-MUT-0001:
+    evidence:
+      - verification/spec/mutation_matrices.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_gravity_equations.py
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_output_blocks.py
+      - tests/parser/test_manual_snippet_corpus.py
+      - verification/spec/anchors.yaml
+      - verification/spec/branch_matrices.yaml
+      - verification/spec/constant_matrices.yaml
+      - verification/spec/diagnostic_matrices.yaml
+    evidence_type: source_linked_mutation_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-BRANCH-0001:
+    evidence:
+      - verification/spec/branch_matrices.yaml
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_forces_equations.py
+      - manual/chapters/chapter02/01_04_geocentric.tex
+      - manual/chapters/chapter02/01_05_local_geodetic.tex
+      - manual/chapters/chapter02/01_08_velocity.tex
+      - manual/chapters/chapter02/01_09_wind.tex
+    evidence_type: branch_and_singularity_matrix
+    status: partial
+    gaps: [reviewer_approval]
+  TAOS-REQ-INIT-0001:
+    evidence:
+      - tests/unit/test_runtime_algorithms.py
+      - tests/unit/test_runtime_lowering.py
+    evidence_type: runtime_dependency_tests
+    status: partial
+    gaps: [full_cycle_matrix, inactive_trajectory_semantics, independent_scheduler_tests]
+  TAOS-REQ-INIT-0002:
+    evidence:
+      - tests/unit/test_runtime_lowering.py
+      - tests/unit/test_runtime_algorithms.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/04_problem_overview.tex
+      - src/taoryx/runtime/initialization.py
+      - src/taoryx/runtime/runtime_model.py
+    evidence_type: inherited_initialization_runtime_activation
+    status: partial
+    gaps: [cycle_matrix, missing-node_matrix, reviewer_approval]
+  TAOS-REQ-INIT-0003:
+    evidence:
+      - tests/unit/test_runtime_lowering.py
+      - tests/unit/test_verification_baseline.py
+      - manual/chapters/chapter04/02_05_increment.tex
+      - manual/chapters/chapter04/02_11_reset.tex
+    evidence_type: segment_discontinuity_order_contract
+    status: partial
+    gaps: [copied_state_matrix, reviewer_approval]
+  TAOS-REQ-SCEN-0004:
+    evidence:
+      - tests/e2e/test_metamorphic.py
+      - tests/unit/test_verification_baseline.py
+      - tests/fixtures/taos_e2e_v23/manifest.json
+      - tests/fixtures/taos_e2e_v23/metamorphic/groups.yaml
+    evidence_type: metamorphic_regression_group_contract
+    status: partial
+    gaps: [runtime_oracles, reviewer_approval]
+unlinked_test_groups: []
+note: These tests are valuable evidence but need requirement IDs before they count toward release coverage.

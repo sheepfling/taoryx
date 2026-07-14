@@ -1,0 +1,83 @@
+schema_version: 1
+description: Explicit branch and singularity cases for the numerical verification layer.
+branches:
+  - id: TAOS-BRANCH-0001
+    category: aerodynamic_singularity
+    source:
+      manual_section: 2.1.9
+      manual_pages: [2-26, 2-31]
+      manual_text: manual/chapters/chapter02/01_09_wind.tex
+    branch: total_angle_of_attack_zero
+    expected_behavior: preserve_source_singularity_convention
+    expected_diagnostic: windward meridian unit vector is undefined when total angle of attack is zero
+    tests:
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_verification_baseline.py
+    notes: This branch must remain explicit and should not be collapsed into the ordinary projection formulas.
+  - id: TAOS-BRANCH-0002
+    category: aerodynamic_singularity
+    source:
+      manual_section: 2.1.9
+      manual_pages: [2-26, 2-31]
+      manual_text: manual/chapters/chapter02/01_09_wind.tex
+    branch: alpha_equals_plus_minus_90_degrees
+    expected_behavior: preserve_source_special_case_convention
+    expected_diagnostic: none
+    tests:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+    notes: The branch is resolved by explicit source convention in the frame equations rather than by a generic wind-axis identity.
+  - id: TAOS-BRANCH-0003
+    category: velocity_singularity
+    source:
+      manual_section: 2.1.8
+      manual_pages: [2-23, 2-24]
+      manual_text: manual/chapters/chapter02/01_08_velocity.tex
+    branch: zero_or_vertical_relative_velocity
+    expected_behavior: reject_with_source_labeled_diagnostic
+    expected_diagnostic: wind axes are undefined at zero speed
+    tests:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+    notes: The implementation must reject degenerate velocity frames instead of inferring a fallback basis.
+  - id: TAOS-BRANCH-0004
+    category: velocity_singularity
+    source:
+      manual_section: 2.1.8
+      manual_pages: [2-23, 2-24]
+      manual_text: manual/chapters/chapter02/01_08_velocity.tex
+    branch: vertical_velocity
+    expected_behavior: reject_with_source_labeled_diagnostic
+    expected_diagnostic: wind axes are undefined when velocity is parallel to the geodetic up axis
+    tests:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+    notes: A vertical relative-velocity vector is not a valid wind-frame basis.
+  - id: TAOS-BRANCH-0005
+    category: geodetic_singularity
+    source:
+      manual_section: 2.1.4
+      manual_pages: [2-9, 2-18]
+      manual_text: manual/chapters/chapter02/01_05_local_geodetic.tex
+    branch: pole_convention
+    expected_behavior: preserve_source_pole_convention
+    expected_diagnostic: yaw is undefined
+    tests:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+    notes: The geodetic-pole branch is a documented convention, not a general-angle identity.
+  - id: TAOS-BRANCH-0006
+    category: geocentric_velocity_singularity
+    source:
+      manual_section: 2.1.4-2.1.6
+      manual_pages: [2-9, 2-18]
+      manual_text: manual/chapters/chapter02/01_04_geocentric.tex
+    branch: zero_or_vertical_velocity
+    expected_behavior: reject_with_source_labeled_diagnostic
+    expected_diagnostic: flight path angle
+    tests:
+      - tests/unit/test_geodesy_equations.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+    notes: Zero-speed and vertical-speed cases remain explicit boundary checks.
+####

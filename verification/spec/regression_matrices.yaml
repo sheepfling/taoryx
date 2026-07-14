@@ -1,0 +1,65 @@
+schema_version: 1
+description: Source-linked regression matrix for numerical and grammar-adjacent verification scenarios.
+regressions:
+  - id: TAOS-REG-0001
+    category: canonical_ecfc_zero_force
+    source:
+      manual_sections: [2.2.1, 4.2, 4.3]
+      manual_pages: [2-37, 4-2, 4-3]
+      manifest: tests/fixtures/taos_e2e_v23/manifest.yaml
+      case: tests/fixtures/taos_e2e_v23/cases/positive/p001_linear_ecfc_zero_force/case.yaml
+    evidence:
+      tests:
+        - tests/unit/test_runtime_lowering.py
+        - tests/unit/test_verification_baseline.py
+      oracles: e2e
+    note: This anchor checks the canonical zero-force ECFC regression without implying TAOS 96.0 compatibility.
+  - id: TAOS-REG-0002
+    category: gravity_drop
+    source:
+      manual_sections: [2.3.4, 4.3]
+      manual_pages: [4-43, 4-44, 4-55, 4-56]
+      manifest: tests/fixtures/taos_e2e_v23/manifest.yaml
+      case: tests/fixtures/taos_e2e_v23/cases/positive/p043_wgs84_gravity_drop/case.yaml
+    evidence:
+      tests:
+        - tests/unit/test_runtime_lowering.py
+        - tests/unit/test_verification_baseline.py
+      oracles: monotonic
+    note: This anchor binds the gravity regression to the WGS-84 source constants and manual pages.
+  - id: TAOS-REG-0003
+    category: optimize_linear_boundary
+    source:
+      manual_sections: [2.6.3]
+      manual_pages: [4-32, 4-34]
+      manifest: tests/fixtures/taos_e2e_v23/manifest.yaml
+      case: tests/fixtures/taos_e2e_v23/cases/positive/p022_optimize_linear_boundary/case.yaml
+    evidence:
+      tests:
+        - tests/unit/test_runtime_lowering.py
+        - tests/unit/test_verification_baseline.py
+      oracles: bound_solution
+    note: This anchor keeps the optimization scenario source-linked and numerically checkable.
+  - id: TAOS-REG-0004
+    category: manual_corpus_ch3_ch4
+    source:
+      manual_sections: [3, 4]
+      manual_examples:
+        - manual/chapters/chapter04/05_examples_intro.tex
+        - manual/chapters/chapter04/05_01_ballistic_reentry.tex
+        - manual/chapters/chapter04/05_02_ballistic_rocket.tex
+        - manual/chapters/chapter04/05_03_air_intercept.tex
+        - manual/chapters/chapter04/05_04_ground_intercept.tex
+      manual_output_listings:
+        - examples/chapter04/ballistic-reentry-printout.txt
+        - examples/chapter04/ballistic-reentry-summary.txt
+        - examples/chapter04/problem-output-example.txt
+      manifest: tests/fixtures/taos_manual_corpus_v22/manifest.yaml
+      corpus: tests/fixtures/taos_manual_corpus_v22/grammar_reference
+    evidence:
+      tests:
+        - tests/parser/test_manual_snippet_corpus.py
+        - tests/unit/test_verification_baseline.py
+      oracles: lossless_parser
+    note: The manual corpus remains a regression corpus for grammar and wrapper recovery, not a compatibility claim.
+####

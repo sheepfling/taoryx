@@ -8,6 +8,7 @@ from taoryx.equations import (
     AerodynamicAngles,
     BodyAxes,
     CartesianVector3,
+    WindAxes,
     aerodynamic_angles_from_body_axes,
     body_force_to_ecfc,
     earth_rotation_rate,
@@ -219,4 +220,28 @@ def test_aerodynamic_angle_round_trip_handles_forward_and_90_degree_alpha_cases(
     ninety_degree_body_axes = wind_body_axes_from_aerodynamic_angles(wind_axes, math.pi / 2, math.radians(30.0))
     ninety_recovered = aerodynamic_angles_from_body_axes(wind_axes, ninety_degree_body_axes)
     assert ninety_recovered.beta_radians == pytest.approx(math.radians(30.0))
+    assert ninety_recovered.windward_meridian_radians == pytest.approx(-math.radians(30.0))
+    assert ninety_recovered.total_alpha_radians == pytest.approx(math.pi / 2.0)
+####
+
+
+def test_aerodynamic_angle_total_alpha_ninety_branch_respects_windward_meridian_convention() -> None:
+    wind_axes = WindAxes(
+        CartesianVector3(1.0, 0.0, 0.0),
+        CartesianVector3(0.0, 1.0, 0.0),
+        CartesianVector3(0.0, 0.0, 1.0),
+    )
+    body_axes = BodyAxes(
+        CartesianVector3(0.0, 1.0, 0.0),
+        CartesianVector3(1.0, 0.0, 0.0),
+        CartesianVector3(0.0, 0.0, -1.0),
+    )
+
+    recovered = aerodynamic_angles_from_body_axes(wind_axes, body_axes)
+
+    assert recovered.alpha_radians == pytest.approx(0.0)
+    assert recovered.beta_e_radians == pytest.approx(math.pi / 2.0)
+    assert recovered.beta_radians == pytest.approx(-recovered.windward_meridian_radians)
+    assert recovered.total_alpha_radians == pytest.approx(math.pi / 2.0)
+    assert recovered.windward_meridian_radians == pytest.approx(-math.pi / 2.0)
 ####

@@ -1,0 +1,57 @@
+schema_version: 1
+description: Structured ambiguity matrix for source-located unresolved or provisionally resolved cases.
+ambiguities:
+  - id: TAOS-AMBMAT-0001
+    category: equation_inconsistency
+    source:
+      manual_page: 2-69
+      manual_equation: 2-239
+      registry: verification/spec/ambiguities.yaml
+    ambiguity_ids:
+      - TAOS-AMB-0001
+    candidate_classes:
+      - documentary_literal
+      - editorial_resolution
+    tests:
+      - tests/unit/test_ranges_equations.py
+      - tests/unit/test_geodesy.py
+      - tests/unit/test_verification_baseline.py
+    note: Equation inconsistency remains explicit and traceable to both the manual and the ambiguity registry.
+  - id: TAOS-AMBMAT-0002
+    category: coordinate_and_aerodynamic_singularity
+    source:
+      manual_page: 2-18
+      manual_sections: [2.1.7, 2.1.9]
+      registry: verification/spec/ambiguities.yaml
+    ambiguity_ids:
+      - TAOS-AMB-0002
+      - TAOS-AMB-0005
+    candidate_classes:
+      - documented_pole_convention
+      - direct_projection_branch
+      - normalized_branch_family
+    tests:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Coordinate singularity and aerodynamic branch conventions stay explicit rather than being flattened into one rule.
+  - id: TAOS-AMBMAT-0003
+    category: source_value_rounding_and_model_convention
+    source:
+      manual_pages: [2-54, 4-55]
+      manual_sections: [2.3.1, 4.3]
+      registry: verification/spec/ambiguities.yaml
+    ambiguity_ids:
+      - TAOS-AMB-0003
+      - TAOS-AMB-0004
+    candidate_classes:
+      - source_table_value
+      - runtime_default
+      - atmosphere_model_latitude
+      - trajectory_latitude
+    tests:
+      - tests/unit/test_atmosphere.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_verification_baseline.py
+    note: Source-value rounding and atmosphere-latitude convention remain explicit and reviewer-trackable.
+####

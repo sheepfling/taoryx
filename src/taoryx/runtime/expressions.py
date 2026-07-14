@@ -68,14 +68,23 @@ def evaluate_expression(
     if isinstance(expression, NumberExpression):
         return expression.value
     if isinstance(expression, NameExpression):
-        if expression.name in values:
-            return float(values[expression.name])
+        value = _lookup_case_insensitive(values, expression.name)
+        if value is not None:
+            return float(value)
         if resolver is not None:
             return float(resolver(expression.name))
         raise KeyError(f"undefined variable: {expression.name}")
     if isinstance(expression, IndexedExpression):
-        return float(values[f"{expression.name}[{expression.index}]"])
+        key = f"{expression.name}[{expression.index}]"
+        value = _lookup_case_insensitive(values, key)
+        if value is None:
+            raise KeyError(f"undefined variable: {key}")
+        return float(value)
     if isinstance(expression, ParameterExpression):
+        if expression.family == "optimize" and expression.loop is not None:
+            scoped_key = f"optimize-{expression.loop}-{expression.index}"
+            if scoped_key in parameters:
+                return float(parameters[scoped_key])
         key = f"{expression.family}-{expression.index}"
         return float(parameters[key])
     if isinstance(expression, TableReferenceExpression):
@@ -91,15 +100,35 @@ def evaluate_expression(
         return _binary(expression.operator, left, right)
     if isinstance(expression, CallExpression):
         if expression.function.casefold() == "table":
-            if tables is None or len(expression.arguments) != 1 or not isinstance(expression.arguments[0], NameExpression):
-                raise ValueError("table() requires one configured table name")
+            if tables is None or not expression.arguments or not isinstance(expression.arguments[0], NameExpression):
+                raise ValueError("table() requires a configured table name")
             table_name = expression.arguments[0].name.casefold()
             if table_name not in tables:
                 raise KeyError(f"undefined table: {table_name}")
-            return float(tables[table_name](values))
+            evaluator = tables[table_name]
+            if len(expression.arguments) == 1:
+                return float(evaluator(values))
+            arguments = [evaluate_expression(arg, values, parameters, resolver, tables) for arg in expression.arguments[1:]]
+            evaluate_call = getattr(evaluator, "evaluate_call", None)
+            if evaluate_call is None:
+                raise ValueError(f"table {table_name!r} does not support argumented lookup")
+            return float(evaluate_call(values, arguments))
         arguments = [evaluate_expression(arg, values, parameters, resolver, tables) for arg in expression.arguments]
         return _call(expression.function, arguments)
     raise TypeError(f"unsupported expression: {type(expression).__name__}")
+####
+
+
+def _lookup_case_insensitive(values: Mapping[str, float], name: str) -> float | None:
+    """Resolve names emitted by the case-insensitive TAOS language."""
+
+    if name in values:
+        return values[name]
+    folded = name.casefold()
+    for key, value in values.items():
+        if key.casefold() == folded:
+            return value
+    return None
 ####
 
 
@@ -151,13 +180,34 @@ def _binary(operator: str, left: float, right: float) -> float:
 
 def _call(function: str, arguments: Sequence[float]) -> float:
     name = function.casefold()
+    if name == "atan2":
+        if len(arguments) != 2:
+            raise ValueError(f"function {function} requires two arguments")
+        return float(math.atan2(arguments[0], arguments[1]))
+    if name in {"max", "min"}:
+        if not arguments:
+            raise ValueError(f"function {function} requires at least one argument")
+        return float(max(arguments) if name == "max" else min(arguments))
     if len(arguments) != 1:
         raise ValueError(f"function {function} requires one argument")
     value = arguments[0]
     functions: dict[str, Callable[[float], float]] = {
-        "abs": float.__abs__, "sqrt": math.sqrt, "ln": math.log, "log": math.log10,
-        "sin": math.sin, "cos": math.cos, "tan": math.tan, "asin": math.asin,
-        "acos": math.acos, "atan": math.atan, "exp": math.exp,
+        "abs": float.__abs__,
+        "acos": math.acos,
+        "asin": math.asin,
+        "atan": math.atan,
+        "ceil": math.ceil,
+        "cos": lambda item: math.cos(math.radians(item)),
+        "cosh": math.cosh,
+        "exp": math.exp,
+        "floor": math.floor,
+        "log": math.log,
+        "log10": math.log10,
+        "sin": lambda item: math.sin(math.radians(item)),
+        "sinh": math.sinh,
+        "sqrt": math.sqrt,
+        "tan": lambda item: math.tan(math.radians(item)),
+        "tanh": math.tanh,
     }
     try:
         return float(functions[name](value))

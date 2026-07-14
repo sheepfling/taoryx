@@ -1,9 +1,11 @@
 # `.tbl` and `.prb` grammar validation
 
 This is the working area for validating the TAOS table and problem languages.
-The grammar is reconstructed from the manual. Documented constructs are accepted,
-source-preserved, and diagnosed within their evidence-backed boundaries; complex
-bodies may remain raw statements when typed semantics would require unsupported inference.
+It is not the canonical manual source and it is not the runtime implementation.
+The grammar is reconstructed from the manual. Documented constructs are
+accepted, source-preserved, and diagnosed within their evidence-backed
+boundaries; complex bodies may remain raw statements when typed semantics would
+require unsupported inference.
 
 ## Sources of truth
 

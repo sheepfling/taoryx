@@ -1,0 +1,63 @@
+schema_version: 1
+description: Mutation families that must fail under the verification baseline.
+mutations:
+  - id: TAOS-MUT-0001
+    category: anchor_sign_flip
+    source:
+      manual_sections: [2.1.1, 2.1.3, 2.1.5]
+      manual_pages: [2-5, 2-18, 2-34]
+      registry: verification/spec/anchors.yaml
+    mutation_family:
+      - flip_ecfc_axis_sign
+      - flip_local_horizon_axis_sign
+      - transpose_basis_orientation
+    tests:
+      - tests/unit/test_verification_baseline.py
+    note: Anchor sign flips and orientation transpositions must fail rather than remaining numerically plausible.
+  - id: TAOS-MUT-0002
+    category: body_and_wind_branch_flip
+    source:
+      manual_sections: [2.1.7, 2.1.9]
+      manual_pages: [2-19, 2-26, 2-31, 2-34]
+      registry: verification/spec/branch_matrices.yaml
+    mutation_family:
+      - flip_body_yaw_pitch_roll_convention
+      - flip_windward_meridian_branch
+      - swap_alpha_branch_signs
+    tests:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Body and wind branch mutations must fail at the explicit branch boundaries.
+  - id: TAOS-MUT-0003
+    category: coefficient_sign_flip
+    source:
+      manual_sections: [2.3.4, 4.3]
+      manual_pages: [2-58, 2-61, 4-55, 4-56]
+      registry: verification/spec/constant_matrices.yaml
+    mutation_family:
+      - flip_j2_sign
+      - flip_c20_sign
+      - swap_normalized_and_unnormalized_coefficients
+    tests:
+      - tests/unit/test_gravity.py
+      - tests/unit/test_gravity_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Gravity coefficient sign mutations must fail against the exact-decimal constant registry.
+  - id: TAOS-MUT-0004
+    category: diagnostic_survival
+    source:
+      manual_sections: [4.0, 4.1, 4.5, 4.7, 4.8, 4.10, 4.11, 4.13, 4.14]
+      manual_pages: [4-1, 4-2, 4-5, 4-7, 4-8, 4-11, 4-14, 4-16, 4-24, 4-27, 4-30, 4-41, 4-43, 4-73, 4-74]
+      registry: verification/spec/diagnostic_matrices.yaml
+    mutation_family:
+      - erase_source_location
+      - collapse_recovery_record
+      - generic_failure_only
+    tests:
+      - tests/parser/test_problem_framing.py
+      - tests/parser/test_output_blocks.py
+      - tests/parser/test_manual_snippet_corpus.py
+      - tests/unit/test_verification_baseline.py
+    note: Diagnostics must survive mutations by preserving source-located recovery records.
+####

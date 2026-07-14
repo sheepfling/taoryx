@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from taoryx.language.models import SourceLocation, TableOperation
+from taoryx.language.models import SourceLocation, TableCall, TableOperation
 from taoryx.tables import (
     ExtrapolationMode,
     SkewedTableSlice,
     TableEvaluationContext,
     accumulate_table_values,
+    apply_table_operation,
     evaluate_full_table,
     interpolate_nd,
     interpolate_skewed,
@@ -92,6 +93,29 @@ def test_full_table_goto_and_multi_table_accumulation() -> None:
     assert accumulate_table_values((1.0, 2.5, -0.5)) == pytest.approx(3.0)
 
 
+def test_full_table_can_resolve_a_nested_runtime_table_evaluator() -> None:
+    context = TableEvaluationContext.from_values({}, evaluators={"inner": lambda _: 4.0})
+    result = evaluate_full_table(
+        (
+            _operation("add", TableCall(name="inner")),
+            _operation("mult", 3.0),
+            _operation("end"),
+        ),
+        context,
+    )
+
+    assert result.value == pytest.approx(12.0)
+    ####
+
+
+def test_full_table_min_and_max_select_the_named_extremum() -> None:
+    assert apply_table_operation(3.0, "max", 5.0) == pytest.approx(5.0)
+    assert apply_table_operation(3.0, "max", 2.0) == pytest.approx(3.0)
+    assert apply_table_operation(3.0, "min", 5.0) == pytest.approx(3.0)
+    assert apply_table_operation(3.0, "min", 2.0) == pytest.approx(2.0)
+    ####
+
+
 def test_skewed_interpolation_evaluates_each_inner_slice_before_outer_mix() -> None:
     table = prepare_skewed_table(
         (
@@ -101,3 +125,16 @@ def test_skewed_interpolation_evaluates_each_inner_slice_before_outer_mix() -> N
     )
 
     assert interpolate_skewed(table, (0.5, 0.5)) == pytest.approx(5.5)
+
+
+def test_skewed_interpolation_supports_sparse_nested_outer_groups() -> None:
+    table = prepare_skewed_table(
+        (
+            SkewedTableSlice((0.0, 0.0), (0.0, 5.0), (0.10, 0.20)),
+            SkewedTableSlice((0.0, 5.0), (0.0, 5.0), (0.20, 0.30)),
+            SkewedTableSlice((50000.0, 2.0), (0.0, 5.0), (0.09, 0.10)),
+            SkewedTableSlice((50000.0, 8.0), (0.0, 5.0), (0.06, 0.07)),
+        )
+    )
+
+    assert interpolate_skewed(table, (50000.0, 5.0, 5.0)) == pytest.approx(0.085)

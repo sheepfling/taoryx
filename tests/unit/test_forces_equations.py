@@ -18,6 +18,7 @@ from taoryx.equations import (
     specific_load_vector_from_accelerations,
     specific_load_vector_from_forces,
     wind_body_axes_from_aerodynamic_angles,
+    wind_unit_vectors_from_velocity,
 )
 
 
@@ -102,4 +103,24 @@ def test_specific_load_helpers_follow_the_manual_definitions() -> None:
 
     with pytest.raises(ValueError, match="mass must be nonzero"):
         specific_load_vector_from_forces(aerodynamic_force, propulsive_force, 0.0)
+####
+
+
+def test_wind_and_meridian_singularity_diagnostics_are_explicit() -> None:
+    with pytest.raises(ValueError, match="wind axes are undefined at zero speed"):
+        wind_unit_vectors_from_velocity(
+            CartesianVector3(0.0, 0.0, 0.0),
+            geodetic_up=CartesianVector3(0.0, 0.0, 1.0),
+        )
+
+    with pytest.raises(ValueError, match="wind axes are undefined when velocity is parallel to the geodetic up axis"):
+        wind_unit_vectors_from_velocity(
+            CartesianVector3(0.0, 0.0, 5.0),
+            geodetic_up=CartesianVector3(0.0, 0.0, 1.0),
+        )
+
+    wind_axes = WindAxes(CartesianVector3(1.0, 0.0, 0.0), CartesianVector3(0.0, 1.0, 0.0), CartesianVector3(0.0, 0.0, 1.0))
+    body_axes = BodyAxes(CartesianVector3(1.0, 0.0, 0.0), CartesianVector3(0.0, 1.0, 0.0), CartesianVector3(0.0, 0.0, 1.0))
+    with pytest.raises(ValueError, match="windward meridian unit vector is undefined when total angle of attack is zero"):
+        aerodynamic_force_from_axial_and_normal_coefficients(wind_axes, body_axes, 1.0, 1.0, 1.0, 1.0)
 ####

@@ -291,7 +291,7 @@ def test_define_function_arity_and_table_argument_are_checked() -> None:
     )
 
     codes = [diagnostic.code for diagnostic in document.diagnostics]
-    assert codes.count("invalid-define-function-arity") == 2
+    assert codes.count("invalid-define-function-arity") == 1
     assert "invalid-define-table-argument" not in codes
     assert all(record.code == "invalid-define-function-arity" for record in document.recovered_records)
     ####

@@ -1,7 +1,8 @@
 # taoryx simulation architecture
 
+These notes describe the implementation boundaries for the TAOS successor.
 The manual describes a trajectory-analysis system with several distinct
-responsibilities. The replacement should preserve those boundaries instead of
+responsibilities; the replacement should preserve those boundaries instead of
 turning the `.prb` parser into the simulator.
 
 ## System layers
@@ -17,9 +18,21 @@ turning the `.prb` parser into the simulator.
 | Guidance/search/optimization | Chapter 2 §§5–6; Chapter 4 `*Search`, `*Optimize`, `*Survey` | `taoryx.guidance`, `taoryx.search` |
 | Outputs and reports | Chapter 2 §4; Chapter 4 `*Print`, `*Summarize` | `taoryx.outputs` |
 
-The initial runtime scaffold is deliberately generic. It does not claim
-numerical equivalence with historical TAOS 96.0 and does not implement the
-manual's equations yet.
+The runtime now provides an executable, evidence-bounded subset of this
+architecture: parsed `.prb`/`.tbl` files lower into runtime problems and
+tables, the engine integrates trajectories, applies supported events and
+controls, and renders outputs and summaries. It does not claim numerical
+equivalence with historical TAOS 96.0, and unsupported or ambiguous language
+shapes are diagnosed rather than silently executed.
+
+## Related catalog pages
+
+- `metadata/algorithm_catalog/` holds the reviewed planning catalog and the
+  generated implementation ledger.
+- [`docs/architecture/algorithm-catalog.md`](algorithm-catalog.md) explains the
+  catalog as an architecture layer, not as a second equation registry.
+- [`docs/architecture/state-model.md`](state-model.md) defines the canonical
+  ECFC point-mass state and its runtime/integrator boundaries.
 
 ## Execution shape
 
@@ -44,12 +57,11 @@ parse → validate → resolve scenario
 
 ## Implementation order
 
-1. Stabilize parser ASTs and table resolution.
-2. Define units, frames, state variables, and scenario resolution contracts.
-3. Implement coordinate transforms and equation registry bindings.
-4. Add derivative contributions and a validated integrator.
-5. Add segment/event execution and output evaluation.
-6. Add search, optimization, guidance, and regression fixtures.
+1. Extend typed parser defaults and cross-block validation.
+2. Complete the planned P1/P2 algorithm catalog entries.
+3. Expand trajectory-level regression baselines and independent equation tests.
+4. Establish historical comparison evidence when a trusted TAOS 96.0
+   executable or output corpus is available.
 
 Every implemented equation should link back to its canonical ID in
 `metadata/equations.csv`; implementation coverage is separate from manual

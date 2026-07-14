@@ -1,0 +1,142 @@
+schema_version: 1
+description: Family-level constant provenance matrix for numerical verification.
+constants:
+  - id: TAOS-CONST-0001
+    family: wgs84_j2
+    source:
+      manual_section: 4.3
+      manual_pages: [4-55]
+      manual_table: 4-16
+      manual_text: manual/chapters/chapter04/04_03_earth.tex
+    model_ids:
+      - earth.wgs84_j2
+    exact_decimals:
+      - 1.08262998905e-3
+      - 20925646.3255
+      - 1/298.257223563
+      - 1.40764438125e16
+      - 7.292115e-5
+    tests:
+      - tests/unit/test_verification_baseline.py
+    notes: WGS-84 family constants are kept as exact-decimal registry entries with source table provenance.
+  - id: TAOS-CONST-0002
+    family: wgs72_j2
+    source:
+      manual_section: 4.3
+      manual_pages: [4-55]
+      manual_table: 4-16
+      manual_text: manual/chapters/chapter04/04_03_earth.tex
+    model_ids:
+      - earth.wgs72_j2
+    exact_decimals:
+      - 1.08261579002e-3
+      - 20925639.7638
+      - 20855480.7087
+      - 1/298.26
+      - 1.40764544069e16
+      - 7.292115147e-5
+    tests:
+      - tests/unit/test_verification_baseline.py
+    notes: WGS-72 family constants are anchored to the same table with their own decimal values.
+  - id: TAOS-CONST-0003
+    family: tsap72_84_zonal
+    source:
+      manual_section: 4.3
+      manual_pages: [4-55]
+      manual_table: 4-17
+      manual_text: manual/chapters/chapter04/04_03_earth.tex
+    model_ids:
+      - earth.tsap84
+      - earth.tsap72
+    exact_decimals:
+      - -2.532153068e-6
+      - -1.610987610e-6
+      - -2.538810043e-6
+      - -1.655970000e-6
+    tests:
+      - tests/unit/test_verification_baseline.py
+    notes: The TSAP zonal constants are retained as printed family values.
+  - id: TAOS-CONST-0004
+    family: wgs84_degree4_full
+    source:
+      manual_section: 4.3
+      manual_pages: [4-56]
+      manual_table: 4-19
+      manual_text: manual/chapters/chapter04/04_03_earth.tex
+    model_ids:
+      - earth.wgs84_full
+    exact_decimals:
+      - -1.082629e-3
+      - 1.572805e-6
+      - 2.532153e-6
+      - 2.194673e-6
+      - 3.096837e-7
+      - 1.000789e-7
+      - 1.610987e-6
+      - -5.080013e-7
+      - 7.780961e-8
+      - 5.926679e-8
+      - -3.948164e-9
+      - -9.023759e-7
+      - 2.709571e-7
+      - -2.121201e-7
+      - 1.973456e-7
+      - -4.498693e-7
+      - 1.466394e-7
+      - -1.189998e-8
+      - 6.540039e-9
+    tests:
+      - tests/unit/test_verification_baseline.py
+    notes: Full WGS-84 degree-4 coefficients remain source-table anchored and exact-decimal.
+  - id: TAOS-CONST-0005
+    family: gem_t1_degree4_full
+    source:
+      manual_section: 4.3
+      manual_pages: [4-56]
+      manual_table: 4-19
+      manual_text: manual/chapters/chapter04/04_03_earth.tex
+    model_ids:
+      - earth.gem_t1_full
+    exact_decimals:
+      - -1.082625e-3
+      - 1.574322e-6
+      - 2.532618e-6
+      - 2.192402e-6
+      - 3.086210e-7
+      - 1.005372e-7
+      - 1.616190e-6
+      - -5.060561e-7
+      - 7.759155e-8
+      - 5.922238e-8
+      - -4.015116e-9
+      - -9.035928e-7
+      - 2.695880e-7
+      - -2.119137e-7
+      - 1.970571e-7
+      - -4.507384e-7
+      - 1.484816e-7
+      - -1.198933e-8
+      - 6.517407e-9
+    tests:
+      - tests/unit/test_verification_baseline.py
+    notes: GEM-T1 full coefficients are preserved as exact printed family values.
+  - id: TAOS-CONST-0006
+    family: atmosphere_1976
+    source:
+      manual_section: 2.3.1
+      manual_pages: [2-52]
+      manual_table: null
+      manual_text: manual/chapters/chapter02/03_01_atmosphere.tex
+    model_ids:
+      - atmosphere.us_standard_1976
+      - atmosphere.standard
+    exact_decimals:
+      - 9.80665
+      - 28.9644
+      - 8314.32
+    tests:
+      - tests/unit/test_atmosphere.py
+      - tests/unit/test_atmosphere_equations.py
+      - tests/unit/test_verification_baseline.py
+    notes: Atmospheric constants remain exact-decimal registry entries tied to the manual source text.
+####

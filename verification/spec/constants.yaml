@@ -1,0 +1,993 @@
+schema_version: 1
+description: Exact-decimal constant/model registry seed. Values are intentionally not inferred here.
+source_registries:
+  manual_models: metadata/acceleration_models_chapter2.yaml
+  manual_literals: tests/fixtures/taos_manual_corpus_v22/grammar_reference/inline_literals.csv
+models:
+  - id: earth.spherical
+    source_name: spherical
+    normalization: not_applicable
+    status: model_named_source_provenance_pending
+  - id: earth.wgs72_j2
+    source_name: wgs-72
+    normalization: source_specific
+    status: exact_decimal_audit_pending
+  - id: earth.wgs84_j2
+    source_name: wgs-84
+    normalization: source_specific
+    status: exact_decimal_audit_pending
+  - id: earth.tsap72_degree4_zonal
+    source_name: tsap-72
+    normalization: source_specific
+    status: exact_decimal_audit_pending
+  - id: earth.tsap84_degree4_zonal
+    source_name: tsap-84
+    normalization: source_specific
+    status: exact_decimal_audit_pending
+  - id: earth.wgs84_degree4_full
+    source_name: wgs-84-full
+    normalization: source_specific
+    status: exact_decimal_audit_pending
+  - id: earth.gem_t1_degree4_full
+    source_name: gem-t1-full
+    normalization: source_specific
+    status: exact_decimal_audit_pending
+constants:
+  - id: earth.wgs84.equatorial_radius
+    model: earth.wgs84_j2
+    symbol: R_e
+    exact_decimal: "20925646.3255"
+    parsed_value: 20925646.3255
+    unit: foot
+    derived_si_value: 6378137.0
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_earth.py
+        - tests/unit/test_geodesy_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84.flattening
+    model: earth.wgs84_j2
+    symbol: f
+    exact_decimal: "1/298.257223563"
+    parsed_value: 0.0033528106647474805
+    unit: dimensionless
+    derived_si_value: 0.0033528106647474805
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_earth.py
+        - tests/unit/test_geodesy_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84.gravitational_parameter
+    model: earth.wgs84_j2
+    symbol: GM
+    exact_decimal: "1.40764438125e16"
+    parsed_value: 1.40764438125e16
+    unit: foot^3/second^2
+    derived_si_value: 3.986004418e14
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84.rotation_rate
+    model: earth.wgs84_j2
+    symbol: omega
+    exact_decimal: "7.292115e-5"
+    parsed_value: 7.292115e-5
+    unit: radian/second
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_frames_equations.py
+        - tests/unit/test_motion_equations.py
+    status: adopted_constant_seed
+  - id: atmosphere.us_standard_1976.reference_gravity
+    model: atmosphere.us_standard_1976
+    symbol: g0
+    exact_decimal: "9.80665"
+    parsed_value: 9.80665
+    unit: meter/second^2
+    source:
+      manual_section: 2.3.1
+      manual_page: 2-52
+      tex_file: manual/chapters/chapter02/03_01_atmosphere.tex
+      tex_line_start: 65
+      tex_line_end: 71
+      tests:
+        - tests/unit/test_atmosphere.py
+        - tests/unit/test_atmosphere_equations.py
+    status: adopted_constant_seed
+  - id: atmosphere.us_standard_1976.molecular_weight
+    model: atmosphere.us_standard_1976
+    symbol: M0
+    exact_decimal: "28.9644"
+    parsed_value: 28.9644
+    unit: kilogram/kilomole
+    source:
+      manual_section: 2.3.1
+      manual_page: 2-52
+      tex_file: manual/chapters/chapter02/03_01_atmosphere.tex
+      tex_line_start: 65
+      tex_line_end: 71
+      tests:
+        - tests/unit/test_atmosphere.py
+        - tests/unit/test_atmosphere_equations.py
+    status: adopted_constant_seed
+  - id: atmosphere.standard.universal_gas_constant
+    model: atmosphere.us_standard_1976
+    symbol: R
+    exact_decimal: "8314.32"
+    parsed_value: 8314.32
+    unit: joule/kilomole/kelvin
+    source:
+      manual_section: 2.3.1
+      manual_page: 2-52
+      tex_file: manual/chapters/chapter02/03_01_atmosphere.tex
+      tex_line_start: 44
+      tex_line_end: 46
+      tests:
+        - tests/unit/test_atmosphere.py
+        - tests/unit/test_atmosphere_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84.j2
+    model: earth.wgs84_j2
+    symbol: J2
+    exact_decimal: "1.08262998905e-3"
+    parsed_value: 1.08262998905e-3
+    unit: dimensionless
+    derived_si_value: 0.00108262998905
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs72.equatorial_radius
+    model: earth.wgs72_j2
+    symbol: R_e
+    exact_decimal: "20925639.7638"
+    parsed_value: 20925639.7638
+    unit: foot
+    derived_si_value: 6378135.0
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_earth.py
+        - tests/unit/test_geodesy_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs72.polar_radius
+    model: earth.wgs72_j2
+    symbol: R_p
+    exact_decimal: "20855480.7087"
+    parsed_value: 20855480.7087
+    unit: foot
+    derived_si_value: 6356750.520016095
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_earth.py
+        - tests/unit/test_geodesy_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs72.flattening
+    model: earth.wgs72_j2
+    symbol: f
+    exact_decimal: "1/298.26"
+    parsed_value: 0.003352779454167505
+    unit: dimensionless
+    derived_si_value: 0.003352779454167505
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_earth.py
+        - tests/unit/test_geodesy_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs72.rotation_rate
+    model: earth.wgs72_j2
+    symbol: omega
+    exact_decimal: "7.292115147e-5"
+    parsed_value: 7.292115147e-5
+    unit: radian/second
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_frames_equations.py
+        - tests/unit/test_motion_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs72.gravitational_parameter
+    model: earth.wgs72_j2
+    symbol: GM
+    exact_decimal: "1.40764544069e16"
+    parsed_value: 1.40764544069e16
+    unit: foot^3/second^2
+    derived_si_value: 3.986008e14
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs72.j2
+    model: earth.wgs72_j2
+    symbol: J2
+    exact_decimal: "1.08261579002e-3"
+    parsed_value: 1.08261579002e-3
+    unit: dimensionless
+    derived_si_value: 0.00108261579002
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-16
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 71
+      tex_line_end: 78
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.tsap84.j3
+    model: earth.tsap84_degree4_zonal
+    symbol: J3
+    exact_decimal: "-2.532153068e-6"
+    parsed_value: -2.532153068e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-17
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 88
+      tex_line_end: 105
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.tsap84.j4
+    model: earth.tsap84_degree4_zonal
+    symbol: J4
+    exact_decimal: "-1.610987610e-6"
+    parsed_value: -1.610987610e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-17
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 88
+      tex_line_end: 105
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.tsap72.j3
+    model: earth.tsap72_degree4_zonal
+    symbol: J3
+    exact_decimal: "-2.538810043e-6"
+    parsed_value: -2.538810043e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-17
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 88
+      tex_line_end: 105
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.tsap72.j4
+    model: earth.tsap72_degree4_zonal
+    symbol: J4
+    exact_decimal: "-1.655970000e-6"
+    parsed_value: -1.655970000e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-55
+      manual_table: 4-17
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 88
+      tex_line_end: 105
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c20
+    model: earth.wgs84_degree4_full
+    symbol: c20
+    exact_decimal: "-1.082629e-3"
+    parsed_value: -1.082629e-3
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c22
+    model: earth.wgs84_degree4_full
+    symbol: c22
+    exact_decimal: "1.572805e-6"
+    parsed_value: 1.572805e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c30
+    model: earth.wgs84_degree4_full
+    symbol: c30
+    exact_decimal: "2.532153e-6"
+    parsed_value: 2.532153e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c31
+    model: earth.wgs84_degree4_full
+    symbol: c31
+    exact_decimal: "2.194673e-6"
+    parsed_value: 2.194673e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c32
+    model: earth.wgs84_degree4_full
+    symbol: c32
+    exact_decimal: "3.096837e-7"
+    parsed_value: 3.096837e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c33
+    model: earth.wgs84_degree4_full
+    symbol: c33
+    exact_decimal: "1.000789e-7"
+    parsed_value: 1.000789e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c40
+    model: earth.wgs84_degree4_full
+    symbol: c40
+    exact_decimal: "1.610987e-6"
+    parsed_value: 1.610987e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c41
+    model: earth.wgs84_degree4_full
+    symbol: c41
+    exact_decimal: "-5.080013e-7"
+    parsed_value: -5.080013e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c42
+    model: earth.wgs84_degree4_full
+    symbol: c42
+    exact_decimal: "7.780961e-8"
+    parsed_value: 7.780961e-8
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c43
+    model: earth.wgs84_degree4_full
+    symbol: c43
+    exact_decimal: "5.926679e-8"
+    parsed_value: 5.926679e-8
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.c44
+    model: earth.wgs84_degree4_full
+    symbol: c44
+    exact_decimal: "-3.948164e-9"
+    parsed_value: -3.948164e-9
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.s22
+    model: earth.wgs84_degree4_full
+    symbol: s22
+    exact_decimal: "-9.023759e-7"
+    parsed_value: -9.023759e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.s31
+    model: earth.wgs84_degree4_full
+    symbol: s31
+    exact_decimal: "2.709571e-7"
+    parsed_value: 2.709571e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.s32
+    model: earth.wgs84_degree4_full
+    symbol: s32
+    exact_decimal: "-2.121201e-7"
+    parsed_value: -2.121201e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.s33
+    model: earth.wgs84_degree4_full
+    symbol: s33
+    exact_decimal: "1.973456e-7"
+    parsed_value: 1.973456e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.s41
+    model: earth.wgs84_degree4_full
+    symbol: s41
+    exact_decimal: "-4.498693e-7"
+    parsed_value: -4.498693e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.s42
+    model: earth.wgs84_degree4_full
+    symbol: s42
+    exact_decimal: "1.466394e-7"
+    parsed_value: 1.466394e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.s43
+    model: earth.wgs84_degree4_full
+    symbol: s43
+    exact_decimal: "-1.189998e-8"
+    parsed_value: -1.189998e-8
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.wgs84_full.s44
+    model: earth.wgs84_degree4_full
+    symbol: s44
+    exact_decimal: "6.540039e-9"
+    parsed_value: 6.540039e-9
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c20
+    model: earth.gem_t1_degree4_full
+    symbol: c20
+    exact_decimal: "-1.082625e-3"
+    parsed_value: -1.082625e-3
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c22
+    model: earth.gem_t1_degree4_full
+    symbol: c22
+    exact_decimal: "1.574322e-6"
+    parsed_value: 1.574322e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c30
+    model: earth.gem_t1_degree4_full
+    symbol: c30
+    exact_decimal: "2.532618e-6"
+    parsed_value: 2.532618e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c31
+    model: earth.gem_t1_degree4_full
+    symbol: c31
+    exact_decimal: "2.192402e-6"
+    parsed_value: 2.192402e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c32
+    model: earth.gem_t1_degree4_full
+    symbol: c32
+    exact_decimal: "3.086210e-7"
+    parsed_value: 3.086210e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c33
+    model: earth.gem_t1_degree4_full
+    symbol: c33
+    exact_decimal: "1.005372e-7"
+    parsed_value: 1.005372e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c40
+    model: earth.gem_t1_degree4_full
+    symbol: c40
+    exact_decimal: "1.616190e-6"
+    parsed_value: 1.616190e-6
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c41
+    model: earth.gem_t1_degree4_full
+    symbol: c41
+    exact_decimal: "-5.060561e-7"
+    parsed_value: -5.060561e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c42
+    model: earth.gem_t1_degree4_full
+    symbol: c42
+    exact_decimal: "7.759155e-8"
+    parsed_value: 7.759155e-8
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c43
+    model: earth.gem_t1_degree4_full
+    symbol: c43
+    exact_decimal: "5.922238e-8"
+    parsed_value: 5.922238e-8
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.c44
+    model: earth.gem_t1_degree4_full
+    symbol: c44
+    exact_decimal: "-4.015116e-9"
+    parsed_value: -4.015116e-9
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.s22
+    model: earth.gem_t1_degree4_full
+    symbol: s22
+    exact_decimal: "-9.035928e-7"
+    parsed_value: -9.035928e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.s31
+    model: earth.gem_t1_degree4_full
+    symbol: s31
+    exact_decimal: "2.695880e-7"
+    parsed_value: 2.695880e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.s32
+    model: earth.gem_t1_degree4_full
+    symbol: s32
+    exact_decimal: "-2.119137e-7"
+    parsed_value: -2.119137e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.s33
+    model: earth.gem_t1_degree4_full
+    symbol: s33
+    exact_decimal: "1.970571e-7"
+    parsed_value: 1.970571e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.s41
+    model: earth.gem_t1_degree4_full
+    symbol: s41
+    exact_decimal: "-4.507384e-7"
+    parsed_value: -4.507384e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.s42
+    model: earth.gem_t1_degree4_full
+    symbol: s42
+    exact_decimal: "1.484816e-7"
+    parsed_value: 1.484816e-7
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.s43
+    model: earth.gem_t1_degree4_full
+    symbol: s43
+    exact_decimal: "-1.198933e-8"
+    parsed_value: -1.198933e-8
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed
+  - id: earth.gem_t1_full.s44
+    model: earth.gem_t1_degree4_full
+    symbol: s44
+    exact_decimal: "6.517407e-9"
+    parsed_value: 6.517407e-9
+    unit: dimensionless
+    source:
+      manual_section: 4.3
+      manual_page: 4-56
+      manual_table: 4-19
+      tex_file: manual/chapters/chapter04/04_03_earth.tex
+      tex_line_start: 130
+      tex_line_end: 155
+      tests:
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+    status: adopted_constant_seed

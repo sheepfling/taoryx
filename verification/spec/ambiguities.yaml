@@ -1,0 +1,149 @@
+schema_version: 1
+description: Permanent record of uncertainty; never resolve by silent cleanup.
+resolution_classes:
+  A: obvious_typographical_defect
+  B: internally_resolvable_inconsistency
+  C: externally_resolvable_inconsistency
+  D: unresolved_ambiguity
+ambiguities:
+  - id: TAOS-AMB-0001
+    location:
+      source_page: 2-69
+      equation: 2-239
+    category: printed-equation-inconsistency
+    source_form: Printed forms in equation 2-239 are inconsistent across the source presentation.
+    candidate_interpretations:
+      - id: source_literal
+        description: Preserve the printed form exactly for documentary fidelity.
+      - id: editorial_resolution
+        description: Use the documented reconstructed editorial resolution for numerical evaluation.
+    evidence:
+      internal:
+        - metadata/algorithm_catalog/algorithms.yaml#TAOS-ALG-GEO-002
+        - metadata/equations_provenance.csv#2-239
+      external: []
+    decision:
+      documentary_edition: preserve_source
+      numerical_kernel: editorial_resolution_recorded_in_manual_reconstruction
+      status: provisionally_resolved
+    tests:
+      - tests/unit/test_ranges_equations.py
+      - tests/unit/test_geodesy.py
+    reviewers:
+      mathematical: pending
+      historical: not_required_for_documentary_or_scientific_resolution
+    notes: The existing catalog records the inconsistency and requires the implementation decision to remain traceable.
+  - id: TAOS-AMB-0002
+    location:
+      source_page: 2-18
+      equation: null
+    category: coordinate-singularity-convention
+    source_form: Pole handling and Euler-angle conventions require a defined branch at a coordinate singularity.
+    candidate_interpretations:
+      - id: documented_pole_convention
+        description: Apply the reconstructed convention used by the coordinate implementation.
+      - id: undefined-at-pole
+        description: Treat the affected angle as undefined and require an explicit fallback at the API boundary.
+    evidence:
+      internal:
+        - metadata/coordinate_systems_chapter2.yaml
+        - src/taoryx/coordinates.py
+        - tests/unit/test_frames_equations.py
+      external: []
+    decision:
+      documentary_edition: preserve_source
+      numerical_kernel: documented_pole_convention
+      status: pending_explicit_anchor_review
+    tests:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_frames_equations.py
+    reviewers:
+      mathematical: pending
+      historical: pending
+    notes: This record prevents a pole branch from being mistaken for a general-angle identity.
+  - id: TAOS-AMB-0003
+    location:
+      source_page: 4-55
+      table: 4-16
+      symbol: j2
+    category: source-value-rounding
+    source_form: The WGS-84 gravity table prints J2 as 1.08262998905e-3, while the runtime gravity tests use a rounded 0.00108262668 value.
+    candidate_interpretations:
+      - id: source_table
+        description: Preserve the table value exactly as printed in the manual.
+      - id: runtime_default
+        description: Preserve the rounded runtime/test constant currently used by the gravity wrappers.
+    evidence:
+      internal:
+        - verification/spec/constants.yaml
+        - tests/unit/test_gravity.py
+        - tests/unit/test_gravity_equations.py
+      external:
+        - manual/chapters/chapter04/04_03_earth.tex
+    decision:
+      documentary_edition: preserve_source_table_value
+      numerical_kernel: runtime_default_pending_review
+      status: unresolved
+    tests:
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_gravity_equations.py
+    reviewers:
+      mathematical: pending
+      historical: pending
+    notes: This captures an actual source-versus-runtime discrepancy instead of normalizing it away.
+  - id: TAOS-AMB-0004
+    location:
+      source_page: 2-54
+      equation: 2-??-latitude-convention
+    category: atmosphere-latitude-convention-mismatch
+    source_form: The atmosphere model uses its own latitude parameter, which is explicitly not necessarily the current trajectory latitude, and this convention is noted as inconsistent with the gravity model.
+    candidate_interpretations:
+      - id: atmosphere_model_latitude
+        description: Use the latitude associated with the atmosphere model, as stated in the atmosphere chapter.
+      - id: trajectory_latitude
+        description: Substitute the current trajectory latitude for model latitude to align with gravity propagation.
+    evidence:
+      internal:
+        - manual/chapters/chapter02/03_01_atmosphere.tex
+        - verification/spec/constants.yaml
+      external: []
+    decision:
+      documentary_edition: preserve_source
+      numerical_kernel: atmosphere_model_latitude
+      status: provisionally_resolved
+    tests:
+      - tests/unit/test_verification_baseline.py
+      - tests/unit/test_atmosphere.py
+    reviewers:
+      mathematical: pending
+      historical: pending
+    notes: The manual explicitly says this convention is inconsistent with the gravity model used for trajectory propagation, so the convention is preserved rather than silently unified.
+  - id: TAOS-AMB-0005
+    location:
+      source_page: 2-26
+      section: 2.1.9
+    category: aerodynamic-branch-convention
+    source_form: The manual preserves special-case branch statements for aerodynamic angles at alpha=±90 degrees and alpha_T=90 degrees.
+    candidate_interpretations:
+      - id: direct_projection_branch
+        description: Keep the direct projected-sideslip branch exactly as printed for the special cases.
+      - id: normalized_branch_family
+        description: Normalize the aerodynamic angle families to one branch rule in the runtime while preserving the source branch text in the documentary edition.
+    evidence:
+      internal:
+        - manual/chapters/chapter02/01_09_wind.tex
+        - tests/unit/test_frames_equations.py
+        - tests/unit/test_verification_baseline.py
+      external: []
+    decision:
+      documentary_edition: preserve_source_branch_statements
+      numerical_kernel: direct_projection_branch
+      status: pending_explicit_review
+    tests:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+    reviewers:
+      mathematical: pending
+      historical: pending
+    notes: The branch forms are documented in the wind-coordinate section and should remain explicit rather than collapsed into a single symbolic identity.

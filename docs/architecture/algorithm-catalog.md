@@ -1,8 +1,9 @@
 # Algorithm Catalog Architecture
 
-The v1 catalog decomposes the manual into 107 implementation-sized records. It
-is a planning and traceability layer, not a second equation registry and not a
-claim of TAOS 96.0 runtime compatibility.
+This page explains the catalog as an implementation-planning layer. The v1
+catalog decomposes the manual into 107 implementation-sized records, but it is
+not a second equation registry and it is not a claim of TAOS 96.0 runtime
+compatibility.
 
 ## Boundaries
 
@@ -32,7 +33,14 @@ JSON catalog and the implementation ledger by
 ## Implementation status
 
 The catalog's `cataloged` status means the work item has provenance, steps, and
-test ideas. `algorithm_status.csv` separately records whether a documented
-typed binding exists; `typed_binding` still does not claim full historical
-runtime semantics. Completion of a runtime algorithm requires its lowering,
-execution behavior, focused tests, provenance links, and repository gates.
+test ideas. The generated `algorithm_status.csv` records separate evidence:
+roadmap completion, documented binding, target importability, verification-path
+existence, implementation stage, and historical-equivalence status.
+`unit_verified` means that the documented target imports and every named test
+file exists. It does not claim that every input branch has been exercised,
+that the runtime semantics are complete, or that behavior matches TAOS 96.0.
+`roadmap_status=complete` is a stronger project decision and must only be
+marked after the algorithm's execution behavior, focused tests, provenance
+links, and repository gates are complete. Historical equivalence remains a
+separate status because it requires the historical executable or trusted
+output baselines.

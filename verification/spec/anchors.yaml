@@ -1,0 +1,68 @@
+schema_version: 1
+description: Fixed expected vectors for independent frame and sign checks.
+source_basis: metadata/coordinate_systems_chapter2.yaml
+anchors:
+  - id: ecfc_equator_greenwich
+    frame: ecfc
+    input: {longitude_degrees: 0.0, latitude_degrees: 0.0, radius: 1.0}
+    expected_position: [1.0, 0.0, 0.0]
+    rationale: ECFC x axis is the Greenwich meridian in the equatorial plane.
+  - id: ecfc_equator_ninety_east
+    frame: ecfc
+    input: {longitude_degrees: 90.0, latitude_degrees: 0.0, radius: 1.0}
+    expected_position: [0.0, 1.0, 0.0]
+    rationale: ECFC y axis is 90 degrees east longitude in the equatorial plane.
+  - id: ecfc_north_pole
+    frame: ecfc
+    input: {longitude_degrees: 0.0, latitude_degrees: 90.0, radius: 1.0}
+    expected_position: [0.0, 0.0, 1.0]
+    rationale: ECFC z axis is the north-pole/spin-axis direction.
+  - id: geocentric_equator_greenwich
+    frame: geocentric_horizon
+    input: {longitude_degrees: 0.0, latitude_degrees: 0.0}
+    expected_basis:
+      north: [0.0, 0.0, 1.0]
+      east: [0.0, 1.0, 0.0]
+      down: [-1.0, 0.0, 0.0]
+  - id: geodetic_equator_greenwich
+    frame: geodetic_horizon
+    input: {longitude_degrees: 0.0, latitude_degrees: 0.0}
+    expected_basis:
+      north: [0.0, 0.0, 1.0]
+      east: [0.0, 1.0, 0.0]
+      down: [-1.0, 0.0, 0.0]
+  - id: ecic_quarter_turn
+    frame: ecic
+    input: {rotation_angle_degrees: 90.0, vector: [1.0, 0.0, 0.0]}
+    expected_vector: [0.0, 1.0, 0.0]
+  - id: wind_due_ecfc_x
+    frame: wind
+    input: {velocity: [1.0, 0.0, 0.0], geodetic_up: [0.0, 0.0, 1.0], bank_degrees: 0.0}
+    expected_basis:
+      x: [1.0, 0.0, 0.0]
+      y: [0.0, 1.0, 0.0]
+      z: [0.0, 0.0, 1.0]
+  - id: body_zero_euler_geodetic_equator_greenwich
+    frame: body_fixed
+    input:
+      longitude_degrees: 0.0
+      latitude_degrees: 0.0
+      yaw_degrees: 0.0
+      pitch_degrees: 0.0
+      roll_degrees: 0.0
+    expected_basis:
+      x: [0.0, 0.0, 1.0]
+      y: [0.0, 1.0, 0.0]
+      z: [-1.0, 0.0, 0.0]
+    rationale: Zero geodetic yaw, pitch, and roll preserve the local north-east-down triad at the equator and Greenwich.
+  - id: tangent_plane_zero_azimuth_equator_greenwich
+    frame: tangent_plane
+    input:
+      longitude_degrees: 0.0
+      latitude_degrees: 0.0
+      azimuth_degrees: 0.0
+    expected_basis:
+      x: [0.0, 0.0, 1.0]
+      y: [0.0, -1.0, 0.0]
+      z: [1.0, 0.0, 0.0]
+    rationale: Zero tangent-plane azimuth selects local north for x, west for y, and up for z at the equator and Greenwich.

@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 
 from taoryx.contracts import Frame
 from taoryx.language.expressions import ExpressionType
+from taoryx.state import PointMassState
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,6 +19,7 @@ class RuntimeState:
     frame: Frame | str = Frame.ECFC
     named: Mapping[str, float] = field(default_factory=dict)
     value_names: tuple[str, ...] = ()
+    segment_endpoints: Mapping[int, RuntimeState] = field(default_factory=dict)
 
     def with_values(self, values: Sequence[float], *, time: float | None = None) -> RuntimeState:
         normalized = tuple(float(v) for v in values)
@@ -26,8 +28,31 @@ class RuntimeState:
             named[name] = value
         resolved_time = self.time if time is None else time
         named["time"] = resolved_time
-        return RuntimeState(resolved_time, normalized, self.frame, named, self.value_names)
+        return RuntimeState(resolved_time, normalized, self.frame, named, self.value_names, self.segment_endpoints)
     ####
+
+    def to_point_mass_state(self) -> PointMassState:
+        """Convert the canonical nine-value runtime state to physical state.
+
+        Runtime lowering may carry many named derived values, but only the
+        canonical TAOS integration names cross into the point-mass kernel.
+        """
+
+        expected = PointMassState.STATE_NAMES
+        if self.value_names and self.value_names != expected:
+            raise ValueError("runtime state names do not match the canonical TAOS point-mass order")
+        return PointMassState.from_values(self.time, list(self.values))
+        ####
+
+    @classmethod
+    def from_point_mass_state(cls, state: PointMassState) -> RuntimeState:
+        """Wrap a validated physical state for runtime scheduling and output."""
+
+        values = state.to_values()
+        named = dict(zip(PointMassState.STATE_NAMES, values, strict=True))
+        named["time"] = state.time
+        return cls(state.time, values, Frame.ECFC, named, PointMassState.STATE_NAMES)
+        ####
 ####
 
 
@@ -46,6 +71,7 @@ class RuntimeVehicle:
     dependency_segments: Mapping[str, int] = field(default_factory=dict)
     segment_number: int = 1
     active: bool = True
+    activation_pending: bool = True
     history: list[RuntimeState] = field(default_factory=list)
     stop_when: Callable[[RuntimeState], bool] | None = None
     events: tuple[EventCondition, ...] = ()
@@ -54,14 +80,18 @@ class RuntimeVehicle:
     relative_tolerance: float = 1e-8
     max_step_size: float | None = None
     derived_definitions: Mapping[str, ExpressionType] = field(default_factory=dict)
+    definition_evaluator: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
     parameters: Mapping[str, float] = field(default_factory=dict)
     table_evaluators: Mapping[str, Callable[[Mapping[str, float]], float]] = field(default_factory=dict)
     environment_evaluator: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
     event_handlers: Mapping[str, Callable[[RuntimeState], RuntimeState]] = field(default_factory=dict)
+    activation_handler: Callable[[RuntimeState], RuntimeState] | None = None
 
     def __post_init__(self) -> None:
         if self.step_size <= 0.0:
             raise ValueError("vehicle step_size must be positive")
+        if self.active:
+            self.activation_pending = False
         if not self.history:
             self.history.append(self.state)
         ####
@@ -99,6 +129,7 @@ class EventCondition:
     name: str
     function: Callable[[RuntimeState], float]
     action: str = "stop"
+    predicate: Callable[[RuntimeState], bool] | None = None
 
 
 @dataclass(frozen=True, slots=True)

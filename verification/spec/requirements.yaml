@@ -1,0 +1,654 @@
+schema_version: 1
+description: Seed registry for normative facts; source metadata remains canonical.
+requirements:
+  - id: TAOS-REQ-SCOPE-0001
+    source:
+      section: 2.1
+      manual_pages: [2-5, 2-35]
+      metadata: metadata/coordinate_systems_chapter2.yaml
+    rule: TAOS equations of motion use a three-degree-of-freedom point-mass model.
+    scope: simulation
+    validation_phase: governance
+    status: adopted_boundary
+    tests: [tests/unit/test_dynamics.py, tests/unit/test_coordinates.py]
+  - id: TAOS-REQ-FRAME-0001
+    source:
+      section: 2.1.12
+      manual_pages: [2-35]
+      metadata: metadata/coordinate_systems_chapter2.yaml
+    rule: Frame unit vectors are represented in ECFC components for transformations.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: partially_tested
+    tests: [tests/unit/test_frames_equations.py, tests/unit/test_coordinates.py]
+  - id: TAOS-REQ-FRAME-0002
+    source:
+      section: 2.1
+      metadata: metadata/coordinate_systems_chapter2.yaml
+    rule: Every documented coordinate frame has explicit axes, origin, transform convention, singularities, and anchor cases.
+    scope: coordinate_transforms
+    validation_phase: governance
+    status: registry_complete_sign_review_pending
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_coordinates.py]
+  - id: TAOS-REQ-NUM-0001
+    source:
+      section: 2
+      metadata: verification/spec/tolerances.yaml
+    rule: Numeric acceptance thresholds are scoped to a quantity and conditioning regime; no blanket tolerance is permitted.
+    scope: numerical_verification
+    validation_phase: governance
+    status: policy_adopted
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-NUM-0002
+    source:
+      section: 2.2-2.6
+      metadata: tests/fixtures/taos_e2e_v23/manifest.json
+    rule: Canonical regression anchors record explicit scenario-specific thresholds and oracle kinds rather than relying on a blanket e2e tolerance.
+    scope: integrated_verification
+    validation_phase: e2e
+    status: threshold_matrix_started
+    tests: [tests/e2e/test_static_corpus.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-GRAV-0001
+    source:
+      section: 2.3
+      metadata: verification/spec/constants.yaml
+    rule: Earth and atmosphere constants are stored as exact-decimal registry entries with model IDs and source links.
+    scope: numerical_verification
+    validation_phase: governance
+    status: registry_seeded
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-GRAV-0002
+    source:
+      section: 4.3
+      metadata: verification/spec/constants.yaml
+    rule: Full degree-4 Earth-model coefficients are stored as exact-decimal registry entries and linked to the manual table.
+    scope: numerical_verification
+    validation_phase: governance
+    status: registry_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_gravity.py, tests/unit/test_gravity_equations.py]
+  - id: TAOS-REQ-GRAV-0003
+    source:
+      section: 4.3
+      metadata: verification/spec/constants.yaml
+    rule: GEM-T1 full-model coefficients are stored as exact-decimal registry entries and linked to the manual table.
+    scope: numerical_verification
+    validation_phase: governance
+    status: registry_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_gravity.py, tests/unit/test_gravity_equations.py]
+  - id: TAOS-REQ-FRAME-0003
+    source:
+      section: 2.1
+      metadata: verification/spec/anchors.yaml
+    rule: Coordinate implementations must agree with fixed cardinal anchor vectors defined independently of production helpers.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: anchor_suite_started
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-FRAME-0006
+    source:
+      section: 2.1
+      metadata: verification/spec/anchors.yaml
+    rule: Sign, axis, and branch mutations against the fixed anchor vectors must fail rather than remaining numerically plausible.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: mutation_contract_started
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-FRAME-0004
+    source:
+      section: 2.1.7
+      manual_pages: [2-19, 2-23, 2-31, 2-34]
+      metadata: manual/chapters/chapter02/01_07_body_fixed.tex
+    rule: Documented frame singularities must raise source-located diagnostics that match the manual boundary condition being enforced.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: diagnostic_contract_started
+    tests: [tests/unit/test_frames_equations.py, tests/unit/test_attitude.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-FRAME-0005
+    source:
+      section: 2.1.9
+      manual_pages: [2-26, 2-31]
+      metadata: manual/chapters/chapter02/01_09_wind.tex
+    rule: Aerodynamic branch conventions at alpha=±90 degrees and alpha_T=90 degrees must remain explicit and source-linked.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: branch_contract_started
+    tests: [tests/unit/test_frames_equations.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-EQ-0001
+    source:
+      section: 2.1
+      manual_pages: [2-7, 2-31]
+      metadata: manual/chapters/chapter02/01_02_ecic.tex
+    rule: Representative frame equations are independently rederived and anchored to the manual equation labels used by the numerical tests.
+    scope: equation_verification
+    validation_phase: numerical
+    status: equation_contract_started
+    tests: [tests/unit/test_frames_equations.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-EQ-0002
+    source:
+      section: 2.1.9
+      manual_pages: [2-26, 2-31]
+      metadata: manual/chapters/chapter02/01_09_wind.tex
+    rule: Representative aerodynamic equations are independently rederived and anchored to the manual equation labels used by the numerical tests.
+    scope: equation_verification
+    validation_phase: numerical
+    status: equation_contract_started
+    tests: [tests/unit/test_frames_equations.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-EQ-0003
+    source:
+      section: 2.3.1
+      manual_pages: [2-52, 2-55]
+      metadata: manual/chapters/chapter02/03_01_atmosphere.tex
+    rule: Representative atmosphere equations are independently rederived and anchored to the manual equation labels used by the numerical tests.
+    scope: equation_verification
+    validation_phase: numerical
+    status: equation_contract_started
+    tests: [tests/unit/test_atmosphere_equations.py, tests/unit/test_atmosphere.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-EQ-0004
+    source:
+      section: 2.1.4-2.1.6
+      manual_pages: [2-9, 2-18]
+      metadata: manual/chapters/chapter02/01_04_geocentric.tex
+    rule: Representative geodesy equations are independently rederived and anchored to the manual equation labels used by the numerical tests.
+    scope: equation_verification
+    validation_phase: numerical
+    status: equation_contract_started
+    tests: [tests/unit/test_geodesy_equations.py, tests/unit/test_coordinates.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-EQ-0005
+    source:
+      section: 2.3.4
+      manual_pages: [2-58, 2-61]
+      metadata: manual/chapters/chapter02/03_04_gravity_model.tex
+    rule: Representative gravity equations are independently rederived and anchored to the manual equation labels used by the numerical tests.
+    scope: equation_verification
+    validation_phase: numerical
+    status: equation_contract_started
+    tests: [tests/unit/test_gravity_equations.py, tests/unit/test_gravity.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-EQ-0006
+    source:
+      section: 2.6.2-2.6.3
+      manual_pages: [2-96, 2-105]
+      metadata: manual/chapters/chapter02/06_03_optimization.tex
+    rule: Representative optimization equations are independently rederived and anchored to the manual equation labels used by the numerical tests.
+    scope: equation_verification
+    validation_phase: numerical
+    status: equation_contract_started
+    tests: [tests/unit/test_search_optimization_equations.py, tests/unit/test_optimization.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-FRAME-0007
+    source:
+      section: 2.1-2.1.12
+      manual_pages: [2-5, 2-34]
+      metadata: manual/chapters/chapter02/01_01_ecfc.tex
+    rule: Representative coordinate-frame equations are independently rederived and anchored to the manual equation labels used by the numerical tests.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: equation_contract_started
+    tests: [tests/unit/test_frames_equations.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-GRAV-0004
+    source:
+      section: 4.3
+      manual_pages: [4-55, 4-58]
+      metadata: manual/chapters/chapter04/04_03_earth.tex
+    rule: Gravity constant registries remain anchored to the documented table labels for the WGS and TSAP earth-model tables.
+    scope: numerical_verification
+    validation_phase: numerical
+    status: table_contract_started
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-ATM-0001
+    source:
+      section: 4.1
+      manual_pages: [4-1, 4-2]
+      metadata: manual/chapters/chapter04/04_01_atmos.tex
+    rule: Atmosphere model registries remain anchored to the documented atmosphere-type table and default atmosphere statement.
+    scope: numerical_verification
+    validation_phase: numerical
+    status: table_contract_started
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_atmosphere.py, tests/unit/test_atmosphere_equations.py]
+  - id: TAOS-REQ-ATM-0002
+    source:
+      section: 4.1
+      manual_pages: [4-1, 4-2]
+      metadata: manual/chapters/chapter04/04_01_atmos.tex
+    rule: Malformed atmosphere inputs must be diagnosed with source-located locations and preserved recovery records rather than silently normalized.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_problem_framing.py, tests/parser/test_lossless_baseline.py]
+  - id: TAOS-REQ-ATM-0003
+    source:
+      section: 2.3.1 and 4.1
+      manual_pages: [2-52, 4-1, 4-2]
+      metadata: manual/chapters/chapter02/03_01_atmosphere.tex
+    rule: Atmosphere constants must remain exact-decimal registry entries linked to the documented 1976 standard atmosphere values and default model statement.
+    scope: numerical_verification
+    validation_phase: governance
+    status: registry_seeded
+    tests: [tests/unit/test_atmosphere.py, tests/unit/test_atmosphere_equations.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-GRAV-0007
+    source:
+      section: 2.3 and 4.3
+      manual_pages: [2-52, 4-55, 4-56]
+      metadata: verification/spec/constant_matrices.yaml
+    rule: Family-level constant provenance must remain explicit for Earth and atmosphere models, with exact decimal strings and manual page/table anchors preserved in the verification matrix.
+    scope: numerical_verification
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_atmosphere.py, tests/unit/test_atmosphere_equations.py, tests/unit/test_gravity.py, tests/unit/test_gravity_equations.py]
+  - id: TAOS-REQ-EQMAT-0001
+    source:
+      section: 2.1-2.6
+      manual_pages: [2-5, 2-105]
+      metadata: verification/spec/equation_matrices.yaml
+    rule: Topic-level equation derivation groups must remain explicit and source-located for the coordinate, aerodynamic, atmosphere, geodesy, gravity, and optimization families.
+    scope: equation_verification
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_frames_equations.py, tests/unit/test_coordinates.py, tests/unit/test_forces_equations.py, tests/unit/test_atmosphere_equations.py, tests/unit/test_geodesy_equations.py, tests/unit/test_gravity_equations.py, tests/unit/test_search_optimization_equations.py]
+  - id: TAOS-REQ-REG-0001
+    source:
+      section: 2.2-4.4
+      manual_pages: [2-37, 4-44]
+      metadata: verification/spec/regression_matrices.yaml
+    rule: Source-linked regression anchors for canonical numeric scenarios and the manual corpus must remain explicit, lossless, and preserve the no-TAOS-96-compatibility boundary.
+    scope: integrated_verification
+    validation_phase: e2e
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_runtime_lowering.py, tests/unit/test_outputs.py, tests/parser/test_manual_snippet_corpus.py, tests/e2e/test_static_corpus.py]
+  - id: TAOS-REQ-DIAG-0001
+    source:
+      section: 2.1.7-4.14
+      manual_pages: [2-19, 2-24, 2-31, 4-1, 4-2, 4-7, 4-14, 4-73]
+      metadata: verification/spec/diagnostic_matrices.yaml
+    rule: Source-located diagnostics for malformed, singular, or ambiguous cases must remain explicit as a matrix of recoverable diagnostic families rather than collapsing into a generic failure mode.
+    scope: parser
+    validation_phase: parser
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_coordinates.py, tests/unit/test_frames_equations.py, tests/unit/test_forces_equations.py, tests/parser/test_problem_framing.py, tests/parser/test_output_blocks.py, tests/parser/test_manual_snippet_corpus.py]
+  - id: TAOS-REQ-DIAG-0002
+    source:
+      section: 3.26
+      manual_pages: [3-26]
+      metadata: verification/spec/diagnostic_matrices.yaml
+    rule: Duplicate independent values documented in the manual corpus must remain source-located warnings with preserved recovery records instead of being silently normalized away.
+    scope: parser
+    validation_phase: parser
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/parser/test_manual_snippet_corpus.py]
+  - id: TAOS-REQ-AMBMAT-0001
+    source:
+      section: verification registry
+      metadata: verification/spec/ambiguity_matrices.yaml
+    rule: Ambiguity families must remain grouped, source-located, reviewer-trackable, and linked back to the canonical ambiguity registry.
+    scope: governance
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-WIND-0001
+    source:
+      section: 4.14
+      manual_pages: [4-73, 4-74]
+      metadata: manual/chapters/chapter04/04_14_wind.tex
+    rule: The wind data block must preserve the documented direction conventions, default zero-wind behavior, and mutually exclusive component sets.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_output_blocks.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-PRT-0001
+    source:
+      section: 4.7
+      manual_pages: [4-19, 4-21]
+      metadata: manual/chapters/chapter04/04_07_print.tex
+    rule: The print block must preserve problem-versus-trajectory scope, require bracketed trajectory selectors for problem-scoped related variables, and enforce the documented 10-variable limit.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_output_blocks.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-UFMT-0001
+    source:
+      section: 4.13
+      manual_pages: [4-41, 4-43]
+      metadata: manual/chapters/chapter04/04_13_units_fmt.tex
+    rule: The units/fmt block must preserve the manual unit table, enforce dimensional compatibility, and keep unit changes global while allowing format-only changes.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_problem_framing.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-SURVEY-0001
+    source:
+      section: 4.11
+      manual_pages: [4-27, 4-30]
+      metadata: manual/chapters/chapter04/04_11_survey.tex
+    rule: The survey block must preserve placeholder-to-block linkage, incremental and explicit value modes, uniqueness of survey identifiers, and recovery for malformed or duplicate survey settings.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_problem_framing.py, tests/parser/test_problem_parser.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-TITLE-0001
+    source:
+      section: 4.12
+      metadata: manual/chapters/chapter04/04_12_title.tex
+    rule: The title block must preserve multiline title text, stop at the next valid data block, and keep comment boundaries explicit without losing the title source text.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_problem_framing.py, tests/parser/test_lexical.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-SUM-0001
+    source:
+      section: 4.10
+      metadata: manual/chapters/chapter04/04_10_summarize.tex
+    rule: The summarize block must preserve the documented math-operation vocabulary, special-function operand rules, and source-located recovery for malformed or conflicting summary operations.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_summarize_parser.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-SUMM-0001
+    source:
+      section: 4.10
+      metadata: manual/chapters/chapter04/04_10_summarize.tex
+    rule: The summarize block must preserve survey-linked summary values, the documented special functions, and the required segment/trajectory references for non-special-function operands.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_summarize_parser.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-FILE-0001
+    source:
+      section: 4.5
+      metadata: manual/chapters/chapter04/04_05_file.tex
+    rule: The file block must preserve problem-versus-trajectory scope and require bracketed trajectory selectors for problem-scoped related variables while preserving source-located recovery for malformed related output.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_output_blocks.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-AERO-0001
+    source:
+      section: 2.3.2
+      manual_pages: [2-56, 2-58]
+      metadata: manual/chapters/chapter02/03_02_aerodynamic_forces.tex
+    rule: Aerodynamic force equations must preserve the documented axial-normal, lift-drag-side, and body-axis coefficient conversions, including the zero-total-angle-of-attack normal-force singularity and source-located diagnostics for malformed related output.
+    scope: numerical_verification
+    validation_phase: numerical
+    status: equation_contract_started
+    tests: [tests/unit/test_forces_equations.py, tests/unit/test_frames_equations.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-RADAR-0001
+    source:
+      section: 4.8
+      manual_pages: [4-22, 4-24]
+      metadata: manual/chapters/chapter04/04_08_radar.tex
+    rule: The radar block must preserve station numbering and naming, local offset semantics, and the documented earth-shape override contract, including rejection of mixed direct-geometry definitions.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_problem_framing.py, tests/parser/test_manual_snippet_corpus.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-PRB-0001
+    source:
+      section: 4.0
+      manual_pages: [4-7, 4-8]
+      metadata: manual/chapters/chapter04/04_problem_overview.tex
+    rule: Malformed trajectory and segment headers must be diagnosed with source-located recovery records and stale hierarchy context must be closed.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_problem_framing.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-SCEN-0001
+    source:
+      section: 2.2.1
+      manual_pages: [2-37, 4-2, 4-3]
+      metadata: tests/fixtures/taos_e2e_v23/manifest.yaml
+    rule: A canonical regression scenario remains source-linked, lossless, and numerically checkable through its recorded e2e oracles.
+    scope: integrated_verification
+    validation_phase: e2e
+    status: scenario_anchor_started
+    tests: [tests/e2e/test_static_corpus.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-SCEN-0002
+    source:
+      section: 2.3.4
+      manual_pages: [4-43, 4-44]
+      metadata: tests/fixtures/taos_e2e_v23/manifest.yaml
+    rule: A gravity-driven regression scenario remains source-linked, lossless, and numerically checkable through its recorded monotonic oracles.
+    scope: integrated_verification
+    validation_phase: e2e
+    status: scenario_anchor_started
+    tests: [tests/e2e/test_static_corpus.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-SCEN-0003
+    source:
+      section: 2.6.3
+      manual_pages: [4-32, 4-34]
+      metadata: tests/fixtures/taos_e2e_v23/manifest.yaml
+    rule: A canonical optimization regression scenario remains source-linked, lossless, and numerically checkable through its recorded bound-solution oracles.
+    scope: integrated_verification
+    validation_phase: e2e
+    status: scenario_anchor_started
+    tests: [tests/e2e/test_static_corpus.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-GRAMMAR-0001
+    source:
+      section: 4
+      metadata: tests/fixtures/taos_manual_corpus_v22/grammar_reference
+    rule: File ingestion preserves source and returns located diagnostics and recovery records.
+    scope: parser
+    validation_phase: parser
+    status: tested_in_fixture_baseline
+    tests: [tests/e2e/test_static_corpus.py, tests/parser/test_problem_parser.py]
+  - id: TAOS-REQ-GRAMMAR-0002
+    source:
+      section: 3-4
+      metadata: tools/build_e2e_documented_coverage.py
+    rule: The documented positive-corpus coverage matrix remains complete for Chapter 3 table behavior and Chapter 4 scoped block behavior, while preserving the explicit ambiguity contract.
+    scope: parser
+    validation_phase: e2e
+    status: coverage_matrix_started
+    tests: [tests/e2e/test_documented_coverage.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-GRAMMAR-0003
+    source:
+      section: 4
+      metadata: tests/parser/test_problem_framing.py
+    rule: Lossless parser recovery preserves malformed source text, emits source-located diagnostics, and retains recovery records for ambiguous or non-UTF-8 input.
+    scope: parser
+    validation_phase: parser
+    status: recovery_contract_started
+    tests: [tests/parser/test_problem_framing.py, tests/parser/test_lossless_baseline.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-AMB-0001
+    source:
+      section: verification registry
+      metadata: verification/spec/ambiguities.yaml
+    rule: Every ambiguity record remains source-located, explicit, reviewer-trackable, and linked to at least one verification test.
+    scope: governance
+    validation_phase: governance
+    status: ambiguity_registry_started
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-SIGN-0001
+    source:
+      section: 2.1-4.3
+      manual_pages: [2-5, 2-61, 4-55, 4-56]
+      metadata: verification/spec/sign_matrices.yaml
+    rule: Sign and orientation conventions for frames, branches, and coefficient tables must remain explicit, source-located, and independently asserted in a sign-convention matrix.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_coordinates.py, tests/unit/test_frames_equations.py, tests/unit/test_forces_equations.py, tests/unit/test_geodesy_equations.py, tests/unit/test_gravity.py, tests/unit/test_gravity_equations.py]
+  - id: TAOS-REQ-FRAME-0009
+    source:
+      section: 2.1.1-2.1.11
+      manual_pages: [2-5, 2-34]
+      metadata: verification/spec/frame_matrices.yaml
+    rule: Frame conventions must remain explicit, source-located, and grouped by reviewed frame cards and independent anchor vectors.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_coordinates.py, tests/unit/test_frames_equations.py, tests/unit/test_geodesy_equations.py, tests/unit/test_forces_equations.py]
+  - id: TAOS-REQ-MATRIX-0001
+    source:
+      section: verification registry
+      metadata: verification/spec/matrix_inventory.yaml
+    rule: The verification matrices must be indexed in a single master inventory so the numerical evidence structure is auditable as a whole.
+    scope: governance
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-CH4-0001
+    source:
+      section: 4
+      metadata: verification/spec/chapter4_normative_inventory.yaml
+    rule: Chapter 4 normative passages must be indexed by section and mapped to requirement IDs so no source-anchored parser or runtime rule is left unrepresented.
+    scope: governance
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/parser/test_problem_framing.py, tests/parser/test_output_blocks.py, tests/parser/test_summarize_parser.py, tests/unit/test_runtime_lowering.py]
+  - id: TAOS-REQ-CH4-SEG-0001
+    source:
+      section: 4.2
+      metadata: manual/chapters/04_problem_files.tex
+    rule: Chapter 4 segment-data-block families must be indexed so segment-level numerical, guidance, and discontinuity rules remain auditable.
+    scope: governance
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-CH4-TRAJ-0001
+    source:
+      section: 4.3
+      metadata: manual/chapters/04_problem_files.tex
+    rule: Chapter 4 trajectory-data-block families must be indexed so trajectory-level initialization, coordinate, and output rules remain auditable.
+    scope: governance
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-CH4-PROB-0001
+    source:
+      section: 4.4
+      metadata: manual/chapters/04_problem_files.tex
+    rule: Chapter 4 problem-data-block families must be indexed so top-level atmosphere, earth, optimization, and output rules remain auditable.
+    scope: governance
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-CH4-EX-0001
+    source:
+      section: 5
+      metadata: manual/chapters/04_problem_files.tex
+    rule: Chapter 4 example families must be indexed as regression-style scenario evidence without implying historical compatibility.
+    scope: governance
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-REVIEW-0001
+    source:
+      section: verification governance
+      metadata: verification/spec/review_inventory.yaml
+    rule: Required reviewer roles must be explicit for each matrix and major inventory artifact so pending approvals remain auditable.
+    scope: governance
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-MUT-0001
+    source:
+      section: 2.1-4.14
+      manual_pages: [2-5, 2-34, 4-1, 4-74]
+      metadata: verification/spec/mutation_matrices.yaml
+    rule: Mutation families that flip signs, branches, or diagnostics must remain explicit so the baseline can prove those defects fail.
+    scope: numerical_verification
+    validation_phase: governance
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_coordinates.py, tests/unit/test_frames_equations.py, tests/unit/test_forces_equations.py, tests/unit/test_gravity.py, tests/unit/test_gravity_equations.py, tests/parser/test_problem_framing.py, tests/parser/test_output_blocks.py, tests/parser/test_manual_snippet_corpus.py]
+  - id: TAOS-REQ-OPT-0001
+    source:
+      section: 2.6.3
+      metadata: metadata/optimization_model_chapter2.yaml
+    rule: Optimization backends are selectable; modern solver convergence is not historical compatibility evidence.
+    scope: optimization
+    validation_phase: numerical
+    status: partially_tested
+    tests: [tests/unit/test_optimization.py, tests/unit/test_runtime_algorithms.py]
+  - id: TAOS-REQ-OPT-0002
+    source:
+      section: 4.4.6
+      manual_pages: [4-32, 4-34]
+      metadata: manual/chapters/chapter04/04_06_optimize.tex
+    rule: Malformed \problemblock{*optimize} blocks and unsupported optimize endpoints must emit source-located diagnostics and preserve recovery records instead of silently normalizing source text.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_problem_parser.py, tests/parser/test_problem_framing.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-OPT-0003
+    source:
+      section: 4.4.9
+      manual_pages: [4-11, 4-14]
+      metadata: manual/chapters/chapter04/04_09_search.tex
+    rule: Malformed \problemblock{*search} blocks and unmatched search placeholders must emit source-located diagnostics and preserve recovery records instead of silently normalizing source text.
+    scope: parser
+    validation_phase: parser
+    status: diagnostic_contract_started
+    tests: [tests/parser/test_problem_parser.py, tests/parser/test_problem_framing.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-FRAME-0008
+    source:
+      section: 2.1.8 and 2.2.5
+      manual_pages: [2-24, 2-25, 2-47, 2-49]
+      metadata: manual/chapters/chapter02/01_08_velocity.tex
+    rule: Velocity-frame unit-vector construction must reject zero or vertical relative velocity with source-located diagnostics and preserve the singular recovery path explicitly.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: diagnostic_contract_started
+    tests: [tests/unit/test_coordinates.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-GRAV-0005
+    source:
+      section: 2.3.4
+      manual_pages: [2-58, 2-61]
+      metadata: manual/chapters/chapter02/03_04_gravity_model.tex
+    rule: Gravity wrapper functions must preserve the geocentric frame contract while evaluating the documented geopotential and acceleration forms from the registered constants and coefficients.
+    scope: numerical_verification
+    validation_phase: numerical
+    status: equation_contract_started
+    tests: [tests/unit/test_gravity.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-GRAV-0006
+    source:
+      section: 4.3
+      manual_pages: [4-55, 4-56]
+      metadata: manual/chapters/chapter04/04_03_earth.tex
+    rule: Gravity model registry entries must retain explicit model IDs, source names, normalization flags, and status markers for the WGS, TSAP, and GEM families.
+    scope: numerical_verification
+    validation_phase: governance
+    status: registry_seeded
+    tests: [tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-BRANCH-0001
+    source:
+      section: 2.1.4-2.1.9
+      manual_pages: [2-9, 2-18, 2-23, 2-24, 2-26, 2-31]
+      metadata: verification/spec/branch_matrices.yaml
+    rule: Documented branch and singularity cases for geodetic, geocentric, velocity, and aerodynamic frame construction must remain explicit, source-located, and recoverable through the verification matrix.
+    scope: coordinate_transforms
+    validation_phase: numerical
+    status: matrix_seeded
+    tests: [tests/unit/test_verification_baseline.py, tests/unit/test_coordinates.py, tests/unit/test_frames_equations.py, tests/unit/test_forces_equations.py]
+  - id: TAOS-REQ-INIT-0001
+    source:
+      section: 4.2
+      metadata: metadata/trajectory_execution_chapter2.yaml
+    rule: Inherited initialization must be represented as a dependency and reject cycles or missing nodes.
+    scope: initialization
+    validation_phase: runtime
+    status: partially_tested
+    tests: [tests/unit/test_runtime_algorithms.py, tests/unit/test_runtime_lowering.py]
+  - id: TAOS-REQ-INIT-0002
+    source:
+      section: 4.2
+      metadata: manual/chapters/chapter04/04_problem_overview.tex
+    rule: Inherited trajectory initialization activates at the source segment and remains cycle-checked in the runtime dependency graph.
+    scope: initialization
+    validation_phase: runtime
+    status: runtime_activation_started
+    tests: [tests/unit/test_runtime_lowering.py, tests/unit/test_runtime_algorithms.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-INIT-0003
+    source:
+      section: 4.2.5 and 4.2.11
+      metadata: manual/chapters/chapter04/02_05_increment.tex
+    rule: Segment discontinuity blocks apply reset before increment, preserve source order, and keep copied state adjustments explicit.
+    scope: initialization
+    validation_phase: runtime
+    status: discontinuity_order_started
+    tests: [tests/unit/test_runtime_lowering.py, tests/unit/test_verification_baseline.py]
+  - id: TAOS-REQ-SCEN-0004
+    source:
+      section: 2.2-4.4
+      metadata: tests/fixtures/taos_e2e_v23/metamorphic/groups.yaml
+    rule: Metamorphic regression groups remain source-linked to explicit case sets and comparison relations, and runtime execution of those groups does not imply TAOS 96.0 historical compatibility.
+    scope: integrated_verification
+    validation_phase: e2e
+    status: regression_group_started
+    tests: [tests/e2e/test_metamorphic.py, tests/unit/test_verification_baseline.py]

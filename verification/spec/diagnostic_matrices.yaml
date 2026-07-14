@@ -1,0 +1,110 @@
+schema_version: 1
+description: Source-linked diagnostics matrix for malformed and ambiguous cases.
+diagnostics:
+  - id: TAOS-DIAG-0001
+    category: frame_singularity
+    source:
+      manual_sections: [2.1.7, 2.1.9]
+      manual_pages: [2-19, 2-26, 2-31, 2-34]
+      manual_text: manual/chapters/chapter02/01_07_body_fixed.tex
+    diagnostic_family:
+      - source_labeled_singularity
+      - pole_convention
+      - aerodynamic_branch_boundary
+    tests:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+    note: Frame singularities must stay explicit and reject silent fallback.
+  - id: TAOS-DIAG-0002
+    category: velocity_singularity
+    source:
+      manual_sections: [2.1.8, 2.2.5]
+      manual_pages: [2-23, 2-24, 2-47, 2-49]
+      manual_text: manual/chapters/chapter02/01_08_velocity.tex
+    diagnostic_family:
+      - zero_speed
+      - vertical_relative_velocity
+      - zero_or_vertical_wind_axes
+    tests:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Velocity singularities are source-located and preserve the singular recovery path.
+  - id: TAOS-DIAG-0003
+    category: atmosphere_malformed_input
+    source:
+      manual_sections: [2.3.1, 4.1]
+      manual_pages: [2-52, 4-1, 4-2]
+      manual_text: manual/chapters/chapter02/03_01_atmosphere.tex
+    diagnostic_family:
+      - malformed_atmosphere_block
+      - duplicate_atmosphere_settings
+      - conflicting_atmosphere_shapes
+    tests:
+      - tests/parser/test_problem_framing.py
+      - tests/unit/test_atmosphere.py
+      - tests/unit/test_verification_baseline.py
+    note: Atmosphere diagnostics must preserve recovery records rather than normalizing them away.
+  - id: TAOS-DIAG-0004
+    category: problem_framing
+    source:
+      manual_sections: [4.0, 4.2]
+      manual_pages: [4-7, 4-8, 4-9]
+      manual_text: manual/chapters/chapter04/04_problem_overview.tex
+    diagnostic_family:
+      - malformed_trajectory_header
+      - malformed_segment_header
+      - stale_hierarchy_context
+      - missing_initial_state
+    tests:
+      - tests/parser/test_problem_framing.py
+      - tests/unit/test_runtime_lowering.py
+      - tests/unit/test_verification_baseline.py
+    note: Problem framing diagnostics must keep hierarchy and recovery explicit.
+  - id: TAOS-DIAG-0005
+    category: output_block_malformed_input
+    source:
+      manual_sections: [4.5, 4.7, 4.8, 4.10, 4.12, 4.14]
+      manual_pages: [4-16, 4-21, 4-23, 4-28, 4-32, 4-73]
+      manual_text: manual/chapters/chapter04/04_05_file.tex
+    diagnostic_family:
+      - invalid_related_output_subscript
+      - missing_output_filename
+      - missing_output_variables
+      - invalid_egs_summary
+      - mixed_wind_components
+    tests:
+      - tests/parser/test_output_blocks.py
+      - tests/unit/test_verification_baseline.py
+    note: Output-block diagnostics remain source-located and are not collapsed into generic parser failure.
+  - id: TAOS-DIAG-0006
+    category: ambiguous_manual_corpus
+    source:
+      manual_sections: [3, 4]
+      manual_pages: [3-1, 4-1]
+      manifest: tests/fixtures/taos_manual_corpus_v22/manifest.yaml
+      corpus: tests/fixtures/taos_manual_corpus_v22/grammar_reference
+    diagnostic_family:
+      - preserved_ambiguity
+      - recovery_record
+      - grammar_allowlist
+    tests:
+      - tests/parser/test_manual_snippet_corpus.py
+      - tests/unit/test_verification_baseline.py
+    note: The manual corpus includes ambiguous or repaired forms that must stay explicit for provenance.
+  - id: TAOS-DIAG-0007
+    category: duplicate_independent_values
+    source:
+      manual_sections: [3.26]
+      manual_pages: [3-26]
+      manual_text: tests/fixtures/taos_manual_corpus_v22/wrappers/chapter03/ch3-035__wrapped.tbl
+    diagnostic_family:
+      - duplicate_independent_value
+      - source_labeled_warning
+      - preserved_recovery_record
+    tests:
+      - tests/parser/test_manual_snippet_corpus.py
+      - tests/unit/test_verification_baseline.py
+    note: The Orbus mass-flow example preserves a printed duplicate tmark abscissa as a source warning instead of a hard syntax error.
+####

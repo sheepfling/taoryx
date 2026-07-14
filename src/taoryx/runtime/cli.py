@@ -6,6 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
+from .optimization_runtime import available_optimizers
 from .runner import run_files
 
 
@@ -19,10 +20,24 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--report", type=Path)
     run.add_argument("--json", action="store_true")
     run.add_argument("--max-steps", type=int, default=100000)
+    optimizers = subparsers.add_parser("optimizers", help="inspect available numerical backends")
+    optimizers_subparsers = optimizers.add_subparsers(dest="optimizer_command", required=True)
+    optimizers_subparsers.add_parser("list", help="list installed optimization backends")
     arguments = parser.parse_args(argv)
+    if arguments.command == "optimizers":
+        for backend in available_optimizers():
+            print(backend.value)
+        return 0
+    if arguments.max_steps <= 0:
+        parser.error("--max-steps must be positive")
     report = run_files(arguments.problem, tuple(arguments.tables), output_dir=arguments.output_dir, max_steps=arguments.max_steps)
     if arguments.report:
-        arguments.report.write_text(json.dumps(report.as_dict(), indent=2) + "\n", encoding="utf-8")
+        try:
+            arguments.report.parent.mkdir(parents=True, exist_ok=True)
+            arguments.report.write_text(json.dumps(report.as_dict(), indent=2) + "\n", encoding="utf-8")
+        except OSError as error:
+            print(f"error: report-write-failed: {error}")
+            return 2
     if arguments.json:
         print(json.dumps(report.as_dict(), indent=2))
     else:

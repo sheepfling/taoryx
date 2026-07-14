@@ -1,0 +1,59 @@
+schema_version: 1
+description: Master inventory of the verification matrices used by the numerical verification layer.
+matrices:
+  - id: TAOS-MATRIX-0001
+    name: frame_matrices
+    path: verification/spec/frame_matrices.yaml
+    requirement_id: TAOS-REQ-FRAME-0009
+    purpose: Group reviewed frame cards and anchor vectors into explicit frame-convention families.
+  - id: TAOS-MATRIX-0002
+    name: sign_matrices
+    path: verification/spec/sign_matrices.yaml
+    requirement_id: TAOS-REQ-SIGN-0001
+    purpose: Record sign, handedness, and coefficient-sign conventions independently of frame cards.
+  - id: TAOS-MATRIX-0003
+    name: branch_matrices
+    path: verification/spec/branch_matrices.yaml
+    requirement_id: TAOS-REQ-BRANCH-0001
+    purpose: Record explicit branch and singularity families for geometric and aerodynamic edge cases.
+  - id: TAOS-MATRIX-0004
+    name: constant_matrices
+    path: verification/spec/constant_matrices.yaml
+    requirement_id: TAOS-REQ-GRAV-0007
+    purpose: Group family-level constant provenance for Earth and atmosphere models.
+  - id: TAOS-MATRIX-0005
+    name: equation_matrices
+    path: verification/spec/equation_matrices.yaml
+    requirement_id: TAOS-REQ-EQMAT-0001
+    purpose: Group topic-level derivation families for independently rederived equations.
+  - id: TAOS-MATRIX-0006
+    name: regression_matrices
+    path: verification/spec/regression_matrices.yaml
+    requirement_id: TAOS-REQ-REG-0001
+    purpose: Record source-linked regression anchors for canonical numeric scenarios and the manual corpus.
+  - id: TAOS-MATRIX-0007
+    name: diagnostic_matrices
+    path: verification/spec/diagnostic_matrices.yaml
+    requirement_id: TAOS-REQ-DIAG-0001
+    purpose: Record source-linked diagnostic families for malformed and ambiguous cases.
+  - id: TAOS-MATRIX-0008
+    name: ambiguity_matrices
+    path: verification/spec/ambiguity_matrices.yaml
+    requirement_id: TAOS-REQ-AMBMAT-0001
+    purpose: Group unresolved and provisionally resolved ambiguity records into source-located families.
+  - id: TAOS-MATRIX-0009
+    name: anchors
+    path: verification/spec/anchors.yaml
+    requirement_id: TAOS-REQ-FRAME-0003
+    purpose: Preserve independently expected vectors for sign and handedness checks.
+  - id: TAOS-MATRIX-0010
+    name: requirements
+    path: verification/spec/requirements.yaml
+    requirement_id: null
+    purpose: Hold the canonical requirement registry that the matrices map into.
+  - id: TAOS-MATRIX-0011
+    name: traceability
+    path: verification/traceability.yaml
+    requirement_id: null
+    purpose: Map requirements to evidence and residual gaps.
+####

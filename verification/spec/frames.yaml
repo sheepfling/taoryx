@@ -1,0 +1,125 @@
+schema_version: 1
+description: Verification-facing frame cards linked to the reviewed Chapter 2 registry.
+source_registry: metadata/coordinate_systems_chapter2.yaml
+frames:
+  - id: ecfc
+    source_registry_id: ecfc
+    name: Earth-Centered and Fixed Cartesian
+    origin: earth_center
+    axes: {x: greenwich_equator, y: ninety_degrees_east_equator, z: north_pole}
+    handedness: pending_explicit_anchor_review
+    parent: null
+    time_dependence: earth_fixed
+    transform_convention: ecfc_unit_vector_projection
+    singularities: []
+    anchor_cases: [equator_greenwich, equator_ninety_east, north_pole]
+  - id: ecic
+    source_registry_id: ecic
+    name: Earth-Centered Inertial Cartesian
+    origin: earth_center
+    axes: {z: earth_spin_axis, xy: inertially_fixed_equatorial_plane}
+    handedness: pending_explicit_anchor_review
+    parent: ecfc
+    time_dependence: inertial
+    transform_convention: earth_rotation_angle
+    singularities: []
+    anchor_cases: [zero_rotation_angle, quarter_rotation_angle]
+  - id: local_geocentric_horizon
+    source_registry_id: local_geocentric_horizon
+    name: Local Geocentric Horizon
+    origin: vehicle_center_of_mass
+    axes: {x: north, y: east, z: down_to_earth_center}
+    handedness: pending_explicit_anchor_review
+    parent: geocentric
+    time_dependence: vehicle_position
+    transform_convention: unit_vector_projection
+    singularities: [earth_pole_longitude_convention]
+    anchor_cases: [north, east, down]
+  - id: local_geodetic_horizon
+    source_registry_id: local_geodetic_horizon
+    name: Local Geodetic Horizon
+    origin: vehicle_center_of_mass
+    axes: {x: geodetic_north, y: east, z: geodetic_down}
+    handedness: pending_explicit_anchor_review
+    parent: geodetic
+    time_dependence: vehicle_position
+    transform_convention: unit_vector_projection
+    singularities: [earth_pole_longitude_convention]
+    anchor_cases: [north, east, down]
+  - id: body_fixed
+    source_registry_id: body_fixed
+    name: Body-Fixed Cartesian
+    origin: vehicle_center_of_mass
+    axes: {x: longitudinal, y: right_wing, z: bottom_of_vehicle}
+    handedness: pending_explicit_anchor_review
+    parent: local_geocentric_horizon_or_local_geodetic_horizon
+    time_dependence: guidance_supplied_attitude
+    transform_convention: documented_euler_angles
+    singularities: [euler_branch_boundaries]
+    anchor_cases: [body_x_aligned_velocity, positive_attack, positive_bank]
+  - id: wind
+    source_registry_id: wind
+    name: Wind Cartesian
+    origin: vehicle_center_of_mass
+    axes: {x: air_relative_velocity, yz: bank_rotated_velocity_plane}
+    handedness: pending_explicit_anchor_review
+    parent: velocity
+    time_dependence: air_relative_velocity
+    transform_convention: aerodynamic_angle_branches
+    singularities: [zero_air_relative_speed, total_angle_zero, total_angle_pi]
+    anchor_cases: [positive_attack, positive_sideslip, zero_speed]
+  - id: geocentric
+    source_registry_id: geocentric
+    name: Geocentric
+    origin: earth_center
+    axes: {position: radius_longitude_geocentric_latitude, velocity: flight_path_and_heading}
+    handedness: source_scalar_convention
+    parent: ecfc
+    time_dependence: vehicle_position
+    transform_convention: geocentric_unit_vectors
+    singularities: [earth_pole_longitude_convention, zero_horizontal_speed]
+    anchor_cases: [equator_greenwich, equator_ninety_east, north_pole]
+  - id: geodetic
+    source_registry_id: geodetic
+    name: Geodetic
+    origin: earth_center_with_ellipsoid_reference
+    axes: {position: altitude_longitude_geodetic_latitude, velocity: flight_path_and_heading}
+    handedness: source_scalar_convention
+    parent: ecfc
+    time_dependence: vehicle_position
+    transform_convention: geodetic_unit_vectors
+    singularities: [earth_pole_longitude_convention, zero_horizontal_speed]
+    anchor_cases: [equator_surface, pole_surface, geodetic_north]
+  - id: velocity
+    source_registry_id: velocity
+    name: Velocity Cartesian
+    origin: vehicle_center_of_mass
+    axes: {x: earth_or_air_relative_velocity, y: local_horizon_transverse, z: completes_frame}
+    handedness: source_defined_check_required
+    parent: local_geocentric_horizon_or_local_geodetic_horizon
+    time_dependence: vehicle_velocity_and_wind
+    transform_convention: flight_path_heading_projection
+    singularities: [zero_relative_speed, vertical_velocity]
+    anchor_cases: [due_east, due_north, zero_speed]
+  - id: inertial_platform
+    source_registry_id: inertial_platform
+    name: Inertial Platform Cartesian
+    origin: vehicle_center_of_mass_at_alignment
+    axes: {x: user_aligned, y: user_aligned, z: user_aligned}
+    handedness: source_defined_check_required
+    parent: ecic
+    time_dependence: inertially_fixed_after_alignment
+    transform_convention: documented_platform_alignment
+    singularities: [alignment_branch_boundaries]
+    anchor_cases: [identity_alignment, quarter_turn_alignment]
+  - id: tangent_plane
+    source_registry_id: tangent_plane
+    name: Tangent Plane Cartesian
+    origin: user_defined_geodetic_point
+    axes: {x: selected_azimuth, y: right_handed_horizontal_complement, z: ellipsoid_normal_up}
+    handedness: source_defined_check_required
+    parent: geodetic
+    time_dependence: fixed_at_reference_point
+    transform_convention: tangent_plane_projection
+    singularities: [reference_point_pole]
+    anchor_cases: [zero_azimuth, ninety_degree_azimuth, surface_reference]

@@ -7,8 +7,10 @@ from pydantic import BaseModel
 
 from taoryx.language.diagnostics import Diagnostic, Severity
 from taoryx.language.expressions import (
+    CallExpression,
     Expression,
     IndexedExpression,
+    NameExpression,
     ParameterExpression,
     TableReferenceExpression,
 )
@@ -115,6 +117,28 @@ def validate_problem(
         for name, variables in (available_table_variables or {}).items()
     }
     for problem in document.problems:
+        for expression, location in _walk_model_expressions(problem, problem.location):
+            table_name = None
+            if isinstance(expression, TableReferenceExpression):
+                table_name = expression.name
+            elif (
+                isinstance(expression, CallExpression)
+                and expression.function.casefold() == "table"
+                and expression.arguments
+                and isinstance(expression.arguments[0], NameExpression)
+            ):
+                table_name = expression.arguments[0].name
+            if table_name is not None and available_tables is not None and table_name.casefold() not in available_table_names:
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.WARNING,
+                        code="external-table-reference",
+                        message=f"Table {table_name!r} is not present in the supplied table set.",
+                        location=location,
+                    )
+                )
+            ####
+        ####
         survey_blocks = [block for block in problem.blocks if isinstance(block, SurveyBlock) and block.survey_id is not None]
         survey_counts = Counter(block.survey_id for block in survey_blocks)
         for block in survey_blocks:
@@ -389,9 +413,7 @@ def validate_problem(
                     ####
                     for assignment in block.assignments:
                         for node in _walk_expression(assignment.value):
-                            if isinstance(node, TableReferenceExpression) and available_table_names and node.name.casefold() not in available_table_names:
-                                diagnostics.append(Diagnostic(severity=Severity.WARNING, code="external-table-reference", message=f"Table {node.name!r} is not present in the supplied table set.", location=assignment.location))
-                            elif isinstance(node, TableReferenceExpression) and available_table_types:
+                            if isinstance(node, TableReferenceExpression) and available_table_types and node.name.casefold() in available_table_types:
                                 expected_type = assignment.name.casefold() if block.keyword in {"aero", "cg", "prop", "wind"} else None
                                 actual_type = available_table_types[node.name.casefold()]
                                 if expected_type in TABLE_TYPE_REFERENCES and actual_type != expected_type:

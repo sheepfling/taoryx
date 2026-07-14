@@ -296,6 +296,34 @@ def test_manual_corpus_diagnostic_allowlist_is_explicit() -> None:
     ####
 
 
+def test_recoverable_manual_wrapper_diagnostic_keeps_source_location_and_record() -> None:
+    entry = next(item for item in MANIFEST["entries"] if item["id"] == "ch3-022")
+    path = CORPUS / entry["wrapper_path"]
+    parsed = parse_table_text(path.read_text(encoding="utf-8"), str(path))
+
+    diagnostic = next(item for item in parsed.diagnostics if item.code == "missing-interpolation-data")
+    record = next(item for item in parsed.recovered_records if item.code == diagnostic.code)
+    assert diagnostic.location is not None
+    assert record.location == diagnostic.location
+    assert record.text == "    add factor(ca2,mach)"
+####
+
+
+def test_duplicate_source_abscissa_is_preserved_as_a_source_warning() -> None:
+    entry = next(item for item in MANIFEST["entries"] if item["id"] == "ch3-035")
+    path = CORPUS / entry["wrapper_path"]
+    parsed = parse_table_text(path.read_text(encoding="utf-8"), str(path))
+
+    diagnostic = next(item for item in parsed.diagnostics if item.code == "duplicate-independent-value")
+    record = next(item for item in parsed.recovered_records if item.code == diagnostic.code)
+    assert diagnostic.severity.value == "warning"
+    assert diagnostic.location is not None
+    assert diagnostic.location.line == 6
+    assert record.location == diagnostic.location
+    assert record.text == "      tmark = -999.00 0.00 0.00 0.02 0.04 0.06,"
+####
+
+
 def test_manual_corpus_diagnostics_and_recovery_records_are_source_located() -> None:
     entries = [entry for entry in MANIFEST["entries"] if entry["wrapper_path"]]
     for entry in entries:

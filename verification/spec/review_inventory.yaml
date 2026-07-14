@@ -1,0 +1,103 @@
+schema_version: 1
+description: Required reviewer roles for each verification matrix and major baseline artifact.
+reviews:
+  - id: TAOS-REVIEW-0001
+    target: verification/spec/frame_matrices.yaml
+    required_roles:
+      - documentary_reviewer
+      - flight_mechanics_reviewer
+    status: pending
+    note: Frame conventions require reviewer sign-off on handedness, basis orientation, and anchor interpretation.
+  - id: TAOS-REVIEW-0002
+    target: verification/spec/sign_matrices.yaml
+    required_roles:
+      - flight_mechanics_reviewer
+      - geodesy_gravity_reviewer
+    status: pending
+    note: Sign conventions span frame orientation and coefficient-table signs.
+  - id: TAOS-REVIEW-0003
+    target: verification/spec/branch_matrices.yaml
+    required_roles:
+      - flight_mechanics_reviewer
+      - mathematical_reviewer
+    status: pending
+    note: Branch boundaries require source interpretation and numerical behavior review.
+  - id: TAOS-REVIEW-0004
+    target: verification/spec/constant_matrices.yaml
+    required_roles:
+      - geodesy_gravity_reviewer
+      - documentary_reviewer
+    status: pending
+    note: Constant provenance requires exact source-decimal review and table/page audit.
+  - id: TAOS-REVIEW-0005
+    target: verification/spec/equation_matrices.yaml
+    required_roles:
+      - mathematical_reviewer
+      - flight_mechanics_reviewer
+    status: pending
+    note: Equation derivations require independent derivation review and source-label audit.
+  - id: TAOS-REVIEW-0006
+    target: verification/spec/regression_matrices.yaml
+    required_roles:
+      - numerical_reviewer
+      - historical_reviewer
+    status: pending
+    note: Regression anchors remain separate from historical compatibility claims and need scenario review.
+  - id: TAOS-REVIEW-0007
+    target: verification/spec/diagnostic_matrices.yaml
+    required_roles:
+      - language_reviewer
+      - documentary_reviewer
+    status: pending
+    note: Diagnostics require source-located error wording and recovery-path review.
+  - id: TAOS-REVIEW-0008
+    target: verification/spec/ambiguity_matrices.yaml
+    required_roles:
+      - mathematical_reviewer
+      - documentary_reviewer
+      - historical_reviewer
+    status: pending
+    note: Ambiguity records remain reviewer-trackable across documentary and numerical interpretations.
+  - id: TAOS-REVIEW-0009
+    target: verification/spec/matrix_inventory.yaml
+    required_roles:
+      - documentary_reviewer
+      - numerical_reviewer
+    status: pending
+    note: The master inventory needs broad sign-off because it enumerates the evidence structure.
+  - id: TAOS-REVIEW-0010
+    target: verification/spec/chapter4_normative_inventory.yaml
+    required_roles:
+      - language_reviewer
+      - documentary_reviewer
+    status: pending
+    note: Chapter 4 coverage requires review of the parser/runtime normative mapping.
+  - id: TAOS-REVIEW-0011
+    target: TAOS-REQ-CH4-SEG-0001
+    required_roles:
+      - language_reviewer
+      - numerical_reviewer
+    status: pending
+    note: Segment-block family coverage needs review of the shared runtime and boundary semantics.
+  - id: TAOS-REVIEW-0012
+    target: TAOS-REQ-CH4-TRAJ-0001
+    required_roles:
+      - documentary_reviewer
+      - numerical_reviewer
+    status: pending
+    note: Trajectory-block family coverage needs review of initialization and output semantics.
+  - id: TAOS-REVIEW-0013
+    target: TAOS-REQ-CH4-PROB-0001
+    required_roles:
+      - documentary_reviewer
+      - geodesy_gravity_reviewer
+    status: pending
+    note: Problem-block family coverage needs review of atmosphere, earth, and top-level runtime semantics.
+  - id: TAOS-REVIEW-0014
+    target: TAOS-REQ-CH4-EX-0001
+    required_roles:
+      - numerical_reviewer
+      - historical_reviewer
+    status: pending
+    note: Example-family coverage needs review as regression evidence, not compatibility evidence.
+####

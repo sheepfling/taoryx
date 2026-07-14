@@ -12,14 +12,16 @@ This repository is ready to become a live Codex codebase. The documentation reco
 - The Appendix contains 171 machine-readable output-variable entries.
 - References, historical Index, and Distribution pages are reconstructed.
 - Ten extracted `.tbl` / `.prb` fixtures are parser-backed and structurally validated.
-- `src/taoryx.language` provides an installable Python 3.12 parser/validator foundation with typed Pydantic AST nodes and CLI diagnostics.
+- `src/taoryx.language` provides an installable Python 3.12 parser/validator with typed Pydantic AST nodes and CLI diagnostics.
+- `src/taoryx.runtime` lowers parsed `.prb`/`.tbl` files into runtime problems and tables, executes supported trajectories through `taoryx run`, and writes deterministic print, file, and summary outputs.
+- The P0 algorithm catalog is fully promoted: every P0 row has an executable binding and focused verification path; planned P1/P2 rows remain separate in the generated status ledger.
 - The full manual, QA reports, original source PDF, parser wheel, scripts, metadata, tests, and generated products are included in the handoff bundle.
 
 ### Explicitly not complete
 
 - The parser does not assign typed runtime semantics to every complex block body; unsupported or
   ambiguous bodies are source-preserved and diagnosed under the evidence-bounded grammar contract.
-- The 326 equations are not all implemented as executable Python functions and do not each have an independent unit test.
+- The 326 equations are not all independently implemented as executable Python functions; the catalog and equation registries distinguish implemented subsets from transcription-only records.
 - No runtime-equivalence claim has been established against TAOS 96.0.
 - The manual remains a semantic edition rather than a complete word-for-word diplomatic transcription outside the completed fidelity tranches.
 
@@ -37,12 +39,13 @@ This repository is ready to become a live Codex codebase. The documentation reco
 
 ## Recommended next milestones
 
-1. Fully type the internal languages of `*define`, `*fly`, `*optimize`, `*search`, `*survey`, and `*summarize`.
-2. Add defaults, unit dimensions, cross-block restrictions, and lossless formatting to `taoryx.language`.
-3. Map every equation record to an implementation symbol or an explicit
-   documentation-only status under `src/taoryx/equations/`.
-4. Add property tests for coordinate transforms, geodesy, atmosphere, guidance, searches, and inverse relationships.
-5. Add trajectory-level regression tests when an executable reference implementation or validated result set is available.
+1. Extend defaults, unit dimensions, cross-block restrictions, and lossless
+   formatting in `taoryx.language`.
+2. Complete the planned P1/P2 algorithm catalog entries and their inverse or
+   property tests.
+3. Add trajectory-level regression baselines for more manual scenarios.
+4. Establish historical comparison evidence when an executable reference or
+   trusted output set is available.
 
 ## Release boundaries
 

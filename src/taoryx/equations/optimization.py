@@ -15,6 +15,9 @@ class NonlinearProgram:
     objective: str
     equality_constraints: tuple[str, ...]
     inequality_constraints: tuple[str, ...]
+    parameters: tuple[str, ...] = ()
+    bounds: tuple[tuple[float, float], ...] = ()
+    references: tuple[float, ...] = ()
 ####
 
 
@@ -46,10 +49,19 @@ def general_nonlinear_program(
     objective: str,
     equality_constraints: tuple[str, ...],
     inequality_constraints: tuple[str, ...],
+    parameters: tuple[str, ...] = (),
+    bounds: tuple[tuple[float, float], ...] = (),
+    references: tuple[float, ...] = (),
 ) -> NonlinearProgram:
     """Return a structured nonlinear-program representation."""
 
-    return NonlinearProgram(objective, equality_constraints, inequality_constraints)
+    if len(parameters) != len(bounds):
+        raise ValueError("optimization parameters and bounds must have matching lengths")
+    if any(lower > upper or not math.isfinite(lower) or not math.isfinite(upper) for lower, upper in bounds):
+        raise ValueError("optimization bounds must be finite and ordered")
+    if any(not math.isfinite(reference) or reference == 0.0 for reference in references):
+        raise ValueError("optimization references must be finite and nonzero")
+    return NonlinearProgram(objective, equality_constraints, inequality_constraints, parameters, bounds, references)
 ####
 
 

@@ -80,7 +80,7 @@ that every downstream algorithm depending on it is complete.
 | `TAOS-ALG-GUID-005` | 2-281 through 2-283 | `taoryx.numeric.newton_system` | `tests/unit/test_guidance.py` |
 | `TAOS-ALG-GUID-006` | 2-284 through 2-286 | `taoryx.guidance.predictive_intercept` | `tests/unit/test_guidance.py` |
 | `TAOS-ALG-GUID-007` | 2-287 through 2-297 | `taoryx.guidance.proportional_navigation` | `tests/unit/test_radar.py` |
-| `TAOS-ALG-GUID-008` | Chapter 2.5.3 range-insensitive axis | `taoryx.guidance.range_insensitive_axis` | `tests/unit/test_guidance.py` |
+| `TAOS-ALG-GUID-008` | Chapter 2.5.3 range-insensitive axis | `taoryx.guidance.range_insensitive_axis` | `tests/unit/test_guidance.py`; `tests/unit/test_runtime_lowering.py` |
 | `TAOS-ALG-GUID-009` | Chapter 2.5.4 flight-path limits | `taoryx.guidance.apply_flight_path_limits` | `tests/unit/test_guidance.py` |
 | `TAOS-ALG-IIP-001` | 2-266 through 2-270 | `taoryx.iip.iip_derivatives` | `tests/unit/test_iip.py` |
 | `TAOS-ALG-IIP-002` | Fehlberg adaptive Runge-Kutta | `taoryx.integration.rkf45_step` | `tests/unit/test_integration.py` |

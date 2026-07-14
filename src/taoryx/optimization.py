@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from .equations import NonlinearProgram, general_nonlinear_program
-from .numeric import finite_difference_jacobian
+from .numeric import DifferenceMode, finite_difference_jacobian
 
 
 class OptimizationStatus(StrEnum):
@@ -41,10 +41,21 @@ def build_optimization_problem(
     objective: str,
     equality_constraints: Sequence[str] = (),
     inequality_constraints: Sequence[str] = (),
+    *,
+    parameters: Sequence[str] = (),
+    bounds: Sequence[tuple[float, float]] = (),
+    references: Sequence[float] = (),
 ) -> NonlinearProgram:
     """Evaluate TAOS-ALG-OPT-001's typed nonlinear-program boundary."""
 
-    return general_nonlinear_program(objective, tuple(equality_constraints), tuple(inequality_constraints))
+    return general_nonlinear_program(
+        objective,
+        tuple(equality_constraints),
+        tuple(inequality_constraints),
+        tuple(parameters),
+        tuple((float(lower), float(upper)) for lower, upper in bounds),
+        tuple(float(reference) for reference in references),
+    )
 ####
 
 
@@ -56,6 +67,7 @@ def han_powell_rqp(
     equality_constraints: Sequence[Callable[[tuple[float, ...]], float]] = (),
     inequality_constraints: Sequence[Callable[[tuple[float, ...]], float]] = (),
     derivative_step: float = 1e-6,
+    difference_mode: DifferenceMode = DifferenceMode.FORWARD,
     tolerance: float = 1e-7,
     max_iterations: int = 100,
 ) -> OptimizationResult:
@@ -86,7 +98,7 @@ def han_powell_rqp(
         equalities = tuple(_evaluate(function, parameters) for function in equality_constraints)
         inequalities = tuple(_evaluate(function, parameters) for function in inequality_constraints)
         violation = _constraint_violation(equalities, inequalities)
-        objective_gradient = finite_difference_jacobian(objective, parameters, derivative_step).gradient()
+        objective_gradient = finite_difference_jacobian(objective, parameters, derivative_step, mode=difference_mode).gradient()
         if violation <= tolerance and max(abs(value) for value in objective_gradient) <= tolerance:
             return OptimizationResult(parameters, objective_value, equalities, inequalities, iteration, OptimizationStatus.CONVERGED)
         if iteration == max_iterations:
@@ -97,7 +109,7 @@ def han_powell_rqp(
             inequal = tuple(_evaluate(function, point) for function in inequality_constraints)
             return _evaluate(objective, point) + penalty * _constraint_penalty(equal, inequal)
 
-        gradient = finite_difference_jacobian(merit, parameters, derivative_step).gradient()
+        gradient = finite_difference_jacobian(merit, parameters, derivative_step, mode=difference_mode).gradient()
         current_merit = merit(parameters)
         step = 1.0
         while step >= 1e-8:

@@ -1,0 +1,41 @@
+schema_version: 1
+description: Acceptance tolerances are scoped by quantity, units, conditioning, and source precision.
+policy:
+  blanket_tolerance_forbidden: true
+  every_numeric_test_requires: [absolute_tolerance, relative_tolerance, units, conditioning_note]
+tolerances:
+  - id: orthonormal_basis_double
+    quantity: basis_norm_and_dot_products
+    units: dimensionless
+    absolute_tolerance: 1.0e-12
+    relative_tolerance: 0.0
+    conditioning_note: ordinary_double_precision_basis_away_from_singularities
+    evidence: tests/unit/test_coordinates.py
+  - id: frame_round_trip_double
+    quantity: coordinate_components
+    units: source_vector_units
+    absolute_tolerance: 1.0e-8
+    relative_tolerance: 1.0e-12
+    conditioning_note: ordinary_coordinates_away_from_poles_and_zero_speed
+    evidence: tests/unit/test_coordinates.py
+  - id: geodetic_inverse_near_pole
+    quantity: latitude_and_altitude
+    units: radians_and_source_length_units
+    absolute_tolerance: 1.0e-8
+    relative_tolerance: 1.0e-10
+    conditioning_note: increased_error_budget_near_polar_longitude_singularity
+    evidence: tests/unit/test_coordinates.py
+  - id: gravity_acceleration_reference
+    quantity: acceleration
+    units: source_acceleration_units
+    absolute_tolerance: 1.0e-10
+    relative_tolerance: 1.0e-10
+    conditioning_note: benchmark_specific_value_required_before_release
+    evidence: tests/unit/test_gravity_equations.py
+  - id: trajectory_regression
+    quantity: final_state_components
+    units: component_specific
+    absolute_tolerance: null
+    relative_tolerance: null
+    conditioning_note: must_be_set_per_scenario_and_integrator_step_size
+    evidence: tests/e2e/

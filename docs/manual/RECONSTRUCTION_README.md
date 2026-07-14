@@ -57,7 +57,9 @@ External source references:
 - a `taoryx-validate` CLI;
 - pytest coverage for all extracted manual fixtures and block dispatch.
 
-This is the canonical parser foundation, not yet a complete lossless language implementation or a TAOS runtime.
+This is the canonical parser and runtime foundation. `taoryx run` executes the
+supported evidence-bounded `.prb`/`.tbl` subset; it is not yet a complete
+lossless language implementation or a historically equivalent TAOS runtime.
 
 ## Build
 
@@ -100,7 +102,11 @@ Start with [CODEX_HANDOFF.md](CODEX_HANDOFF.md) and [AGENTS.md](AGENTS.md) when 
 
 ## Validation boundaries
 
-All numbered equations are transcribed and provenance-mapped, but they are **not yet all implemented as executable Python functions or individually unit-tested**. Chapter 2 validators provide selected section-level algebraic and numerical checks.
+All numbered equations are transcribed and provenance-mapped. The promoted
+algorithm catalog records which equation groups have executable bindings and
+focused tests; remaining equation records are documentation-only or planned.
+Chapter 2 validators provide selected section-level algebraic and numerical
+checks.
 
 The extracted `.tbl` and `.prb` files are parser-validated documentation fixtures. They have not been run against the historical TAOS 96.0 executable. Historical printouts are source transcriptions, and reconstructed trajectory plots were not regenerated with the historical binary.
 

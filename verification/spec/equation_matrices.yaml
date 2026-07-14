@@ -1,0 +1,99 @@
+schema_version: 1
+description: Topic-level derivation matrix for equations that are independently rederived in the numerical verification layer.
+equations:
+  - id: TAOS-EQMAT-0001
+    topic: coordinate_frames
+    source:
+      manual_sections: [2.1, 2.1.12]
+      manual_pages: [2-5, 2-34]
+      manual_text: manual/chapters/chapter02/01_01_ecfc.tex
+    equation_groups:
+      - ecfc_position_and_velocity
+      - ecic_rotation_and_derivative
+      - local_geocentric_basis
+      - local_geodetic_basis
+      - body_orientation_and_euler_sequence
+      - tangent_plane_projection
+    tests:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+    notes: Frame equations are grouped because the implementation and source labels span the Chapter 2 coordinate-convention set.
+  - id: TAOS-EQMAT-0002
+    topic: aerodynamic_forces
+    source:
+      manual_sections: [2.1.8, 2.1.9]
+      manual_pages: [2-23, 2-26, 2-31]
+      manual_text: manual/chapters/chapter02/03_02_aerodynamic_forces.tex
+    equation_groups:
+      - wind_axes
+      - aerodynamic_angles
+      - force_component_transforms
+    tests:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_verification_baseline.py
+    notes: Aerodynamic equations preserve explicit branch behavior at the documented singularities.
+  - id: TAOS-EQMAT-0003
+    topic: atmosphere
+    source:
+      manual_sections: [2.3.1]
+      manual_pages: [2-52, 2-55]
+      manual_text: manual/chapters/chapter02/03_01_atmosphere.tex
+    equation_groups:
+      - hydrostatic_relation
+      - perfect_gas_relation
+      - temperature_and_pressure_layers
+      - density_speed_of_sound_viscosity
+    tests:
+      - tests/unit/test_atmosphere_equations.py
+      - tests/unit/test_atmosphere.py
+      - tests/unit/test_verification_baseline.py
+    notes: Atmosphere equations remain anchored to the source labels and constants registry.
+  - id: TAOS-EQMAT-0004
+    topic: geodesy
+    source:
+      manual_sections: [2.1.4-2.1.6]
+      manual_pages: [2-9, 2-18]
+      manual_text: manual/chapters/chapter02/01_04_geocentric.tex
+    equation_groups:
+      - geocentric_position
+      - geocentric_velocity_angles
+      - geodetic_surface_geometry
+      - geodetic_position_and_velocity
+    tests:
+      - tests/unit/test_geodesy_equations.py
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+    notes: Geodesy equations are grouped around the position/velocity round-trip contracts.
+  - id: TAOS-EQMAT-0005
+    topic: gravity
+    source:
+      manual_sections: [2.3.4, 4.3]
+      manual_pages: [2-58, 2-61, 4-55, 4-56]
+      manual_text: manual/chapters/chapter02/03_04_gravity_model.tex
+    equation_groups:
+      - legendre_and_normalization
+      - geopotential_and_acceleration
+      - degree4_coefficient_application
+    tests:
+      - tests/unit/test_gravity_equations.py
+      - tests/unit/test_gravity.py
+      - tests/unit/test_verification_baseline.py
+    notes: Gravity equations must remain tied to the exact constant registry and model family provenance.
+  - id: TAOS-EQMAT-0006
+    topic: optimization
+    source:
+      manual_sections: [2.6.2-2.6.3, 2.6.5]
+      manual_pages: [2-96, 2-105]
+      manual_text: manual/chapters/chapter02/06_03_optimization.tex
+    equation_groups:
+      - control_variable_solution
+      - search_and_optimize_flow
+      - guidance_time_constant_update
+    tests:
+      - tests/unit/test_search_optimization_equations.py
+      - tests/unit/test_optimization.py
+      - tests/unit/test_verification_baseline.py
+    notes: Optimization equations are treated as derivation evidence even when solver backends change.
+####

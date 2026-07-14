@@ -1,0 +1,77 @@
+schema_version: 1
+description: Sign-convention matrix for orientation, handedness, and coefficient sign behavior.
+signs:
+  - id: TAOS-SIGN-0001
+    category: ecfc_orientation
+    source:
+      manual_sections: [2.1, 2.1.1]
+      manual_pages: [2-5, 2-7]
+      manual_text: manual/chapters/chapter02/01_01_ecfc.tex
+    sign_family:
+      - greenwich_positive_x
+      - east_positive_y
+      - north_pole_positive_z
+    tests:
+      - tests/unit/test_coordinates.py
+      - tests/unit/test_verification_baseline.py
+    note: ECFC orientation stays right-handed and matched to the documented axes.
+  - id: TAOS-SIGN-0002
+    category: local_horizon_orientation
+    source:
+      manual_sections: [2.1.3, 2.1.5]
+      manual_pages: [2-13, 2-18]
+      manual_text: manual/chapters/chapter02/01_03_local_geocentric.tex
+    sign_family:
+      - north_positive_x
+      - east_positive_y
+      - down_positive_oriented_toward_earth_center
+    tests:
+      - tests/unit/test_geodesy_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Local horizon bases use source-defined north/east/down orientation.
+  - id: TAOS-SIGN-0003
+    category: body_orientation
+    source:
+      manual_sections: [2.1.7]
+      manual_pages: [2-19, 2-23, 2-31, 2-34]
+      manual_text: manual/chapters/chapter02/01_07_body_fixed.tex
+    sign_family:
+      - yaw_about_positive_z_gd
+      - pitch_about_positive_y_1
+      - roll_about_positive_x_2
+      - body_points_straight_up_or_down_is_singular
+    tests:
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Body-axis sign conventions remain distinct from generic Euler-angle identities.
+  - id: TAOS-SIGN-0004
+    category: wind_orientation
+    source:
+      manual_sections: [2.1.8, 2.1.9]
+      manual_pages: [2-23, 2-26, 2-31]
+      manual_text: manual/chapters/chapter02/01_09_wind.tex
+    sign_family:
+      - x_axis_aligned_with_relative_velocity
+      - positive_windward_meridian_branch
+      - positive_angle_of_attack_and_sideslip_conventions
+    tests:
+      - tests/unit/test_forces_equations.py
+      - tests/unit/test_frames_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Wind-axis sign conventions remain explicit across the branch boundaries.
+  - id: TAOS-SIGN-0005
+    category: gravity_and_coefficients
+    source:
+      manual_sections: [2.3.4, 4.3]
+      manual_pages: [2-58, 2-61, 4-55, 4-56]
+      manual_text: manual/chapters/chapter02/03_04_gravity_model.tex
+    sign_family:
+      - j2_negative_for_zonal_model_terms
+      - c20_negative_degree4_full_model
+      - coefficient_tables_preserve_printed_signs
+    tests:
+      - tests/unit/test_gravity.py
+      - tests/unit/test_gravity_equations.py
+      - tests/unit/test_verification_baseline.py
+    note: Gravity-model signs remain tied to the printed coefficient tables and runtime checks.
+####
