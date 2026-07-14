@@ -1,14 +1,21 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77.0.3", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "taoryx"
-version = "0.1.0.dev0"
+version = "0.1.0a0"
 description = "A Python successor to the TAOS 1995 simulation system"
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [{name = "taoryx contributors"}]
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+]
 dependencies = ["pydantic>=2.8", "PyYAML>=6.0"]
 
 [project.scripts]
