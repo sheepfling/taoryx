@@ -326,7 +326,10 @@ class TableAerodynamicModel:
             mach,
             angle_of_attack,
             sideslip,
-            self.control_provider(state) if self.control_provider is not None else None,
+            {
+                "altitude_m": position_ecfc.vector.norm() - self.earth_rotation.earth.equatorial_radius.si_value,
+                **(self.control_provider(state) if self.control_provider is not None else {}),
+            },
         )
         force_coefficients = self.context_coefficients(context) if self.context_coefficients is not None else self.coefficients(mach, angle_of_attack, sideslip)
         force_body = force_coefficients.scaled(dynamic_pressure * self.reference_area_m2)

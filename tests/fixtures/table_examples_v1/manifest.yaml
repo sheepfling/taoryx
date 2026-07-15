@@ -39,3 +39,13 @@ tables:
   - propulsion/burn-mdot.tbl
   - propulsion/constant-thrust.tbl
   - wind/wind-speed.tbl
+external_catalogs:
+  - id: x15_coherent_6dof_public_research_v1
+    path: tests/fixtures/x15_coherent_6dof_public_research_v1
+    manifest: tables/catalog.yaml
+    classification: vehicle-specific-public-6dof-research-surrogate
+    table_families:
+      - aerodynamic-static-six-axis
+      - aerodynamic-control-six-axis
+      - propulsion
+    plotting: tests/unit/test_x15_table_catalog.py

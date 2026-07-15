@@ -94,7 +94,8 @@ TABLE_TYPES = {
     "windd",
     "output",
 }
-COEFFICIENT_TABLE_TYPES = {"ca", "cn", "cl", "cd", "cs", "cx", "cy", "cz"}
+TAORYX_TABLE_TYPES = {"cmx", "cmy", "cmz"}
+COEFFICIENT_TABLE_TYPES = {"ca", "cn", "cl", "cd", "cs", "cx", "cy", "cz", *TAORYX_TABLE_TYPES}
 THRUST_UNITS = {"lb", "n", "kn"}
 MASS_FLOW_UNITS = {
     "lb/sec",
@@ -801,7 +802,7 @@ class _TableTokenParser:
             return None
         ####
         table_type = type_token.value.lower()
-        if table_type not in TABLE_TYPES:
+        if table_type not in TABLE_TYPES | TAORYX_TABLE_TYPES:
             self.issues.append(
                 ParseIssue(
                     severity="error",

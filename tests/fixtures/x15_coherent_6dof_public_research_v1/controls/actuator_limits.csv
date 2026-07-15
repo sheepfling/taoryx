@@ -1,0 +1,4 @@
+control,source_property,minimum_rad,maximum_rad,minimum_deg,maximum_deg,dynamic_model,C1_per_s,derived_time_constant_s,hard_rate_limit_deg_s,pure_delay_s,fidelity,source_id
+symmetric_stabilator,fcs/elevator-pos-rad,-0.26,0.61,-14.89690267,34.9504255,first_order_lag_C1_over_s_plus_C1,600.0,0.0016666667,,,DIRECT_TRANSCRIPTION_PLUS_FILTER_DEFINITION,JSBSIM_X15_XML_AND_FGFILTER
+differential_stabilator,fcs/left-aileron-pos-rad,-0.35,0.35,-20.05352283,20.05352283,algebraic_clip_in_source_model,,,,,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML
+rudder,fcs/rudder-pos-rad,-0.52,0.52,-29.79380535,29.79380535,algebraic_clip_in_source_model,,,,,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML

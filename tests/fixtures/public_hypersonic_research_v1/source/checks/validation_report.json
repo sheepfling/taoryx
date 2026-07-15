@@ -1,0 +1,17 @@
+{
+  "checks": {
+    "max_cd_component_sum_error": 1.000000082740371e-10,
+    "max_motor_relative_impulse_error": 9.557613934458899e-16,
+    "motor_curve_count": 3,
+    "scramjet_map_rows": 960,
+    "winged_cone_component_rows": 88,
+    "winged_cone_static_rows": 88,
+    "x33_case_rows": 21,
+    "x33_component_rows": 24
+  },
+  "dataset": "public_hypersonic_research_dataset_v1",
+  "failures": [],
+  "generated_date": "2026-07-15",
+  "status": "PASS",
+  "version": "1.0.0"
+}

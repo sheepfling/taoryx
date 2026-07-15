@@ -1,0 +1,5 @@
+parameter,value_source_units,source_units,value_si,si_units,fidelity,source_id,note
+length,12.0,ft,3.6576,m,DIRECT_TRANSCRIPTION,AIAA_X43A_M7_FLIGHT_AERO,Source-specific approximate value; check configuration before use.
+width,5.0,ft,1.524,m,DIRECT_TRANSCRIPTION,AIAA_X43A_M7_FLIGHT_AERO,Source-specific approximate value; check configuration before use.
+height,2.2,ft,0.67056,m,DIRECT_TRANSCRIPTION,AIAA_X43A_M7_FLIGHT_AERO,Source-specific approximate value; check configuration before use.
+maximum_weight,2800.0,lbf,12455.02052273,N,DIRECT_TRANSCRIPTION,AIAA_X43A_M7_FLIGHT_AERO,Source-specific approximate value; check configuration before use.

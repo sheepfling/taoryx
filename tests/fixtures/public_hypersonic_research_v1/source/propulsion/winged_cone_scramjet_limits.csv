@@ -1,0 +1,9 @@
+parameter,value,units,fidelity,source_id
+model_mach_min,0.3,Mach,DIRECT_TRANSCRIPTION,NASA_TP_3525
+model_mach_max,25.0,Mach,DIRECT_TRANSCRIPTION,NASA_TP_3525
+equivalence_ratio_min,0.1,1,DIRECT_TRANSCRIPTION,NASA_TP_3525
+equivalence_ratio_max,10.0,1,DIRECT_TRANSCRIPTION,NASA_TP_3525
+fuel_flow_min,10.0,lbm/s,DIRECT_TRANSCRIPTION,NASA_TP_3525
+fuel_flow_max,200.0,lbm/s,DIRECT_TRANSCRIPTION,NASA_TP_3525
+fuel_flow_response_time_constant,0.5,s,DIRECT_TRANSCRIPTION,NASA_TP_3525
+thrust_axis,body_x_only,text,DIRECT_TRANSCRIPTION,NASA_TP_3525

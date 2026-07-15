@@ -101,6 +101,25 @@ families:
     oracle: tests/unit/test_mission_family_examples.py
     exclusions:
       - historical_taos_96_syntax_compatibility
+  - id: drone_poi_loiter_source
+    title: Source-defined drone launch, moving POI-track loiter, and return-home route
+    status: verified
+    source: drone_poi_loiter/mission.prb
+    dynamics_mode: point-mass-3dof
+    capabilities:
+      - vertical_launch_phase
+      - multi_poi_track_guidance
+      - loiter_duration
+      - return_home_guidance
+    oracle: tests/unit/test_drone_poi_loiter.py
+    claims:
+      - source_file_execution
+      - common_point_mass_guidance_kernel
+      - phase_and_target_trajectory_coverage
+    exclusions:
+      - stationary_position_hold
+      - rotorcraft_lift_and_motor_dynamics
+      - historical_taos_96_syntax_compatibility
   - id: sixdof_staged_reentry_terminal
     title: Two-stage rigid-body launch, thermal entry, and terminal guidance
     status: scaffolded

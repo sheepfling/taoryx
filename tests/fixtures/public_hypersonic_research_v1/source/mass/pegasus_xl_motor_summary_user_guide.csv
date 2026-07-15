@@ -1,0 +1,4 @@
+stage,motor,length_cm,diameter_cm,inert_mass_kg,propellant_mass_kg,derived_stage_mass_kg,total_vacuum_impulse_kN_s,average_chamber_pressure_kPa,burn_time_s,maximum_vacuum_thrust_kN,effective_delivered_vacuum_impulse_N_s_per_kg,derived_effective_isp_s,thrust_vector_control,fidelity,source_id,note
+1,Orion 50S XL,1027.0,128.0,1369.0,15014.0,16383.0,43586.0,7515.0,68.6,726.0,2846.0,290.211234,none_fin_control,DIRECT_TRANSCRIPTION_AND_UNIT_DERIVATION,NORTHROP_PEGASUS_GUIDE_8_2,Integrated Pegasus stage definition.
+2,Orion 50 XL,311.0,128.0,416.0,3925.0,4341.0,11218.0,7026.0,69.4,196.0,2838.0,289.395461,plus_minus_3_deg,DIRECT_TRANSCRIPTION_AND_UNIT_DERIVATION,NORTHROP_PEGASUS_GUIDE_8_2,Integrated Pegasus stage definition.
+3,Orion 38,134.0,97.0,126.0,770.0,896.0,2185.0,4523.0,68.5,36.0,2817.0,287.254057,plus_minus_3_deg,DIRECT_TRANSCRIPTION_AND_UNIT_DERIVATION,NORTHROP_PEGASUS_GUIDE_8_2,Integrated Pegasus stage definition.

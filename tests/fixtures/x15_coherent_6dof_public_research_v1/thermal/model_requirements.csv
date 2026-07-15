@@ -1,0 +1,4 @@
+item,status,required_input,recommendation
+certified_vehicle_heating_model,not available in selected public executable deck,"surface geometry, nose/leading-edge radii, material stack, catalyticity, wall temperature",keep heating outside flight-dynamics validation claims
+generic_convective_correlation,not instantiated,validated Sutton-Graves constant and local radius for the exact configuration,do not infer an X-15 heat rate from aerodynamic coefficients alone
+radiative_heating,not included,high-enthalpy chemistry and radiation model,required only where trajectory enthalpy makes it material

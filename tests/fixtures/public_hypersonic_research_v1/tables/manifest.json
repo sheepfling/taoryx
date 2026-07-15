@@ -1,0 +1,43 @@
+{
+  "source": "source/aero/langley_winged_cone_hypersonic_static.csv",
+  "generated": [
+    "tables/langley_winged_cone_6axis_static.tbl",
+    "tables/orion38_thrust_mdot.tbl",
+    "tables/orion50xl_thrust_mdot.tbl",
+    "tables/orion50sxl_thrust_mdot.tbl"
+  ],
+  "rows": 88,
+  "axes": {
+    "mach": [
+      6.0,
+      7.0,
+      8.0,
+      10.0,
+      12.0,
+      15.0,
+      20.0,
+      25.0
+    ],
+    "alpha_deg": [
+      -5.0,
+      0.0,
+      2.0,
+      4.0,
+      6.0,
+      8.0,
+      10.0,
+      12.0,
+      15.0,
+      18.0,
+      20.0
+    ],
+    "alpha_table_units": "radian"
+  },
+  "coverage": "longitudinal-only",
+  "control_effectiveness": false,
+  "sideslip": false,
+  "fidelity": "EQUATION_RECONSTRUCTION",
+  "source_id": "NASA_CR_194987",
+  "reference_area_m2": 334.450944,
+  "reference_length_m": 24.384
+}

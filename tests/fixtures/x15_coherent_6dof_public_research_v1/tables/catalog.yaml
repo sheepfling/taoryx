@@ -1,0 +1,35 @@
+id: x15_coherent_6dof_public_research_v1_tables
+title: X-15 coherent public research table catalog
+kind: vehicle-specific-public-6dof-research-surrogate
+source_fixture: tests/fixtures/x15_coherent_6dof_public_research_v1
+provenance:
+  source_validation: checks/validation_report.json
+  source_status: beta
+  notes:
+    - source-faithful-transcription
+    - generated-si-unit-tables
+    - not-flight-qualified
+tables:
+  - path: x15_static_6axis.tbl
+    family: aerodynamic-static-six-axis
+    axes: [mach, altitude_m, alpha, beta]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+  - path: x15_symmetric_stabilator_6axis.tbl
+    family: aerodynamic-control-six-axis
+    control: symmetric-stabilator
+    axes: [mach, altitude_m, alpha, beta, symmetric_stabilator]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+  - path: x15_differential_stabilator_6axis.tbl
+    family: aerodynamic-control-six-axis
+    control: differential-stabilator
+    axes: [mach, altitude_m, alpha, beta, differential_stabilator]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+  - path: x15_rudder_6axis.tbl
+    family: aerodynamic-control-six-axis
+    control: rudder
+    axes: [mach, altitude_m, alpha, beta, rudder]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+  - path: x15_xlr99_thrust_mdot.tbl
+    family: propulsion
+    axes: [time]
+    quantities: [thrust, mdot]

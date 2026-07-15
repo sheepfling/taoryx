@@ -1,0 +1,14 @@
+uncertainty_group,coefficient_or_derivative,lower_factor,upper_factor,interpretation,fidelity,source_id,note
+free_flight_force,CA,0.76,1.24,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+free_flight_force,CY,0.79,1.21,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+free_flight_force,CN,0.82,1.18,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+free_flight_moment,Cm,0.82,1.18,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+free_flight_moment,Cl,0.79,1.21,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+free_flight_moment,Cn,0.79,1.21,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+damping_derivative,Cmq,0.4,1.6,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+damping_derivative,Clp,0.25,1.75,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+damping_derivative,Cnr,0.25,1.75,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+cross_derivative,Clr,0.1,1.9,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+cross_derivative,Cnp,0.1,1.9,multiplicative factor on a compatible baseline model,DIRECT_TRANSCRIPTION,AIAA_2003_5819,Uncertainty factor only; not a nominal derivative.
+flight_vs_prediction_observation,axial_force,1.1,1.15,flight-derived relative to preflight prediction,REPORTED_OBSERVATION,AIAA_X43A_M7_FLIGHT_AERO,"Applies to portions of the descent envelope, not universally."
+flight_vs_prediction_observation,normal_force,1.1,1.15,flight-derived relative to preflight prediction,REPORTED_OBSERVATION,AIAA_X43A_M7_FLIGHT_AERO,Reported as a similar underprediction magnitude.

@@ -1,0 +1,9 @@
+parameter,source_value,source_units,si_value,si_units,coordinate_or_note,fidelity,source_id
+reference_area,200.0,ft^2,18.580608,m^2,JSBSim metrics/wingarea,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML
+reference_span,22.36,ft,6.815328,m,Used for Cl and Cn normalization,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML
+reference_chord,10.27,ft,3.130296,m,Used for Cm normalization,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML
+aerodynamic_reference_station_x,345.4,in,8.77316,m,Structural station increasing aft; y=z=0,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML
+empty_cg_structural_station_x,345.0,in,8.763,m,Structural station increasing aft; y=z=0,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML
+aerodynamic_reference_relative_to_empty_cg_body_x,-0.4,in,-0.01016,m,Body x positive forward; AERORP is 0.4 in aft of empty CG,DERIVED_COORDINATE_TRANSFORMATION,JSBSIM_X15_XML
+overall_length_approximate,50.0,ft,15.24,m,NASA official program-page approximate value,OFFICIAL_APPROXIMATE_VALUE,NASA_X15_PROGRAM_PAGE
+overall_height_approximate,13.0,ft,3.9624,m,NASA official program-page approximate value,OFFICIAL_APPROXIMATE_VALUE,NASA_X15_PROGRAM_PAGE

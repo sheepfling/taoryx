@@ -1390,6 +1390,11 @@ def _lower_rigid_body_case(
             return state
         if target not in segments:
             raise ValueError(f"rigid-body event targets missing segment {target}")
+        # Segment reset/increment blocks are the native problem-file seam for
+        # staging and release events.  Apply them before switching the force
+        # sources so mass and propellant discontinuities are visible to the
+        # next rigid-body derivative evaluation.
+        state = _apply_segment_updates(state, segments[target], parameters, tables)
         active_segment["number"] = target
         vehicle.events = segment_events[target]
         vehicle.segment_number = target
@@ -1690,6 +1695,9 @@ def _rigid_body_aerodynamic_model(
         values.setdefault("alpha", math.radians(values.get("alpha-deg", 0.0)))
         values.setdefault("bank", math.radians(values.get("bank-deg", 0.0)))
         values.setdefault("fin_pitch", 0.0)
+        values.setdefault("symmetric_stabilator", math.radians(values.get("symmetric-stabilator-deg", 0.0)))
+        values.setdefault("differential_stabilator", math.radians(values.get("differential-stabilator-deg", 0.0)))
+        values.setdefault("rudder", math.radians(values.get("rudder-deg", 0.0)))
         if target_position is None or navigation_gain <= 0.0:
             return values
         target_ecic = _runtime_target_position(target_attributes, earth, EarthRotationAdapter(earth), state.time)

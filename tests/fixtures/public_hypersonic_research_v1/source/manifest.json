@@ -1,0 +1,169 @@
+{
+  "coherent_vehicle_database": false,
+  "dataset_name": "public_hypersonic_research_dataset_v1",
+  "engineering_certification": false,
+  "files": [
+    {
+      "bytes": 1133,
+      "path": "DATA_DICTIONARY.md",
+      "sha256": "4021a6730a1171da5793336afc89b8eb52a99f9733a4609108260a9eb55fa6b7"
+    },
+    {
+      "bytes": 496,
+      "path": "NOTICE.md",
+      "sha256": "b13db97bb5edce7bbb08d627269fd5449181a29fd147a03a6d126cf9162df6b3"
+    },
+    {
+      "bytes": 2164,
+      "path": "README.md",
+      "sha256": "c019ba4015d0a9b238103ba19d434aededfedc64fef6ee4ce4f13c7dd5019d0b"
+    },
+    {
+      "bytes": 856,
+      "path": "aero/langley_winged_cone_equations.md",
+      "sha256": "c72288ceb1d9f4872678313f8889fe137380a947e75333114e0a59b514b05c96"
+    },
+    {
+      "bytes": 3474,
+      "path": "aero/langley_winged_cone_geometry.csv",
+      "sha256": "d3b41b8fec87bbc18212284ee663ff69dca4a7e965ffb97d01d9a4c33ae518e7"
+    },
+    {
+      "bytes": 20908,
+      "path": "aero/langley_winged_cone_hypersonic_components.csv",
+      "sha256": "a9eb286f700740d41094f460ec1bbd1db4279cb778c9f6df4a84071ac3f742f4"
+    },
+    {
+      "bytes": 23645,
+      "path": "aero/langley_winged_cone_hypersonic_static.csv",
+      "sha256": "34b8ba78ee3d2272693932ca6d7f2e3508e4822d1f6e1c2061360eeb716df192"
+    },
+    {
+      "bytes": 978,
+      "path": "aero/source_envelopes.csv",
+      "sha256": "961323935e380609e14c7dfb86fa77e158d1ca932b3458c2eecc927ad30d82ba"
+    },
+    {
+      "bytes": 2417,
+      "path": "aero/uncertainty_models.csv",
+      "sha256": "581f0d114b5008e520c6e7405d809c59e4435b08573a7860366a034e603e4bc0"
+    },
+    {
+      "bytes": 3842,
+      "path": "aero/x33_longitudinal_cfd_summary.csv",
+      "sha256": "57c576274b2c9690a9c0b7fafa74b07876dade8855cb3aadb4b95721b4241c9e"
+    },
+    {
+      "bytes": 2248,
+      "path": "aero/x33_mach6_component_cfd.csv",
+      "sha256": "5605d3c0afc104f443f2f4ef0ea77c7387e036728430fe8b5914e786299fec70"
+    },
+    {
+      "bytes": 911,
+      "path": "aero/x43a_flight_test_envelope.csv",
+      "sha256": "06e5fb4c203635ca2c15b9a18d9655bd39b066c7e688134e7ecd82e01a370e60"
+    },
+    {
+      "bytes": 475,
+      "path": "checks/validation_report.json",
+      "sha256": "6986883cb38b461c9eb2562da177eda3295ab3cef094ac331310ebafac89b129"
+    },
+    {
+      "bytes": 1344,
+      "path": "mass/pegasus_motor_summary_catalog.csv",
+      "sha256": "b685d803fb0f4ccf0b338e5420800f29e3a552f3dfba44ecccc2a25999b0a3a3"
+    },
+    {
+      "bytes": 934,
+      "path": "mass/pegasus_xl_motor_summary_user_guide.csv",
+      "sha256": "b6dc0f9df3c86b20597447a2e1fa99ed167c4a11ae7d240beb5a3a31895e3f63"
+    },
+    {
+      "bytes": 655,
+      "path": "mass/winged_cone_mass_budget.csv",
+      "sha256": "c498cc0a3430141854190a95782f19e403a8b7c8c9c018b3d21f277ca6360918"
+    },
+    {
+      "bytes": 1542,
+      "path": "mass/winged_cone_point_mass_schedule.csv",
+      "sha256": "f87f43efebd5aad20028ef06eb5caef1211034842a7562b676dab7bb7c6ab795"
+    },
+    {
+      "bytes": 1967,
+      "path": "mass/x43a_hxlv_mass_uncertainty.csv",
+      "sha256": "133aee1ef0961777ef147ad91688acf9c758020ca450cacf158a6a59e7b5daf6"
+    },
+    {
+      "bytes": 3901,
+      "path": "mass/x43a_hxlv_nominal_mass_properties.csv",
+      "sha256": "741e7439b2fc33415d7d665499118b326acf9649ee7e7b32b942980dbf0194cb"
+    },
+    {
+      "bytes": 653,
+      "path": "mass/x43a_vehicle_dimensions.csv",
+      "sha256": "cf48a40ebf80511e968902fbb08cdc7aeed1e39d20312f7e962804cb9ad77fec"
+    },
+    {
+      "bytes": 660,
+      "path": "propulsion/README.md",
+      "sha256": "d2ae15cca9846b459d0e607bb190b4bc5de1b5ccbd0382a6151894a1974136dc"
+    },
+    {
+      "bytes": 1487,
+      "path": "propulsion/motor_curve_validation.csv",
+      "sha256": "c744d81e8a2c76faea5f708977d622803220b23e596df24bbbadfe12b165ebe3"
+    },
+    {
+      "bytes": 165689,
+      "path": "propulsion/orion38_thrust_curve_surrogate.csv",
+      "sha256": "add3ed1696abff445d12c464c61dd0fe78e89b08c56962728617d1d5dc1befd7"
+    },
+    {
+      "bytes": 184476,
+      "path": "propulsion/orion50sxl_thrust_curve_surrogate.csv",
+      "sha256": "9b8016d86775b13522dcb92cf5430f3f65fc498bbe879cd83a11a962abe8c901"
+    },
+    {
+      "bytes": 182248,
+      "path": "propulsion/orion50xl_thrust_curve_surrogate.csv",
+      "sha256": "3ff5278e0b82ccd2ef5546b294e8a1f00143aeec6c571bbd8234d3e682769105"
+    },
+    {
+      "bytes": 1243,
+      "path": "propulsion/winged_cone_scramjet_functions.csv",
+      "sha256": "1d5d99e449a5de9b594ba914a9a9bb40fa3df0b907febfe0f42f58c2eff5f2ee"
+    },
+    {
+      "bytes": 547,
+      "path": "propulsion/winged_cone_scramjet_limits.csv",
+      "sha256": "43fcfa7dee01dd2a9c1209b83973c1a60292a8e88da49cfc0f1789483e23ad2e"
+    },
+    {
+      "bytes": 202199,
+      "path": "propulsion/winged_cone_scramjet_map.csv",
+      "sha256": "74dab2d98e71e5a409c6a8ca9d3c91dc70a66a1bfd607361a3639dc9890857a2"
+    },
+    {
+      "bytes": 197,
+      "path": "pyproject.toml",
+      "sha256": "b5050ef2e15cb21bd8b1a96cdabd1f5d30363637a7a5df8a3525c7de89040fcb"
+    },
+    {
+      "bytes": 2492,
+      "path": "scripts/validate_dataset.py",
+      "sha256": "5831662d5ce43a5a85874825133ae957af9a75cbc91f1bd8bd50b129902383a8"
+    },
+    {
+      "bytes": 2994,
+      "path": "sources.csv",
+      "sha256": "3edc90734e4de95c1fe468149d46e013c7f4a5b265923e111f8b32b046814847"
+    },
+    {
+      "bytes": 252,
+      "path": "unit_conversions.csv",
+      "sha256": "bb73d386db465dc7ff3bc532f93762c6082df997c5ed6f9cb820c53d78841fb0"
+    }
+  ],
+  "generated_date": "2026-07-15",
+  "version": "1.0.0"
+}

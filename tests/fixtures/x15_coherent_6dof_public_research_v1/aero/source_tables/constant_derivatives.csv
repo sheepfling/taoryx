@@ -1,0 +1,16 @@
+derivative,value,normalization,fidelity,source_id
+CY_beta,-1.4,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+CY_da,-0.05,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+CY_dr,0.45,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cl_beta,-0.01,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cl_p,-0.35,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cl_r,0.04,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cl_dr,0.012,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cm_alpha,-1.2,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cm_q,-6.2,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cm_alphadot,0.0,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cn_beta,0.5,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cn_p,0.0,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cn_r,-1.5,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cn_da,0.04,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML
+Cn_dr,-0.3,"p*b/(2V), q*c/(2V), r*b/(2V) for rate derivatives; radians for angles",DIRECT_TRANSCRIPTION_FROM_EXECUTABLE_MODEL,JSBSIM_X15_XML

@@ -1,0 +1,59 @@
+(drone-poi-loiter)
+*title Source-driven vertical launch, POI loiter, and return-home mission
+*atmos none
+*earth spherical gm=0 omega=0
+
+*trajectory 1 drone start on 1
+  *initial ecfc x=6378137 y=0 z=0 xdt=0 ydt=0 zdt=0 time=0 mass=25
+  *file drone.dat time xecfc yecfc zecfc vel relrng[2] relrng[3] relrng[4] relrng[5]
+  *segment 1 cold-launch
+    *integ dtprnt=1 dt=0.1
+    *prop thrust=400 mdot=0
+    *fly gamgd=90
+    *when time>5 goto 2
+  *segment 2 poi-1-loiter
+    *integ dtprnt=1 dt=0.1
+    *fly propnav=2
+    *when time>15 goto 3
+  *segment 3 poi-2-loiter
+    *integ dtprnt=1 dt=0.1
+    *fly propnav=3
+    *when time>25 goto 4
+  *segment 4 poi-3-loiter
+    *integ dtprnt=1 dt=0.1
+    *fly propnav=4
+    *when time>35 goto 5
+  *segment 5 return-home
+    *integ dtprnt=1 dt=0.1
+    *fly propnav=5
+    *when relrng[5]<25 stop
+    *when time>80 stop
+
+*trajectory 2 poi-1 start on 1
+  *initial ecfc x=6377937 y=0 z=0 xdt=80 ydt=0 zdt=0 time=0 mass=1
+  *file poi-1.dat time xecfc yecfc zecfc
+  *segment 1 moving-poi-track
+    *integ dtprnt=1 dt=0.1
+    *when time>80 stop
+
+*trajectory 3 poi-2 start on 1
+  *initial ecfc x=6377937 y=10 z=0 xdt=80 ydt=0 zdt=0 time=0 mass=1
+  *file poi-2.dat time xecfc yecfc zecfc
+  *segment 1 moving-poi-track
+    *integ dtprnt=1 dt=0.1
+    *when time>80 stop
+
+*trajectory 4 poi-3 start on 1
+  *initial ecfc x=6377937 y=20 z=0 xdt=80 ydt=0 zdt=0 time=0 mass=1
+  *file poi-3.dat time xecfc yecfc zecfc
+  *segment 1 moving-poi-track
+    *integ dtprnt=1 dt=0.1
+    *when time>80 stop
+  
+*trajectory 5 home start on 1
+  *initial ecfc x=6377937 y=0 z=0 xdt=80 ydt=0 zdt=0 time=0 mass=1
+  *file home.dat time xecfc yecfc zecfc
+  *segment 1 moving-home
+    *integ dtprnt=1 dt=0.1
+    *when time>80 stop
+*end

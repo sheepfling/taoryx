@@ -1,0 +1,6 @@
+quantity,value_lbm_or_lbf,value_kg,fidelity,source_id,note
+fully_fueled_weight_or_mass_equivalent,300000.0,136077.711,DIRECT_TRANSCRIPTION_WITH_STANDARD_LBM_EQUIVALENCE,NASA_TP_3525,"Source says approximately 300,000 lb."
+fuel_load,110000.0,49895.1607,DIRECT_TRANSCRIPTION_WITH_STANDARD_LBM_EQUIVALENCE,NASA_TP_3525,
+dry_mass_by_difference,190000.0,86182.5503,DERIVED_DIFFERENCE,NASA_TP_3525,"300,000 - 110,000."
+simulation_maneuver_start_mass,250000.0,113398.0925,DIRECT_TRANSCRIPTION_WITH_STANDARD_LBM_EQUIVALENCE,NASA_TP_3525,
+fuel_remaining_at_maneuver_start_by_difference,60000.0,27215.5422,DERIVED_DIFFERENCE,NASA_TP_3525,"250,000 - 190,000."

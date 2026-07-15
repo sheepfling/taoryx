@@ -47,9 +47,11 @@ def test_hypersonic_glide_guidance_runs_with_two_vehicle_target(tmp_path: Path) 
     glider = result.states["1"]
     target = result.states["2"]
     assert glider[0].named["mach"] > 5.0
-    assert min(state.named["relrng[2]"] for state in glider) < glider[0].named["relrng[2]"]
+    assert min(state.named["relrng[2]"] for state in glider) <= 1_000.0
+    assert glider[-1].named["relrng[2]"] <= 1_000.0
+    assert int(glider[-1].named["_segment"]) == 2
     assert all(state.named["alt"] == state.named["alt"] for state in glider)
-    assert target[-1].time == pytest.approx(glider[-1].time)
+    assert target[-1].time >= glider[-1].time
     ####
 
 

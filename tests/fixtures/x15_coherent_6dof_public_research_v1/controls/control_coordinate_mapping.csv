@@ -1,0 +1,4 @@
+package_coordinate,source_property,primary_effect,left_right_mapping,mapping_status
+symmetric_stabilator_deg,fcs/elevator-pos-rad,pitch and lift,left=de+da; right=de-da,DERIVED_COORDINATE_MAPPING_VERIFY_PHYSICAL_SIGN_AND_GEARING
+differential_stabilator_deg,fcs/left-aileron-pos-rad,roll with side-force and yaw cross-coupling,left=de+da; right=de-da,DERIVED_COORDINATE_MAPPING_VERIFY_PHYSICAL_SIGN_AND_GEARING
+rudder_deg,fcs/rudder-pos-rad,yaw with side-force and roll cross-coupling,single source coordinate,SOURCE_NATIVE_COORDINATE

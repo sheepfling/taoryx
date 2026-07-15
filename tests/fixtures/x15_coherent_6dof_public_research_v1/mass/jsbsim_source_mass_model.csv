@@ -1,0 +1,5 @@
+quantity,source_value,source_units,si_value,si_units,location_structural_station_in,fidelity,source_id,note
+active_empty_mass,14560.0,lbm,6604.3049072,kg,345.0,DIRECT_TRANSCRIPTION_ACTIVE_VALUE,JSBSIM_X15_XML,"A legacy 15,560-lb value is commented out in the source file."
+main_oxidizer_capacity,9470.0,lbm,4295.5197439,kg,282.3,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML,
+main_fuel_capacity,8236.0,lbm,3735.78675932,kg,408.3,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML,
+rcs_oxidizer_capacity,12.0,lbm,5.44310844,kg,140.0,DIRECT_TRANSCRIPTION,JSBSIM_X15_XML,RCS thruster geometry is absent.

@@ -1,0 +1,6 @@
+model_part,numeric_uncertainty_available,source_status,package_action
+static longitudinal coefficients,no,beta executable model with public-report ancestry and guesses,no invented sigma supplied
+lateral-directional derivatives,no,constant derivatives; no Mach/alpha scheduling,treat as low-fidelity surrogate
+control derivatives,no,mostly linear and separable,no interaction uncertainty invented
+mass/CG/inertia schedule,no,point-tank derivation from source locations,NASA mass anchors retained separately
+propulsion,no,source parameters underpredict NASA maximum thrust anchor,both source-native and NASA envelope retained

@@ -1,0 +1,6 @@
+dataset_or_source,mach_min,mach_max,alpha_min_deg,alpha_max_deg,beta_min_deg,beta_max_deg,reynolds_or_qbar,coverage,fidelity,source_id
+langley_winged_cone_analytical,0.3,25.0,-20.0,20.0,,,not an independent axis,longitudinal model; archive tabulates M>=6,SOURCE_ENVELOPE_ONLY,NASA_CR_194987
+x33_floft_inviscid_CFD,4.96,12.02,12.0,48.0,,,"perfect gas, equilibrium air, CF4","longitudinal CN, CA, Cm",DIRECT_TRANSCRIPTION,NASA_CR_1999_209366
+x43a_cowl_closed_descent,0.91,6.81,0.0,14.0,,,approximately 400 to 1300 psf,flight-test envelope; curves not digitized,SOURCE_ENVELOPE_ONLY,AIAA_X43A_M7_FLIGHT_AERO
+osculating_cone_waverider_tests,4.0,6.0,negative,about_10,-3.0,3.0,Mach-6 runs roughly 1e6 to 4e6 per ft,six-component validation source; plots not digitized,SOURCE_ENVELOPE_ONLY,AIAA_98_0682
+mach6_hypersonic_cruise_wing_body,6.0,6.0,-4.0,20.0,-4.0,0.0,see source,"six-component data at beta=0,-2,-4 deg; plots not digitized",SOURCE_ENVELOPE_ONLY,NASA_TM_19780022112

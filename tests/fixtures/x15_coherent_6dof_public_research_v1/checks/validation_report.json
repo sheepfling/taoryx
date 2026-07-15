@@ -1,0 +1,29 @@
+{
+  "checks": {
+    "actual_grid_counts": {
+      "combined_controls_sample.csv": 2268,
+      "differential_stabilator_grid.csv": 34020,
+      "rudder_grid.csv": 26460,
+      "static_grid_zero_controls.csv": 3780,
+      "symmetric_stabilator_grid.csv": 34020
+    },
+    "atmosphere_rows": 86,
+    "expected_differential_stabilator_rows": 34020,
+    "expected_rudder_rows": 26460,
+    "expected_static_rows": 3780,
+    "expected_symmetric_stabilator_rows": 34020,
+    "final_main_fuel_lbm": 0.0,
+    "final_main_oxidizer_lbm": 0.8502732240431214,
+    "full_throttle_first_tank_depletion_s": 90.01092896174863,
+    "mass_schedule_rows": 182,
+    "max_beta_parity_error": 0.0,
+    "max_source_node_interpolation_error": 0.0,
+    "minimum_final_inertia_eigenvalue_slug_ft2": 3645.563565603603,
+    "propulsion_history_rows": 182
+  },
+  "dataset": "x15_coherent_6dof_public_research_v1",
+  "failures": [],
+  "generated_date": "2026-07-15",
+  "status": "PASS",
+  "version": "1.0.0"
+}

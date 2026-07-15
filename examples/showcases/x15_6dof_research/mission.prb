@@ -1,0 +1,24 @@
+(x15-6dof-research)
+*title X-15 coherent 6-DOF research-kernel flight
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=7.2921151467e-5 gm=3.986004418e14
+*runtime status vehicle reference-area=18.580608 reference-length=3.130296 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024 dry-mass-kg=9000.0
+*runtime status telemetry sample-interval-s=0.5 formats=text,json,sqlite
+*runtime control throttle vehicle=1 default=1.0 lower=0.4 upper=1.0
+*runtime control symmetric-stabilator-deg vehicle=1 default=0.0 lower=-14.9 upper=34.9
+
+*trajectory 1 x15 start on 1
+  *initial ecic
+    x=6398137.0 y=0.0 z=0.0
+    xdt=0.0 ydt=1800.0 zdt=0.0
+    qw=0.7071067812 qx=0.0 qy=0.0 qz=0.7071067812
+    wx=0.0 wy=0.0 wz=0.0
+    time=0.0 mass=14641.0545 propellant_mass=5641.0545
+  *file x15.dat time mass
+  *segment 1 powered-research-flight
+    *integ dtprnt=0.5 dt=0.05
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *prop thrust=(x15-thrust) mdot=(x15-mdot)
+    *when time>1 stop
+*end
