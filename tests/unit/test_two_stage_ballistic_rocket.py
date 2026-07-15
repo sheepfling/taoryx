@@ -4,7 +4,6 @@ from pathlib import Path
 
 from taoryx.runtime.runner import run_files
 
-
 ROOT = Path(__file__).resolve().parents[1].parent / "examples" / "mission_families" / "two_stage_ballistic_rocket"
 
 
