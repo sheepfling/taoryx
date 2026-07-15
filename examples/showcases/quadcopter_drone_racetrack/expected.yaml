@@ -1,0 +1,9 @@
+schema_version: 1
+showcase_id: quadcopter_drone_racetrack
+invariants:
+  - {id: racetrack_laps_complete, status: planned, unit: laps, tolerance: 0}
+  - {id: altitude_hold_bounded, status: planned, unit: m, tolerance: 2.0}
+  - {id: cross_track_error_bounded, status: planned, unit: m, tolerance: 10.0}
+  - {id: wind_profile_recorded, status: planned, unit: event, tolerance: 0}
+  - {id: control_saturation_events_recorded, status: planned, unit: event, tolerance: 0}
+limitations: [rotorcraft force and moment model is not connected, motor allocation and actuator saturation traces are planned]

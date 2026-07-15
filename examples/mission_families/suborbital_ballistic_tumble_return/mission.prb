@@ -1,0 +1,14 @@
+(suborbital-ballistic-tumble-return)
+*title Synthetic suborbital launch and averaged tumbling atmospheric return
+*atmos standard
+*earth wgs-84 omega=0
+
+*trajectory 1 tumbling-body start on 1
+  *initial geodetic alt=1 long=0 lat=0 vel=3000 gama=60 psi=90 time=0 mass=100
+  *file suborbital-return.dat time alt vel gama dynprs cd
+  *segment 1 ascent-and-return
+    *integ dtprnt=1 dt=0.1
+    *aero cd=(cone-cd)
+    *fly alpha=0
+    *when alt<0 stop
+*end

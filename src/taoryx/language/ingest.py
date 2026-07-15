@@ -9,6 +9,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from taoryx.language.diagnostics import Diagnostic, Severity
+from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.lexical import LexicalDocument, lex_text
 from taoryx.language.lossless import LosslessDocument, parse_lossless_bytes
 from taoryx.language.models import ProblemDocument, RecoveredRecord, TableDocument
@@ -85,11 +86,12 @@ def ingest_text(
     source_path: str = "<memory>",
     available_tables: set[str] | Mapping[str, str] | None = None,
     available_table_variables: Mapping[str, Collection[str]] | None = None,
+    profile: GrammarProfile | str = GrammarProfile.TAOS96,
 ) -> IngestedDocument:
     source = parse_lossless_bytes(text.encode("utf-8"), source_path=source_path)
     lexical = lex_text(text, source_path=source_path)
     if kind is FileKind.PROBLEM:
-        document = parse_problem_text(text, source_path)
+        document = parse_problem_text(text, source_path, profile=profile)
         diagnostics = validate_problem(
             document,
             available_tables=available_tables,
@@ -114,6 +116,7 @@ def ingest_file(
     available_tables: set[str] | Mapping[str, str] | None = None,
     available_table_variables: Mapping[str, Collection[str]] | None = None,
     encoding: str = "utf-8",
+    profile: GrammarProfile | str = GrammarProfile.TAOS96,
 ) -> IngestedDocument:
     source_path = Path(path)
     data = source_path.read_bytes()
@@ -122,7 +125,7 @@ def ingest_file(
     lexical = lex_text(text, source_path=str(source_path))
     kind = kind_for_path(source_path)
     if kind is FileKind.PROBLEM:
-        document = parse_problem_text(text, str(source_path))
+        document = parse_problem_text(text, str(source_path), profile=profile)
         diagnostics = validate_problem(
             document,
             available_tables=available_tables,

@@ -23,6 +23,7 @@ from . import (
     outputs,
     radar,
     runtime,
+    scenario,
     searches,
     simulation,
     state,
@@ -31,8 +32,33 @@ from . import (
     tables,
     visualization,
 )
+from .family_debug_rendering import FamilyDebugRenderReport, render_family_debug_artifacts
+from .family_debugging import DebugFamily, FamilyDebugPlan, build_family_debug_plan, family_profile
 from .modes import DynamicsMode, Kinematic6DofState, Quaternion
 from .outputs import DynamicsKind, EventRecord, RunArtifact, SegmentSpan, TelemetryChannel, VehicleKind, VehicleTelemetry, build_run_artifact
+from .rigid_body import (
+    RIGID_BODY_STATE_NAMES,
+    RigidBody6DofModel,
+    RigidBody6DofState,
+    RigidBodyForceMoment,
+    ThermalAssessment,
+    ThermalLimits,
+    assess_thermal_limits,
+)
+from .rigid_body_frames import EarthRotationAdapter
+from .scenario import (
+    ControlContract,
+    OutputContract,
+    RandomSeed,
+    ResolutionRecord,
+    ResolvedScenario,
+    ScenarioCompileError,
+    ScenarioCompiler,
+    ScenarioRequest,
+    ScenarioRuntimeContract,
+    ScenarioSource,
+    StatusContract,
+)
 from .state import PointMassRates, PointMassState
 from .table_explorer import (
     AxisInterpolationBracket,
@@ -45,5 +71,17 @@ from .table_explorer import (
     inspect_table_document,
     inspect_table_file,
 )
+from .vehicle import (
+    AerodynamicOutput,
+    AeroQueryContext,
+    MassProperties,
+    PreparedAerodynamicCoefficients,
+    PreparedCoefficientTable,
+    PropulsionOutput,
+    StageDefinition,
+    StagedPropulsion,
+    TableAerodynamicModel,
+)
+from .visualization import render_run_artifact_html, render_run_artifact_plots
 
-__all__ = ["__version__", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "modes", "numeric", "optimization", "outputs", "radar", "runtime", "searches", "simulation", "state", "state_rates", "table_explorer", "tables", "visualization", "AxisInterpolationBracket", "DynamicsKind", "DynamicsMode", "EventRecord", "InterpolationExplanation", "Kinematic6DofState", "PointMassRates", "PointMassState", "Quaternion", "RunArtifact", "SegmentSpan", "TableInspection", "TableInspectionArtifact", "TableInspectionFormat", "TableInspectionStatus", "TelemetryChannel", "VehicleKind", "VehicleTelemetry", "build_run_artifact", "explain_interpolation", "inspect_table_document", "inspect_table_file"]
+__all__ = ["__version__", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "modes", "numeric", "optimization", "outputs", "radar", "rigid_body", "rigid_body_frames", "runtime", "scenario", "searches", "simulation", "state", "state_rates", "table_explorer", "tables", "vehicle", "visualization", "AeroQueryContext", "AerodynamicOutput", "AxisInterpolationBracket", "ControlContract", "DebugFamily", "DynamicsKind", "DynamicsMode", "EarthRotationAdapter", "EventRecord", "FamilyDebugPlan", "FamilyDebugRenderReport", "InterpolationExplanation", "Kinematic6DofState", "MassProperties", "OutputContract", "PointMassRates", "PointMassState", "PreparedAerodynamicCoefficients", "PreparedCoefficientTable", "PropulsionOutput", "Quaternion", "RIGID_BODY_STATE_NAMES", "RandomSeed", "ResolutionRecord", "ResolvedScenario", "RigidBody6DofModel", "RigidBody6DofState", "RigidBodyForceMoment", "RunArtifact", "ScenarioCompileError", "ScenarioCompiler", "ScenarioRequest", "ScenarioRuntimeContract", "ScenarioSource", "SegmentSpan", "StageDefinition", "StagedPropulsion", "StatusContract", "TableAerodynamicModel", "TableInspection", "TableInspectionArtifact", "TableInspectionFormat", "TableInspectionStatus", "TelemetryChannel", "ThermalAssessment", "ThermalLimits", "VehicleKind", "VehicleTelemetry", "assess_thermal_limits", "build_family_debug_plan", "build_run_artifact", "explain_interpolation", "family_profile", "inspect_table_document", "inspect_table_file", "render_family_debug_artifacts", "render_run_artifact_html", "render_run_artifact_plots"]

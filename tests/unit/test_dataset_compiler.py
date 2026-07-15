@@ -34,13 +34,14 @@ def test_flatten_rectangular_grid_uses_last_axis_fastest() -> None:
 def test_generic_cruise_compiles_and_round_trips_source_nodes(tmp_path: Path) -> None:
     generated = compile_dataset(ROOT / "dataset.yaml", tmp_path)
     assert sorted(path.name for path in generated.values()) == sorted(
-        ["demo-cg.tbl", "demo-clean-cd.tbl", "demo-clean-cl.tbl", "demo-flap-dcd.tbl", "demo-flap-dcl.tbl", "demo-jet-mdot.tbl", "demo-jet-thrust.tbl", "demo-speedbrake-dcd.tbl", "provenance.json"]
+        ["demo-cg.tbl", "demo-clean-cd.tbl", "demo-clean-cl.tbl", "demo-flap-dcd.tbl", "demo-flap-dcl.tbl", "demo-jet-mdot.tbl", "demo-jet-thrust.tbl", "demo-speedbrake-dcd.tbl", "demo-wind-down.tbl", "demo-wind-heading.tbl", "demo-wind-speed.tbl", "provenance.json"]
     )
 
     provenance = json.loads(generated["provenance"].read_text(encoding="utf-8"))
     assert provenance["dataset_id"] == "generic_cruise_demo"
     assert provenance["generator"]["flight_qualified"] is False
-    assert len(provenance["source_hashes"]) == 5
+    assert len(provenance["source_hashes"]) == 6
+    assert provenance["conventions"]["wind_heading"] == "to"
 
     for path in generated.values():
         if path.suffix != ".tbl":

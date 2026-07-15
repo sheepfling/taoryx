@@ -54,4 +54,19 @@ ambiguities:
       - tests/unit/test_gravity.py
       - tests/unit/test_verification_baseline.py
     note: Source-value rounding and atmosphere-latitude convention remain explicit and reviewer-trackable.
+  - id: TAOS-AMBMAT-0004
+    category: wind_heading_and_component_direction
+    source:
+      manual_pages: [4-89]
+      manual_sections: [4.4.14]
+      registry: verification/spec/ambiguities.yaml
+    ambiguity_ids:
+      - TAOS-AMB-0006
+    candidate_classes:
+      - manual_from_direction
+      - legacy_vector_direction
+    tests:
+      - tests/unit/test_mission_family_examples.py
+      - tests/unit/test_runtime_algorithms.py
+    note: The legacy equivalence fixture and the documentary wind-heading prose are preserved as competing evidence until reviewed.
 ####

@@ -1,0 +1,8 @@
+schema_version: 1
+showcase_id: suborbital_ballistic_return
+plots:
+  - {id: flight_phase_timeline, title: Launch, coast, apogee, and return timeline, x: time, y: phase, events: [launch, apogee, atmospheric-return, ground]}
+  - {id: altitude_range, title: Altitude and downrange history, x: time, y: [altitude, range]}
+  - {id: speed_mach, title: Speed and Mach history, x: time, y: [speed, mach]}
+  - {id: dynamic_pressure_drag, title: Dynamic pressure and drag corridor, x: time, y: [dynamic_pressure, drag]}
+  - {id: mass_load, title: Mass and normal-load history, x: time, y: [mass, normal_load]}

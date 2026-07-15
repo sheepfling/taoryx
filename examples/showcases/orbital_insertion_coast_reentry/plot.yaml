@@ -1,0 +1,8 @@
+schema_version: 1
+showcase_id: orbital_insertion_coast_reentry
+plots:
+  - {id: orbital_phase_timeline, title: Orbital phase and event timeline, x: time, y: phase, events: [insertion-burn, apoapsis, periapsis, reentry]}
+  - {id: altitude_speed, title: Altitude and inertial speed, x: time, y: [altitude, speed]}
+  - {id: orbital_elements, title: Orbital energy and angular momentum, x: time, y: [specific_orbital_energy, angular_momentum]}
+  - {id: ground_track, title: Orbital ground track, x: longitude_deg, y: latitude_deg}
+  - {id: reentry_corridor, title: Reentry flight-path corridor, x: altitude, y: [speed, flight_path_angle]}

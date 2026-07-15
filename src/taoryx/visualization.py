@@ -12,12 +12,15 @@ The plotting layer is intentionally dependency-light.  It supports:
 from __future__ import annotations
 
 import io
+import json
 import math
 from dataclasses import dataclass
 from html import escape
 from itertools import product
+from pathlib import Path
 from typing import Any
 
+from taoryx.outputs import RunArtifact, TelemetryChannel, VehicleTelemetry
 from taoryx.tables import PreparedTable, prepare_table
 
 AxisKey = int | str
@@ -109,6 +112,176 @@ def render_table_png(
     figure.savefig(buffer, format="png", dpi=dpi, bbox_inches="tight")
     plt.close(figure)
     return buffer.getvalue()
+
+
+def render_run_artifact_html(
+    artifact: RunArtifact,
+    path: str | Path,
+    *,
+    vehicle_id: str | None = None,
+    channels: tuple[str, ...] = (),
+) -> Path:
+    """Render selected semantic telemetry channels into a standalone HTML view.
+
+    The renderer consumes only :class:`RunArtifact`; unavailable requested
+    channels are recorded in the page metadata instead of being synthesized.
+    """
+
+    selected_ids = (vehicle_id,) if vehicle_id is not None else tuple(artifact.vehicles)
+    panels: list[str] = []
+    omitted: list[dict[str, str]] = []
+    for selected_id in selected_ids:
+        vehicle = artifact.vehicles.get(selected_id)
+        if vehicle is None:
+            omitted.append({"vehicle": selected_id, "reason": "vehicle unavailable"})
+            continue
+        requested = channels or _default_artifact_channels(vehicle)
+        for channel_name in requested:
+            channel = vehicle.channels.get(channel_name)
+            if channel is None:
+                omitted.append({"vehicle": selected_id, "channel": channel_name, "reason": "channel unavailable"})
+                continue
+            panels.append(_render_artifact_channel_svg(vehicle, channel))
+    payload = {
+        "schema_version": artifact.schema_version,
+        "scenario_identity": artifact.scenario_identity,
+        "problem": artifact.problem,
+        "vehicles": list(artifact.vehicles),
+        "requested_channels": list(channels),
+        "omitted": omitted,
+    }
+    body = "\n".join(panels) or '<p class="empty">No renderable channels were selected.</p>'
+    document = (
+        "<!doctype html>\n<html><head><meta charset='utf-8'>"
+        f"<title>TAORYX run: {escape(artifact.problem)}</title>"
+        "<style>body{font-family:system-ui,sans-serif;background:#f8fafc;color:#172033;margin:2rem}"
+        ".panel{display:inline-block;vertical-align:top;margin:0 1rem 1rem 0;background:white}"
+        ".empty{padding:2rem;background:white;border:1px solid #cbd5e1}</style></head>"
+        f"<body><h1>{escape(artifact.problem)}</h1><p>Scenario identity: {escape(artifact.scenario_identity or 'unresolved')}</p>"
+        f"{body}<script type='application/json' id='taoryx-metadata'>{escape(json.dumps(payload, sort_keys=True))}</script></body></html>\n"
+    )
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(document, encoding="utf-8")
+    return destination
+
+
+def render_run_artifact_plots(
+    artifact: RunArtifact,
+    directory: str | Path,
+    *,
+    vehicle_id: str | None = None,
+    channels: tuple[str, ...] = (),
+    dpi: int = 140,
+) -> tuple[Path, ...]:
+    """Render artifact telemetry to deterministic static PNG plots.
+
+    Only normalized channel values in ``artifact`` are consumed. Missing or
+    non-numeric channels are recorded in ``plot-manifest.json`` and omitted;
+    the renderer never reopens source files or evaluates model expressions.
+    """
+
+    if dpi <= 0:
+        raise ValueError("plot dpi must be positive")
+    matplotlib = _get_matplotlib()
+    destination = Path(directory)
+    destination.mkdir(parents=True, exist_ok=True)
+    selected_ids = (vehicle_id,) if vehicle_id is not None else tuple(sorted(artifact.vehicles))
+    rendered: list[Path] = []
+    omitted: list[dict[str, str]] = []
+    manifest: dict[str, object] = {
+        "schema_version": artifact.schema_version,
+        "scenario_identity": artifact.scenario_identity,
+        "renderer": "taoryx.visualization.render_run_artifact_plots",
+        "dpi": dpi,
+        "plots": [],
+        "omitted": omitted,
+    }
+    for selected_id in selected_ids:
+        vehicle = artifact.vehicles.get(selected_id)
+        if vehicle is None:
+            omitted.append({"vehicle": selected_id, "reason": "vehicle unavailable"})
+            continue
+        requested = channels or _default_artifact_channels(vehicle)
+        for channel_name in requested:
+            channel = vehicle.channels.get(channel_name)
+            if channel is None:
+                omitted.append({"vehicle": selected_id, "channel": channel_name, "reason": "channel unavailable"})
+                continue
+            points = [(time, value) for time, value in zip(vehicle.times, channel.values, strict=True) if value is not None and math.isfinite(value)]
+            if not points:
+                omitted.append({"vehicle": selected_id, "channel": channel_name, "reason": "no numeric samples"})
+                continue
+            figure, axis = matplotlib.subplots(figsize=(7.2, 3.6), layout="constrained")
+            try:
+                figure.patch.set_facecolor("white")
+                axis.plot([point[0] for point in points], [point[1] for point in points], color="#2563eb", linewidth=2.0)
+                axis.set_title(f"{selected_id}: {channel.semantic_name}", loc="left", fontsize=13, fontweight="semibold")
+                axis.set_xlabel("time")
+                axis.set_ylabel(channel.unit or channel.semantic_name)
+                axis.grid(True, color="#cbd5e1", linewidth=0.8)
+                safe_name = _plot_filename(selected_id, channel.semantic_name)
+                plot_path = destination / f"{safe_name}.png"
+                figure.savefig(plot_path, format="png", dpi=dpi, bbox_inches="tight")
+            finally:
+                matplotlib.close(figure)
+            rendered.append(plot_path)
+            cast_plots = manifest["plots"]
+            assert isinstance(cast_plots, list)
+            cast_plots.append({"vehicle": selected_id, "channel": channel.semantic_name, "path": plot_path.name, "unit": channel.unit})
+    (destination / "plot-manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return tuple(rendered)
+
+
+def _plot_filename(vehicle_id: str, channel_name: str) -> str:
+    return "_".join("".join(character if character.isalnum() else "-" for character in value).strip("-") or "value" for value in (vehicle_id, channel_name))
+
+
+def _default_artifact_channels(vehicle: VehicleTelemetry) -> tuple[str, ...]:
+    preferred = (
+        "position.altitude.geodetic",
+        "kinematics.speed",
+        "mass.total",
+        "aerodynamics.dynamic_pressure",
+    )
+    return tuple(name for name in preferred if name in vehicle.channels) or tuple(vehicle.channels)[:4]
+
+
+def _render_artifact_channel_svg(vehicle: VehicleTelemetry, channel: TelemetryChannel) -> str:
+    width = 720
+    height = 300
+    left, right, top, bottom = 72, 24, 42, 48
+    values = [(time, value) for time, value in zip(vehicle.times, channel.values, strict=True) if value is not None]
+    if not values:
+        return f"<div class='panel'><p>{escape(channel.semantic_name)} has no numeric samples.</p></div>"
+    x_min, x_max = values[0][0], values[-1][0]
+    y_min = min(value for _, value in values)
+    y_max = max(value for _, value in values)
+    if math.isclose(x_min, x_max):
+        x_min -= 1.0
+        x_max += 1.0
+    if math.isclose(y_min, y_max):
+        y_min -= 1.0
+        y_max += 1.0
+    plot_width = width - left - right
+    plot_height = height - top - bottom
+    points = " ".join(
+        f"{left + (time - x_min) / (x_max - x_min) * plot_width:.2f},{top + (1.0 - (value - y_min) / (y_max - y_min)) * plot_height:.2f}"
+        for time, value in values
+    )
+    title = f"{vehicle.vehicle_id}: {channel.semantic_name}"
+    return (
+        f"<div class='panel'><svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' "
+        f"viewBox='0 0 {width} {height}' role='img' aria-label='{escape(title)}'>"
+        f"<rect width='{width}' height='{height}' fill='#fff' stroke='#cbd5e1' rx='10'/>"
+        f"<text x='{left}' y='25' font-family='sans-serif' font-size='16' font-weight='700'>{escape(title)}</text>"
+        f"<line x1='{left}' y1='{top}' x2='{left}' y2='{height-bottom}' stroke='#64748b'/>"
+        f"<line x1='{left}' y1='{height-bottom}' x2='{width-right}' y2='{height-bottom}' stroke='#64748b'/>"
+        f"<polyline fill='none' stroke='#2563eb' stroke-width='2' points='{points}'/>"
+        f"<text x='{left}' y='{height-14}' font-family='monospace' font-size='11'>{x_min:g} .. {x_max:g} s</text>"
+        f"<text x='{width-right}' y='{top+14}' text-anchor='end' font-family='monospace' font-size='11'>{y_min:g} .. {y_max:g}</text>"
+        "</svg></div>"
+    )
 ####
 
 

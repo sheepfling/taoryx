@@ -1,0 +1,25 @@
+schema_version: 1
+showcase_id: 6dof_stage_coast_entry
+plots:
+  - id: phase_timeline
+    title: Flight phase timeline
+    x: time
+    y: phase
+    events: [stage-1-separation, stage-2-burnout, apogee, entry-thermal-control]
+  - id: mass_thrust
+    title: Mass and thrust history
+    x: time
+    y: [mass, propellant_mass, thrust]
+  - id: ascent_apogee
+    title: Altitude and vertical velocity
+    x: time
+    y: [altitude, vertical_velocity]
+  - id: thermal_corridor
+    title: Thermal entry corridor
+    x: time
+    y: [heat_rate, heat_load]
+    limits: [maximum_heat_rate, maximum_heat_load]
+  - id: attitude_rates
+    title: Attitude and body rates
+    x: time
+    y: [qw, qx, qy, qz, wx, wy, wz]

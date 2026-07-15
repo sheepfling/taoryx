@@ -1,0 +1,23 @@
+(source-runtime-branch)
+*atmos none
+*earth spherical gm=0 omega=0
+*trajectory 1 vehicle start on 1
+  *define scheduled_throttle
+    if (time < 1) {
+      scheduled_throttle = 0.25;
+    } else {
+      scheduled_throttle = 0.75;
+    }
+  *define integral fuel_used=0
+    fuel_used = scheduled_throttle;
+  *initial geodetic alt=0 long=0 lat=0 vel=10 gama=0 psi=0 time=0 wt=10
+  *file source-runtime-branch.dat time scheduled_throttle fuel_used
+  *segment 1 boost
+    *integ dt=0.5
+    *prop thrust=10*scheduled_throttle mdot=0
+    *when time>1 goto 2
+  *segment 2 cruise
+    *integ dt=0.5
+    *prop thrust=4*scheduled_throttle mdot=0
+    *when time>2 stop
+*end

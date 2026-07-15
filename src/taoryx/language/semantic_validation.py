@@ -14,7 +14,7 @@ from taoryx.language.expressions import (
     ParameterExpression,
     TableReferenceExpression,
 )
-from taoryx.language.grammar_contracts import DOCUMENTED_STATE_VARIABLES
+from taoryx.language.grammar_contracts import DOCUMENTED_STATE_VARIABLES, GrammarProfile
 from taoryx.language.models import (
     DefineBlock,
     EgsBlock,
@@ -111,6 +111,96 @@ def _walk_model_expressions(value: object, location: object) -> Iterator[tuple[E
 
 def _normalize_variable_name(name: str) -> str:
     return name.casefold().split("[", 1)[0]
+####
+
+
+def _validate_search_topology(problem, search_blocks: list[SearchBlock], diagnostics: list[Diagnostic]) -> None:
+    """Reject partially intersecting search loops on the same trajectory."""
+
+    intervals: list[tuple[int, int, int, SearchBlock]] = []
+    for search in search_blocks:
+        if search.search_id is None or search.objective is None or search.objective.left.segment is None:
+            continue
+        trajectory_number = search.objective.left.trajectory or search.objective.left.trajectory_subscript
+        if trajectory_number is None:
+            continue
+        trajectory = next((item for item in problem.trajectories if item.number == trajectory_number), None)
+        if trajectory is None:
+            continue
+        start_segment = _search_start_segment(trajectory, search.search_id)
+        if start_segment is None:
+            continue
+        end_segment = search.objective.left.segment
+        if start_segment > end_segment:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="invalid-search-interval",
+                    message=f"Search {search.search_id} starts on segment {start_segment} after its objective segment {end_segment}.",
+                    location=search.location,
+                )
+            )
+            continue
+        intervals.append((trajectory_number, start_segment, end_segment, search))
+    ####
+    for index, (trajectory, first_start, first_end, first_search) in enumerate(intervals):
+        for _, second_start, second_end, second_search in intervals[index + 1 :]:
+            if trajectory != _search_trajectory(second_search):
+                continue
+            if _search_intervals_partially_overlap(first_start, first_end, second_start, second_end):
+                diagnostics.append(
+                    Diagnostic(
+                        severity=Severity.ERROR,
+                        code="partially-overlapping-searches",
+                        message=(
+                            f"Searches {first_search.search_id} and {second_search.search_id} partially overlap "
+                            f"on trajectory {trajectory}; search intervals must be disjoint or wholly nested."
+                        ),
+                        location=second_search.location,
+                    )
+                )
+            ####
+        ####
+    ####
+####
+
+
+def _search_start_segment(trajectory, search_id: int) -> int | None:
+    """Return the first segment containing a search placeholder."""
+
+    for segment in sorted(trajectory.segments, key=lambda item: item.location.line):
+        if any(
+            isinstance(expression, ParameterExpression)
+            and expression.family == "search"
+            and expression.index == search_id
+            for expression, _ in _walk_model_expressions(segment, segment.location)
+        ):
+            return segment.number
+        ####
+    ####
+    if any(
+        isinstance(expression, ParameterExpression)
+        and expression.family == "search"
+        and expression.index == search_id
+        for block in trajectory.blocks
+        for expression, _ in _walk_model_expressions(block, block.location)
+    ):
+        return trajectory.start_segment
+    return None
+####
+
+
+def _search_trajectory(search: SearchBlock) -> int | None:
+    if search.objective is None:
+        return None
+    return search.objective.left.trajectory or search.objective.left.trajectory_subscript
+####
+
+
+def _search_intervals_partially_overlap(first_start: int, first_end: int, second_start: int, second_end: int) -> bool:
+    """Return true for overlap without containment."""
+
+    return first_start < second_start < first_end < second_end or second_start < first_start < second_end < first_end
 ####
 
 
@@ -273,6 +363,8 @@ def validate_problem(
                 ####
             ####
         ####
+        if document.grammar_profile is GrammarProfile.TAOS96:
+            _validate_search_topology(problem, search_blocks, diagnostics)
         trajectory_by_number = {trajectory.number: trajectory for trajectory in problem.trajectories}
 
         def validate_endpoint(endpoint, location: object, *, default_trajectory: int | None = None) -> None:

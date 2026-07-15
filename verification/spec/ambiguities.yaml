@@ -147,3 +147,31 @@ ambiguities:
       mathematical: pending
       historical: pending
     notes: The branch forms are documented in the wind-coordinate section and should remain explicit rather than collapsed into a single symbolic identity.
+  - id: TAOS-AMB-0006
+    location:
+      source_page: 4-89
+      section: 4.4.14
+    category: wind-heading-and-component-direction
+    source_form: The manual defines windh as the direction from which wind blows and defines positive east/north components as motion from those directions, while the legacy metamorphic fixtures compare windh=90 with a positive east component as the same velocity vector.
+    candidate_interpretations:
+      - id: manual_from_direction
+        description: Interpret windh and component signs as meteorological source directions, then form the physical velocity vector toward the opposite direction.
+      - id: legacy_vector_direction
+        description: Preserve the existing runtime and metamorphic fixtures, where heading/components directly describe the velocity vector used in V_air=V_earth-V_wind.
+    evidence:
+      internal:
+        - manual/chapters/chapter04/04_14_wind.tex
+        - tests/fixtures/taos_e2e_v23/manifest.yaml#m007_wind_representation_equivalence
+        - src/taoryx/runtime/lowering.py#_wind_observables
+      external: []
+    decision:
+      documentary_edition: preserve_manual_from_direction
+      numerical_kernel: legacy_vector_direction_pending_adjudication
+      status: unresolved
+    tests:
+      - tests/unit/test_mission_family_examples.py
+      - tests/unit/test_runtime_algorithms.py
+    reviewers:
+      mathematical: pending
+      historical: pending
+    notes: New mission-family claims must name the selected convention; no historical compatibility claim may use this path until the discrepancy is adjudicated.

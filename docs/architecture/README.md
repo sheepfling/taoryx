@@ -8,6 +8,14 @@ turning the `.prb` parser into the simulator.
 Use this section when you want the runtime shape, the table explorer / plotter
 boundary, the telemetry contract, or the analysis workspace in one place.
 
+The broader implementation sequence is tracked in
+[`../plan/taoryx-successor-roadmap.md`](../plan/taoryx-successor-roadmap.md).
+The native guided rigid-body work is staged separately in
+[`../plan/native-guided-6dof-implementation.md`](../plan/native-guided-6dof-implementation.md).
+The composition, resolved-scenario, artifact, and visualization sequence is
+tracked in
+[`../plan/composable-scenario-runtime.md`](../plan/composable-scenario-runtime.md).
+
 ## System layers
 
 | Layer | Manual source | Planned package boundary |
@@ -28,6 +36,72 @@ controls, and renders outputs and summaries. It does not claim numerical
 equivalence with historical TAOS 96.0, and unsupported or ambiguous language
 shapes are diagnosed rather than silently executed.
 
+## Batch plus live execution
+
+The core TAORYX differentiator is that batch analysis and live control use the
+same executable model. A `.prb` sequence can be parsed, validated, lowered,
+and run deterministically like TAOS. The resolved runtime graph can also be
+stepped from an external player, notebook, autopilot, reinforcement-learning
+agent, or hardware adapter through bounded control channels. The controller
+changes commands and effectors; it does not bypass the physical state model.
+
+The execution modes are deliberately composable:
+
+```text
+source .prb/.tbl
+       |
+       v
+parse -> validate -> lower -> RuntimeProblem
+                              |
+              +---------------+----------------+
+              |                                |
+              v                                v
+       batch integration                 InteractiveSession
+       fixed command plan                pause/step/commands
+              |                                |
+              +---------------+----------------+
+                              v
+                    telemetry / replay artifact
+                              |
+                              v
+                    clone_at(time) -> branch
+```
+
+This supports controlled experiments such as comparing an open-loop batch
+trajectory with a player or AI policy, interrupting at a flight event, changing
+control laws, and continuing from the exact or interpolated runtime state. The
+interactive and branching contracts are TAORYX extensions and are not claims
+of historical TAOS 96.0 behavior.
+
+## Program and emulator boundary
+
+`taoryx.runtime.program.LoadedProgram` is the explicit bridge between the
+generic problem-file program and the runtime emulator. It retains the
+validated `ProblemDocument`, source paths, table documents, lowered tables,
+executable cases, controls, searches, and segment structure.
+
+```python
+from taoryx.runtime.program import LoadedProgram
+
+program = LoadedProgram.load("mission.prb", ("aero.tbl",), profile="taoryx")
+summary = program.inspect()
+runtime = program.case()
+branch = program.clone_case_at(12.5)
+program.set_control("throttle", 0.8)
+live = program.inspect_case()
+```
+
+This makes the loaded program inspectable before execution and makes copying a
+running case a normal operation rather than an ad hoc serialization trick.
+The same loaded source can feed batch execution, interactive control, replay,
+or a cloned experiment branch. Runtime controls and parameters can be modified
+through explicit APIs; source text is not silently rewritten, so a modified
+emulator state can always be distinguished from a modified source program.
+
+Runtime consumers should use the tiered observation API for live data instead
+of digging through internal named state: standard flight vectors first,
+declared model/status values second, and deep diagnostics only on request.
+
 ## Related catalog pages
 
 - `metadata/algorithm_catalog/` holds the reviewed planning catalog and the
@@ -43,6 +117,12 @@ shapes are diagnosed rather than silently executed.
   runtime artifact consumed by reports and visualization backends.
 - [`docs/architecture/table-explorer.md`](table-explorer.md) explains the
   renderer-independent table inspection and plotting boundary.
+- [`docs/architecture/interactive-engine.md`](interactive-engine.md) defines
+  deterministic external stepping, command routing, replay, and artifacts.
+- [`docs/extensions/README.md`](../extensions/README.md) defines the claim
+  boundary and documentation contract for TAORYX-only capabilities.
+- [`examples/showcases/README.md`](../../examples/showcases/README.md) lists
+  reproducible demonstrations and their plot contracts.
 - [`../../analysis/tumbling/README.md`](../../analysis/tumbling/README.md)
   collects the current aerodynamic-analysis workspace and generated studies.
 
@@ -80,3 +160,4 @@ parse → validate → resolve scenario
 Every implemented equation should link back to its canonical ID in
 `metadata/equations.csv`; implementation coverage is separate from manual
 transcription coverage.
+- [Environment providers](environment-providers.md)

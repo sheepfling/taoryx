@@ -20,7 +20,7 @@ class DynamicsMode(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class Quaternion:
-    """Unit quaternion mapping body vectors into the ECFC reference frame."""
+    """Unit quaternion mapping body vectors into the selected reference frame."""
 
     w: float
     x: float
@@ -48,13 +48,32 @@ class Quaternion:
         )
         ####
 
+    def conjugate(self) -> Quaternion:
+        """Return the inverse rotation for this unit quaternion."""
+
+        return Quaternion(self.w, -self.x, -self.y, -self.z)
+        ####
+
+    def rotate(self, vector: Vector3) -> Vector3:
+        """Map a body-frame vector into the state's reference coordinates."""
+
+        pure = Quaternion(0.0, vector.x, vector.y, vector.z)
+        rotated = self.normalized().multiply(pure).multiply(self.normalized().conjugate())
+        return Vector3(rotated.x, rotated.y, rotated.z)
+        ####
+
+    def derivative(self, body_rate: Vector3) -> Quaternion:
+        """Return the quaternion derivative for a body-frame angular rate."""
+
+        return self.multiply(Quaternion(0.0, body_rate.x, body_rate.y, body_rate.z))
+        ####
+
     def integrate_body_rate(self, body_rate: Vector3, step_size: float) -> Quaternion:
         """Propagate attitude using a controller-supplied body rate."""
 
         if not math.isfinite(step_size) or step_size <= 0.0:
             raise ValueError("attitude step size must be positive and finite")
-        omega = Quaternion(0.0, body_rate.x, body_rate.y, body_rate.z)
-        derivative = self.multiply(omega)
+        derivative = self.derivative(body_rate)
         return Quaternion(
             self.w + 0.5 * step_size * derivative.w,
             self.x + 0.5 * step_size * derivative.x,

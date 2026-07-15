@@ -1,0 +1,8 @@
+schema_version: 1
+showcase_id: suborbital_ballistic_return
+invariants:
+  - {id: apogee_detected, status: planned, unit: event, tolerance: 0}
+  - {id: dynamic_pressure_peak_detected, status: planned, unit: Pa, tolerance: 0.0}
+  - {id: atmospheric_return, status: planned, unit: event, tolerance: 0}
+  - {id: ground_event, status: planned, unit: event, tolerance: 0}
+limitations: [averaged tumble representation, generated aerodynamic data is synthetic analysis output]

@@ -159,7 +159,7 @@ def compute_trajectories(
             if vehicle.events
         }
         if any(immediate_crossings.values()):
-            if _apply_event_crossings(active, immediate_crossings):
+            if _apply_event_crossings(problem, active, immediate_crossings):
                 if _has_pending_activation(problem):
                     return ExecutionResult(_histories(problem), False, "dependency_unresolved")
                 return ExecutionResult(_histories(problem), True, "stop_condition")
@@ -171,7 +171,11 @@ def compute_trajectories(
         previous = {vehicle.name: vehicle.state for vehicle in active}
         integrate_active_vehicles(problem, step)
         crossings_by_vehicle = {
-            vehicle.name: refine_segment_final_condition(previous[vehicle.name], vehicle.state, vehicle.events)
+            vehicle.name: tuple(
+                crossing
+                for crossing in refine_segment_final_condition(previous[vehicle.name], vehicle.state, vehicle.events)
+                if crossing.action == "stop" or crossing.name not in vehicle.fired_events
+            )
             for vehicle in active
             if vehicle.events
         }
@@ -199,7 +203,7 @@ def compute_trajectories(
                 )
                 for vehicle in active
             }
-            if _apply_event_crossings(active, applicable_crossings):
+            if _apply_event_crossings(problem, active, applicable_crossings):
                 if _has_pending_activation(problem):
                     return ExecutionResult(_histories(problem), False, "dependency_unresolved")
                 return ExecutionResult(_histories(problem), True, "stop_condition")
@@ -240,12 +244,14 @@ def _current_event_crossings(vehicle: RuntimeVehicle) -> tuple[EventCrossing, ..
     return tuple(
         EventCrossing(condition.name, vehicle.state.time, condition.function(vehicle.state), condition.action)
         for condition in vehicle.events
+        if condition.action == "stop" or condition.name not in vehicle.fired_events
         if (condition.predicate(vehicle.state) if condition.predicate is not None else condition.function(vehicle.state) >= 0.0)
     )
 ####
 
 
 def _apply_event_crossings(
+    problem: RuntimeProblem,
     active: Sequence[RuntimeVehicle],
     crossings_by_vehicle: Mapping[str, Sequence[EventCrossing]],
 ) -> bool:
@@ -253,11 +259,29 @@ def _apply_event_crossings(
 
     for vehicle in active:
         for crossing in crossings_by_vehicle.get(vehicle.name, ()):
+            if crossing.action != "stop" and crossing.name in vehicle.fired_events:
+                continue
+            segment_from = vehicle.segment_number
             handler = vehicle.event_handlers.get(crossing.name)
             if handler is not None:
                 vehicle.state = handler(vehicle.state)
                 vehicle.state = _refresh_runtime_state(vehicle, vehicle.state)
                 vehicle.history[-1] = vehicle.state
+            vehicle.fired_events.add(crossing.name)
+            condition = next((item for item in vehicle.events if item.name == crossing.name), None)
+            problem.event_history.append(
+                {
+                    "name": crossing.name,
+                    "vehicle": vehicle.name,
+                    "time": crossing.time,
+                    "action": crossing.action,
+                    "signal": condition.signal if condition is not None and condition.signal is not None else crossing.name,
+                    "residual": crossing.residual,
+                    "segment_from": segment_from,
+                    "segment_to": vehicle.segment_number,
+                    "source": condition.source if condition is not None else None,
+                }
+            )
             if crossing.action == "stop":
                 vehicle.active = False
                 vehicle.activation_pending = False
@@ -355,6 +379,7 @@ def _refresh_runtime_state(vehicle: RuntimeVehicle, state: RuntimeState, *, publ
     """Refresh environment and user-defined values at every derivative stage."""
 
     named = dict(state.named)
+    named.update(vehicle.control_values)
     if vehicle.environment_evaluator is not None:
         environment_values = named
         if not publish_rates:

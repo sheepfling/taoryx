@@ -32,6 +32,34 @@ The dependency-free SQLite sink preserves the complete plotter contract:
 artifact.write_sqlite("artifacts/run.sqlite", run_id="case-01")
 ```
 
+Scenario-linked artifacts also retain the resolved scenario identity,
+requested composition patches, applied resolution records, command/event metadata,
+and visualization metadata. SQLite
+stores these under `taoryx_run_metadata` so JSON and database views can be
+reconciled without reopening source files.
+
+For a renderer-independent HTML view:
+
+```bash
+taoryx artifact html artifacts/case-01.json --output artifacts/case-01.html \
+  --channel position.altitude.geodetic
+```
+
+The HTML renderer consumes only `RunArtifact`. Requested channels that are not
+present are recorded as omitted panels in its metadata rather than inferred
+from source expressions.
+
+Static PNG plots use the same artifact-only boundary:
+
+```bash
+taoryx artifact plot artifacts/case-01.json --output-dir artifacts/case-01-plots \
+  --channel position.altitude.geodetic
+```
+
+The command writes one PNG per available channel and a deterministic
+`plot-manifest.json` containing the scenario identity, renderer metadata, and
+omitted-channel reasons.
+
 It creates these normalized tables:
 
 | Table | Contents |
@@ -54,6 +82,10 @@ The long-form sample table is intentional: new channels do not require a
 schema migration, while channel metadata retains the interpolation policy that
 plotters need for angles, stepwise segment values, and future quaternion or
 event channels.
+
+CSV remains backward-compatible for unlinked artifacts. Scenario-linked CSV
+exports add `schema_version` and `scenario_identity` columns so every selected
+sample can be reconciled with JSON, SQLite, text, and static plot outputs.
 
 ## Orthogonal vehicle and dynamics metadata
 

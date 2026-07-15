@@ -58,6 +58,21 @@ def test_initial_assignment_form_defaults_to_geodetic() -> None:
     assert not document.diagnostics
 
 
+def test_taoryx_ecic_initial_accepts_rigid_body_attitude_state() -> None:
+    document = parse_problem_text(
+        "(demo)\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "*initial ecic\n"
+        "x=1 y=2 z=3 xdt=4 ydt=5 zdt=6 qw=1 qx=0 qy=0 qz=0 mass=10\n"
+        "*segment 1\n"
+        "*when time>1 stop\n"
+        "*end\n",
+        profile="taoryx",
+    )
+
+    assert not document.diagnostics
+
+
 def test_semantic_validation_rejects_unknown_initial_source_segment() -> None:
     document = parse_problem_text(
         "(demo)\n"

@@ -1,0 +1,19 @@
+schema_version: 1
+id: 6dof_stage_coast_entry
+title: Rigid-body staged launch, coast, and thermal entry
+status: scaffolded
+claim_boundary:
+  manual_bounded: false
+  taoryx_extension: true
+  historical_taos_96_compatibility: false
+dynamics_mode: rigid-body-6dof
+source:
+  problem_file: null
+  table_files: []
+  runtime_contract:
+    - src/taoryx/rigid_body.py
+    - src/taoryx/runtime/rigid_body.py
+    - tests/unit/test_rigid_body.py
+outputs:
+  artifact_root: artifacts/showcases/6dof_stage_coast_entry
+  formats: [text, json, sqlite, png]

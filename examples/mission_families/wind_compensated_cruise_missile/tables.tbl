@@ -1,0 +1,14 @@
+(cm-cd)
+table cd(alpha) no-extrap sref=4
+alpha=-20,0,20
+cd=0.08,0.06,0.08
+
+(cm-thrust)
+table thrust(time) no-extrap units=n
+time=0,60
+thrust=1500,1500
+
+(cm-zero-mdot)
+table mdot(time) no-extrap units=kg/sec
+time=0,60
+mdot=0,0

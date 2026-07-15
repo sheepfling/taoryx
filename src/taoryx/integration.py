@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from importlib.util import find_spec
+from typing import Any, cast
 
 from .simulation.contracts import DerivativeModel, SimulationState
 
@@ -154,7 +155,8 @@ def scipy_ivp_step(
         return tuple(float(value) for value in model(current))
     ####
 
-    result = solve_ivp(
+    scipy_solve_ivp = cast(Any, solve_ivp)
+    result = scipy_solve_ivp(
         wrapped,
         (state.time, state.time + step_size),
         state.values,

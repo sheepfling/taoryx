@@ -1,0 +1,6 @@
+invariants:
+  - {id: source_parses, status: required}
+  - {id: scheduled_command_changes, status: required}
+  - {id: integral_stash_is_published, status: required}
+  - {id: clone_starts_at_requested_time, status: required}
+  - {id: clone_can_continue_independently, status: required}

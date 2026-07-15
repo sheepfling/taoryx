@@ -10,6 +10,7 @@ conventions:
   mdot_sign: positive_consumption
   coefficients: wind_axes
   interpolation: multilinear
+  wind_heading: to
 tables:
   - id: demo-clean-cl
     type: cl
@@ -60,6 +61,24 @@ tables:
     source: source/cg.csv
     axes: [wt]
     value_column: cg_x_m
+    extrapolation: no-extrap
+  - id: demo-wind-speed
+    type: windv
+    source: source/wind.csv
+    axes: [alt]
+    value_column: wind_speed_m_s
+    extrapolation: no-extrap
+  - id: demo-wind-heading
+    type: windh
+    source: source/wind.csv
+    axes: [alt]
+    value_column: wind_heading_deg
+    extrapolation: no-extrap
+  - id: demo-wind-down
+    type: windd
+    source: source/wind.csv
+    axes: [alt]
+    value_column: wind_down_m_s
     extrapolation: no-extrap
 provenance:
   generated_by: taoryx-dataset-compiler

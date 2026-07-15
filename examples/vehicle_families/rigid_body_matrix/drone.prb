@@ -1,0 +1,18 @@
+(rigid-body-drone)
+*title Source-driven rigid-body drone family smoke test
+*mode rigid-body-6dof
+*atmos standard
+*earth spherical gm=0 omega=0
+*runtime status vehicle reference-area=2.0 reference-length=1.0 inertia-x=5 inertia-y=6 inertia-z=7 dry-mass-kg=25
+*runtime status actuator maximum-moment=200 maximum-body-rate-deg-s=180
+*runtime status thermal policy=none
+*runtime control bank-deg default=0 lower=-45 upper=45 slew=30
+
+*trajectory 1 drone start on 1
+  *initial ecic x=7000000 y=0 z=0 xdt=0 ydt=120 zdt=0 time=0 mass=25 propellant_mass=0
+  *segment 1 cruise
+    *integ dtprnt=0.1 dt=0.01
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *fly bankgc=0
+    *when time>0.2 stop
+*end

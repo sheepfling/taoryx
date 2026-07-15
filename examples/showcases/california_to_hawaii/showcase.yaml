@@ -1,0 +1,31 @@
+schema_version: 1
+id: california_to_hawaii
+title: Synthetic California-to-Hawaii long-range flight
+status: runnable_synthetic
+claim_boundary:
+  manual_bounded: false
+  taoryx_extension: true
+  historical_taos_96_compatibility: false
+  engineering_validity: false
+parameters:
+  start_latitude_deg: 34.7
+  start_longitude_deg: -120.6
+  target_latitude_deg: 21.31
+  target_longitude_deg: -157.86
+  apogee_altitude_m: 220000.0
+  glide_mach_center: 6.0
+  glide_mach_tolerance: 5.0
+  initial_mass_kg: 12000.0
+  cruise_mass_kg: 8000.0
+  wind_east_m_s: 35.0
+  wind_north_m_s: 8.0
+  sample_interval_s: 10.0
+outputs:
+  artifact_root: artifacts/showcases/california_to_hawaii
+  formats: [text, json, sqlite, png]
+mission_phases:
+  - stage-1-powered
+  - stage-2-powered
+  - coast-to-apogee
+  - hypersonic-glide
+  - terminal-pronav

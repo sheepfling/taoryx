@@ -1,2 +1,5 @@
 (* taoryx-specific extensions; these are not claims about the 1995 manual. *)
 mode-block = "*mode" , ( "point-mass" | "kinematic-6dof" | "rigid-body-6dof" ) ;
+dof-directive = "*3dof" | "*6dof" ;
+runtime-block = "*runtime" , ( "parameter" | "control" | "status" | "event" | "output" ) , identifier , attribute* ;
+attribute = identifier , "=" , token ;

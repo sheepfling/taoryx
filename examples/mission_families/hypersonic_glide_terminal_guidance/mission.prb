@@ -1,0 +1,23 @@
+(hypersonic-glide-terminal-guidance)
+*title Synthetic hypersonic lifting glide with terminal proportional navigation
+*atmos standard
+*earth wgs-84 omega=0
+
+*trajectory 1 glider start on 1
+  *initial geodetic alt=80000 long=0 lat=0 vel=7000 gama=-5 psi=90 time=0 mass=500
+  *file glider.dat time alt vel mach gama relrng[2] alpha cl cd
+  *segment 1 glide
+    *integ dtprnt=0.5 dt=0.05 dtguid=2
+    *inertial ecfc
+    *aero cl=(hg-cl) cd=(hg-cd)
+    *fly propnav=2
+    *when relrng[2]<250 stop
+    *when time=120 stop
+
+*trajectory 2 target start on 1
+  *initial geodetic alt=0 long=0.15 lat=0 vel=150 gama=0 psi=90 time=0 mass=1
+  *file target.dat time xecfc yecfc zecfc
+  *segment 1 ground-track
+    *integ dtprnt=0.5 dt=0.05
+    *when time=120 stop
+*end

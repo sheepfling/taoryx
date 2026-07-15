@@ -1,0 +1,31 @@
+schema_version: 1
+showcase_id: 6dof_stage_coast_entry
+invariants:
+  - id: stage_1_separation_once
+    status: planned
+    unit: event
+    tolerance: 0
+  - id: stage_2_burnout_before_apogee
+    status: planned
+    unit: s
+    tolerance: 0.1
+  - id: apogee_detected
+    status: planned
+    unit: event
+    tolerance: 0
+  - id: heat_rate_within_limit
+    status: planned
+    unit: W/m^2
+    tolerance: 0.01
+  - id: heat_load_within_limit
+    status: planned
+    unit: J/m^2
+    tolerance: 0.01
+  - id: mass_accounting_closes
+    status: planned
+    unit: kg
+    tolerance: 1.0e-9
+limitations:
+  - stage-specific propulsion and inertia model not yet connected
+  - atmospheric drag and heating model not yet connected
+  - integrated launch-to-entry oracle not yet available

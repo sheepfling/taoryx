@@ -6,8 +6,8 @@ from taoryx.contracts import Frame, FrameVector3, Vector3
 from taoryx.language.problem_parser import parse_problem_text
 from taoryx.modes import DynamicsMode, Kinematic6DofState, Quaternion
 from taoryx.runtime.common import RuntimeProblem, RuntimeState, RuntimeVehicle
-from taoryx.runtime.engine import integrate_active_vehicles
-from taoryx.runtime.lowering import _dynamics_mode, _unsupported_features
+from taoryx.runtime.engine import compute_trajectories, integrate_active_vehicles
+from taoryx.runtime.lowering import _dynamics_mode, _unsupported_features, lower_problem_document
 from taoryx.state import PointMassRates, PointMassState
 
 
@@ -37,6 +37,38 @@ def test_rigid_body_mode_is_rejected_instead_of_falling_back() -> None:
     document = parse_problem_text("(demo)\n*mode rigid-body-6dof\n*end\n")
 
     assert _unsupported_features(document.problems[0]) == ("mode rigid-body-6dof",)
+
+
+@pytest.mark.parametrize(("directive", "expected"), (("3dof", DynamicsMode.POINT_MASS), ("6dof", DynamicsMode.RIGID_BODY_6DOF)))
+def test_successor_dof_directive_selects_runtime_mode(directive: str, expected: DynamicsMode) -> None:
+    document = parse_problem_text(f"(demo)\n*{directive}\n*end\n", profile="taoryx")
+
+    assert _dynamics_mode(document.problems[0]) is expected
+
+
+def test_successor_6dof_directive_lowers_to_rigid_body_runtime() -> None:
+    document = parse_problem_text(
+        "(rigid-body-smoke)\n"
+        "*6dof\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecic x=20925646.3255 y=0 z=0 xdt=0 ydt=300 zdt=0 time=0 mass=100\n"
+        "  *segment 1 coast\n"
+        "    *integ dt=0.1\n"
+        "    *when time>0.2 stop\n"
+        "*end\n",
+        profile="taoryx",
+    )
+
+    assert not [item for item in document.diagnostics if item.severity.value == "error"]
+    lowered = lower_problem_document(document)
+
+    assert lowered.unsupported_features == ()
+    vehicle = lowered.cases[0].problem.vehicles["1"]
+    assert vehicle.dynamics_mode is DynamicsMode.RIGID_BODY_6DOF
+    assert vehicle.state.value_names[6:10] == ("qw", "qx", "qy", "qz")
+    result = compute_trajectories(lowered.cases[0].problem, max_steps=10)
+    assert result.stop_reason == "stop_condition"
+    assert result.states["1"][-1].time == pytest.approx(0.2)
 
 
 def test_unknown_mode_is_source_located() -> None:

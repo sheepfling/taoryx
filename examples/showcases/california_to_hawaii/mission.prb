@@ -1,0 +1,51 @@
+(california-to-hawaii)
+*title TAORYX 6-DOF California-to-Hawaii migration showcase
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=7.2921151467e-5 gm=3.986004418e14
+*runtime status vehicle reference-area=5.0 reference-length=1.0 inertia-x=10000.0 inertia-y=10000.0 inertia-z=10000.0 dry-mass-kg=8000.0
+*runtime status target latitude-deg=21.31 longitude-deg=-157.86 altitude-m=0.0 velocity-east-mps=0.0 velocity-north-mps=0.0
+*runtime status route mode=great-circle terminal-guidance-mode=route propnav-attitude-horizon-s=1.0 start-latitude-deg=34.70 start-longitude-deg=-120.60 duration-s=2450.0 powered-end-s=360.0 terminal-start-s=900.0 terminal-time-floor-s=60.0 terminal-capture=true terminal-capture-gain=1.0 terminal-horizontal-gain=1.05 terminal-altitude-gain=0.0002 terminal-radial-damping=2.0 terminal-velocity-damping=0.8 terminal-descent-rate-mps=500.0 terminal-descent-rate-final-mps=2500.0 terminal-climb-rate-mps=4000.0 apogee-altitude-m=220000.0 powered-speed-mps=2500.0 powered-climb-rate-mps=4500.0 glide-speed-mps=6000.0 terminal-speed-mps=2000.0 terminal-command-speed-mps=2000.0 position-capture-gain=0.0
+*runtime status guidance propnav-gain=4.0 max-alpha-deg=20.0 lift-acceleration-per-radian=100.0 attitude-gain=50000.0 rate-damping=5000.0
+*runtime status actuator maximum-moment=250000.0 maximum-body-rate-deg-s=3600.0
+*runtime status thermal policy=stop heat-rate-coefficient=0.002 maximum-heat-rate-w-m2=1000000000.0 maximum-heat-load-j-m2=1000000000000.0
+*runtime status telemetry sample-interval-s=10.0 formats=text,json,sqlite,png
+*runtime control throttle vehicle=1 default=1.0 lower=0.0 upper=1.0
+*runtime control alpha-deg vehicle=1 default=0.0 lower=-20.0 upper=20.0
+*runtime control bank-deg vehicle=1 default=0.0 lower=-180.0 upper=180.0
+
+*trajectory 1 ca-hi-vehicle start on 1
+  *initial ecic
+    x=-2673469.6 y=-4520590.2 z=3636635.6
+    xdt=-3086.3 ydt=747.0 zdt=-266.8
+    qw=0.34238 qx=0.0 qy=-0.62278 qz=-0.70350
+    wx=0.0 wy=0.0 wz=0.0
+    time=0.0 mass=12000.0 propellant_mass=4000.0
+  *segment 1 stage-1-powered
+    *integ dtprnt=10.0 dt=1.0
+    *prop thrust=160000.0 mdot=16.0
+    *when time>180 goto 2
+
+  *segment 2 stage-2-powered
+    *integ dtprnt=10.0 dt=1.0
+    *prop thrust=90000.0 mdot=5.0
+    *when time>360 goto 3
+
+  *segment 3 coast-to-apogee
+    *integ dtprnt=10.0 dt=1.0
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *when time>700 goto 4
+
+  *segment 4 hypersonic-glide
+    *integ dtprnt=10.0 dt=1.0
+    *prop thrust=80000.0 mdot=0.05
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *when time>1650 goto 5
+
+  *segment 5 terminal-pronav
+    *integ dtprnt=10.0 dt=1.0
+    *prop thrust=80000.0 mdot=0.05
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *fly propnav=4
+    *when time>3000 stop
+*end

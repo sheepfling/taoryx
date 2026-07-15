@@ -1,0 +1,11 @@
+schema_version: 1
+id: suborbital_ballistic_return
+title: Suborbital ballistic return debugging showcase
+status: scaffolded
+claim_boundary: {manual_bounded: true, taoryx_extension: false, historical_taos_96_compatibility: false, engineering_validity: false}
+dynamics_mode: point-mass-3dof
+source:
+  problem_file: ../../mission_families/suborbital_ballistic_tumble_return/mission.prb
+  table_files: [generated-by-analysis/tumbling/cone_cd.tbl]
+  runtime_contract: [RunArtifact, segment-events]
+outputs: {artifact_root: artifacts/showcases/suborbital_ballistic_return, formats: [text, json, sqlite, png]}

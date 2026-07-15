@@ -1,0 +1,21 @@
+(two-stage-ballistic-rocket)
+*title Source-driven two-stage rocket ascent and ballistic return
+*atmos standard
+*earth wgs-84 omega=0
+
+*trajectory 1 vehicle start on 1
+  *initial geodetic alt=0 long=0 lat=0 vel=50 gama=80 psi=90 time=0 mass=1000
+  *file vehicle.dat time alt vel mass thrust
+  *segment 1 stage-1-powered
+    *integ dtprnt=1 dt=0.1
+    *prop thrust=100000 mdot=20
+    *when time>20 goto 2
+  *segment 2 stage-2-powered
+    *integ dtprnt=1 dt=0.1
+    *prop thrust=50000 mdot=5
+    *when time>45 goto 3
+  *segment 3 ballistic-coast-and-return
+    *integ dtprnt=1 dt=0.1
+    *when alt<0 stop
+    *when time>1000 stop
+*end

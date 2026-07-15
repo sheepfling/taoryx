@@ -1,0 +1,7 @@
+schema_version: 1
+id: source_runtime_branch
+title: Source problem execution and runtime branching
+status: executable
+claim_boundary: {manual_bounded: false, taoryx_extension: true, historical_taos_96_compatibility: false, engineering_validity: false}
+source: {problem_file: source_runtime_branch.prb, table_files: [], runtime_contract: [source-ingestion, custom-define-state, time-varying-command, runtime-clone]}
+outputs: {artifact_root: build/composition/source-runtime-branch, formats: [json]}

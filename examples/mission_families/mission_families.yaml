@@ -1,0 +1,122 @@
+schema_version: 1
+title: TAORYX canonical mission-family suite
+claim_policy:
+  historical_taos: manual_bounded_only
+  taoryx_extensions: explicitly_labeled
+families:
+  - id: two_stage_ballistic_rocket
+    title: Two-stage rocket ascent, coast, and ballistic return
+    status: verified
+    source: two_stage_ballistic_rocket/mission.prb
+    dynamics_mode: point-mass-3dof
+    capabilities:
+      - two_stage_propulsion
+      - changing_mass
+      - powered_ascent
+      - ballistic_return
+    oracle: tests/unit/test_two_stage_ballistic_rocket.py
+    claims:
+      - source_file_execution
+      - ascent_and_return_phase_coverage
+    exclusions:
+      - engineering_vehicle_performance
+      - rigid_body_6dof
+  - id: staged_rocket_changing_mass
+    title: Two-stage rocket with changing mass and separation
+    status: verified
+    source: ../vehicle_families/staged_rocket/two_stage_demo/mission.prb
+    dynamics_mode: point-mass-3dof
+    capabilities:
+      - variable_mass
+      - stage_separation
+      - trajectory_inheritance
+      - thrust_tables
+    oracle: tests/unit/test_vehicle_family_examples.py
+    claims:
+      - synthetic_runtime_execution
+      - mass_and_stage_transition_invariants
+    exclusions:
+      - historical_taos_96_numerical_compatibility
+      - rigid_body_6dof
+  - id: hypersonic_glide_terminal_guidance
+    title: Hypersonic lifting glide with terminal proportional navigation
+    status: scaffolded
+    source: hypersonic_glide_terminal_guidance/mission.prb
+    dynamics_mode: point-mass-3dof
+    capabilities:
+      - lifting_aerodynamics
+      - atmospheric_reentry
+      - heading_or_flight_path_guidance
+      - terminal_targeting
+    required_runtime:
+      - target_relative_guidance_with_ground_intercept
+      - documented_control_limits
+      - terminal_glide_extension_controller
+    oracle: tests/unit/test_mission_family_examples.py
+  - id: suborbital_ballistic_tumble_return
+    title: Suborbital ascent followed by ballistic tumbling atmospheric return
+    status: scaffolded
+    source: suborbital_ballistic_tumble_return/mission.prb
+    dynamics_mode: point-mass-3dof-averaged-tumble
+    capabilities:
+      - ballistic_reentry
+      - atmosphere
+      - averaged_full_angle_drag
+    required_runtime:
+      - analysis_to_fixture_provenance
+      - integrated_suborbital_return_oracle
+    oracle: tests/unit/test_mission_family_examples.py
+    exclusions:
+      - rigid_body_moment_dynamics
+  - id: wind_compensated_cruise_missile
+    title: Wind-aware cruise missile against a slowly moving target
+    status: scaffolded
+    source: wind_compensated_cruise_missile/mission.prb
+    dynamics_mode: point-mass-3dof
+    capabilities:
+      - wind_provider
+      - heading_hold
+      - thrust_or_attitude_control
+      - terminal_proportional_navigation
+      - moving_target
+    required_runtime:
+      - resolved_wind_heading_convention
+      - closed_loop_control_commands
+      - wind_zero_case_metamorphic_oracle
+    oracle: tests/unit/test_mission_family_examples.py
+  - id: drone_racetrack_loiter
+    title: Quadcopter or drone loitering in a changing atmosphere
+    status: scaffolded
+    source: null
+    dynamics_mode: kinematic-6dof
+    capabilities:
+      - changing_atmosphere
+      - external_command_stream
+      - waypoint_or_racetrack_controller
+      - loiter_duration
+    required_runtime:
+      - time_steppable_environment_provider
+      - rotorcraft_or_force_command_model
+      - racetrack_tracking_oracle
+    oracle: tests/unit/test_mission_family_examples.py
+    exclusions:
+      - historical_taos_96_syntax_compatibility
+  - id: sixdof_staged_reentry_terminal
+    title: Two-stage rigid-body launch, thermal entry, and terminal guidance
+    status: scaffolded
+    source: sixdof_staged_reentry_terminal/README.md
+    dynamics_mode: rigid-body-6dof
+    capabilities:
+      - quaternion_attitude
+      - body_rate_dynamics
+      - stage_phase_transitions
+      - coast_to_apogee
+      - thermal_entry_limiting
+      - terminal_pronav_handoff
+    required_runtime:
+      - stage_specific_force_and_inertia_models
+      - atmospheric_drag_and_heating
+      - integrated_launch_to_impact_oracle
+    oracle: tests/unit/test_rigid_body.py
+    exclusions:
+      - historical_taos_96_syntax_compatibility

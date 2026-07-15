@@ -1,0 +1,11 @@
+schema_version: 1
+id: quadcopter_drone_racetrack
+title: Quadcopter/drone racetrack and loiter debugging showcase
+status: scaffolded
+claim_boundary: {manual_bounded: false, taoryx_extension: true, historical_taos_96_compatibility: false, engineering_validity: false}
+dynamics_mode: kinematic-3-plus-3-dof
+source:
+  problem_file: ../../mission_families/drone_racetrack_loiter/mission.prb
+  table_files: []
+  runtime_contract: [changing-atmosphere-provider, racetrack-controller, control-command-trace]
+outputs: {artifact_root: artifacts/showcases/quadcopter_drone_racetrack, formats: [text, json, sqlite, png]}

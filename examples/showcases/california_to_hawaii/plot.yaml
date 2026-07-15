@@ -1,0 +1,28 @@
+schema_version: 1
+showcase_id: california_to_hawaii
+plots:
+  - id: route_map
+    title: California to Hawaii great-circle route
+    x: longitude_deg
+    y: latitude_deg
+    overlays: [start, destination]
+  - id: altitude_range
+    title: Altitude and remaining range
+    x: time
+    y: [altitude_m, range_to_target_m]
+  - id: altitude_mach
+    title: Altitude and hypersonic Mach corridor
+    x: time
+    y: [altitude_m, mach]
+  - id: mass_propulsion
+    title: Mass and propulsion profile
+    x: time
+    y: [mass_kg, propellant_mass_kg, thrust_n]
+  - id: thermal_exposure
+    title: Synthetic thermal exposure
+    x: time
+    y: [heat_rate_w_m2, heat_load_j_m2]
+  - id: attitude_rates
+    title: Attitude and body-rate channels
+    x: time
+    y: [qw, qx, qy, qz, wx, wy, wz]

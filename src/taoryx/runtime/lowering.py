@@ -8,13 +8,13 @@ import random
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TypeAlias, cast
+from typing import Any, TypeAlias, cast
 
 from pydantic import BaseModel
 
 from taoryx.aerodynamics import maximum_lift_to_drag
 from taoryx.attitude import EulerAngles, euler_angles_to_body_basis
-from taoryx.contracts import Angle, Basis3, Frame, FrameVector3, Latitude, Longitude, Vector3
+from taoryx.contracts import Angle, Basis3, EarthModel, Frame, FrameVector3, Latitude, Longitude, Quantity, Unit, Vector3
 from taoryx.coordinates import geocentric_unit_vectors, geodetic_unit_vectors
 from taoryx.dynamics import ConstraintMode, apply_rail_constraint
 from taoryx.equations.geodesy import CartesianVector3
@@ -30,7 +30,9 @@ from taoryx.language.expressions import (
     ParameterExpression,
     TableReferenceExpression,
     WildcardExpression,
+    parse_expression,
 )
+from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.models import (
     AeroBlock,
     Assignment,
@@ -65,6 +67,7 @@ from taoryx.language.models import (
     RailBlock,
     RandomBlock,
     ResetBlock,
+    RuntimeBlock,
     SearchBlock,
     Segment,
     SummarizeBlock,
@@ -84,7 +87,8 @@ from taoryx.modes import DynamicsMode, Kinematic6DofState, Quaternion
 from taoryx.numeric import DifferenceMode
 from taoryx.optimization import build_optimization_problem, redistribute_control_history
 from taoryx.output_catalog import output_channel_spec
-from taoryx.rigid_body import RigidBody6DofModel, RigidBody6DofState, RigidBodyForceMoment
+from taoryx.rigid_body import RIGID_BODY_STATE_NAMES, RigidBody6DofModel, RigidBody6DofState, RigidBodyForceMoment
+from taoryx.rigid_body_frames import EarthRotationAdapter
 from taoryx.searches import golden_section_minimize, parabolic_minimize, parabolic_root, secant_bracketed_root
 from taoryx.tables import (
     ExtrapolationMode,
@@ -96,12 +100,15 @@ from taoryx.tables import (
     prepare_skewed_table,
     prepare_table,
 )
+from taoryx.vehicle import PreparedAerodynamicCoefficients, TableAerodynamicModel
 
 from .common import EventCondition, RuntimeProblem, RuntimeState, RuntimeVehicle
 from .engine import ExecutionResult, compute_trajectories
+from .environment_runtime import ExponentialAtmosphereProvider
 from .expressions import evaluate_definition_program, evaluate_expression
+from .guidance_control import allocate_alpha_bank
 from .optimization_runtime import resolve_optimize_block
-from .rigid_body import rigid_body_vehicle
+from .rigid_body import bounded_attitude_moment, rigid_body_vehicle
 from .summaries import evaluate_summary
 from .surveys import generate_survey_cases
 from .units import format_number, from_internal, selected_setting, to_internal
@@ -465,6 +472,7 @@ def lower_problem_document(
     tables: Mapping[str, RuntimeTable] | None = None,
     *,
     seed: int | None = None,
+    parameter_overrides: Mapping[str, float] | None = None,
 ) -> LoweredDocument:
     """Lower every parsed problem and its survey combinations in source order."""
 
@@ -503,12 +511,14 @@ def lower_problem_document(
         case_problem_indices.extend([len(problem_case_counts) - 1] * len(survey_cases))
         search_seed = _search_seed_parameters(problem)
         optimize_seed = _optimize_seed_parameters(problem)
+        declared_parameters = _runtime_parameters(problem)
+        resolved_parameters = {**declared_parameters, **(parameter_overrides or {}), **search_seed, **optimize_seed}
         cases.extend(
             _lower_case(
                 problem,
                 _sample_problem_random_parameters(
                     problem,
-                    {**search_seed, **optimize_seed, **parameters},
+                    {**resolved_parameters, **parameters},
                     index,
                     tables or {},
                     seed=seed,
@@ -524,7 +534,7 @@ def lower_problem_document(
         output_files.extend(_output_files(problem, len(problem_case_counts) - 1))
         summaries.extend(_summary_specs(problem))
         summary_egs_files.extend(_summary_egs_specs(problem, len(problem_case_counts) - 1))
-        unsupported.extend(_unsupported_features(problem))
+        unsupported.extend(_unsupported_features(problem, document.grammar_profile))
         problem_searches.extend(block for block in problem.blocks if isinstance(block, SearchBlock))
         problem_optimizations.extend(block for block in problem.blocks if isinstance(block, OptimizeBlock))
         print_scopes.extend(_print_scopes(problem))
@@ -679,6 +689,8 @@ def _lower_case(
         )
         condition_list: list[EventCondition] = []
         segment_events: dict[int, tuple[EventCondition, ...]] = {}
+        runtime_events = _runtime_event_conditions(problem, parameters, tables)
+        control_values = _runtime_control_values(problem, str(trajectory.number))
         segment_by_number = {segment.number: segment for segment in trajectory.segments}
         active_segment = {"number": trajectory.start_segment}
         initial_segment = segment_by_number[trajectory.start_segment]
@@ -720,6 +732,7 @@ def _lower_case(
             earth_omega,
             include_trajectory_references,
             include_specific_loads_in_derivative,
+            runtime_controls=control_values,
         )
         for segment in trajectory.segments:
             segment_conditions: list[EventCondition] = []
@@ -740,12 +753,13 @@ def _lower_case(
                         condition_function,
                         segment_block.action or "stop",
                         condition_predicate,
+                        source=f"{segment_block.location.path}:{segment_block.location.line}",
                     )
                     condition_list.append(event)
                     segment_conditions.append(event)
                     event_targets[event.name] = segment_block.target_segment if segment_block.action == "goto" else None
             ####
-            segment_events[segment.number] = tuple(segment_conditions)
+            segment_events[segment.number] = (*runtime_events, *segment_conditions)
         ####
         conditions = segment_events.get(trajectory.start_segment, ())
 
@@ -835,6 +849,9 @@ def _lower_case(
                         thrust += evaluate_expression(thrust_assignment.value, state.named, parameters, tables=_table_evaluators(state_tables))
                     if mdot_assignment is not None:
                         mass_rate += evaluate_expression(mdot_assignment.value, state.named, parameters, tables=_table_evaluators(state_tables))
+            throttle = state.named.get("throttle", 1.0)
+            thrust *= throttle
+            mass_rate *= throttle
             weight_state = "wt" in state.value_names and "mass" not in state.value_names and segment is not None and any(isinstance(block, RailBlock) for block in segment.blocks)
             raw_mass = abs(state.named.get("wt", state.named.get("mass", 1.0)))
             mass = max(raw_mass / 32.174 if weight_state else raw_mass, 1e-12)
@@ -842,8 +859,8 @@ def _lower_case(
                 aero_acceleration = _ecfc_aerodynamic_acceleration(segment, state.named, state_tables, parameters, mass)
             else:
                 aero_acceleration = _aerodynamic_acceleration(segment, state.named, state_tables, parameters, mass) if segment is not None else (0.0, 0.0, 0.0)
-            ecfc_propulsive_acceleration = _ecfc_propulsive_acceleration(segment, state.named, state_tables, parameters, mass) if segment is not None else (0.0, 0.0, 0.0)
-            geodetic_propulsive_acceleration = _geodetic_propulsive_acceleration(segment, state.named, state_tables, parameters, mass) if segment is not None else None
+            ecfc_propulsive_acceleration = _ecfc_propulsive_acceleration(segment, state.named, state_tables, parameters, mass, throttle) if segment is not None else (0.0, 0.0, 0.0)
+            geodetic_propulsive_acceleration = _geodetic_propulsive_acceleration(segment, state.named, state_tables, parameters, mass, throttle) if segment is not None else None
             geodetic_force_rates = _geodetic_force_rates(
                 segment,
                 state.named,
@@ -992,6 +1009,7 @@ def _lower_case(
             derived_definitions=definitions,
             definition_evaluator=definition_evaluator if definition_controls else None,
             parameters=parameters,
+            control_values=control_values,
             table_evaluators=_table_evaluators(tables),
             environment_evaluator=vehicle_environment,
             event_handlers=event_handlers,
@@ -1096,29 +1114,122 @@ def _lower_rigid_body_case(
         start_time,
         FrameVector3(Vector3(named["x"], named["y"], named["z"]), Frame.ECIC),
         FrameVector3(Vector3(named["xdt"], named["ydt"], named["zdt"]), Frame.ECIC),
-        Quaternion.identity(),
+        Quaternion(
+            named.get("qw", 1.0),
+            named.get("qx", 0.0),
+            named.get("qy", 0.0),
+            named.get("qz", 0.0),
+        ).normalized(),
         body_rate,
         named["mass"],
         named.get("propellant_mass", named["mass"]),
         named.get("heat_load", 0.0),
         named.get("peak_heat_rate", 0.0),
     )
-    segment = trajectory.segments[0] if trajectory.segments else None
+    segments = {item.number: item for item in trajectory.segments}
+    if not segments:
+        raise ValueError("rigid-body mode requires at least one segment")
+    active_segment = {"number": trajectory.start_segment}
+    control_values = _runtime_control_values(problem, str(trajectory.number))
+    vehicle_attributes = _runtime_attributes(problem, "vehicle")
+    actuator_attributes = _runtime_attributes(problem, "actuator")
+    target_attributes = _runtime_attributes(problem, "target")
+    guidance_attributes = _runtime_attributes(problem, "guidance")
+    route_attributes = _runtime_attributes(problem, "route")
+    thermal_attributes = _runtime_attributes(problem, "thermal")
+    inertia = Vector3(
+        float(vehicle_attributes.get("inertia-x", "1.0")),
+        float(vehicle_attributes.get("inertia-y", "1.0")),
+        float(vehicle_attributes.get("inertia-z", "1.0")),
+    )
+    segment = segments[trajectory.start_segment]
     step = _segment_step_size(segment, parameters, 0.01)
+    earth_omega = _earth_parameters(problem, parameters)[1]
+    aerodynamic_model = _rigid_body_aerodynamic_model(
+        problem,
+        tables,
+        earth_mu,
+        earth_omega,
+        control_values,
+        target_attributes=target_attributes,
+        guidance_attributes=guidance_attributes,
+        reference_area=float(vehicle_attributes.get("reference-area", "1.0")),
+        reference_length=float(vehicle_attributes.get("reference-length", "1.0")),
+    )
+    controller_saturated = {"value": False}
 
     def force_moment(state: RigidBody6DofState) -> RigidBodyForceMoment:
-        thrust = 0.0
+        thrust_vector = Vector3(0.0, 0.0, 0.0)
         mass_rate = 0.0
-        if segment is not None:
-            for block in segment.blocks:
-                if not isinstance(block, PropulsionBlock):
-                    continue
-                assignments = {assignment.name.casefold(): assignment.value for assignment in block.assignments}
-                if "thrust" in assignments:
-                    thrust += evaluate_expression(assignments["thrust"], {"time": state.time, "mass": state.mass}, parameters, tables=_table_evaluators(tables))
-                if "mdot" in assignments:
-                    mass_rate += evaluate_expression(assignments["mdot"], {"time": state.time, "mass": state.mass}, parameters, tables=_table_evaluators(tables))
-        return RigidBodyForceMoment(Vector3(thrust, 0.0, 0.0), Vector3(0.0, 0.0, 0.0), mass_rate)
+        current_segment = segments[active_segment["number"]]
+        for block in current_segment.blocks:
+            if not isinstance(block, PropulsionBlock):
+                continue
+            assignments = {assignment.name.casefold(): assignment.value for assignment in block.assignments}
+            if "thrust" in assignments:
+                thrust_value = evaluate_expression(assignments["thrust"], {"time": state.time, "mass": state.mass}, parameters, tables=_table_evaluators(tables))
+                thrust_value *= control_values.get("throttle", 1.0)
+                ep1 = math.radians(evaluate_expression(assignments["ep1"], {"time": state.time, "mass": state.mass}, parameters, tables=_table_evaluators(tables))) if "ep1" in assignments else 0.0
+                ep2 = math.radians(evaluate_expression(assignments["ep2"], {"time": state.time, "mass": state.mass}, parameters, tables=_table_evaluators(tables))) if "ep2" in assignments else 0.0
+                thrust_vector = thrust_vector + Vector3(
+                    thrust_value * math.cos(ep1),
+                    -thrust_value * math.sin(ep1) * math.cos(ep2),
+                    -thrust_value * math.sin(ep1) * math.sin(ep2),
+                )
+            if "mdot" in assignments:
+                mass_rate += evaluate_expression(assignments["mdot"], {"time": state.time, "mass": state.mass}, parameters, tables=_table_evaluators(tables))
+        mass_rate *= control_values.get("throttle", 1.0)
+        route_velocity = _runtime_route_velocity(route_attributes, target_attributes, state, earth_omega)
+        standard_propnav = _segment_uses_guidance(current_segment, "propnav")
+        if (standard_propnav and route_velocity is None) or _runtime_pure_propnav_active(route_attributes, state.time):
+            command = _runtime_propnav_command(
+                state,
+                target_attributes,
+                float(guidance_attributes.get("propnav-gain", "0.0")),
+                earth_mu,
+                earth_omega,
+            )
+            demand = cast(Vector3, command["demand"])
+            horizon = max(float(route_attributes.get("propnav-attitude-horizon-s", "1.0")), 0.01)
+            route_velocity = state.velocity.vector + demand.scaled(horizon)
+        thrust_moment = Vector3(0.0, 0.0, 0.0)
+        if route_velocity is not None:
+            route_direction = route_velocity.scaled(1.0 / max(route_velocity.norm(), 1.0e-12))
+            desired_body = state.attitude.conjugate().rotate(route_direction)
+            attitude_error = Vector3(1.0, 0.0, 0.0).cross(desired_body)
+            attitude_gain = float(guidance_attributes.get("attitude-gain", "10000.0"))
+            rate_damping = float(guidance_attributes.get("rate-damping", "2000.0"))
+            maximum_moment_text = actuator_attributes.get("maximum-moment", guidance_attributes.get("maximum-moment"))
+            maximum_moment = float(maximum_moment_text) if maximum_moment_text is not None else None
+            maximum_body_rate_text = actuator_attributes.get("maximum-body-rate-deg-s")
+            maximum_body_rate = math.radians(float(maximum_body_rate_text)) if maximum_body_rate_text is not None else None
+            controller = bounded_attitude_moment(
+                attitude_error,
+                state.body_rate,
+                attitude_gain=attitude_gain,
+                rate_damping=rate_damping,
+                maximum_moment=maximum_moment,
+                maximum_body_rate=maximum_body_rate,
+            )
+            thrust_moment = controller.moment_body
+            controller_saturated["value"] = controller.saturated
+            if thrust_vector.norm() > 0.0:
+                # Route guidance commands the attitude; propulsion remains a
+                # body-X load. This keeps thrust-vector steering inside the
+                # integrated attitude/moment path rather than injecting ECIC
+                # acceleration directly.
+                thrust_vector = Vector3(thrust_vector.norm(), 0.0, 0.0)
+        propulsion = RigidBodyForceMoment(thrust_vector, thrust_moment, mass_rate)
+        if aerodynamic_model is None or not any(isinstance(block, AeroBlock) for block in current_segment.blocks):
+            return propulsion
+        aero = aerodynamic_model.evaluate(state)
+        heat_rate_coefficient = max(0.0, float(thermal_attributes.get("heat-rate-coefficient", "0.002")))
+        return RigidBodyForceMoment(
+            propulsion.force_body + aero.force_body_n,
+            propulsion.moment_body + aero.moment_body_nm,
+            propulsion.propellant_mass_rate,
+            aero.dynamic_pressure_pa * aero.airspeed_m_s * heat_rate_coefficient,
+        )
     ####
 
     def gravity(state: RigidBody6DofState) -> Vector3:
@@ -1127,18 +1238,129 @@ def _lower_rigid_body_case(
     ####
 
     model = RigidBody6DofModel(
-        Vector3(1.0, 1.0, 1.0),
+        inertia,
         force_moment,
         gravity,
-        dry_mass=named["mass"] - named.get("propellant_mass", 0.0),
+        dry_mass=float(vehicle_attributes.get("dry-mass-kg", str(named["mass"] - named.get("propellant_mass", 0.0)))),
     )
     vehicle = rigid_body_vehicle(str(trajectory.number), initial_state, model, step_size=step, integrator="rk4")
-    if segment is not None:
-        events: list[EventCondition] = []
-        for block in segment.blocks:
+    vehicle.control_values = control_values
+    base_observables = vehicle.environment_evaluator
+
+    def observables(values: Mapping[str, float]) -> dict[str, float]:
+        result = dict(base_observables(values)) if base_observables is not None else {}
+        state = RigidBody6DofState.from_values(float(values.get("time", start_time)), tuple(values[name] for name in RIGID_BODY_STATE_NAMES))
+        result.update(_rigid_body_guidance_observables(state, target_attributes, guidance_attributes, earth_mu, _earth_parameters(problem, parameters)[1]))
+        result.update(_rigid_body_aero_observables(state, aerodynamic_model))
+        aero_force_body = Vector3(
+            float(result.get("aero_force_body_x_n", 0.0)),
+            float(result.get("aero_force_body_y_n", 0.0)),
+            float(result.get("aero_force_body_z_n", 0.0)),
+        )
+        aero_acceleration_ecic = state.attitude.rotate(aero_force_body).scaled(1.0 / max(state.mass, 1.0))
+        command_ecic = Vector3(
+            float(result.get("pro_nav_command_ecfc_x_m_s2", 0.0)),
+            float(result.get("pro_nav_command_ecfc_y_m_s2", 0.0)),
+            float(result.get("pro_nav_command_ecfc_z_m_s2", 0.0)),
+        )
+        result["pro_nav_achieved_aero_acceleration_m_s2"] = aero_acceleration_ecic.norm()
+        result["pro_nav_acceleration_response_residual_m_s2"] = (command_ecic - aero_acceleration_ecic).norm()
+        result.update(_rigid_body_position_observables(state, target_attributes, earth_mu, earth_omega))
+        # Derive source-facing channels from the same total load and aero
+        # sample; do not introduce a second force evaluation path.
+        total_force_body = Vector3(
+            float(result.get("force_body_x_n", 0.0)),
+            float(result.get("force_body_y_n", 0.0)),
+            float(result.get("force_body_z_n", 0.0)),
+        )
+        total_moment_body = Vector3(
+            float(result.get("moment_body_x_nm", 0.0)),
+            float(result.get("moment_body_y_nm", 0.0)),
+            float(result.get("moment_body_z_nm", 0.0)),
+        )
+        aero_moment_body = Vector3(
+            float(result.get("aero_moment_body_x_nm", 0.0)),
+            float(result.get("aero_moment_body_y_nm", 0.0)),
+            float(result.get("aero_moment_body_z_nm", 0.0)),
+        )
+        propulsion_force = total_force_body - aero_force_body
+        control_moment = total_moment_body - aero_moment_body
+        result.update(
+            {
+                "mass_kg": state.mass,
+                "propellant_mass_kg": state.propellant_mass,
+                "thrust_n": propulsion_force.norm(),
+                "thrust_force_n": propulsion_force.norm(),
+                "drag_force_n": max(0.0, -aero_force_body.x),
+                "control_force_n": math.hypot(aero_force_body.y, aero_force_body.z),
+                "total_force_n": float(result.get("total_force_ecic_n", total_force_body.norm())),
+                "control_torque_nm": control_moment.norm(),
+                "mach": float(result.get("aero_mach", 0.0)),
+            }
+        )
+        result["attitude_controller_saturated"] = 1.0 if controller_saturated["value"] else 0.0
+        result["_segment"] = float(active_segment["number"])
+        return result
+    ####
+
+    vehicle.environment_evaluator = observables
+    if control_values:
+        vehicle.state = RuntimeState(vehicle.state.time, vehicle.state.values, vehicle.state.frame, {**vehicle.state.named, **control_values}, vehicle.state.value_names, vehicle.state.segment_endpoints)
+        vehicle.history[0] = vehicle.state
+    segment_events: dict[int, tuple[EventCondition, ...]] = {}
+    event_targets: dict[str, int | None] = {}
+    runtime_events = _runtime_event_conditions(problem, parameters, tables)
+    for current_segment in segments.values():
+        safety_event_name = f"trajectory-{trajectory.number}-earth-intersection-{current_segment.number}"
+        event_targets[safety_event_name] = None
+        events: list[EventCondition] = [
+            EventCondition(
+                safety_event_name,
+                lambda state: _rigid_body_altitude_residual(state),
+                "stop",
+                lambda state: _rigid_body_altitude_residual(state) <= 0.0,
+                signal="earth-intersection",
+                source="taoryx-rigid-body-safety-guard",
+            )
+        ]
+        events.extend(runtime_events)
+        if thermal_attributes.get("policy", "none").casefold() == "stop":
+            thermal_limits = (
+                ("heat-rate", "heat_rate_w_m2", "maximum-heat-rate-w-m2"),
+                ("heat-load", "heat_load", "maximum-heat-load-j-m2"),
+            )
+            for label, state_name, limit_name in thermal_limits:
+                limit_text = thermal_attributes.get(limit_name)
+                if limit_text is None:
+                    continue
+                limit = float(limit_text)
+                event_name = f"trajectory-{trajectory.number}-thermal-{label}-{current_segment.number}"
+
+                def thermal_residual(state: RuntimeState, state_name: str = state_name, limit: float = limit) -> float:
+                    return limit - state.named.get(state_name, 0.0)
+                ####
+
+                def thermal_predicate(state: RuntimeState, residual: Callable[[RuntimeState], float] = thermal_residual) -> bool:
+                    return residual(state) <= 0.0
+                ####
+
+                events.append(
+                    EventCondition(
+                        event_name,
+                        thermal_residual,
+                        "stop",
+                        thermal_predicate,
+                        signal=f"thermal-{label}-limit",
+                        source=f"{problem.location.path}:runtime thermal policy",
+                    )
+                )
+                event_targets[event_name] = None
+            ####
+        for block in current_segment.blocks:
             if not isinstance(block, WhenBlock) or block.condition is None:
                 continue
             expression = block.condition
+            event_name = f"trajectory-{trajectory.number}-when-{current_segment.number}-{len(events) + 1}"
 
             def condition_function(state: RuntimeState, expression: ExpressionType = expression) -> float:
                 return _event_residual(expression, state.named, parameters, tables)
@@ -1150,17 +1372,541 @@ def _lower_rigid_body_case(
 
             events.append(
                 EventCondition(
-                    f"trajectory-{trajectory.number}-when-{segment.number}-{len(events) + 1}",
+                    event_name,
                     condition_function,
                     block.action or "stop",
                     condition_predicate,
+                    source=f"{block.location.path}:{block.location.line}",
                 )
             )
-        vehicle.events = tuple(events)
+            event_targets[event_name] = block.target_segment if block.action == "goto" else None
+        segment_events[current_segment.number] = tuple(events)
+    ####
+
+    vehicle.events = segment_events[trajectory.start_segment]
+
+    def transition_handler(state: RuntimeState, *, target: int | None = None) -> RuntimeState:
+        if target is None:
+            return state
+        if target not in segments:
+            raise ValueError(f"rigid-body event targets missing segment {target}")
+        active_segment["number"] = target
+        vehicle.events = segment_events[target]
+        vehicle.segment_number = target
+        vehicle.step_size = _segment_step_size(segments[target], parameters, vehicle.step_size)
+        vehicle.max_step_size = vehicle.step_size
+        return state
+    ####
+
+    def make_transition_handler(target: int) -> Callable[[RuntimeState], RuntimeState]:
+        def handler(state: RuntimeState) -> RuntimeState:
+            return transition_handler(state, target=target)
+        ####
+
+        return handler
+    ####
+
+    vehicle.event_handlers = {
+        event.name: make_transition_handler(target)
+        for events in segment_events.values()
+        for event in events
+        if (target := event_targets[event.name]) is not None
+    }
     runtime = RuntimeProblem({vehicle.name: vehicle})
     runtime.metadata["dynamics_mode"] = DynamicsMode.RIGID_BODY_6DOF.value
     runtime.metadata["parameters"] = dict(parameters)
+    runtime.metadata["vehicle"] = dict(vehicle_attributes)
+    runtime.metadata["actuator"] = dict(actuator_attributes)
+    runtime.metadata["target"] = dict(_runtime_attributes(problem, "target"))
+    runtime.metadata["route"] = dict(route_attributes)
+    runtime.metadata["thermal"] = dict(thermal_attributes)
+    runtime.metadata["telemetry"] = dict(_runtime_attributes(problem, "telemetry"))
+    runtime.metadata["controls"] = dict(control_values)
+    runtime.metadata["native_pipeline"] = {
+        "integration_frame": "ecic",
+        "environment_frame": "ecfc",
+        "load_sources": ("gravity", "propulsion") + (("aerodynamics", "thermal") if aerodynamic_model is not None else ()),
+        "guidance": "proportional-navigation" if float(guidance_attributes.get("propnav-gain", "0.0")) > 0.0 else "none",
+        "route_guidance": route_attributes.get("mode", "none"),
+        "terminal_guidance_mode": route_attributes.get("terminal-guidance-mode", "route"),
+        "terminal_guidance_owner": "pure-propnav" if route_attributes.get("terminal-guidance-mode", "route").casefold() in {"propnav", "pure-propnav"} else "route",
+        "table_binding": "explicit-segment-aero" if aerodynamic_model is not None else "none",
+    }
     return RuntimeCase(index, parameters, runtime)
+####
+
+
+def _rigid_body_altitude_residual(state: RuntimeState) -> float:
+    """Return geocentric altitude above the native Earth collision surface."""
+
+    radius = math.sqrt(sum(state.named.get(name, 0.0) ** 2 for name in ("x", "y", "z")))
+    return radius - 6_378_137.0
+####
+
+
+def _runtime_route_velocity(
+    route_attributes: Mapping[str, str],
+    target_attributes: Mapping[str, str],
+    state: RigidBody6DofState,
+    earth_omega: float,
+) -> Vector3 | None:
+    """Resolve a declared great-circle route into an ECIC velocity direction.
+
+    This is a native extension guidance reference, not a force injection. It
+    supplies a desired velocity direction to the thrust-vector/attitude
+    controller; the rigid-body model still integrates the resulting body
+    thrust, moments, gravity, mass flow, and any active aerodynamic loads.
+    """
+
+    if route_attributes.get("mode", "").casefold() != "great-circle":
+        return None
+    required = ("start-latitude-deg", "start-longitude-deg", "duration-s")
+    if any(name not in route_attributes for name in required) or "latitude-deg" not in target_attributes or "longitude-deg" not in target_attributes:
+        return None
+    start_lat = math.radians(float(route_attributes["start-latitude-deg"]))
+    start_lon = math.radians(float(route_attributes["start-longitude-deg"]))
+    target_lat = math.radians(float(target_attributes["latitude-deg"]))
+    target_lon = math.radians(float(target_attributes["longitude-deg"]))
+    start = Vector3(math.cos(start_lat) * math.cos(start_lon), math.cos(start_lat) * math.sin(start_lon), math.sin(start_lat))
+    target = Vector3(math.cos(target_lat) * math.cos(target_lon), math.cos(target_lat) * math.sin(target_lon), math.sin(target_lat))
+    cosine = max(-1.0, min(1.0, start.dot(target)))
+    route_angle = math.acos(cosine)
+    duration = max(float(route_attributes["duration-s"]), 1.0)
+    fraction = max(0.0, min(1.0, state.time / duration))
+    if route_angle <= 1.0e-12:
+        route_unit = start
+    else:
+        sine = math.sin(route_angle)
+        route_unit = (start.scaled(math.sin((1.0 - fraction) * route_angle) / sine) + target.scaled(math.sin(fraction * route_angle) / sine))
+        route_unit = route_unit.scaled(1.0 / max(route_unit.norm(), 1.0e-12))
+    tangent = target - route_unit.scaled(route_unit.dot(target))
+    tangent = tangent.scaled(1.0 / max(tangent.norm(), 1.0e-12))
+    apogee = float(route_attributes.get("apogee-altitude-m", "220000.0"))
+    terminal_start = float(route_attributes.get("terminal-start-s", "1650.0"))
+    terminal_descent_end = max(float(route_attributes.get("terminal-descent-end-s", str(duration))), terminal_start + 1.0)
+    powered_end = float(route_attributes.get("powered-end-s", "360.0"))
+    if state.time < powered_end:
+        altitude_rate = float(route_attributes.get("powered-climb-rate-mps", str(apogee / max(powered_end, 1.0))))
+        speed = float(route_attributes.get("powered-speed-mps", "3500.0"))
+        desired_altitude = max(0.0, apogee * state.time / max(powered_end, 1.0))
+    elif state.time < terminal_start:
+        altitude_rate = 0.0
+        speed = float(route_attributes.get("glide-speed-mps", "6000.0"))
+        desired_altitude = apogee
+    else:
+        altitude_rate = -apogee / max(terminal_descent_end - terminal_start, 1.0)
+        speed = float(route_attributes.get("terminal-speed-mps", "2000.0"))
+        desired_altitude = max(0.0, apogee + altitude_rate * (state.time - terminal_start))
+    rotation = Vector3(0.0, 0.0, earth_omega)
+    ecic_tangent = Vector3(
+        tangent.x * math.cos(earth_omega * state.time) - tangent.y * math.sin(earth_omega * state.time),
+        tangent.x * math.sin(earth_omega * state.time) + tangent.y * math.cos(earth_omega * state.time),
+        tangent.z,
+    )
+    ecic_radial = Vector3(
+        route_unit.x * math.cos(earth_omega * state.time) - route_unit.y * math.sin(earth_omega * state.time),
+        route_unit.x * math.sin(earth_omega * state.time) + route_unit.y * math.cos(earth_omega * state.time),
+        route_unit.z,
+    )
+    desired_position = ecic_radial.scaled(6_378_137.0 + desired_altitude)
+    if state.time >= terminal_start and route_attributes.get("terminal-capture", "false").casefold() in {"1", "true", "yes"}:
+        target_ecic_radial = Vector3(
+            target.x * math.cos(earth_omega * state.time) - target.y * math.sin(earth_omega * state.time),
+            target.x * math.sin(earth_omega * state.time) + target.y * math.cos(earth_omega * state.time),
+            target.z,
+        )
+        desired_position = target_ecic_radial.scaled(6_378_137.0 + desired_altitude)
+        time_floor = max(float(route_attributes.get("terminal-time-floor-s", "1.0")), 1.0)
+        time_to_go = max(terminal_descent_end - state.time, time_floor)
+        capture_gain = float(route_attributes.get("terminal-capture-gain", "1.0"))
+        radial_now = state.position.vector.scaled(1.0 / max(state.position.vector.norm(), 1.0e-12))
+        position_error = desired_position - state.position.vector
+        current_altitude = state.position.vector.norm() - 6_378_137.0
+        radial_speed = state.velocity.vector.dot(radial_now)
+        altitude_error = desired_altitude - current_altitude
+        altitude_gain = float(route_attributes.get("terminal-altitude-gain", "0.001"))
+        radial_damping = float(route_attributes.get("terminal-radial-damping", "0.8"))
+        radial_rate = altitude_gain * altitude_error - radial_damping * radial_speed
+        descent_limit = abs(float(route_attributes.get("terminal-descent-rate-mps", "1000.0")))
+        final_descent_limit = abs(float(route_attributes.get("terminal-descent-rate-final-mps", str(descent_limit))))
+        descent_fraction = max(0.0, min(1.0, (state.time - terminal_start) / max(terminal_descent_end - terminal_start, 1.0)))
+        descent_limit += (final_descent_limit - descent_limit) * descent_fraction
+        climb_limit = abs(float(route_attributes.get("terminal-climb-rate-mps", str(descent_limit))))
+        radial_rate = max(-descent_limit, min(climb_limit, radial_rate))
+        horizontal_error = position_error - radial_now.scaled(position_error.dot(radial_now))
+        horizontal_state_velocity = state.velocity.vector - radial_now.scaled(radial_speed)
+        velocity_damping = max(0.0, float(route_attributes.get("terminal-velocity-damping", "0.0")))
+        horizontal_gain = float(route_attributes.get("terminal-horizontal-gain", str(capture_gain)))
+        horizontal_velocity = horizontal_error.scaled(horizontal_gain / time_to_go) - horizontal_state_velocity.scaled(velocity_damping)
+        commanded_velocity = horizontal_velocity + radial_now.scaled(radial_rate) + rotation.cross(state.position.vector)
+        command_speed = abs(float(route_attributes.get("terminal-command-speed-mps", route_attributes.get("terminal-speed-mps", "2000.0"))))
+        if command_speed > 0.0 and commanded_velocity.norm() > command_speed:
+            commanded_velocity = commanded_velocity.scaled(command_speed / commanded_velocity.norm())
+        return commanded_velocity
+    position_capture_gain = float(route_attributes.get("position-capture-gain", "0.0"))
+    position_correction = desired_position - state.position.vector
+    return (
+        ecic_tangent.scaled(speed)
+        + ecic_radial.scaled(altitude_rate)
+        + position_correction.scaled(position_capture_gain)
+        + rotation.cross(state.position.vector)
+    )
+####
+
+
+def _rigid_body_aero_observables(state: RigidBody6DofState, model: TableAerodynamicModel | None) -> dict[str, float]:
+    """Publish table-aero channels without creating a second load path.
+
+    The evaluator is called only for telemetry. The derivative still obtains
+    its loads from the same ``TableAerodynamicModel`` instance in
+    ``force_moment``. An inactive model returns explicit zero channels so
+    consumers can use one stable schema across propulsion-only and aero cases.
+    """
+
+    if model is None:
+        return {
+            "aero_active": 0.0,
+            "aero_density_kg_m3": 0.0,
+            "aero_dynamic_pressure_pa": 0.0,
+            "aero_airspeed_m_s": 0.0,
+            "aero_mach": 0.0,
+            "aero_alpha_deg": 0.0,
+            "aero_sideslip_deg": 0.0,
+            "aero_force_body_x_n": 0.0,
+            "aero_force_body_y_n": 0.0,
+            "aero_force_body_z_n": 0.0,
+            "aero_moment_body_x_nm": 0.0,
+            "aero_moment_body_y_nm": 0.0,
+            "aero_moment_body_z_nm": 0.0,
+        }
+    output = model.evaluate(state)
+    return {
+        "aero_active": 1.0,
+        "aero_density_kg_m3": output.density_kg_m3,
+        "aero_dynamic_pressure_pa": output.dynamic_pressure_pa,
+        "aero_airspeed_m_s": output.airspeed_m_s,
+        "aero_mach": output.mach,
+        "aero_alpha_deg": math.degrees(output.angle_of_attack_rad),
+        "aero_sideslip_deg": math.degrees(output.sideslip_rad),
+        "aero_force_body_x_n": output.force_body_n.x,
+        "aero_force_body_y_n": output.force_body_n.y,
+        "aero_force_body_z_n": output.force_body_n.z,
+        "aero_moment_body_x_nm": output.moment_body_nm.x,
+        "aero_moment_body_y_nm": output.moment_body_nm.y,
+        "aero_moment_body_z_nm": output.moment_body_nm.z,
+    }
+####
+
+
+def _rigid_body_position_observables(
+    state: RigidBody6DofState,
+    target_attributes: Mapping[str, str],
+    earth_mu: float,
+    earth_omega: float,
+) -> dict[str, float]:
+    """Publish Earth-fixed route coordinates and target range."""
+
+    earth = EarthModel(
+        Quantity(6_378_137.0, Unit.METER),
+        0.0,
+        Quantity(max(earth_mu, 1.0), Unit.METER_CUBED_PER_SECOND_SQUARED),
+        Quantity(earth_omega, Unit.RADIAN_PER_SECOND),
+    )
+    position_ecfc, _ = EarthRotationAdapter(earth).ecic_to_ecfc(state.position, state.velocity, time_seconds=state.time)
+    position = position_ecfc.vector
+    radius = max(position.norm(), 1.0)
+    target = _runtime_target_position(target_attributes, earth, EarthRotationAdapter(earth), state.time)
+    return {
+        "latitude_deg": math.degrees(math.asin(max(-1.0, min(1.0, position.z / radius)))),
+        "longitude_deg": math.degrees(math.atan2(position.y, position.x)),
+        "altitude_m": radius - earth.equatorial_radius.si_value,
+        "speed_m_s": state.velocity.vector.norm(),
+        "range_to_target_m": 0.0 if target is None else (target - state.position.vector).norm(),
+    }
+####
+
+
+def _rigid_body_aerodynamic_model(
+    problem: Problem,
+    tables: Mapping[str, RuntimeTable],
+    earth_mu: float,
+    earth_omega: float,
+    control_values: Mapping[str, float] = {},
+    *,
+    target_attributes: Mapping[str, str] = {},
+    guidance_attributes: Mapping[str, str] = {},
+    reference_area: float = 1.0,
+    reference_length: float = 1.0,
+) -> TableAerodynamicModel | None:
+    """Build the explicit TAORYX table-aero bridge for rigid-body cases.
+
+    This is intentionally opt-in by table content: a rigid-body problem with
+    no complete ``cx/cy/cz`` family retains its propulsion-only lowering. The
+    bridge gives extension problems a deterministic atmosphere, ECIC/ECFC
+    conversion, force/moment lookup, and named control-surface inputs.
+    """
+
+    aero_assignments = {
+        assignment.name.casefold(): assignment.value
+        for trajectory in problem.trajectories
+        for segment in trajectory.segments
+        for block in segment.blocks
+        if isinstance(block, AeroBlock)
+        for assignment in block.assignments
+    }
+    if not aero_assignments:
+        return None
+    selected_tables: dict[str, RuntimeTable] = {}
+    for name in ("cx", "cy", "cz", "cmx", "cmy", "cmz"):
+        reference = aero_assignments.get(name)
+        if not isinstance(reference, TableReferenceExpression):
+            continue
+        table = tables.get(reference.name.casefold())
+        if table is not None:
+            selected_tables[name] = table
+    coefficients = PreparedAerodynamicCoefficients.from_runtime_tables(cast(Mapping[str, Any], selected_tables))
+    if set(coefficients.force_tables) != {"cx", "cy", "cz"}:
+        return None
+    earth = EarthModel(
+        Quantity(6_378_137.0, Unit.METER),
+        0.0,
+        Quantity(max(earth_mu, 1.0), Unit.METER_CUBED_PER_SECOND_SQUARED),
+        Quantity(earth_omega, Unit.RADIAN_PER_SECOND),
+    )
+    environment = ExponentialAtmosphereProvider(
+        earth.equatorial_radius.si_value,
+        wind=FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECFC),
+    )
+    resolved_area = next((table.reference_area for table in tables.values() if table.reference_area is not None), reference_area)
+
+    target_position = _runtime_target_position(target_attributes, earth, EarthRotationAdapter(earth), 0.0)
+    navigation_gain = float(guidance_attributes.get("propnav-gain", "0.0"))
+
+    def controls(state: RigidBody6DofState) -> dict[str, float]:
+        values = dict(control_values)
+        # The grammar-facing controls are degree-labelled, while coefficient
+        # tables use the canonical radian ``alpha``/``bank`` axes. Keep both
+        # names in the query context rather than making table data guess.
+        values.setdefault("alpha", math.radians(values.get("alpha-deg", 0.0)))
+        values.setdefault("bank", math.radians(values.get("bank-deg", 0.0)))
+        values.setdefault("fin_pitch", 0.0)
+        if target_position is None or navigation_gain <= 0.0:
+            return values
+        target_ecic = _runtime_target_position(target_attributes, earth, EarthRotationAdapter(earth), state.time)
+        if target_ecic is None:
+            return values
+        demand = cast(Vector3, _runtime_propnav_command(state, target_attributes, navigation_gain, earth_mu, earth_omega)["demand"])
+        allocation = allocate_alpha_bank(
+            demand,
+            lift_acceleration_per_radian=float(guidance_attributes.get("lift-acceleration-per-radian", "100.0")),
+            maximum_angle_of_attack_radians=math.radians(float(guidance_attributes.get("max-alpha-deg", "20.0"))),
+        )
+        values["alpha-deg"] = math.degrees(allocation.angle_of_attack_radians)
+        values["bank-deg"] = math.degrees(allocation.bank_radians)
+        values["alpha"] = allocation.angle_of_attack_radians
+        values["bank"] = allocation.bank_radians
+        values["fin_pitch"] = allocation.angle_of_attack_radians / math.radians(float(guidance_attributes.get("max-alpha-deg", "20.0")))
+        values["pro-nav-acceleration-m-s2"] = demand.norm()
+        return values
+    ####
+
+    return TableAerodynamicModel(
+        environment,
+        EarthRotationAdapter(earth),
+        resolved_area,
+        reference_length,
+        coefficients.force_provider(),
+        moment_coefficients=coefficients.moment_provider(),
+        context_coefficients=coefficients.context_force_provider(),
+        context_moment_coefficients=coefficients.context_moment_provider(),
+        control_provider=controls,
+    )
+####
+
+
+def _runtime_target_position(
+    attributes: Mapping[str, str],
+    earth: EarthModel,
+    adapter: EarthRotationAdapter,
+    time_seconds: float,
+) -> Vector3 | None:
+    """Resolve a declared fixed ground target into ECIC coordinates."""
+
+    if "latitude-deg" not in attributes or "longitude-deg" not in attributes:
+        return None
+    latitude = math.radians(float(attributes["latitude-deg"]))
+    longitude = math.radians(float(attributes["longitude-deg"]))
+    altitude = float(attributes.get("altitude-m", "0.0"))
+    radius = earth.equatorial_radius.si_value + altitude
+    ecfc = FrameVector3(
+        Vector3(
+            radius * math.cos(latitude) * math.cos(longitude),
+            radius * math.cos(latitude) * math.sin(longitude),
+            radius * math.sin(latitude),
+        ),
+        Frame.ECFC,
+    )
+    return adapter.ecfc_to_ecic(ecfc, FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECFC), time_seconds=time_seconds)[0].vector
+####
+
+
+def _runtime_propnav_command(
+    state: RigidBody6DofState,
+    target_attributes: Mapping[str, str],
+    navigation_gain: float,
+    earth_mu: float,
+    earth_omega: float,
+) -> dict[str, float | Vector3]:
+    """Evaluate one native ECIC ProNav command and its LOS observables."""
+
+    earth = EarthModel(
+        Quantity(6_378_137.0, Unit.METER),
+        0.0,
+        Quantity(max(earth_mu, 1.0), Unit.METER_CUBED_PER_SECOND_SQUARED),
+        Quantity(earth_omega, Unit.RADIAN_PER_SECOND),
+    )
+    target = _runtime_target_position(target_attributes, earth, EarthRotationAdapter(earth), state.time)
+    if target is None or navigation_gain <= 0.0:
+        return {
+            "demand": Vector3(0.0, 0.0, 0.0),
+            "range": 0.0,
+            "closing": 0.0,
+            "azimuth": 0.0,
+            "elevation": 0.0,
+            "azimuth_rate": 0.0,
+            "elevation_rate": 0.0,
+        }
+    target_velocity = Vector3(0.0, 0.0, earth_omega).cross(target)
+    relative = target - state.position.vector
+    relative_velocity = target_velocity - state.velocity.vector
+    range_m = max(relative.norm(), 1.0e-12)
+    horizontal = math.hypot(relative.x, relative.y)
+    horizontal_rate = (relative.x * relative_velocity.y - relative.y * relative_velocity.x) / max(horizontal * horizontal, 1.0e-12)
+    horizontal_rate_projection = (relative.x * relative_velocity.x + relative.y * relative_velocity.y) / max(horizontal, 1.0e-12)
+    elevation_rate = (horizontal * relative_velocity.z - relative.z * horizontal_rate_projection) / max(range_m * range_m, 1.0e-12)
+    navigation = proportional_navigation(
+        CartesianVector3(state.position.vector.x, state.position.vector.y, state.position.vector.z),
+        CartesianVector3(state.velocity.vector.x, state.velocity.vector.y, state.velocity.vector.z),
+        CartesianVector3(target.x, target.y, target.z),
+        CartesianVector3(target_velocity.x, target_velocity.y, target_velocity.z),
+        navigation_gain,
+    )
+    return {
+        "demand": Vector3(navigation.ecfc_acceleration.x, navigation.ecfc_acceleration.y, navigation.ecfc_acceleration.z),
+        "range": range_m,
+        "closing": -relative.dot(relative_velocity) / range_m,
+        "azimuth": math.atan2(relative.y, relative.x),
+        "elevation": math.atan2(relative.z, max(horizontal, 1.0e-12)),
+        "azimuth_rate": horizontal_rate,
+        "elevation_rate": elevation_rate,
+    }
+####
+
+
+def _runtime_pure_propnav_active(route_attributes: Mapping[str, str], state_time: float) -> bool:
+    """Return whether terminal attitude steering is owned by pure ProNav."""
+
+    mode = route_attributes.get("terminal-guidance-mode", "route").casefold()
+    terminal_start = float(route_attributes.get("terminal-start-s", "1650.0"))
+    return mode in {"propnav", "pure-propnav"} and state_time >= terminal_start
+####
+
+
+def _segment_uses_guidance(segment: Segment, guidance_name: str) -> bool:
+    """Return whether a standard segment ``*fly`` selects a guidance law."""
+
+    expected = guidance_name.casefold()
+    return any(
+        isinstance(block, FlyBlock)
+        and (block.guidance_variable or "").casefold() == expected
+        for block in segment.blocks
+    )
+####
+
+
+def _rigid_body_guidance_observables(
+    state: RigidBody6DofState,
+    target_attributes: Mapping[str, str],
+    guidance_attributes: Mapping[str, str],
+    earth_mu: float,
+    earth_omega: float,
+) -> dict[str, float]:
+    """Publish native ProNav demand and allocation channels for one state."""
+
+    result = {
+        "pro_nav_active": 0.0,
+        "pro_nav_acceleration_m_s2": 0.0,
+        "pro_nav_command_ecfc_x_m_s2": 0.0,
+        "pro_nav_command_ecfc_y_m_s2": 0.0,
+        "pro_nav_command_ecfc_z_m_s2": 0.0,
+        "pro_nav_los_range_m": 0.0,
+        "pro_nav_closing_velocity_m_s": 0.0,
+        "pro_nav_los_azimuth_deg": 0.0,
+        "pro_nav_los_elevation_deg": 0.0,
+        "pro_nav_los_azimuth_rate_deg_s": 0.0,
+        "pro_nav_los_elevation_rate_deg_s": 0.0,
+        "alpha_command_deg": 0.0,
+        "bank_command_deg": 0.0,
+        "acceleration_residual_m_s2": 0.0,
+    }
+    gain = float(guidance_attributes.get("propnav-gain", "0.0"))
+    if gain <= 0.0:
+        return result
+    command = _runtime_propnav_command(state, target_attributes, gain, earth_mu, earth_omega)
+    demand = cast(Vector3, command["demand"])
+    range_m = float(cast(Any, command["range"]))
+    if range_m <= 0.0:
+        return result
+    allocation = allocate_alpha_bank(
+        demand,
+        lift_acceleration_per_radian=float(guidance_attributes.get("lift-acceleration-per-radian", "100.0")),
+        maximum_angle_of_attack_radians=math.radians(float(guidance_attributes.get("max-alpha-deg", "20.0"))),
+    )
+    result.update(
+        {
+            "pro_nav_active": 1.0,
+            "pro_nav_acceleration_m_s2": demand.norm(),
+            "pro_nav_command_ecfc_x_m_s2": demand.x,
+            "pro_nav_command_ecfc_y_m_s2": demand.y,
+            "pro_nav_command_ecfc_z_m_s2": demand.z,
+            "pro_nav_los_range_m": range_m,
+            "pro_nav_closing_velocity_m_s": float(cast(Any, command["closing"])),
+            "pro_nav_los_azimuth_deg": math.degrees(float(cast(Any, command["azimuth"]))),
+            "pro_nav_los_elevation_deg": math.degrees(float(cast(Any, command["elevation"]))),
+            "pro_nav_los_azimuth_rate_deg_s": math.degrees(float(cast(Any, command["azimuth_rate"]))),
+            "pro_nav_los_elevation_rate_deg_s": math.degrees(float(cast(Any, command["elevation_rate"]))),
+            "alpha_command_deg": math.degrees(allocation.angle_of_attack_radians),
+            "bank_command_deg": math.degrees(allocation.bank_radians),
+            "acceleration_residual_m_s2": allocation.residual_acceleration.norm(),
+        }
+    )
+    return result
+####
+
+
+def _runtime_attributes(problem: Problem, name: str) -> Mapping[str, str]:
+    """Resolve one named TAORYX runtime status declaration."""
+
+    attributes: dict[str, str] = {}
+    for block in problem.blocks:
+        if isinstance(block, RuntimeBlock) and block.declaration == "status" and block.name is not None and block.name.casefold() == name.casefold():
+            attributes.update(block.attributes)
+    return attributes
+####
+
+
+def _runtime_parameters(problem: Problem) -> dict[str, float]:
+    """Resolve one-time parameter declarations from a problem file."""
+
+    parameters: dict[str, float] = {}
+    for block in problem.blocks:
+        if not isinstance(block, RuntimeBlock) or block.declaration != "parameter" or block.name is None:
+            continue
+        raw_value = block.attributes.get("value", block.attributes.get("default"))
+        if raw_value is None:
+            raise ValueError(f"runtime parameter {block.name!r} requires value= or default=")
+        parameters[block.name.casefold()] = float(raw_value)
+    return parameters
 ####
 
 
@@ -1616,6 +2362,7 @@ def _ecfc_propulsive_acceleration(
     tables: Mapping[str, RuntimeTable],
     parameters: Mapping[str, float],
     mass: float,
+    throttle: float = 1.0,
 ) -> CartesianTriple:
     """Assemble thrust vectors in ECFC axes from active propulsion blocks."""
 
@@ -1646,6 +2393,7 @@ def _ecfc_propulsive_acceleration(
         if thrust_assignment is None:
             continue
         thrust = evaluate_expression(thrust_assignment.value, named, parameters, tables=evaluators)
+        thrust *= throttle
         ep1 = evaluate_expression(assignments["ep1"].value, named, parameters, tables=evaluators) if "ep1" in assignments else 0.0
         ep2 = evaluate_expression(assignments["ep2"].value, named, parameters, tables=evaluators) if "ep2" in assignments else 0.0
         first = math.radians(ep1)
@@ -1875,6 +2623,7 @@ def _geodetic_propulsive_acceleration(
     tables: Mapping[str, RuntimeTable],
     parameters: Mapping[str, float],
     mass: float,
+    throttle: float = 1.0,
 ) -> CartesianTriple | None:
     """Resolve propulsion vectors in the active geodetic-horizon basis."""
 
@@ -1904,6 +2653,7 @@ def _geodetic_propulsive_acceleration(
         if thrust_assignment is None:
             continue
         thrust = evaluate_expression(thrust_assignment.value, named, parameters, tables=evaluators)
+        thrust *= throttle
         ep1 = math.radians(evaluate_expression(assignments["ep1"].value, named, parameters, tables=evaluators)) if "ep1" in assignments else 0.0
         ep2 = math.radians(evaluate_expression(assignments["ep2"].value, named, parameters, tables=evaluators)) if "ep2" in assignments else 0.0
         body_vector = (
@@ -1929,7 +2679,7 @@ def _specific_load_observables(
     raw_mass = abs(values.get("wt", values.get("mass", 1.0)))
     mass = max(raw_mass, 1e-12)
     aerodynamic = _ecfc_aerodynamic_acceleration(segment, values, tables, parameters, mass)
-    propulsive = _ecfc_propulsive_acceleration(segment, values, tables, parameters, mass)
+    propulsive = _ecfc_propulsive_acceleration(segment, values, tables, parameters, mass, values.get("throttle", 1.0))
     specific = tuple(
         left + right + values.get(f"_guidance_a{axis}", 0.0)
         for left, right, axis in zip(aerodynamic, propulsive, ("x", "y", "z"), strict=True)
@@ -2216,11 +2966,28 @@ def _vehicle_environment_evaluator(
     earth_rotation_rate: float = 0.0,
     include_trajectory_references: bool = True,
     include_specific_loads_in_derivative: bool = True,
+    runtime_controls: Mapping[str, float] = {},
 ) -> Callable[[Mapping[str, float]], Mapping[str, float]]:
     """Combine atmosphere refresh with active-segment force observables."""
 
     def evaluate(values: Mapping[str, float]) -> Mapping[str, float]:
         result = dict(base_evaluator(values) if base_evaluator is not None else {})
+        guidance_controls = {
+            name: value
+            for name, value in runtime_controls.items()
+            if name in {"alpha", "alphat", "bankgc", "bankgd", "beta", "betae", "gamgd", "mach", "power", "psigc", "psigd"}
+        }
+        result.update(guidance_controls)
+        if "mach" in guidance_controls:
+            result["_command_mach"] = guidance_controls["mach"]
+        if "gamgd" in guidance_controls:
+            result["_command_gamgd"] = guidance_controls["gamgd"]
+        if "psigd" in guidance_controls:
+            result["_command_psigd"] = guidance_controls["psigd"]
+            result["_command_psi"] = guidance_controls["psigd"]
+        if "psigc" in guidance_controls:
+            result["_command_psigc"] = guidance_controls["psigc"]
+            result["_command_psi"] = guidance_controls["psigc"]
         if platform_state is not None:
             result.update(_inertial_platform_observables({**values, **result}, platform_state, earth_rotation_rate))
         if include_trajectory_references:
@@ -2272,6 +3039,7 @@ def _vehicle_environment_evaluator(
                 except (KeyError, TypeError, ValueError):
                     # A special rule without resolvable aerodynamic data is inert.
                     pass
+        result.update(guidance_controls)
         result.update(_evaluate_relative_guidance(result, vehicles, vehicle_name))
         result.update(_evaluate_range_insensitive_guidance(segment, {**values, **result}, parameters, gravitational_parameter))
         result.setdefault("alpha", values.get("alpha", 0.0))
@@ -3202,7 +3970,70 @@ def _event_residual(
             return right - left
         return left - right
     return evaluate_expression(expression, values, parameters, tables=_table_evaluators(tables))
-####
+    ####
+
+
+def _runtime_event_conditions(
+    problem: Problem,
+    parameters: Mapping[str, float],
+    tables: Mapping[str, RuntimeTable],
+) -> tuple[EventCondition, ...]:
+    """Lower declarative TAORYX runtime events into the batch event engine."""
+
+    events: list[EventCondition] = []
+    for block in problem.blocks:
+        if not isinstance(block, RuntimeBlock) or block.declaration != "event":
+            continue
+        condition_text = block.attributes.get("condition")
+        if not condition_text or block.name is None:
+            continue
+        expression = parse_expression(condition_text)
+        action = block.attributes.get("action", "signal").casefold()
+        if action not in {"stop", "signal"}:
+            raise ValueError(f"batch runtime event {block.name!r} does not support action {action!r}; use stop or signal")
+
+        def condition_function(state: RuntimeState, expression: ExpressionType = expression) -> float:
+            return _event_residual(expression, {**state.named, "time": state.time}, parameters, tables)
+        ####
+
+        def condition_predicate(state: RuntimeState, expression: ExpressionType = expression) -> bool:
+            return _event_satisfied(expression, {**state.named, "time": state.time}, parameters, tables)
+        ####
+
+        events.append(
+            EventCondition(
+                f"runtime-{block.name}",
+                condition_function,
+                action,
+                condition_predicate,
+                signal=block.attributes.get("signal") or block.name,
+                source=f"{block.location.path}:{block.location.line}",
+            )
+        )
+    return tuple(events)
+    ####
+
+
+def _runtime_control_values(problem: Problem, vehicle_name: str) -> dict[str, float]:
+    """Resolve bounded declarative control defaults for one batch vehicle."""
+
+    values: dict[str, float] = {}
+    for block in problem.blocks:
+        if not isinstance(block, RuntimeBlock) or block.declaration != "control" or block.name is None:
+            continue
+        selected_vehicle = block.attributes.get("vehicle")
+        if selected_vehicle is not None and selected_vehicle != vehicle_name:
+            continue
+        value = float(block.attributes.get("default", "0"))
+        lower = float(block.attributes["lower"]) if "lower" in block.attributes else None
+        upper = float(block.attributes["upper"]) if "upper" in block.attributes else None
+        if lower is not None and upper is not None and lower > upper:
+            raise ValueError(f"runtime control {block.name!r} has lower bound above upper bound")
+        if lower is not None and value < lower or upper is not None and value > upper:
+            raise ValueError(f"runtime control {block.name!r} default lies outside its bounds")
+        values[block.name.casefold()] = value
+    return values
+    ####
 
 
 def _event_satisfied(
@@ -3351,7 +4182,7 @@ def _summary_egs_specs(problem: Problem, problem_index: int) -> tuple[tuple[str,
 ####
 
 
-def _unsupported_features(problem: Problem) -> tuple[str, ...]:
+def _unsupported_features(problem: Problem, profile: GrammarProfile = GrammarProfile.TAOS96) -> tuple[str, ...]:
     """List parsed control blocks that the current runtime cannot execute."""
 
     features: list[str] = []
@@ -3360,7 +4191,7 @@ def _unsupported_features(problem: Problem) -> tuple[str, ...]:
     if any(not _is_supported_optimization(block) for block in problem.blocks if isinstance(block, OptimizeBlock)):
         features.append("optimize")
     has_successor_directive = any(isinstance(block, DofDirectiveBlock) for block in problem.blocks)
-    if _dynamics_mode(problem) is DynamicsMode.RIGID_BODY_6DOF and not has_successor_directive:
+    if profile is GrammarProfile.TAOS96 and _dynamics_mode(problem) is DynamicsMode.RIGID_BODY_6DOF and not has_successor_directive:
         features.append("mode rigid-body-6dof")
     return tuple(dict.fromkeys(features))
 
@@ -4389,7 +5220,7 @@ def _require_summary_operand(operation: str, value: float | None) -> float:
 def _summary_unary(operation: str, value: float) -> float:
     import math
 
-    functions = {
+    functions: dict[str, Callable[[float], float]] = {
         "abs": abs,
         "neg": lambda item: -item,
         "sqr": lambda item: item * item,

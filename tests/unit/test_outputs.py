@@ -112,3 +112,8 @@ def test_run_artifact_print_and_sqlite_sinks_preserve_plotter_inputs(tmp_path: P
             "SELECT interpolation FROM taoryx_channels WHERE semantic_name = 'phase.segment'"
         ).fetchone() == ("step",)
         assert connection.execute("SELECT value FROM taoryx_samples WHERE semantic_name = 'position.altitude.geodetic' AND sample_index = 1").fetchone() == (100.0,)
+
+    csv_path = artifact.write_csv(tmp_path / "run.csv", vehicle_id="1", channels=("position.altitude.geodetic",))
+    rows = csv_path.read_text(encoding="utf-8").splitlines()
+    assert rows[0] == "vehicle_id,time,semantic_name,source_name,unit,value"
+    assert rows[-1].endswith(",100.0")

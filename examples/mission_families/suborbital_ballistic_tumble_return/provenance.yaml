@@ -1,0 +1,18 @@
+schema_version: 1
+family: suborbital_ballistic_tumble_return
+source_kind: synthetic_analysis
+claim: averaged_3dof_tumbling_drag_only
+not_claimed:
+  - six_dof_rigid_body_moment_dynamics
+  - flight_qualified_aerodynamics
+  - historical_taos_96_numerical_compatibility
+sources:
+  - path: analysis/tumbling/aero_models.py
+    sha256: 448ec4ee1794f1f36b38b6f3295eb71de5723f9360697a81e5140c43125f0157
+  - path: analysis/tumbling/generate_tbl_data.py
+    sha256: 643b54b76e94f747adb469588154c35d445893c61fe7b6f397bb8cac52c681bf
+artifacts:
+  - path: analysis/tumbling/generated/cone_cd.tbl
+    sha256: 00428278d12fb0e978dc20360bb4749ed5e12a104099593084a1b80f88bef1b4
+  - path: examples/mission_families/suborbital_ballistic_tumble_return/mission.prb
+    sha256: 8203bed3a54b09c3790ffe077fff2b89d61f45113a6e2f9cfbc7f2da0b237cb3

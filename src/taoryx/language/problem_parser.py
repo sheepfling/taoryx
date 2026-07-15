@@ -63,6 +63,7 @@ from taoryx.language.models import (
     RawStatement,
     RecoveredRecord,
     ResetBlock,
+    RuntimeBlock,
     SearchBlock,
     SearchObjective,
     Segment,
@@ -129,6 +130,7 @@ _AERO_COEFFICIENT_SETS = (
     {"cx", "cy", "cz"},
 )
 _FORMAT_RE = re.compile(r"^[ef]\.\d+$", re.IGNORECASE)
+_RUNTIME_ATTRIBUTE_RE = re.compile(r"(?P<name>[A-Za-z_][A-Za-z0-9_.-]*)=(?P<value>\"[^\"]*\"|'[^']*'|[^\s]+)")
 _ATMOS_STANDARD_MODELS = {"none", "standard", *{str(number) for number in range(21)}}
 _EARTH_MODELS = {"spherical", "wgs-72", "wgs-84", "tsap-72", "tsap-84", "wgs-84-full", "gem-t1-full"}
 _EARTH_PARAMETER_NAMES = {"reqtr", "rpolr", "ecc", "flat", "omega", "g", "gm", "j2", "j3", "j4", "c20", "c22", "c30", "c31", "c32", "c33", "c40", "c41", "c42", "c43", "c44", "s22", "s31", "s32", "s33", "s41", "s42", "s43", "s44"}
@@ -994,9 +996,11 @@ def _parse_summary_operation(text: str, path: str, line: int, diagnostics: list[
     return SummaryOperation(operation=operation, operand=_parse_summary_operand(operand_text, path, line, diagnostics) if operand_text else None, location=_location(path, line))
 
 
-def _validate_initial_assignments(block: InitialBlock, path: str, line: int, diagnostics: list[Diagnostic]) -> None:
+def _validate_initial_assignments(block: InitialBlock, path: str, line: int, diagnostics: list[Diagnostic], *, profile: GrammarProfile = GrammarProfile.TAOS96) -> None:
     coordinate = block.coordinate_system or "geodetic"
-    allowed = _INITIAL_VARIABLES[coordinate]
+    allowed = set(_INITIAL_VARIABLES[coordinate])
+    if profile is GrammarProfile.TAORYX and coordinate == "ecic":
+        allowed.update({"qw", "qx", "qy", "qz", "wx", "wy", "wz", "propellant_mass", "heat_load", "peak_heat_rate"})
     seen: set[str] = set()
     for assignment in block.assignments:
         name = assignment.name.casefold()
@@ -2176,6 +2180,7 @@ def _make_block(
         "print": PrintBlock,
         "radar": RadarBlock,
         "random": RandomBlock,
+        "runtime": RuntimeBlock,
         "optimize": OptimizeBlock,
         "search": SearchBlock,
         "summarize": SummarizeBlock,
@@ -2205,7 +2210,19 @@ def _make_block(
         return None
     ####
     extra: dict[str, Any] = {}
-    if keyword in {"atmos", "earth"}:
+    if keyword == "runtime":
+        fields = _free_fields(header)
+        declaration = fields[0].casefold() if fields else None
+        if declaration not in {"parameter", "control", "status", "event", "output"}:
+            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-runtime-declaration", message="Expected '*runtime parameter|control|status|event|output ...'.", location=_location(path, line)))
+        else:
+            extra["declaration"] = declaration
+            extra["name"] = fields[1] if len(fields) > 1 and "=" not in fields[1] else None
+            attributes = {match.group("name").casefold(): match.group("value").strip("\"'") for match in _RUNTIME_ATTRIBUTE_RE.finditer(header)}
+            extra["attributes"] = attributes
+            if declaration in {"parameter", "control", "status", "event"} and extra["name"] is None:
+                diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-runtime-name", message=f"Runtime {declaration} declarations require a name.", location=_location(path, line)))
+    elif keyword in {"atmos", "earth"}:
         extra["model"] = words[0] if words else None
         if keyword == "atmos":
             model = (words[0] if words else "").casefold()
@@ -2755,7 +2772,7 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
                 scope = "problem"
                 current_segment = None
                 current_trajectory = None
-                if keyword in {"3dof", "6dof", "random"} and document.grammar_profile is GrammarProfile.TAOS96:
+                if keyword in {"3dof", "6dof", "random", "runtime"} and document.grammar_profile is GrammarProfile.TAOS96:
                     document.diagnostics.append(
                         Diagnostic(
                             severity=Severity.ERROR,
@@ -3456,7 +3473,7 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
                 block.wind_form = _wind_form(block.assignments)
             if isinstance(block, InitialBlock) and block.mode != "from":
                 before = len(document.diagnostics)
-                _validate_initial_assignments(block, path, block.location.line, document.diagnostics)
+                _validate_initial_assignments(block, path, block.location.line, document.diagnostics, profile=document.grammar_profile)
                 names = {assignment.name.casefold() for assignment in block.assignments}
                 if not names & {"wt", "mass"}:
                     document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-initial-mass", message="A direct '*initial' block requires wt or mass.", location=block.location))

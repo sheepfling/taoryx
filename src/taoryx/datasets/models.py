@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -40,6 +41,7 @@ class DatasetConventions(BaseModel):
     mdot_sign: str
     coefficients: str
     interpolation: str = "multilinear"
+    wind_heading: Literal["to", "from"] = "to"
 ####
 
 

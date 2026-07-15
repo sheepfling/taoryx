@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
+from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import ingest_file
 
 
@@ -22,12 +23,13 @@ def main() -> int:
     parser.add_argument("paths", nargs="+", type=Path)
     parser.add_argument("--json", action="store_true", dest="as_json")
     parser.add_argument("--report", type=Path, help="Write the complete machine-readable report to this JSON file.")
+    parser.add_argument("--profile", choices=tuple(profile.value for profile in GrammarProfile), default=GrammarProfile.TAOS96.value)
     arguments = parser.parse_args()
     reports: list[dict[str, Any]] = []
     error_count = 0
     for path in arguments.paths:
         try:
-            ingested = ingest_file(path)
+            ingested = ingest_file(path, profile=arguments.profile)
             document = ingested.document
             diagnostics = list(ingested.diagnostics)
         except (OSError, UnicodeError, ValueError) as exc:

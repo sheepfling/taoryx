@@ -99,6 +99,19 @@ def test_views() -> None:
     ####
 
 
+def showcase_california_hawaii() -> None:
+    """Regenerate the California-to-Hawaii JSON, SQLite, text, and PNG artifact."""
+    run(
+        [
+            project_python(),
+            str(ROOT / "examples/showcases/california_to_hawaii/run_showcase.py"),
+            "--output-dir",
+            "artifacts/showcases/california_to_hawaii",
+        ]
+    )
+    ####
+
+
 def grammar() -> None:
     run([project_python(), "-m", "pytest", "tests/parser"])
     run([project_python(), str(TOOLS / "check_taos_fixtures.py")])
@@ -210,6 +223,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-slow": lambda: test_category("slow"),
     "test-spectre": lambda: test_category("spectre"),
     "test-views": test_views,
+    "showcase-california-hawaii": showcase_california_hawaii,
     "e2e": e2e,
     "manual": manual,
     "equation-audit": equation_audit,

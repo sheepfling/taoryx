@@ -1,0 +1,16 @@
+(runtime-inputs)
+*title Runtime input contract example
+*atmos none
+*earth spherical gm=0 omega=0
+*runtime parameter initial-mass value=100.0 unit=kg
+*runtime parameter guidance-gain value=1.25 unit=1
+*runtime parameter moving-target-x value=1000.0 unit=m mutable=true
+*runtime control throttle vehicle=1 default=0.0 lower=0.0 upper=1.0 unit=fraction
+*runtime status throttle source=throttle unit=fraction
+*runtime status target-x source=moving-target-x unit=m
+*trajectory 1 vehicle start on 1
+  *initial ecfc x=0 y=0 z=0 xdt=10 ydt=0 zdt=0 mass=100 time=0
+  *segment 1 flight
+    *integ dt=0.1
+    *when time>1.0 stop
+*end

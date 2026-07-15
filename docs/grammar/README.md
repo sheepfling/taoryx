@@ -22,6 +22,7 @@ python tools/dev.py test-spectre
 - [Problem EBNF](../../grammars/taos_problem.ebnf) — documentary grammar for `.prb` files
 - [taoryx extensions](../../grammars/taoryx_extensions.ebnf) — successor-only mode syntax,
   explicitly separate from the 1995 TAOS grammar
+- [Grammar profiles](profiles.md) — selectable `taos96` and `taoryx` claim boundaries
 - `src/taoryx/language/` — parser, AST models, diagnostics, and semantic validation
 - `examples/chapter03/` and `examples/chapter04/` — extracted manual fixtures
 - `metadata/fixture_provenance.yaml` — fixture provenance and expected status
@@ -98,7 +99,8 @@ grammar automatically.
 
 ## User-facing entry points
 
-- `taoryx-validate` is the direct problem/table validator.
+- `taoryx-validate` is the direct problem/table validator; pass `--profile taoryx`
+  when validating successor extensions.
 - `python tools/dev.py grammar` runs the parser, fixture, and manual-corpus
   checks together.
 - `python tools/dev.py test-grammar` runs the grammar view from pytest.

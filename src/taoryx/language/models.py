@@ -102,7 +102,17 @@ class DofDirectiveBlock(BlockBase):
 
     keyword: Literal["3dof", "6dof"]
     mode: Literal["point-mass", "rigid-body-6dof"]
-####
+    ####
+
+
+class RuntimeBlock(BlockBase):
+    """TAORYX extension declaring runtime inputs, observations, or events."""
+
+    keyword: Literal["runtime"] = "runtime"
+    declaration: Literal["parameter", "control", "status", "event", "output"] | None = None
+    name: str | None = None
+    attributes: dict[str, str] = Field(default_factory=dict)
+    ####
 
 
 class DefineBlock(BlockBase):
@@ -371,6 +381,7 @@ ProblemBlock = Annotated[
     | PrintBlock
     | RadarBlock
     | RandomBlock
+    | RuntimeBlock
     | SearchBlock
     | SummarizeBlock
     | SurveyBlock

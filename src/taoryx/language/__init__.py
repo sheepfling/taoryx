@@ -11,6 +11,7 @@ from taoryx.language.analytical_tables import (
 from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
 from taoryx.language.ebnf import EbnfGrammar, EbnfReferenceError, EbnfSyntaxError, load_ebnf, parse_ebnf
 from taoryx.language.grammar_contracts import (
+    GRAMMAR_PROFILE_DESCRIPTIONS,
     SUPPORTED_GRAMMAR_CONTRACTS,
     SUPPORTED_TAORYX_PROBLEM_BLOCKS,
     TAORYX_MODE_CONTRACT,
@@ -18,6 +19,7 @@ from taoryx.language.grammar_contracts import (
     TAOS96_FREE_FIELD_CONTRACT,
     TAOS96_HIERARCHY_CONTRACT,
     TAOS96_PROBLEM_CATALOG_CONTRACT,
+    GrammarProfile,
 )
 from taoryx.language.ingest import FileKind, IngestedDocument, ingest_file, ingest_text, kind_for_path
 from taoryx.language.lexical import LexicalDocument, LexicalLine, LexicalToken, TitleTail, TokenKind, lex_line, lex_text, lex_title_tail
@@ -92,4 +94,6 @@ __all__ = [
     "TAOS96_HIERARCHY_CONTRACT",
     "TAOS96_PROBLEM_CATALOG_CONTRACT",
     "TAORYX_MODE_CONTRACT",
+    "GrammarProfile",
+    "GRAMMAR_PROFILE_DESCRIPTIONS",
 ]

@@ -1,0 +1,9 @@
+schema_version: 1
+showcase_id: orbital_insertion_coast_reentry
+invariants:
+  - {id: insertion_burn_recorded, status: planned, unit: event, tolerance: 0}
+  - {id: apoapsis_recorded, status: planned, unit: event, tolerance: 0}
+  - {id: periapsis_recorded, status: planned, unit: event, tolerance: 0}
+  - {id: orbital_energy_finite, status: planned, unit: m2/s2, tolerance: 0.0}
+  - {id: reentry_event_recorded, status: planned, unit: event, tolerance: 0}
+limitations: [dedicated orbital propagation and element extraction are not connected]

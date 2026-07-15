@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
+from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import ProblemDocument, TableDocument
 from taoryx.language.table_parser import table_type_catalog
@@ -27,6 +28,7 @@ class RunReport:
     diagnostics: tuple[Diagnostic, ...]
     outputs: tuple[str, ...]
     artifacts: tuple[RunArtifact, ...] = ()
+    metadata: tuple[dict[str, object], ...] = ()
 
     @property
     def exit_code(self) -> int:
@@ -46,6 +48,7 @@ class RunReport:
             "diagnostics": [item.model_dump(mode="json") for item in self.diagnostics],
             "outputs": list(self.outputs),
             "artifacts": [artifact.model_dump(mode="json") for artifact in self.artifacts],
+            "metadata": list(self.metadata),
             "exit_code": self.exit_code,
         }
     ####
@@ -60,6 +63,7 @@ def run_files(
     max_steps: int = 100000,
     integrator: str | None = None,
     seed: int | None = None,
+    profile: GrammarProfile | str = GrammarProfile.TAOS96,
 ) -> RunReport:
     """Ingest, lower, execute, and write products for one `.prb` file."""
 
@@ -106,7 +110,11 @@ def run_files(
                 table_sources[name] = definition.location.path
     ####
     try:
-        problem_ingested = ingest_file(problem, available_tables={name for document in table_documents for name in table_type_catalog(document)})
+        problem_ingested = ingest_file(
+            problem,
+            available_tables={name for document in table_documents for name in table_type_catalog(document)},
+            profile=profile,
+        )
         problem_document = cast(ProblemDocument, problem_ingested.document)
         diagnostics.extend(_runtime_diagnostics(problem_ingested.diagnostics))
         if problem_ingested.kind is not FileKind.PROBLEM:
@@ -160,10 +168,19 @@ def run_files(
             case.problem,
             result,
             vehicle_kinds={vehicle_id: vehicle.vehicle_kind for vehicle_id, vehicle in case.problem.vehicles.items()},
+            events=case.problem.event_history,
         )
         for case, result in zip(lowered.cases, results, strict=True)
     )
-    return RunReport(str(problem), tuple(map(str, table_paths)), len(lowered.cases), results, tuple(diagnostics), outputs, artifacts)
+    metadata = tuple(
+        {
+            key: value
+            for key, value in case.problem.metadata.items()
+            if key in {"dynamics_mode", "parameters", "vehicle", "actuator", "target", "route", "controls", "thermal", "telemetry", "native_pipeline"}
+        }
+        for case in lowered.cases
+    )
+    return RunReport(str(problem), tuple(map(str, table_paths)), len(lowered.cases), results, tuple(diagnostics), outputs, artifacts, metadata)
 ####
 
 

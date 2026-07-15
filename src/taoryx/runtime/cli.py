@@ -9,7 +9,11 @@ from html import escape
 from pathlib import Path
 
 from taoryx.integration import available_integrator_descriptions, available_integrators
+from taoryx.language.grammar_contracts import GrammarProfile
+from taoryx.outputs import RunArtifact
+from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
 from taoryx.table_explorer import InterpolationExplanation, TableInspection, explain_interpolation, inspect_table_file
+from taoryx.visualization import render_run_artifact_html, render_run_artifact_plots
 
 from .optimization_runtime import available_optimizers
 from .runner import run_files
@@ -26,6 +30,7 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--json", action="store_true")
     run.add_argument("--max-steps", type=int, default=100000)
     run.add_argument("--seed", type=int, help="base seed for *random sampling")
+    run.add_argument("--profile", choices=tuple(profile.value for profile in GrammarProfile), default=GrammarProfile.TAOS96.value)
     run.add_argument(
         "--integrator",
         choices=tuple(item.value for item in available_integrators()),
@@ -34,6 +39,28 @@ def main(argv: list[str] | None = None) -> int:
             "or scipy-* if installed"
         ),
     )
+    scenario = subparsers.add_parser("scenario", help="compile and inspect resolved scenario caches")
+    scenario_subparsers = scenario.add_subparsers(dest="scenario_command", required=True)
+    compile_scenario = scenario_subparsers.add_parser("compile", help="validate source and write a resolved scenario cache")
+    compile_scenario.add_argument("problem", type=Path)
+    compile_scenario.add_argument("tables", type=Path, nargs="*")
+    compile_scenario.add_argument("--output", type=Path, required=True)
+    compile_scenario.add_argument("--profile", choices=tuple(profile.value for profile in GrammarProfile), default=GrammarProfile.TAOS96.value)
+    compile_scenario.add_argument("--seed", type=int)
+    compile_scenario.add_argument("--integrator")
+    compile_scenario.add_argument("--json", action="store_true")
+    artifact = subparsers.add_parser("artifact", help="inspect normalized run artifacts")
+    artifact_subparsers = artifact.add_subparsers(dest="artifact_command", required=True)
+    artifact_html = artifact_subparsers.add_parser("html", help="render a run artifact as standalone HTML")
+    artifact_html.add_argument("path", type=Path)
+    artifact_html.add_argument("--output", type=Path, required=True)
+    artifact_html.add_argument("--vehicle")
+    artifact_html.add_argument("--channel", action="append", default=[])
+    artifact_plot = artifact_subparsers.add_parser("plot", help="render static PNG plots from a run artifact")
+    artifact_plot.add_argument("path", type=Path)
+    artifact_plot.add_argument("--output-dir", type=Path, required=True)
+    artifact_plot.add_argument("--vehicle")
+    artifact_plot.add_argument("--channel", action="append", default=[])
     table = subparsers.add_parser("table", help="inspect TAOS table files")
     table_subparsers = table.add_subparsers(dest="table_command", required=True)
     inspect = table_subparsers.add_parser("inspect", help="inspect a .tbl file")
@@ -49,6 +76,10 @@ def main(argv: list[str] | None = None) -> int:
     integrators_subparsers = integrators.add_subparsers(dest="integrator_command", required=True)
     integrators_subparsers.add_parser("list", help="list installed integration backends")
     arguments = parser.parse_args(argv)
+    if arguments.command == "scenario":
+        return _compile_scenario(arguments)
+    if arguments.command == "artifact":
+        return _render_artifact(arguments)
     if arguments.command == "table":
         return _inspect_table(arguments)
     if arguments.command == "optimizers":
@@ -68,6 +99,7 @@ def main(argv: list[str] | None = None) -> int:
         max_steps=arguments.max_steps,
         integrator=arguments.integrator,
         seed=arguments.seed,
+        profile=arguments.profile,
     )
     if arguments.report:
         try:
@@ -87,6 +119,62 @@ def main(argv: list[str] | None = None) -> int:
         for output in report.outputs:
             print(f"output: {output}")
     return report.exit_code
+
+
+def _compile_scenario(arguments: argparse.Namespace) -> int:
+    """Compile source files into a deterministic scenario cache."""
+
+    try:
+        scenario = ScenarioCompiler().load_or_compile(
+            arguments.output,
+            arguments.problem,
+            table_paths=tuple(arguments.tables),
+            profile=arguments.profile,
+            seed=arguments.seed,
+            integrator=arguments.integrator,
+        )
+    except ScenarioCompileError as error:
+        for diagnostic in error.diagnostics:
+            location = diagnostic.location
+            prefix = f"{location.path}:{location.line}: " if location else ""
+            print(f"error: {prefix}{diagnostic.code}: {diagnostic.message}")
+        return 2
+    except (OSError, TypeError, ValueError) as error:
+        print(f"error: scenario-compile-failed: {error}")
+        return 2
+    if arguments.json:
+        print(scenario.model_dump_json(indent=2))
+    else:
+        print(f"compiled scenario {scenario.identity}")
+        print(f"cache: {arguments.output}")
+    return 0
+
+
+def _render_artifact(arguments: argparse.Namespace) -> int:
+    """Render one normalized artifact without loading source files."""
+
+    try:
+        artifact = RunArtifact.model_validate_json(arguments.path.read_text(encoding="utf-8"))
+        if arguments.artifact_command == "html":
+            render_run_artifact_html(
+                artifact,
+                arguments.output,
+                vehicle_id=arguments.vehicle,
+                channels=tuple(arguments.channel),
+            )
+            print(f"rendered artifact HTML: {arguments.output}")
+        else:
+            plots = render_run_artifact_plots(
+                artifact,
+                arguments.output_dir,
+                vehicle_id=arguments.vehicle,
+                channels=tuple(arguments.channel),
+            )
+            print(f"rendered {len(plots)} artifact plot(s): {arguments.output_dir}")
+    except (OSError, TypeError, ValueError) as error:
+        print(f"error: artifact-render-failed: {error}")
+        return 2
+    return 0
 
 
 def _inspect_table(arguments: argparse.Namespace) -> int:

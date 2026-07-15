@@ -1,0 +1,8 @@
+schema_version: 1
+id: orbital_insertion_coast_reentry
+title: Orbital insertion, coast, and reentry telemetry showcase
+status: scaffolded
+claim_boundary: {manual_bounded: false, taoryx_extension: true, historical_taos_96_compatibility: false, engineering_validity: false}
+dynamics_mode: point-mass-3dof
+source: {problem_file: null, table_files: [], runtime_contract: [orbital-elements-and-event-provider]}
+outputs: {artifact_root: artifacts/showcases/orbital_insertion_coast_reentry, formats: [text, json, sqlite, png]}

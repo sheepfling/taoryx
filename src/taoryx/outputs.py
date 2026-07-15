@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import csv
 import json
+import math
 import sqlite3
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -109,7 +111,13 @@ class RunArtifact(BaseModel):
     schema_version: int = 1
     problem: str
     vehicles: dict[str, VehicleTelemetry]
-    parameters: dict[str, float] = Field(default_factory=dict)
+    parameters: dict[str, float | str | bool] = Field(default_factory=dict)
+    scenario_identity: str | None = None
+    composition: list[dict[str, object]] = Field(default_factory=list)
+    resolution_records: list[dict[str, object]] = Field(default_factory=list)
+    commands: list[dict[str, object]] = Field(default_factory=list)
+    events: list[dict[str, object]] = Field(default_factory=list)
+    visualization: dict[str, object] = Field(default_factory=dict)
 
     def write_json(self, path: str | Path) -> Path:
         """Persist this artifact as human-readable JSON."""
@@ -125,10 +133,15 @@ class RunArtifact(BaseModel):
         output = StringIO()
         output.write(f"Run: {self.problem}\n")
         output.write(f"Schema version: {self.schema_version}\n")
+        if self.scenario_identity is not None:
+            output.write(f"Scenario identity: {self.scenario_identity}\n")
+        if self.resolution_records:
+            output.write(f"Resolution records: {len(self.resolution_records)}\n")
         if self.parameters:
             output.write("Parameters:\n")
             for name, value in sorted(self.parameters.items()):
-                output.write(f"  {name} = {value:g}\n")
+                formatted = f"{value:g}" if isinstance(value, (int, float)) and not isinstance(value, bool) else str(value)
+                output.write(f"  {name} = {formatted}\n")
         for vehicle_id, vehicle in self.vehicles.items():
             output.write(f"\nVehicle {vehicle_id}: {vehicle.name}\n")
             output.write(f"  kind={vehicle.kind.value} dynamics={vehicle.dynamics.value}\n")
@@ -146,6 +159,36 @@ class RunArtifact(BaseModel):
             if vehicle.events:
                 output.write(f"  events: {len(vehicle.events)}\n")
         return output.getvalue()
+
+    def write_csv(
+        self,
+        path: str | Path,
+        *,
+        vehicle_id: str | None = None,
+        channels: Sequence[str] = (),
+    ) -> Path:
+        """Write selected telemetry in deterministic long-form CSV."""
+
+        destination = Path(path)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        selected = (vehicle_id,) if vehicle_id is not None else tuple(sorted(self.vehicles))
+        requested = tuple(channels)
+        with destination.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.writer(handle)
+            linked = self.scenario_identity is not None
+            header = ("vehicle_id", "time", "semantic_name", "source_name", "unit", "value", "schema_version", "scenario_identity") if linked else ("vehicle_id", "time", "semantic_name", "source_name", "unit", "value")
+            writer.writerow(header)
+            for selected_id in selected:
+                vehicle = self.vehicles[selected_id]
+                names = requested or tuple(sorted(vehicle.channels))
+                for index, time in enumerate(vehicle.times):
+                    for name in names:
+                        channel = vehicle.channels.get(name)
+                        if channel is None:
+                            continue
+                        row = (selected_id, time, name, channel.source_name, channel.unit or "", channel.values[index])
+                        writer.writerow((*row, self.schema_version, self.scenario_identity) if linked else row)
+        return destination
 
     def print_text(self, *, max_rows: int | None = None) -> None:
         """Print the deterministic text view to standard output."""
@@ -170,6 +213,17 @@ class RunArtifact(BaseModel):
         connection.execute(
             "INSERT INTO taoryx_runs(run_id, schema_version, problem) VALUES (?, ?, ?)",
             (run_id, self.schema_version, self.problem),
+        )
+        connection.executemany(
+            "INSERT INTO taoryx_run_metadata(run_id, name, value_json) VALUES (?, ?, ?)",
+            [
+                (run_id, "scenario_identity", json.dumps(self.scenario_identity)),
+                (run_id, "composition", json.dumps(self.composition, sort_keys=True)),
+                (run_id, "resolution_records", json.dumps(self.resolution_records, sort_keys=True)),
+                (run_id, "commands", json.dumps(self.commands, sort_keys=True)),
+                (run_id, "events", json.dumps(self.events, sort_keys=True)),
+                (run_id, "visualization", json.dumps(self.visualization, sort_keys=True)),
+            ],
         )
         connection.executemany(
             "INSERT INTO taoryx_parameters(run_id, name, value) VALUES (?, ?, ?)",
@@ -235,6 +289,12 @@ CREATE TABLE IF NOT EXISTS taoryx_parameters (
     run_id TEXT NOT NULL REFERENCES taoryx_runs(run_id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     value REAL NOT NULL,
+    PRIMARY KEY (run_id, name)
+);
+CREATE TABLE IF NOT EXISTS taoryx_run_metadata (
+    run_id TEXT NOT NULL REFERENCES taoryx_runs(run_id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    value_json TEXT NOT NULL,
     PRIMARY KEY (run_id, name)
 );
 CREATE TABLE IF NOT EXISTS taoryx_vehicles (
@@ -308,6 +368,12 @@ def build_run_artifact(
     result: ExecutionResult,
     *,
     vehicle_kinds: Mapping[str, VehicleKind] | None = None,
+    scenario_identity: str | None = None,
+    composition: Sequence[Mapping[str, object]] = (),
+    resolution_records: Sequence[Mapping[str, object]] = (),
+    commands: Sequence[Mapping[str, object]] = (),
+    events: Sequence[Mapping[str, object]] = (),
+    visualization: Mapping[str, object] | None = None,
 ) -> RunArtifact:
     """Build telemetry directly from runtime histories, never from report text."""
 
@@ -324,11 +390,76 @@ def build_run_artifact(
     }
     raw_parameters = problem.metadata.get("parameters", {})
     parameters = {
-        str(name): float(value)
+        str(name): (float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else value)
         for name, value in raw_parameters.items()
-        if isinstance(value, (int, float)) and not isinstance(value, bool)
+        if isinstance(value, (bool, int, float, str))
     } if isinstance(raw_parameters, Mapping) else {}
-    return RunArtifact(problem=problem_name, vehicles=vehicles, parameters=parameters)
+    return RunArtifact(
+        problem=problem_name,
+        vehicles=vehicles,
+        parameters=parameters,
+        scenario_identity=scenario_identity,
+        composition=[dict(item) for item in composition],
+        resolution_records=[dict(item) for item in resolution_records],
+        commands=[dict(item) for item in commands],
+        events=[dict(item) for item in events],
+        visualization=dict(visualization or {}),
+    )
+
+
+def apply_output_subscriptions(artifact: RunArtifact, subscriptions: Sequence[object]) -> RunArtifact:
+    """Filter and deterministically sample an artifact from runtime subscriptions."""
+
+    if not subscriptions:
+        return artifact
+    intervals = [float(getattr(item, "sample_interval")) for item in subscriptions if getattr(item, "sample_interval", None) is not None]
+    interval = min(intervals) if intervals else None
+    requested = {
+        str(channel).casefold()
+        for item in subscriptions
+        for channel in getattr(item, "channels", ())
+    }
+    include_events = any(bool(getattr(item, "include_events", True)) for item in subscriptions)
+    vehicles: dict[str, VehicleTelemetry] = {}
+    for vehicle_id, vehicle in artifact.vehicles.items():
+        indices = _sample_indices(vehicle.times, interval)
+        channels = {
+            name: channel.model_copy(update={"values": [channel.values[index] for index in indices]})
+            for name, channel in vehicle.channels.items()
+            if not requested or name.casefold() in requested or channel.source_name.casefold() in requested
+        }
+        vehicles[vehicle_id] = vehicle.model_copy(
+            update={
+                "times": [vehicle.times[index] for index in indices],
+                "channels": channels,
+                "events": vehicle.events if include_events else [],
+            }
+        )
+    visualization = dict(artifact.visualization)
+    visualization["output_sampling"] = {
+        "sample_interval": interval,
+        "channels": sorted(requested),
+        "include_events": include_events,
+    }
+    return artifact.model_copy(update={"vehicles": vehicles, "events": artifact.events if include_events else [], "visualization": visualization})
+
+
+def _sample_indices(times: Sequence[float], interval: float | None) -> list[int]:
+    if not times:
+        return []
+    if interval is None:
+        return list(range(len(times)))
+    if not math.isfinite(interval) or interval <= 0.0:
+        raise ValueError("output sample interval must be positive and finite")
+    indices = [0]
+    next_time = times[0] + interval
+    for index, time in enumerate(times[1:], start=1):
+        if time + 1.0e-12 >= next_time:
+            indices.append(index)
+            next_time = times[0] + (len(indices)) * interval
+    if indices[-1] != len(times) - 1:
+        indices.append(len(times) - 1)
+    return indices
 
 
 def _build_vehicle_telemetry(vehicle_id: str, vehicle: object, history: Sequence[object], kind: VehicleKind) -> VehicleTelemetry:

@@ -1,0 +1,50 @@
+schema_version: 1
+showcase_id: california_to_hawaii
+invariants:
+  - id: route_starts_in_california
+    unit: deg
+    tolerance: 0.01
+  - id: route_ends_in_honolulu
+    unit: deg
+    tolerance: 0.01
+  - id: great_circle_distance_km
+    value: 3920.0
+    unit: km
+    tolerance: 25.0
+  - id: two_powered_stages
+    value: 2
+    unit: stages
+    tolerance: 0
+  - id: exoatmospheric_apogee
+    value: 100000.0
+    unit: m
+    tolerance: 0.0
+  - id: time_above_atmosphere
+    value: 200.0
+    unit: s
+    tolerance: 0.0
+  - id: hypersonic_glide_mach
+    value: 8.0
+    unit: mach
+    tolerance: 5.0
+  - id: terminal_pronav_activation
+    unit: event
+    tolerance: 0
+  - id: destination_range_m
+    value: 0.0
+    unit: m
+    tolerance: 40000.0
+  - id: destination_altitude_m
+    value: 0.0
+    unit: m
+    tolerance: 100.0
+  - id: quaternion_norm
+    value: 1.0
+    unit: dimensionless
+    tolerance: 1.0e-12
+  - id: mass_nonincreasing
+    unit: kg
+    tolerance: 0.0
+limitations:
+  - invented vehicle, aerodynamic, atmosphere, and heating parameters are not a validated design
+  - no historical TAOS or real-vehicle compatibility claim

@@ -4,8 +4,161 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Protocol
 
 from taoryx.contracts import Frame, FrameVector3, Vector3
+
+
+@dataclass(frozen=True, slots=True)
+class EnvironmentSample:
+    """One deterministic environment sample consumed by a runtime step.
+
+    The core atmosphere fields are sufficient for the current 3-DOF force
+    model. Weather fields are optional data carried through the boundary so a
+    provider can add them without changing the translational state contract.
+    Wind is an earth-fixed ECFC vector; callers must subtract it from the
+    earth-relative vehicle velocity before deriving air-relative quantities.
+    """
+
+    density: float
+    pressure: float
+    temperature: float
+    speed_of_sound: float
+    wind: FrameVector3
+    humidity: float | None = None
+    cloud_fraction: float | None = None
+    rain_rate: float | None = None
+####
+
+
+class EnvironmentProvider(Protocol):
+    """Provider boundary for deterministic or live environment data."""
+
+    def sample(self, *, time: float, position: FrameVector3) -> EnvironmentSample:
+        """Return the environment at one simulation time and position."""
+        ...
+    ####
+####
+
+
+@dataclass(frozen=True, slots=True)
+class StaticEnvironmentProvider:
+    """Provider useful for tests and replayable deterministic scenarios."""
+
+    value: EnvironmentSample
+
+    def sample(self, *, time: float, position: FrameVector3) -> EnvironmentSample:
+        del time, position
+        return self.value
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class ExponentialAtmosphereProvider:
+    """Deterministic altitude atmosphere with a fixed ECFC wind vector."""
+
+    reference_radius_m: float
+    sea_level_density: float = 1.225
+    scale_height_m: float = 8_500.0
+    sea_level_temperature_k: float = 288.15
+    vacuum_altitude_m: float = 120_000.0
+    wind: FrameVector3 = FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECFC)
+
+    def __post_init__(self) -> None:
+        if self.reference_radius_m <= 0.0 or self.sea_level_density < 0.0 or self.scale_height_m <= 0.0:
+            raise ValueError("atmosphere geometry and density parameters must be valid")
+        if self.vacuum_altitude_m < 0.0:
+            raise ValueError("vacuum altitude must be nonnegative")
+        if self.wind.frame is not Frame.ECFC:
+            raise ValueError("atmosphere wind must be expressed in ECFC")
+        ####
+
+    def sample(self, *, time: float, position: FrameVector3) -> EnvironmentSample:
+        """Return density, thermodynamic values, and wind at ECFC position."""
+
+        del time
+        altitude = position.vector.norm() - self.reference_radius_m
+        if altitude >= self.vacuum_altitude_m:
+            density = 0.0
+        else:
+            density = self.sea_level_density * math.exp(-max(0.0, altitude) / self.scale_height_m)
+        temperature = max(180.0, self.sea_level_temperature_k - 0.0065 * max(0.0, altitude))
+        pressure = density * 287.05 * temperature
+        speed_of_sound = math.sqrt(1.4 * 287.05 * temperature)
+        return EnvironmentSample(density, pressure, temperature, speed_of_sound, self.wind)
+        ####
+    ####
+####
+
+
+@dataclass(frozen=True, slots=True)
+class EnvironmentKeyframe:
+    """A time-stamped environment sample for deterministic replay."""
+
+    time: float
+    value: EnvironmentSample
+####
+
+
+@dataclass(frozen=True, slots=True)
+class ScheduledEnvironmentProvider:
+    """Linearly interpolate environment samples between source keyframes."""
+
+    keyframes: tuple[EnvironmentKeyframe, ...]
+
+    def __post_init__(self) -> None:
+        if not self.keyframes:
+            raise ValueError("scheduled environment requires at least one keyframe")
+        if any(left.time >= right.time for left, right in zip(self.keyframes, self.keyframes[1:], strict=False)):
+            raise ValueError("environment keyframe times must be strictly increasing")
+        ####
+    ####
+
+    def sample(self, *, time: float, position: FrameVector3) -> EnvironmentSample:
+        del position
+        if time <= self.keyframes[0].time:
+            return self.keyframes[0].value
+        if time >= self.keyframes[-1].time:
+            return self.keyframes[-1].value
+        for left, right in zip(self.keyframes, self.keyframes[1:], strict=True):
+            if left.time <= time <= right.time:
+                fraction = (time - left.time) / (right.time - left.time)
+                return _interpolate_environment(left.value, right.value, fraction)
+        raise RuntimeError("environment keyframe lookup failed")
+    ####
+####
+
+
+def _interpolate_environment(left: EnvironmentSample, right: EnvironmentSample, fraction: float) -> EnvironmentSample:
+    def blend(a: float, b: float) -> float:
+        return a + fraction * (b - a)
+    ####
+
+    return EnvironmentSample(
+        density=blend(left.density, right.density),
+        pressure=blend(left.pressure, right.pressure),
+        temperature=blend(left.temperature, right.temperature),
+        speed_of_sound=blend(left.speed_of_sound, right.speed_of_sound),
+        wind=FrameVector3(
+            Vector3(
+                blend(left.wind.vector.x, right.wind.vector.x),
+                blend(left.wind.vector.y, right.wind.vector.y),
+                blend(left.wind.vector.z, right.wind.vector.z),
+            ),
+            Frame.ECFC,
+        ),
+        humidity=_blend_optional(left.humidity, right.humidity, fraction),
+        cloud_fraction=_blend_optional(left.cloud_fraction, right.cloud_fraction, fraction),
+        rain_rate=_blend_optional(left.rain_rate, right.rain_rate, fraction),
+    )
+####
+
+
+def _blend_optional(left: float | None, right: float | None, fraction: float) -> float | None:
+    if left is None or right is None:
+        return right if fraction >= 1.0 else left
+    return left + fraction * (right - left)
+####
 
 
 @dataclass(frozen=True, slots=True)

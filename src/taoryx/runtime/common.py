@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
+from copy import copy, deepcopy
 from dataclasses import dataclass, field
 
 from taoryx.contracts import Frame, Vector3
@@ -31,6 +32,29 @@ class RuntimeState:
         resolved_time = self.time if time is None else time
         named["time"] = resolved_time
         return RuntimeState(resolved_time, normalized, self.frame, named, self.value_names, self.segment_endpoints)
+    ####
+
+    def interpolated(self, other: RuntimeState, time: float) -> RuntimeState:
+        """Linearly interpolate this state and its numeric named observables."""
+
+        if other.time == self.time:
+            if time != self.time:
+                raise ValueError("cannot interpolate distinct times from a zero-duration state")
+            return self
+        fraction = (time - self.time) / (other.time - self.time)
+        if fraction < -1e-12 or fraction > 1.0 + 1e-12:
+            raise ValueError("interpolation time lies outside the state interval")
+        fraction = min(1.0, max(0.0, fraction))
+        values = tuple(left + fraction * (right - left) for left, right in zip(self.values, other.values, strict=True))
+        named = dict(self.named)
+        for name in set(self.named) | set(other.named):
+            left = self.named.get(name)
+            right = other.named.get(name)
+            if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                named[name] = float(left) + fraction * (float(right) - float(left))
+            elif right is not None:
+                named[name] = right
+        return RuntimeState(time, values, self.frame, named, self.value_names, self.segment_endpoints)
     ####
 
     def to_point_mass_state(self) -> PointMassState:
@@ -87,6 +111,7 @@ class RuntimeVehicle:
     derived_definitions: Mapping[str, ExpressionType] = field(default_factory=dict)
     definition_evaluator: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
     parameters: Mapping[str, float] = field(default_factory=dict)
+    control_values: Mapping[str, float] = field(default_factory=dict)
     table_evaluators: Mapping[str, Callable[[Mapping[str, float]], float]] = field(default_factory=dict)
     environment_evaluator: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
     event_handlers: Mapping[str, Callable[[RuntimeState], RuntimeState]] = field(default_factory=dict)
@@ -98,12 +123,16 @@ class RuntimeVehicle:
     body_rate_provider: BodyRateProvider | None = None
     stall_detector: StallDetector | None = None
     vehicle_kind: VehicleKind = VehicleKind.GENERIC
+    fired_events: set[str] = field(default_factory=set)
 
     def __post_init__(self) -> None:
         if self.step_size <= 0.0:
             raise ValueError("vehicle step_size must be positive")
         if self.active:
             self.activation_pending = False
+        if self.control_values:
+            named = {**self.state.named, **self.control_values}
+            self.state = RuntimeState(self.state.time, self.state.values, self.state.frame, named, self.state.value_names, self.state.segment_endpoints)
         if self.dynamics_mode is DynamicsMode.KINEMATIC_6DOF and self.kinematic_state is None:
             raise ValueError("kinematic-6dof vehicles require a kinematic state sidecar")
         if self.dynamics_mode is not DynamicsMode.KINEMATIC_6DOF and self.kinematic_state is not None:
@@ -123,9 +152,67 @@ class RuntimeProblem:
     table_knots: tuple[float, ...] = ()
     final_time: float | None = None
     metadata: dict[str, object] = field(default_factory=dict)
+    event_history: list[dict[str, object]] = field(default_factory=list)
 
     def active_vehicles(self) -> tuple[RuntimeVehicle, ...]:
         return tuple(vehicle for vehicle in self.vehicles.values() if vehicle.active)
+    ####
+
+    def observe(self, vehicle: str | None = None, *, status_names: Sequence[str] = (), include_deep: bool = False) -> object:
+        """Return a tiered observation for one vehicle or all vehicles."""
+
+        from .observations import observe_vehicle
+
+        if vehicle is not None:
+            return observe_vehicle(self.vehicles[vehicle], status_names=status_names, include_deep=include_deep)
+        return {name: observe_vehicle(item, status_names=status_names, include_deep=include_deep) for name, item in self.vehicles.items()}
+    ####
+
+    def clone_at(self, time: float, *, resume: bool = True) -> RuntimeProblem:
+        """Clone the executable graph at a recorded or interpolated flight time.
+
+        Vehicle callbacks remain shared because they are executable model code;
+        mutable vehicle state, histories, metadata, and event sets are copied so
+        the returned graph can be advanced independently.
+        """
+
+        if not self.vehicles:
+            raise ValueError("cannot clone an empty runtime problem")
+        histories: dict[str, list[RuntimeState]] = {}
+        cloned_vehicles: dict[str, RuntimeVehicle] = {}
+        for name, source in self.vehicles.items():
+            if not source.history:
+                raise ValueError(f"vehicle {name!r} has no history to clone")
+            first = source.history[0].time
+            last = source.history[-1].time
+            if time < first - 1e-12 or time > last + 1e-12:
+                raise ValueError(f"clone time {time} is outside vehicle {name!r} history [{first}, {last}]")
+            bounded_time = min(last, max(first, time))
+            retained = [state for state in source.history if state.time < bounded_time - 1e-12]
+            exact = next((state for state in source.history if abs(state.time - bounded_time) <= 1e-12), None)
+            if exact is None:
+                upper_index = next(index for index, state in enumerate(source.history) if state.time > bounded_time)
+                exact = source.history[upper_index - 1].interpolated(source.history[upper_index], bounded_time)
+            retained.append(exact)
+            histories[name] = retained
+            clone = copy(source)
+            clone.state = exact
+            clone.history = retained
+            clone.fired_events = set(event for event in source.fired_events if event in {condition.name for condition in source.events if condition.action != "stop"})
+            if resume:
+                clone.active = True
+                clone.activation_pending = False
+            cloned_vehicles[name] = clone
+        cloned = RuntimeProblem(
+            cloned_vehicles,
+            self.print_times,
+            self.table_knots,
+            self.final_time,
+            deepcopy(self.metadata),
+            deepcopy(self.event_history),
+        )
+        cloned.metadata["cloned_at_time"] = float(time)
+        return cloned
     ####
 ####
 
@@ -146,6 +233,8 @@ class EventCondition:
     function: Callable[[RuntimeState], float]
     action: str = "stop"
     predicate: Callable[[RuntimeState], bool] | None = None
+    signal: str | None = None
+    source: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

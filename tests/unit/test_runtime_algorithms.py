@@ -4,6 +4,7 @@ import pytest
 
 from taoryx.contracts import Frame, FrameVector3, Quantity, Unit, Vector3
 from taoryx.language.expressions import parse_expression
+from taoryx.outputs import build_run_artifact
 from taoryx.runtime.common import EventCondition, RuntimeProblem, RuntimeState, RuntimeVehicle
 from taoryx.runtime.engine import compute_trajectories, get_next_time_step
 from taoryx.runtime.environment_runtime import evaluate_wind
@@ -191,6 +192,31 @@ def test_event_restart_rewinds_synchronized_vehicles() -> None:
     assert result.completed
     assert [state.time for state in result.states["continuing"]] == pytest.approx([0.0, 0.5, 1.0])
     assert result.states["continuing"][1].values == pytest.approx((1.0,))
+
+
+def test_batch_signal_and_stop_events_are_recorded_once_with_provenance() -> None:
+    vehicle = RuntimeVehicle(
+        "signal-vehicle",
+        RuntimeState(0.0, (0.0,), value_names=("x",)),
+        lambda state: (1.0,),
+        step_size=0.2,
+        events=(
+            EventCondition("midpoint", lambda state: state.values[0] - 0.15, "signal", signal="midpoint-reached", source="test.prb:4"),
+            EventCondition("stop", lambda state: state.values[0] - 0.25, "stop", signal="terminal", source="test.prb:5"),
+        ),
+    )
+
+    problem = RuntimeProblem({vehicle.name: vehicle}, final_time=1.0)
+    result = compute_trajectories(problem)
+
+    assert result.completed
+    assert [event["name"] for event in problem.event_history] == ["midpoint", "stop"]
+    assert problem.event_history[0]["action"] == "signal"
+    assert problem.event_history[0]["signal"] == "midpoint-reached"
+    assert problem.event_history[0]["source"] == "test.prb:4"
+    assert problem.event_history[1]["time"] == pytest.approx(0.25)
+    artifact = build_run_artifact("test.prb", problem, result, events=problem.event_history)
+    assert artifact.events[0]["signal"] == "midpoint-reached"
 ####
 
 

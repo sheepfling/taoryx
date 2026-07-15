@@ -1,0 +1,8 @@
+schema_version: 1
+showcase_id: quadcopter_drone_racetrack
+plots:
+  - {id: ground_track, title: Quadcopter racetrack ground track, x: east, y: north, overlays: [racetrack_boundary, lap_markers]}
+  - {id: altitude_hold, title: Altitude hold and vertical rate, x: time, y: [altitude, vertical_speed, altitude_command]}
+  - {id: airspeed_wind, title: Airspeed and changing wind, x: time, y: [airspeed, wind_east, wind_north, wind_down]}
+  - {id: attitude_rates, title: Attitude and body rates, x: time, y: [roll, pitch, yaw, roll_rate, pitch_rate, yaw_rate]}
+  - {id: controls, title: Commanded controls and saturation, x: time, y: [throttle, roll_command, pitch_command, yaw_command], events: [control-saturation, lap-complete]}

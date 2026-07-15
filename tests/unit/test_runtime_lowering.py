@@ -1028,6 +1028,41 @@ def test_multiple_search_blocks_resolve_in_source_order(tmp_path: Path) -> None:
 ####
 
 
+def test_three_nested_searches_resolve_in_runtime(tmp_path: Path) -> None:
+    problem = tmp_path / "three-nested-searches.prb"
+    problem.write_text(
+        "(three-nested-searches)\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecfc x=20925746.3255 y=0 z=0 xdt=srch-1 ydt=srch-2 zdt=srch-3 time=0 mass=1\n"
+        "  *segment 1 inner\n"
+        "    *integ dt=0.1\n"
+        "    *when time>1 goto 2\n"
+        "  *segment 2 middle\n"
+        "    *when time>2 goto 3\n"
+        "  *segment 3 outer\n"
+        "    *when time>3 stop\n"
+        "*search 1 vary x-velocity until xecfc=20925776.3255 on segment 3, trajectory 1\n"
+        "  xlo=0 xhi=20 xest=5 dx=1 tol=0.001 xref=10 fref=1 maxitr=30 print=0 integ=0\n"
+        "*search 2 vary y-velocity until yecfc=40 on segment 2, trajectory 1\n"
+        "  xlo=0 xhi=30 xest=10 dx=1 tol=0.001 xref=10 fref=1 maxitr=30 print=0 integ=0\n"
+        "*search 3 vary z-velocity until zecfc=10 on segment 1, trajectory 1\n"
+        "  xlo=0 xhi=30 xest=10 dx=1 tol=0.001 xref=10 fref=1 maxitr=30 print=0 integ=0\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+
+    report = run_files(problem, output_dir=tmp_path / "out", max_steps=100)
+
+    assert report.exit_code == 0
+    final = report.results[0].states["1"][-1]
+    assert final.named["xdt"] == pytest.approx(10.0, abs=1e-3)
+    assert final.named["ydt"] == pytest.approx(21.0526315789, abs=1e-3)
+    assert final.named["zdt"] == pytest.approx(11.112192, abs=1e-3)
+####
+
+
 def test_optimize_fixture_recomputes_scalar_boundary(tmp_path: Path) -> None:
     problem = ROOT / "tests/fixtures/taos_e2e_v23/cases/positive/p022_optimize_linear_boundary/input/p022_optimize_linear_boundary.prb"
     report = run_files(problem, output_dir=tmp_path, max_steps=500)
