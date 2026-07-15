@@ -15,7 +15,7 @@
 
 *trajectory 1 booster-and-x15 start on 1
   *initial ecic
-    x=-2498713.869685 y=-4660081.673312 z=3566608.947764
+    x=-2499105.632024 y=-4660812.306987 z=3567168.140668
     xdt=-1146.824856 ydt=400.590391 zdt=971.761333
     qw=0.3624865939 qx=0.0 qy=-0.8616482024 qz=0.3551983172
     wx=0.0 wy=0.0 wz=0.0
@@ -30,7 +30,7 @@
     *when time>50 goto 3
   *segment 3 x15-release-and-propnav
     *integ dtprnt=2.0 dt=0.25
-    *reset mass=14641.0545 propellant_mass=5641.0545
+    *reset mass=14641.0545
     *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
     *fly propnav=4
     *when time>2400 stop

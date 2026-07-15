@@ -9,9 +9,12 @@ vehicle through three explicit segments:
    ProNav attitude steering toward a Hawaii target.
 
 The segment-3 `*reset` is the source-language staging seam: the booster mass
-and propellant are removed before the X-15 tables become active. The runtime
-applies that reset during the native segment transition; no Python flight
-equations are used by the showcase.
+mass is reset to the X-15 research-surrogate mass before its tables become
+active. The runtime applies that reset during the native segment transition;
+no Python flight equations are used by the showcase. The current rigid-body
+reset contract does not yet expose a separate propellant-state assignment;
+that is tracked as a follow-up rather than being smuggled into the problem
+file.
 
 The result is an attempt, not an engineering performance claim. The supplied
 X-15 public research deck is a beta surrogate bounded by Mach 6.7, 80,000 ft,

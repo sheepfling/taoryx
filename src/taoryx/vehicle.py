@@ -327,7 +327,10 @@ class TableAerodynamicModel:
             angle_of_attack,
             sideslip,
             {
-                "altitude_m": position_ecfc.vector.norm() - self.earth_rotation.earth.equatorial_radius.si_value,
+                # Numerical integration can place a state a few ulps below
+                # the reference surface.  Geometric altitude for atmosphere
+                # and table lookup has a physical floor at zero.
+                "altitude_m": max(0.0, position_ecfc.vector.norm() - self.earth_rotation.earth.equatorial_radius.si_value),
                 **(self.control_provider(state) if self.control_provider is not None else {}),
             },
         )
