@@ -147,6 +147,7 @@ class LoadedProgram:
             "optimizations": [optimize.loop for optimize in self.lowered.optimizations],
             "controls": self.inspect_controls(),
             "parameters": self.inspect_parameters(),
+            "lqr": self.inspect_lqr(),
             "vehicles": [
                 {
                     "name": name,
@@ -201,6 +202,25 @@ class LoadedProgram:
             }
             for block in self.source.problems[0].blocks
             if isinstance(block, RuntimeBlock) and block.declaration == "parameter" and block.name is not None
+        ]
+    ####
+
+    def inspect_lqr(self) -> list[dict[str, object]]:
+        """List declarative LQR configurations without solving them."""
+
+        return [
+            {
+                "name": block.name,
+                "states": tuple(block.attributes.get("states", "").split(",")) if block.attributes.get("states") else (),
+                "controls": tuple(block.attributes.get("controls", "").split(",")) if block.attributes.get("controls") else (),
+                "q_source": block.attributes.get("q", block.attributes.get("q-table")),
+                "r_source": block.attributes.get("r", block.attributes.get("r-table")),
+                "linearization_source": block.attributes.get("linearization", block.attributes.get("ab")),
+                "method": block.attributes.get("method", "continuous"),
+                "update": block.attributes.get("update", "initial"),
+            }
+            for block in self.source.problems[0].blocks
+            if isinstance(block, RuntimeBlock) and block.declaration == "lqr" and block.name is not None
         ]
     ####
 

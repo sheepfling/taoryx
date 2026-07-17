@@ -323,3 +323,30 @@ def test_problem_file_separates_setup_parameters_controls_and_mutable_inputs(tmp
     observation = program.observe(vehicle="1")
     assert observation.status["throttle"] == pytest.approx(0.75)
     assert observation.status["moving-target-x"] == pytest.approx(1200.0)
+
+
+def test_problem_file_declares_lqr_contract(tmp_path: Path) -> None:
+    source = tmp_path / "lqr.prb"
+    source.write_text(
+        "(lqr)\n"
+        "*atmos none\n"
+        "*runtime lqr attitude states=alpha,q controls=elevator linearization=trim q-table=Q r-table=R update=segment\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecfc x=0 y=0 z=0 xdt=1 ydt=0 zdt=0 mass=1 time=0\n"
+        "  *segment 1 flight\n"
+        "    *integ dt=0.1\n"
+        "    *when time>0.1 stop\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+    program = LoadedProgram.load(source, profile=GrammarProfile.TAORYX)
+    assert program.inspect_lqr() == [{
+        "name": "attitude",
+        "states": ("alpha", "q"),
+        "controls": ("elevator",),
+        "q_source": "Q",
+        "r_source": "R",
+        "linearization_source": "trim",
+        "method": "continuous",
+        "update": "segment",
+    }]

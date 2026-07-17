@@ -2213,15 +2213,22 @@ def _make_block(
     if keyword == "runtime":
         fields = _free_fields(header)
         declaration = fields[0].casefold() if fields else None
-        if declaration not in {"parameter", "control", "status", "event", "output"}:
-            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-runtime-declaration", message="Expected '*runtime parameter|control|status|event|output ...'.", location=_location(path, line)))
+        if declaration not in {"parameter", "control", "status", "event", "output", "lqr"}:
+            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-runtime-declaration", message="Expected '*runtime parameter|control|status|event|output|lqr ...'.", location=_location(path, line)))
         else:
             extra["declaration"] = declaration
             extra["name"] = fields[1] if len(fields) > 1 and "=" not in fields[1] else None
             attributes = {match.group("name").casefold(): match.group("value").strip("\"'") for match in _RUNTIME_ATTRIBUTE_RE.finditer(header)}
             extra["attributes"] = attributes
-            if declaration in {"parameter", "control", "status", "event"} and extra["name"] is None:
+            if declaration in {"parameter", "control", "status", "event", "lqr"} and extra["name"] is None:
                 diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-runtime-name", message=f"Runtime {declaration} declarations require a name.", location=_location(path, line)))
+            if declaration == "lqr":
+                if not attributes.get("states"):
+                    diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-lqr-states", message="Runtime lqr declarations require states=.", location=_location(path, line)))
+                if not attributes.get("controls"):
+                    diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-lqr-controls", message="Runtime lqr declarations require controls=.", location=_location(path, line)))
+                if attributes.get("method", "continuous").casefold() != "continuous":
+                    diagnostics.append(Diagnostic(severity=Severity.ERROR, code="unsupported-lqr-method", message="TAORYX currently supports only method=continuous for runtime lqr.", location=_location(path, line)))
     elif keyword in {"atmos", "earth"}:
         extra["model"] = words[0] if words else None
         if keyword == "atmos":

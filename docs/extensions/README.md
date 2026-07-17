@@ -17,6 +17,8 @@ TAOS behavior.
   every `.prb`/`.tbl` fixture.
 - [Showcase catalog](showcase-catalog.md): polished, reproducible examples
   and their expected plots.
+- [LQR](lqr.md): declarative linear-quadratic regulator configuration and
+  validated continuous-time solver.
 
 ## Claim vocabulary
 

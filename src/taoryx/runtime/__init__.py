@@ -43,6 +43,7 @@ from .interactive import (
     StatusSpec,
 )
 from .loiter import RacetrackCommand, RacetrackController, RacetrackPhase, RacetrackReference, RacetrackSpec
+from .lqr import LqrResult, LqrSpec, LqrUnavailableError, solve_continuous_lqr
 from .observations import RuntimeObservation, StandardRuntimeOutput, observe_vehicle
 from .optimization_runtime import (
     OptimizerBackend,
@@ -107,6 +108,10 @@ __all__ = [
     "RacetrackPhase",
     "RacetrackReference",
     "RacetrackSpec",
+    "LqrResult",
+    "LqrSpec",
+    "LqrUnavailableError",
+    "solve_continuous_lqr",
     "PursuitCommand",
     "TargetState",
     "GuidanceDemand",
