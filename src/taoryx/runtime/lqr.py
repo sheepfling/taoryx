@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from importlib.util import find_spec
 from typing import Any
 
@@ -38,6 +38,51 @@ class LqrResult:
     condition_number: float
     state_names: tuple[str, ...]
     control_names: tuple[str, ...]
+####
+
+
+@dataclass(frozen=True, slots=True)
+class LqrCommand:
+    """Named bounded control command produced by an LQR controller."""
+
+    controls: Mapping[str, float]
+    unsaturated: Mapping[str, float]
+    saturated: tuple[str, ...]
+####
+
+
+@dataclass(frozen=True, slots=True)
+class LqrController:
+    """Apply a solved gain to named runtime state values."""
+
+    result: LqrResult
+    state_trim: Mapping[str, float] = field(default_factory=dict)
+    control_trim: Mapping[str, float] = field(default_factory=dict)
+    lower: Mapping[str, float] = field(default_factory=dict)
+    upper: Mapping[str, float] = field(default_factory=dict)
+
+    def command(self, state: Mapping[str, float]) -> LqrCommand:
+        """Return ``u_trim - K(x - x_trim)`` with optional saturation."""
+
+        import numpy as np
+
+        missing = [name for name in self.result.state_names if name not in state]
+        if missing:
+            raise KeyError(f"LQR state is missing: {', '.join(missing)}")
+        state_error = np.asarray([float(state[name]) - float(self.state_trim.get(name, 0.0)) for name in self.result.state_names])
+        raw = np.asarray(self.result.control_names and self.result.gain @ state_error).reshape(-1)
+        unsaturated = {
+            name: float(self.control_trim.get(name, 0.0) - value)
+            for name, value in zip(self.result.control_names, raw, strict=True)
+        }
+        applied = {
+            name: min(float(self.upper[name]), max(float(self.lower[name]), value))
+            if name in self.lower and name in self.upper else value
+            for name, value in unsaturated.items()
+        }
+        saturated = tuple(name for name in applied if applied[name] != unsaturated[name])
+        return LqrCommand(applied, unsaturated, saturated)
+    ####
 ####
 
 
