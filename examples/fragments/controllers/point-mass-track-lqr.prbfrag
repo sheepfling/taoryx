@@ -1,0 +1,4 @@
+*runtime lqr track states=cross-track-error,cross-track-rate,heading-error,heading-rate controls=normal-acceleration,bank-command linearization=track-trim q-table=track-q r-table=track-r method=continuous update=segment
+*runtime control normal-acceleration default=0.0 lower=-100.0 upper=100.0 unit=mps2
+*runtime control bank-command default=0.0 lower=-1.5707963268 upper=1.5707963268 unit=rad
+*runtime status controller mode=lqr loop=point-mass-track
