@@ -1,0 +1,48 @@
+schema_version: 1
+id: taoryx_long_vehicle_scenarios_v1
+description: Longer open-loop scenarios run after source-anchored plant validation.
+vehicles:
+  - id: b747-long-trim
+    display_name: B747 long trim hold
+    problem: examples/mission_families/slower_b747/SV01_long_trim_hold_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+    max_steps: 3100
+    alpha_beta_reference_deg: [3.1, 0.0]
+    expectations:
+      min_duration_s: 1.0
+      max_altitude_delta_m: 2.0
+      max_speed_delta_m_s: 2.0
+      max_alpha_deg: 4.0
+      max_beta_deg: 5.0
+  - id: skywalker-x8-long-anchor
+    display_name: Skywalker X8 long powered recovery
+    problem: examples/mission_families/slower_x8/SV03_long_powered_recovery_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 2500
+    alpha_beta_reference_deg: [7.9, 0.0]
+    expectations:
+      min_duration_s: 10.0
+      max_speed_delta_m_s: 2.0
+      max_alpha_deg: 12.0
+      max_beta_deg: 5.0
+  - id: hummingbird-long-hover
+    display_name: Hummingbird long hover
+    problem: examples/mission_families/slower_hummingbird/SV05_long_hover_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 6500
+    alpha_beta_reference_deg: [0.0, 0.0]
+    expectations:
+      min_duration_s: 1.0
+      max_altitude_delta_m: 0.5
+      max_final_speed_m_s: 0.1

@@ -1,0 +1,18 @@
+(dof6-bank-maneuver)
+*title Native rigid-body bank authority and roll moment response
+*mode rigid-body-6dof
+*atmos standard
+*earth spherical gm=0 omega=0
+*runtime status vehicle reference-area=2.0 reference-length=1.0 inertia-x=5 inertia-y=6 inertia-z=7 dry-mass-kg=25
+*runtime status actuator maximum-moment=200 maximum-body-rate-deg-s=180
+*runtime status thermal policy=none
+*runtime control bank-deg default=25.0 lower=-45.0 upper=45.0 slew=30
+
+*trajectory 1 bank-test start on 1
+  *initial ecic x=6379000 y=0 z=0 xdt=0 ydt=120 zdt=0 qw=0.7071068 qz=0.7071068 time=0 mass=25 propellant_mass=0
+  *segment 1 bank
+    *integ dtprnt=0.1 dt=0.01
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *fly bankgc=25
+    *when time>0.2 stop
+*end

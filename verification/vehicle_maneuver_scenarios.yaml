@@ -1,0 +1,53 @@
+schema_version: 1
+id: taoryx_vehicle_maneuver_scenarios_v1
+description: Source-bounded waypoint and altitude maneuvers for the slower vehicle catalog.
+claim_boundary: These are native TAORYX research-surrogate maneuvers, not flight-validation claims.
+vehicles:
+  - id: b747-basic-waypoint-altitude
+    display_name: B747 ten-second waypoint and altitude maneuver
+    family: fixed-wing
+    problem: examples/mission_families/slower_b747/SV01_basic_waypoint_altitude_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+    max_steps: 700
+    expectations:
+      min_duration_s: 10.0
+      max_final_range_m: 50.0
+      max_alpha_deg: 4.0
+      max_beta_deg: 5.0
+      max_altitude_delta_m: 60.0
+      max_speed_delta_m_s: 5.0
+  - id: skywalker-x8-basic-waypoint-altitude
+    display_name: Skywalker X8 twenty-second powered waypoint and altitude maneuver
+    family: fixed-wing
+    problem: examples/mission_families/slower_x8/SV03_basic_waypoint_altitude_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 5000
+    expectations:
+      min_duration_s: 20.0
+      max_final_range_m: 350.0
+      max_alpha_deg: 12.0
+      max_beta_deg: 5.0
+      max_altitude_delta_m: 25.0
+      max_speed_delta_m_s: 2.0
+  - id: hummingbird-basic-waypoint-altitude
+    display_name: Hummingbird eight-second waypoint and altitude maneuver
+    family: multirotor
+    problem: examples/mission_families/slower_hummingbird/SV05_basic_waypoint_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 9000
+    expectations:
+      min_duration_s: 8.0
+      max_final_range_m: 0.01
+      max_final_speed_m_s: 0.2
+      max_altitude_delta_m: 0.3

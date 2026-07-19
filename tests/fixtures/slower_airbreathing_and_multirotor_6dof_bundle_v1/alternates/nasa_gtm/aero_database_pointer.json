@@ -1,0 +1,10 @@
+{
+  "blob_sha": "b56a4c8b02281bc6e9d43676454dad20e45be95c",
+  "commit": "9717143270144aca1f5d38d7c24c0fce678d1589",
+  "included_in_this_bundle": false,
+  "path": "gtm_design/config/T2_polynomial_aerodatabase.mat",
+  "reason": "The connected retrieval interface exposed metadata but not raw binary bytes.",
+  "recommended_action": "Clone the NASA repository or download the raw MAT file, then inspect variables with scipy.io.loadmat.",
+  "reported_size": "approximately 1.1 MB",
+  "repository": "nasa/GTM_DesignSim"
+}

@@ -2,14 +2,17 @@
 
 TAORYX provides a declarative LQR configuration and a numerical solver. The
 problem file names the state/control contract and the sources of the matrices;
-the runtime or a Python model adapter supplies the numeric `A`, `B`, `Q`, and
-`R` matrices.
+prepared `output` tables may supply flattened `A`, `B`, `Q`, and `R` values. A
+six-value `Q` or three-value `R` table is interpreted as a diagonal matrix;
+full matrices use row-major values.
 
 ```text
 *runtime lqr attitude
   states=alpha,beta,p,q,r
   controls=fin-pitch,fin-yaw
   linearization=vehicle-trim
+  a-table=attitude-a
+  b-table=attitude-b
   q-table=attitude-q
   r-table=control-r
   method=continuous

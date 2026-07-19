@@ -211,7 +211,7 @@ def test_runtime_failure_preserves_lowered_case_count(tmp_path: Path) -> None:
     assert any(item.code == "runtime-execution-failed" for item in report.diagnostics)
 
 
-def test_cli_run_rejects_duplicate_tables_across_inputs(tmp_path: Path, capsys) -> None:
+def test_cli_run_rejects_ambiguous_unqualified_table_across_inputs(tmp_path: Path, capsys) -> None:
     problem, _ = _write_runtime_inputs(tmp_path)
     first = tmp_path / "first.tbl"
     second = tmp_path / "second.tbl"
@@ -230,4 +230,6 @@ def test_cli_run_rejects_duplicate_tables_across_inputs(tmp_path: Path, capsys) 
     )
 
     assert exit_code == 2
-    assert "duplicate-runtime-table" in capsys.readouterr().out
+    output = capsys.readouterr().out
+    assert "missing-runtime-table" in output
+    assert "gain" in output

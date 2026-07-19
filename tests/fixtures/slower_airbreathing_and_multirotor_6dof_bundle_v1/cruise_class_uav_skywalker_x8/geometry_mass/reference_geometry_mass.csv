@@ -1,0 +1,10 @@
+parameter,value,units,note,source_id,fidelity
+mass,3.364,kg,constant; electric battery depletion not modeled,LOW_HANSEN_2025,PUBLISHED_VALUE
+Ixx,0.325,kg*m^2,,LOW_HANSEN_2025,PUBLISHED_VALUE
+Iyy,0.14,kg*m^2,,LOW_HANSEN_2025,PUBLISHED_VALUE
+Izz,0.4,kg*m^2,,LOW_HANSEN_2025,PUBLISHED_VALUE
+Ixz,0.029,kg*m^2,,LOW_HANSEN_2025,PUBLISHED_VALUE
+reference_area,0.75,m^2,,LOW_HANSEN_2025,PUBLISHED_VALUE
+reference_span,2.1,m,roll/yaw reference length,LOW_HANSEN_2025,PUBLISHED_VALUE
+reference_chord,0.36,m,pitch reference length,LOW_HANSEN_2025,PUBLISHED_VALUE
+aerodynamic_moment_reference,0.25,fraction_cbar,CG at 25% cbar,LOW_HANSEN_2025,PUBLISHED_VALUE

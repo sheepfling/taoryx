@@ -95,6 +95,12 @@ def test_views() -> None:
     print("  slow         long-running or historical/stress tests")
     print("  artifact     human-readable outputs written below artifacts/")
     print("  spectre      Spectre problem/segment/trajectory corpus")
+    print("  dof-matrix   3-DOF-first/6-DOF-second robustness evidence summary")
+    print("  robustness-matrix   bounded paired vehicle verification with convergence and failure reports")
+    print("  verification-artifacts   render the full Matplotlib verification and CA-HI bundle")
+    print("  showcase-composites   render nominal paired family and all-family overview figures")
+    print("  maneuver-matrix   run bound native vehicle maneuvers and write classified evidence")
+    print("  slower-tables regenerate B747, Skywalker X8, and Hummingbird research decks")
     print("Commands: test-grammar, test-equations, test-algorithms, test-slow, test-artifacts, test-spectre")
     ####
 
@@ -109,6 +115,76 @@ def showcase_california_hawaii() -> None:
             "artifacts/showcases/california_to_hawaii",
         ]
     )
+    ####
+
+
+def dof_matrix() -> None:
+    """Generate machine-readable 3-DOF/6-DOF robustness evidence."""
+    run([project_python(), str(TOOLS / "run_dof_matrix.py")])
+    ####
+
+
+def robustness_matrix() -> None:
+    """Run the bounded paired vehicle verification matrix and write reports."""
+    run([project_python(), str(TOOLS / "run_robustness_matrix.py")])
+    ####
+
+
+def verification_artifacts() -> None:
+    """Render the full verification and CA-HI Matplotlib artifact bundle."""
+    mpl_config = ROOT / "artifacts" / ".mplconfig"
+    mpl_config.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("MPLCONFIGDIR", str(mpl_config))
+    # The matrix report may deliberately contain envelope rejections.  Keep
+    # producing the remaining artifacts so those classified smoke-test
+    # outcomes do not prevent the overview bundle from being inspected.
+    print("+", project_python(), TOOLS / "run_robustness_matrix.py", "--plots")
+    matrix_result = subprocess.run(
+        [project_python(), str(TOOLS / "run_robustness_matrix.py"), "--plots"],
+        cwd=ROOT,
+        check=False,
+    )
+    if matrix_result.returncode:
+        print(f"robustness matrix retained classified failures (exit {matrix_result.returncode}); continuing artifact generation")
+    print("+", project_python(), TOOLS / "run_dof_matrix.py", "--plots")
+    dof_result = subprocess.run(
+        [project_python(), str(TOOLS / "run_dof_matrix.py"), "--plots"],
+        cwd=ROOT,
+        check=False,
+    )
+    if dof_result.returncode:
+        print(f"DOF matrix retained classified failures (exit {dof_result.returncode}); continuing artifact generation")
+    showcase_result = subprocess.run(
+        [
+            project_python(),
+            str(ROOT / "examples/showcases/california_to_hawaii/run_showcase.py"),
+            "--output-dir",
+            "artifacts/showcases/california_to_hawaii",
+        ],
+        cwd=ROOT,
+        check=False,
+    )
+    if showcase_result.returncode:
+        print(f"CA-HI showcase retained its reported status (exit {showcase_result.returncode}); continuing artifact generation")
+    run([project_python(), str(TOOLS / "render_showcase_composites.py")])
+    ####
+
+
+def showcase_composites() -> None:
+    """Render nominal paired trajectory composites for the slower vehicles."""
+    run([project_python(), str(TOOLS / "render_showcase_composites.py")])
+    ####
+
+
+def maneuver_matrix() -> None:
+    """Run bound native vehicle maneuvers and write classified evidence."""
+    run([project_python(), str(TOOLS / "run_maneuver_matrix.py"), "--plots"])
+    ####
+
+
+def import_slower_tables() -> None:
+    """Regenerate slower-vehicle research decks from source CSV files."""
+    run([project_python(), str(TOOLS / "import_slower_6dof_tables.py")])
     ####
 
 
@@ -224,6 +300,12 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-spectre": lambda: test_category("spectre"),
     "test-views": test_views,
     "showcase-california-hawaii": showcase_california_hawaii,
+    "dof-matrix": dof_matrix,
+    "robustness-matrix": robustness_matrix,
+    "verification-artifacts": verification_artifacts,
+    "showcase-composites": showcase_composites,
+    "maneuver-matrix": maneuver_matrix,
+    "slower-tables": import_slower_tables,
     "e2e": e2e,
     "manual": manual,
     "equation-audit": equation_audit,

@@ -1,0 +1,73 @@
+schema_version: 1
+id: taoryx_robustness_matrix_v1
+title: Bounded paired 3-DOF/6-DOF verification matrix
+claim_boundary:
+  engineering_validity: unproven
+  historical_taos_96_compatibility: unproven
+  source_data: public_research_surrogates
+  cahi: evidence_only_until_endpoint_requirement_is_declared
+
+gates:
+  nominal:
+    required_pass_rate: 1.0
+    requirements: [paired_3dof_and_6dof_complete, finite_states, positive_mass, normalized_quaternion, active_table_loads, no_runtime_diagnostics]
+  convergence:
+    required_pass_rate: 1.0
+    method: compare_native_6dof_nominal_with_half_step
+    integrator: rk4
+    tolerances: {position_m: 1.0e-1, velocity_m_s: 1.0e-2, attitude_rad: 1.0e-3}
+  envelope:
+    required_pass_rate: 1.0
+    requirements: [no_table_extrapolation, no_negative_mass, no_actuator_limit_violation_unreported]
+  bounded_robustness:
+    required_pass_rate: 0.95
+    minimum_cases_per_family: 9
+    failure_policy: classify_every_failure
+    requirement: nominal_neighborhood_only
+  cahi:
+    status: evidence_only
+    required_inputs: [declared_endpoint_requirement, independent_route_oracle, convergence_evidence, perturbation_matrix]
+    stop_ship: [do_not_call_success_from_completion_alone, do_not_call_success_from_a_40_km_miss]
+
+families:
+  - id: SV01
+    vehicle: b747
+    directory: slower_b747
+    problem_3dof: SV01_3dof.prb
+    problem_6dof: SV01_6dof.prb
+    tables_6dof: [b747_nominal_static_6axis.tbl]
+    max_steps: 200
+    variations:
+      speed_scale: [0.95, 1.0, 1.05]
+      altitude_delta_m: [-100.0, 0.0, 100.0]
+      mass_scale: [0.98, 1.0, 1.02]
+    envelope: {speed_m_s: [190.0, 210.0], altitude_m: [900.0, 1100.0], alpha_deg: [-4.0, 4.0], beta_deg: [-5.0, 5.0]}
+  - id: SV03
+    vehicle: skywalker_x8
+    directory: slower_x8
+    problem_3dof: SV03_3dof.prb
+    problem_6dof: SV03_6dof.prb
+    tables_6dof: [skywalker_x8_static_6axis.tbl]
+    max_steps: 200
+    variations:
+      speed_scale: [0.95, 1.0, 1.05]
+      altitude_delta_m: [-50.0, 0.0, 50.0]
+      mass_scale: [0.98, 1.0, 1.02]
+    envelope: {speed_m_s: [12.0, 27.0], altitude_m: [178.0, 3000.0], alpha_deg: [0.0, 12.0], beta_deg: [-5.0, 5.0]}
+  - id: SV05
+    vehicle: hummingbird
+    directory: slower_hummingbird
+    problem_3dof: SV05_3dof.prb
+    problem_6dof: SV05_6dof.prb
+    tables_6dof: [hummingbird_cx.tbl, hummingbird_cy.tbl, hummingbird_cz.tbl, hummingbird_cmx.tbl, hummingbird_cmy.tbl, hummingbird_cmz.tbl]
+    max_steps: 200
+    variations:
+      speed_scale: [0.9, 1.0, 1.1]
+      altitude_delta_m: [-0.5, 0.0, 0.5]
+      mass_scale: [0.95, 1.0, 1.05]
+    envelope: {body_velocity_m_s: [-10.0, 10.0], rotor_speed_rad_s: [469.124, 469.124], wrench_table_mode: direct}
+  - id: CAHI
+    vehicle: synthetic_long_route
+    status: evidence_only
+    source: examples/showcases/california_to_hawaii/mission.prb
+    reason: endpoint_requirement_and_independent_route_oracle_not_declared

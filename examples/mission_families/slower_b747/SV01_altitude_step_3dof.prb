@@ -1,0 +1,22 @@
+(slower-b747-sv01-altitude-step-3dof)
+*title B747 point-mass altitude-step reduction
+*atmos standard
+*earth wgs-84 omega=0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status target latitude-deg=0.0 longitude-deg=0.014 altitude-m=140.0
+*runtime status route mode=great-circle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=10.0 altitude-profile=linear-target start-altitude-m=100.0 powered-speed-mps=153.0
+*trajectory 1 b747 start on 1
+  *initial geodetic alt=100.0 long=0.0 lat=0.0 vel=153.0 gama=0.0 psi=90.0 time=0.0 mass=288756.9
+  *segment 1 altitude-step
+    *integ dtprnt=0.2 dt=0.05
+    *fly alpha=3.1
+    *aero cx=(cx) cy=(cy) cz=(cz) sref=510.96672
+    *prop thrust=(thrust) mdot=0
+    *when time>10.0 stop
+*end

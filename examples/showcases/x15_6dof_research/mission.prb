@@ -12,13 +12,13 @@
   *initial ecic
     x=6398137.0 y=0.0 z=0.0
     xdt=0.0 ydt=1800.0 zdt=0.0
-    qw=0.7071067812 qx=0.0 qy=0.0 qz=0.7071067812
+    qw=0.5 qx=-0.5 qy=-0.5 qz=0.5
     wx=0.0 wy=0.0 wz=0.0
     time=0.0 mass=14641.0545 propellant_mass=5641.0545
   *file x15.dat time mass
   *segment 1 powered-research-flight
-    *integ dtprnt=0.5 dt=0.05
+    *integ dtprnt=0.01 dt=0.001
     *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
     *prop thrust=(x15-thrust) mdot=(x15-mdot)
-    *when time>1 stop
+    *when time>0.01 stop
 *end

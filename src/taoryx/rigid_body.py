@@ -115,6 +115,10 @@ class RigidBodyForceMoment:
     moment_body: Vector3
     propellant_mass_rate: float = 0.0
     heat_rate: float = 0.0
+    aero_force_body: Vector3 | None = None
+    propulsion_force_body: Vector3 | None = None
+    aero_moment_body: Vector3 | None = None
+    propulsion_moment_body: Vector3 | None = None
 
     def __post_init__(self) -> None:
         if self.propellant_mass_rate < 0.0 or not math.isfinite(self.propellant_mass_rate):
@@ -186,7 +190,16 @@ class RigidBody6DofModel:
             and state.mass > self.dry_mass + 1.0e-8
         ):
             return load
-        return RigidBodyForceMoment(load.force_body, load.moment_body, 0.0, load.heat_rate)
+        return RigidBodyForceMoment(
+            load.force_body,
+            load.moment_body,
+            0.0,
+            load.heat_rate,
+            load.aero_force_body,
+            load.propulsion_force_body,
+            load.aero_moment_body,
+            load.propulsion_moment_body,
+        )
         ####
 
     def derivative(self, state: RigidBody6DofState) -> tuple[float, ...]:
@@ -241,11 +254,42 @@ class RigidBody6DofModel:
         force_ecic = state.attitude.rotate(load.force_body)
         total_force_ecic = force_ecic + gravity.scaled(state.mass)
         acceleration = total_force_ecic.scaled(1.0 / state.mass)
+        gravity_force_body = state.attitude.conjugate().rotate(gravity.scaled(state.mass))
+        total_force_body = load.force_body + gravity_force_body
+        acceleration_body = state.attitude.conjugate().rotate(acceleration)
+        # ``acceleration_body`` is the inertial acceleration resolved in body
+        # axes, not the time derivative of the body velocity components.  The
+        # latter would require the additional omega-cross-velocity term.  The
+        # Newton equation in this observable contract is therefore the direct
+        # body-resolved inertial acceleration balance:
+        #
+        #     m R_BI a_I - (F_aero,B + F_prop,B + F_gravity,B) = 0.
+        #
+        # Keeping this distinct prevents rotating-frame transport terms from
+        # being counted twice in closure telemetry.
+        force_residual = acceleration_body.scaled(state.mass) - total_force_body
         attitude = state.attitude.normalized()
         roll = math.atan2(2.0 * (attitude.w * attitude.x + attitude.y * attitude.z), 1.0 - 2.0 * (attitude.x * attitude.x + attitude.y * attitude.y))
         pitch_argument = 2.0 * (attitude.w * attitude.y - attitude.z * attitude.x)
         pitch = math.asin(max(-1.0, min(1.0, pitch_argument)))
         yaw = math.atan2(2.0 * (attitude.w * attitude.z + attitude.x * attitude.y), 1.0 - 2.0 * (attitude.y * attitude.y + attitude.z * attitude.z))
+        aero_force = load.aero_force_body or Vector3(0.0, 0.0, 0.0)
+        propulsion_force = load.propulsion_force_body or (load.force_body - aero_force)
+        aero_moment = load.aero_moment_body or Vector3(0.0, 0.0, 0.0)
+        propulsion_moment = load.propulsion_moment_body or (load.moment_body - aero_moment)
+        angular_momentum = Vector3(self.inertia.x * state.body_rate.x, self.inertia.y * state.body_rate.y, self.inertia.z * state.body_rate.z)
+        angular_acceleration = Vector3(
+            (load.moment_body.x - state.body_rate.cross(angular_momentum).x) / self.inertia.x,
+            (load.moment_body.y - state.body_rate.cross(angular_momentum).y) / self.inertia.y,
+            (load.moment_body.z - state.body_rate.cross(angular_momentum).z) / self.inertia.z,
+        )
+        moment_residual = Vector3(
+            self.inertia.x * angular_acceleration.x,
+            self.inertia.y * angular_acceleration.y,
+            self.inertia.z * angular_acceleration.z,
+        ) + state.body_rate.cross(angular_momentum) - load.moment_body
+        force_scale = max(state.mass * gravity.norm(), total_force_body.norm(), 1.0e-12)
+        moment_scale = max(load.moment_body.norm(), 1.0)
         return {
             "force_body_x_n": load.force_body.x,
             "force_body_y_n": load.force_body.y,
@@ -257,6 +301,31 @@ class RigidBody6DofModel:
             "force_ecic_y_n": force_ecic.y,
             "force_ecic_z_n": force_ecic.z,
             "total_force_ecic_n": total_force_ecic.norm(),
+            "aero_force_body_x_n": aero_force.x,
+            "aero_force_body_y_n": aero_force.y,
+            "aero_force_body_z_n": aero_force.z,
+            "propulsion_force_body_x_n": propulsion_force.x,
+            "propulsion_force_body_y_n": propulsion_force.y,
+            "propulsion_force_body_z_n": propulsion_force.z,
+            "gravity_force_body_x_n": gravity_force_body.x,
+            "gravity_force_body_y_n": gravity_force_body.y,
+            "gravity_force_body_z_n": gravity_force_body.z,
+            "total_force_body_x_n": total_force_body.x,
+            "total_force_body_y_n": total_force_body.y,
+            "total_force_body_z_n": total_force_body.z,
+            "aero_moment_body_x_nm": aero_moment.x,
+            "aero_moment_body_y_nm": aero_moment.y,
+            "aero_moment_body_z_nm": aero_moment.z,
+            "propulsion_moment_body_x_nm": propulsion_moment.x,
+            "propulsion_moment_body_y_nm": propulsion_moment.y,
+            "propulsion_moment_body_z_nm": propulsion_moment.z,
+            "total_moment_body_x_nm": load.moment_body.x,
+            "total_moment_body_y_nm": load.moment_body.y,
+            "total_moment_body_z_nm": load.moment_body.z,
+            "translation_equation_residual_n": force_residual.norm(),
+            "translation_equation_residual_normalized": force_residual.norm() / force_scale,
+            "rotation_equation_residual_nm": moment_residual.norm(),
+            "rotation_equation_residual_normalized": moment_residual.norm() / moment_scale,
             "acceleration_ecic_x_m_s2": acceleration.x,
             "acceleration_ecic_y_m_s2": acceleration.y,
             "acceleration_ecic_z_m_s2": acceleration.z,

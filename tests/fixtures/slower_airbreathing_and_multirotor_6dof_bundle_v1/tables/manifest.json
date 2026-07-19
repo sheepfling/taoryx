@@ -1,0 +1,46 @@
+{
+  "dataset_name": "slower_airbreathing_and_multirotor_6dof_bundle_v1",
+  "source_bundle_sha256": "17ee0ca897e3ee44d4dd68deb6eb6c4922fef9ef87de46fb032124596b39b911",
+  "fidelity": "vehicle-specific public research surrogates; not flight-qualified",
+  "source_preserved": true,
+  "generated": [
+    "b747_jt9d_thrust.tbl",
+    "b747_nominal_elevator_6axis.tbl",
+    "b747_nominal_static_6axis.tbl",
+    "hummingbird_cmx.tbl",
+    "hummingbird_cmy.tbl",
+    "hummingbird_cmz.tbl",
+    "hummingbird_cx.tbl",
+    "hummingbird_cy.tbl",
+    "hummingbird_cz.tbl",
+    "hummingbird_rotor_reaction_torque.tbl",
+    "hummingbird_rotor_static.tbl",
+    "skywalker_x8_collective_elevon_6axis.tbl",
+    "skywalker_x8_differential_elevon_6axis.tbl",
+    "skywalker_x8_propeller_cq.tbl",
+    "skywalker_x8_propeller_ct.tbl",
+    "skywalker_x8_rate_p_6axis.tbl",
+    "skywalker_x8_rate_q_6axis.tbl",
+    "skywalker_x8_rate_r_6axis.tbl",
+    "skywalker_x8_static_6axis.tbl",
+    "skywalker_x8_thrust.tbl"
+  ],
+  "models": {
+    "b747": {
+      "family": "subsonic-four-engine-jet",
+      "source": "jet_b747"
+    },
+    "skywalker_x8": {
+      "family": "fixed-wing-uav",
+      "source": "cruise_class_uav_skywalker_x8"
+    },
+    "hummingbird": {
+      "family": "multirotor",
+      "source": "quadcopter_hummingbird"
+    }
+  },
+  "omissions": [
+    "B747 aileron and rudder control grids remain source CSV; the condition-3 elevator deck is generated for the golden trim case.",
+    "GTM remains a pointer-only alternate because its binary aero database was not supplied."
+  ]
+}

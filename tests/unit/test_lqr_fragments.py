@@ -6,7 +6,6 @@ from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.models import ProblemDocument, RuntimeBlock
 from taoryx.language.problem_parser import parse_problem_text
 
-
 ROOT = Path(__file__).resolve().parents[2]
 FRAGMENTS = ROOT / "examples" / "fragments" / "controllers"
 

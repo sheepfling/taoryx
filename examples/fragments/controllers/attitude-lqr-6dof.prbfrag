@@ -1,4 +1,4 @@
-*runtime lqr attitude states=qx,qy,qz,wx,wy,wz controls=moment-x,moment-y,moment-z linearization=attitude-trim q-table=attitude-q r-table=moment-r method=continuous update=segment
+*runtime lqr attitude states=attitude-error-x,attitude-error-y,attitude-error-z,wx,wy,wz controls=moment-x,moment-y,moment-z linearization=attitude-trim a-table=attitude-a b-table=attitude-b q-table=attitude-q r-table=moment-r method=continuous update=segment
 *runtime control moment-x default=0.0 lower=-1.0e6 upper=1.0e6 unit=nm
 *runtime control moment-y default=0.0 lower=-1.0e6 upper=1.0e6 unit=nm
 *runtime control moment-z default=0.0 lower=-1.0e6 upper=1.0e6 unit=nm

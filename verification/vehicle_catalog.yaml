@@ -1,0 +1,44 @@
+schema_version: 1
+id: taoryx_source_anchored_vehicle_catalog_v1
+description: >-
+  Standard source-anchored plant cases. Each entry is data consumed by the
+  common golden-plant harness; vehicle-specific Python runners are not needed.
+vehicles:
+  - id: b747
+    display_name: B747
+    family: transport-jet
+    problem: examples/mission_families/slower_b747/SV01_anchor_condition3_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+    max_steps: 100
+    alpha_beta_reference_deg: [3.1, 0.0]
+  - id: skywalker_x8
+    display_name: Skywalker X8
+    family: fixed-wing-uav
+    problem: examples/mission_families/slower_x8/SV03_published_trim_anchor_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+    max_steps: 100
+    alpha_beta_reference_deg: [7.9, 0.0]
+  - id: hummingbird
+    display_name: AscTec Hummingbird
+    family: multirotor
+    problem: examples/mission_families/slower_hummingbird/SV05_hover_validation_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 2500
+    alpha_beta_reference_deg: [0.0, 0.0]
+  - id: x15
+    display_name: X-15
+    family: rocket-plane
+    problem: examples/showcases/x15_6dof_research/mission.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 100
+    alpha_beta_reference_deg: [0.0, 0.0]

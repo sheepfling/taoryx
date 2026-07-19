@@ -1,5 +1,5 @@
-*runtime lqr hover-position states=position-x,position-y,position-z,velocity-x,velocity-y,velocity-z controls=collective-thrust,moment-x,moment-y,moment-z linearization=hover-trim q-table=position-q r-table=force-moment-r method=continuous update=segment
-*runtime lqr hover-attitude states=qx,qy,qz,wx,wy,wz controls=moment-x,moment-y,moment-z linearization=hover-attitude-trim q-table=attitude-q r-table=moment-r method=continuous update=segment
+*runtime lqr hover-position states=position-x,position-y,position-z,velocity-x,velocity-y,velocity-z controls=collective-thrust,moment-x,moment-y,moment-z linearization=hover-trim a-table=hover-position-a b-table=hover-position-b q-table=position-q r-table=force-moment-r method=continuous update=segment
+*runtime lqr hover-attitude states=attitude-error-x,attitude-error-y,attitude-error-z,wx,wy,wz controls=moment-x,moment-y,moment-z linearization=hover-attitude-trim a-table=hover-attitude-a b-table=hover-attitude-b q-table=attitude-q r-table=moment-r method=continuous update=segment
 *runtime control collective-thrust default=0.0 lower=0.0 upper=1.0 unit=fraction
 *runtime control moment-x default=0.0 lower=-100.0 upper=100.0 unit=nm
 *runtime control moment-y default=0.0 lower=-100.0 upper=100.0 unit=nm

@@ -16,7 +16,6 @@ from taoryx.language.expressions import parse_expression
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import ProblemDocument, RuntimeBlock, TableDocument
-from taoryx.language.table_parser import table_type_catalog
 
 SCENARIO_SCHEMA_VERSION = 1
 
@@ -307,7 +306,8 @@ class ResolvedScenario(BaseModel):
     def lower(self) -> Any:
         """Lower the validated source and apply its semantic composition patches."""
 
-        from taoryx.runtime.lowering import lower_problem_document, lower_tables
+        from taoryx.runtime.lowering import lower_problem_document
+        from taoryx.runtime.table_binding import bind_runtime_tables
 
         table_documents = [TableDocument.model_validate(document) for document in self.parsed_tables] if self.parsed_tables else [
             cast(TableDocument, ingest_file(path, profile=self.request.profile).document)
@@ -320,7 +320,7 @@ class ResolvedScenario(BaseModel):
                 ProblemDocument,
                 ingest_file(
                     self.request.problem_path,
-                    available_tables={name for document in table_documents for name in table_type_catalog(document)},
+                    available_tables=bind_runtime_tables(table_documents, {})[0],
                     profile=self.request.profile,
                 ).document,
             )
@@ -332,7 +332,7 @@ class ResolvedScenario(BaseModel):
                     continue
                 for setting in block.settings:
                     unit_settings[setting.variable.casefold()] = setting.unit
-        tables = {name: table for document in table_documents for name, table in lower_tables(document, unit_settings).items()}
+        _, tables = bind_runtime_tables(table_documents, unit_settings)
         lowered = lower_problem_document(
             problem_document,
             tables,
@@ -443,7 +443,9 @@ class ScenarioCompiler:
                 table_documents.append(cast(TableDocument, ingested.document))
             else:
                 diagnostics.append(_error(table_path, "expected-table-file", "scenario table inputs must use .tbl files"))
-        available_tables = {name for document in table_documents for name in table_type_catalog(document)}
+        from taoryx.runtime.table_binding import bind_runtime_tables
+
+        available_tables = bind_runtime_tables(table_documents, {})[0]
         problem_ingested = ingest_file(problem, available_tables=available_tables, profile=selected_profile)
         diagnostics.extend(problem_ingested.diagnostics)
         if problem_ingested.kind is not FileKind.PROBLEM:

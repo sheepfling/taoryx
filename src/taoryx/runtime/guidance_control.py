@@ -97,6 +97,53 @@ class AlphaBankCommand:
     saturated: bool
 
 
+@dataclass(frozen=True, slots=True)
+class TurnCommand:
+    """Bounded body moment produced by a coordinated-turn controller."""
+
+    moment_body: Vector3
+    saturated: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class CoordinatedTurnController:
+    """Reusable heading/bank controller for rigid-body waypoint turns.
+
+    The controller consumes already-resolved heading and bank errors. It does
+    not know about a rectangle, a vehicle, or a problem-file grammar. Vehicle
+    adapters provide gains and the runtime remains responsible for applying
+    the returned moment through the Newton--Euler equations.
+    """
+
+    heading_gain: float
+    bank_gain: float
+    heading_rate_damping: float
+    bank_rate_damping: float
+    maximum_moment: float | None = None
+
+    def __post_init__(self) -> None:
+        if any(value < 0.0 or not math.isfinite(value) for value in (self.heading_gain, self.bank_gain, self.heading_rate_damping, self.bank_rate_damping)):
+            raise ValueError("turn gains and damping must be finite and nonnegative")
+        if self.maximum_moment is not None and (self.maximum_moment <= 0.0 or not math.isfinite(self.maximum_moment)):
+            raise ValueError("maximum turn moment must be positive and finite")
+        ####
+    ####
+
+    def command(self, heading_error: float, bank_error: float, body_rates: Vector3) -> TurnCommand:
+        """Return a bounded bank/heading moment for one controller sample."""
+
+        raw = Vector3(
+            self.bank_gain * bank_error - self.bank_rate_damping * body_rates.x,
+            0.0,
+            self.heading_gain * heading_error - self.heading_rate_damping * body_rates.z,
+        )
+        if self.maximum_moment is None or raw.norm() <= self.maximum_moment:
+            return TurnCommand(raw, False)
+        return TurnCommand(raw.scaled(self.maximum_moment / raw.norm()), True)
+        ####
+    ####
+
+
 def allocate_alpha_bank(
     demanded_acceleration: Vector3,
     *,

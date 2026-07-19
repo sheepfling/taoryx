@@ -1,0 +1,201 @@
+schema_version: 1
+id: taoryx_vehicle_family_validation_execution_v1
+claim_boundary: engineering validation of the declared TAORYX model and envelope; not flight qualification
+required_artifacts:
+  - run-report.json
+  - phase-metrics.json
+  - convergence-report.json
+  - plots/*.png
+statuses:
+  - planned
+  - candidate
+  - blocked
+  - validated
+scenarios:
+  - id: glider-entry-pullout-glide-terminal
+    family: unpowered_hypersonic_glider
+    status: blocked
+    verdict: blocked
+    provenance:
+      type: source_anchored_public_research_surrogate
+      source: tests/fixtures/x15_coherent_6dof_public_research_v1/README.md
+    candidate_problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
+    supporting_problems:
+      - examples/mission_families/hypersonic_glide_terminal_guidance/mission.prb
+      - examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
+    supporting_tables:
+      - examples/mission_families/hypersonic_glide_terminal_guidance/aero.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+    supporting_artifacts:
+      - vehicle-family-validation/glider-3dof-extension/run-report.json
+      - vehicle-family-validation/glider-3dof-extension/phase-metrics.json
+      - vehicle-family-validation/glider-unpowered-6dof/run-report.json
+      - vehicle-family-validation/glider-unpowered-6dof/phase-metrics.json
+      - vehicle-family-validation/glider-unpowered-6dof/convergence-report.json
+      - vehicle-family-validation/glider-unpowered-6dof/plots
+    duration_s: 120
+    required_channels:
+      - time_s
+      - altitude_m
+      - speed_m_s
+      - mach
+      - aero_alpha_deg
+      - aero_sideslip_deg
+      - mass_kg
+      - range_to_target_m
+    phases:
+      - release
+      - ballistic_coast
+      - atmospheric_interface
+      - energy_management_glide
+      - heading_capture
+      - terminal_corridor
+    convergence:
+      problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s, mach, aero_alpha_deg, aero_sideslip_deg]
+    perturbations:
+      - id: release-speed-plus-one
+        input: initial_y_velocity
+        expected: bounded_unpowered_envelope
+      - id: release-height-plus-one
+        input: initial_ecic_z
+        expected: bounded_unpowered_envelope
+    blocking_reason: 120 s source-anchored unpowered 6DOF release, energy-management, terminal-descent, convergence, perturbation, and Matplotlib evidence now pass; explicit bank-reversal and deeper energy/heading-capture telemetry remain before validation
+  - id: b747-trim-climb-cruise-maneuver-descent
+    family: powered_fixed_wing
+    status: candidate
+    verdict: blocked
+    provenance:
+      type: source_anchored_generated_tables
+      source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/sources.csv
+    candidate_problem: examples/mission_families/slower_b747/SV01_rectangle_course_3dof.prb
+    supporting_problems:
+      - examples/mission_families/slower_b747/SV01_long_trim_hold_6dof.prb
+      - examples/mission_families/slower_b747/SV01_rectangle_course_6dof.prb
+      - examples/mission_families/slower_b747/SV01_approach_go_around_long_6dof.prb
+      - examples/mission_families/slower_b747/SV01_climb_cruise_3dof.prb
+    duration_s: 320
+    phases:
+      - rectangle_leg_1
+      - rectangle_leg_2
+      - rectangle_leg_3
+      - rectangle_leg_4
+      - approach
+      - go_around
+    required_channels:
+      - time_s
+      - alt
+      - vel
+      - lat
+      - long
+      - mach
+    convergence:
+      problem: examples/mission_families/slower_b747/SV01_long_trim_hold_6dof.prb
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s, aero_alpha_deg, aero_sideslip_deg]
+    perturbations:
+      - id: speed-plus-one-mps
+        input: initial_y_velocity
+        expected: bounded_altitude_speed_angles
+      - id: altitude-plus-one-m
+        input: initial_ecic_x
+        expected: bounded_altitude_speed_angles
+    artifact_paths:
+      - vehicle-family-validation/b747-rectangle-3dof/run-report.json
+      - vehicle-family-validation/b747-rectangle-3dof/plots
+      - vehicle-family-validation/b747-trim-hold-contract/run-report.json
+      - vehicle-family-validation/b747-trim-hold-contract/phase-metrics.json
+      - vehicle-family-validation/b747-trim-hold-contract/convergence-report.json
+      - vehicle-family-validation/b747-approach-go-around-6dof/phase-metrics.json
+      - vehicle-family-validation/b747-approach-go-around-6dof/convergence-report.json
+      - vehicle-family-validation/b747-climb-cruise-3dof/phase-metrics.json
+    blocking_reason: 320 s rectangle, 60 s 6DOF trim, 60 s approach/go-around, and 60 s climb/cruise pass phase bounds and artifacts; trim and approach convergence plus two perturbations pass, but source-anchored disturbance/fuel, descent, and route semantics remain
+    blocking_evidence:
+      - table: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+        finding: installed thrust map explicitly declares that fuel flow is not modeled
+      - problem: examples/mission_families/slower_b747/SV01_descent_corridor_6dof.prb
+        finding: 20 s run reaches approximately 750 m altitude and 6.97 deg angle of attack from the 100 m start, outside the declared descent corridor
+  - id: x8-powered-trim-route-recovery
+    family: powered_fixed_wing
+    status: candidate
+    verdict: blocked
+    provenance:
+      type: source_anchored_generated_tables
+      source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/sources.csv
+    candidate_problem: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
+    supporting_problems:
+      - examples/mission_families/slower_x8/SV03_long_validation_6dof.prb
+      - examples/mission_families/slower_x8/SV03_long_powered_recovery_6dof.prb
+      - examples/mission_families/slower_x8/SV03_combined_controller_recovery_6dof.prb
+    duration_s: 120
+    phases:
+      - powered_trim
+      - climb_leveloff
+      - heading_reversal
+      - wide_rectangle
+      - gust_rejection
+      - trim_return
+    convergence:
+      problem: examples/mission_families/slower_x8/SV03_long_validation_6dof.prb
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s, aero_alpha_deg, aero_sideslip_deg]
+    perturbations:
+      - id: speed-plus-half-mps
+        input: initial_y_velocity
+        expected: bounded_powered_envelope
+      - id: altitude-plus-half-m
+        input: initial_ecic_x
+        expected: bounded_powered_envelope
+      - id: fixed-crosswind-five-mps
+        input: problem_wind_geodetic
+        expected: bounded_route_envelope
+    artifact_paths:
+      - vehicle-family-validation/x8-long-rectangle-route-6dof/run-report.json
+      - vehicle-family-validation/x8-long-rectangle-route-6dof/phase-metrics.json
+      - vehicle-family-validation/x8-long-rectangle-route-6dof/plots
+      - vehicle-family-validation/x8-powered-validation-6dof/run-report.json
+      - vehicle-family-validation/x8-powered-validation-6dof/plots
+      - vehicle-family-validation/x8-powered-validation-6dof/convergence-report.json
+    blocking_reason: 120 s four-leg powered rectangle now passes route closure, phase bounds, standard plots, and fixed-crosswind rejection; the 60 s anchor passes convergence and two initial-state perturbations, but dedicated climb/level-off evidence remains
+  - id: hummingbird-takeoff-hover-translate-disturb-land
+    family: quadrotor
+    status: validated
+    verdict: validated
+    provenance:
+      type: source_anchored_generated_model
+      source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/README.md
+    candidate_problem: examples/mission_families/slower_hummingbird/SV05_rectangle_course_6dof.prb
+    supporting_problems:
+      - examples/mission_families/slower_hummingbird/SV05_hover_validation_6dof.prb
+      - examples/mission_families/slower_hummingbird/SV05_disturbed_response_6dof.prb
+      - examples/mission_families/slower_hummingbird/SV05_takeoff_6dof.prb
+      - examples/mission_families/slower_hummingbird/SV05_landing_6dof.prb
+      - examples/mission_families/slower_hummingbird/SV05_return_home_land_6dof.prb
+    duration_s: 40
+    phases:
+      - hover_leg
+      - elevated_corner
+      - return_leg
+      - landing_checkpoint
+    required_channels:
+      - time_s
+      - altitude_m
+      - speed_m_s
+      - mass_kg
+    convergence:
+      problem: examples/mission_families/slower_hummingbird/SV05_return_home_land_6dof.prb
+      factors: [1.0, 0.5, 0.25]
+      channels: [range_to_target_m, altitude_m, speed_m_s]
+    perturbations:
+      - id: offset-plus-ten-cm
+        input: initial_y
+        expected: bounded_return_and_landing
+      - id: altitude-plus-ten-cm
+        input: initial_ecic_x
+        expected: bounded_return_and_landing
+    artifact_paths:
+      - vehicle-family-validation/hummingbird-return-home-land/run-report.json
+      - vehicle-family-validation/hummingbird-return-home-land/phase-metrics.json
+      - vehicle-family-validation/hummingbird-return-home-land/convergence-report.json
+    validation_scope: synthetic Hummingbird direct-wrench quadrotor model and declared low-speed envelope; not flight qualification

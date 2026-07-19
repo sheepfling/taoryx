@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
-from typing import Protocol
+from dataclasses import dataclass, replace
+from typing import Callable, Protocol
 
 from taoryx.contracts import Frame, FrameVector3, Vector3
 
@@ -87,6 +87,28 @@ class ExponentialAtmosphereProvider:
         speed_of_sound = math.sqrt(1.4 * 287.05 * temperature)
         return EnvironmentSample(density, pressure, temperature, speed_of_sound, self.wind)
         ####
+    ####
+####
+
+
+@dataclass(frozen=True, slots=True)
+class WindFieldEnvironmentProvider:
+    """Overlay a position/time-dependent wind field on an atmosphere.
+
+    The atmosphere remains responsible for thermodynamic quantities.  The
+    resolver only supplies the earth-fixed ECFC wind required by the
+    air-relative aerodynamic calculation.
+    """
+
+    atmosphere: EnvironmentProvider
+    wind_resolver: Callable[[float, FrameVector3], FrameVector3]
+
+    def sample(self, *, time: float, position: FrameVector3) -> EnvironmentSample:
+        sample = self.atmosphere.sample(time=time, position=position)
+        wind = self.wind_resolver(time, position)
+        if wind.frame is not Frame.ECFC:
+            raise ValueError("resolved atmosphere wind must be expressed in ECFC")
+        return replace(sample, wind=wind)
     ####
 ####
 

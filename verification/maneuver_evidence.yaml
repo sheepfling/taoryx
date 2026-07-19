@@ -1,0 +1,394 @@
+schema_version: 1
+id: taoryx_maneuver_evidence_v1
+description: Native problem-file bindings for runnable entries in the vehicle maneuver matrix.
+cases:
+  - id: b747/trim-hold-3dof
+    case_id: b747/trim-hold
+    dimension: 3dof
+    problem: examples/mission_families/slower_b747/SV01_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    max_steps: 50
+    limits: {max_abs_aero_alpha_deg: 4.0, max_abs_aero_sideslip_deg: 5.0, max_speed_m_s: 250.0}
+  - id: b747/trim-hold
+    dimension: 6dof
+    problem: examples/mission_families/slower_b747/SV01_long_trim_hold_6dof.prb
+    tables: [tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl]
+    max_steps: 3100
+    limits: {max_abs_aero_alpha_deg: 4.0, max_abs_aero_sideslip_deg: 5.0}
+  - id: b747/altitude-step
+    dimension: 6dof
+    problem: examples/mission_families/slower_b747/SV01_basic_waypoint_altitude_6dof.prb
+    tables: [tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl]
+    max_steps: 700
+    limits: {max_abs_aero_alpha_deg: 4.0, max_abs_aero_sideslip_deg: 5.0}
+  - id: b747/altitude-step-3dof
+    case_id: b747/altitude-step
+    dimension: 3dof
+    problem: examples/mission_families/slower_b747/SV01_altitude_step_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    max_steps: 210
+    limits: {max_speed_m_s: 180.0}
+  - id: b747/rounded-racetrack
+    dimension: 6dof
+    problem: examples/mission_families/slower_b747/SV01_rectangle_course_6dof.prb
+    tables: [tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl]
+    max_steps: 17000
+    limits: {max_abs_aero_alpha_deg: 4.0, max_abs_aero_sideslip_deg: 5.0}
+  - id: b747/rounded-racetrack-3dof
+    case_id: b747/rounded-racetrack
+    dimension: 3dof
+    problem: examples/mission_families/slower_b747/SV01_rectangle_course_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    max_steps: 16010
+    limits: {max_speed_m_s: 180.0, min_speed_m_s: 20.0}
+  - id: b747/heading-doublet
+    dimension: 6dof
+    problem: examples/mission_families/slower_b747/SV01_bounded_route_controller_6dof.prb
+    tables: [tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl]
+    max_steps: 510
+    limits: {max_abs_aero_alpha_deg: 4.0, max_abs_aero_sideslip_deg: 5.0}
+  - id: b747/heading-doublet-3dof
+    case_id: b747/heading-doublet
+    dimension: 3dof
+    problem: examples/mission_families/slower_b747/SV01_heading_doublet_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    max_steps: 210
+    limits: {max_speed_m_s: 180.0, min_speed_m_s: 20.0}
+  - id: b747/descent-corridor
+    dimension: 6dof
+    problem: examples/mission_families/slower_b747/SV01_descent_corridor_6dof.prb
+    tables: [tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl]
+    max_steps: 1010
+    limits: {max_abs_aero_alpha_deg: 4.0, max_abs_aero_sideslip_deg: 5.0}
+  - id: b747/descent-corridor-3dof
+    case_id: b747/descent-corridor
+    dimension: 3dof
+    problem: examples/mission_families/slower_b747/SV01_descent_corridor_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    max_steps: 410
+    limits: {max_speed_m_s: 180.0, min_speed_m_s: 20.0}
+  - id: b747/landing-go-around
+    dimension: 6dof
+    problem: examples/mission_families/slower_b747/SV01_approach_go_around_6dof.prb
+    tables: [tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl]
+    max_steps: 610
+    limits: {max_abs_aero_alpha_deg: 4.0, max_abs_aero_sideslip_deg: 5.0}
+  - id: skywalker-x8/powered-trim-hold
+    dimension: 6dof
+    problem: examples/mission_families/slower_x8/SV03_long_powered_recovery_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 2000
+    limits: {max_abs_aero_alpha_deg: 12.0, max_abs_aero_sideslip_deg: 5.0, max_speed_m_s: 27.0}
+  - id: skywalker-x8/launch-climb
+    dimension: 6dof
+    problem: examples/mission_families/slower_x8/SV03_basic_waypoint_altitude_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 4010
+    limits: {max_abs_aero_alpha_deg: 12.0, max_abs_aero_sideslip_deg: 5.0, max_speed_m_s: 27.0}
+  - id: skywalker-x8/altitude-step
+    dimension: 6dof
+    problem: examples/mission_families/slower_x8/SV03_basic_waypoint_altitude_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 4010
+    limits: {max_abs_aero_alpha_deg: 12.0, max_abs_aero_sideslip_deg: 5.0, max_speed_m_s: 27.0}
+  - id: skywalker-x8/powered-trim-hold-3dof
+    case_id: skywalker-x8/powered-trim-hold
+    dimension: 3dof
+    problem: examples/mission_families/slower_x8/SV03_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 10
+    limits: {max_abs_aero_alpha_deg: 12.0, max_abs_aero_sideslip_deg: 5.0, max_speed_m_s: 30.0}
+  - id: skywalker-x8/rounded-racetrack
+    dimension: 6dof
+    problem: examples/mission_families/slower_x8/SV03_rectangle_course_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 24010
+    limits: {max_abs_aero_alpha_deg: 12.0, max_abs_aero_sideslip_deg: 5.0, max_speed_m_s: 27.0}
+  - id: skywalker-x8/rounded-racetrack-3dof
+    case_id: skywalker-x8/rounded-racetrack
+    dimension: 3dof
+    problem: examples/mission_families/slower_x8/SV03_rectangle_course_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 24010
+    limits: {max_speed_m_s: 27.0, min_speed_m_s: 2.0}
+  - id: skywalker-x8/heading-doublet
+    dimension: 6dof
+    problem: examples/mission_families/slower_x8/SV03_lateral_rate_response_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 1010
+    limits: {max_abs_aero_alpha_deg: 12.0, max_abs_aero_sideslip_deg: 5.0, max_speed_m_s: 27.0}
+  - id: skywalker-x8/heading-doublet-3dof
+    case_id: skywalker-x8/heading-doublet
+    dimension: 3dof
+    problem: examples/mission_families/slower_x8/SV03_heading_doublet_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 110
+    limits: {max_speed_m_s: 27.0, min_speed_m_s: 2.0}
+  - id: skywalker-x8/descent-corridor
+    dimension: 6dof
+    problem: examples/mission_families/slower_x8/SV03_descent_corridor_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 4010
+    limits: {max_abs_aero_alpha_deg: 12.0, max_abs_aero_sideslip_deg: 5.0, max_speed_m_s: 27.0}
+  - id: skywalker-x8/launch-climb-3dof
+    case_id: skywalker-x8/launch-climb
+    dimension: 3dof
+    problem: examples/mission_families/slower_x8/SV03_launch_climb_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 410
+    limits: {max_speed_m_s: 27.0, min_speed_m_s: 2.0}
+  - id: skywalker-x8/altitude-step-3dof
+    case_id: skywalker-x8/altitude-step
+    dimension: 3dof
+    problem: examples/mission_families/slower_x8/SV03_altitude_step_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 410
+    limits: {max_speed_m_s: 27.0, min_speed_m_s: 2.0}
+  - id: skywalker-x8/descent-corridor-3dof
+    case_id: skywalker-x8/descent-corridor
+    dimension: 3dof
+    problem: examples/mission_families/slower_x8/SV03_descent_corridor_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 410
+    limits: {max_speed_m_s: 27.0, min_speed_m_s: 2.0}
+  - id: skywalker-x8/landing-go-around
+    dimension: 6dof
+    problem: examples/mission_families/slower_x8/SV03_approach_go_around_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 4810
+    limits: {max_abs_aero_alpha_deg: 12.0, max_abs_aero_sideslip_deg: 5.0, max_speed_m_s: 27.0}
+  - id: hummingbird/hover
+    dimension: 6dof
+    problem: examples/mission_families/slower_hummingbird/SV05_long_hover_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 6500
+    limits: {max_speed_m_s: 10.0}
+  - id: hummingbird/hover-3dof
+    case_id: hummingbird/hover
+    dimension: 3dof
+    problem: examples/mission_families/slower_hummingbird/SV05_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+    max_steps: 20
+    limits: {max_speed_m_s: 10.0}
+  - id: hummingbird/waypoint-square
+    dimension: 6dof
+    problem: examples/mission_families/slower_hummingbird/SV05_rectangle_course_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 40010
+    limits: {max_speed_m_s: 10.0}
+  - id: hummingbird/waypoint-square-3dof
+    case_id: hummingbird/waypoint-square
+    dimension: 3dof
+    problem: examples/mission_families/slower_hummingbird/SV05_rectangle_course_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+    max_steps: 40010
+    limits: {max_speed_m_s: 10.0}
+  - id: hummingbird/takeoff-hover-land
+    dimension: 6dof
+    problem: examples/mission_families/slower_hummingbird/SV05_basic_waypoint_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 8010
+    limits: {max_speed_m_s: 10.0}
+  - id: hummingbird/takeoff-hover-land-3dof
+    case_id: hummingbird/takeoff-hover-land
+    dimension: 3dof
+    problem: examples/mission_families/slower_hummingbird/SV05_takeoff_hover_land_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+    max_steps: 8010
+    limits: {max_speed_m_s: 10.0}
+  - id: hummingbird/yaw-step
+    dimension: 6dof
+    problem: examples/mission_families/slower_hummingbird/SV05_differential_allocation_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 210
+    limits: {max_speed_m_s: 10.0}
+  - id: hummingbird/yaw-step-3dof
+    case_id: hummingbird/yaw-step
+    dimension: 3dof
+    problem: examples/mission_families/slower_hummingbird/SV05_yaw_step_3dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+    max_steps: 210
+    limits: {max_speed_m_s: 10.0}
+  - id: hummingbird/wind-gust
+    dimension: 6dof
+    problem: examples/mission_families/slower_hummingbird/SV05_disturbed_response_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 2010
+    limits: {max_speed_m_s: 10.0}
+  - id: hummingbird/degraded-rotor
+    dimension: 6dof
+    problem: examples/mission_families/slower_hummingbird/SV05_degraded_rotor_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 2010
+    limits: {max_speed_m_s: 10.0}
+  - id: x15/powered-ascent
+    dimension: 6dof
+    problem: examples/showcases/x15_rocket_to_hawaii/mission_matrix_prefix_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 1020
+  - id: x15/powered-ascent-3dof
+    case_id: x15/powered-ascent
+    dimension: 3dof
+    problem: examples/showcases/x15_rocket_to_hawaii/mission_3dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 1801
+    limits: {max_speed_m_s: 2500.0, min_altitude_m: 0.0}
+  - id: x15/release-coast
+    dimension: 6dof
+    problem: examples/showcases/x15_rocket_to_hawaii/mission_matrix_prefix_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 1020
+  - id: x15/release-coast-3dof
+    case_id: x15/release-coast
+    dimension: 3dof
+    problem: examples/showcases/x15_rocket_to_hawaii/mission_3dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 1801
+    limits: {max_speed_m_s: 2500.0, min_altitude_m: 0.0}
+  - id: x15/terminal-waypoint
+    dimension: 6dof
+    problem: examples/showcases/x15_rocket_to_hawaii/mission_matrix_prefix_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 1020
+  - id: x15/terminal-waypoint-3dof
+    case_id: x15/terminal-waypoint
+    dimension: 3dof
+    problem: examples/showcases/x15_rocket_to_hawaii/mission_3dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 1801
+    limits: {max_speed_m_s: 2500.0, min_altitude_m: 0.0}
+  - id: x15/bank-energy-management
+    dimension: 6dof
+    problem: examples/showcases/x15_rocket_to_hawaii/mission_matrix_prefix_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 1020
+  - id: x15/bank-energy-management-3dof
+    case_id: x15/bank-energy-management
+    dimension: 3dof
+    problem: examples/showcases/x15_rocket_to_hawaii/mission_3dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 1801
+    limits: {max_speed_m_s: 2500.0, min_altitude_m: 0.0}
+  - id: x15/certified-landing
+    dimension: 6dof
+    problem: examples/showcases/x15_rocket_to_hawaii/certified_landing_checkpoint_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 20

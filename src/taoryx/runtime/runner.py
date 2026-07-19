@@ -10,11 +10,11 @@ from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import ProblemDocument, TableDocument
-from taoryx.language.table_parser import table_type_catalog
 from taoryx.outputs import RunArtifact, build_run_artifact
 
 from .engine import ExecutionResult
-from .lowering import execute_lowered, lower_problem_document, lower_tables, problem_unit_settings
+from .lowering import execute_lowered, lower_problem_document, problem_unit_settings
+from .table_binding import bind_runtime_tables
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,30 +89,16 @@ def run_files(
         except (OSError, UnicodeError, ValueError) as error:
             diagnostics.append(_error(path, "table-ingest-failed", str(error)))
     ####
-    table_sources: dict[str, str] = {}
-    for document in table_documents:
-        for definition in document.tables:
-            name = definition.name.casefold()
-            previous = table_sources.get(name)
-            if previous is not None:
-                diagnostics.append(
-                    Diagnostic(
-                        severity=Severity.ERROR,
-                        code="duplicate-runtime-table",
-                        message=(
-                            f"Table {definition.name!r} is supplied by both {previous!r} "
-                            f"and {definition.location.path!r}; runtime table names must be unique."
-                        ),
-                        location=definition.location,
-                    )
-                )
-            else:
-                table_sources[name] = definition.location.path
+    try:
+        available_tables, tables = bind_runtime_tables(table_documents, {})
+    except (KeyError, TypeError, ValueError) as error:
+        diagnostics.append(_error(problem, "runtime-table-binding-failed", str(error)))
+        return RunReport(str(problem), tuple(map(str, table_paths)), 0, (), tuple(diagnostics), ())
     ####
     try:
         problem_ingested = ingest_file(
             problem,
-            available_tables={name for document in table_documents for name in table_type_catalog(document)},
+            available_tables=available_tables,
             profile=profile,
         )
         problem_document = cast(ProblemDocument, problem_ingested.document)
@@ -127,7 +113,7 @@ def run_files(
         return RunReport(str(problem), tuple(map(str, table_paths)), 0, (), tuple(diagnostics), ())
     try:
         unit_settings, _ = problem_unit_settings(problem_document)
-        tables = {name: table for document in table_documents for name, table in lower_tables(document, unit_settings).items()}
+        available_tables, tables = bind_runtime_tables(table_documents, unit_settings)
         lowered = lower_problem_document(problem_document, tables, seed=seed)
         unsafe_output = _unsafe_output_path(lowered, destination)
         if unsafe_output is not None:

@@ -27,6 +27,8 @@ The `controllers/` fragments are TAORYX-extension alternatives for existing
 - `quadrotor-hover-lqr-6dof.prbfrag`: cascaded position and attitude loops.
 
 They declare state/control contracts and matrix-source names for the LQR
-adapter. They do not silently replace the native PD, pursuit, or allocation
-controllers; execution wiring and numeric matrix providers remain explicit
-model-adapter work.
+adapter. The `attitude-lqr-6dof` declaration is wired by the native rigid-body
+lowering when composed into a routed 6-DOF problem. The point-mass and
+quadrotor fragments remain declaration-only until their model-specific
+linearization and actuator adapters are connected. No fragment silently
+replaces pursuit, thermal, or rotor-allocation logic.

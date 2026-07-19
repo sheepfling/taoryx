@@ -1,0 +1,61 @@
+schema_version: 1
+id: taoryx_long_validation_trajectories_v1
+claim_boundary: sustained research-surrogate semantics; not flight qualification
+common:
+  required_integrators: [rk4_dt, rk4_dt_over_2, rk4_dt_over_4, adaptive_reference]
+  required_artifacts: [manifest, initial_condition_audit, event_timeline, closure_metrics, convergence_report, plots]
+  no_unsupported_extrapolation: true
+  thermal_claim_requires_certified_model: true
+vehicles:
+  - id: b747
+    semantic_family: powered_fixed_wing
+    duration_s: 480
+    phases: [source_trim, elevator_doublet, altitude_step, heading_change, wind_rejection, trim_return]
+    nominal_problem: examples/mission_families/slower_b747/SV01_long_validation_6dof.prb
+    primary_metrics: [airspeed_error, altitude_error, heading_error, alpha_margin, beta_margin, saturation, closure_p99, convergence]
+    gates:
+      max_airspeed_error_fraction: 0.02
+      max_altitude_steady_error_m: 10
+      max_heading_steady_error_deg: 2
+      max_abs_alpha_deg: 4
+      max_abs_beta_deg: 5
+  - id: skywalker-x8
+    semantic_family: powered_fixed_wing
+    duration_s: 540
+    phases: [powered_trim, climb_leveloff, heading_reversal, wide_rectangle, gust_rejection, trim_return]
+    nominal_problem: examples/mission_families/slower_x8/SV03_long_validation_6dof.prb
+    primary_metrics: [speed_envelope, altitude_error, corner_miss, beta_recovery, saturation, closure_p99, convergence]
+    gates:
+      speed_min_m_s: 12
+      speed_max_m_s: 27
+      alpha_min_deg: 0
+      alpha_max_deg: 12
+      max_abs_beta_deg: 5
+      max_corner_miss_6dof_m: 25
+  - id: hummingbird
+    semantic_family: multirotor
+    duration_s: 135
+    phases: [takeoff, hover, north_step, east_step, yaw_step, return_square, descent_checkpoint]
+    nominal_problem: examples/mission_families/slower_hummingbird/SV05_long_validation_6dof.prb
+    primary_metrics: [hover_position_error, waypoint_radius, altitude_error, yaw_error, rate_error, rotor_saturation, wrench_error, convergence]
+    gates:
+      max_hover_position_error_m: 0.1
+      max_waypoint_radius_m: 0.25
+      max_hover_altitude_error_m: 0.1
+      max_yaw_error_deg: 3
+      max_body_rate_error_deg_s: 2
+      max_wrench_relative_error: 0.01
+  - id: x15
+    semantic_family: unpowered_hypersonic_glider
+    duration_s: 300
+    phases: [release, ballistic_coast, atmospheric_interface, energy_management_glide, heading_capture, terminal_corridor]
+    nominal_problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
+    primary_metrics: [release_mass_balance, propulsion_zero_after_release, apogee, dynamic_pressure_transition, mach_margin, alpha_margin, route_capture, ground_clearance, convergence]
+    gates:
+      max_mach: 6.7
+      max_abs_beta_deg: 10
+      min_altitude_m: 0
+      require_apogee: true
+      require_positive_atmospheric_dynamic_pressure: true
+      require_zero_post_release_mass_flow: true
+      thermal_claim: excluded

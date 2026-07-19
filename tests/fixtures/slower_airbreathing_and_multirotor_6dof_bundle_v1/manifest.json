@@ -1,0 +1,263 @@
+{
+  "dataset_name": "slower_airbreathing_and_multirotor_6dof_bundle_v1",
+  "file_count_excluding_manifest_and_checksums": 51,
+  "files": [
+    {
+      "bytes": 1453,
+      "path": "MODEL_FIDELITY.md",
+      "sha256": "00557ffd9b49080469cfacd36ace2c372c973c2d4b1b001d71171795a041f6b5"
+    },
+    {
+      "bytes": 483,
+      "path": "NOTICE.md",
+      "sha256": "989149a7171ee05be1e2d483418b9c97392cc4424a094d80ffaa18f3af8cd5d6"
+    },
+    {
+      "bytes": 1480,
+      "path": "README.md",
+      "sha256": "77de65d1a79c667507013c587c74c7ae32a4384f64e75647fc0733fac48042a0"
+    },
+    {
+      "bytes": 620,
+      "path": "alternates/nasa_gtm/README.md",
+      "sha256": "2c41fb0b61f9da03ab939f20958164cbce3cebbf61eea8a6c8f9aeab86fb8db7"
+    },
+    {
+      "bytes": 517,
+      "path": "alternates/nasa_gtm/aero_database_pointer.json",
+      "sha256": "e8f3ed9d0ef23ca4dace7f618fa9cf795906c46c4056207ca2ff0279aeed5616"
+    },
+    {
+      "bytes": 1895,
+      "path": "alternates/nasa_gtm/jetcat_p70_thrust_table.csv",
+      "sha256": "5ea5359d7b26464ccfd2a5fbf61f573f82f1c2a2fc5b25b34abca642b6a0793a"
+    },
+    {
+      "bytes": 822,
+      "path": "alternates/nasa_gtm/reference_geometry_mass.csv",
+      "sha256": "3b1e7cb0ed8882fd4a4c63c1bdac67945c645569151bf95db9abbc39f2130abe"
+    },
+    {
+      "bytes": 9601,
+      "path": "bundle_index.xlsx",
+      "sha256": "236db3bd811e211eca9275965e014d4e94e6bbfa3d0fb90c4ff5d50469e29e0e"
+    },
+    {
+      "bytes": 1028,
+      "path": "checks/validation_report.json",
+      "sha256": "bb601d16418081d3b96fabd570561b6bdcea364a7a623598520e5677265b2820"
+    },
+    {
+      "bytes": 873,
+      "path": "comparison_summary.csv",
+      "sha256": "d5ea321e178f90707c394319644ce4165d7b78aeccdc2efc326501db071a2ab4"
+    },
+    {
+      "bytes": 853,
+      "path": "coverage_matrix.csv",
+      "sha256": "c5e0999910ae3d6ff83bd95b4fc65c486a123cd192918c332a7b88a1e35c3a8d"
+    },
+    {
+      "bytes": 1060,
+      "path": "cruise_class_uav_skywalker_x8/VALIDITY.md",
+      "sha256": "4f55c0e200bf7d3026530bc148cecf3fd721e4f73fe20eb22d7c0fb055d95f53"
+    },
+    {
+      "bytes": 2620434,
+      "path": "cruise_class_uav_skywalker_x8/aero/collective_elevon_grid.csv",
+      "sha256": "dac216cbaa0c81ec33c6cbc96ea70b0da1becd060a15d8d04b7df60a4ea39a5d"
+    },
+    {
+      "bytes": 2628530,
+      "path": "cruise_class_uav_skywalker_x8/aero/differential_elevon_grid.csv",
+      "sha256": "cbeba4413bf6028a84004c5d75b84b8ac928dde97af197d450c74bf71257b894"
+    },
+    {
+      "bytes": 2816,
+      "path": "cruise_class_uav_skywalker_x8/aero/identified_coefficients.csv",
+      "sha256": "05a8ad94ea79133fd5b1a73f7c40084270188db73e2c154050d86930c9c9c782"
+    },
+    {
+      "bytes": 1652971,
+      "path": "cruise_class_uav_skywalker_x8/aero/powered_six_axis_grid.csv",
+      "sha256": "2931ca5d997bf5ad3ef205052a3ac2205d8f7b222158e05243f316f6848f8a65"
+    },
+    {
+      "bytes": 110679,
+      "path": "cruise_class_uav_skywalker_x8/aero/rate_effects_grid.csv",
+      "sha256": "16f2cbe19428b6f028d3d075175178e7b361bf22812adadca5fc3c608ab29c57"
+    },
+    {
+      "bytes": 246236,
+      "path": "cruise_class_uav_skywalker_x8/aero/static_airframe_grid.csv",
+      "sha256": "34625f2999f5dffd40c170170d37bac6168b823936523186e90e27916c5711ee"
+    },
+    {
+      "bytes": 690,
+      "path": "cruise_class_uav_skywalker_x8/controls/actuator_limits.csv",
+      "sha256": "015baf568319fd11b1b465abfb5548a608762f88006fd5f3d6a0283395367d2c"
+    },
+    {
+      "bytes": 406,
+      "path": "cruise_class_uav_skywalker_x8/controls/control_mapping_status.csv",
+      "sha256": "133a9cbd31e5623b0db350de32fad102e6ef16fb5f5a139aa060b064c09d1561"
+    },
+    {
+      "bytes": 657,
+      "path": "cruise_class_uav_skywalker_x8/geometry_mass/reference_geometry_mass.csv",
+      "sha256": "665af18e1adf1d7b1f11fe1663d7a498362a9fa6247d4c0ca12fe86c556c4a05"
+    },
+    {
+      "bytes": 5242,
+      "path": "cruise_class_uav_skywalker_x8/propulsion/propeller_coefficients.csv",
+      "sha256": "110b62083ac9fbefb2fb7a50d9f7db18407db8f57aa57a8fdf363be534b96e9d"
+    },
+    {
+      "bytes": 30027,
+      "path": "cruise_class_uav_skywalker_x8/propulsion/simplified_thrust_map.csv",
+      "sha256": "9ddcbaa2099dfa2802c3c0af677bd6eb8fd2b54f13a21acd2f65cd2af74c54ab"
+    },
+    {
+      "bytes": 999,
+      "path": "jet_b747/VALIDITY.md",
+      "sha256": "b374181f1bff677d542b57ba30b4ad5d342ea8b7051aab1430e3b7cfb4a0adf5"
+    },
+    {
+      "bytes": 1100824,
+      "path": "jet_b747/aero/aileron_grid.csv",
+      "sha256": "36a3baae0c40012405b9730af73eb3dab78d137c989a6bb6b7232d83e4dbb29d"
+    },
+    {
+      "bytes": 1129424,
+      "path": "jet_b747/aero/elevator_grid.csv",
+      "sha256": "ca3b55f08a9ff631b6835c5b5822c39ebee5733c3d3796de2211b431c65b43a3"
+    },
+    {
+      "bytes": 2464,
+      "path": "jet_b747/aero/flight_conditions.csv",
+      "sha256": "35947ac0d3140d096f9d77eb6ee7f4cdbaa2b7cf2796a04254aa516f6324005b"
+    },
+    {
+      "bytes": 1712,
+      "path": "jet_b747/aero/lateral_directional_derivatives.csv",
+      "sha256": "02465aca85617f6526622d821d1dc5b68f55292839f5c5d87bce8a83448b9ec7"
+    },
+    {
+      "bytes": 1593,
+      "path": "jet_b747/aero/longitudinal_derivatives.csv",
+      "sha256": "7eec61497170e56473c60dbf1cb9a9572691d2966edd7e3a9839151607c0f1a3"
+    },
+    {
+      "bytes": 90782,
+      "path": "jet_b747/aero/rate_effects_grid.csv",
+      "sha256": "62c310d7f0b984cec60ae697e55a5ed9f6f1df38e43b0d191362a610c5235de1"
+    },
+    {
+      "bytes": 1133934,
+      "path": "jet_b747/aero/rudder_grid.csv",
+      "sha256": "79d2758fe3ec1d76defdab03c8924a799f0ea95cb32d2b4caa980fba9f1f3f6f"
+    },
+    {
+      "bytes": 200663,
+      "path": "jet_b747/aero/static_six_axis_grid.csv",
+      "sha256": "44a04895adea1831a98d25f90e4af8d2729bf7c909242a434cd4cc76afa6a0da"
+    },
+    {
+      "bytes": 435,
+      "path": "jet_b747/controls/actuator_limits.csv",
+      "sha256": "666d45939c72db7ba401efc786b921cdf6415af44d6a8fbbf8f1a631ad85d300"
+    },
+    {
+      "bytes": 932,
+      "path": "jet_b747/geometry_mass/implementation_mass_properties.csv",
+      "sha256": "97b38af894c44d82aa8c86fd87afda785c91c4d7daafc581ca052fef275e0a92"
+    },
+    {
+      "bytes": 443,
+      "path": "jet_b747/geometry_mass/reference_geometry.csv",
+      "sha256": "7b28f40e7a9b5b1bdc64441f01bce63546dce9f875c09dcfd4228f379e75a5b7"
+    },
+    {
+      "bytes": 582,
+      "path": "jet_b747/geometry_mass/source_discrepancies.csv",
+      "sha256": "2bb49d43437d7177cbb235e4f734120a333172c1f3c7f9005d87ddaacf5c5739"
+    },
+    {
+      "bytes": 470,
+      "path": "jet_b747/propulsion/engine_positions.csv",
+      "sha256": "210947dfe56d6ba2a81e20aaf6d40845a557f28a30cad735cfa66092221d89dd"
+    },
+    {
+      "bytes": 22773,
+      "path": "jet_b747/propulsion/jt9d_installed_thrust_map.csv",
+      "sha256": "40be0290dc0774f6a9c374bfba3f9298e5251fd7a3bf380cc9a3635f4e17c4a1"
+    },
+    {
+      "bytes": 345,
+      "path": "metadata.json",
+      "sha256": "79f8f9890d83c6fd62089727f95c9a058cf3ee0e925cdd4ab2820f12af7f80b5"
+    },
+    {
+      "bytes": 780,
+      "path": "model_selection.csv",
+      "sha256": "3cf0e523cdec08aa75de6711ef865a3b5de85adf49f21cc62139465a67e92381"
+    },
+    {
+      "bytes": 960,
+      "path": "quadcopter_hummingbird/VALIDITY.md",
+      "sha256": "ef0cc8b2905a12fd2b4c8cef1fee9a10f55b1d0fbca1c777ff9e606ece26f051"
+    },
+    {
+      "bytes": 55097,
+      "path": "quadcopter_hummingbird/aero/common_speed_wrench_grid.csv",
+      "sha256": "3f175f10f4ab4a249ba7d7679b834c2065c28aa2f7e431f97e4bb59550b423be"
+    },
+    {
+      "bytes": 634,
+      "path": "quadcopter_hummingbird/controls/control_allocation_matrix.csv",
+      "sha256": "a506f5c98456b38a0642e8d7cb02deed6a22cffef9d4b5150f01b37907909312"
+    },
+    {
+      "bytes": 10289,
+      "path": "quadcopter_hummingbird/controls/differential_speed_response.csv",
+      "sha256": "aff8cb00623b5c6ea10cb9a41469cfb2ede18216c6a1f4156e9e0c1e1e6051bf"
+    },
+    {
+      "bytes": 1269,
+      "path": "quadcopter_hummingbird/geometry_mass/parameters.csv",
+      "sha256": "e6b6060cbdb43a450a1fed74bcf5ef2bb37cfae93af4cbdfa218d32849ebfd62"
+    },
+    {
+      "bytes": 374,
+      "path": "quadcopter_hummingbird/geometry_mass/rotor_positions.csv",
+      "sha256": "160455781de4b70cfe4add08f2781759d388ad01d877d8e3dbb504787ddc8175"
+    },
+    {
+      "bytes": 334,
+      "path": "quadcopter_hummingbird/propulsion/hover_and_limits.csv",
+      "sha256": "3c4c194cc9518d5627b7320656c7455a719ae0430e04f88479b3ace1f099cedf"
+    },
+    {
+      "bytes": 5841,
+      "path": "quadcopter_hummingbird/propulsion/rotor_static_map.csv",
+      "sha256": "4d309b35920ea9b896af81d99666b163b1001edcc498155a8a2a3c047a75eb6a"
+    },
+    {
+      "bytes": 1897,
+      "path": "quadcopter_hummingbird/scripts/wrench_evaluator.py",
+      "sha256": "8cc908a3bfb7e3455e4b9aa4ad82e14c3b88936d513f25cecff0a7c72d7ec983"
+    },
+    {
+      "bytes": 1258,
+      "path": "scripts/validate_dataset.py",
+      "sha256": "3050053a0b2d5e9c8eb2823708bdeb68a04b676acf5fba36931fd6fe95db736a"
+    },
+    {
+      "bytes": 2732,
+      "path": "sources.csv",
+      "sha256": "169d6369943f00834d58b23d1cc9816661e1a42e995ac7892060e3302745902d"
+    }
+  ],
+  "generated_date": "2026-07-16",
+  "version": "1.0.0"
+}

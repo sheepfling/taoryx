@@ -1,0 +1,2 @@
+*when altitude_m>{{RELEASE_ALTITUDE_M}} goto {{RELEASE_SEGMENT}}
+*when time>{{RELEASE_FALLBACK_S}} goto {{RELEASE_SEGMENT}}

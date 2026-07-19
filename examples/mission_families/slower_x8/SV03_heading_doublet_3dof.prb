@@ -1,0 +1,23 @@
+(slower-x8-sv03-heading-doublet-3dof)
+*title Skywalker X8 point-mass heading doublet reduction
+*atmos standard
+*earth wgs-84 omega=0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status target latitude-deg=0.0 longitude-deg=0.0032 altitude-m=178.0
+*runtime status route mode=great-circle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=5.0 powered-speed-mps=17.9
+*runtime control throttle vehicle=1 default=0.7407992605852429 lower=0 upper=1
+*trajectory 1 x8 start on 1
+  *initial geodetic alt=178.0 long=0.0 lat=0.0 vel=17.9 gama=0.0 psi=90.0 time=0.0 mass=3.364
+  *segment 1 heading-doublet
+    *integ dtprnt=0.2 dt=0.05
+    *fly alpha=7.9
+    *aero cx=(cx-static) cy=(cy-static) cz=(cz-static) sref=0.75
+    *prop thrust=(thrust) mdot=0
+    *when time>5.0 stop
+*end

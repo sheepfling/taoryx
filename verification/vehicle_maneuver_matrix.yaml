@@ -1,0 +1,63 @@
+schema_version: 1
+id: taoryx_vehicle_maneuver_matrix_v1
+description: Staged maneuver matrix for the standard vehicle catalog.
+claim_boundary: Research-surrogate maneuvers are not flight-validation claims.
+vehicles:
+  - id: b747
+    family: fixed-wing
+    source_envelope: local NASA handling-qualities surrogate
+    cases:
+      - {id: trim-hold, dimension: [3dof, 6dof], status: available, tags: [dof3, dof6, slow], objective: Hold a source-anchored local cruise trim.}
+      - {id: altitude-step, dimension: [3dof, 6dof], status: planned, tags: [dof3, dof6, slow, artifact], objective: Climb and recover to a commanded altitude corridor.}
+      - {id: heading-doublet, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Execute a bounded heading change and return to trim.}
+      - {id: rounded-racetrack, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Complete a physically feasible rounded waypoint course.}
+      - {id: descent-corridor, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Descend to a declared altitude and speed corridor.}
+      - id: landing-go-around
+        dimension: 6dof
+        status: in_progress
+        tags: [dof6, slow, artifact]
+        objective: Approach and execute a bounded go-around checkpoint before runway contact.
+        evidence_mode: non_contact_approach_checkpoint
+        limitation: Physical runway contact, landing gear, ground effect, stall, and thermal claims remain excluded.
+  - id: skywalker-x8
+    family: fixed-wing
+    source_envelope: local flight-identified surrogate
+    cases:
+      - {id: powered-trim-hold, dimension: [3dof, 6dof], status: available, tags: [dof3, dof6, slow], objective: Hold the powered operating neighborhood.}
+      - {id: launch-climb, dimension: [3dof, 6dof], status: planned, tags: [dof3, dof6, slow, artifact], objective: Accelerate into the trim envelope and climb.}
+      - {id: altitude-step, dimension: [3dof, 6dof], status: planned, tags: [dof3, dof6, slow, artifact], objective: Track an altitude step inside the alpha/beta deck.}
+      - {id: heading-doublet, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Exercise differential elevon and sideslip recovery.}
+      - {id: rounded-racetrack, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Complete a wide waypoint course.}
+      - {id: descent-corridor, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Descend while maintaining airspeed and table margins.}
+      - id: landing-go-around
+        dimension: 6dof
+        status: in_progress
+        tags: [dof6, slow, artifact]
+        objective: Approach and execute a bounded go-around checkpoint before runway contact.
+        evidence_mode: non_contact_approach_checkpoint
+        limitation: Physical runway contact, ground effect, stall, and thermal claims remain excluded.
+  - id: hummingbird
+    family: multirotor
+    source_envelope: RotorPy-derived rigid-body surrogate
+    cases:
+      - {id: hover, dimension: [3dof, 6dof], status: available, tags: [dof3, dof6, slow], objective: Establish and maintain hover equilibrium.}
+      - {id: takeoff-hover-land, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Climb to 2 m, hover, descend, and settle.}
+      - {id: waypoint-square, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Visit north/east/elevated corners and return.}
+      - {id: yaw-step, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Track yaw without position drift.}
+      - {id: wind-gust, dimension: 6dof, status: in_progress, tags: [dof6, slow, artifact], objective: Reject a horizontal wind gust.}
+      - {id: degraded-rotor, dimension: 6dof, status: in_progress, tags: [dof6, slow, artifact], objective: Recover from a bounded single-rotor thrust reduction.}
+  - id: x15
+    family: hypersonic-rocket-plane
+    source_envelope: public X-15 research surrogate
+    cases:
+      - {id: powered-ascent, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Exercise powered ascent and mass flow.}
+      - {id: release-coast, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Propagate release, coast, and apogee events.}
+      - {id: bank-energy-management, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Manage descent energy inside the coefficient deck.}
+      - {id: terminal-waypoint, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Capture a benign ground waypoint.}
+      - id: certified-landing
+        dimension: 6dof
+        status: in_progress
+        tags: [dof6, slow, artifact]
+        objective: Execute a terminal approach checkpoint before runway contact.
+        evidence_mode: non_contact_approach_checkpoint
+        limitation: Certified thermal, landing-gear, ground-effect, and contact claims remain excluded.

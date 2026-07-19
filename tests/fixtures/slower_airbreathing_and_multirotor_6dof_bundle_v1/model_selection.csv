@@ -1,0 +1,4 @@
+slot,selected_vehicle,why_selected,main_limit,operational_or_weapon_data
+subsonic_jet,Boeing 747-100,Public NASA handling-qualities derivatives at ten flight conditions and complete 6-axis control structure,Local Taylor-expansion model; cruise derivatives 3-10 are digitized from NASA plots,none
+cruise_class_non_weapon_surrogate,Skywalker X8,"Recent flight-test-identified nonlinear 6-DOF model with elevons, rates, propeller coupling and actuator data",Identified near 18 m/s and approximately 0-12 deg alpha; no post-stall model,explicitly excluded
+quadcopter,AscTec Hummingbird,"Coherent rigid-body, rotor, motor-lag and aerodynamic-wrench model with physical rotor geometry",Some rotor-drag parameters are implementation-tuned rather than a certified identification,none

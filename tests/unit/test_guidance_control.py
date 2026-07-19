@@ -5,7 +5,7 @@ import math
 import pytest
 
 from taoryx.contracts import Vector3
-from taoryx.runtime.guidance_control import AttitudeCommand, ControlOutput, GuidanceDemand, TargetState, allocate_alpha_bank
+from taoryx.runtime.guidance_control import AttitudeCommand, ControlOutput, CoordinatedTurnController, GuidanceDemand, TargetState, allocate_alpha_bank
 
 
 def test_alpha_bank_allocator_tracks_unsaturated_transverse_demand() -> None:
@@ -55,4 +55,15 @@ def test_native_guidance_contracts_are_slotted_and_frame_bounded() -> None:
     assert command.bank_radians == pytest.approx(0.2)
     assert output.residual_acceleration.norm() == pytest.approx(0.0)
     assert getattr(target, "__slots__")
+    ####
+
+
+def test_coordinated_turn_controller_maps_errors_to_bounded_body_moment() -> None:
+    controller = CoordinatedTurnController(heading_gain=4.0, bank_gain=6.0, heading_rate_damping=1.0, bank_rate_damping=2.0, maximum_moment=2.0)
+
+    command = controller.command(heading_error=0.5, bank_error=-0.25, body_rates=Vector3(0.1, 0.0, -0.2))
+
+    assert command.moment_body.norm() == pytest.approx(2.0)
+    assert command.moment_body.y == pytest.approx(0.0)
+    assert command.saturated
     ####

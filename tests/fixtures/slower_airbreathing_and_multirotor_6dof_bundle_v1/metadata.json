@@ -1,0 +1,13 @@
+{
+  "alternate_lead": "NASA Generic Transport Model T2",
+  "dataset_name": "slower_airbreathing_and_multirotor_6dof_bundle_v1",
+  "generated_date": "2026-07-16",
+  "models": [
+    "Boeing 747-100",
+    "Skywalker X8",
+    "AscTec Hummingbird"
+  ],
+  "terminal_guidance_content": false,
+  "version": "1.0.0",
+  "weapon_specific_content": false
+}

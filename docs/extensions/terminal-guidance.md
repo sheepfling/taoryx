@@ -16,6 +16,25 @@ attitude owner after `terminal-start-s`. In both modes the ProNav calculation
 is still observable, and its aerodynamic allocation remains subject to the
 declared control limits and tables.
 
+`max-sideslip-deg=N` projects the commanded body-X direction into a bounded
+body-Y corridor before moment control. This is a command limit; it does not
+alter the measured aerodynamic sideslip or clamp a table query.
+
+`sideslip-gain=N` adds a body-axis yaw feedback moment from measured
+air-relative sideslip. `sideslip-rate-damping=N` adds body-yaw-rate damping to
+that same loop. Both are disabled by default and are intended for a
+vehicle-specific 6-DOF extension where the coefficient deck supports this
+closed-loop approximation. The resulting moment remains subject to the
+declared actuator maximum.
+
+`energy-management=alpha-drag` enables an opt-in energy loop. When
+`energy-target-speed-mps=N` is below the current airspeed, the controller
+raises the table-query alpha command according to
+`energy-alpha-gain-deg-per-mps=N`, bounded by `energy-max-alpha-deg=N`.
+This changes the aerodynamic force through the declared coefficient tables; it
+does not inject an artificial deceleration or alter the integrated equations
+of motion.
+
 The California-to-Hawaii showcase intentionally uses `route` today. Its
 synthetic aerodynamic table is a wiring and regression fixture, not real
 vehicle data. A pure-ProNav run must therefore be treated as a controller
@@ -46,6 +65,24 @@ attitude. A terminal-guidance showcase must identify:
 Historical `*fly propnav` behavior and a modern TAORYX ProNav controller are
 separate claims. Agreement of endpoint position alone does not establish
 historical compatibility.
+
+## Segment-scoped route activation
+
+For staged rigid-body showcases, route attitude steering is activated by the
+existing segment `*fly propnav` block. Booster and coast segments without that
+block do not receive route steering; no separate segment selector is needed.
+This does not clamp aerodynamic angles or authorize table extrapolation.
+
+For a declared payload release, `release-attitude=airflow` on the vehicle
+status block acquires body-X along the current air-relative velocity and
+chooses a coordinated body-Y plane at the segment boundary. This is an
+explicit attitude reset at release, not a table-query clamp.
+
+The route profile also supports explicit powered, coast, and terminal flight
+path shaping through `powered-end-s`, `apogee-altitude-m`, `terminal-start-s`,
+and the terminal descent-rate controls. Staged problem files should pair that
+profile with altitude-based `*when ... goto ...` conditions and a time fallback
+for booster cutoff and payload release.
 
 ## Guidance-response telemetry
 

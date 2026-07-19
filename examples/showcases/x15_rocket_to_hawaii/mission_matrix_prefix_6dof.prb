@@ -1,0 +1,36 @@
+(x15-matrix-prefix-6dof)
+*title X-15 native 6-DOF staged 50-second matrix prefix
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=7.2921151467e-5 gm=3.986004418e14
+*runtime status vehicle reference-area=18.580608 reference-length=3.130296 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024 dry-mass-kg=9000.0
+*runtime status target latitude-deg=21.31 longitude-deg=-157.86 altitude-m=0.0 velocity-east-mps=0.0 velocity-north-mps=0.0
+*runtime status route mode=great-circle terminal-guidance-mode=propnav propnav-attitude-horizon-s=1.0 start-latitude-deg=34.0 start-longitude-deg=-118.2 duration-s=50.0 powered-end-s=40.0 terminal-start-s=1800.0 apogee-altitude-m=20000.0 powered-speed-mps=2200.0 glide-speed-mps=1700.0 terminal-speed-mps=900.0 terminal-command-speed-mps=900.0
+*runtime status actuator maximum-moment=250000.0 maximum-body-rate-deg-s=3600.0
+*runtime status thermal policy=none heat-rate-coefficient=0.002
+*runtime control throttle vehicle=1 default=1.0 lower=0.0 upper=1.0
+*runtime control symmetric-stabilator-deg vehicle=1 default=0.0 lower=-14.9 upper=34.9
+*trajectory 1 booster-and-x15-prefix start on 1
+  *initial ecic
+    x=-2499105.632024 y=-4660812.306987 z=3567168.140668
+    xdt=-1146.824856 ydt=400.590391 zdt=971.761333
+    qw=0.3624865939 qx=0.0 qy=-0.8616482024 qz=0.3551983172
+    wx=0.0 wy=0.0 wz=0.0
+    time=0.0 mass=30000.0 propellant_mass=9000.0
+  *file x15_matrix_prefix.dat time altitude_m latitude_deg longitude_deg speed_m_s mach mass_kg range_to_target_m _segment
+  *segment 1 booster-powered
+    *integ dtprnt=2.0 dt=0.05
+    *prop thrust=40000.0 mdot=100.0
+    *when altitude_m>12000 goto 2
+    *when time>20 goto 2
+  *segment 2 booster-coast-to-apogee
+    *integ dtprnt=2.0 dt=0.05
+    *when altitude_m>18000 goto 3
+    *when time>30 goto 3
+  *segment 3 x15-release-prefix
+    *integ dtprnt=2.0 dt=0.05
+    *reset mass=14641.0545
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *fly propnav=4
+    *when time>50.0 stop
+*end

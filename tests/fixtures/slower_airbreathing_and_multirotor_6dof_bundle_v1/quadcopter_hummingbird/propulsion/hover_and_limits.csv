@@ -1,0 +1,5 @@
+quantity,value,units,note
+hover_common_rotor_speed,469.124102661955,rad/s,ideal no-wind hover from mg = 4*k_eta*omega^2
+hover_common_rotor_speed,4479.805191731992,rpm,
+maximum_total_collective_thrust,50.13,N,all four rotors at 1500 rad/s
+maximum_thrust_to_weight,10.223674751317,ratio,"model value, not a flight-certified limit"

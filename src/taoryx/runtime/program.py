@@ -17,10 +17,10 @@ from taoryx.language.diagnostics import Diagnostic, Severity
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import ProblemDocument, RuntimeBlock, TableDocument, TitleBlock
-from taoryx.language.table_parser import table_type_catalog
 
 from .common import RuntimeProblem, RuntimeState
-from .lowering import LoweredDocument, lower_problem_document, lower_tables, problem_unit_settings
+from .lowering import LoweredDocument, lower_problem_document, problem_unit_settings
+from .table_binding import bind_runtime_tables
 
 
 class ProgramLoadError(ValueError):
@@ -68,11 +68,7 @@ class LoadedProgram:
             if ingested.kind is not FileKind.TABLE or not isinstance(ingested.document, TableDocument):
                 continue
             table_documents.append(ingested.document)
-        available_tables = {
-            name: table_type
-            for document in table_documents
-            for name, table_type in table_type_catalog(document).items()
-        }
+        available_tables, _ = bind_runtime_tables(table_documents, {})
         problem_ingested = ingest_file(problem_path, available_tables=available_tables, profile=selected_profile)
         diagnostics.extend(problem_ingested.diagnostics)
         if problem_ingested.kind is not FileKind.PROBLEM or not isinstance(problem_ingested.document, ProblemDocument):
@@ -80,11 +76,7 @@ class LoadedProgram:
         if any(item.severity is Severity.ERROR for item in diagnostics):
             raise ProgramLoadError(diagnostics)
         unit_settings, _ = problem_unit_settings(problem_ingested.document)
-        tables = {
-            name: table
-            for document in table_documents
-            for name, table in lower_tables(document, unit_settings).items()
-        }
+        _, tables = bind_runtime_tables(table_documents, unit_settings)
         lowered = lower_problem_document(problem_ingested.document, tables, seed=seed, parameter_overrides=parameter_overrides)
         return cls(str(problem_path), normalized_table_paths, selected_profile, problem_ingested.document, tuple(table_documents), lowered, tuple(diagnostics))
     ####
@@ -421,7 +413,7 @@ class LoadedProgram:
         source = ProblemDocument.model_validate(source_payload)
         table_documents = tuple(TableDocument.model_validate(item) for item in table_payloads)
         unit_settings, _ = problem_unit_settings(source)
-        tables = {name: table for document in table_documents for name, table in lower_tables(document, unit_settings).items()}
+        _, tables = bind_runtime_tables(list(table_documents), unit_settings)
         lowered = lower_problem_document(source, tables)
         program = cls(
             str(payload["problem_path"]),

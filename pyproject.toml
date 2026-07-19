@@ -55,6 +55,8 @@ markers = [
   "equations: equation catalog, implementation, provenance, and verification view",
   "algorithms: algorithm catalog, runtime bindings, and algorithm-verification view",
   "table: table parser, table fixtures, table artifacts, and table-visualization view",
+  "dof3: 3-DOF robustness-matrix view",
+  "dof6: 6-DOF robustness-matrix view",
   "slow: long-running tests that are excluded from the fast development loop",
   "artifact: tests that intentionally write human-readable artifacts under artifacts/",
   "spectre: end-to-end or fixture tests for the Spectre problem/segment trajectory corpus",

@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING, cast
 
 from taoryx.contracts import Frame, FrameVector3, Vector3
 from taoryx.integration import IntegratorName, euler_step, normalize_integrator, rk4_step, rkf45_step, scipy_ivp_step
-from taoryx.modes import DynamicsMode
+from taoryx.modes import DynamicsMode, Quaternion
+from taoryx.rigid_body import RIGID_BODY_STATE_NAMES
 from taoryx.simulation.contracts import DerivativeModel, SimulationState
 
 from .common import Derivative, DerivativePipeline, RuntimeProblem, RuntimeState, RuntimeVehicle, SearchRestart
@@ -105,6 +106,7 @@ def _integrate_vehicle(vehicle: RuntimeVehicle, step: float) -> None:
                 ).values,
                 time=start.time + step,
             )
+    candidate = _normalize_rigid_body_quaternion(vehicle, candidate)
     candidate = _refresh_runtime_state(vehicle, candidate)
     if vehicle.dynamics_mode is DynamicsMode.KINEMATIC_6DOF and vehicle.kinematic_state is not None:
         body_rate = vehicle.body_rate_provider(candidate) if vehicle.body_rate_provider is not None else Vector3(0.0, 0.0, 0.0)
@@ -121,6 +123,21 @@ def _integrate_vehicle(vehicle: RuntimeVehicle, step: float) -> None:
             )
     vehicle.state = candidate
     vehicle.history.append(candidate)
+####
+
+
+def _normalize_rigid_body_quaternion(vehicle: RuntimeVehicle, state: RuntimeState) -> RuntimeState:
+    """Project an accepted rigid-body state back onto unit-quaternion space."""
+
+    if vehicle.dynamics_mode is not DynamicsMode.RIGID_BODY_6DOF:
+        return state
+    indices = tuple(state.value_names.index(name) for name in RIGID_BODY_STATE_NAMES[6:10])
+    attitude = Quaternion(*(state.values[index] for index in indices)).normalized()
+    values = list(state.values)
+    for index, value in zip(indices, (attitude.w, attitude.x, attitude.y, attitude.z), strict=True):
+        values[index] = value
+    named = {**state.named, "qw": attitude.w, "qx": attitude.x, "qy": attitude.y, "qz": attitude.z}
+    return RuntimeState(state.time, tuple(values), state.frame, named, state.value_names, state.segment_endpoints)
 ####
 
 

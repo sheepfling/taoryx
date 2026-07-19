@@ -1,0 +1,19 @@
+(slower-hummingbird-sv05-rectangle-course-3dof)
+*title Hummingbird thrust-vector rectangular waypoint reduction
+*atmos standard
+*earth wgs-84 omega=0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status route mode=rectangle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=40.0 start-altitude-m=2.0 rectangle-length-m=0.5 rectangle-width-m=0.5 elevated-corner-altitude-m=3.0 rectangle-speed-mps=0.1
+*trajectory 1 hummingbird start on 1
+  *initial geodetic alt=2.0 long=0.0 lat=0.0 vel=0.0 gama=0.0 psi=90.0 time=0.0 mass=0.5
+  *segment 1 rectangle
+    *integ dtprnt=0.1 dt=0.001
+    *prop thrust=(thrust) mdot=0 ep1=90 ep2=-90
+    *when time>40.0 stop
+*end

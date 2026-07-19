@@ -1,0 +1,4 @@
+item,status,detail
+virtual_control_coordinates,usable,delta_e is collective elevon; delta_a is differential elevon
+physical_left_right_sign_mapping,verify_before_use,Public implementation prose and paper matrix use opposite differential sign descriptions; package does not silently choose one
+rudder,not_present,Flying wing uses differential elevon and dihedral effects for lateral-directional control

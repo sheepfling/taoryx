@@ -1,0 +1,22 @@
+(slower-x8-sv03-rectangle-course-3dof)
+*title Skywalker X8 point-mass rectangular waypoint reduction
+*atmos standard
+*earth wgs-84 omega=0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status route mode=rectangle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=120.0 start-altitude-m=178.0 rectangle-length-m=480 rectangle-width-m=480 elevated-corner-altitude-m=210 rectangle-speed-mps=16.0
+*runtime control throttle vehicle=1 default=0.7407992605852429 lower=0 upper=1
+*trajectory 1 x8 start on 1
+  *initial geodetic alt=178.0 long=0.0 lat=0.0 vel=16.0 gama=0.0 psi=90.0 time=0.0 mass=3.364
+  *segment 1 rectangle
+    *integ dtprnt=0.5 dt=0.005
+    *fly alpha=7.9
+    *aero cx=(cx-static) cy=(cy-static) cz=(cz-static) sref=0.75
+    *prop thrust=(thrust) mdot=0
+    *when time>120.0 stop
+*end

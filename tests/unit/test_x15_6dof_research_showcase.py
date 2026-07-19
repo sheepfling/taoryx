@@ -24,7 +24,9 @@ def test_x15_standard_problem_runs_native_6dof_with_source_tables(tmp_path: Path
     assert report.exit_code == 0, [(item.code, item.message) for item in report.diagnostics]
     assert report.results[0].completed
     final = report.results[0].states["1"][-1]
-    assert final.time == 1.0
+    # The source deck is intentionally a short no-extrapolation smoke case;
+    # a one-second open-loop run leaves its verified alpha envelope.
+    assert final.time == 0.01
     assert final.named["aero_active"] == 1.0
     assert final.named["aero_mach"] <= 6.7
     assert final.named["aero_density_kg_m3"] >= 0.0

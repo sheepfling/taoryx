@@ -159,6 +159,9 @@ def test_table_aerodynamic_model_resolves_air_data_and_body_loads() -> None:
     assert output.dynamic_pressure_pa == pytest.approx(5_000.0)
     assert output.force_body_n.x == pytest.approx(-10_000.0)
     assert output.moment_body_nm == Vector3(0.0, 0.0, 0.0)
+    assert output.query_values["mach"] == pytest.approx(100.0 / 340.0)
+    assert output.query_values["alpha"] == pytest.approx(0.0)
+    assert output.table_margins == {}
     ####
 
 
@@ -179,6 +182,11 @@ def test_prepared_aerodynamic_coefficients_interpolate_and_reject_envelope() -> 
     coefficients = tables.force_provider()(1.5, 0.0, 0.0)
 
     assert coefficients == Vector3(-1.5, 0.05, -0.1)
+    assert tables.table_margins({"mach": 1.5}) == {
+        "force.cx.mach": pytest.approx(0.5),
+        "force.cy.mach": pytest.approx(0.5),
+        "force.cz.mach": pytest.approx(0.5),
+    }
     with pytest.raises(ValueError, match="outside"):
         tables.force_provider()(2.5, 0.0, 0.0)
     ####

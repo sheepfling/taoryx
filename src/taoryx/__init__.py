@@ -30,6 +30,7 @@ from . import (
     state_rates,
     table_explorer,
     tables,
+    validation,
     visualization,
 )
 from .family_debug_rendering import FamilyDebugRenderReport, render_family_debug_artifacts
@@ -46,6 +47,7 @@ from .rigid_body import (
     assess_thermal_limits,
 )
 from .rigid_body_frames import EarthRotationAdapter
+from .rotorcraft import QuadRotorAllocation, RotorCommandSet
 from .scenario import (
     ControlContract,
     OutputContract,
@@ -71,6 +73,7 @@ from .table_explorer import (
     inspect_table_document,
     inspect_table_file,
 )
+from .validation import Direction, PhaseWindow, require_bounded, require_change_of_sign, require_channel, require_monotonic, require_net_change
 from .vehicle import (
     AerodynamicOutput,
     AeroQueryContext,
@@ -84,4 +87,4 @@ from .vehicle import (
 )
 from .visualization import render_run_artifact_html, render_run_artifact_plots
 
-__all__ = ["__version__", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "modes", "numeric", "optimization", "outputs", "radar", "rigid_body", "rigid_body_frames", "runtime", "scenario", "searches", "simulation", "state", "state_rates", "table_explorer", "tables", "vehicle", "visualization", "AeroQueryContext", "AerodynamicOutput", "AxisInterpolationBracket", "ControlContract", "DebugFamily", "DynamicsKind", "DynamicsMode", "EarthRotationAdapter", "EventRecord", "FamilyDebugPlan", "FamilyDebugRenderReport", "InterpolationExplanation", "Kinematic6DofState", "MassProperties", "OutputContract", "PointMassRates", "PointMassState", "PreparedAerodynamicCoefficients", "PreparedCoefficientTable", "PropulsionOutput", "Quaternion", "RIGID_BODY_STATE_NAMES", "RandomSeed", "ResolutionRecord", "ResolvedScenario", "RigidBody6DofModel", "RigidBody6DofState", "RigidBodyForceMoment", "RunArtifact", "ScenarioCompileError", "ScenarioCompiler", "ScenarioRequest", "ScenarioRuntimeContract", "ScenarioSource", "SegmentSpan", "StageDefinition", "StagedPropulsion", "StatusContract", "TableAerodynamicModel", "TableInspection", "TableInspectionArtifact", "TableInspectionFormat", "TableInspectionStatus", "TelemetryChannel", "ThermalAssessment", "ThermalLimits", "VehicleKind", "VehicleTelemetry", "assess_thermal_limits", "build_family_debug_plan", "build_run_artifact", "explain_interpolation", "family_profile", "inspect_table_document", "inspect_table_file", "render_family_debug_artifacts", "render_run_artifact_html", "render_run_artifact_plots"]
+__all__ = ["__version__", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "modes", "numeric", "optimization", "outputs", "radar", "rigid_body", "rigid_body_frames", "rotorcraft", "runtime", "scenario", "searches", "simulation", "state", "state_rates", "table_explorer", "tables", "validation", "vehicle", "visualization", "AeroQueryContext", "AerodynamicOutput", "AxisInterpolationBracket", "ControlContract", "DebugFamily", "Direction", "DynamicsKind", "DynamicsMode", "EarthRotationAdapter", "EventRecord", "FamilyDebugPlan", "FamilyDebugRenderReport", "InterpolationExplanation", "Kinematic6DofState", "MassProperties", "OutputContract", "PhaseWindow", "PointMassRates", "PointMassState", "PreparedAerodynamicCoefficients", "PreparedCoefficientTable", "PropulsionOutput", "QuadRotorAllocation", "Quaternion", "RIGID_BODY_STATE_NAMES", "RandomSeed", "ResolutionRecord", "ResolvedScenario", "RigidBody6DofModel", "RigidBody6DofState", "RigidBodyForceMoment", "RotorCommandSet", "RunArtifact", "ScenarioCompileError", "ScenarioCompiler", "ScenarioRequest", "ScenarioRuntimeContract", "ScenarioSource", "SegmentSpan", "StageDefinition", "StagedPropulsion", "StatusContract", "TableAerodynamicModel", "TableInspection", "TableInspectionArtifact", "TableInspectionFormat", "TableInspectionStatus", "TelemetryChannel", "ThermalAssessment", "ThermalLimits", "VehicleKind", "VehicleTelemetry", "assess_thermal_limits", "build_family_debug_plan", "build_run_artifact", "explain_interpolation", "family_profile", "inspect_table_document", "inspect_table_file", "render_family_debug_artifacts", "render_run_artifact_html", "render_run_artifact_plots", "require_bounded", "require_change_of_sign", "require_channel", "require_monotonic", "require_net_change"]

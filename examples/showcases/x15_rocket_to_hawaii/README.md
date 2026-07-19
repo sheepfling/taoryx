@@ -14,14 +14,21 @@ active. The runtime applies that reset during the native segment transition;
 no Python flight equations are used by the showcase. The current rigid-body
 reset contract does not yet expose a separate propellant-state assignment;
 that is tracked as a follow-up rather than being smuggled into the problem
-file.
+file. Booster cutoff and X-15 release now have altitude-triggered `*when`
+conditions with time fallbacks, so the pre-release profile is visible in the
+problem file rather than hidden in a custom runner.
 
 The result is an attempt, not an engineering performance claim. The supplied
 X-15 public research deck is a beta surrogate bounded by Mach 6.7, 80,000 ft,
-and its declared angle domains. The problem uses `no-extrap` tables, so an
-out-of-envelope trajectory is reported as a failed evidence case rather than
-silently extrapolated. A successful Hawaii intercept would require a vehicle
-and propulsion deck with enough range and a valid high-altitude envelope.
+and its declared angle domains, including a ±10° sideslip grid. The problem
+uses `no-extrap` tables, so an out-of-envelope trajectory is reported as a
+failed evidence case rather than silently extrapolated. The mission explicitly
+delays route steering until segment 3 through the segment's standard `*fly`
+block. Controller equations remain available in the TAORYX rigid-body backend,
+but are not encoded as X-15-specific problem-file directives. The current
+regression records an out-of-envelope failure instead of claiming a Hawaii
+intercept. A successful intercept would require a vehicle and propulsion deck
+with enough range and a valid high-altitude envelope.
 
 Run with:
 

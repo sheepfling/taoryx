@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "profile": "TAOS96-compatible 3-DOF local runtime baseline",
+  "cases": [
+    {"id": "p004_vacuum_ballistic_coarse", "claim": "ballistic integration", "min_duration_s": 200.0, "invariant": "altitude_increases"},
+    {"id": "p006_vacuum_ballistic_fine", "claim": "fine-step ballistic integration", "min_duration_s": 200.0, "invariant": "altitude_increases"},
+    {"id": "p015_crosswind", "claim": "crosswind air-relative behavior"},
+    {"id": "p025_level_mach_guidance", "claim": "flight-condition guidance", "invariant": "guidance_solved"},
+    {"id": "p026_predictive_intercept", "claim": "predictive intercept geometry", "min_vehicles": 2},
+    {"id": "p027_proportional_navigation", "claim": "proportional navigation geometry", "min_vehicles": 2, "invariant": "guidance_demand"},
+    {"id": "p032_manual_ballistic_reentry", "claim": "ballistic reentry and trajectory family", "invariant": "altitude_decreases"},
+    {"id": "p039_table_driven_thrust_vector", "claim": "table-driven thrust vectoring"},
+    {"id": "p040_wind_speed_heading_tables", "claim": "wind speed and heading tables"},
+    {"id": "p041_wind_component_tables", "claim": "wind component tables"}
+  ],
+  "six_dof_cases": [
+    {"id": "dof6_ballistic", "path": "examples/verification/dof6/ballistic.prb", "claim": "rigid-body ballistic coast and quaternion stability", "kind": "ballistic", "reference_3dof": "p004_vacuum_ballistic_coarse"},
+    {"id": "rigid_body_rocket", "path": "examples/vehicle_families/rigid_body_matrix/rocket.prb", "claim": "rigid-body propulsion and mass flow", "kind": "propulsion", "reference_3dof": "p039_table_driven_thrust_vector"},
+    {"id": "rigid_body_glider", "path": "examples/vehicle_families/rigid_body_matrix/glider.prb", "claim": "rigid-body table aero and attitude state", "kind": "aero", "reference_3dof": "p025_level_mach_guidance"},
+    {"id": "rigid_body_drone", "path": "examples/vehicle_families/rigid_body_matrix/drone.prb", "claim": "rigid-body actuator and aero state", "kind": "aero", "reference_3dof": "p039_table_driven_thrust_vector"},
+    {"id": "dof6_pitch_maneuver", "path": "examples/verification/dof6/pitch_maneuver.prb", "claim": "alpha command and pitch moment response", "kind": "pitch", "reference_3dof": "p025_level_mach_guidance", "table": "examples/showcases/california_to_hawaii/aero.tbl"},
+    {"id": "dof6_bank_maneuver", "path": "examples/verification/dof6/bank_maneuver.prb", "claim": "bank command and roll moment response", "kind": "bank", "reference_3dof": "p027_proportional_navigation", "table": "examples/showcases/california_to_hawaii/aero.tbl"},
+    {"id": "short_range_propnav", "path": "examples/verification/dof6/short_range_propnav.prb", "claim": "short-range ProNav turn", "kind": "route", "reference_3dof": "p027_proportional_navigation", "table": "examples/showcases/california_to_hawaii/aero.tbl"},
+    {"id": "actuator_saturation", "path": "examples/verification/dof6/actuator_saturation.prb", "claim": "bounded actuator saturation", "kind": "saturation", "reference_3dof": "p025_level_mach_guidance", "table": "examples/showcases/california_to_hawaii/aero.tbl"},
+    {"id": "dof6_crosswind", "path": "examples/verification/dof6/crosswind.prb", "claim": "native rigid-body yaw/sideslip response to geodetic crosswind", "kind": "wind", "reference_3dof": "p015_crosswind", "table": "examples/showcases/california_to_hawaii/aero.tbl"},
+    {"id": "california_to_hawaii", "path": "examples/showcases/california_to_hawaii/mission.prb", "claim": "long-range route and azimuth stress", "kind": "route", "reference_3dof": "p027_proportional_navigation", "table": "examples/showcases/california_to_hawaii/aero.tbl"}
+  ]
+}

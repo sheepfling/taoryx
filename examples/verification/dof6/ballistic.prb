@@ -1,0 +1,15 @@
+(dof6-ballistic)
+*title Native rigid-body ballistic coast and quaternion stability
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=7.2921151467e-5 gm=3.986004418e14
+*runtime status vehicle reference-area=1.0 reference-length=1.0 inertia-x=10 inertia-y=10 inertia-z=10 dry-mass-kg=100
+*runtime status actuator maximum-body-rate-deg-s=3600
+*runtime status thermal policy=none
+
+*trajectory 1 ballistic-test start on 1
+  *initial ecic x=7000000 y=0 z=0 xdt=0 ydt=7500 zdt=0 qw=1 qx=0 qy=0 qz=0 wx=0 wy=0 wz=0 time=0 mass=100 propellant_mass=0
+  *segment 1 coast
+    *integ dtprnt=0.1 dt=0.1
+    *when time>10 stop
+*end

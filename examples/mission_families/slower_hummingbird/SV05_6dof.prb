@@ -1,0 +1,16 @@
+(slower-hummingbird-sv05-6dof)
+*title Hummingbird hover and small rigid-body response
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=0
+*runtime status vehicle aero-load-mode=direct-wrench aero-wrench-frame=source-z-up reference-area=1.0 reference-length=0.34 dry-mass-kg=0.5 inertia-x=0.00365 inertia-y=0.00368 inertia-z=0.00703 envelope-max-speed=10
+*runtime status actuator maximum-moment=1 maximum-body-rate-deg-s=720
+*runtime status thermal policy=none
+*runtime control rotor-speed vehicle=1 default=469.124102661955 lower=0 upper=1500
+*trajectory 1 hummingbird start on 1
+  *initial ecic x=6378139.0 y=0.0 z=0.0 xdt=0.0 ydt=0.0 zdt=0.0 qw=0.5 qx=-0.5 qy=-0.5 qz=0.5 time=0.0 mass=0.5 propellant_mass=0.0
+  *segment 1 hover
+    *integ dtprnt=0.002 dt=0.001
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *when time>0.01 stop
+*end

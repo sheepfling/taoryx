@@ -10,6 +10,7 @@ from typing import Protocol
 from .contracts import Frame, Vector3
 from .rigid_body import RigidBody6DofState, RigidBodyForceMoment
 from .rigid_body_frames import EarthRotationAdapter
+from .rotorcraft import QuadRotorAllocation, RotorCommandSet
 from .runtime.environment_runtime import EnvironmentProvider
 from .tables import PreparedTable, interpolate_nd
 
@@ -135,6 +136,8 @@ class AerodynamicOutput:
     mach: float
     angle_of_attack_rad: float
     sideslip_rad: float
+    query_values: Mapping[str, float] = field(default_factory=dict)
+    table_margins: Mapping[str, float] = field(default_factory=dict)
 
 
 AerodynamicCoefficientProvider = Callable[[float, float, float], Vector3]
@@ -172,15 +175,36 @@ class PreparedCoefficientTable:
     def evaluate(self, values: Mapping[str, float]) -> float:
         """Evaluate strictly inside the declared coefficient envelope."""
 
-        query = tuple(values[name] for name in self.independent_variables)
-        for axis, value in zip(self.table.axes, query, strict=True):
+        query_values = dict(values)
+        if "velocity_m_s" in self.independent_variables and "velocity_m_s" not in query_values:
+            query_values["velocity_m_s"] = query_values["airspeed_m_s"]
+        if "airspeed_m_s" in self.independent_variables and "airspeed_m_s" not in query_values:
+            query_values["airspeed_m_s"] = query_values["velocity_m_s"]
+        query = tuple(query_values[name] for name in self.independent_variables)
+        for axis_name, axis, value in zip(self.independent_variables, self.table.axes, query, strict=True):
             lower, upper = min(axis), max(axis)
             if not lower <= value <= upper:
+                distance = min(abs(value - lower), abs(value - upper))
                 raise ValueError(
                     f"coefficient table {self.name!r} query {query!r} is outside its declared envelope "
-                    f"on axis [{lower}, {upper}]"
+                    f"on axis {axis_name!r}: value={value}, range=[{lower}, {upper}], "
+                    f"distance_to_boundary={distance}"
                 )
         return interpolate_nd(self.table, query)
+        ####
+
+    def margins(self, values: Mapping[str, float]) -> Mapping[str, float]:
+        """Return distance to every declared interpolation-axis boundary."""
+
+        query_values = dict(values)
+        if "velocity_m_s" in self.independent_variables and "velocity_m_s" not in query_values:
+            query_values["velocity_m_s"] = query_values["airspeed_m_s"]
+        if "airspeed_m_s" in self.independent_variables and "airspeed_m_s" not in query_values:
+            query_values["airspeed_m_s"] = query_values["velocity_m_s"]
+        return {
+            axis_name: min(abs(float(query_values[axis_name]) - min(axis)), abs(max(axis) - float(query_values[axis_name])))
+            for axis_name, axis in zip(self.independent_variables, self.table.axes, strict=True)
+        }
         ####
     ####
 
@@ -259,6 +283,17 @@ class PreparedAerodynamicCoefficients:
         tables = {name[2:]: table for name, table in self.moment_tables.items()}
         return lambda context: self._provider(tables, context.values, ("x", "y", "z"))
         ####
+
+    def table_margins(self, values: Mapping[str, float]) -> Mapping[str, float]:
+        """Return named distances to every force and moment table boundary."""
+
+        result: dict[str, float] = {}
+        for family, tables in (("force", self.force_tables), ("moment", self.moment_tables)):
+            for name, table in tables.items():
+                for axis, margin in table.margins(values).items():
+                    result[f"{family}.{name}.{axis}"] = margin
+        return result
+        ####
     ####
 
 
@@ -290,6 +325,8 @@ class TableAerodynamicModel:
     context_coefficients: ContextCoefficientProvider | None = None
     context_moment_coefficients: ContextCoefficientProvider | None = None
     control_provider: Callable[[RigidBody6DofState], Mapping[str, float]] | None = None
+    alpha_reference_rad: float = 0.0
+    table_margin_provider: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
 
     def __post_init__(self) -> None:
         if self.reference_area_m2 <= 0.0 or self.reference_length_m <= 0.0:
@@ -300,6 +337,8 @@ class TableAerodynamicModel:
     def evaluate(self, state: RigidBody6DofState) -> AerodynamicOutput:
         """Resolve environment, air data, and body loads for one state."""
 
+        air_velocity_body = self.air_velocity_body(state)
+        airspeed = air_velocity_body.norm()
         position_ecfc, earth_relative_velocity = self.earth_rotation.ecic_to_ecfc(
             state.position,
             state.velocity,
@@ -309,18 +348,14 @@ class TableAerodynamicModel:
         if sample.wind.frame is not Frame.ECFC:
             raise ValueError("environment wind must be expressed in ECFC")
         del earth_relative_velocity
-        air_velocity_ecic = self.earth_rotation.air_relative_velocity_ecic(
-            state.position,
-            state.velocity,
-            sample.wind,
-            time_seconds=state.time,
-        ).vector
-        air_velocity_body = state.attitude.conjugate().rotate(air_velocity_ecic)
-        airspeed = air_velocity_body.norm()
         dynamic_pressure = 0.5 * sample.density * airspeed * airspeed
         speed_of_sound = sample.speed_of_sound
         mach = airspeed / speed_of_sound if speed_of_sound > 0.0 else 0.0
-        angle_of_attack = math.atan2(-air_velocity_body.z, max(abs(air_velocity_body.x), 1.0e-12))
+        # Canonical fixed-wing body axes are +X forward, +Y right, +Z down.
+        # Positive alpha is the velocity component toward +Z (the vehicle is
+        # pitched nose-up relative to the airflow).  Source-native rotor
+        # frames use the separate DirectWrenchTableModel adapter below.
+        angle_of_attack = math.atan2(air_velocity_body.z, max(abs(air_velocity_body.x), 1.0e-12))
         sideslip = math.atan2(air_velocity_body.y, max(math.hypot(air_velocity_body.x, air_velocity_body.z), 1.0e-12))
         context = AeroQueryContext.from_air_data(
             mach,
@@ -331,6 +366,13 @@ class TableAerodynamicModel:
                 # the reference surface.  Geometric altitude for atmosphere
                 # and table lookup has a physical floor at zero.
                 "altitude_m": max(0.0, position_ecfc.vector.norm() - self.earth_rotation.earth.equatorial_radius.si_value),
+                "airspeed_m_s": airspeed,
+                "speed_of_sound_m_s": speed_of_sound,
+                # Some historical local aerodynamic decks use alpha as an
+                # offset from the published trim condition.  Preserve the
+                # physical air-data observable while applying that convention
+                # only to the table query.
+                "alpha": angle_of_attack - self.alpha_reference_rad,
                 **(self.control_provider(state) if self.control_provider is not None else {}),
             },
         )
@@ -344,9 +386,41 @@ class TableAerodynamicModel:
             else Vector3(0.0, 0.0, 0.0)
         )
         moment_body = moment_coefficients.scaled(dynamic_pressure * self.reference_area_m2 * self.reference_length_m)
-        return AerodynamicOutput(force_body, moment_body, sample.density, dynamic_pressure, speed_of_sound, airspeed, mach, angle_of_attack, sideslip)
+        return AerodynamicOutput(
+            force_body,
+            moment_body,
+            sample.density,
+            dynamic_pressure,
+            speed_of_sound,
+            airspeed,
+            mach,
+            angle_of_attack,
+            sideslip,
+            dict(context.values),
+            dict(self.table_margin_provider(context.values)) if self.table_margin_provider is not None else {},
+        )
         ####
     ####
+
+    def air_velocity_body(self, state: RigidBody6DofState) -> Vector3:
+        """Return the current air-relative velocity resolved in body axes."""
+
+        position_ecfc, _ = self.earth_rotation.ecic_to_ecfc(
+            state.position,
+            state.velocity,
+            time_seconds=state.time,
+        )
+        sample = self.environment.sample(time=state.time, position=position_ecfc)
+        if sample.wind.frame is not Frame.ECFC:
+            raise ValueError("environment wind must be expressed in ECFC")
+        air_velocity_ecic = self.earth_rotation.air_relative_velocity_ecic(
+            state.position,
+            state.velocity,
+            sample.wind,
+            time_seconds=state.time,
+        ).vector
+        return state.attitude.conjugate().rotate(air_velocity_ecic)
+        ####
 
     def force_moment(self, state: RigidBody6DofState) -> RigidBodyForceMoment:
         """Adapt aerodynamic output to the rigid-body force/moment contract."""
@@ -356,3 +430,98 @@ class TableAerodynamicModel:
         ####
     ####
 ####
+
+
+@dataclass(frozen=True, slots=True)
+class DirectWrenchTableModel:
+    """Evaluate body-force/body-moment tables without coefficient scaling.
+
+    This generic bridge is useful for rotorcraft and other models whose source
+    deck reports dimensional loads directly.  The table names still use the
+    existing six-component ``*aero`` assignment contract; ``aero-load-mode``
+    selects whether those values are coefficients or SI loads.
+    """
+
+    environment: EnvironmentProvider
+    earth_rotation: EarthRotationAdapter
+    loads: PreparedAerodynamicCoefficients
+    control_provider: Callable[[RigidBody6DofState], Mapping[str, float]] | None = None
+    source_z_up: bool = False
+    rotor_allocation: QuadRotorAllocation | None = None
+
+    def evaluate(self, state: RigidBody6DofState) -> AerodynamicOutput:
+        """Resolve direct wrench tables against body-relative velocity."""
+
+        position_ecfc, _ = self.earth_rotation.ecic_to_ecfc(state.position, state.velocity, time_seconds=state.time)
+        sample = self.environment.sample(time=state.time, position=position_ecfc)
+        air_velocity_body = self.air_velocity_body(state)
+        airspeed = air_velocity_body.norm()
+        speed_of_sound = sample.speed_of_sound
+        mach = airspeed / speed_of_sound if speed_of_sound > 0.0 else 0.0
+        alpha = math.atan2(-air_velocity_body.z, max(abs(air_velocity_body.x), 1.0e-12))
+        beta = math.atan2(air_velocity_body.y, max(math.hypot(air_velocity_body.x, air_velocity_body.z), 1.0e-12))
+        source_velocity_z = -air_velocity_body.z if self.source_z_up else air_velocity_body.z
+        controls = self.control_provider(state) if self.control_provider else {}
+        rotor_commands = _rotor_commands_from_controls(controls, self.rotor_allocation)
+        rotor_speed = rotor_commands.rms_speed_rad_s if rotor_commands is not None else controls.get("rotor_speed", 469.124102661955)
+        query = AeroQueryContext.from_air_data(
+            mach,
+            alpha,
+            beta,
+            {
+                "velocity_x": air_velocity_body.x,
+                "velocity_y": air_velocity_body.y,
+                "velocity_z": source_velocity_z,
+                "airspeed_m_s": airspeed,
+                "rotor_speed": rotor_speed,
+                **{name: value for name, value in controls.items() if name.startswith("rotor-")},
+            },
+        )
+        force = self.loads.context_force_provider()(query)
+        moments = self.loads.context_moment_provider()
+        moment = moments(query) if moments is not None else Vector3(0.0, 0.0, 0.0)
+        allocation = self.rotor_allocation
+        if rotor_commands is not None and allocation is not None:
+            moment = moment + allocation.differential_moment_source(rotor_commands)
+        if self.source_z_up:
+            # RotorPy uses +Z for thrust/up; TAORYX rigid-body body Z is down.
+            force = Vector3(force.x, force.y, -force.z)
+            moment = Vector3(-moment.x, -moment.y, moment.z)
+        return AerodynamicOutput(
+            force,
+            moment,
+            sample.density,
+            0.5 * sample.density * airspeed * airspeed,
+            speed_of_sound,
+            airspeed,
+            mach,
+            alpha,
+            beta,
+            dict(query.values),
+            dict(self.loads.table_margins(query.values)),
+        )
+        ####
+
+    def air_velocity_body(self, state: RigidBody6DofState) -> Vector3:
+        """Return body-relative air velocity for direct-load queries."""
+
+        position_ecfc, _ = self.earth_rotation.ecic_to_ecfc(state.position, state.velocity, time_seconds=state.time)
+        sample = self.environment.sample(time=state.time, position=position_ecfc)
+        air_velocity_ecic = self.earth_rotation.air_relative_velocity_ecic(state.position, state.velocity, sample.wind, time_seconds=state.time).vector
+        return state.attitude.conjugate().rotate(air_velocity_ecic)
+        ####
+    ####
+####
+
+
+def _rotor_commands_from_controls(
+    controls: Mapping[str, float],
+    allocation: QuadRotorAllocation | None,
+) -> RotorCommandSet | None:
+    if allocation is None:
+        return None
+    names = ("rotor-1-speed", "rotor-2-speed", "rotor-3-speed", "rotor-4-speed")
+    if not all(name in controls for name in names):
+        return RotorCommandSet(*(controls.get(name, controls.get("rotor_speed", 469.124102661955)) for name in names))
+    return RotorCommandSet(*(controls[name] for name in names))
+    ####

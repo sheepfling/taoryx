@@ -1,0 +1,20 @@
+(slower-hummingbird-sv05-yaw-step-3dof)
+*title Hummingbird point-mass heading step reduction
+*atmos standard
+*earth wgs-84 omega=0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status target latitude-deg=0.0 longitude-deg=0.000001 altitude-m=2.0
+*runtime status route mode=great-circle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=0.2 powered-speed-mps=0.1
+*trajectory 1 hummingbird start on 1
+  *initial geodetic alt=2.0 long=0.0 lat=0.0 vel=0.0 gama=0.0 psi=0.0 time=0.0 mass=0.5
+  *segment 1 yaw-step
+    *integ dtprnt=0.01 dt=0.001
+    *prop thrust=(thrust) mdot=0 ep1=90 ep2=-90
+    *when time>0.2 stop
+*end

@@ -63,11 +63,20 @@ the verification baseline.
 states what must be true before the layer is considered strong enough for a
 release claim.
 
+`acceptance/robustness_matrix_v1.yaml` is the executable claim boundary for
+the paired slower-vehicle examples. Run it with `python tools/dev.py
+robustness-matrix`; the ignored report is written below
+`artifacts/verification/robustness_matrix_v1/`. It records nominal completion,
+RK4 half-step convergence, declared-envelope filtering, bounded perturbation
+pass rates, worst-case records, and failure classifications. The CA-HI case is
+intentionally evidence-only until it has a declared endpoint requirement and
+an independent route oracle.
+
 The current baseline supports documentary fidelity (D), semantic coherence (S),
 and bounded parser conformance (P) in stated areas. It does not establish
-historical compatibility (H). The simulation scope is the TAOS three-degree-of-
-freedom point-mass model. Attitude is supplied by guidance and force models;
-rotational dynamics and a six-degree-of-freedom moment model are explicitly out
-of scope.
+historical compatibility (H) or engineering validity. The historical TAOS
+scope is the three-degree-of-freedom point-mass model; taoryx also contains a
+separately labeled native 6-DOF extension exercised by public research
+surrogates, without claiming that extension was part of TAOS 95/96.
 
 ####

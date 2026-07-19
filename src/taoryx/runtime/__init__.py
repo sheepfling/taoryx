@@ -21,6 +21,7 @@ from .environment_runtime import (
 from .guidance_control import (
     AttitudeCommand,
     ControlOutput,
+    CoordinatedTurnController,
     GlideCommand,
     GuidanceDemand,
     HypersonicGlideTerminal,
@@ -118,6 +119,7 @@ __all__ = [
     "TargetState",
     "GuidanceDemand",
     "AttitudeCommand",
+    "CoordinatedTurnController",
     "AttitudeControlOutput",
     "ControlOutput",
     "WindCompensatedPursuit",
