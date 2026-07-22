@@ -100,6 +100,7 @@ python tools/aero_drag_analysis.py --all --output-dir build/aero-drag
 
 ## What To Read Next
 
+- [Agent workflows](docs/AGENT_WORKFLOWS.md)
 - [Manual build and provenance workflow](docs/BUILDING.md)
 - [Test selections and markers](docs/BUILDING_TESTS.md)
 - [Manual reconstruction notes](docs/manual/README.md)

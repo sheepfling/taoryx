@@ -1,0 +1,27 @@
+schema_version: 1
+id: taoryx_fixed_wing_showcases_v1
+claim_boundary: >-
+  Family-specific research-surrogate showcases. These are controller and
+  convention demonstrations, not flight qualification or global-envelope
+  validation.
+showcases:
+  - id: b747-square-waypoint
+    family: b747
+    shape: square
+    problem: examples/mission_families/slower_b747/SV01_rectangle_course_6dof.prb
+    evidence: waypoint sequencing, altitude corner, coordinated turn response
+  - id: b747-figure-eight
+    family: b747
+    shape: figure-eight
+    problem: examples/mission_families/slower_b747/SV01_figure_eight_route_6dof.prb
+    evidence: alternating bank command, local-roll sign changes, heading continuity, sideslip recovery
+  - id: skywalker-x8-square-waypoint
+    family: skywalker_x8
+    shape: square
+    problem: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
+    evidence: four-leg waypoint sequencing and altitude transition
+  - id: skywalker-x8-figure-eight
+    family: skywalker_x8
+    shape: figure-eight
+    problem: examples/mission_families/slower_x8/SV03_figure_eight_route_6dof.prb
+    evidence: alternating bank/roll response, differential sideslip response, smooth crossing

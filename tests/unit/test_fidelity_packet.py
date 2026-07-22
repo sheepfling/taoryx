@@ -42,6 +42,8 @@ def test_packet_contains_all_families_and_hashes_inputs(tmp_path: Path, monkeypa
                 "verification/fidelity_parity.yaml",
                 "verification/long_validation_trajectories.yaml",
                 "verification/controller_missions.yaml",
+                "verification/acceptance/README.md",
+                "verification/acceptance/robustness_matrix_v1.yaml",
         ]
         assert "evidence/claims.md" in names
         assert "evidence/controller_scenarios.yaml" in names

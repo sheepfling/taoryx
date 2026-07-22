@@ -1338,7 +1338,7 @@ def _lower_rigid_body_case(
         rotor_allocation=rotor_allocation,
     )
     controller_saturated = {"value": False}
-    coordinated_turn_enabled = guidance_attributes.get("rectangle-coordinated-turn", "false").casefold() in {"1", "true", "yes"}
+    coordinated_turn_enabled = _runtime_coordinated_turn_enabled(guidance_attributes, route_attributes)
     coordinated_turn_controller = CoordinatedTurnController(
         heading_gain=float(guidance_attributes.get("rectangle-heading-gain-nm-per-rad", "0.0")),
         bank_gain=float(guidance_attributes.get("rectangle-bank-gain-nm-per-rad", "0.0")),
@@ -1462,8 +1462,12 @@ def _lower_rigid_body_case(
         rotorcraft_guidance = aero_load_mode.casefold() == "direct-wrench" and rotor_allocation is not None
         if route_velocity is not None and not rotorcraft_guidance:
             route_direction = route_velocity.scaled(1.0 / max(route_velocity.norm(), 1.0e-12))
-            coordinated_turn = guidance_attributes.get("rectangle-coordinated-turn", "false").casefold() in {"1", "true", "yes"}
-            rectangle_bank = None if coordinated_turn else _runtime_rectangle_bank_angle(route_attributes, state)
+            coordinated_turn = _runtime_coordinated_turn_enabled(guidance_attributes, route_attributes)
+            rectangle_bank = (
+                _runtime_rectangle_bank_angle(route_attributes, state)
+                if attitude_lqr is not None or not coordinated_turn
+                else None
+            )
             if rectangle_bank is not None:
                 radial = state.position.vector.scaled(1.0 / max(state.position.vector.norm(), 1.0e-12))
                 desired_body_x_ecic = route_direction
@@ -1698,7 +1702,7 @@ def _lower_rigid_body_case(
         body_rate_damping = float(guidance_attributes.get("body-rate-damping-nm-s-per-rad", "0.0"))
         if body_rate_damping > 0.0:
             thrust_moment = thrust_moment + state.body_rate.scaled(-body_rate_damping)
-        if route_attributes.get("mode", "").casefold() == "rectangle" and coordinated_turn_enabled and attitude_lqr is None:
+        if route_attributes.get("mode", "").casefold() in {"rectangle", "figure-eight", "figure8"} and coordinated_turn_enabled and attitude_lqr is None:
             heading_error, bank_error = _runtime_rectangle_turn_errors(route_attributes, state, route_velocity or Vector3(1.0, 0.0, 0.0))
             turn_command = coordinated_turn_controller.command(heading_error, bank_error, state.body_rate)
             thrust_moment = thrust_moment + turn_command.moment_body
@@ -1800,7 +1804,11 @@ def _lower_rigid_body_case(
         rectangle_bank = _runtime_rectangle_bank_angle(route_attributes, state)
         if rectangle_bank is not None:
             result["route_bank_command_deg"] = math.degrees(rectangle_bank)
+            # This compatibility channel reports the achieved local body roll
+            # used by the route controller, not an independent aerodynamic
+            # bank measurement.
             result["route_bank_achieved_deg"] = result["local_roll_deg"]
+            result["route_bank_tracking_error_deg"] = result["route_bank_command_deg"] - result["route_bank_achieved_deg"]
         for block in segments[active_segment["number"]].blocks:
             if not isinstance(block, FlyBlock) or block.guidance_variable is None:
                 continue
@@ -1818,6 +1826,8 @@ def _lower_rigid_body_case(
                 except (KeyError, TypeError, ValueError):
                     pass
             result["bank_command_deg"] = float(commanded_bank)
+            # Preserve the historical channel name while making its meaning
+            # explicit: achieved local roll, not raw table-query bank.
             result["bank_achieved_deg"] = result["local_roll_deg"]
         # Derive source-facing channels from the same total load and aero
         # sample; do not introduce a second force evaluation path.
@@ -2183,7 +2193,7 @@ def _runtime_route_velocity(
     thrust, moments, gravity, mass flow, and any active aerodynamic loads.
     """
 
-    if route_attributes.get("mode", "").casefold() == "rectangle":
+    if route_attributes.get("mode", "").casefold() in {"rectangle", "figure-eight", "figure8"}:
         return _runtime_rectangle_route_velocity(route_attributes, state, earth_omega)
     if route_attributes.get("mode", "").casefold() != "great-circle":
         return None
@@ -2303,7 +2313,10 @@ def _runtime_rectangle_route_velocity(
     """
 
     required = ("start-latitude-deg", "start-longitude-deg", "duration-s", "rectangle-length-m", "rectangle-width-m")
-    if any(name not in route_attributes for name in required):
+    mode = route_attributes.get("mode", "").casefold()
+    if mode in {"figure-eight", "figure8"}:
+        return _runtime_figure_eight_route_velocity(route_attributes, state, earth_omega)
+    if mode != "rectangle" or any(name not in route_attributes for name in required):
         return None
     latitude = math.radians(float(route_attributes["start-latitude-deg"]))
     longitude = math.radians(float(route_attributes["start-longitude-deg"]))
@@ -2368,9 +2381,11 @@ def _runtime_rectangle_waypoint_position(
     route_attributes: Mapping[str, str],
     state: RigidBody6DofState,
 ) -> Vector3 | None:
-    """Return the active rectangle corner target for rotorcraft guidance."""
+    """Return the active smooth-route reference for route diagnostics."""
 
     required = ("start-latitude-deg", "start-longitude-deg", "duration-s", "rectangle-length-m", "rectangle-width-m")
+    if route_attributes.get("mode", "").casefold() in {"figure-eight", "figure8"}:
+        return _runtime_figure_eight_waypoint_position(route_attributes, state)
     if route_attributes.get("mode", "").casefold() != "rectangle" or any(name not in route_attributes for name in required):
         return None
     latitude = math.radians(float(route_attributes["start-latitude-deg"]))
@@ -2395,6 +2410,32 @@ def _runtime_rectangle_waypoint_position(
         radial.scaled(radius),
     )
     return corners[leg] + (corners[leg + 1] - corners[leg]).scaled(fraction)
+
+
+def _runtime_figure_eight_waypoint_position(
+    route_attributes: Mapping[str, str],
+    state: RigidBody6DofState,
+) -> Vector3 | None:
+    """Return the current smooth figure-eight reference position."""
+
+    required = ("start-latitude-deg", "start-longitude-deg", "duration-s", "figure-eight-length-m", "figure-eight-width-m")
+    if any(name not in route_attributes for name in required):
+        return None
+    latitude = math.radians(float(route_attributes["start-latitude-deg"]))
+    longitude = math.radians(float(route_attributes["start-longitude-deg"]))
+    start_altitude = float(route_attributes.get("start-altitude-m", "0.0"))
+    duration = max(float(route_attributes["duration-s"]), 1.0)
+    theta = 2.0 * math.pi * max(0.0, min(duration, state.time)) / duration
+    radius = 6_378_137.0 + start_altitude
+    radial = Vector3(math.cos(latitude) * math.cos(longitude), math.cos(latitude) * math.sin(longitude), math.sin(latitude))
+    east = Vector3(-math.sin(longitude), math.cos(longitude), 0.0)
+    north = Vector3(-math.sin(latitude) * math.cos(longitude), -math.sin(latitude) * math.sin(longitude), math.cos(latitude))
+    return (
+        radial.scaled(radius)
+        + east.scaled(0.5 * float(route_attributes["figure-eight-length-m"]) * math.sin(theta))
+        + north.scaled(0.5 * float(route_attributes["figure-eight-width-m"]) * math.sin(theta) * math.cos(theta))
+    )
+    ####
 
 
 def _runtime_rectangle_corner_positions(route_attributes: Mapping[str, str]) -> tuple[Vector3, ...] | None:
@@ -2423,41 +2464,149 @@ def _runtime_rectangle_corner_positions(route_attributes: Mapping[str, str]) -> 
         radial.scaled(radius),
     )
     ####
+
+
+def _runtime_route_tracking_geometry(
+    route_attributes: Mapping[str, str],
+    route_target: Vector3,
+    state: RigidBody6DofState,
+    earth_omega: float,
+) -> dict[str, float]:
+    """Return path-relative errors for smooth and waypoint routes.
+
+    ``route_target_error_m`` is distance to the moving reference point.  The
+    cross/along-track channels below instead measure error relative to the
+    instantaneous route tangent, so a phase lag is not misreported as an
+    unstable path.  The calculation is diagnostic only and does not steer the
+    vehicle.
+    """
+
+    reference_velocity = _runtime_route_velocity(route_attributes, {}, state, earth_omega)
+    if reference_velocity is None or reference_velocity.norm() <= 1.0e-12:
+        return {}
+    radial = state.position.vector.scaled(1.0 / max(state.position.vector.norm(), 1.0e-12))
+    tangent = reference_velocity - radial.scaled(reference_velocity.dot(radial))
+    if tangent.norm() <= 1.0e-12:
+        return {}
+    tangent = tangent.scaled(1.0 / tangent.norm())
+    lateral = radial.cross(tangent)
+    if lateral.norm() <= 1.0e-12:
+        return {}
+    lateral = lateral.scaled(1.0 / lateral.norm())
+    position_error = state.position.vector - route_target
+    actual_velocity = state.velocity.vector - radial.scaled(state.velocity.vector.dot(radial))
+    heading_error = 0.0
+    if actual_velocity.norm() > 1.0e-12:
+        actual_direction = actual_velocity.scaled(1.0 / actual_velocity.norm())
+        heading_error = math.atan2(radial.dot(tangent.cross(actual_direction)), tangent.dot(actual_direction))
+    return {
+        "route_cross_track_error_m": position_error.dot(lateral),
+        "route_along_track_error_m": position_error.dot(tangent),
+        "route_heading_error_deg": math.degrees(heading_error),
+    }
+    ####
+
+
+def _runtime_figure_eight_route_velocity(
+    route_attributes: Mapping[str, str],
+    state: RigidBody6DofState,
+    earth_omega: float,
+) -> Vector3 | None:
+    """Resolve a smooth local figure-eight course into an ECIC velocity.
+
+    The course is a reusable guidance geometry, not a vehicle-specific
+    controller: east/north coordinates follow ``(A sin(theta),
+    B sin(theta) cos(theta))`` over one duration.  The path is continuous at
+    the crossing and its tangent reverses turn sense between lobes.
+    """
+
+    required = ("start-latitude-deg", "start-longitude-deg", "duration-s", "figure-eight-length-m", "figure-eight-width-m")
+    if any(name not in route_attributes for name in required):
+        return None
+    latitude = math.radians(float(route_attributes["start-latitude-deg"]))
+    longitude = math.radians(float(route_attributes["start-longitude-deg"]))
+    start_altitude = float(route_attributes.get("start-altitude-m", "0.0"))
+    duration = max(float(route_attributes["duration-s"]), 1.0)
+    theta = 2.0 * math.pi * max(0.0, min(duration, state.time)) / duration
+    radius = 6_378_137.0 + start_altitude
+    radial = Vector3(math.cos(latitude) * math.cos(longitude), math.cos(latitude) * math.sin(longitude), math.sin(latitude))
+    east = Vector3(-math.sin(longitude), math.cos(longitude), 0.0)
+    north = Vector3(-math.sin(latitude) * math.cos(longitude), -math.sin(latitude) * math.sin(longitude), math.cos(latitude))
+    half_length = 0.5 * float(route_attributes["figure-eight-length-m"])
+    half_width = 0.5 * float(route_attributes["figure-eight-width-m"])
+    east_offset = half_length * math.sin(theta)
+    north_offset = half_width * math.sin(theta) * math.cos(theta)
+    east_rate = half_length * math.cos(theta)
+    north_rate = half_width * math.cos(2.0 * theta)
+    desired_position = radial.scaled(radius) + east.scaled(east_offset) + north.scaled(north_offset)
+    tangent = east.scaled(east_rate) + north.scaled(north_rate)
+    tangent = tangent.scaled(1.0 / max(tangent.norm(), 1.0e-12))
+    speed = abs(float(route_attributes.get("figure-eight-speed-mps", "0.0")))
+    if speed <= 0.0:
+        speed = math.hypot(east_rate, north_rate) * 2.0 * math.pi / duration
+    correction = desired_position - state.position.vector
+    correction_gain = float(route_attributes.get("position-capture-gain", "0.0"))
+    correction = limit_vector_norm(correction.scaled(correction_gain), max(float(route_attributes.get("position-capture-max-correction-mps", str(max(speed * 0.25, 1.0)))), 0.0))
+    return tangent.scaled(speed) + correction + Vector3(0.0, 0.0, earth_omega).cross(state.position.vector)
+    ####
 ####
 
 
 def _runtime_rectangle_bank_angle(
     route_attributes: Mapping[str, str],
     state: RigidBody6DofState,
+    earth_omega: float = 0.0,
 ) -> float | None:
-    """Return a bounded coordinated-turn bank command near rectangle corners."""
+    """Return a scheduled bank command with optional bounded path feedback."""
 
-    if route_attributes.get("mode", "").casefold() != "rectangle":
-        return None
-    if "rectangle-bank-deg" not in route_attributes:
-        return None
-    try:
-        duration = max(float(route_attributes["duration-s"]), 1.0)
-        length = float(route_attributes["rectangle-length-m"])
-        width = float(route_attributes["rectangle-width-m"])
-    except (KeyError, ValueError):
-        return None
-    leg_duration = duration / 4.0
-    leg = min(3, max(0, int(state.time / leg_duration)))
-    local_time = state.time - leg * leg_duration
-    window = min(leg_duration / 2.0, max(0.0, float(route_attributes.get("rectangle-corner-window-s", "0.0"))))
-    if window <= 0.0:
-        return 0.0
-    # East -> north -> west -> south is a left turn at each corner.
-    turn_sign = -1.0
-    if local_time < window and leg > 0:
-        strength = 1.0 - local_time / window
-    elif leg < 3 and leg_duration - local_time < window:
-        strength = 1.0 - (leg_duration - local_time) / window
+    if route_attributes.get("mode", "").casefold() in {"figure-eight", "figure8"}:
+        duration = max(float(route_attributes.get("duration-s", "1.0")), 1.0)
+        theta = 2.0 * math.pi * max(0.0, min(duration, state.time)) / duration
+        scheduled = math.radians(float(route_attributes.get("figure-eight-bank-deg", "20.0"))) * math.sin(theta)
+        maximum = abs(float(route_attributes.get("route-max-bank-deg", route_attributes.get("figure-eight-bank-deg", "20.0"))))
     else:
+        if route_attributes.get("mode", "").casefold() != "rectangle" or "rectangle-bank-deg" not in route_attributes:
+            return None
+        try:
+            duration = max(float(route_attributes["duration-s"]), 1.0)
+            length = float(route_attributes["rectangle-length-m"])
+            width = float(route_attributes["rectangle-width-m"])
+        except (KeyError, ValueError):
+            return None
+        leg_duration = duration / 4.0
+        leg = min(3, max(0, int(state.time / leg_duration)))
+        local_time = state.time - leg * leg_duration
+        window = min(leg_duration / 2.0, max(0.0, float(route_attributes.get("rectangle-corner-window-s", "0.0"))))
         strength = 0.0
-    _ = length, width
-    return turn_sign * math.radians(float(route_attributes.get("rectangle-bank-deg", "25.0"))) * strength
+        if window > 0.0 and local_time < window and leg > 0:
+            strength = 1.0 - local_time / window
+        elif window > 0.0 and leg < 3 and leg_duration - local_time < window:
+            strength = 1.0 - (leg_duration - local_time) / window
+        _ = length, width
+        scheduled = -math.radians(float(route_attributes["rectangle-bank-deg"])) * strength
+        maximum = abs(float(route_attributes.get("route-max-bank-deg", route_attributes["rectangle-bank-deg"])))
+
+    feedback_gain = float(route_attributes.get("route-cross-track-bank-gain-deg-per-m", "0.0"))
+    if feedback_gain != 0.0:
+        route_target = _runtime_rectangle_waypoint_position(route_attributes, state)
+        if route_target is not None:
+            geometry = _runtime_route_tracking_geometry(route_attributes, route_target, state, earth_omega)
+            scheduled += math.radians(feedback_gain * geometry.get("route_cross_track_error_m", 0.0))
+    return max(-math.radians(maximum), min(math.radians(maximum), scheduled))
+####
+
+
+def _runtime_coordinated_turn_enabled(
+    guidance_attributes: Mapping[str, str],
+    route_attributes: Mapping[str, str],
+) -> bool:
+    """Resolve the shared coordinated-turn switch for smooth and polygonal routes."""
+
+    route_mode = route_attributes.get("mode", "").casefold()
+    names = ("rectangle-coordinated-turn", "figure-eight-coordinated-turn")
+    if route_mode in {"figure-eight", "figure8"}:
+        names = ("figure-eight-coordinated-turn", "rectangle-coordinated-turn")
+    return any(guidance_attributes.get(name, "false").casefold() in {"1", "true", "yes"} for name in names)
 ####
 
 
@@ -2508,6 +2657,8 @@ def _rigid_body_local_attitude_observables(state: RigidBody6DofState, earth: Ear
     ECIC Euler angles are retained for historical/debugging continuity, but
     they are not aircraft roll, pitch, and heading.  This independent basis
     resolves the integrated body axes into local north/east/down components.
+    ``local_roll_deg`` is body Euler roll; it is deliberately distinct from
+    TAOS ``bankgc``/``bankgd`` aerodynamic bank about the velocity vector.
     """
 
     position_ecfc, _ = earth.ecic_to_ecfc(state.position, state.velocity, time_seconds=state.time)
@@ -2636,8 +2787,17 @@ def _rigid_body_position_observables(
     route_target = _runtime_rectangle_waypoint_position(route_attributes, state)
     if route_target is not None:
         duration = max(float(route_attributes.get("duration-s", "1.0")), 1.0)
-        result["route_leg_index"] = float(min(3, max(0, int(state.time / (duration / 4.0)))))
+        route_mode = route_attributes.get("mode", "").casefold()
+        phase_index = float(min(3, max(0, int(state.time / (duration / 4.0)))))
+        if route_mode == "rectangle":
+            result["route_leg_index"] = phase_index
+        elif route_mode in {"figure-eight", "figure8"}:
+            # A smooth figure-eight has no physical waypoint corners.  Keep
+            # its lobe/phase transitions distinct from square-course legs.
+            result["route_phase_index"] = phase_index
         result["route_target_error_m"] = (route_target - state.position.vector).norm()
+        if route_attributes.get("mode", "").casefold() in {"rectangle", "figure-eight", "figure8"}:
+            result.update(_runtime_route_tracking_geometry(route_attributes, route_target, state, earth_omega))
         corners = _runtime_rectangle_corner_positions(route_attributes)
         if corners is not None:
             result.update(
@@ -3471,6 +3631,11 @@ def _build_attitude_lqr(
         state_names=state_names,
         control_names=control_names,
     )
+    if not result.hurwitz:
+        raise ValueError(
+            "attitude LQR closed-loop poles are not strictly stable: "
+            f"maximum real pole={result.maximum_real_pole:.6g}"
+        )
     maximum_moment_text = actuator_attributes.get("maximum-moment")
     if maximum_moment_text is None:
         return LqrController(result)

@@ -39,6 +39,15 @@ OUTPUT_CHANNEL_CATALOG: tuple[OutputChannelSpec, ...] = (
     OutputChannelSpec(("alpha",), "aerodynamics.angle_of_attack", "angle", "angle"),
     OutputChannelSpec(("beta",), "aerodynamics.sideslip", "angle", "angle"),
     OutputChannelSpec(("segment", "_segment"), "phase.segment", "discrete", "step"),
+    OutputChannelSpec(("route_target_error_m",), "route.active_reference_error", "length"),
+    OutputChannelSpec(("route_cross_track_error_m",), "route.cross_track_error", "length"),
+    OutputChannelSpec(("route_along_track_error_m",), "route.along_track_error", "length"),
+    OutputChannelSpec(("route_heading_error_deg",), "route.heading_error", "angle", "angle"),
+    OutputChannelSpec(("route_bank_command_deg",), "route.bank.command", "angle", "angle"),
+    OutputChannelSpec(("route_bank_achieved_deg",), "route.bank.achieved_local_roll", "angle", "angle"),
+    OutputChannelSpec(("route_bank_tracking_error_deg",), "route.bank.tracking_error", "angle", "angle"),
+    OutputChannelSpec(("route_leg_index",), "route.leg_index", "discrete", "step"),
+    OutputChannelSpec(("route_phase_index",), "route.phase_index", "discrete", "step"),
 )
 
 _BY_ALIAS = {alias: spec for spec in OUTPUT_CHANNEL_CATALOG for alias in spec.aliases}

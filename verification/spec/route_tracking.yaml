@@ -1,0 +1,56 @@
+schema_version: 1
+id: taoryx_route_tracking_contract_v1
+description: >-
+  Common route-navigation telemetry contract for point-mass, kinematic bridge,
+  and rigid-body vehicles.
+channels:
+  route_target_error_m:
+    meaning: distance_to_active_reference_point
+    units: m
+    signed: false
+    valid_for: [waypoint, smooth_route]
+  route_cross_track_error_m:
+    meaning: signed_lateral_distance_to_route_tangent
+    units: m
+    signed: true
+    valid_for: [waypoint, smooth_route, great_circle]
+  route_along_track_error_m:
+    meaning: signed_distance_along_route_tangent_to_reference_point
+    units: m
+    signed: true
+    valid_for: [waypoint, smooth_route]
+  route_heading_error_deg:
+    meaning: signed_velocity_heading_error_relative_to_route_tangent
+    units: deg
+    signed: true
+    valid_for: [waypoint, smooth_route, great_circle]
+  route_bank_command_deg:
+    meaning: commanded_local_roll_or_aerodynamic_bank
+    units: deg
+    signed: true
+    valid_for: [fixed_wing]
+  route_bank_achieved_deg:
+    meaning: achieved_local_roll_compatibility_channel
+    units: deg
+    signed: true
+    independent_aerodynamic_bank: false
+    valid_for: [fixed_wing]
+  route_bank_tracking_error_deg:
+    meaning: route_bank_command_minus_achieved_local_roll
+    units: deg
+    signed: true
+    valid_for: [fixed_wing]
+  route_leg_index:
+    meaning: zero_based_discrete_waypoint_leg
+    units: index
+    valid_for: [waypoint]
+  route_phase_index:
+    meaning: zero_based_smooth_route_phase_or_lobe
+    units: index
+    valid_for: [smooth_route]
+rules:
+  - route_target_error_m_must_not_replace_cross_track_error_for_smooth_routes
+  - route_leg_index_and_route_phase_index_are_mutually_exclusive
+  - unavailable_channels_are_omitted_or_recorded_as_nan
+  - raw_table_query_coordinates_are_not_navigation_errors
+####

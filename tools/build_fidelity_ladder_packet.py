@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import os
 import re
 import shutil
+import subprocess
 import uuid
 import zipfile
 from pathlib import Path
@@ -35,7 +37,97 @@ CLAIM_INPUTS = (
     ROOT / "verification/fidelity_parity.yaml",
     LONG_CONFIG,
     CONTROLLER_MISSION_CONFIG,
+    ROOT / "verification/acceptance/README.md",
+    ROOT / "verification/acceptance/robustness_matrix_v1.yaml",
 )
+CLOSURE_METRIC_DICTIONARY = {
+    "schema_version": 1,
+    "metrics": {
+        "rhs_algebraic_translation": {
+            "channel": "translation_equation_residual_normalized",
+            "equation": "m*(v_dot_body + omega_body cross v_body) - F_total_body",
+            "frame": "body",
+            "normalization": "max(m*g, norm(F_total))",
+            "sampling": "integrator RHS at every saved sample",
+            "events": "runtime event samples retained and separately marked",
+        },
+        "rhs_algebraic_rotation": {
+            "channel": "rotation_equation_residual_normalized",
+            "equation": "I*omega_dot + omega cross (I*omega) - M_total",
+            "frame": "body",
+            "normalization": "max(1 N m, norm(M_total))",
+            "sampling": "integrator RHS at every saved sample",
+            "events": "runtime event samples retained and separately marked",
+        },
+        "independent_finite_difference_translation": {
+            "summary_field": "independent_closure.independent_translation",
+            "equation": "finite-difference saved velocity plus rotating-frame correction minus force sum",
+            "frame": "body/ECIC adapter declared by the source telemetry contract",
+            "normalization": "family closure contract",
+            "sampling": "smooth interior samples only",
+            "events": "declared event times excluded from p99 and max statistics",
+        },
+        "independent_finite_difference_rotation": {
+            "summary_field": "independent_closure.independent_rotation",
+            "equation": "finite-difference angular rate plus Euler moment balance",
+            "frame": "body",
+            "normalization": "family closure contract",
+            "sampling": "smooth interior samples only",
+            "events": "declared event times excluded from p99 and max statistics",
+        },
+        "active_waypoint_error": {
+            "channel": "route_target_error_m",
+            "definition": "distance from the vehicle to the currently active waypoint",
+            "units": "m",
+            "not_final_route_error": True,
+        },
+        "route_cross_track_error": {
+            "channel": "route_cross_track_error_m",
+            "definition": "signed lateral distance from the active route leg",
+            "units": "m",
+        },
+        "route_along_track_error": {
+            "channel": "route_along_track_error_m",
+            "definition": "signed distance along the active route tangent to the reference point",
+            "units": "m",
+        },
+        "route_leg_index": {
+            "channel": "route_leg_index",
+            "definition": "zero-based active waypoint/leg index",
+            "units": "index",
+        },
+        "route_heading_error": {
+            "channel": "route_heading_error_deg",
+            "definition": "local heading error relative to the active route leg",
+            "units": "deg",
+        },
+        "route_bank_tracking_error": {
+            "channel": "route_bank_tracking_error_deg",
+            "definition": "commanded route bank minus achieved local roll",
+            "units": "deg",
+        },
+        "command_achieved_error": {
+            "definition": "commanded actuator or guidance value minus achieved value",
+            "units": "channel-specific; source telemetry names carry units",
+            "required_channels": [
+                "*_command_*",
+                "*_achieved_*",
+                "*_saturated",
+            ],
+        },
+    },
+}
+SCORE_DEFINITION = {
+    "schema_version": 1,
+    "gate_status": "required objectives must pass; blocked required objectives prevent a pass",
+    "quality_score": {
+        "formula": "100 * weighted_mean(max(0, 1 - quality_normalized_error))",
+        "quality_limit": "declared desired-performance boundary, distinct from the hard gate target/tolerance",
+        "interpretation": "a result near a hard failure limit may pass the gate but receives a low quality score",
+        "advisory_objectives": "reported separately and never override required gate status",
+    },
+    "legacy_score": "gate_compliance_legacy is retained only when any objective lacks quality_limit",
+}
 CLOSURE_CONTRACT = {
     "b747": {"independent_force_p99_max": 1.0e-4, "independent_moment_p99_max": 1.0e-3, "test": "tests/e2e/test_vehicle_family_validation.py"},
     "skywalker_x8": {"independent_force_p99_max": 5.0e-3, "independent_moment_p99_max": 5.0e-3, "test": "tests/e2e/test_x8_family_validation.py"},
@@ -115,6 +207,105 @@ def _scenario_contract(
 
 def _files(root: Path) -> tuple[Path, ...]:
     return tuple(path for path in sorted(root.rglob("*")) if path.is_file())
+    ####
+
+
+def _relativeize(value: Any) -> Any:
+    """Remove workstation-specific absolute paths from packet metadata."""
+
+    if isinstance(value, dict):
+        return {key: _relativeize(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_relativeize(item) for item in value]
+    if isinstance(value, str):
+        try:
+            path = Path(value)
+        except (TypeError, ValueError):
+            return value
+        if path.is_absolute():
+            try:
+                return str(path.relative_to(ROOT))
+            except ValueError:
+                return path.name
+    return value
+    ####
+
+
+def _write_telemetry_csv(output: Path, histories: list[Any]) -> str | None:
+    """Persist all numeric state channels, including command/actuator channels."""
+
+    if not histories:
+        return None
+    names = sorted({name for state in histories for name, value in state.named.items() if isinstance(value, (int, float))})
+    path = output / "telemetry.csv"
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=["time_s", *names])
+        writer.writeheader()
+        for state in histories:
+            row: dict[str, object] = {"time_s": state.time}
+            row.update({name: state.named.get(name) for name in names})
+            writer.writerow(row)
+    return path.name
+    ####
+
+
+def _write_bundle_metadata(packet: Path) -> None:
+    """Write reproducibility metadata that travels with the packet."""
+
+    evidence = packet / "evidence"
+    evidence.mkdir(parents=True, exist_ok=True)
+    (evidence / "metric_dictionary.json").write_text(
+        json.dumps(CLOSURE_METRIC_DICTIONARY, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    (evidence / "score_definition.json").write_text(
+        json.dumps(SCORE_DEFINITION, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    try:
+        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    except (OSError, subprocess.CalledProcessError):
+        commit = "unavailable"
+    (packet / "software_commit.txt").write_text(f"git_commit={commit}\n", encoding="utf-8")
+    try:
+        diff = subprocess.check_output(["git", "diff", "--binary", "HEAD"], cwd=ROOT, text=True)
+        status = subprocess.check_output(["git", "status", "--short"], cwd=ROOT, text=True)
+    except (OSError, subprocess.CalledProcessError):
+        diff = "# working tree diff unavailable\n"
+        status = "working tree status unavailable\n"
+    (packet / "working_tree.patch").write_text(diff, encoding="utf-8")
+    (packet / "working_tree.status").write_text(status, encoding="utf-8")
+    (packet / "dependency.lock").write_text(
+        "# Reproducibility profile captured from the packet-producing environment.\n"
+        f"python_version=3.12\npyproject_sha256={_sha256(ROOT / 'pyproject.toml')}\n"
+        + _pip_freeze(),
+        encoding="utf-8",
+    )
+    reproduce = packet / "reproduce.sh"
+    reproduce.write_text(
+        "#!/bin/sh\n"
+        "set -eu\n"
+        "# Run from the TAORYX repository checkout that produced this packet.\n"
+        "python tools/build_fidelity_ladder_packet.py --output artifacts/verification/fidelity_ladder\n",
+        encoding="utf-8",
+    )
+    reproduce.chmod(0o755)
+    ####
+
+
+def _pip_freeze() -> str:
+    """Return installed package versions without making the packet depend on pip."""
+
+    try:
+        output = subprocess.check_output(
+            [str(ROOT / ".venv/bin/python"), "-m", "pip", "freeze", "--disable-pip-version-check"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.STDOUT,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        return f"pip_freeze=unavailable:{type(error).__name__}\n"
+    return "pip_freeze_begin\n" + output + "pip_freeze_end\n"
     ####
 
 
@@ -237,6 +428,7 @@ def _telemetry_metrics(report: Any) -> dict[str, Any]:
         "motor_shutdown",
     )
     final_state = histories[-1]
+    all_channels = sorted({name for state in histories for name, value in state.named.items() if isinstance(value, (int, float))})
     final = {
         channel: float(final_state.named[channel])
         for channel in known_channels
@@ -244,7 +436,8 @@ def _telemetry_metrics(report: Any) -> dict[str, Any]:
     }
     maximums: dict[str, float] = {}
     maxima: dict[str, float] = {}
-    for channel in known_channels:
+    minimums: dict[str, float] = {}
+    for channel in all_channels:
         values = [
             float(state.named[channel])
             for state in histories
@@ -253,12 +446,25 @@ def _telemetry_metrics(report: Any) -> dict[str, Any]:
         if values:
             maximums[channel] = max(abs(value) for value in values)
             maxima[channel] = max(values)
+            minimums[channel] = min(values)
+    final.update({channel: float(final_state.named[channel]) for channel in all_channels if channel in final_state.named and channel not in final})
     return {
         "sample_count": len(histories),
         "duration_s": float(final_state.time - histories[0].time),
         "final": final,
         "max": maxima,
         "max_abs": maximums,
+        "min": minimums,
+        "channel_names": all_channels,
+        "channel_statistics": {
+            channel: {
+                "final": final.get(channel),
+                "minimum": minimums.get(channel),
+                "maximum": maxima.get(channel),
+                "maximum_absolute": maximums.get(channel),
+            }
+            for channel in all_channels
+        },
     }
     ####
 
@@ -624,6 +830,12 @@ PLOT_CHANNELS = (
     "taos.route_bank_command_deg",
     "taos.route_bank_achieved_deg",
     "taos.route_target_error_m",
+    "taos.route_leg_index",
+    "taos.route_cross_track_error_m",
+    "taos.route_along_track_error_m",
+    "taos.route_heading_error_deg",
+    "taos.route_bank_tracking_error_deg",
+    "taos.route_phase_index",
     "taos.route_corner_0_error_m",
     "taos.route_corner_1_error_m",
     "taos.route_corner_2_error_m",
@@ -634,6 +846,23 @@ PLOT_CHANNELS = (
     "taos.moment_body_x_nm",
     "taos.moment_body_y_nm",
     "taos.moment_body_z_nm",
+    "taos.alpha_command_deg",
+    "taos.bank_command_deg",
+    "taos.pro_nav_command_ecfc_x_m_s2",
+    "taos.pro_nav_command_ecfc_y_m_s2",
+    "taos.pro_nav_command_ecfc_z_m_s2",
+    "taos.pro_nav_acceleration_response_residual_m_s2",
+    "taos.elevator-deg",
+    "taos.rudder-deg",
+    "taos.collective-elevon-deg",
+    "taos.differential-elevon-deg",
+    "taos.symmetric-stabilator-deg",
+    "taos.differential-stabilator-deg",
+    "taos.rotor_command_saturated",
+    "taos.aero_query_rotor-1-speed",
+    "taos.aero_query_rotor-2-speed",
+    "taos.aero_query_rotor-3-speed",
+    "taos.aero_query_rotor-4-speed",
     "taos.translation_equation_residual_normalized",
     "taos.rotation_equation_residual_normalized",
 )
@@ -649,8 +878,10 @@ def _run_case(
 ) -> dict[str, Any]:
     report = run_files(problem, tables, output_dir=output, max_steps=max_steps, integrator="rk4", profile=GrammarProfile.TAORYX)
     results = []
+    telemetry_histories: list[Any] = []
     for result in report.results:
         states = next(iter(result.states.values()), ())
+        telemetry_histories.extend(states)
         final = states[-1] if states else None
         results.append(
             {
@@ -721,7 +952,8 @@ def _run_case(
                 except (ValueError, AssertionError) as error:
                     closure = {"status": "unavailable", "reason": str(error)}
     event_timeline = _event_timeline(report)
-    event_timeline = _event_timeline(report)
+    telemetry_artifact = _write_telemetry_csv(output, telemetry_histories)
+    event_timeline = _relativeize(_event_timeline(report))
     return {
         "exit_code": report.exit_code,
         "diagnostics": [{"code": item.code, "message": item.message} for item in report.diagnostics],
@@ -731,6 +963,7 @@ def _run_case(
         "event_timeline": event_timeline,
         "event_continuity_audit": _event_continuity_audit(event_timeline),
         "telemetry_metrics": _telemetry_metrics(report),
+        "telemetry_artifact": telemetry_artifact,
         "independent_closure": closure,
     }
     ####
@@ -752,6 +985,7 @@ def build(
     run_id = str(uuid.uuid4())
     packet = output / run_id
     packet.mkdir(parents=True, exist_ok=False)
+    _write_bundle_metadata(packet)
     manifest: dict[str, Any] = {
         "schema_version": 1,
         "run_id": run_id,
@@ -763,6 +997,15 @@ def build(
         "families": [],
         "claim_inputs": [str(path.relative_to(ROOT)) for path in CLAIM_INPUTS],
         "closure_contract": CLOSURE_CONTRACT,
+        "metric_dictionary": "evidence/metric_dictionary.json",
+        "score_definition": "evidence/score_definition.json",
+        "hashes_file": "SHA256SUMS",
+        "working_tree_patch": "working_tree.patch",
+        "working_tree_status": "working_tree.status",
+        "reproduction": {
+            "script": "reproduce.sh",
+            "command": "python tools/build_fidelity_ladder_packet.py --output artifacts/verification/fidelity_ladder",
+        },
     }
     evidence_dir = packet / "evidence"
     evidence_dir.mkdir(parents=True, exist_ok=True)
@@ -1118,19 +1361,57 @@ def build(
             }
         )
     manifest["controller_missions"] = controller_mission_reports
+    _write_case_manifests(packet)
     manifest_path = packet / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     manifest["files"] = {
         str(path.relative_to(packet)): _sha256(path)
         for path in _files(packet)
-        if path != manifest_path
+        if path not in {manifest_path, packet / "SHA256SUMS"}
     }
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    hashes_path = packet / "SHA256SUMS"
+    hashes_path.write_text(
+        "".join(
+            f"{_sha256(path)}  {path.relative_to(packet)}\n"
+            for path in _files(packet)
+            if path != hashes_path
+        ),
+        encoding="utf-8",
+    )
     archive = output / f"fidelity-ladder-evidence-{run_id}.zip"
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as handle:
         for path in _files(packet):
             handle.write(path, path.relative_to(packet))
     return archive
+    ####
+
+
+def _write_case_manifests(packet: Path) -> None:
+    """Add a local manifest beside every case summary before bundle hashing."""
+
+    for summary_path in sorted(packet.rglob("summary.json")):
+        case_dir = summary_path.parent
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        files = {
+            str(path.relative_to(case_dir)): _sha256(path)
+            for path in _files(case_dir)
+            if path.name != "case_manifest.json"
+        }
+        contract = summary.get("scenario_contract")
+        case_manifest = {
+            "schema_version": 1,
+            "case_id": case_dir.relative_to(packet).as_posix(),
+            "claim_boundary": "source-bounded research-surrogate evidence; not flight qualification",
+            "summary": "summary.json",
+            "telemetry": summary.get("telemetry_artifact"),
+            "scenario_contract": contract,
+            "files": files,
+        }
+        (case_dir / "case_manifest.json").write_text(
+            json.dumps(case_manifest, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     ####
 
 

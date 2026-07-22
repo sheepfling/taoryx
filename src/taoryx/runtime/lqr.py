@@ -38,6 +38,25 @@ class LqrResult:
     condition_number: float
     state_names: tuple[str, ...]
     control_names: tuple[str, ...]
+
+    @property
+    def maximum_real_pole(self) -> float:
+        """Return the largest real part among the closed-loop poles."""
+
+        return max(float(value.real) for value in self.closed_loop_eigenvalues)
+
+    @property
+    def hurwitz(self) -> bool:
+        """Whether every closed-loop pole is strictly in the left half-plane."""
+
+        return self.maximum_real_pole < 0.0
+
+    @property
+    def unstable_poles(self) -> tuple[Any, ...]:
+        """Return poles that are nonnegative in real part."""
+
+        return tuple(value for value in self.closed_loop_eigenvalues if float(value.real) >= 0.0)
+    ####
 ####
 
 

@@ -35,6 +35,25 @@ def test_composite_cannot_hide_failed_required_objective() -> None:
     ####
 
 
+def test_quality_score_penalizes_a_result_near_a_hard_limit() -> None:
+    spec = ObjectiveSpec(
+        "route",
+        "waypoint",
+        "range_m",
+        500.0,
+        1.0,
+        "m",
+        comparison="maximum",
+        quality_limit=100.0,
+    )
+    report = score_objectives((spec,), {"range_m": 350.0})
+    assert report["status"] == "pass"
+    assert report["score_kind"] == "quality"
+    assert report["quality_score"] == 0.0
+    assert report["gate_score"] == 100.0
+    ####
+
+
 def test_missing_channel_blocks_required_goal_and_event_scores() -> None:
     state = ObjectiveSpec("altitude", "capture", "altitude_m", 2.0, 0.1, "m")
     event = ObjectiveSpec("release", "separation", "release", True, None, "event", comparison="event")

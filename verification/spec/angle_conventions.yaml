@@ -1,0 +1,74 @@
+schema_version: 1
+id: taoryx_angle_conventions_v1
+description: >-
+  Machine-readable semantic firewall for aerodynamic angles, local attitude,
+  velocity angles, table-query coordinates, and bank/roll interpretation.
+sources:
+  - manual/chapters/chapter02/01_07_body_fixed.tex
+  - manual/chapters/chapter02/01_09_wind.tex
+  - manual/chapters/chapter02/05_00_guidance_rules.tex
+axes:
+  body: {x: forward, y: right, z: down}
+  local_geocentric_horizon: {x: north, y: east, z: down}
+  local_geodetic_horizon: {x: geodetic_north, y: east, z: down}
+  integration_attitude: quaternion_body_to_ecic
+angles:
+  alpha:
+    meaning: projected_angle_of_attack
+    channel: aero_alpha_deg
+    formula: atan2(w, abs(u))
+    positive_direction: body_positive_z_down
+    unavailable_when: airspeed_below_minimum
+  beta:
+    meaning: projected_sideslip
+    channel: aero_sideslip_deg
+    formula: atan2(v, hypot(u, w))
+    positive_direction: body_positive_y_right
+    singularity: alpha_plus_or_minus_90_degrees
+  betae:
+    meaning: euler_sideslip
+    channel: null
+    must_not_alias: aero_sideslip_deg
+  alphat:
+    meaning: total_angle_of_attack
+    channel: null
+    range_deg: [0.0, 180.0]
+  bankgc:
+    meaning: geocentric_aerodynamic_bank
+    channel: null
+    reference: local_geocentric_horizon
+  bankgd:
+    meaning: geodetic_aerodynamic_bank
+    channel: null
+    reference: local_geodetic_horizon
+  rollgc:
+    meaning: geocentric_body_euler_roll
+    channel: local_roll_deg
+    reference: local_geocentric_horizon
+  rollgd:
+    meaning: geodetic_body_euler_roll
+    channel: null
+    reference: local_geodetic_horizon
+  flight_path_angle:
+    meaning: velocity_direction_angle
+    channel: flight_path_angle_deg
+    reference: local_horizon
+  heading:
+    meaning: velocity_azimuth_clockwise_from_north
+    channel: local_heading_deg
+    reference: local_horizon
+query_channels:
+  aero_query_bank-deg:
+    meaning: raw_table_lookup_coordinate
+    physical_attitude: false
+    plot_as_bank_by_default: false
+compatibility_channels:
+  bank_achieved_deg:
+    meaning: achieved_local_roll_when_bank_controller_active
+    independent_aerodynamic_bank: false
+  route_bank_achieved_deg:
+    meaning: achieved_local_roll_when_route_controller_active
+    independent_aerodynamic_bank: false
+tests:
+  - tests/unit/test_render_evidence_showcase.py
+  - tests/unit/test_rigid_body.py

@@ -7,8 +7,10 @@ does not rerun a simulation or silently mix runs from different packets.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
+import math
 import os
 import shutil
 import zipfile
@@ -30,41 +32,55 @@ MISSION_PANELS = {
     "b747": (
         "1_taos-altitude-m.png",
         "1_taos-speed-m-s.png",
-        "1_taos-local-heading-deg.png",
-        "1_taos-aero-alpha-deg.png",
-        "1_taos-aero-sideslip-deg.png",
+        "__route-error__",
+        "__aero-angles__",
+        "__velocity-angles__",
         "1_taos-translation-equation-residual-normalized.png",
     ),
     "skywalker-x8": (
         "1_taos-altitude-m.png",
         "1_taos-speed-m-s.png",
-        "1_taos-route-target-error-m.png",
-        "1_taos-aero-alpha-deg.png",
-        "1_taos-aero-sideslip-deg.png",
+        "__route-error__",
+        "__aero-angles__",
+        "__velocity-angles__",
         "1_taos-translation-equation-residual-normalized.png",
     ),
     "hummingbird": (
         "1_taos-altitude-m.png",
         "1_taos-speed-m-s.png",
-        "1_taos-route-target-error-m.png",
-        "1_taos-local-heading-deg.png",
-        "1_taos-local-roll-deg.png",
+        "__route-error__",
+        "__aero-angles__",
+        "__velocity-angles__",
         "1_taos-translation-equation-residual-normalized.png",
     ),
     "x15": (
         "1_taos-altitude-m.png",
         "1_taos-speed-m-s.png",
-        "1_taos-local-heading-deg.png",
-        "1_taos-aero-alpha-deg.png",
-        "1_taos-aero-sideslip-deg.png",
+        "__route-error__",
+        "__aero-angles__",
+        "__velocity-angles__",
         "1_taos-translation-equation-residual-normalized.png",
     ),
 }
 PANEL_TITLES = {
-    "b747": ("Altitude", "Speed", "Local heading", "Aerodynamic state", "Lateral state", "Independent translation closure"),
-    "skywalker-x8": ("Altitude", "Speed", "Route error", "Aerodynamic state", "Sideslip", "Independent translation closure"),
-    "hummingbird": ("Altitude", "Speed", "Route error", "Heading", "Roll", "Independent translation closure"),
-    "x15": ("Altitude", "Speed", "Local heading", "Aerodynamic state", "Sideslip", "Independent translation closure"),
+    "b747": ("Altitude", "Speed", "Route error", "AoA / bank / sideslip", "FPA / heading", "Independent translation closure"),
+    "skywalker-x8": ("Altitude", "Speed", "Route error", "AoA / bank / sideslip", "FPA / heading", "Independent translation closure"),
+    "hummingbird": ("Altitude", "Speed", "Route error", "AoA / bank / sideslip", "FPA / heading", "Independent translation closure"),
+    "x15": ("Altitude", "Speed", "Route error", "AoA / bank / sideslip", "FPA / heading", "Independent translation closure"),
+}
+
+ANGLE_SERIES = {
+    "aero": (
+        ("AoA", ("aero_alpha_deg",), "deg", "#2563eb"),
+        # The aero-query bank is a frame-relative lookup coordinate, not the
+        # vehicle's physical local bank.  Never prefer it for this plot.
+        ("Bank", ("route_bank_achieved_deg", "bank_achieved_deg", "local_roll_deg"), "deg", "#dc2626"),
+        ("Sideslip", ("aero_sideslip_deg",), "deg", "#d97706"),
+    ),
+    "velocity": (
+        ("FPA", ("flight_path_angle_deg", "aero_query_flight_path_angle_deg"), "deg", "#2563eb"),
+        ("Heading", ("local_heading_deg",), "deg", "#7c3aed"),
+    ),
 }
 ####
 
@@ -239,6 +255,229 @@ def _render_plant_scoreboard(packet: Path, output: Path, plt: Any) -> None:
 ####
 
 
+def _telemetry_rows(mission_dir: Path) -> list[dict[str, float]]:
+    """Read canonical-SI mission telemetry for custom composite panels."""
+
+    path = mission_dir / "run" / "telemetry.csv"
+    with path.open(newline="", encoding="utf-8") as stream:
+        rows: list[dict[str, float]] = []
+        for raw in csv.DictReader(stream):
+            row: dict[str, float] = {}
+            for key, value in raw.items():
+                if value in (None, ""):
+                    continue
+                try:
+                    number = float(value)
+                except ValueError:
+                    continue
+                if math.isfinite(number):
+                    row[key] = number
+            rows.append(row)
+    return rows
+    ####
+
+
+def _series_from_rows(rows: list[dict[str, float]], names: tuple[str, ...]) -> tuple[str, list[float], list[float]] | None:
+    """Select the first available numeric telemetry channel."""
+
+    for name in names:
+        points = [(row["time_s"], row[name]) for row in rows if "time_s" in row and name in row]
+        if points:
+            return name, [point[0] for point in points], [point[1] for point in points]
+    return None
+    ####
+
+
+def _objective_markers(payload: dict[str, Any], rows: list[dict[str, float]]) -> list[tuple[float, str]]:
+    """Return family-specific objective and execution events.
+
+    Objective scoring is usually evaluated at the end of a mission, so its
+    records do not necessarily contain execution times.  When the telemetry
+    exposes them, route-leg changes and ProNav activation provide the actual
+    family-specific event markers.  We do not invent timestamps for objectives
+    that were only scored as final-state or envelope checks.
+    """
+
+    if not rows:
+        return []
+    start = rows[0].get("time_s", 0.0)
+    finish = rows[-1].get("time_s", start)
+    markers: list[tuple[float, str]] = [(start, "objective evaluation start"), (finish, "objective evaluation finish")]
+    for objective in payload.get("objective_evaluation", {}).get("objectives", []):
+        value = objective.get("time_s")
+        if isinstance(value, (int, float)) and math.isfinite(float(value)):
+            markers.append((float(value), str(objective.get("id", "objective"))))
+        elif objective.get("source") == "final" and objective.get("kind") in {"waypoint", "route_transition"}:
+            # Preserve the distinction between an observed transition and a
+            # final-state score: this is a completion evaluation marker, not an
+            # invented waypoint-arrival timestamp.
+            markers.append((finish, f"final: {objective.get('id', 'objective')}"))
+    previous_leg: float | None = None
+    for row in rows:
+        time_s = row.get("time_s")
+        if time_s is None:
+            continue
+        leg = row.get("route_leg_index")
+        if leg is not None and leg != previous_leg:
+            if previous_leg is not None:
+                markers.append((time_s, f"waypoint leg {int(leg)}"))
+            previous_leg = leg
+    previous_phase: float | None = None
+    for row in rows:
+        time_s = row.get("time_s")
+        if time_s is None:
+            continue
+        phase = row.get("route_phase_index")
+        if phase is not None and phase != previous_phase:
+            if previous_phase is not None:
+                markers.append((time_s, f"figure-eight phase {int(phase)}"))
+            previous_phase = phase
+    previous_segment: float | None = None
+    for row in rows:
+        time_s = row.get("time_s")
+        segment = row.get("_segment")
+        if time_s is None or segment is None:
+            continue
+        if previous_segment is not None and segment != previous_segment:
+            markers.append((time_s, f"segment {int(segment)}"))
+        previous_segment = segment
+    previous_pro_nav = 0.0
+    for row in rows:
+        time_s = row.get("time_s")
+        active = row.get("pro_nav_active")
+        if time_s is None or active is None:
+            continue
+        if active > 0.5 and previous_pro_nav <= 0.5:
+            markers.append((time_s, "ProNav activation"))
+        previous_pro_nav = active
+    unique: dict[float, str] = {}
+    for time_s, label in markers:
+        key = round(time_s, 9)
+        if key in unique and label not in unique[key].split(" / "):
+            unique[key] = f"{unique[key]} / {label}"
+        else:
+            unique.setdefault(key, label)
+    return sorted((time_s, label) for time_s, label in unique.items())
+    ####
+
+
+def _compact_marker_label(label: str) -> str:
+    """Keep per-family timeline annotations readable without changing meaning."""
+
+    if label == "objective evaluation start":
+        return "start"
+    if label == "objective evaluation finish":
+        return "finish"
+    if label == "ProNav activation":
+        return "PN"
+    if label.startswith("waypoint leg "):
+        return "W" + label.removeprefix("waypoint leg ")
+    if label.startswith("figure-eight phase "):
+        return "P" + label.removeprefix("figure-eight phase ")
+    if label.startswith("segment "):
+        return "S" + label.removeprefix("segment ")
+    if label.startswith("final: "):
+        return "final"
+    if " / " in label:
+        return " / ".join(_compact_marker_label(part) for part in label.split(" / "))
+    return label
+    ####
+
+
+def _draw_angle_panel(axis: Any, rows: list[dict[str, float]], kind: str, markers: list[tuple[float, str]]) -> None:
+    """Draw a semantic angle panel directly from packet telemetry."""
+
+    plotted = False
+    for label, names, unit, color in ANGLE_SERIES[kind]:
+        selected = _series_from_rows(rows, names)
+        if selected is None:
+            continue
+        selected_name, times, values = selected
+        display_label = label
+        if label == "Bank":
+            if selected_name == "local_roll_deg":
+                display_label = "Bank (local roll)"
+            elif selected_name in {"route_bank_achieved_deg", "bank_achieved_deg"}:
+                display_label = "Bank (achieved)"
+        axis.plot(times, values, label=display_label, color=color, linewidth=1.8)
+        plotted = True
+    for time_s, label in markers:
+        axis.axvline(time_s, color="#dc2626", linestyle="--", linewidth=0.9, alpha=0.55)
+    axis.set_xlabel("time (s)")
+    axis.set_ylabel("deg")
+    axis.grid(True, color="#cbd5e1", linewidth=0.7)
+    if plotted:
+        axis.legend(fontsize="x-small", loc="best")
+    else:
+        axis.text(0.5, 0.5, "angle channels unavailable", ha="center", va="center", transform=axis.transAxes)
+    ####
+
+
+def _draw_route_panel(axis: Any, rows: list[dict[str, float]], markers: list[tuple[float, str]]) -> None:
+    """Draw route error and annotate family-local steering/mode events."""
+
+    selected = _series_from_rows(rows, ("route_target_error_m", "route_cross_track_error_m"))
+    if selected is None:
+        axis.text(0.5, 0.5, "route metrics unavailable", ha="center", va="center", transform=axis.transAxes)
+    else:
+        name, times, values = selected
+        label = "Distance to active target (m)" if name == "route_target_error_m" else "Cross-track error (m)"
+        axis.plot(times, values, label=label, color="#2563eb", linewidth=1.8)
+        axis.legend(fontsize="x-small", loc="best")
+    for time_s, label in markers:
+        axis.axvline(time_s, color="#dc2626", linestyle="--", linewidth=0.9, alpha=0.55)
+        axis.text(
+            time_s,
+            0.98,
+            _compact_marker_label(label),
+            color="#b91c1c",
+            fontsize=8,
+            ha="left",
+            va="top",
+            rotation=90,
+            transform=axis.get_xaxis_transform(),
+            clip_on=True,
+        )
+    axis.set_xlabel("time (s)")
+    axis.set_ylabel("m")
+    axis.grid(True, color="#cbd5e1", linewidth=0.7)
+    ####
+
+
+def _render_objective_score_timeline(records: dict[str, tuple[Path, dict[str, Any]]], output: Path, plt: Any) -> None:
+    """Show mission scores against their evaluation windows and objective events."""
+
+    figure, axis = plt.subplots(figsize=(15, 6.5), layout="constrained")
+    durations: list[float] = []
+    for row, family in enumerate(FAMILY_ORDER):
+        mission_dir, payload = records[family]
+        telemetry = _telemetry_rows(mission_dir)
+        markers = _objective_markers(payload, telemetry)
+        duration = telemetry[-1].get("time_s", 0.0) if telemetry else 0.0
+        durations.append(duration)
+        score = payload.get("objective_evaluation", {}).get("score")
+        axis.hlines(row, 0.0, duration, color="#94a3b8", linewidth=3.0)
+        axis.scatter([duration], [row], color="#2563eb", s=55, zorder=3)
+        if score is not None:
+            axis.text(duration, row + 0.14, f"score {float(score):.1f}", ha="right", va="bottom", fontsize=9)
+        for time_s, label in markers:
+            # Keep event lines on the owning family's lane.  A full-height
+            # line would falsely suggest that another vehicle shared the
+            # same waypoint or guidance event.
+            axis.vlines(time_s, row - 0.22, row + 0.22, color="#dc2626", linestyle="--", linewidth=0.9, alpha=0.55)
+            short_label = _compact_marker_label(label)
+            axis.text(time_s, row + 0.16, short_label, color="#b91c1c", fontsize=8, ha="left", va="bottom", rotation=90)
+    axis.set_yticks(range(len(FAMILY_ORDER)), [FAMILY_LABELS[family] for family in FAMILY_ORDER])
+    axis.set_xlabel("mission time (s)")
+    axis.set_xlim(left=0.0, right=max(durations, default=1.0) * 1.04)
+    axis.set_title("Controller-mission scores and objective evaluation windows", loc="left", fontsize=16, fontweight="bold", pad=18)
+    figure.text(0.01, 0.01, "Each family has its own event lane: route-leg changes, ProNav activation, declared objective times, and evaluation bounds. Final-only objectives are not assigned invented times.", fontsize=9, color="#475569")
+    axis.grid(True, axis="x", color="#cbd5e1", linewidth=0.7)
+    figure.savefig(output, dpi=180, bbox_inches="tight")
+    plt.close(figure)
+    ####
+
+
 def _load_image(path: Path, plt: Any) -> Any:
     if not path.exists():
         return None
@@ -248,14 +487,27 @@ def _load_image(path: Path, plt: Any) -> Any:
 
 def _render_mission_grid(family: str, mission_dir: Path, output: Path, plt: Any) -> None:
     figure, axes = plt.subplots(2, 3, figsize=(18, 9.5), layout="constrained")
+    telemetry = _telemetry_rows(mission_dir)
+    payload = json.loads((mission_dir / "summary.json").read_text(encoding="utf-8"))
+    markers = _objective_markers(payload, telemetry)
     for axis, title, filename in zip(axes.flat, PANEL_TITLES[family], MISSION_PANELS[family], strict=True):
-        image = _load_image(mission_dir / "plots" / filename, plt)
         axis.axis("off")
         axis.set_title(title, loc="left", fontsize=11, fontweight="bold")
-        if image is None:
-            axis.text(0.5, 0.5, f"missing: {filename}", ha="center", va="center")
+        if filename == "__route-error__":
+            axis.axis("on")
+            _draw_route_panel(axis, telemetry, markers)
+        elif filename == "__aero-angles__":
+            axis.axis("on")
+            _draw_angle_panel(axis, telemetry, "aero", markers)
+        elif filename == "__velocity-angles__":
+            axis.axis("on")
+            _draw_angle_panel(axis, telemetry, "velocity", markers)
         else:
-            axis.imshow(image)
+            image = _load_image(mission_dir / "plots" / filename, plt)
+            if image is not None:
+                axis.imshow(image)
+            else:
+                axis.text(0.5, 0.5, f"missing: {filename}", ha="center", va="center")
     figure.suptitle(f"{FAMILY_LABELS[family]} — strongest native controller-mission evidence", fontsize=17, fontweight="bold")
     figure.text(0.01, 0.005, "All panels are packet-rendered telemetry. Closure panels are independent recomputations; event boundaries are excluded where declared.", fontsize=9, color="#475569")
     figure.savefig(output, dpi=150, bbox_inches="tight")
@@ -311,14 +563,15 @@ def _render_manifest(records: dict[str, tuple[Path, dict[str, Any]]], packet: Pa
         "source_packet": packet_reference,
         "source_packet_manifest_sha256": _sha256(packet / "manifest.json"),
         "claim_boundary": "source-bounded research-surrogate evidence; not flight qualification or historical TAOS compatibility",
-        "composites": ["plant-validation-scoreboard.png", "controller-mission-scoreboard.png", "controller-missions-overview.png"] + [f"{family}-controller-evidence.png" for family in FAMILY_ORDER],
+        "composites": ["plant-validation-scoreboard.png", "controller-mission-scoreboard.png", "objective-score-timeline.png", "controller-missions-overview.png"] + [f"{family}-controller-evidence.png" for family in FAMILY_ORDER],
         "missions": entries,
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (output / "README.md").write_text(
         "# TAORYX evidence showcase\n\n"
         "These composites are derived from the clean, hashed fidelity-ladder packet named in `manifest.json`. "
-        "They emphasize native controller missions, objective scores, route errors, envelope signals, and independent closure.\n\n"
+        "They emphasize native controller missions, objective scores, route errors, combined AoA/bank/sideslip and FPA/heading panels, envelope signals, and independent closure. "
+        "The objective timeline and each family route-error panel keep event markers on the owning family: route-leg changes (W1/W2/W3), segment transitions, ProNav activation, declared objective times, and final-state completion checks. It does not assign invented times to final-only objectives. Hummingbird uses local roll as the declared bank fallback when no aerodynamic bank channel is available.\n\n"
         "The evidence is source-bounded research-surrogate evidence. It is not flight qualification, historical TAOS 96.0 compatibility, or certification.\n",
         encoding="utf-8",
     )
@@ -355,6 +608,7 @@ def generate(packet: Path, output: Path) -> Path:
     records = _mission_records(packet)
     _render_plant_scoreboard(packet, output / "plant-validation-scoreboard.png", plt)
     _render_scoreboard(records, output / "controller-mission-scoreboard.png", plt)
+    _render_objective_score_timeline(records, output / "objective-score-timeline.png", plt)
     _render_mission_overview(records, output / "controller-missions-overview.png", plt)
     for family in FAMILY_ORDER:
         _render_mission_grid(family, records[family][0], output / f"{family}-controller-evidence.png", plt)

@@ -25,6 +25,9 @@ def test_continuous_lqr_solves_and_stabilizes_double_integrator() -> None:
     assert result.gain.shape == (1, 2)
     assert result.controllable is True
     assert np.all(np.real(result.closed_loop_eigenvalues) < 0.0)
+    assert result.hurwitz is True
+    assert result.maximum_real_pole < 0.0
+    assert result.unstable_poles == ()
     assert result.state_names == ("position", "velocity")
 
 

@@ -65,6 +65,12 @@ After modifying any equation or equation label, run `python tools/dev.py equatio
 
 `src/taoryx/language` is a canonical parser foundation, not yet a complete TAOS runtime. Complex block bodies, full default resolution, unit dimensions, lossless formatting, and complete control/search/optimization semantics remain future work. Do not claim runtime compatibility with TAOS 96.0 without the historical executable and table library.
 
+## Agent workflow orientation
+
+For practical recipes covering grammar validation, segment compilation,
+scenario composition, batch and interactive stepping, plotting, and controls
+above trim, start with [docs/AGENT_WORKFLOWS.md](docs/AGENT_WORKFLOWS.md).
+
 ## Source and licensing
 
 The source report states unlimited public release, but this repository does not assign a new license to Sandia source material or to all reconstructed content. Do not add a permissive license without an explicit project decision.
