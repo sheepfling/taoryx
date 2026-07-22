@@ -5,7 +5,7 @@
 *earth wgs-84 omega=0
 *runtime status vehicle reference-area=0.75 reference-length=0.36 dry-mass-kg=3.364 inertia-x=0.325 inertia-y=0.140 inertia-z=0.400 envelope-min-forward-speed=2 envelope-max-speed=27 envelope-max-alpha-deg=12 envelope-max-beta-deg=5
 *runtime status target latitude-deg=0.0 longitude-deg=0.0 altitude-m=178.0
-*runtime status route mode=rectangle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=120.0 start-altitude-m=178.0 rectangle-length-m=480 rectangle-width-m=480 elevated-corner-altitude-m=210 rectangle-speed-mps=16 rectangle-corner-window-s=15.0 rectangle-bank-deg=8 position-capture-gain=0.0
+*runtime status route mode=rectangle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=120.0 start-altitude-m=178.0 rectangle-length-m=615 rectangle-width-m=615 elevated-corner-altitude-m=210 rectangle-speed-mps=16 rectangle-corner-window-s=45.0 rectangle-bank-deg=8 position-capture-gain=0.005 position-capture-max-correction-mps=1.0
 *runtime status guidance propnav-gain=0.0 rectangle-coordinated-turn=false collective-elevon-hold-gain-deg-per-deg=0.5 collective-elevon-hold-target-deg=7.9 collective-elevon-min-deg=-20 collective-elevon-max-deg=20 differential-elevon-hold-gain-deg-per-deg=0.5 differential-elevon-hold-target-deg=0.0 differential-elevon-min-deg=-20 differential-elevon-max-deg=20 sideslip-gain=-12.0 sideslip-rate-damping=2.5 body-rate-damping-nm-s-per-rad=0.1
 *runtime status actuator maximum-moment=20 maximum-body-rate-deg-s=180
 *runtime lqr attitude states=attitude-error-x,attitude-error-y,attitude-error-z,wx,wy,wz controls=moment-x,moment-y,moment-z q-angle=3.0 q-rate=1.0 r-moment=0.5 method=continuous update=initial

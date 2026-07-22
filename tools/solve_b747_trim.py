@@ -13,16 +13,18 @@ import math
 import tempfile
 from pathlib import Path
 
-from scipy.optimize import least_squares
-
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.runtime.runner import run_files
+from taoryx.trim import solve_trim
+from taoryx.trim_catalog import load_trim_catalog
+from taoryx.vehicle_registry import vehicle_definition, vehicle_status_line
 
 ROOT = Path(__file__).resolve().parents[1]
 TABLE = ROOT / "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl"
 OUTPUT = ROOT / "artifacts/golden_plants/b747_condition3_trim_report.json"
 SOURCE_GRID = ROOT / "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/jet_b747/aero/static_six_axis_grid.csv"
 BASE_QUATERNION = (0.5, -0.5, -0.5, 0.5)
+B747 = vehicle_definition("b747")
 
 
 def _quaternion_for_alpha(alpha_rad: float) -> tuple[float, float, float, float]:
@@ -50,7 +52,7 @@ def _problem(alpha_offset_deg: float, thrust_n: float, elevator_deg: float) -> s
 *mode rigid-body-6dof
 *atmos standard
 *earth wgs-84 omega=0
-*runtime status vehicle reference-area=510.96672 reference-length=8.324088 dry-mass-kg=288756.9 inertia-x=24675886.7 inertia-y=44877574.1 inertia-z=67384152.0 envelope-min-forward-speed=20 envelope-max-mach=0.9 envelope-max-alpha-deg=4 envelope-max-beta-deg=5 aero-alpha-reference-deg=3.1
+{vehicle_status_line("b747")}
 *runtime control elevator-deg vehicle=1 default={elevator_deg:.16g} lower=-10 upper=10
 *runtime status actuator maximum-moment=100000000 maximum-body-rate-deg-s=90
 *runtime status thermal policy=none
@@ -71,10 +73,12 @@ def _sha256(path: Path) -> str:
     ####
 
 
-def _residual(parameters: tuple[float, float, float], work: Path) -> tuple[float, float, float]:
+def _residual(state_values: dict[str, float], control_values: dict[str, float], work: Path) -> dict[str, float]:
     """Return normalized axial and vertical force residuals."""
 
-    alpha_offset_deg, thrust_n, elevator_deg = parameters
+    alpha_offset_deg = state_values["alpha_offset_deg"]
+    thrust_n = control_values["thrust_n"]
+    elevator_deg = control_values["elevator_deg"]
     problem = work / "candidate.prb"
     problem.write_text(_problem(alpha_offset_deg, thrust_n, elevator_deg), encoding="utf-8")
     report = run_files(problem, (TABLE,), output_dir=work / "run", max_steps=2, integrator="rk4", profile=GrammarProfile.TAORYX)
@@ -82,12 +86,12 @@ def _residual(parameters: tuple[float, float, float], work: Path) -> tuple[float
         raise RuntimeError("trim candidate failed before producing a state")
     state = report.results[0].states["1"][0].named
     scale = max(float(state["mass"]) * 9.80665, 1.0)
-    moment_scale = max(float(state["mass"]) * 9.80665 * 8.324088, 1.0)
-    return (
-        float(state["total_force_body_x_n"]) / scale,
-        float(state["total_force_body_z_n"]) / scale,
-        float(state["total_moment_body_y_nm"]) / moment_scale,
-    )
+    moment_scale = max(float(state["mass"]) * 9.80665 * float(B747["reference_length_m"]), 1.0)
+    return {
+        "body_x_force": float(state["total_force_body_x_n"]) / scale,
+        "body_z_force": float(state["total_force_body_z_n"]) / scale,
+        "pitch_moment": float(state["total_moment_body_y_nm"]) / moment_scale,
+    }
     ####
 
 
@@ -96,28 +100,21 @@ def main() -> None:
 
     with tempfile.TemporaryDirectory(prefix="taoryx-b747-trim-") as directory:
         work = Path(directory)
-        result = least_squares(
-            lambda values: _residual((float(values[0]), float(values[1]), float(values[2])), work),
-            x0=(0.0, 122_000.0, 0.0),
-            bounds=([-3.9, 0.0, -10.0], [3.9, 1_000_000.0, 10.0]),
-            xtol=1.0e-11,
-            ftol=1.0e-11,
-            gtol=1.0e-11,
-            max_nfev=100,
-        )
-        parameters = (float(result.x[0]), float(result.x[1]), float(result.x[2]))
-        residual = _residual(parameters, work)
+        spec = load_trim_catalog(ROOT / "verification/trim_specs.yaml").get("b747-condition3-trim-v1").to_spec()
+        result = solve_trim(spec, lambda state, controls: _residual(dict(state), dict(controls), work), max_nfev=100, residual_tolerance=1.0e-11)
+        parameters = (result.state["alpha_offset_deg"], result.controls["thrust_n"], result.controls["elevator_deg"])
+        residual = result.residuals
         payload = {
             "vehicle": "b747",
             "source_anchor": "NASA CR-2144 condition 3 / Mach 0.45",
             "claim": "runtime force trim using corrected source-transcoded static deck",
             "parameters": {"alpha_offset_deg": parameters[0], "thrust_n": parameters[1], "elevator_deg": parameters[2]},
-            "residual_normalized": {"body_x": residual[0], "body_z": residual[1], "moment_y": residual[2]},
-            "residual_norm_l2": math.sqrt(sum(value * value for value in residual)),
+            "residual_normalized": {"body_x": residual["body_x_force"], "body_z": residual["body_z_force"], "moment_y": residual["pitch_moment"]},
+            "residual_norm_l2": math.sqrt(sum(value * value for value in residual.values())),
             "acceptance_gate": {
                 "translation_norm_lt": 0.01,
                 "rotation_norm_lt": 0.001,
-                "passed": max(abs(residual[0]), abs(residual[1])) < 0.01 and abs(residual[2]) < 0.001,
+                "passed": max(abs(residual["body_x_force"]), abs(residual["body_z_force"])) < 0.01 and abs(residual["pitch_moment"]) < 0.001,
             },
             "provenance": {
                 "source_grid": str(SOURCE_GRID.relative_to(ROOT)),
@@ -125,7 +122,7 @@ def main() -> None:
                 "runtime_table": str(TABLE.relative_to(ROOT)),
                 "runtime_table_sha256": _sha256(TABLE),
             },
-            "solver": {"success": bool(result.success), "status": int(result.status), "message": str(result.message), "nfev": int(result.nfev)},
+            "solver": {"success": result.success, "status": result.status, "message": result.message, "nfev": result.iterations},
         }
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")

@@ -20,12 +20,23 @@ declared control limits and tables.
 body-Y corridor before moment control. This is a command limit; it does not
 alter the measured aerodynamic sideslip or clamp a table query.
 
+`max-bank-deg=N` bounds the alpha/bank acceleration allocator's bank command.
+It is useful when a source vehicle's aerodynamic or actuator data does not
+support an unrestricted ninety-degree bank. Like the sideslip limit, it is a
+command bound and does not alter the measured state or permit table
+extrapolation.
+
 `sideslip-gain=N` adds a body-axis yaw feedback moment from measured
 air-relative sideslip. `sideslip-rate-damping=N` adds body-yaw-rate damping to
 that same loop. Both are disabled by default and are intended for a
 vehicle-specific 6-DOF extension where the coefficient deck supports this
 closed-loop approximation. The resulting moment remains subject to the
 declared actuator maximum.
+
+`rudder-hold-gain-deg-per-deg=N` provides a route-independent beta-hold using
+the declared rudder table. Its optional target is
+`rudder-hold-target-deg=N`; the default target is zero sideslip. This is a
+trim/plant controller and does not replace route or ProNav guidance.
 
 `energy-management=alpha-drag` enables an opt-in energy loop. When
 `energy-target-speed-mps=N` is below the current airspeed, the controller

@@ -19,10 +19,18 @@ declared coefficient, speed, altitude, and actuator envelopes. A corner
 transition window may be declared for fixed-wing vehicles so the controller
 has time to coordinate the turn. The current development scales provide
 approximately 80 seconds per B747 leg, 30 seconds per X8 leg, and 10 seconds
-per Hummingbird leg. The B747 and X8 corner windows are 75 and 15 seconds
+per Hummingbird leg. The B747 and X8 corner windows are 75 and 30 seconds
 respectively, chosen to keep the turn radius compatible with the declared
 speed and bank. These are comfortable research-course timings, not
 mission-performance claims.
+
+For a route that must correct position error, `position-capture-gain` may be
+paired with `position-capture-max-correction-mps`. The latter bounds the
+additional commanded velocity before attitude guidance sees it, preserving
+the vehicle's aerodynamic beta authority instead of converting a large corner
+miss into an impossible lateral demand. The cap is a generic route-controller
+primitive; it does not relax table boundaries or create a waypoint-capture
+claim by itself.
 
 ## Success gates
 
@@ -77,10 +85,14 @@ evolution backend uses the same bounded native evaluator with a fixed seed;
 its population means the exact number of evaluations may be slightly above
 the requested budget. `turn-prefix` is a deliberately incomplete first-corner
 search; its ranking identifies stable turn behavior, but its candidates must
-still pass a subsequent `--phase full` run. A candidate is `safe` only
-when it completes the full native course and has no configured angle, speed,
-or altitude-limit violation. `completed_unsafe` means it reached the time
-horizon but is not evidence-ready; `incomplete` means it hit the runtime step
-limit; `failed` means ingestion or execution failed. Rankings are exploratory
-artifacts and never replace the fixed baseline fixtures or the closed-course
-acceptance tests.
+still pass a subsequent `--phase full` run. A candidate is `safe` only when it
+completes the full native course, has no configured angle, speed, altitude, or
+corner-capture violation, and reports all four corner errors.
+`completed_unsafe` means it reached the time horizon but is not evidence-ready;
+`incomplete` means it hit the runtime step limit; `failed` means ingestion or
+execution failed. The X8 search is bound to the current checked-in long
+rectangle fixture rather than the older short development fixture. Its
+current baseline remains `completed_unsafe`: the best non-origin corner
+captures are approximately 28 m, 217 m, and 89 m against the 25 m research
+gate. Rankings are exploratory artifacts and never replace the fixed baseline
+fixtures or the closed-course acceptance tests.

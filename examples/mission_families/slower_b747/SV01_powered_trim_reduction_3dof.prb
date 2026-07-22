@@ -1,0 +1,30 @@
+(b747-source-anchor-parity-reduction-3dof)
+*title B747 source-anchor same-plant parity point-mass reduction
+*mode point-mass
+*atmos standard
+*earth wgs-84 omega=0.0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status vehicle reference-area=510.96672 reference-length=8.324088 dry-mass-kg=288756.9 inertia-x=24675886.7 inertia-y=44877574.1 inertia-z=67384152.0 envelope-min-forward-speed=20 envelope-max-mach=0.9 envelope-max-alpha-deg=4 envelope-max-beta-deg=5 aero-alpha-reference-deg=3.1
+*runtime control throttle vehicle=1 default=0.2854 lower=0 upper=1
+*runtime control elevator-deg vehicle=1 default=0.3861602391 lower=-10 upper=10
+
+
+
+
+
+*trajectory 1 b747 start on 1
+  *initial geodetic alt=100.0 long=0.0 lat=0.0 vel=153.0096 gama=0.0 psi=90.0 time=0.0 mass=288756.9
+  *segment 1 powered-trim-parity
+    *integ dtprnt=0.05 dt=0.005
+    *prop thrust=(thrust) mdot=0
+    *aero cx=(cx) cy=(cy) cz=(cz) sref=510.96672
+    *fly alpha=-0.4247762648660709
+
+    *when time>0.1 stop
+*end

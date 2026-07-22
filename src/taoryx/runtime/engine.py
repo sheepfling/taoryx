@@ -113,7 +113,15 @@ def _integrate_vehicle(vehicle: RuntimeVehicle, step: float) -> None:
         try:
             translational = candidate.to_point_mass_state()
         except ValueError:
-            vehicle.kinematic_state = vehicle.kinematic_state.with_attitude_rate(body_rate, step)
+            if {"x", "y", "z", "xdt", "ydt", "zdt"}.issubset(candidate.named):
+                vehicle.kinematic_state = vehicle.kinematic_state.advance(
+                    FrameVector3(Vector3(*(float(candidate.named[name]) for name in ("x", "y", "z"))), Frame.ECFC),
+                    FrameVector3(Vector3(*(float(candidate.named[name]) for name in ("xdt", "ydt", "zdt"))), Frame.ECFC),
+                    body_rate,
+                    step,
+                )
+            else:
+                vehicle.kinematic_state = vehicle.kinematic_state.with_attitude_rate(body_rate, step)
         else:
             vehicle.kinematic_state = vehicle.kinematic_state.advance(
                 FrameVector3(translational.position.vector, Frame.ECFC),
@@ -121,6 +129,21 @@ def _integrate_vehicle(vehicle: RuntimeVehicle, step: float) -> None:
                 body_rate,
                 step,
             )
+        attitude = vehicle.kinematic_state.attitude
+        candidate = RuntimeState(
+            candidate.time,
+            candidate.values,
+            candidate.frame,
+            {
+                **candidate.named,
+                "qw": attitude.w,
+                "qx": attitude.x,
+                "qy": attitude.y,
+                "qz": attitude.z,
+            },
+            candidate.value_names,
+            candidate.segment_endpoints,
+        )
     vehicle.state = candidate
     vehicle.history.append(candidate)
 ####
@@ -279,6 +302,7 @@ def _apply_event_crossings(
             if crossing.action != "stop" and crossing.name in vehicle.fired_events:
                 continue
             segment_from = vehicle.segment_number
+            before_state = vehicle.state
             handler = vehicle.event_handlers.get(crossing.name)
             if handler is not None:
                 vehicle.state = handler(vehicle.state)
@@ -297,6 +321,11 @@ def _apply_event_crossings(
                     "segment_from": segment_from,
                     "segment_to": vehicle.segment_number,
                     "source": condition.source if condition is not None else None,
+                    "pre_values": list(before_state.values),
+                    "post_values": list(vehicle.state.values),
+                    "value_names": list(vehicle.state.value_names),
+                    "frame": str(vehicle.state.frame),
+                    "state_discontinuity": _physical_state_changed(before_state, vehicle.state),
                 }
             )
             if crossing.action == "stop":
@@ -304,6 +333,23 @@ def _apply_event_crossings(
                 vehicle.activation_pending = False
                 break
     return not any(vehicle.active for vehicle in active)
+
+
+def _physical_state_changed(before: RuntimeState, after: RuntimeState, *, tolerance: float = 1e-12) -> bool:
+    """Ignore runtime bookkeeping channels when auditing transition jumps."""
+
+    before_index = {name: index for index, name in enumerate(before.value_names)}
+    after_index = {name: index for index, name in enumerate(after.value_names)}
+    names = tuple(dict.fromkeys((*before.value_names, *after.value_names)))
+    for name in names:
+        if name.startswith("_") or name.casefold() in {"segment", "segment_number", "tseg", "tmark"}:
+            continue
+        left = before.values[before_index[name]] if name in before_index else None
+        right = after.values[after_index[name]] if name in after_index else None
+        if isinstance(left, (int, float)) and isinstance(right, (int, float)) and abs(float(left) - float(right)) > tolerance:
+            return True
+    return False
+    ####
 ####
 
 

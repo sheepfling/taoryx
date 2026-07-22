@@ -30,6 +30,13 @@ regression records an out-of-envelope failure instead of claiming a Hawaii
 intercept. A successful intercept would require a vehicle and propulsion deck
 with enough range and a valid high-altitude envelope.
 
+The long bank-reversal evidence case uses `dt=0.0125 s`. This is a declared
+numerical requirement for its high-rate attitude transitions: at the coarser
+`0.025 s` step, independent inertial force-closure p99 exceeded the release
+gate. At the selected step the same continuous, unpowered, event-terminated
+trajectory passes the translation-closure gate; this is a convergence choice,
+not a relaxation of the physics or an unreported state reset.
+
 Run with:
 
 ```bash

@@ -1,0 +1,13 @@
+(kinematic-bridge-lagged-attitude)
+*title Generic 3+3 DOF prescribed-attitude bridge
+*mode kinematic-6dof
+*atmos none
+*earth spherical gm=0 omega=0
+*runtime status attitude mode=lag roll-deg=0 pitch-deg=4 yaw-deg=30 lag-s=0.5 max-rate-deg-s=180
+
+*trajectory 1 bridge-vehicle start on 1
+  *initial ecic x=7000000 y=0 z=0 xdt=0 ydt=100 zdt=0 time=0 mass=1
+  *segment 1 prescribed-attitude
+    *integ dtprnt=0.1 dt=0.1
+    *when time>10.0 stop
+*end

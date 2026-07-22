@@ -1,0 +1,52 @@
+schema_version: 1
+id: taoryx_trim_specs_v1
+entries:
+  - id: b747-condition3-trim-v1
+    vehicle: b747
+    status: ready
+    state_names: [alpha_offset_deg]
+    control_names: [thrust_n, elevator_deg]
+    residual_names: [body_x_force, body_z_force, pitch_moment]
+    state_initial: {alpha_offset_deg: 0.0}
+    control_initial: {thrust_n: 122000.0, elevator_deg: 0.0}
+    state_lower: {alpha_offset_deg: -3.9}
+    state_upper: {alpha_offset_deg: 3.9}
+    control_lower: {thrust_n: 0.0, elevator_deg: -10.0}
+    control_upper: {thrust_n: 1000000.0, elevator_deg: 10.0}
+    residual_scales: {body_x_force: 1.0, body_z_force: 1.0, pitch_moment: 1.0}
+    notes: NASA CR-2144 condition-3 local source-anchor trim.
+  - id: x8-powered-trim-v1
+    vehicle: skywalker_x8
+    status: ready
+    state_names: [alpha_deg]
+    control_names: [throttle, collective_elevon_deg, differential_elevon_deg]
+    residual_names: [body_x_force, body_z_force, roll_moment, pitch_moment, yaw_moment]
+    state_initial: {alpha_deg: 7.9}
+    control_initial: {throttle: 0.44, collective_elevon_deg: -2.35, differential_elevon_deg: -2.16}
+    state_lower: {alpha_deg: 0.0}
+    state_upper: {alpha_deg: 12.0}
+    control_lower: {throttle: 0.0, collective_elevon_deg: -20.0, differential_elevon_deg: -20.0}
+    control_upper: {throttle: 1.0, collective_elevon_deg: 20.0, differential_elevon_deg: 20.0}
+    residual_scales: {body_x_force: 1.0, body_z_force: 1.0, roll_moment: 1.0, pitch_moment: 1.0, yaw_moment: 1.0}
+    notes: Flight-identified local powered trim; simplified propulsion model.
+  - id: hummingbird-hover-v1
+    vehicle: hummingbird
+    status: ready
+    state_names: []
+    control_names: [equal_rotor_speed_rad_s]
+    residual_names: [body_x_force, body_z_force, yaw_moment]
+    state_initial: {}
+    control_initial: {equal_rotor_speed_rad_s: 469.124102661955}
+    control_lower: {equal_rotor_speed_rad_s: 0.0}
+    control_upper: {equal_rotor_speed_rad_s: 1500.0}
+    residual_scales: {body_x_force: 1.0, body_z_force: 1.0, yaw_moment: 1.0}
+    notes: Equal-rotor source-frame hover equilibrium.
+  - id: x15-release-glide-v1
+    vehicle: x15
+    status: source_only
+    state_names: [alpha_deg]
+    control_names: [symmetric_stabilator_deg, differential_stabilator_deg, rudder_deg]
+    residual_names: [body_x_force, body_z_force, roll_moment, pitch_moment, yaw_moment]
+    state_initial: {alpha_deg: 0.0}
+    control_initial: {symmetric_stabilator_deg: 0.0, differential_stabilator_deg: 0.0, rudder_deg: 2.0}
+    notes: Source-trimmed release artifact; independent residual adapter still required.

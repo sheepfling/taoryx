@@ -25,6 +25,7 @@ from . import (
     runtime,
     scenario,
     searches,
+    segmentation,
     simulation,
     state,
     state_rates,
@@ -33,9 +34,18 @@ from . import (
     validation,
     visualization,
 )
+from .control_directions import ControlDirectionProbe, ControlDirectionResult, audit_control_directions
+from .controller_design import (
+    ControllerDesignCatalog,
+    ControllerDesignMethod,
+    ControllerDesignSpec,
+    build_lqr_controller,
+    load_controller_catalog,
+)
 from .family_debug_rendering import FamilyDebugRenderReport, render_family_debug_artifacts
 from .family_debugging import DebugFamily, FamilyDebugPlan, build_family_debug_plan, family_profile
 from .modes import DynamicsMode, Kinematic6DofState, Quaternion
+from .objectives import ObjectiveResult, ObjectiveSpec, score_objective, score_objectives
 from .outputs import DynamicsKind, EventRecord, RunArtifact, SegmentSpan, TelemetryChannel, VehicleKind, VehicleTelemetry, build_run_artifact
 from .rigid_body import (
     RIGID_BODY_STATE_NAMES,
@@ -61,6 +71,15 @@ from .scenario import (
     ScenarioSource,
     StatusContract,
 )
+from .segmentation import (
+    GoalSpec,
+    SegmentationCatalog,
+    SegmentationScenario,
+    SegmentSpec,
+    TransitionEventSpec,
+    TransitionPolicy,
+    transition_audit,
+)
 from .state import PointMassRates, PointMassState
 from .table_explorer import (
     AxisInterpolationBracket,
@@ -73,7 +92,28 @@ from .table_explorer import (
     inspect_table_document,
     inspect_table_file,
 )
-from .validation import Direction, PhaseWindow, require_bounded, require_change_of_sign, require_channel, require_monotonic, require_net_change
+from .trim import TrimResult, TrimSpec, finite_difference_linearization, solve_trim
+from .trim_catalog import TrimCatalog, TrimCatalogEntry, load_trim_catalog
+from .validation import (
+    Direction,
+    PhaseWindow,
+    actuator_saturation_fraction,
+    capture_time,
+    dwell_in_band,
+    energy_balance_residual,
+    independent_force_closure,
+    integral_mass_balance_error,
+    phase_slice,
+    require_bounded,
+    require_change_of_sign,
+    require_channel,
+    require_monotonic,
+    require_net_change,
+    settling_time,
+    specific_energy,
+    timestep_convergence_error,
+    wrapped_angle_error,
+)
 from .vehicle import (
     AerodynamicOutput,
     AeroQueryContext,
@@ -87,4 +127,4 @@ from .vehicle import (
 )
 from .visualization import render_run_artifact_html, render_run_artifact_plots
 
-__all__ = ["__version__", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "modes", "numeric", "optimization", "outputs", "radar", "rigid_body", "rigid_body_frames", "rotorcraft", "runtime", "scenario", "searches", "simulation", "state", "state_rates", "table_explorer", "tables", "validation", "vehicle", "visualization", "AeroQueryContext", "AerodynamicOutput", "AxisInterpolationBracket", "ControlContract", "DebugFamily", "Direction", "DynamicsKind", "DynamicsMode", "EarthRotationAdapter", "EventRecord", "FamilyDebugPlan", "FamilyDebugRenderReport", "InterpolationExplanation", "Kinematic6DofState", "MassProperties", "OutputContract", "PhaseWindow", "PointMassRates", "PointMassState", "PreparedAerodynamicCoefficients", "PreparedCoefficientTable", "PropulsionOutput", "QuadRotorAllocation", "Quaternion", "RIGID_BODY_STATE_NAMES", "RandomSeed", "ResolutionRecord", "ResolvedScenario", "RigidBody6DofModel", "RigidBody6DofState", "RigidBodyForceMoment", "RotorCommandSet", "RunArtifact", "ScenarioCompileError", "ScenarioCompiler", "ScenarioRequest", "ScenarioRuntimeContract", "ScenarioSource", "SegmentSpan", "StageDefinition", "StagedPropulsion", "StatusContract", "TableAerodynamicModel", "TableInspection", "TableInspectionArtifact", "TableInspectionFormat", "TableInspectionStatus", "TelemetryChannel", "ThermalAssessment", "ThermalLimits", "VehicleKind", "VehicleTelemetry", "assess_thermal_limits", "build_family_debug_plan", "build_run_artifact", "explain_interpolation", "family_profile", "inspect_table_document", "inspect_table_file", "render_family_debug_artifacts", "render_run_artifact_html", "render_run_artifact_plots", "require_bounded", "require_change_of_sign", "require_channel", "require_monotonic", "require_net_change"]
+__all__ = ["__version__", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "modes", "numeric", "objectives", "optimization", "outputs", "radar", "rigid_body", "rigid_body_frames", "rotorcraft", "runtime", "scenario", "segmentation", "searches", "simulation", "state", "state_rates", "table_explorer", "tables", "trim", "validation", "vehicle", "visualization", "AeroQueryContext", "AerodynamicOutput", "AxisInterpolationBracket", "ControlContract", "ControlDirectionProbe", "ControlDirectionResult", "ControllerDesignCatalog", "ControllerDesignMethod", "ControllerDesignSpec", "DebugFamily", "Direction", "DynamicsKind", "DynamicsMode", "EarthRotationAdapter", "EventRecord", "FamilyDebugPlan", "GoalSpec", "FamilyDebugRenderReport", "InterpolationExplanation", "Kinematic6DofState", "MassProperties", "ObjectiveResult", "ObjectiveSpec", "OutputContract", "PhaseWindow", "PointMassRates", "PointMassState", "PreparedAerodynamicCoefficients", "PreparedCoefficientTable", "PropulsionOutput", "QuadRotorAllocation", "Quaternion", "RIGID_BODY_STATE_NAMES", "RandomSeed", "ResolutionRecord", "ResolvedScenario", "RigidBody6DofModel", "RigidBody6DofState", "RigidBodyForceMoment", "RotorCommandSet", "RunArtifact", "ScenarioCompileError", "ScenarioCompiler", "ScenarioRequest", "ScenarioRuntimeContract", "ScenarioSource", "SegmentSpan", "SegmentSpec", "SegmentationCatalog", "SegmentationScenario", "StageDefinition", "StagedPropulsion", "StatusContract", "TableAerodynamicModel", "TableInspection", "TableInspectionArtifact", "TableInspectionFormat", "TableInspectionStatus", "TelemetryChannel", "ThermalAssessment", "ThermalLimits", "TransitionEventSpec", "TransitionPolicy", "TrimCatalog", "TrimCatalogEntry", "TrimResult", "TrimSpec", "VehicleKind", "VehicleTelemetry", "actuator_saturation_fraction", "assess_thermal_limits", "audit_control_directions", "build_family_debug_plan", "build_lqr_controller", "build_run_artifact", "capture_time", "dwell_in_band", "energy_balance_residual", "explain_interpolation", "family_profile", "finite_difference_linearization", "independent_force_closure", "inspect_table_document", "inspect_table_file", "integral_mass_balance_error", "load_controller_catalog", "load_trim_catalog", "phase_slice", "render_family_debug_artifacts", "render_run_artifact_html", "render_run_artifact_plots", "require_bounded", "require_change_of_sign", "require_channel", "require_monotonic", "require_net_change", "score_objective", "score_objectives", "require_net_change", "settling_time", "solve_trim", "specific_energy", "timestep_convergence_error", "transition_audit", "wrapped_angle_error"]

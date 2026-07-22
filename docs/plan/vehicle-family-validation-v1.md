@@ -29,6 +29,21 @@ Every family progresses through these levels in order:
 No family receives a validated verdict if a required level is blocked or if a
 scenario leaves its declared table or operating envelope.
 
+The currently executable long-validation baseline is recorded in
+`verification/long_validation_trajectories.yaml` and is intentionally smaller
+than the eventual family targets below:
+
+| Family | Executable nominal case | Duration | Follow-on maneuver |
+| --- | --- | ---: | --- |
+| B747 | `SV01_long_trim_hold_120_6dof.prb` | 120 s | `SV01_descent_recovery_120_6dof.prb` |
+| Skywalker X8 | `SV03_long_validation_6dof.prb` | 60 s | `SV03_long_rectangle_route_6dof.prb` |
+| Hummingbird | `SV05_rectangle_course_6dof.prb` | 40 s | `SV05_return_home_land_6dof.prb` |
+| X-15 | `long_unpowered_glide_6dof.prb` | 120 s | `long_unpowered_glide_bank_reversal_6dof.prb` |
+
+These are candidate research-surrogate demonstrations, not family-validation
+verdicts. This explicit baseline prevents the planned 300--1,800 second
+targets from being mistaken for evidence already present in the repository.
+
 ## Shared scenario contract
 
 Each scenario is represented by:

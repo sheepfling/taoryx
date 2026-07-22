@@ -51,6 +51,14 @@ Semantics:
 
 Required sequence, nominal case:
 
+The first completed long plant evidence is the generated 120-second source-
+anchor trim hold. It remains near 100 m and 153 m/s with alpha approximately
+2.675° and beta zero. A generated 120-second descent/recovery case now adds a
+native controller phase sequence: 60 seconds at approximately -3° flight path,
+then 60 seconds recovering toward a 520 m level target. The full 480-second
+maneuver sequence below remains a future controller target; it is not implied
+by either case.
+
 | Phase | Duration | Expected mechanics |
 |---|---:|---|
 | Source-anchor trim hold | 0–120 s | Airspeed, altitude, alpha, beta, and rates remain bounded and nearly steady. |
@@ -94,6 +102,11 @@ Semantics:
   separate claims.
 
 Required sequence, nominal case:
+
+The first completed long plant evidence is the generated 120-second level-
+settling corridor. It remains inside 150–190 m altitude, 15–21 m/s speed,
+0–12° alpha, and ±5° beta. This is a bounded local settling result, not yet
+the full climb/reversal/rectangle/gust sequence below.
 
 | Phase | Duration | Expected mechanics |
 |---|---:|---|
@@ -254,3 +267,19 @@ mass, or route trend is a failure even when every number is numerical.
 The completion flag for this plan is four long, independently checked,
 vehicle-specific trajectories—not four short plots and not a single generic
 “matrix pass.”
+
+## Current execution ledger
+
+The first implementation tranche deliberately records blockers instead of
+promoting them to validation:
+
+| Family | Runtime robustness | Behavioral evidence | Model-fidelity blocker |
+|---|---|---|---|
+| X-15 glider | 120 s bounded run, convergence, perturbations | Apogee and post-release energy contract pass; bank-reversal and source-anchored great-circle route telemetry contracts pass | Short-range native ProNav remains blocked by alpha/beta departure from the local deck; the unpowered case is diagnostic rather than a terminal-arrival claim |
+| B747 | Local trim, bounded maneuver, opposite-elevator sign diagnostic, 60-second controlled descent corridor, 20-second composed route/altitude capture, and table-driven notional mass coupling pass | Source-backed fuel flow, longer route closure, and integrated mission semantics remain open | Route and flight-path guidance now compose in one native runtime path; the throttle-to-`mdot` table is a notional first cut, not a NASA JT9D fuel law |
+| Skywalker X8 | 120 s directional rectangle and local response probes | Route directions, bounds, and fixed-crosswind corridor pass | After aligning the rectangle legs to the measured ground speed and adding a capped generic position-capture term, non-origin corner misses are approximately 54/87/124 m; waypoint capture is not established, and the first 120 s climb/level-off probe also exits the local coefficient envelope |
+| Hummingbird | Declared direct-wrench hover/waypoint scope passes | Leave the existing verdict unchanged | The scope remains a synthetic research model, not flight qualification |
+
+This ledger is part of the evidence boundary. A finite run, a small residual,
+or a convergent integrator is a runtime result; it is not by itself evidence
+that the vehicle performed the expected maneuver.

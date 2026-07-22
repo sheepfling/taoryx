@@ -60,6 +60,13 @@ def bind_runtime_tables(
         if runtime_table is None:
             raise ValueError(f"table {definition.name!r} could not be lowered")
         lowered[alias] = replace(runtime_table, name=alias)
+        # Preserve ordinary ``(cx)`` problem-file references when a vehicle
+        # supplies several coefficient families.  The static deck is the
+        # canonical unqualified base; control families remain available under
+        # their deterministic qualified aliases for composition.
+        if len(grouped[raw_name]) > 1 and "static" in Path(definition.location.path).stem.casefold() and raw_name not in available:
+            available[raw_name] = definition.table_type
+            lowered[raw_name] = replace(runtime_table, name=raw_name)
     return available, lowered
 ####
 

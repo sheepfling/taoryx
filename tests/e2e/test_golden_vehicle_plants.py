@@ -8,11 +8,37 @@ from tests.e2e.support.golden_plants import GoldenPlantCase, load_golden_vehicle
 
 ROOT = Path(__file__).resolve().parents[2]
 GOLDEN_CATALOG = load_golden_vehicle_catalog(ROOT / "verification/vehicle_catalog.yaml")
-GOLDEN_PLANT_CASES = tuple(pytest.param(case, id=case.vehicle.casefold().replace(" ", "-")) for case in GOLDEN_CATALOG)
+def _family_marker(vehicle: str) -> pytest.MarkDecorator:
+    """Map catalog vehicle names to the public family selector marker."""
+
+    normalized = vehicle.casefold()
+    if "hummingbird" in normalized:
+        family = "hummingbird"
+    elif "747" in normalized:
+        family = "b747"
+    elif "x8" in normalized:
+        family = "x8"
+    elif "x-15" in normalized or "x15" in normalized:
+        family = "x15"
+    else:
+        raise ValueError(f"No vehicle-family marker mapping for {vehicle!r}")
+    return getattr(pytest.mark, family)
+    ####
+
+
+GOLDEN_PLANT_CASES = tuple(
+    pytest.param(
+        case,
+        id=case.vehicle.casefold().replace(" ", "-"),
+        marks=_family_marker(case.vehicle),
+    )
+    for case in GOLDEN_CATALOG
+)
 X15_CASE = next(case for case in GOLDEN_CATALOG if case.vehicle == "X-15")
 
 
 @pytest.mark.dof6
+@pytest.mark.x15
 def test_x15_research_anchor_passes_the_convention_firewall(tmp_path: Path) -> None:
     """The X-15 source surrogate is wired before controller work begins."""
 
@@ -51,4 +77,11 @@ def test_all_four_source_anchored_plants_are_golden(case: GoldenPlantCase, tmp_p
     assert verification.verdict == "plant-golden"
     assert all(stage.status == "pass" for stage in verification.stages[:11])
     assert verification.stages[11].status == "blocked"
+    closure = verification.stages[8].evidence
+    translation = closure["independent_translation_closure"]
+    rotation = closure["independent_rotation_closure"]
+    assert translation["sample_count"] >= 1.0
+    assert rotation["sample_count"] >= 1.0
+    assert translation["p99_normalized_residual"] >= 0.0
+    assert rotation["p99_normalized_residual"] >= 0.0
     ####

@@ -1,0 +1,72 @@
+schema_version: 1
+id: taoryx_controller_missions_v1
+claim_boundary: >-
+  Source-bounded native TAORYX controller-mission evidence. These cases are
+  controller and route-transition demonstrations, not flight qualification,
+  historical TAOS compatibility, or target-intercept claims.
+missions:
+  - id: b747-integrated-route-transition
+    family: b747
+    display_name: B747 integrated route and altitude transition
+    problem: examples/mission_families/slower_b747/SV01_integrated_route_descent_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+    max_steps: 2000
+    objectives:
+      - {id: duration, kind: controller_mission, channel: duration_s, target: 20.0, tolerance: 0.01, unit: s, source: summary}
+      - {id: route-capture, kind: route_transition, channel: range_to_target_m, target: 500.0, tolerance: 1.0, unit: m, comparison: maximum, source: final}
+      - {id: alpha-envelope, kind: envelope, channel: aero_alpha_deg, target: 4.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+      - {id: beta-envelope, kind: envelope, channel: aero_sideslip_deg, target: 5.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+      - {id: controller-unsaturated, kind: actuator, channel: attitude_controller_saturated, target: 0.0, tolerance: 0.01, unit: "1", comparison: maximum, source: max_abs}
+
+  - id: skywalker-x8-powered-rectangle
+    family: skywalker_x8
+    display_name: Skywalker X8 powered rectangular route
+    problem: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 10000
+    objectives:
+      - {id: duration, kind: controller_mission, channel: duration_s, target: 120.0, tolerance: 0.01, unit: s, source: summary}
+      - {id: final-corner-capture, kind: waypoint, channel: range_to_target_m, target: 300.0, tolerance: 1.0, unit: m, comparison: maximum, source: final}
+      - {id: alpha-envelope, kind: envelope, channel: aero_alpha_deg, target: 12.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+      - {id: beta-envelope, kind: envelope, channel: aero_sideslip_deg, target: 5.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+      - {id: controller-unsaturated, kind: actuator, channel: attitude_controller_saturated, target: 0.0, tolerance: 0.01, unit: "1", comparison: maximum, source: max_abs}
+
+  - id: hummingbird-elevated-rectangle
+    family: hummingbird
+    display_name: Hummingbird hover, elevated corner, and return
+    problem: examples/mission_families/slower_hummingbird/SV05_rectangle_course_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 50000
+    objectives:
+      - {id: duration, kind: controller_mission, channel: duration_s, target: 40.0, tolerance: 0.01, unit: s, source: summary}
+      - {id: return-capture, kind: waypoint, channel: range_to_target_m, target: 0.20, tolerance: 0.01, unit: m, comparison: maximum, source: final}
+      - {id: speed-envelope, kind: envelope, channel: speed_m_s, target: 10.0, tolerance: 0.01, unit: m/s, comparison: maximum, source: max}
+      - {id: altitude-envelope, kind: envelope, channel: altitude_m, target: 3.5, tolerance: 0.01, unit: m, comparison: maximum, source: max}
+
+  - id: x15-source-trim-propnav-transition
+    family: x15
+    display_name: X-15 source trim to native ProNav transition
+    problem: examples/showcases/x15_rocket_to_hawaii/source_trim_then_propnav_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl
+    max_steps: 3000
+    objectives:
+      - {id: duration, kind: controller_transition, channel: duration_s, target: 35.0, tolerance: 0.01, unit: s, source: summary}
+      - {id: propnav-transition, kind: guidance, channel: pro_nav_active, target: 1.0, tolerance: 0.01, unit: "1", comparison: minimum, source: max_abs}
+      - {id: route-transition, kind: route_transition, channel: range_to_target_m, target: 5000.0, tolerance: 1.0, unit: m, comparison: maximum, source: final}
+      - {id: alpha-envelope, kind: envelope, channel: aero_alpha_deg, target: 10.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+      - {id: beta-envelope, kind: envelope, channel: aero_sideslip_deg, target: 10.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}

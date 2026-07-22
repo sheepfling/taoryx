@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 from typing import Callable
 
@@ -85,6 +87,13 @@ def test_category(marker: str) -> None:
     ####
 
 
+def test_vehicle_family(family: str) -> None:
+    """Run only one vehicle family, including its opt-in slow tests."""
+
+    test_category(family)
+    ####
+
+
 def test_views() -> None:
     """Print the supported pytest views and cost-category selections."""
     print("Overlapping test views:")
@@ -99,9 +108,22 @@ def test_views() -> None:
     print("  robustness-matrix   bounded paired vehicle verification with convergence and failure reports")
     print("  verification-artifacts   render the full Matplotlib verification and CA-HI bundle")
     print("  showcase-composites   render nominal paired family and all-family overview figures")
+    print("  b747-x8-evidence      build a UUID-scoped B747/X8 evidence packet")
+    print("  fidelity-packet       build a UUID-scoped four-family fidelity ladder packet")
+    print("  audit-fidelity         audit the newest fidelity packet and milestone gates")
     print("  maneuver-matrix   run bound native vehicle maneuvers and write classified evidence")
     print("  slower-tables regenerate B747, Skywalker X8, and Hummingbird research decks")
+    print("  generate-problems render metadata-driven native .prb products")
+    print("  check-problems verify generated .prb products are current")
+    print("  check-vehicles verify vehicle-family contracts and table bindings")
+    print("  compile-segments compile external segment catalogs into native .prb products")
+    print("  audit-vehicles verify scoped problem files match registry provenance")
+    print("  vehicles   run the complete vehicle registry, generation, and provenance check")
+    print("  segment-lint/build/run validate, compile, or execute the declarative segment catalog")
+    print("  trim-vehicles solve B747, X8, and Hummingbird trims through the common trim solver")
+    print("  control-directions run the signed control-direction convention harness")
     print("Commands: test-grammar, test-equations, test-algorithms, test-slow, test-artifacts, test-spectre")
+    print("Vehicle families: test-b747, test-x8, test-hummingbird, test-x15")
     ####
 
 
@@ -173,6 +195,43 @@ def verification_artifacts() -> None:
 def showcase_composites() -> None:
     """Render nominal paired trajectory composites for the slower vehicles."""
     run([project_python(), str(TOOLS / "render_showcase_composites.py")])
+
+
+def b747_x8_evidence() -> None:
+    """Build the clean B747/X8 source-bound evidence packet."""
+    run([project_python(), str(TOOLS / "build_b747_x8_evidence_packet.py")])
+    ####
+
+
+def fidelity_packet() -> None:
+    """Build the all-family 3-DOF/kinematic/6-DOF evidence packet."""
+    run([project_python(), str(TOOLS / "build_fidelity_ladder_packet.py")])
+    ####
+
+
+def audit_fidelity() -> None:
+    """Audit the newest all-family fidelity packet and its milestone gates."""
+    packets: list[Path] = []
+    for candidate in (ROOT / "artifacts" / "verification" / "fidelity_ladder").glob("*.zip"):
+        try:
+            with zipfile.ZipFile(candidate) as archive:
+                manifest = json.loads(archive.read("manifest.json"))
+            if len(manifest.get("families", [])) == 4:
+                packets.append(candidate)
+        except (OSError, KeyError, ValueError, zipfile.BadZipFile):
+            continue
+    packets.sort(key=lambda path: path.stat().st_mtime)
+    if not packets:
+        raise FileNotFoundError("no all-family fidelity packet found; run `python tools/dev.py fidelity-packet` first")
+    packet = packets[-1]
+    run([project_python(), str(TOOLS / "audit_fidelity_packet.py"), str(packet)])
+    reproduction_dir = ROOT / "artifacts" / "verification" / "fidelity_reproducibility"
+    reproductions = sorted(reproduction_dir.glob("clean-snapshot-*.zip"), key=lambda path: path.stat().st_mtime)
+    command = [project_python(), str(TOOLS / "audit_fidelity_milestones.py"), str(packet)]
+    if reproductions:
+        command.extend(["--reproduced-from", str(reproductions[-1])])
+    command.append("--json")
+    run(command)
     ####
 
 
@@ -185,6 +244,81 @@ def maneuver_matrix() -> None:
 def import_slower_tables() -> None:
     """Regenerate slower-vehicle research decks from source CSV files."""
     run([project_python(), str(TOOLS / "import_slower_6dof_tables.py")])
+    ####
+
+
+def generate_problem_files() -> None:
+    """Generate native problem files from the tracked scenario catalog."""
+    run([project_python(), str(TOOLS / "generate_problem_files.py")])
+    ####
+
+
+def check_problem_files() -> None:
+    """Verify metadata-driven problem files are current."""
+    run([project_python(), str(TOOLS / "generate_problem_files.py"), "--check"])
+    ####
+
+
+def check_vehicle_models() -> None:
+    """Verify vehicle-family membership, fields, and table bindings."""
+    run([project_python(), str(TOOLS / "generate_problem_files.py"), "--check-models"])
+    ####
+
+
+def check_fidelity_parity_contracts() -> None:
+    """Verify shared four-family reduction-parity metadata and hashes."""
+    run([project_python(), str(TOOLS / "generate_fidelity_parity_contracts.py"), "--check"])
+    ####
+
+
+def compile_segments() -> None:
+    """Compile the external segmentation catalog into native problem files."""
+    run([project_python(), str(TOOLS / "compile_segments.py")])
+    ####
+
+
+def lint_segments() -> None:
+    """Lint the external segment catalog without writing products."""
+    run([project_python(), str(TOOLS / "compile_segments.py"), "lint"])
+    ####
+
+
+def run_segments() -> None:
+    """Build and dispatch catalog scenarios through the standard runtime."""
+    run([project_python(), str(TOOLS / "compile_segments.py"), "run"])
+    ####
+
+
+def trim_vehicles() -> None:
+    """Solve the current source-backed family trims through one utility."""
+    for script in ("solve_b747_trim.py", "solve_x8_trim.py", "solve_hummingbird_trim.py"):
+        run([project_python(), str(TOOLS / script)])
+    ####
+
+
+def control_directions() -> None:
+    """Run the configured signed control-direction probes."""
+    run([project_python(), str(TOOLS / "audit_control_directions.py")])
+    ####
+
+
+def run_fidelity_parity() -> None:
+    """Execute candidate shared parity windows and classify blockers."""
+    run([project_python(), str(TOOLS / "run_fidelity_parity.py")])
+    ####
+
+
+def audit_vehicle_provenance() -> None:
+    """Audit vehicle problem headers against the canonical model registry."""
+    run([project_python(), str(TOOLS / "audit_vehicle_provenance.py")])
+    ####
+
+
+def vehicle_check() -> None:
+    """Run the one-command vehicle authoring and provenance workflow."""
+    check_vehicle_models()
+    audit_vehicle_provenance()
+    check_problem_files()
     ####
 
 
@@ -202,10 +336,17 @@ def manual_corpus() -> None:
 
 
 def e2e() -> None:
-    """Validate the checked-in application-level corpus without a TAOS executable."""
+    """Validate the bounded application-level corpus without a TAOS executable."""
+    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime and not slow and not artifact and not spectre"])
+    run([project_python(), "-m", "tools.build_e2e_documented_coverage"])
+    ####
+
+
+def e2e_all() -> None:
+    """Validate every application-level case, including opt-in categories."""
     run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime"])
     run([project_python(), "-m", "tools.build_e2e_documented_coverage"])
-####
+    ####
 
 
 def legacy_audit() -> None:
@@ -272,6 +413,11 @@ def handoff() -> None:
 
 
 def check() -> None:
+    check_vehicle_models()
+    check_fidelity_parity_contracts()
+    compile_segments()
+    audit_vehicle_provenance()
+    check_problem_files()
     lint()
     typecheck()
     test()
@@ -298,15 +444,36 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-grammar": lambda: test_category("grammar"),
     "test-slow": lambda: test_category("slow"),
     "test-spectre": lambda: test_category("spectre"),
+    "test-b747": lambda: test_vehicle_family("b747"),
+    "test-x8": lambda: test_vehicle_family("x8"),
+    "test-hummingbird": lambda: test_vehicle_family("hummingbird"),
+    "test-x15": lambda: test_vehicle_family("x15"),
     "test-views": test_views,
     "showcase-california-hawaii": showcase_california_hawaii,
     "dof-matrix": dof_matrix,
     "robustness-matrix": robustness_matrix,
     "verification-artifacts": verification_artifacts,
     "showcase-composites": showcase_composites,
+    "b747-x8-evidence": b747_x8_evidence,
+    "fidelity-packet": fidelity_packet,
+    "audit-fidelity": audit_fidelity,
     "maneuver-matrix": maneuver_matrix,
     "slower-tables": import_slower_tables,
+    "generate-problems": generate_problem_files,
+    "check-problems": check_problem_files,
+    "check-vehicles": check_vehicle_models,
+    "check-parity": check_fidelity_parity_contracts,
+    "run-parity": run_fidelity_parity,
+    "compile-segments": compile_segments,
+    "segment-lint": lint_segments,
+    "segment-build": compile_segments,
+    "segment-run": run_segments,
+    "trim-vehicles": trim_vehicles,
+    "control-directions": control_directions,
+    "audit-vehicles": audit_vehicle_provenance,
+    "vehicles": vehicle_check,
     "e2e": e2e,
+    "e2e-all": e2e_all,
     "manual": manual,
     "equation-audit": equation_audit,
     "handoff": handoff,

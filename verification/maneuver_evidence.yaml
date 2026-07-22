@@ -336,6 +336,7 @@ cases:
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
     max_steps: 1801
+    allow_ground_termination: true
     limits: {max_speed_m_s: 2500.0, min_altitude_m: 0.0}
   - id: x15/release-coast
     dimension: 6dof
@@ -352,6 +353,7 @@ cases:
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
     max_steps: 1801
+    allow_ground_termination: true
     limits: {max_speed_m_s: 2500.0, min_altitude_m: 0.0}
   - id: x15/terminal-waypoint
     dimension: 6dof
@@ -368,6 +370,7 @@ cases:
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
     max_steps: 1801
+    allow_ground_termination: true
     limits: {max_speed_m_s: 2500.0, min_altitude_m: 0.0}
   - id: x15/bank-energy-management
     dimension: 6dof
@@ -384,6 +387,7 @@ cases:
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
     max_steps: 1801
+    allow_ground_termination: true
     limits: {max_speed_m_s: 2500.0, min_altitude_m: 0.0}
   - id: x15/certified-landing
     dimension: 6dof

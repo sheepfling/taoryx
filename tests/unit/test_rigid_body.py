@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from types import SimpleNamespace
 
 import pytest
@@ -189,6 +190,19 @@ def test_prepared_aerodynamic_coefficients_interpolate_and_reject_envelope() -> 
     }
     with pytest.raises(ValueError, match="outside"):
         tables.force_provider()(2.5, 0.0, 0.0)
+    ####
+
+
+def test_prepared_coefficient_table_accepts_machine_scale_boundary_noise() -> None:
+    table = PreparedCoefficientTable(
+        "control",
+        ("control",),
+        prepare_table(((math.radians(-14.9), math.radians(34.9)),), (1.0, 2.0)),
+    )
+
+    assert table.evaluate({"control": math.radians(-14.9) - 1.0e-14}) == pytest.approx(1.0)
+    with pytest.raises(ValueError, match="outside"):
+        table.evaluate({"control": math.radians(-14.9) - 1.0e-9})
     ####
 
 

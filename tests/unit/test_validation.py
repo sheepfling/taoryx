@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from taoryx.validation import PhaseWindow, require_bounded, require_change_of_sign, require_monotonic, require_net_change
+from taoryx.validation import PhaseWindow, continuity_audit, require_bounded, require_change_of_sign, require_monotonic, require_net_change
 
 HISTORY = tuple({"time_s": float(index), "altitude_m": float(10 - index), "signed": float(index - 2)} for index in range(5))
 
@@ -36,3 +36,22 @@ def test_net_change_checks_phase_displacement_without_overconstraining_samples()
 
 def test_sign_change_check_catches_bank_reversal_shape() -> None:
     require_change_of_sign(HISTORY, "signed", minimum_before=1.0, minimum_after=1.0)
+
+
+def test_continuity_audit_rejects_unexplained_state_jump() -> None:
+    history = tuple({"time_s": float(index), "position_m": value} for index, value in enumerate((0.0, 1.0, 9.0, 10.0)))
+
+    report = continuity_audit(history, {"position_m": 2.0})
+
+    assert report["passed"] is False
+    assert len(report["unexplained_violations"]) == 1
+    assert report["unexplained_violations"][0]["left_time_s"] == 1.0
+
+
+def test_continuity_audit_allows_declared_event_jump() -> None:
+    history = tuple({"time_s": float(index), "position_m": value} for index, value in enumerate((0.0, 1.0, 9.0, 10.0)))
+
+    report = continuity_audit(history, {"position_m": 2.0}, event_times=(2.0,))
+
+    assert report["passed"] is True
+    assert len(report["declared_event_jumps"]) == 1

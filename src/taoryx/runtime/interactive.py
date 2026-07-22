@@ -15,6 +15,8 @@ from enum import StrEnum
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from taoryx.control import SegmentController, VehicleObservation
+
 from .common import Derivative, RuntimeProblem, RuntimeState
 from .engine import integrate_active_vehicles
 
@@ -246,6 +248,7 @@ class InteractiveSession:
     problem: RuntimeProblem
     controls: tuple[ControlSpec, ...] = ()
     control_model: ControlModel | None = None
+    segment_controllers: Mapping[str, SegmentController] = field(default_factory=dict)
     status: InteractiveStatus = InteractiveStatus.CREATED
     snapshots: list[InteractiveSnapshot] = field(default_factory=list)
     command_history: list[ReplayFrame] = field(default_factory=list)
@@ -270,6 +273,9 @@ class InteractiveSession:
         event_names = [event.name for event in self.event_specs]
         if len(set(event_names)) != len(event_names):
             raise ValueError("interactive event names must be unique")
+        unknown_controllers = sorted(set(self.segment_controllers) - set(self.problem.vehicles))
+        if unknown_controllers:
+            raise ValueError(f"segment controller references unknown vehicle(s): {', '.join(unknown_controllers)}")
         ####
         self._last_commands = {control.name: control.default for control in self.controls}
         self._fired_events = set()
@@ -322,8 +328,22 @@ class InteractiveSession:
             raise RuntimeError(f"cannot step an interactive session in {self.status.value} state")
         if not math.isfinite(duration) or duration <= 0.0:
             raise ValueError("interactive step duration must be positive and finite")
-        applied = self._normalize_commands(commands or {}, duration)
         start = self.time
+        controller_commands: dict[str, float] = {}
+        controller_diagnostics: list[str] = []
+        for vehicle_name, controller in self.segment_controllers.items():
+            vehicle = self.problem.vehicles[vehicle_name]
+            observed_state = {
+                **dict(zip(vehicle.state.value_names, vehicle.state.values, strict=False)),
+                **vehicle.state.named,
+            }
+            observation = VehicleObservation(vehicle.state.time, observed_state)
+            generated = controller.step(observation, duration)
+            controller_commands.update(generated.values)
+            if generated.saturated:
+                controller_diagnostics.append(f"controller-saturated:{vehicle_name}:{','.join(generated.saturated)}")
+        requested_commands = {**controller_commands, **(commands or {})}
+        applied = self._normalize_commands(requested_commands, duration)
         self.status = InteractiveStatus.RUNNING
         try:
             integrate_active_vehicles(self.problem, duration)
@@ -366,10 +386,13 @@ class InteractiveSession:
             raise
         # Replay the requested stream, not only the bounded result. The
         # limiter must be re-applied so the replay verifies control semantics.
-        self.command_history.append(ReplayFrame(duration, dict(commands or {})))
+        self.command_history.append(ReplayFrame(duration, dict(requested_commands)))
         statuses = {
             vehicle.name: {
-                status.name: vehicle.state.named.get(status.source or status.name, 0.0)
+                status.name: self._last_commands.get(
+                    status.source or status.name,
+                    vehicle.state.named.get(status.source or status.name, 0.0),
+                )
                 for status in self.status_specs
                 if vehicle.dynamics_mode.value in status.modes
             }
@@ -381,6 +404,7 @@ class InteractiveSession:
             {name: vehicle.state for name, vehicle in self.problem.vehicles.items()},
             applied,
             tuple(events) + tuple(event.name for event in runtime_events),
+            diagnostics=tuple(controller_diagnostics),
             status=self.status,
             runtime_events=tuple(runtime_events),
             statuses=statuses,

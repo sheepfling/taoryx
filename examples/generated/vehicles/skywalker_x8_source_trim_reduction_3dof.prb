@@ -1,0 +1,37 @@
+(slower-x8-sv03-source-trim-reduction-3dof)
+*title Skywalker X8 source-composed powered trim point-mass reduction
+*mode point-mass
+*atmos standard
+*earth wgs-84 omega=0.0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status vehicle reference-area=0.75 reference-length=0.36 dry-mass-kg=3.364 inertia-x=0.325 inertia-y=0.14 inertia-z=0.4 envelope-min-forward-speed=2 envelope-max-speed=27 envelope-max-alpha-deg=12 envelope-max-beta-deg=5
+*runtime control throttle vehicle=1 default=0.5773431905510489 lower=0 upper=1
+*runtime control collective-elevon-deg vehicle=1 default=-2.147887654393667 lower=-20 upper=20
+*runtime control differential-elevon-deg vehicle=1 default=-3.9378035933567617 lower=-20 upper=20
+
+
+
+
+*define x8-cx
+  x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
+*define x8-cy
+  x8-cy=(cy-static)+(cy-collective)-(cy-static)+(cy-differential)-(cy-static);
+*define x8-cz
+  x8-cz=(cz-static)+(cz-collective)-(cz-static)+(cz-differential)-(cz-static);
+
+*trajectory 1 x8 start on 1
+  *initial geodetic alt=178.0 long=0.0 lat=0.0 vel=17.9 gama=0.0 psi=90.0 time=0.0 mass=3.364
+  *segment 1 source-trim-reduction
+    *integ dtprnt=0.1 dt=0.005
+    *prop thrust=(thrust) mdot=0
+    *aero cx=x8-cx cy=x8-cy cz=x8-cz sref=0.75
+    *fly alpha=7.8095001441
+
+    *when time>0.1 stop
+*end

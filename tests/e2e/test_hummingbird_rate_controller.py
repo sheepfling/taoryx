@@ -17,6 +17,7 @@ TABLES = tuple(ROOT / "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bu
 
 @pytest.mark.slow
 @pytest.mark.dof6
+@pytest.mark.hummingbird
 def test_hummingbird_rate_damping_uses_individual_rotor_commands(tmp_path: Path) -> None:
     report = run_files(PROBLEM, TABLES, output_dir=tmp_path, max_steps=700, profile=GrammarProfile.TAORYX)
     assert report.exit_code == 0, [(item.code, item.message) for item in report.diagnostics]

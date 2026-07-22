@@ -15,6 +15,9 @@ The native guided rigid-body work is staged separately in
 The composition, resolved-scenario, artifact, and visualization sequence is
 tracked in
 [`../plan/composable-scenario-runtime.md`](../plan/composable-scenario-runtime.md).
+The progressive point-mass, kinematic bridge, and rigid-body fidelity ladder is
+described in
+[`dynamics-fidelity-ladder.md`](dynamics-fidelity-ladder.md).
 
 ## System layers
 

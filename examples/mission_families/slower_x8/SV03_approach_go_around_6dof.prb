@@ -29,10 +29,12 @@
     *integ dtprnt=0.1 dt=0.005
     *prop thrust=(thrust) mdot=0
     *aero cx=x8-cx cy=x8-cy cz=x8-cz cmx=x8-cmx cmy=x8-cmy cmz=x8-cmz
+    *fly propnav=4
     *when time>12.0 goto 2
   *segment 2 go-around-checkpoint
     *integ dtprnt=0.1 dt=0.005
     *prop thrust=(thrust) mdot=0
     *aero cx=x8-cx cy=x8-cy cz=x8-cz cmx=x8-cmx cmy=x8-cmy cmz=x8-cmz
+    *fly propnav=4
     *when time>24.0 stop
 *end

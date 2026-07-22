@@ -105,6 +105,20 @@ class TurnCommand:
     saturated: bool = False
 
 
+def limit_vector_norm(vector: Vector3, maximum_norm: float) -> Vector3:
+    """Limit a guidance vector without changing its direction."""
+
+    if maximum_norm < 0.0 or not math.isfinite(maximum_norm):
+        raise ValueError("maximum vector norm must be finite and nonnegative")
+    norm = vector.norm()
+    if norm == 0.0 or norm <= maximum_norm:
+        return vector
+    if maximum_norm == 0.0:
+        return Vector3(0.0, 0.0, 0.0)
+    return vector.scaled(maximum_norm / norm)
+    ####
+
+
 @dataclass(frozen=True, slots=True)
 class CoordinatedTurnController:
     """Reusable heading/bank controller for rigid-body waypoint turns.

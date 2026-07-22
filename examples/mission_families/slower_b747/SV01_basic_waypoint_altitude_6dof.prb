@@ -16,6 +16,5 @@
     *integ dtprnt=0.1 dt=0.02
     *prop thrust=179539.8975191153 mdot=0
     *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
-    *fly propnav=4
     *when time>10.0 stop
 *end

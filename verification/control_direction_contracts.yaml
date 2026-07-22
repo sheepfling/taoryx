@@ -1,0 +1,48 @@
+schema_version: 1
+id: taoryx_control_direction_contracts_v1
+description: >-
+  Local signed-effect probes. Expected signs are source-convention claims and
+  must be reviewed against the source tables before controller evidence.
+vehicles:
+  - vehicle: b747
+    problem: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+    baseline: {elevator-deg: 0.3861602391}
+    probes:
+      - {control: elevator-deg, response: total_moment_body_y_nm, delta: 0.1, expected_sign: -1}
+  - vehicle: skywalker_x8
+    problem: examples/mission_families/slower_x8/SV03_source_trim_hold_30_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    baseline: {collective-elevon-deg: -2.1478876544, differential-elevon-deg: -3.9378035934}
+    probes:
+      - {control: collective-elevon-deg, response: total_moment_body_y_nm, delta: 0.1, expected_sign: -1}
+      - {control: differential-elevon-deg, response: total_moment_body_x_nm, delta: 0.1, expected_sign: 1}
+  - vehicle: hummingbird
+    problem: examples/mission_families/slower_hummingbird/SV05_long_hover_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    baseline: {rotor-speed: 468.7244338634}
+    probes:
+      - {control: rotor-speed, response: total_force_body_z_n, delta: 1.0, expected_sign: -1, antisymmetry_tolerance: 0.01}
+  - vehicle: x15
+    problem: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl
+    baseline: {symmetric-stabilator-deg: 0.0, differential-stabilator-deg: 0.0, rudder-deg: 2.0}
+    probes:
+      - {control: symmetric-stabilator-deg, response: total_moment_body_y_nm, delta: 0.1, expected_sign: -1, antisymmetry_tolerance: 1e-8}
+      - {control: differential-stabilator-deg, response: total_moment_body_x_nm, delta: 0.1, expected_sign: 1}
+      - {control: rudder-deg, response: total_moment_body_z_nm, delta: 0.1, expected_sign: -1}

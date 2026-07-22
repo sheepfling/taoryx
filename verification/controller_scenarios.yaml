@@ -4,6 +4,7 @@ description: Bounded native rigid-body controller responses after plant validati
 vehicles:
   - id: b747-bounded-route-controller
     display_name: B747 bounded route-attitude controller
+    vehicle_id: b747
     family: fixed-wing
     problem: examples/mission_families/slower_b747/SV01_bounded_route_controller_6dof.prb
     tables:
@@ -18,6 +19,7 @@ vehicles:
       require_unsaturated: 1.0
   - id: skywalker-x8-bounded-route-controller
     display_name: Skywalker X8 bounded route-attitude controller
+    vehicle_id: skywalker_x8
     family: fixed-wing
     problem: examples/mission_families/slower_x8/SV03_bounded_route_controller_6dof.prb
     tables:
@@ -31,14 +33,18 @@ vehicles:
       require_guidance: 1.0
       require_unsaturated: 1.0
   - id: skywalker-x8-longitudinal-recovery
-    display_name: Skywalker X8 0.5-second longitudinal recovery
+    display_name: Skywalker X8 10-second powered longitudinal recovery
+    vehicle_id: skywalker_x8
     family: fixed-wing
-    problem: examples/mission_families/slower_x8/SV03_long_controller_recovery_6dof.prb
+    problem: examples/generated/vehicles/skywalker_x8_controller_recovery_10_6dof.prb
     tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
-    max_steps: 150
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 3000
     expectations:
-      min_duration_s: 0.5
+      min_duration_s: 10.0
       max_alpha_deg: 12.0
       max_beta_deg: 5.0
       max_body_rate_deg_s: 180.0
@@ -46,9 +52,12 @@ vehicles:
       require_unsaturated: 1.0
   - id: skywalker-x8-lateral-rate-response
     display_name: Skywalker X8 independent sideslip and rate response
+    vehicle_id: skywalker_x8
     family: fixed-wing
     problem: examples/mission_families/slower_x8/SV03_lateral_rate_response_6dof.prb
     tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
     max_steps: 1200
     expectations:
@@ -60,11 +69,34 @@ vehicles:
       require_unsaturated: 1.0
   - id: hummingbird-controller-blocked
     display_name: Hummingbird controller allocation gate
+    vehicle_id: hummingbird
     family: multirotor
     status: blocked
     reason: Individual rotor allocation and rate damping are available; a full waypoint/position controller still requires attitude-command and actuator-state coverage through the canonical vehicle contract.
+  - id: hummingbird-waypoint-return-home-land
+    display_name: Hummingbird waypoint course and return-home landing
+    vehicle_id: hummingbird
+    family: multirotor
+    kind: multirotor_waypoint_land
+    problem: examples/mission_families/slower_hummingbird/SV05_return_home_land_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 25000
+    expectations:
+      min_duration_s: 18.0
+      max_altitude_m: 2.1
+      max_speed_m_s: 1.0
+      final_range_m: 0.001
+      final_altitude_m: 0.001
+      require_motor_shutdown: 1.0
   - id: hummingbird-rate-damped-hover
     display_name: Hummingbird individual-rotor rate-damped hover
+    vehicle_id: hummingbird
     family: multirotor
     problem: examples/mission_families/slower_hummingbird/SV05_rate_damped_hover_6dof.prb
     tables:
@@ -74,9 +106,23 @@ vehicles:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 1000
     reason: First closed-loop rate-damping gate; position/waypoint control remains separate.
-  - id: skywalker-x8-long-recovery-blocked
-    display_name: Skywalker X8 longer collective-elevon recovery
-    family: fixed-wing
-    status: blocked
-    reason: Extending the longitudinal recovery beyond the 0.5-second validated window remains blocked until sideslip and rate response are independently tuned against the local source deck.
+  - id: x15-source-trim-propnav-transition
+    display_name: X-15 source-trim to native ProNav transition
+    vehicle_id: x15
+    family: hypersonic-glider
+    problem: examples/showcases/x15_rocket_to_hawaii/source_trim_then_propnav_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl
+    max_steps: 3000
+    expectations:
+      min_duration_s: 35.0
+      max_alpha_deg: 10.0
+      max_beta_deg: 10.0
+      max_body_rate_deg_s: 3600.0
+      require_guidance: 1.0
+      require_unsaturated: 1.0

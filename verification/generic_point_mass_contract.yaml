@@ -1,0 +1,20 @@
+schema_version: 1
+id: taoryx_generic_point_mass_contract_v1
+description: >-
+  Vehicle-independent contract fixture for the staged fidelity harness. It
+  contains no aerodynamic or propulsion tables and exists to prove that a new
+  point-mass family can enter the contract/parity workflow without a bespoke
+  adapter.
+scenario_id: generic-point-mass-contract-v1
+problem: examples/verification/kinematic_bridge/generic_point_mass.prb
+unit_system: si
+duration_s: 10.0
+tiers:
+  - 3dof
+  - pseudo_6dof
+physical_inputs:
+  initial_state: {x_m: 7000000.0, y_m: 0.0, z_m: 0.0, vx_m_s: 0.0, vy_m_s: 100.0, vz_m_s: 0.0, mass_kg: 1.0}
+  environment: {atmosphere: none, earth_model: spherical, earth_omega_rad_s: 0.0, gravity_m_s2: 0.0}
+  command_history: []
+  event_schedule: []
+  termination_policy: {kind: time, value_s: 10.0}

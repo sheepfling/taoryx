@@ -21,6 +21,7 @@ TABLES = tuple(ROOT / "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bu
 
 @pytest.mark.slow
 @pytest.mark.dof6
+@pytest.mark.hummingbird
 def test_hummingbird_individual_rotor_allocation_reaches_runtime_wrench(tmp_path: Path) -> None:
     report = run_files(PROBLEM, TABLES, output_dir=tmp_path, max_steps=500, profile=GrammarProfile.TAORYX)
     assert report.exit_code == 0, [(item.code, item.message) for item in report.diagnostics]

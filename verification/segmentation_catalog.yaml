@@ -1,0 +1,200 @@
+schema_version: 1
+id: taoryx_declarative_segmentation_v1
+description: >-
+  External orchestration metadata for reusable staged examples. The compiler
+  copies native segment bodies from generated problem sources and emits only
+  historical TAOS/TAORYX syntax.
+controllers:
+  - b747-trim-hold
+  - b747-heading-hold
+  - x8-trim-hold
+  - x8-recovery
+  - hummingbird-altitude
+  - hummingbird-position
+  - x15-energy-management
+  - x15-descent
+actuators:
+  - b747-standard
+  - x8-elevons
+  - hummingbird-quad-x
+  - x15-bank
+tables:
+  - b747-aero
+  - x8-static
+  - x8-control
+  - hummingbird-rotors
+  - x15-aero
+environments:
+  - standard-atmosphere
+  - wgs84-gravity
+scenarios:
+  - id: b747-segmentation-lifecycle
+    vehicle: b747
+    family: fixed-wing-jet
+    source_problem: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
+    output_problem: artifacts/segmentation/examples/b747-segmentation-lifecycle.prb
+    output_manifest: artifacts/segmentation/manifests/b747-segmentation-lifecycle.json
+    output_audit: artifacts/segmentation/audits/b747-segmentation-lifecycle.json
+    runtime_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+    segments:
+      - id: trim
+        mode: rigid_body_6dof
+        entry: {condition: "time >= 0", frame: ecfc, units: si}
+        exit: {condition: "time > 60", target: heading-step}
+        controller: b747-trim-hold
+        actuator_binding: b747-standard
+        table_dependencies: [b747-aero]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: b747-trim-hold
+          kind: trim_hold
+          target: {speed_m_s: 153.0, altitude_m: 100.0}
+          tolerance: {speed_m_s: 1.0, altitude_m: 5.0}
+          dwell_time_s: 30.0
+      - id: heading-step
+        mode: rigid_body_6dof
+        entry: {condition: "time > 60", frame: ecfc, units: si}
+        exit: {condition: "time > 120", action: stop}
+        controller: b747-heading-hold
+        actuator_binding: b747-standard
+        table_dependencies: [b747-aero]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: b747-heading-step
+          kind: heading_capture
+          target: {heading_deg: 10.0}
+          tolerance: {heading_deg: 2.0, altitude_m: 10.0}
+          dwell_time_s: 10.0
+        transition: {position: continuous, velocity: continuous, attitude: continuous, rates: continuous, mass: continuous}
+  - id: x8-segmentation-lifecycle
+    vehicle: skywalker_x8
+    family: fixed-wing-uav
+    source_problem: examples/mission_families/slower_x8/SV03_long_validation_6dof.prb
+    output_problem: artifacts/segmentation/examples/x8-segmentation-lifecycle.prb
+    output_manifest: artifacts/segmentation/manifests/x8-segmentation-lifecycle.json
+    output_audit: artifacts/segmentation/audits/x8-segmentation-lifecycle.json
+    runtime_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    segments:
+      - id: powered-trim
+        mode: rigid_body_6dof
+        entry: {condition: "time >= 0", frame: ecfc, units: si}
+        exit: {condition: "time > 30", target: recovery}
+        controller: x8-trim-hold
+        actuator_binding: x8-elevons
+        table_dependencies: [x8-static, x8-control]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: x8-powered-trim
+          kind: trim_hold
+          target: {speed_m_s: 17.9, altitude_m: 178.0}
+          tolerance: {speed_m_s: 1.0, altitude_m: 10.0}
+          dwell_time_s: 10.0
+      - id: recovery
+        mode: rigid_body_6dof
+        entry: {condition: "time > 30", frame: ecfc, units: si}
+        exit: {condition: "time > 60", action: stop}
+        controller: x8-recovery
+        actuator_binding: x8-elevons
+        table_dependencies: [x8-static, x8-control]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: x8-recovery
+          kind: altitude_capture
+          target: {altitude_m: 178.0}
+          tolerance: {altitude_m: 15.0, speed_m_s: 3.0}
+          dwell_time_s: 5.0
+  - id: hummingbird-segmentation-lifecycle
+    vehicle: hummingbird
+    family: multirotor
+    source_problem: examples/mission_families/slower_hummingbird/SV05_long_hover_6dof.prb
+    output_problem: artifacts/segmentation/examples/hummingbird-segmentation-lifecycle.prb
+    output_manifest: artifacts/segmentation/manifests/hummingbird-segmentation-lifecycle.json
+    output_audit: artifacts/segmentation/audits/hummingbird-segmentation-lifecycle.json
+    runtime_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_reaction_torque.tbl
+    segments:
+      - id: takeoff
+        mode: rigid_body_6dof
+        entry: {condition: "time >= 0", frame: ecfc, units: si}
+        exit: {condition: "time > 5", target: hover}
+        controller: hummingbird-altitude
+        actuator_binding: hummingbird-quad-x
+        table_dependencies: [hummingbird-rotors]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: hummingbird-takeoff
+          kind: altitude_capture
+          target: {altitude_m: 2.0}
+          tolerance: {altitude_m: 0.1, vertical_speed_m_s: 0.2}
+          dwell_time_s: 2.0
+      - id: hover
+        mode: rigid_body_6dof
+        entry: {condition: "time > 5", frame: ecfc, units: si}
+        exit: {condition: "time > 30", action: stop}
+        controller: hummingbird-position
+        actuator_binding: hummingbird-quad-x
+        table_dependencies: [hummingbird-rotors]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: hummingbird-hover
+          kind: hover
+          target: {altitude_m: 2.0}
+          tolerance: {position_m: 0.1, speed_m_s: 0.2, body_rates_rad_s: 0.1}
+          dwell_time_s: 10.0
+  - id: x15-segmentation-lifecycle
+    vehicle: x15
+    family: unpowered-hypersonic-glider
+    source_problem: examples/mission_families/hypersonic_glide_terminal_guidance/mission.prb
+    output_problem: artifacts/segmentation/examples/x15-segmentation-lifecycle.prb
+    output_manifest: artifacts/segmentation/manifests/x15-segmentation-lifecycle.json
+    output_audit: artifacts/segmentation/audits/x15-segmentation-lifecycle.json
+    runtime_tables:
+      - examples/mission_families/hypersonic_glide_terminal_guidance/aero.tbl
+    segments:
+      - id: release-coast
+        mode: rigid_body_6dof
+        entry: {condition: "time >= 0", frame: ecfc, units: si}
+        exit: {condition: "time > 30", target: descent}
+        controller: x15-energy-management
+        actuator_binding: x15-bank
+        table_dependencies: [x15-aero]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: x15-release
+          kind: separation
+          tolerance: {altitude_m: 100.0, speed_m_s: 25.0}
+          reference: carrier-release-state
+      - id: descent
+        source_segment: 2
+        mode: rigid_body_6dof
+        entry: {condition: "time > 30", frame: ecfc, units: si}
+        exit: {condition: "alt < 0", action: stop}
+        controller: x15-descent
+        actuator_binding: x15-bank
+        table_dependencies: [x15-aero]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: x15-ground-contact
+          kind: ground_contact
+          tolerance: {altitude_m: 1.0, vertical_speed_m_s: 25.0}
+          dwell_time_s: 0.0
+    events:
+      - id: x15-release-to-descent
+        kind: separation
+        condition: "time > 30"
+        action: goto
+        target: descent
+        transition: {position: continuous, velocity: continuous, attitude: continuous, rates: continuous, mass: continuous}
+        reason: source-prescribed release/coast handoff; no synthetic impulse

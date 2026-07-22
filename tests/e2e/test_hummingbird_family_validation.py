@@ -9,7 +9,7 @@ import pytest
 
 from taoryx.language import GrammarProfile
 from taoryx.runtime.runner import RunReport, run_files
-from taoryx.validation import PhaseWindow, require_bounded, require_net_change
+from taoryx.validation import PhaseWindow, independent_force_closure, independent_moment_closure, require_bounded, require_net_change
 from taoryx.visualization import render_run_artifact_plots
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,7 +31,7 @@ TAKEOFF = ROOT / "examples/mission_families/slower_hummingbird/SV05_takeoff_6dof
 LANDING = ROOT / "examples/mission_families/slower_hummingbird/SV05_landing_6dof.prb"
 RETURN_HOME_LAND = ROOT / "examples/mission_families/slower_hummingbird/SV05_return_home_land_6dof.prb"
 
-pytestmark = [pytest.mark.slow, pytest.mark.dof6]
+pytestmark = [pytest.mark.slow, pytest.mark.dof6, pytest.mark.hummingbird]
 
 
 def _run(problem: Path, output_dir: Path, max_steps: int) -> RunReport:
@@ -83,6 +83,17 @@ def test_hummingbird_rectangle_route_has_expected_phase_displacements(tmp_path: 
     assert max(abs(sample[name]) for sample in history for name in ("wx", "wy", "wz")) < 0.1
     assert max(sample["translation_equation_residual_normalized"] for sample in history) < 1.0e-8
     assert max(sample["rotation_equation_residual_normalized"] for sample in history) < 1.0e-8
+    assert independent_force_closure(history)["p99_normalized_residual"] < 1.0e-6
+    enriched = tuple(
+        {
+            **sample,
+            "inertia_x_kg_m2": 0.00365,
+            "inertia_y_kg_m2": 0.00368,
+            "inertia_z_kg_m2": 0.00703,
+        }
+        for sample in history
+    )
+    assert independent_moment_closure(enriched)["p99_normalized_residual"] < 1.0e-6
 ####
 
 

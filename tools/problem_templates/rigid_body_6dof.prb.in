@@ -1,0 +1,23 @@
+({{problem_id}})
+*title {{title}}
+*mode {{mode}}
+*atmos standard
+*earth {{earth_model}} omega={{earth_omega_rad_s}}{{earth_gm_suffix}}
+{{vehicle_runtime}}
+{{control_lines}}
+{{target_line}}
+{{route_line}}
+{{guidance_line}}
+*runtime status actuator {{actuator_runtime}}
+*runtime status thermal policy=none
+{{definition_line}}
+*trajectory 1 {{trajectory_vehicle}} start on 1
+  *initial ecic {{initial_state}}
+  *segment 1 {{segment_name}}
+    *integ dtprnt={{dtprnt}} dt={{dt}}
+{{propulsion_line}}
+{{aero_line}}
+{{fly_line}}
+{{file_line}}
+    *when time>{{stop_time}} stop
+*end

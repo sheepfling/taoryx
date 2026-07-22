@@ -98,10 +98,23 @@ def _run(binding: dict[str, Any], output: Path, plots: bool) -> dict[str, Any]:
             violated = observed > limit if operation in {"abs_max", "max"} else observed < limit
             if violated:
                 violations.append({"limit": limit_name, "channel": channel, "observed": observed, "allowed": limit})
-    safety_events = [event for artifact in report.artifacts for event in artifact.events if str(event.get("signal", "")).casefold() in {"earth-intersection", "runtime-safety"}]
+    termination_events = [
+        event
+        for artifact in report.artifacts
+        for event in artifact.events
+        if str(event.get("signal", "")).casefold() in {"earth-intersection", "runtime-safety"}
+    ]
+    safety_events = [
+        event
+        for event in termination_events
+        if not (binding.get("allow_ground_termination", False) and str(event.get("signal", "")).casefold() == "earth-intersection")
+    ]
     for event in safety_events:
         violations.append({"limit": "runtime-safety", "channel": str(event.get("signal", "runtime-safety")), "observed": float(event.get("time", 0.0)), "allowed": "no safety termination"})
-    status = "completed" if completed and not violations else ("completed_unsafe" if completed else ("failed" if report.exit_code != 0 and not report.results else "incomplete"))
+    if completed and not violations:
+        status = "completed_ground_terminated" if termination_events and binding.get("allow_ground_termination", False) else "completed"
+    else:
+        status = "completed_unsafe" if completed else ("failed" if report.exit_code != 0 and not report.results else "incomplete")
     final_values = {} if final is None else {name: final.named[name] for name in FINAL_CHANNELS if name in final.named}
     if is_point_mass and final is not None:
         if "alt" in final.named:
@@ -117,6 +130,8 @@ def _run(binding: dict[str, Any], output: Path, plots: bool) -> dict[str, Any]:
         "problem": str(problem.relative_to(ROOT)),
         "tables": [str(path.relative_to(ROOT)) for path in tables],
         "exit_code": report.exit_code,
+        "stop_reason": [item.stop_reason for item in report.results],
+        "termination_events": termination_events,
         "completed": completed,
         "status": status,
         "limits": limits,
@@ -188,7 +203,7 @@ def main() -> int:
         matching = [binding for binding in bindings if str(binding.get("case_id", binding["id"])) == identifier]
         bound_dimensions = sorted({str(binding["dimension"]) for binding in matching})
         observed = [summary for summary in reports if str(summary.get("case_id", summary.get("id", ""))) == identifier]
-        passing = [summary for summary in observed if summary.get("status") == "completed"]
+        passing = [summary for summary in observed if summary.get("status") in {"completed", "completed_ground_terminated"}]
         passing_dimensions = sorted({str(summary["dimension"]) for summary in passing})
         row_status = "pass" if passing else ("unsafe" if any(summary.get("status") == "completed_unsafe" for summary in observed) else "incomplete" if observed else "unrun")
         coverage.append({

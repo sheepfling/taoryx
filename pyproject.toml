@@ -65,6 +65,10 @@ markers = [
   "stress: intentionally large or long-running runtime cases",
   "negative_runtime: malformed inputs for executable-level rejection checks",
   "metamorphic: compares multiple TAOS executions",
+  "b747: Boeing 747 vehicle-family validation and evidence",
+  "x8: Skywalker X8 vehicle-family validation and evidence",
+  "hummingbird: AscTec Hummingbird vehicle-family validation and evidence",
+  "x15: X-15 vehicle-family validation and evidence",
 ]
 
 [tool.ruff]

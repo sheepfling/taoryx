@@ -1,0 +1,28 @@
+({{problem_id}})
+*title {{title}}
+*mode point-mass
+*atmos standard
+*earth {{earth_model}} omega={{earth_omega_rad_s}}
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+{{vehicle_runtime}}
+{{control_lines}}
+{{target_line}}
+{{route_line}}
+{{guidance_line}}
+{{definition_line}}
+*trajectory 1 {{trajectory_vehicle}} start on 1
+  *initial geodetic {{initial_geodetic}}
+  *segment 1 {{segment_name}}
+    *integ dtprnt={{dtprnt}} dt={{dt}}
+{{propulsion_line}}
+{{aero_line}}
+{{fly_line}}
+{{file_line}}
+    *when time>{{stop_time}} stop
+*end

@@ -71,6 +71,58 @@ def test_successor_6dof_directive_lowers_to_rigid_body_runtime() -> None:
     assert result.states["1"][-1].time == pytest.approx(0.2)
 
 
+def test_kinematic_problem_mode_tracks_a_lagged_prescribed_attitude() -> None:
+    document = parse_problem_text(
+        "(kinematic-bridge-smoke)\n"
+        "*mode kinematic-6dof\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*runtime status attitude mode=lag roll-deg=0 pitch-deg=0 yaw-deg=30 lag-s=0.5 max-rate-deg-s=180\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecic x=7000000 y=0 z=0 xdt=0 ydt=100 zdt=0 time=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dtprnt=0.1 dt=0.1\n"
+        "    *when time>1.0 stop\n"
+        "*end\n",
+        profile="taoryx",
+    )
+
+    assert not [item for item in document.diagnostics if item.severity.value == "error"]
+    lowered = lower_problem_document(document)
+    assert lowered.unsupported_features == ()
+    vehicle = lowered.cases[0].problem.vehicles["1"]
+    assert vehicle.dynamics_mode is DynamicsMode.KINEMATIC_6DOF
+    assert vehicle.kinematic_state is not None
+    result = compute_trajectories(lowered.cases[0].problem, max_steps=20)
+    history = result.states["1"]
+    assert history[-1].time == pytest.approx(1.0)
+    assert history[-1].named["qz"] > 0.0
+    assert history[-1].named["qz"] < 0.3
+    assert history[-1].named["qw"] > 0.9
+
+
+def test_kinematic_problem_mode_accepts_prescribed_body_rates() -> None:
+    document = parse_problem_text(
+        "(kinematic-rate-smoke)\n"
+        "*mode kinematic-6dof\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*runtime status attitude mode=rate yaw-rate-deg-s=90\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecic x=7000000 y=0 z=0 xdt=0 ydt=100 zdt=0 time=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dtprnt=0.1 dt=0.1\n"
+        "    *when time>0.5 stop\n"
+        "*end\n",
+        profile="taoryx",
+    )
+
+    lowered = lower_problem_document(document)
+    result = compute_trajectories(lowered.cases[0].problem, max_steps=10)
+    final = result.states["1"][-1].named
+    assert final["qz"] > 0.1
+
+
 def test_unknown_mode_is_source_located() -> None:
     document = parse_problem_text("(demo)\n*mode six-dof\n*end\n")
 

@@ -1,0 +1,38 @@
+(x8-source-trim-parity-6dof)
+*title Skywalker X8 same-plant parity rigid-body case
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=0.0
+*runtime status vehicle reference-area=0.75 reference-length=0.36 dry-mass-kg=3.364 inertia-x=0.325 inertia-y=0.14 inertia-z=0.4 envelope-min-forward-speed=2 envelope-max-speed=27 envelope-max-alpha-deg=12 envelope-max-beta-deg=5
+*runtime control throttle vehicle=1 default=0.6265437663082247 lower=0 upper=1
+*runtime control collective-elevon-deg vehicle=1 default=-2.097861479714001 lower=-20 upper=20
+*runtime control differential-elevon-deg vehicle=1 default=-3.9378035933567617 lower=-20 upper=20
+
+
+
+
+*runtime status actuator maximum-moment=20 maximum-body-rate-deg-s=360
+*runtime status thermal policy=none
+*define x8-cx
+  x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
+*define x8-cy
+  x8-cy=(cy-static)+(cy-collective)-(cy-static)+(cy-differential)-(cy-static);
+*define x8-cz
+  x8-cz=(cz-static)+(cz-collective)-(cz-static)+(cz-differential)-(cz-static);
+*define x8-cmx
+  x8-cmx=(cmx-static)+(cmx-collective)-(cmx-static)+(cmx-differential)-(cmx-static);
+*define x8-cmy
+  x8-cmy=(cmy-static)+(cmy-collective)-(cmy-static)+(cmy-differential)-(cmy-static);
+*define x8-cmz
+  x8-cmz=(cmz-static)+(cmz-collective)-(cmz-static)+(cmz-differential)-(cmz-static);
+
+*trajectory 1 x8 start on 1
+  *initial ecic x=6378315.0 y=0.0 z=0.0 xdt=0.0 ydt=17.9 zdt=0.0 qw=0.5326838779354746 qx=-0.5326838779354746 qy=-0.4650246081527563 qz=0.4650246081527563 time=0.0 mass=3.364 propellant_mass=0.0
+  *segment 1 powered-trim-parity
+    *integ dtprnt=0.005 dt=0.005
+    *prop thrust=(thrust) mdot=0
+    *aero cx=x8-cx cy=x8-cy cz=x8-cz cmx=x8-cmx cmy=x8-cmy cmz=x8-cmz
+
+
+    *when time>0.1 stop
+*end

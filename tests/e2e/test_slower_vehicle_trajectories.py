@@ -10,6 +10,7 @@ from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.runtime.runner import RunReport, run_files
 from taoryx.visualization import render_run_artifact_plots
 from tests.e2e.support.golden_plants import GoldenPlantCase, run_golden_plant
+from tests.e2e.support.vehicle_sources import source_table
 
 ROOT = Path(__file__).resolve().parents[2]
 MATRIX = yaml.safe_load((ROOT / "examples/mission_families/slower_vehicle_trajectory_matrix.yaml").read_text(encoding="utf-8"))
@@ -30,8 +31,8 @@ pytestmark = [pytest.mark.dof3, pytest.mark.dof6]
 @pytest.mark.parametrize(
     ("problem", "tables", "expected_alpha_deg", "expected_beta_deg"),
     (
-        (B747_ANCHOR, (FIXTURE_TABLES / "b747_nominal_static_6axis.tbl",), 3.1, 0.0),
-        (X8_ANCHOR, (FIXTURE_TABLES / "skywalker_x8_static_6axis.tbl",), 7.9, 0.0),
+        (B747_ANCHOR, (source_table("b747", "b747_nominal_static_6axis.tbl"),), 3.1, 0.0),
+        (X8_ANCHOR, (source_table("skywalker_x8", "skywalker_x8_static_6axis.tbl"),), 7.9, 0.0),
     ),
     ids=("b747-condition3-alpha-reference", "x8-published-trim"),
 )
@@ -75,7 +76,7 @@ def test_b747_condition3_trim_hold_is_bounded(tmp_path: Path) -> None:
         GoldenPlantCase(
             vehicle="B747-condition3-trim",
             problem=B747_TRIM,
-            tables=(FIXTURE_TABLES / "b747_nominal_elevator_6axis.tbl",),
+            tables=(source_table("b747", "b747_nominal_elevator_6axis.tbl"),),
             max_steps=600,
         ),
         tmp_path,
@@ -102,10 +103,10 @@ def test_x8_solved_powered_trim_closes_at_initial_state(tmp_path: Path) -> None:
     run = run_files(
         X8_TRIM,
         (
-            FIXTURE_TABLES / "skywalker_x8_static_6axis.tbl",
-            FIXTURE_TABLES / "skywalker_x8_collective_elevon_6axis.tbl",
-            FIXTURE_TABLES / "skywalker_x8_differential_elevon_6axis.tbl",
-            FIXTURE_TABLES / "skywalker_x8_thrust.tbl",
+            source_table("skywalker_x8", "skywalker_x8_static_6axis.tbl"),
+            source_table("skywalker_x8", "skywalker_x8_collective_elevon_6axis.tbl"),
+            source_table("skywalker_x8", "skywalker_x8_differential_elevon_6axis.tbl"),
+            source_table("skywalker_x8", "skywalker_x8_thrust.tbl"),
         ),
         output_dir=tmp_path,
         max_steps=2,
@@ -128,7 +129,7 @@ def test_x8_composed_differential_elevon_response_is_bounded(tmp_path: Path) -> 
     """The composed control families produce a bounded five-second lateral response."""
 
     tables = tuple(
-        FIXTURE_TABLES / name
+            source_table("skywalker_x8", name)
         for name in (
             "skywalker_x8_static_6axis.tbl",
             "skywalker_x8_collective_elevon_6axis.tbl",
@@ -162,7 +163,7 @@ def test_x8_combined_longitudinal_lateral_recovery_is_bounded(tmp_path: Path) ->
     """The longitudinal and lateral holds share one composed coefficient deck."""
 
     tables = tuple(
-        FIXTURE_TABLES / name
+        source_table("skywalker_x8", name)
         for name in (
             "skywalker_x8_static_6axis.tbl",
             "skywalker_x8_collective_elevon_6axis.tbl",
@@ -192,7 +193,7 @@ def _run_pair(case: dict[str, object], output_dir: Path) -> tuple[RunReport, Run
     directory = ROOT / "examples/mission_families" / str(case["directory"])
     problem_3dof = directory / str(case["problem_3dof"])
     problem_6dof = directory / str(case["problem_6dof"])
-    tables = tuple(FIXTURE_TABLES / str(path) for path in case["tables_6dof"])
+    tables = tuple(source_table(str(case["vehicle"]), Path(str(path)).name) for path in case["tables_6dof"])
     baseline = run_files(problem_3dof, tables, output_dir=output_dir / "3dof", max_steps=int(case["max_steps"]), profile=GrammarProfile.TAORYX)
     high_fidelity = run_files(
         problem_6dof,

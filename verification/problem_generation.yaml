@@ -1,0 +1,489 @@
+schema_version: 1
+id: taoryx_generated_problem_catalog_v1
+description: >-
+  Metadata-driven native problem files. Generated outputs are reproducible
+  products; source claims and scenario values remain in this catalog.
+templates:
+  rigid_body_6dof: tools/problem_templates/rigid_body_6dof.prb.in
+  point_mass_3dof: tools/problem_templates/point_mass_3dof.prb.in
+vehicle_registry: verification/vehicle_models.yaml
+family_registry: verification/vehicle_families.yaml
+profiles:
+  b747_source_scoped:
+    vehicle: b747
+    initial_state: >-
+      x=6379137.0 y=0.0 z=0.0 xdt=-8.0096 ydt=152.7997 zdt=0.0
+      qw=0.4985808899268381 qx=-0.4985808899268381
+      qy=-0.5014150937095554 qz=0.5014150937095554
+      time=0.0 mass=288756.9 propellant_mass=0.0
+    dtprnt: "0.1"
+    dt: "0.01"
+    thrust: "179539.8975191153"
+    mdot: "0"
+    propulsion_line: '    *prop thrust={{thrust}} mdot={{mdot}}'
+    aero_line: '    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)'
+    file_line: ""
+    fly_line: ""
+  x8_canonical:
+    vehicle: skywalker_x8
+    definition_line: |
+      *define x8-cx
+        x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
+      *define x8-cy
+        x8-cy=(cy-static)+(cy-collective)-(cy-static)+(cy-differential)-(cy-static);
+      *define x8-cz
+        x8-cz=(cz-static)+(cz-collective)-(cz-static)+(cz-differential)-(cz-static);
+      *define x8-cmx
+        x8-cmx=(cmx-static)+(cmx-collective)-(cmx-static)+(cmx-differential)-(cmx-static);
+      *define x8-cmy
+        x8-cmy=(cmy-static)+(cmy-collective)-(cmy-static)+(cmy-differential)-(cmy-static);
+      *define x8-cmz
+        x8-cmz=(cmz-static)+(cmz-collective)-(cmz-static)+(cmz-differential)-(cmz-static);
+    aero_line: '    *aero cx=x8-cx cy=x8-cy cz=x8-cz cmx=x8-cmx cmy=x8-cmy cmz=x8-cmz'
+  x8_source_trim_reduction:
+    vehicle: skywalker_x8
+    initial_geodetic: 'alt=178.0 long=0.0 lat=0.0 vel=17.9 gama=0.0 psi=90.0 time=0.0 mass=3.364'
+    control_lines: |
+      *runtime control throttle vehicle=1 default=0.5773431905510489 lower=0 upper=1
+      *runtime control collective-elevon-deg vehicle=1 default=-2.147887654393667 lower=-20 upper=20
+      *runtime control differential-elevon-deg vehicle=1 default=-3.9378035933567617 lower=-20 upper=20
+    definition_line: |
+      *define x8-cx
+        x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
+      *define x8-cy
+        x8-cy=(cy-static)+(cy-collective)-(cy-static)+(cy-differential)-(cy-static);
+      *define x8-cz
+        x8-cz=(cz-static)+(cz-collective)-(cz-static)+(cz-differential)-(cz-static);
+    aero_line: '    *aero cx=x8-cx cy=x8-cy cz=x8-cz sref=0.75'
+    propulsion_line: '    *prop thrust=(thrust) mdot=0'
+    fly_line: '    *fly alpha=7.8095001441'
+  hummingbird_canonical: {vehicle: hummingbird}
+  x15_canonical: {vehicle: x15}
+  b747_parity_point:
+    vehicle: b747
+    initial_geodetic: 'alt=100.0 long=0.0 lat=0.0 vel=153.0096 gama=0.0 psi=90.0 time=0.0 mass=288756.9'
+    control_lines: |
+      *runtime control throttle vehicle=1 default=0.2854 lower=0 upper=1
+      *runtime control elevator-deg vehicle=1 default=0.3861602391 lower=-10 upper=10
+    propulsion_line: '    *prop thrust=(thrust) mdot=0'
+    aero_line: '    *aero cx=(cx) cy=(cy) cz=(cz) sref=510.96672'
+    fly_line: '    *fly alpha=-0.4247762648660709'
+  b747_parity_rigid:
+    vehicle: b747
+    initial_state: >-
+      x=6378237.0 y=0.0 z=0.0 xdt=0.0 ydt=153.0096 zdt=0.0
+      qw=0.5115355557 qx=-0.5115355557 qy=-0.4881919451 qz=0.4881919451
+      time=0.0 mass=288756.9 propellant_mass=0.0
+    control_lines: |
+      *runtime control elevator-deg vehicle=1 default=0.3861602391 lower=-10 upper=10
+    actuator_runtime: 'maximum-moment=100000000 maximum-body-rate-deg-s=90'
+    propulsion_line: '    *prop thrust=179539.8975191153 mdot=0'
+    aero_line: '    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)'
+  x8_parity_rigid:
+    vehicle: skywalker_x8
+    initial_state: >-
+      x=6378315.0 y=0.0 z=0.0 xdt=0.0 ydt=17.9 zdt=0.0
+      qw=0.5326838779354746 qx=-0.5326838779354746
+      qy=-0.4650246081527563 qz=0.4650246081527563
+      time=0.0 mass=3.364 propellant_mass=0.0
+    control_lines: |
+      *runtime control throttle vehicle=1 default=0.6265437663082247 lower=0 upper=1
+      *runtime control collective-elevon-deg vehicle=1 default=-2.097861479714001 lower=-20 upper=20
+      *runtime control differential-elevon-deg vehicle=1 default=-3.9378035933567617 lower=-20 upper=20
+    actuator_runtime: 'maximum-moment=20 maximum-body-rate-deg-s=360'
+    propulsion_line: '    *prop thrust=(thrust) mdot=0'
+    aero_line: '    *aero cx=x8-cx cy=x8-cy cz=x8-cz cmx=x8-cmx cmy=x8-cmy cmz=x8-cmz'
+    definition_line: |
+      *define x8-cx
+        x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
+      *define x8-cy
+        x8-cy=(cy-static)+(cy-collective)-(cy-static)+(cy-differential)-(cy-static);
+      *define x8-cz
+        x8-cz=(cz-static)+(cz-collective)-(cz-static)+(cz-differential)-(cz-static);
+      *define x8-cmx
+        x8-cmx=(cmx-static)+(cmx-collective)-(cmx-static)+(cmx-differential)-(cmx-static);
+      *define x8-cmy
+        x8-cmy=(cmy-static)+(cmy-collective)-(cmy-static)+(cmy-differential)-(cmy-static);
+      *define x8-cmz
+        x8-cmz=(cmz-static)+(cmz-collective)-(cmz-static)+(cmz-differential)-(cmz-static);
+  hummingbird_parity_point:
+    vehicle: hummingbird
+    initial_geodetic: 'alt=2.0 long=0.0 lat=0.0 vel=0.0 gama=0.0 psi=0.0 time=0.0 mass=0.5'
+    vehicle_runtime: >-
+      *runtime status vehicle aero-load-mode=direct-wrench aero-wrench-frame=source-z-up
+      rotor-allocation=quad-x rotor-arm-m=0.17 rotor-thrust-coefficient=5.57e-6
+      rotor-reaction-torque-coefficient=1.36e-7 rotor-speed-min=0 rotor-speed-max=1500
+      reference-area=1.0 reference-length=0.34 dry-mass-kg=0.5 inertia-x=0.00365
+      inertia-y=0.00368 inertia-z=0.00703 envelope-max-speed=10
+    control_lines: ''
+    propulsion_line: '    *prop thrust=(thrust) mdot=0 ep1=90 ep2=-90'
+  hummingbird_parity_rigid:
+    vehicle: hummingbird
+    initial_state: >-
+      x=6378139.0 y=0.0 z=0.0 xdt=0.0 ydt=0.0 zdt=0.0
+      qw=0.5 qx=-0.5 qy=-0.5 qz=0.5 time=0.0 mass=0.5
+    control_lines: '*runtime control rotor-speed vehicle=1 default=469.124102661955 lower=0 upper=1500'
+    actuator_runtime: 'maximum-moment=1 maximum-body-rate-deg-s=720'
+    vehicle_runtime: >-
+      *runtime status vehicle aero-load-mode=direct-wrench aero-wrench-frame=source-z-up
+      rotor-allocation=quad-x rotor-arm-m=0.17 rotor-thrust-coefficient=5.57e-6
+      rotor-reaction-torque-coefficient=1.36e-7 rotor-speed-min=0 rotor-speed-max=1500
+      reference-area=1.0 reference-length=0.34 dry-mass-kg=0.5 inertia-x=0.00365
+      inertia-y=0.00368 inertia-z=0.00703 envelope-max-speed=10
+    aero_line: '    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)'
+  x15_parity_point:
+    vehicle: x15
+    vehicle_runtime: ''
+    control_lines: ''
+    initial_geodetic: 'alt=21500.0 long=-118.2 lat=34.0 vel=1283.426096040443 gama=9.16645928861827 psi=299.82170792451166 time=0.0 mass=14641.0545'
+    propulsion_line: '    *prop thrust=0 mdot=0'
+    aero_line: '    *aero cx=(cx) cy=(cy) cz=(cz) sref=18.580608'
+    fly_line: '    *fly alpha=0.0'
+  x15_parity_rigid:
+    vehicle: x15
+    vehicle_runtime: >-
+      *runtime status vehicle reference-area=18.580608 reference-length=3.130296
+      inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024
+      dry-mass-kg=14641.0545 envelope-max-mach=6.7 envelope-max-alpha-deg=10 envelope-max-beta-deg=10
+    initial_state: >-
+      x=-2550174.732106006 y=-4630503.055917352 z=3606993.764430032
+      xdt=-544.7078860930444 ydt=494.63489765078185 zdt=636.70629759
+      qw=-0.0683358917930683 qx=0.389325992523833 qy=0.7691778008540426 qz=0.5021165085032727
+      wx=0.0 wy=0.0 wz=0.0 time=0.0 mass=14641.0545
+    control_lines: '*runtime control bank-deg vehicle=1 default=0.0 lower=-25.0 upper=25.0'
+    actuator_runtime: 'maximum-moment=250000 maximum-body-rate-deg-s=3600'
+    propulsion_line: '    *prop thrust=0 mdot=0'
+    aero_line: '    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)'
+    fly_line: '    *fly bankgc=0'
+scenarios:
+  - id: b747-source-anchor-parity-reduction-3dof
+    output: examples/mission_families/slower_b747/SV01_powered_trim_reduction_3dof.prb
+    template: point_mass_3dof
+    profile: b747_parity_point
+    title: B747 source-anchor same-plant parity point-mass reduction
+    segment_name: powered-trim-parity
+    thrust: '179539.8975191153'
+    dtprnt: '0.05'
+    dt: '0.005'
+    stop_time: '0.1'
+  - id: b747-source-anchor-parity-6dof
+    output: examples/mission_families/slower_b747/SV01_powered_trim_parity_6dof.prb
+    profile: b747_parity_rigid
+    title: B747 source-anchor same-plant parity rigid-body case
+    segment_name: powered-trim-parity
+    mode: rigid-body-6dof
+    earth_model: wgs-84
+    earth_omega_rad_s: '0.0'
+    thrust: '179539.8975191153'
+    dtprnt: '0.005'
+    dt: '0.005'
+    stop_time: '0.1'
+  - id: x8-source-trim-parity-reduction-3dof
+    output: examples/mission_families/slower_x8/SV03_powered_trim_reduction_3dof.prb
+    template: point_mass_3dof
+    profile: x8_source_trim_reduction
+    title: Skywalker X8 same-plant prescribed-attitude powered reduction
+    segment_name: powered-trim-parity
+    dtprnt: '0.05'
+    dt: '0.005'
+    stop_time: '0.1'
+  - id: x8-source-trim-parity-6dof
+    output: examples/mission_families/slower_x8/SV03_powered_trim_parity_6dof.prb
+    profile: x8_parity_rigid
+    title: Skywalker X8 same-plant parity rigid-body case
+    segment_name: powered-trim-parity
+    mode: rigid-body-6dof
+    earth_model: wgs-84
+    earth_omega_rad_s: '0.0'
+    dtprnt: '0.005'
+    dt: '0.005'
+    stop_time: '0.1'
+  - id: hummingbird-hover-parity-reduction-3dof
+    output: examples/mission_families/slower_hummingbird/SV05_hover_reduction_3dof.prb
+    template: point_mass_3dof
+    profile: hummingbird_parity_point
+    title: Hummingbird common source-frame hover translational reduction
+    segment_name: hover-parity
+    thrust: '0'
+    dtprnt: '0.005'
+    dt: '0.001'
+    stop_time: '0.1'
+  - id: hummingbird-hover-parity-6dof
+    output: examples/mission_families/slower_hummingbird/SV05_hover_parity_6dof.prb
+    profile: hummingbird_parity_rigid
+    title: Hummingbird common source-frame hover rigid-body parity case
+    segment_name: hover-parity
+    mode: rigid-body-6dof
+    earth_model: wgs-84
+    earth_omega_rad_s: '0.0'
+    dtprnt: '0.005'
+    dt: '0.001'
+    stop_time: '0.1'
+  - id: x15-release-glide-parity-reduction-3dof
+    output: examples/showcases/x15_rocket_to_hawaii/release_glide_reduction_3dof.prb
+    template: point_mass_3dof
+    profile: x15_parity_point
+    title: X-15 common release unpowered glide translational reduction
+    segment_name: release-glide
+    earth_model: wgs-84
+    earth_omega_rad_s: '7.2921151467e-5'
+    dtprnt: '0.025'
+    dt: '0.0125'
+    stop_time: '0.01'
+  - id: x15-release-glide-parity-6dof
+    output: examples/showcases/x15_rocket_to_hawaii/release_glide_parity_6dof.prb
+    profile: x15_parity_rigid
+    title: X-15 common release unpowered glide rigid-body parity case
+    segment_name: release-glide
+    mode: rigid-body-6dof
+    earth_model: wgs-84
+    earth_omega_rad_s: '7.2921151467e-5'
+    earth_gm_suffix: ' gm=3.986004418e14'
+    dtprnt: '0.025'
+    dt: '0.0125'
+    stop_time: '0.01'
+  - id: slower-b747-sv01-open-loop-descent-diagnostic-6dof
+    output: examples/mission_families/slower_b747/SV01_open_loop_descent_diagnostic_6dof.prb
+    profile: b747_source_scoped
+    title: B747 source-anchor open-loop descending flight-path diagnostic
+    segment_name: open-loop-descent-diagnostic
+    guidance_line: '*runtime status guidance flight-path-hold-target-deg=-3.0 attitude-gain=200000 rate-damping=500000'
+    target_line: ""
+    route_line: ""
+    stop_time: "10.0"
+  - id: b747-generated-canonical-source-anchor-6dof
+    output: examples/generated/vehicles/b747_canonical_source_anchor_6dof.prb
+    profile: b747_source_scoped
+    title: B747 generated canonical source-anchor plant
+    segment_name: canonical-source-anchor
+    initial_state: >-
+      x=6378237.0 y=0.0 z=0.0 xdt=0.0 ydt=153.0096 zdt=0.0
+      qw=0.5133417022 qx=-0.5133417022 qy=-0.4862923984 qz=0.4862923984
+      time=0.0 mass=288756.9 propellant_mass=0.0
+    dtprnt: "0.05"
+    dt: "0.005"
+    stop_time: "0.1"
+  - id: skywalker-x8-generated-canonical-plant-6dof
+    output: examples/generated/vehicles/skywalker_x8_canonical_6dof.prb
+    profile: x8_canonical
+    title: Skywalker X8 generated canonical plant anchor
+    segment_name: canonical-plant-anchor
+    initial_state: >-
+      x=6378315.0 y=0.0 z=0.0 xdt=0.0 ydt=17.9 zdt=0.0
+      qw=0.5332552264 qx=-0.5332552264 qy=-0.4643693180 qz=0.4643693180
+      time=0.0 mass=3.364 propellant_mass=0.0
+    dtprnt: "0.05"
+    dt: "0.005"
+    propulsion_line: ""
+    file_line: ""
+    fly_line: ""
+    target_line: ""
+    route_line: ""
+    guidance_line: ""
+    stop_time: "0.1"
+  - id: slower-x8-sv03-source-trim-hold-30-6dof
+    output: examples/mission_families/slower_x8/SV03_source_trim_hold_30_6dof.prb
+    profile: x8_canonical
+    title: Skywalker X8 source-composed powered trim hold
+    segment_name: source-trim-hold-30
+    initial_state: >-
+      x=6378315.0 y=0.0 z=0.0 xdt=0.0 ydt=17.9 zdt=0.0
+      qw=0.5328883197426527 qx=-0.5328883197426527
+      qy=-0.4647903168976871 qz=0.4647903168976871
+      time=0.0 mass=3.364 propellant_mass=0.0
+    dtprnt: "0.1"
+    dt: "0.005"
+    control_lines: |
+      *runtime control throttle vehicle=1 default=0.5773431905510489 lower=0 upper=1
+      *runtime control collective-elevon-deg vehicle=1 default=-2.147887654393667 lower=-20 upper=20
+      *runtime control differential-elevon-deg vehicle=1 default=-3.9378035933567617 lower=-20 upper=20
+    propulsion_line: '    *prop thrust=(thrust) mdot=0'
+    target_line: ""
+    route_line: ""
+    guidance_line: >-
+      *runtime status guidance attitude-gain=100 rate-damping=5
+      collective-elevon-hold-gain-deg-per-deg=0.5
+      collective-elevon-hold-target-deg=7.8095
+      differential-elevon-hold-gain-deg-per-deg=0.5
+      differential-elevon-hold-target-deg=0.0 sideslip-gain=50
+      sideslip-rate-damping=1 body-rate-damping-nm-s-per-rad=0.1
+      flight-path-hold-target-deg=0 airspeed-hold-target-mps=17.9
+      airspeed-hold-gain-throttle-per-mps=0.15 airspeed-hold-min-throttle=0.35
+      airspeed-hold-max-throttle=0.85
+    fly_line: ""
+    file_line: ""
+    stop_time: "30.0"
+  - id: slower-x8-sv03-source-trim-reduction-3dof
+    output: examples/generated/vehicles/skywalker_x8_source_trim_reduction_3dof.prb
+    template: point_mass_3dof
+    profile: x8_source_trim_reduction
+    title: Skywalker X8 source-composed powered trim point-mass reduction
+    segment_name: source-trim-reduction
+    dtprnt: "0.1"
+    dt: "0.005"
+    stop_time: "0.1"
+  - id: slower-x8-sv03-long-level-settling-6dof
+    output: examples/mission_families/slower_x8/SV03_long_level_settling_6dof.prb
+    profile: x8_canonical
+    title: Skywalker X8 source-neighborhood 120-second level settling corridor
+    segment_name: long-level-settling
+    initial_state: >-
+      x=6378315.0 y=0.0 z=0.0 xdt=0.0 ydt=17.9 zdt=0.0
+      qw=0.5332552264 qx=-0.5332552264 qy=-0.4643693180 qz=0.4643693180
+      time=0.0 mass=3.364 propellant_mass=0.0
+    dtprnt: "0.1"
+    dt: "0.005"
+    control_lines: |
+      *runtime control throttle vehicle=1 default=0.6265437663082247 lower=0 upper=1
+      *runtime control collective-elevon-deg vehicle=1 default=-2.35 lower=-20 upper=20
+      *runtime control differential-elevon-deg vehicle=1 default=-2.16 lower=-20 upper=20
+    target_line: '*runtime status target altitude-m=178.0'
+    guidance_line: >-
+      *runtime status guidance attitude-gain=500.0 rate-damping=10.0
+      flight-path-hold-target-deg=0.0 flight-path-hold-altitude-gain-deg-per-m=0.5
+      flight-path-hold-max-target-deg=10.0 collective-elevon-hold-gain-deg-per-deg=0.5
+      collective-elevon-hold-target-deg=7.9 collective-elevon-min-deg=-20
+      collective-elevon-max-deg=20 differential-elevon-hold-gain-deg-per-deg=0.5
+      differential-elevon-hold-target-deg=0.0 differential-elevon-min-deg=-20
+      differential-elevon-max-deg=20 sideslip-gain=50.0 sideslip-rate-damping=1.0
+      body-rate-damping-nm-s-per-rad=0.1 airspeed-hold-target-mps=18.0
+      airspeed-hold-gain-throttle-per-mps=0.15 airspeed-hold-min-throttle=0.35
+      airspeed-hold-max-throttle=0.85
+    actuator_runtime: 'maximum-moment=20 maximum-body-rate-deg-s=180'
+    propulsion_line: '    *prop thrust=(thrust) mdot=0'
+    stop_time: "120.0"
+  - id: slower-x8-sv03-controller-recovery-10-6dof
+    output: examples/generated/vehicles/skywalker_x8_controller_recovery_10_6dof.prb
+    profile: x8_canonical
+    title: Skywalker X8 generated 10-second powered controller recovery
+    segment_name: controller-recovery-10
+    initial_state: >-
+      x=6378315.0 y=0.0 z=0.0 xdt=0.0 ydt=17.9 zdt=0.0
+      qw=0.5332552264 qx=-0.5332552264 qy=-0.4643693180 qz=0.4643693180
+      time=0.0 mass=3.364 propellant_mass=0.0
+    dtprnt: "0.05"
+    dt: "0.005"
+    control_lines: |
+      *runtime control throttle vehicle=1 default=0.6265437663082247 lower=0 upper=1
+      *runtime control collective-elevon-deg vehicle=1 default=-2.35 lower=-20 upper=20
+      *runtime control differential-elevon-deg vehicle=1 default=-2.16 lower=-20 upper=20
+    target_line: '*runtime status target altitude-m=178.0'
+    guidance_line: >-
+      *runtime status guidance attitude-gain=500.0 rate-damping=10.0
+      flight-path-hold-target-deg=0.0 flight-path-hold-altitude-gain-deg-per-m=0.5
+      flight-path-hold-max-target-deg=10.0 collective-elevon-hold-gain-deg-per-deg=0.5
+      collective-elevon-hold-target-deg=7.9 collective-elevon-min-deg=-20
+      collective-elevon-max-deg=20 differential-elevon-hold-gain-deg-per-deg=0.5
+      differential-elevon-hold-target-deg=0.0 differential-elevon-min-deg=-20
+      differential-elevon-max-deg=20 sideslip-gain=50.0 sideslip-rate-damping=1.0
+      body-rate-damping-nm-s-per-rad=0.1 airspeed-hold-target-mps=18.0
+      airspeed-hold-gain-throttle-per-mps=0.15 airspeed-hold-min-throttle=0.35
+      airspeed-hold-max-throttle=0.85
+    actuator_runtime: 'maximum-moment=100 maximum-body-rate-deg-s=180'
+    propulsion_line: '    *prop thrust=(thrust) mdot=0'
+    stop_time: "10.0"
+  - id: hummingbird-generated-canonical-hover-6dof
+    output: examples/generated/vehicles/hummingbird_canonical_hover_6dof.prb
+    profile: hummingbird_canonical
+    title: Hummingbird generated canonical hover plant
+    segment_name: canonical-hover
+    initial_state: >-
+      x=6378139.0 y=0.0 z=0.0 xdt=0.0 ydt=0.0 zdt=0.0
+      qw=0.5 qx=-0.5 qy=-0.5 qz=0.5 time=0.0 mass=0.5 propellant_mass=0.0
+    dtprnt: "0.1"
+    dt: "0.005"
+    propulsion_line: ""
+    aero_line: '    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)'
+    file_line: ""
+    fly_line: ""
+    target_line: ""
+    route_line: ""
+    guidance_line: ""
+    stop_time: "10.0"
+  - id: x15-generated-canonical-research-6dof
+    output: examples/generated/vehicles/x15_canonical_research_6dof.prb
+    profile: x15_canonical
+    title: X-15 generated canonical research plant
+    segment_name: canonical-research-flight
+    initial_state: >-
+      x=6398137.0 y=0.0 z=0.0 xdt=0.0 ydt=1800.0 zdt=0.0
+      qw=0.5 qx=-0.5 qy=-0.5 qz=0.5 wx=0.0 wy=0.0 wz=0.0
+      time=0.0 mass=14641.0545 propellant_mass=5641.0545
+    dtprnt: "0.01"
+    dt: "0.001"
+    propulsion_line: '    *prop thrust=(x15-thrust) mdot=(x15-mdot)'
+    aero_line: '    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)'
+    file_line: '    *file x15.dat time mass'
+    fly_line: ""
+    target_line: ""
+    route_line: ""
+    guidance_line: ""
+    stop_time: "0.01"
+  - id: slower-b747-sv01-flight-path-hold-descent-6dof
+    output: examples/mission_families/slower_b747/SV01_flight_path_hold_descent_6dof.prb
+    profile: b747_source_scoped
+    title: B747 source-scoped controlled descending corridor
+    segment_name: flight-path-hold-descent
+    guidance_line: '*runtime status guidance flight-path-hold-target-deg=-3.0 attitude-gain=1000000000 rate-damping=2000000000'
+    target_line: ""
+    route_line: ""
+    stop_time: "60.0"
+  - id: slower-b747-sv01-long-trim-hold-120-6dof
+    output: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
+    profile: b747_source_scoped
+    title: B747 source-anchor 120-second powered trim hold
+    segment_name: long-trim-hold-120
+    initial_state: >-
+      x=6378237.0 y=0.0 z=0.0 xdt=0.0 ydt=153.0096 zdt=0.0
+      qw=0.5115355557 qx=-0.5115355557 qy=-0.4881919451 qz=0.4881919451
+      time=0.0 mass=288756.9 propellant_mass=0.0
+    dtprnt: "0.1"
+    dt: "0.02"
+    stop_time: "120.0"
+  - id: slower-b747-sv01-descent-recovery-120-6dof
+    output: examples/mission_families/slower_b747/SV01_descent_recovery_120_6dof.prb
+    profile: b747_source_scoped
+    title: B747 source-scoped descent followed by level recovery
+    segment_name: descent-recovery-120
+    guidance_line: >-
+      *runtime status guidance flight-path-hold-target-deg=-3.0
+      flight-path-hold-transition-s=60.0 flight-path-hold-after-target-deg=0.0
+      flight-path-hold-after-altitude-m=520.0
+      flight-path-hold-altitude-gain-deg-per-m=0.02
+      flight-path-hold-max-target-deg=10.0 attitude-gain=1000000000
+      rate-damping=2000000000
+    actuator_runtime: 'maximum-moment=100000000 maximum-body-rate-deg-s=90'
+    dtprnt: "0.1"
+    dt: "0.02"
+    stop_time: "120.0"
+  - id: slower-b747-sv01-integrated-route-descent-6dof
+    output: examples/mission_families/slower_b747/SV01_integrated_route_descent_6dof.prb
+    profile: b747_source_scoped
+    title: B747 source-scoped integrated route and altitude transition
+    segment_name: integrated-route-descent
+    initial_state: >-
+      x=6378237.0 y=0.0 z=0.0 xdt=0.0 ydt=153.0096 zdt=0.0
+      qw=0.5115355557 qx=-0.5115355557 qy=-0.4881919451 qz=0.4881919451
+      time=0.0 mass=288756.9 propellant_mass=0.0
+    guidance_line: '*runtime status guidance propnav-gain=0.5 attitude-gain=200000.0 rate-damping=500000.0 flight-path-hold-target-deg=0.0 max-sideslip-deg=4.0 alpha-hold-gain-deg-per-deg=-1.0 alpha-hold-target-deg=3.1 elevator-min-deg=-10 elevator-max-deg=10'
+    target_line: '*runtime status target latitude-deg=0.0 longitude-deg=0.03 altitude-m=100.0'
+    route_line: '*runtime status route mode=great-circle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=20.0 powered-end-s=20.0 powered-speed-mps=153.0 powered-climb-rate-mps=0.0 position-capture-gain=0.0'
+    fly_line: '    *fly propnav=4'
+    dtprnt: "0.1"
+    dt: "0.02"
+    stop_time: "20.0"
+  - id: slower-b747-sv01-reduced-fuel-mass-coupling-6dof
+    output: examples/mission_families/slower_b747/SV01_reduced_fuel_mass_coupling_6dof.prb
+    profile: b747_source_scoped
+    title: B747 reduced-order fuel and runtime mass coupling diagnostic
+    segment_name: reduced-fuel-mass-coupling
+    initial_state: >-
+      x=6379137.0 y=0.0 z=0.0 xdt=-8.0096 ydt=152.7997 zdt=0.0
+      qw=0.4985808899268381 qx=-0.4985808899268381
+      qy=-0.5014150937095554 qz=0.5014150937095554
+      time=0.0 mass=288876.9 propellant_mass=120.0
+    mdot: (b747-notional-mdot)
+    stop_time: "10.0"
+    target_line: ""
+    route_line: ""
+    guidance_line: ""

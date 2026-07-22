@@ -26,7 +26,10 @@ vehicles:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
-    max_steps: 5000
+    # The adaptive rigid-body integrator takes more than one internal step per
+    # requested 5 ms interval near the waypoint turn.  Keep the 20 s mission
+    # gate and give it enough budget to reach the declared endpoint.
+    max_steps: 7000
     expectations:
       min_duration_s: 20.0
       max_final_range_m: 350.0

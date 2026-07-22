@@ -180,16 +180,20 @@ class PreparedCoefficientTable:
             query_values["velocity_m_s"] = query_values["airspeed_m_s"]
         if "airspeed_m_s" in self.independent_variables and "airspeed_m_s" not in query_values:
             query_values["airspeed_m_s"] = query_values["velocity_m_s"]
-        query = tuple(query_values[name] for name in self.independent_variables)
-        for axis_name, axis, value in zip(self.independent_variables, self.table.axes, query, strict=True):
+        raw_query = tuple(query_values[name] for name in self.independent_variables)
+        query_values_at_boundary: list[float] = []
+        for axis_name, axis, value in zip(self.independent_variables, self.table.axes, raw_query, strict=True):
             lower, upper = min(axis), max(axis)
-            if not lower <= value <= upper:
+            boundary_tolerance = 1.0e-12 * max(1.0, abs(lower), abs(upper))
+            if value < lower - boundary_tolerance or value > upper + boundary_tolerance:
                 distance = min(abs(value - lower), abs(value - upper))
                 raise ValueError(
-                    f"coefficient table {self.name!r} query {query!r} is outside its declared envelope "
+                    f"coefficient table {self.name!r} query {raw_query!r} is outside its declared envelope "
                     f"on axis {axis_name!r}: value={value}, range=[{lower}, {upper}], "
                     f"distance_to_boundary={distance}"
                 )
+            query_values_at_boundary.append(min(upper, max(lower, value)))
+        query = tuple(query_values_at_boundary)
         return interpolate_nd(self.table, query)
         ####
 
@@ -215,6 +219,8 @@ class PreparedAerodynamicCoefficients:
 
     force_tables: Mapping[str, PreparedCoefficientTable]
     moment_tables: Mapping[str, PreparedCoefficientTable] = field(default_factory=dict)
+    control_force_tables: Mapping[str, Mapping[str, PreparedCoefficientTable]] = field(default_factory=dict)
+    control_moment_tables: Mapping[str, Mapping[str, PreparedCoefficientTable]] = field(default_factory=dict)
 
     @classmethod
     def from_runtime_tables(cls, tables: Mapping[str, RuntimeTableLike]) -> PreparedAerodynamicCoefficients:
@@ -222,17 +228,26 @@ class PreparedAerodynamicCoefficients:
 
         force: dict[str, PreparedCoefficientTable] = {}
         moments: dict[str, PreparedCoefficientTable] = {}
+        control_force: dict[str, dict[str, PreparedCoefficientTable]] = {}
+        control_moment: dict[str, dict[str, PreparedCoefficientTable]] = {}
         for key, runtime_table in tables.items():
             if runtime_table.prepared is None:
                 raise ValueError(f"aerodynamic table {key!r} has no prepared interpolation data")
             key_name = key.casefold()
-            name = key_name if key_name in {"cmx", "cmy", "cmz"} else (runtime_table.output_variable or key).casefold()
+            name = (runtime_table.output_variable or key).casefold()
+            family = key_name.removeprefix(f"{name}-") if key_name.startswith(f"{name}-") else ""
             prepared = PreparedCoefficientTable(name, tuple(runtime_table.independent_variables), runtime_table.prepared)
             if name in {"cx", "cy", "cz"}:
-                force[name] = prepared
+                if family and family != "static":
+                    control_force.setdefault(family, {})[name] = prepared
+                else:
+                    force.setdefault(name, prepared)
             elif name in {"cmx", "cmy", "cmz"}:
-                moments[name] = prepared
-        return cls(force, moments)
+                if family and family != "static":
+                    control_moment.setdefault(family, {})[name] = prepared
+                else:
+                    moments.setdefault(name, prepared)
+        return cls(force, moments, control_force, control_moment)
         ####
 
     def _provider(
@@ -257,7 +272,7 @@ class PreparedAerodynamicCoefficients:
     def context_force_provider(self) -> ContextCoefficientProvider:
         """Return an extensible provider accepting arbitrary named variables."""
 
-        return lambda context: self._provider(self.force_tables, context.values)
+        return lambda context: self._compose_provider(self.force_tables, self.control_force_tables, context.values)
         ####
 
     def moment_provider(self) -> AerodynamicCoefficientProvider | None:
@@ -281,7 +296,40 @@ class PreparedAerodynamicCoefficients:
         if not {"cmx", "cmy", "cmz"}.issubset(normalized):
             raise ValueError("moment coefficient set must contain cmx, cmy, and cmz")
         tables = {name[2:]: table for name, table in self.moment_tables.items()}
-        return lambda context: self._provider(tables, context.values, ("x", "y", "z"))
+        control_tables = {
+            family: {name[2:]: table for name, table in members.items()}
+            for family, members in self.control_moment_tables.items()
+        }
+        return lambda context: self._compose_provider(tables, control_tables, context.values, ("x", "y", "z"))
+        ####
+
+    def _compose_provider(
+        self,
+        base_tables: Mapping[str, PreparedCoefficientTable],
+        control_tables: Mapping[str, Mapping[str, PreparedCoefficientTable]],
+        values: Mapping[str, float],
+        required: tuple[str, str, str] = ("cx", "cy", "cz"),
+    ) -> Vector3:
+        """Compose a static coefficient set with qualified control increments."""
+
+        result = self._provider(base_tables, values, required)
+        for members in control_tables.values():
+            if not all(name in members for name in required):
+                continue
+            axes = tuple(
+                axis
+                for axis in members[required[0]].independent_variables
+                if axis not in {"mach", "altitude_m", "alpha", "beta", "airspeed_m_s", "velocity_m_s"}
+            )
+            if len(axes) != 1:
+                continue
+            control_axis = axes[0]
+            zero_values = dict(values)
+            zero_values[control_axis] = 0.0
+            current_vector = self._provider(members, values, required)
+            zero_vector = self._provider(members, zero_values, required)
+            result = result + (current_vector - zero_vector)
+        return result
         ####
 
     def table_margins(self, values: Mapping[str, float]) -> Mapping[str, float]:
@@ -292,6 +340,14 @@ class PreparedAerodynamicCoefficients:
             for name, table in tables.items():
                 for axis, margin in table.margins(values).items():
                     result[f"{family}.{name}.{axis}"] = margin
+        for family, control_tables in (
+            ("force", self.control_force_tables),
+            ("moment", self.control_moment_tables),
+        ):
+            for control_family, members in control_tables.items():
+                for name, table in members.items():
+                    for axis, margin in table.margins(values).items():
+                        result[f"{family}.{control_family}.{name}.{axis}"] = margin
         return result
         ####
     ####
@@ -376,7 +432,17 @@ class TableAerodynamicModel:
                 **(self.control_provider(state) if self.control_provider is not None else {}),
             },
         )
+        nonfinite_query = tuple(
+            name for name, value in context.values.items() if not math.isfinite(float(value))
+        )
+        if nonfinite_query:
+            raise ValueError(
+                "aerodynamic query contains non-finite values: "
+                + ", ".join(sorted(nonfinite_query))
+            )
         force_coefficients = self.context_coefficients(context) if self.context_coefficients is not None else self.coefficients(mach, angle_of_attack, sideslip)
+        if not all(math.isfinite(value) for value in (force_coefficients.x, force_coefficients.y, force_coefficients.z)):
+            raise ValueError("aerodynamic force coefficients are non-finite")
         force_body = force_coefficients.scaled(dynamic_pressure * self.reference_area_m2)
         moment_coefficients = (
             self.context_moment_coefficients(context)
@@ -386,6 +452,8 @@ class TableAerodynamicModel:
             else Vector3(0.0, 0.0, 0.0)
         )
         moment_body = moment_coefficients.scaled(dynamic_pressure * self.reference_area_m2 * self.reference_length_m)
+        if not all(math.isfinite(value) for value in (moment_coefficients.x, moment_coefficients.y, moment_coefficients.z)):
+            raise ValueError("aerodynamic moment coefficients are non-finite")
         return AerodynamicOutput(
             force_body,
             moment_body,

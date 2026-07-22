@@ -1,0 +1,441 @@
+{
+  "catalog": "verification/fidelity_parity.yaml",
+  "families": [
+    {
+      "blocker": null,
+      "command_schedule": [
+        {
+          "controls": {
+            "elevator_deg": 0.3861602391
+          },
+          "end_s": 0.1,
+          "start_s": 0.0
+        }
+      ],
+      "continuity_tolerances": {
+        "altitude_m": 1.0,
+        "mass_kg": 1.0,
+        "speed_m_s": 1.0
+      },
+      "duration_s": 0.1,
+      "environment": {
+        "atmosphere": "standard",
+        "earth_model": "wgs-84",
+        "earth_omega_rad_s": 0.0,
+        "wind_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "event_schedule": [],
+      "id": "b747",
+      "initial_state_si": {
+        "alpha_deg": 3.1,
+        "altitude_m": 100.0,
+        "beta_deg": 0.0,
+        "mass_kg": 288756.9,
+        "true_airspeed_m_s": 153.0096
+      },
+      "inputs": {
+        "bridge_source_problem": {
+          "path": "examples/mission_families/slower_b747/SV01_powered_trim_reduction_3dof.prb",
+          "sha256": "e82a4fe98fa673e4e418dd1ff70cbf07d2fd58c8ceb9bd980f26825240bb81a5"
+        },
+        "constrained_rigid_problem": {
+          "path": "examples/mission_families/slower_b747/SV01_powered_trim_parity_6dof.prb",
+          "sha256": "608e7f402c2de49b16b6224ac50d3671a618ab0fc4950513d6504e3d3ebbbc8d"
+        },
+        "point_mass_problem": {
+          "path": "examples/mission_families/slower_b747/SV01_powered_trim_reduction_3dof.prb",
+          "sha256": "e82a4fe98fa673e4e418dd1ff70cbf07d2fd58c8ceb9bd980f26825240bb81a5"
+        }
+      },
+      "parity_tolerances": {
+        "altitude_m": 0.1,
+        "mass_kg": 1e-06,
+        "speed_m_s": 0.1
+      },
+      "propulsion": {
+        "mass_flow_kg_s": 0.0,
+        "model": "constant-thrust",
+        "thrust_n": 179539.8975191153
+      },
+      "reduction_kind": "point-mass-3dof",
+      "scenario_id": "b747-source-anchor-reduction-v1",
+      "source_tables": [
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl",
+          "sha256": "086a9d70cec53f35543f6af5cba8d1256155f493fd80bfdabc2d93253d89c132"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl",
+          "sha256": "555052738e548108fb39efba3df1617fb5d8ca3ff23cdd79c8261efe97d2c5d3"
+        }
+      ],
+      "state_mapping": {
+        "altitude_m": {
+          "point": "alt",
+          "point_scale": 0.3048,
+          "rigid": "altitude_m",
+          "rigid_scale": 1.0
+        },
+        "mass_kg": {
+          "point": "mass",
+          "point_scale": 0.45359237,
+          "rigid": "mass_kg",
+          "rigid_scale": 1.0
+        },
+        "speed_m_s": {
+          "point": "vel",
+          "point_scale": 0.3048,
+          "rigid": "speed_m_s",
+          "rigid_scale": 1.0
+        }
+      },
+      "status": "candidate",
+      "termination_policy": {
+        "condition": "time",
+        "kind": "final-condition",
+        "value_s": 0.1
+      },
+      "unit_profiles": {
+        "point_mass": "native-fps",
+        "rigid_body": "si"
+      }
+    },
+    {
+      "blocker": null,
+      "command_schedule": [
+        {
+          "controls": {
+            "collective_elevon_deg": -2.097861479714001,
+            "differential_elevon_deg": 0.0
+          },
+          "end_s": 0.1,
+          "start_s": 0.0
+        }
+      ],
+      "continuity_tolerances": {
+        "altitude_m": 1.0,
+        "mass_kg": 1.0,
+        "speed_m_s": 1.0
+      },
+      "duration_s": 0.1,
+      "environment": {
+        "atmosphere": "standard",
+        "earth_model": "wgs-84",
+        "earth_omega_rad_s": 0.0,
+        "wind_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "event_schedule": [],
+      "id": "skywalker_x8",
+      "initial_state_si": {
+        "alpha_deg": 7.8095,
+        "altitude_m": 178.0,
+        "beta_deg": 0.0,
+        "mass_kg": 3.364,
+        "true_airspeed_m_s": 17.9
+      },
+      "inputs": {
+        "bridge_source_problem": {
+          "path": "examples/mission_families/slower_x8/SV03_powered_trim_reduction_3dof.prb",
+          "sha256": "92aa040e80605b962627165b1f917c866751dd85be17b7e52720ca29c9d7c8d2"
+        },
+        "constrained_rigid_problem": {
+          "path": "examples/mission_families/slower_x8/SV03_powered_trim_parity_6dof.prb",
+          "sha256": "2e3a7c735e373573b26b4463221b125d0b6e158facd525b8e17e5cac79c2a987"
+        },
+        "point_mass_problem": {
+          "path": "examples/mission_families/slower_x8/SV03_powered_trim_reduction_3dof.prb",
+          "sha256": "92aa040e80605b962627165b1f917c866751dd85be17b7e52720ca29c9d7c8d2"
+        }
+      },
+      "parity_tolerances": {
+        "altitude_m": 0.1,
+        "mass_kg": 1e-06,
+        "speed_m_s": 0.1
+      },
+      "propulsion": {
+        "mass_flow_kg_s": 0.0,
+        "model": "source-composed-thrust",
+        "throttle": 0.6265437663082247
+      },
+      "reduction_kind": "point-mass-3dof",
+      "scenario_id": "x8-source-trim-reduction-v1",
+      "source_tables": [
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl",
+          "sha256": "acd304737c987008355e2b780295fe5d7dfb6820c6fba5c043ebb64189ae338d"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl",
+          "sha256": "4c4ee06b200818ed696ce870fca21f4b60464ce42df31ac8e8ea62b80f8a92b7"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl",
+          "sha256": "6db2aa48e572c4303e2360ba07efecfca6e745b28a85c5a514bd323ec3c52184"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl",
+          "sha256": "9b05bb9eb2a70a14ec8edb3446fa631040ccff5abcacc2ba9f0780b7711fdca8"
+        }
+      ],
+      "state_mapping": {
+        "altitude_m": {
+          "point": "alt",
+          "point_scale": 0.3048,
+          "rigid": "altitude_m",
+          "rigid_scale": 1.0
+        },
+        "mass_kg": {
+          "point": "mass",
+          "point_scale": 0.45359237,
+          "rigid": "mass_kg",
+          "rigid_scale": 1.0
+        },
+        "speed_m_s": {
+          "point": "vel",
+          "point_scale": 0.3048,
+          "rigid": "speed_m_s",
+          "rigid_scale": 1.0
+        }
+      },
+      "status": "candidate",
+      "termination_policy": {
+        "condition": "time",
+        "kind": "final-condition",
+        "value_s": 0.1
+      },
+      "unit_profiles": {
+        "point_mass": "native-fps",
+        "rigid_body": "si"
+      }
+    },
+    {
+      "blocker": null,
+      "command_schedule": [
+        {
+          "controls": {
+            "collective": "hover"
+          },
+          "end_s": 0.1,
+          "start_s": 0.0
+        }
+      ],
+      "continuity_tolerances": {
+        "altitude_m": 1.0,
+        "mass_kg": 1.0,
+        "speed_m_s": 1.0
+      },
+      "duration_s": 0.1,
+      "environment": {
+        "atmosphere": "standard",
+        "earth_model": "wgs-84",
+        "earth_omega_rad_s": 0.0,
+        "wind_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "event_schedule": [],
+      "id": "hummingbird",
+      "initial_state_si": {
+        "altitude_m": 2.0,
+        "mass_kg": 0.5,
+        "true_airspeed_m_s": 0.0
+      },
+      "inputs": {
+        "bridge_source_problem": {
+          "path": "examples/mission_families/slower_hummingbird/SV05_hover_reduction_3dof.prb",
+          "sha256": "28131ee7cb07ba4663769f1a5ed0bb73bc343745ae2d7bc7c7d6911b15cf5a84"
+        },
+        "constrained_rigid_problem": {
+          "path": "examples/mission_families/slower_hummingbird/SV05_hover_parity_6dof.prb",
+          "sha256": "151720543a781fce07d96eac3cffd7126214966d1323c400d96983595a400dde"
+        },
+        "point_mass_problem": {
+          "path": "examples/mission_families/slower_hummingbird/SV05_hover_reduction_3dof.prb",
+          "sha256": "28131ee7cb07ba4663769f1a5ed0bb73bc343745ae2d7bc7c7d6911b15cf5a84"
+        }
+      },
+      "parity_tolerances": {
+        "altitude_m": 0.1,
+        "mass_kg": 1e-06,
+        "speed_m_s": 0.1
+      },
+      "propulsion": {
+        "mass_flow_kg_s": 0.0,
+        "model": "individual-rotor-allocation"
+      },
+      "reduction_kind": "point-mass-3dof",
+      "scenario_id": "hummingbird-hover-reduction-v1",
+      "source_tables": [
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl",
+          "sha256": "7557dfc56b104d7e9456c47e96b92a6bd39961e748342e4b683536c6874da05a"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl",
+          "sha256": "07546231afad77206b58966fbe9105eaf7162d57dfe78ec65ea6cbae56ece7a8"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl",
+          "sha256": "c5eaa0a64b8880a6dbd724fece70506fa29f3acdce771f6a5d4ba49961f761ec"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl",
+          "sha256": "a0c7bef46a613233dd2e668eac3acc06ab359058d977e1276cd3c7207cf868a7"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl",
+          "sha256": "ac84d5ca648d0c68f77435e95033e8cc7b631d38ba50a86d5a1ae28cc5306198"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl",
+          "sha256": "e445b9090f348655979087127a73a2b29bfc940f5de21ec49e871bef844d9501"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl",
+          "sha256": "0022c1d7498423c6267c0728a29d0eaa48b2ee7b9d4439536ee9dca6e3e33d7a"
+        },
+        {
+          "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_reaction_torque.tbl",
+          "sha256": "fb3b71000b241f48bc3c35c82df5fbf77d815ea0d05ca1c4fa9ad706d8e431e1"
+        }
+      ],
+      "state_mapping": {
+        "altitude_m": {
+          "point": "alt",
+          "point_scale": 0.3048,
+          "rigid": "altitude_m",
+          "rigid_scale": 1.0
+        },
+        "mass_kg": {
+          "point": "mass",
+          "point_scale": 0.45359237,
+          "rigid": "mass_kg",
+          "rigid_scale": 1.0
+        },
+        "speed_m_s": {
+          "point": "vel",
+          "point_scale": 0.3048,
+          "rigid": "speed_m_s",
+          "rigid_scale": 1.0
+        }
+      },
+      "status": "candidate",
+      "termination_policy": {
+        "condition": "time",
+        "kind": "final-condition",
+        "value_s": 0.1
+      },
+      "unit_profiles": {
+        "point_mass": "native-fps",
+        "rigid_body": "si"
+      }
+    },
+    {
+      "blocker": null,
+      "command_schedule": [
+        {
+          "controls": {
+            "bank_deg": 0.0
+          },
+          "end_s": 0.01,
+          "start_s": 0.0
+        }
+      ],
+      "continuity_tolerances": {
+        "altitude_m": 3.0,
+        "mass_kg": 1.0,
+        "speed_m_s": 1.0
+      },
+      "duration_s": 0.01,
+      "environment": {
+        "atmosphere": "standard",
+        "earth_model": "wgs-84",
+        "earth_omega_rad_s": 0.0,
+        "wind_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "event_schedule": [],
+      "id": "x15",
+      "initial_state_si": {
+        "altitude_m": 21000.0,
+        "mass_kg": 14641.0545,
+        "true_airspeed_m_s": 1300.0
+      },
+      "inputs": {
+        "bridge_source_problem": {
+          "path": "examples/showcases/x15_rocket_to_hawaii/release_glide_reduction_3dof.prb",
+          "sha256": "3888335348c79c7d92168789bdd4ec01f9a67670e8d29335d182c4b58c5936e9"
+        },
+        "constrained_rigid_problem": {
+          "path": "examples/showcases/x15_rocket_to_hawaii/release_glide_parity_6dof.prb",
+          "sha256": "82e7fb70ad8b3920b35dd20f74365e6dd0bfc21f317140a25cbd30714f8a2e35"
+        },
+        "point_mass_problem": {
+          "path": "examples/showcases/x15_rocket_to_hawaii/release_glide_reduction_3dof.prb",
+          "sha256": "3888335348c79c7d92168789bdd4ec01f9a67670e8d29335d182c4b58c5936e9"
+        }
+      },
+      "parity_tolerances": {
+        "altitude_m": 0.25,
+        "mass_kg": 1e-06,
+        "speed_m_s": 0.05
+      },
+      "propulsion": {
+        "mass_flow_kg_s": 0.0,
+        "model": "unpowered-glide"
+      },
+      "reduction_kind": "point-mass-3dof",
+      "scenario_id": "x15-release-glide-reduction-v1",
+      "source_tables": [
+        {
+          "path": "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl",
+          "sha256": "01fb370545eddc2ba904f186ddf101d2e1b3c409fe803078d9eecd3c86bd40af"
+        }
+      ],
+      "state_mapping": {
+        "altitude_m": {
+          "point": "alt",
+          "point_scale": 0.3048,
+          "rigid": "altitude_m",
+          "rigid_scale": 1.0
+        },
+        "mass_kg": {
+          "point": "mass",
+          "point_scale": 0.45359237,
+          "rigid": "mass_kg",
+          "rigid_scale": 1.0
+        },
+        "speed_m_s": {
+          "point": "vel",
+          "point_scale": 0.3048,
+          "rigid": "aero_airspeed_m_s",
+          "rigid_scale": 1.0
+        }
+      },
+      "status": "candidate",
+      "termination_policy": {
+        "condition": "geodetic-altitude",
+        "kind": "ground-or-time",
+        "value_m": 0.0
+      },
+      "unit_profiles": {
+        "point_mass": "native-fps",
+        "rigid_body": "si"
+      }
+    }
+  ],
+  "schema_version": 1
+}

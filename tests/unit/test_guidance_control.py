@@ -5,7 +5,15 @@ import math
 import pytest
 
 from taoryx.contracts import Vector3
-from taoryx.runtime.guidance_control import AttitudeCommand, ControlOutput, CoordinatedTurnController, GuidanceDemand, TargetState, allocate_alpha_bank
+from taoryx.runtime.guidance_control import (
+    AttitudeCommand,
+    ControlOutput,
+    CoordinatedTurnController,
+    GuidanceDemand,
+    TargetState,
+    allocate_alpha_bank,
+    limit_vector_norm,
+)
 
 
 def test_alpha_bank_allocator_tracks_unsaturated_transverse_demand() -> None:
@@ -33,6 +41,19 @@ def test_alpha_bank_allocator_reports_alpha_saturation_residual() -> None:
     assert command.angle_of_attack_radians == pytest.approx(0.5)
     assert command.achieved_acceleration.z == pytest.approx(5.0)
     assert command.residual_acceleration.z == pytest.approx(15.0)
+    assert command.saturated
+    ####
+
+
+def test_alpha_bank_allocator_applies_declared_bank_limit() -> None:
+    command = allocate_alpha_bank(
+        Vector3(0.0, 10.0, 0.0),
+        lift_acceleration_per_radian=10.0,
+        maximum_angle_of_attack_radians=1.0,
+        maximum_bank_radians=math.radians(30.0),
+    )
+
+    assert command.bank_radians == pytest.approx(math.radians(30.0))
     assert command.saturated
     ####
 
@@ -66,4 +87,14 @@ def test_coordinated_turn_controller_maps_errors_to_bounded_body_moment() -> Non
     assert command.moment_body.norm() == pytest.approx(2.0)
     assert command.moment_body.y == pytest.approx(0.0)
     assert command.saturated
+    ####
+
+
+def test_limit_vector_norm_preserves_direction_and_handles_zero_limit() -> None:
+    vector = limit_vector_norm(Vector3(3.0, 4.0, 0.0), 2.0)
+    assert vector.norm() == pytest.approx(2.0)
+    assert (vector.x, vector.y, vector.z) == pytest.approx((1.2, 1.6, 0.0))
+    assert limit_vector_norm(Vector3(1.0, 2.0, 3.0), 0.0).norm() == pytest.approx(0.0)
+    with pytest.raises(ValueError, match="finite and nonnegative"):
+        limit_vector_norm(Vector3(1.0, 0.0, 0.0), -1.0)
     ####

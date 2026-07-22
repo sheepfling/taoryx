@@ -646,7 +646,12 @@ def validate_problem(
                             if isinstance(node, TableReferenceExpression) and available_table_types and node.name.casefold() in available_table_types:
                                 expected_type = assignment.name.casefold() if block.keyword in {"aero", "cg", "prop", "wind"} else None
                                 actual_type = available_table_types[node.name.casefold()]
-                                if expected_type in TABLE_TYPE_REFERENCES and actual_type != expected_type:
+                                # ``output`` is the documented generic value
+                                # table form used by synthetic/example decks;
+                                # it may feed a typed aero/prop assignment,
+                                # while a conflicting typed table remains an
+                                # ingestion error.
+                                if expected_type in TABLE_TYPE_REFERENCES and actual_type not in {expected_type, "output"}:
                                     diagnostics.append(
                                         Diagnostic(
                                             severity=Severity.ERROR,

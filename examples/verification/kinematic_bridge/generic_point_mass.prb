@@ -1,0 +1,15 @@
+(generic-point-mass-contract)
+*title Generic point-mass contract and bridge fixture
+*mode point-mass
+*atmos none
+*earth spherical gm=0 omega=0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+
+*trajectory 1 generic-vehicle start on 1
+  *initial ecic x=7000000.0 y=0.0 z=0.0 xdt=0.0 ydt=100.0 zdt=0.0 time=0.0 mass=1.0
+  *segment 1 inertial-coast
+    *integ dtprnt=0.1 dt=0.1
+    *when time>10.0 stop
+*end

@@ -724,6 +724,36 @@ def test_less_than_when_condition_transitions_and_stops(tmp_path: Path) -> None:
 ####
 
 
+def test_point_mass_ground_safety_guard_stops_below_zero_altitude(tmp_path: Path) -> None:
+    problem = tmp_path / "ground-safety.prb"
+    problem.write_text(
+        "(ground-safety)\n"
+        "*mode point-mass\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 test start on 1\n"
+        "  *initial geodetic alt=1 long=0 lat=0 vel=-1 gama=90 psi=0 time=0 mass=1\n"
+        "  *segment 1 descent\n"
+        "    *integ dtprnt=0.1 dt=0.1\n"
+        "    *when time>2 stop\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+
+    report = run_files(problem, output_dir=tmp_path / "run", max_steps=100, profile=grammar_contracts.GrammarProfile.TAORYX)
+
+    assert report.results
+    assert report.results[0].completed
+    assert report.results[0].stop_reason == "stop_condition"
+    assert any(
+        event["signal"] == "earth-intersection"
+        and event["source"] == "taoryx-point-mass-safety-guard"
+        for artifact in report.artifacts
+        for event in artifact.events
+    )
+####
+
+
 @pytest.mark.parametrize(
     ("operator", "initial", "velocity", "expected_time"),
     (("<=", 1.0, -1.0, 0.75), (">=", 0.0, 1.0, 0.25)),

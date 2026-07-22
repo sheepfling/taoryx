@@ -1,0 +1,6 @@
+# Notional first-cut fuel-flow surrogate for the B747 runtime contract.
+# This is not extracted from NASA CR-2144 or the JT9D source table.
+(b747-notional-mdot)
+table mdot(throttle) no-extrap units=kg/sec
+throttle=0,1
+mdot=0,2

@@ -23,13 +23,13 @@ def test_inject_controls_replaces_existing_and_adds_missing_runtime_attributes()
     ####
 
 
-def test_inject_controls_requires_a_guidance_status_line_for_missing_attributes() -> None:
-    source = "*runtime status route mode=rectangle\n"
+def test_inject_controls_requires_a_status_line_for_missing_attributes() -> None:
+    source = "*title no-runtime-status\n"
 
     try:
         inject_controls(source, {"rectangle-bank-gain-nm-per-rad": 10.0})
     except ValueError as error:
-        assert "guidance line" in str(error)
+        assert "guidance or route line" in str(error)
     else:
         raise AssertionError("missing guidance status line should fail closed")
     ####

@@ -1,0 +1,28 @@
+(hummingbird-hover-parity-reduction-3dof)
+*title Hummingbird common source-frame hover translational reduction
+*mode point-mass
+*atmos standard
+*earth wgs-84 omega=0.0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status vehicle aero-load-mode=direct-wrench aero-wrench-frame=source-z-up rotor-allocation=quad-x rotor-arm-m=0.17 rotor-thrust-coefficient=5.57e-6 rotor-reaction-torque-coefficient=1.36e-7 rotor-speed-min=0 rotor-speed-max=1500 reference-area=1.0 reference-length=0.34 dry-mass-kg=0.5 inertia-x=0.00365 inertia-y=0.00368 inertia-z=0.00703 envelope-max-speed=10
+
+
+
+
+
+*trajectory 1 hummingbird start on 1
+  *initial geodetic alt=2.0 long=0.0 lat=0.0 vel=0.0 gama=0.0 psi=0.0 time=0.0 mass=0.5
+  *segment 1 hover-parity
+    *integ dtprnt=0.005 dt=0.001
+    *prop thrust=(thrust) mdot=0 ep1=90 ep2=-90
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+
+
+    *when time>0.1 stop
+*end

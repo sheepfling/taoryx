@@ -66,6 +66,9 @@ def observe_vehicle(
     state = vehicle.state
     named = dict(state.named)
     named.update(vehicle.parameters)
+    # Interactive control commands are live inputs even before the next
+    # integration sample; expose their achieved values through status output.
+    named.update(vehicle.control_values)
     for name, value in zip(state.value_names, state.values, strict=False):
         named.setdefault(name, value)
     position = _vector_from_aliases(named, (("x_ecfc", "x"), ("y_ecfc", "y"), ("z_ecfc", "z")))

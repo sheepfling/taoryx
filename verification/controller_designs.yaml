@@ -1,0 +1,34 @@
+schema_version: 1
+id: taoryx_controller_designs_v1
+designs:
+  # These are design declarations, not claims that the gains are already
+  # validated.  The trim and local matrices must be supplied by the evidence
+  # workflow before a controller becomes a vehicle claim.
+  - id: b747-local-lqr
+    method: lqr
+    trim: b747-condition3-trim-v1
+    allocator: b747-standard
+    states: [alpha, beta, p, q, r]
+    controls: [elevator, aileron, rudder]
+    notes: Local source-anchor design; no global B747 envelope claim.
+  - id: x8-local-lqr
+    method: lqr
+    trim: x8-powered-trim-v1
+    allocator: x8-elevons
+    states: [alpha, beta, p, q, r]
+    controls: [collective-elevon, differential-elevon]
+    notes: Local flight-identified design; retain source envelope limits.
+  - id: hummingbird-rate-lqr
+    method: lqr
+    trim: hummingbird-hover-v1
+    allocator: hummingbird-quad-x
+    states: [p, q, r]
+    controls: [moment_x_nm, moment_y_nm, moment_z_nm]
+    notes: Rate-loop design around equal-rotor hover; position control is separate.
+  - id: x15-bank-lqr
+    method: lqr
+    trim: x15-release-glide-v1
+    allocator: x15-bank
+    states: [alpha, beta, p, q, r]
+    controls: [differential-stabilator, rudder]
+    notes: Local unpowered-glide design; not a terminal-guidance claim.

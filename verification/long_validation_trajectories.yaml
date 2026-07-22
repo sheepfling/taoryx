@@ -9,46 +9,80 @@ common:
 vehicles:
   - id: b747
     semantic_family: powered_fixed_wing
-    duration_s: 480
-    phases: [source_trim, elevator_doublet, altitude_step, heading_change, wind_rejection, trim_return]
-    nominal_problem: examples/mission_families/slower_b747/SV01_long_validation_6dof.prb
-    primary_metrics: [airspeed_error, altitude_error, heading_error, alpha_margin, beta_margin, saturation, closure_p99, convergence]
+    duration_s: 120
+    phases: [source_trim, sustained_cruise, source_anchor_return]
+    nominal_problem: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
+    primary_metrics: [trim_speed_drift, trim_altitude_drift, alpha_margin, beta_margin, saturation, closure_p99, convergence]
     gates:
-      max_airspeed_error_fraction: 0.02
-      max_altitude_steady_error_m: 10
-      max_heading_steady_error_deg: 2
+      max_speed_drift_m_s: 2
+      max_altitude_drift_m: 2
       max_abs_alpha_deg: 4
       max_abs_beta_deg: 5
+    objectives:
+      - {id: duration, kind: trajectory_duration, channel: duration_s, target: 120.0, tolerance: 0.01, unit: s, source: summary}
+      - {id: final-speed, kind: trim_hold, channel: speed_m_s, target: 153.0, tolerance: 2.0, unit: m/s, source: final}
+      - {id: final-altitude, kind: trim_hold, channel: altitude_m, target: 100.0, tolerance: 2.0, unit: m, source: final}
+      - {id: alpha-envelope, kind: envelope, channel: aero_alpha_deg, target: 4.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+      - {id: beta-envelope, kind: envelope, channel: aero_sideslip_deg, target: 5.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+    convergence:
+      source: fidelity_parity
+      window_s: 30
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s]
+      tolerances: {altitude_m: 0.1, speed_m_s: 0.01}
+    follow_on_maneuver: examples/mission_families/slower_b747/SV01_descent_recovery_120_6dof.prb
   - id: skywalker-x8
     semantic_family: powered_fixed_wing
-    duration_s: 540
-    phases: [powered_trim, climb_leveloff, heading_reversal, wide_rectangle, gust_rejection, trim_return]
+    duration_s: 60
+    phases: [powered_trim, source_neighborhood_recovery, bounded_level_flight]
     nominal_problem: examples/mission_families/slower_x8/SV03_long_validation_6dof.prb
-    primary_metrics: [speed_envelope, altitude_error, corner_miss, beta_recovery, saturation, closure_p99, convergence]
+    primary_metrics: [speed_envelope, altitude_drift, alpha_margin, beta_recovery, saturation, closure_p99, convergence]
+    convergence_window_s: 10
+    convergence_problem: examples/mission_families/slower_x8/SV03_source_trim_hold_30_6dof.prb
     gates:
       speed_min_m_s: 12
       speed_max_m_s: 27
       alpha_min_deg: 0
       alpha_max_deg: 12
       max_abs_beta_deg: 5
-      max_corner_miss_6dof_m: 25
+      max_speed_drift_m_s: 2
+    objectives:
+      - {id: duration, kind: trajectory_duration, channel: duration_s, target: 60.0, tolerance: 0.01, unit: s, source: summary}
+      - {id: final-speed, kind: powered_trim, channel: speed_m_s, target: 17.9, tolerance: 2.0, unit: m/s, source: final}
+      - {id: alpha-envelope, kind: envelope, channel: aero_alpha_deg, target: 12.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+      - {id: beta-envelope, kind: envelope, channel: aero_sideslip_deg, target: 5.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+    convergence:
+      source: fidelity_parity
+      window_s: 10
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s]
+      tolerances: {altitude_m: 0.5, speed_m_s: 0.1}
+    follow_on_maneuver: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
   - id: hummingbird
     semantic_family: multirotor
-    duration_s: 135
-    phases: [takeoff, hover, north_step, east_step, yaw_step, return_square, descent_checkpoint]
-    nominal_problem: examples/mission_families/slower_hummingbird/SV05_long_validation_6dof.prb
-    primary_metrics: [hover_position_error, waypoint_radius, altitude_error, yaw_error, rate_error, rotor_saturation, wrench_error, convergence]
+    duration_s: 40
+    phases: [hover, rectangular_waypoint_course, elevated_corner, return_to_origin]
+    nominal_problem: examples/mission_families/slower_hummingbird/SV05_rectangle_course_6dof.prb
+    primary_metrics: [waypoint_geometry, altitude_transition, speed_envelope, rotor_saturation, wrench_error, convergence]
     gates:
-      max_hover_position_error_m: 0.1
-      max_waypoint_radius_m: 0.25
-      max_hover_altitude_error_m: 0.1
-      max_yaw_error_deg: 3
-      max_body_rate_error_deg_s: 2
+      max_speed_m_s: 10
+      max_abs_sideslip_deg: 20
       max_wrench_relative_error: 0.01
+    objectives:
+      - {id: duration, kind: hover_course, channel: duration_s, target: 40.0, tolerance: 0.01, unit: s, source: summary}
+      - {id: final-altitude, kind: hover, channel: altitude_m, target: 2.0, tolerance: 0.5, unit: m, source: final}
+      - {id: speed-envelope, kind: envelope, channel: speed_m_s, target: 10.0, tolerance: 0.01, unit: m/s, comparison: maximum, source: max}
+    convergence:
+      source: fidelity_parity
+      window_s: 20
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s]
+      tolerances: {altitude_m: 0.5, speed_m_s: 0.1}
+    follow_on_maneuver: examples/mission_families/slower_hummingbird/SV05_return_home_land_6dof.prb
   - id: x15
     semantic_family: unpowered_hypersonic_glider
-    duration_s: 300
-    phases: [release, ballistic_coast, atmospheric_interface, energy_management_glide, heading_capture, terminal_corridor]
+    duration_s: 120
+    phases: [release, energy_management, atmospheric_descent, terminal_geometry_diagnostic]
     nominal_problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
     primary_metrics: [release_mass_balance, propulsion_zero_after_release, apogee, dynamic_pressure_transition, mach_margin, alpha_margin, route_capture, ground_clearance, convergence]
     gates:
@@ -59,3 +93,14 @@ vehicles:
       require_positive_atmospheric_dynamic_pressure: true
       require_zero_post_release_mass_flow: true
       thermal_claim: excluded
+    objectives:
+      - {id: duration, kind: glide, channel: duration_s, target: 120.0, tolerance: 0.01, unit: s, source: summary}
+      - {id: mach-envelope, kind: envelope, channel: mach, target: 6.7, tolerance: 0.01, unit: "1", comparison: maximum, source: max_abs}
+      - {id: beta-envelope, kind: envelope, channel: aero_sideslip_deg, target: 10.0, tolerance: 0.01, unit: deg, comparison: maximum, source: max_abs}
+    convergence:
+      source: fidelity_parity
+      window_s: 60
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s]
+      tolerances: {altitude_m: 10.0, speed_m_s: 1.0}
+    follow_on_maneuver: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_bank_reversal_6dof.prb

@@ -9,8 +9,15 @@ model envelope.
 `SV03_long_anchor_propagation_6dof.prb` is the bounded open-loop propagation
 case. `SV03_bounded_route_controller_6dof.prb` exercises the native route-
 attitude controller for a bounded 0.1-second response.
-`SV03_long_controller_recovery_6dof.prb` is the 0.5-second collective-elevon
-alpha-hold baseline.
+`SV03_long_controller_recovery_6dof.prb` is the retained 0.5-second collective-
+elevon alpha-hold diagnostic. The generated
+`examples/generated/vehicles/skywalker_x8_controller_recovery_10_6dof.prb`
+is the current metadata-driven 10-second powered recovery case. It composes
+the static, collective-elevon, differential-elevon, and thrust tables and uses
+the declared source-neighborhood controls. Its enlarged moment allowance is a
+notional research-controller setting, recorded so that this case exercises the
+plant and envelope for a useful duration without claiming a published X8
+flight-control law.
 
 `SV03_combined_controller_recovery_6dof.prb` is the harmonized five-second
 longitudinal/lateral recovery gate. It uses the same composed coefficient deck

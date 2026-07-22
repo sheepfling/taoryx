@@ -121,6 +121,17 @@ class RigidBodyForceMoment:
     propulsion_moment_body: Vector3 | None = None
 
     def __post_init__(self) -> None:
+        vectors = {
+            "force_body": self.force_body,
+            "moment_body": self.moment_body,
+            "aero_force_body": self.aero_force_body,
+            "propulsion_force_body": self.propulsion_force_body,
+            "aero_moment_body": self.aero_moment_body,
+            "propulsion_moment_body": self.propulsion_moment_body,
+        }
+        for name, vector in vectors.items():
+            if vector is not None and not all(math.isfinite(value) for value in (vector.x, vector.y, vector.z)):
+                raise ValueError(f"rigid-body {name} components must be finite")
         if self.propellant_mass_rate < 0.0 or not math.isfinite(self.propellant_mass_rate):
             raise ValueError("propellant mass rate must be finite and nonnegative")
         if self.heat_rate < 0.0 or not math.isfinite(self.heat_rate):
@@ -214,13 +225,20 @@ class RigidBody6DofModel:
             self.inertia.y * state.body_rate.y,
             self.inertia.z * state.body_rate.z,
         )
+        try:
+            gyroscopic_term = state.body_rate.cross(angular_momentum)
+        except ValueError as error:
+            raise ValueError(
+                "rigid-body rotational cross term became non-finite: "
+                f"body_rate={state.body_rate!r}, angular_momentum={angular_momentum!r}"
+            ) from error
         angular_acceleration = Vector3(
-            (load.moment_body.x - state.body_rate.cross(angular_momentum).x) / self.inertia.x,
-            (load.moment_body.y - state.body_rate.cross(angular_momentum).y) / self.inertia.y,
-            (load.moment_body.z - state.body_rate.cross(angular_momentum).z) / self.inertia.z,
+            (load.moment_body.x - gyroscopic_term.x) / self.inertia.x,
+            (load.moment_body.y - gyroscopic_term.y) / self.inertia.y,
+            (load.moment_body.z - gyroscopic_term.z) / self.inertia.z,
         )
         quaternion_rate = state.attitude.derivative(state.body_rate)
-        return (
+        derivative = (
             state.velocity.vector.x,
             state.velocity.vector.y,
             state.velocity.vector.z,
@@ -239,6 +257,14 @@ class RigidBody6DofModel:
             load.heat_rate,
             max(0.0, load.heat_rate - state.peak_heat_rate),
         )
+        if not all(math.isfinite(value) for value in derivative):
+            bad = tuple(
+                name
+                for name, value in zip(RIGID_BODY_STATE_NAMES, derivative, strict=True)
+                if not math.isfinite(value)
+            )
+            raise ValueError("rigid-body derivative contains non-finite values: " + ", ".join(bad))
+        return derivative
         ####
 
     def observables(self, state: RigidBody6DofState) -> dict[str, float]:
@@ -278,16 +304,23 @@ class RigidBody6DofModel:
         aero_moment = load.aero_moment_body or Vector3(0.0, 0.0, 0.0)
         propulsion_moment = load.propulsion_moment_body or (load.moment_body - aero_moment)
         angular_momentum = Vector3(self.inertia.x * state.body_rate.x, self.inertia.y * state.body_rate.y, self.inertia.z * state.body_rate.z)
+        try:
+            gyroscopic_term = state.body_rate.cross(angular_momentum)
+        except ValueError as error:
+            raise ValueError(
+                "rigid-body observable rotational cross term became non-finite: "
+                f"body_rate={state.body_rate!r}, angular_momentum={angular_momentum!r}"
+            ) from error
         angular_acceleration = Vector3(
-            (load.moment_body.x - state.body_rate.cross(angular_momentum).x) / self.inertia.x,
-            (load.moment_body.y - state.body_rate.cross(angular_momentum).y) / self.inertia.y,
-            (load.moment_body.z - state.body_rate.cross(angular_momentum).z) / self.inertia.z,
+            (load.moment_body.x - gyroscopic_term.x) / self.inertia.x,
+            (load.moment_body.y - gyroscopic_term.y) / self.inertia.y,
+            (load.moment_body.z - gyroscopic_term.z) / self.inertia.z,
         )
         moment_residual = Vector3(
             self.inertia.x * angular_acceleration.x,
             self.inertia.y * angular_acceleration.y,
             self.inertia.z * angular_acceleration.z,
-        ) + state.body_rate.cross(angular_momentum) - load.moment_body
+        ) + gyroscopic_term - load.moment_body
         force_scale = max(state.mass * gravity.norm(), total_force_body.norm(), 1.0e-12)
         moment_scale = max(load.moment_body.norm(), 1.0)
         return {
@@ -300,6 +333,9 @@ class RigidBody6DofModel:
             "force_ecic_x_n": force_ecic.x,
             "force_ecic_y_n": force_ecic.y,
             "force_ecic_z_n": force_ecic.z,
+            "total_force_ecic_x_n": total_force_ecic.x,
+            "total_force_ecic_y_n": total_force_ecic.y,
+            "total_force_ecic_z_n": total_force_ecic.z,
             "total_force_ecic_n": total_force_ecic.norm(),
             "aero_force_body_x_n": aero_force.x,
             "aero_force_body_y_n": aero_force.y,

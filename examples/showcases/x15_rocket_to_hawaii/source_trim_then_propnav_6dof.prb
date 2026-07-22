@@ -1,0 +1,28 @@
+(x15-source-trim-then-propnav-6dof)
+*title X-15 source-envelope trim then native ProNav transition
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=7.2921151467e-5 gm=3.986004418e14
+*runtime status vehicle reference-area=18.580608 reference-length=3.130296 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024 dry-mass-kg=14641.0545 envelope-max-mach=6.7 envelope-max-alpha-deg=10 envelope-max-beta-deg=10
+*runtime status target latitude-deg=34.4898575251 longitude-deg=-119.3516454012 altitude-m=21500.0
+*runtime status route mode=great-circle start-latitude-deg=34.3068454669 start-longitude-deg=-118.8430647160 duration-s=35.0 altitude-profile=linear-target start-altitude-m=21500.0 powered-speed-mps=1283.0 powered-climb-rate-mps=-15.0 position-capture-gain=0.0
+*runtime status guidance propnav-gain=0.01 max-alpha-deg=10.0 max-bank-deg=30.0 lift-acceleration-per-radian=100.0 fixed-wing-control-authority=surfaces surface-pitch-gain-deg-per-rad=12.0 surface-roll-gain-deg-per-rad=12.0 surface-yaw-gain-deg-per-rad=12.0 sideslip-surface-gain-deg-per-rad=80.0 rudder-hold-gain-deg-per-deg=1.0 rudder-hold-target-deg=0.0 symmetric-stabilator-min-deg=-14.9 symmetric-stabilator-max-deg=34.9 differential-stabilator-min-deg=-20.05 differential-stabilator-max-deg=20.05 rudder-min-deg=-29.79 rudder-max-deg=29.79
+*runtime status actuator maximum-moment=250000 maximum-body-rate-deg-s=3600
+*runtime control symmetric-stabilator-deg vehicle=1 default=0.0 lower=-14.9 upper=34.9
+*runtime control differential-stabilator-deg vehicle=1 default=0.0 lower=-20.05 upper=20.05
+*runtime control rudder-deg vehicle=1 default=2.0 lower=-29.79 upper=29.79
+*trajectory 1 glider start on 1
+  *initial ecic x=-2550174.732106006 y=-4630503.055917352 z=3606993.764430032 xdt=-882.369500802 ydt=680.596575558 zdt=636.70629759 qw=0.332761597086 qx=-0.0923464597563 qy=-0.712620308262 qz=0.610666969082 wx=0.178322831283 wy=0.13481920873 wz=-0.22509452394 time=0.0 mass=14641.0545 propellant_mass=0.0
+  *segment 1 source-trim
+    *integ dtprnt=0.5 dt=0.02
+    *prop thrust=0 mdot=0
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *fly alpha=0.0
+    *when time>30 goto 2
+  *segment 2 terminal-propnav
+    *integ dtprnt=0.5 dt=0.02
+    *prop thrust=0 mdot=0
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *fly propnav=2
+    *when time>35 stop
+*end

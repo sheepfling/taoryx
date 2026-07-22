@@ -1,0 +1,131 @@
+schema_version: 1
+id: taoryx_vehicle_model_registry_v1
+description: >-
+  Canonical vehicle descriptions used by generated problem files and the
+  common vehicle harness. Values are SI unless the field name says otherwise.
+vehicles:
+  b747:
+    display_name: Boeing 747-100 research surrogate
+    family_id: powered_fixed_wing
+    mode: rigid-body-6dof
+    trajectory_vehicle: b747
+    earth_model: wgs-84
+    earth_omega_rad_s: 0.0
+    body_frame: x-forward-y-right-z-down
+    reference_area_m2: 510.96672
+    reference_length_m: 8.324088
+    dry_mass_kg: 288756.9
+    inertia_kg_m2: {x: 24675886.7, y: 44877574.1, z: 67384152.0}
+    envelope: {min_forward_speed_m_s: 20, max_mach: 0.9, max_alpha_deg: 4, max_beta_deg: 5}
+    aero_alpha_reference_deg: 3.1
+    controls:
+      - {name: elevator-deg, default: 0.3861602391, lower: -10, upper: 10}
+      - {name: aileron-deg, default: 0.0, lower: -10, upper: 10}
+      - {name: rudder-deg, default: 0.0, lower: -10, upper: 10}
+    actuator: {maximum_moment: 100000000, maximum_body_rate_deg_s: 90}
+    table_bindings:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    source:
+      status: public-research-surrogate
+      bundle: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
+      model_path: jet_b747
+    audit_problem_globs: [examples/mission_families/slower_b747/*.prb, examples/generated/vehicles/b747_*.prb]
+  skywalker_x8:
+    display_name: Skywalker X8 research surrogate
+    family_id: powered_fixed_wing
+    mode: rigid-body-6dof
+    trajectory_vehicle: x8
+    earth_model: wgs-84
+    earth_omega_rad_s: 0.0
+    body_frame: x-forward-y-right-z-down
+    reference_area_m2: 0.75
+    reference_length_m: 0.36
+    dry_mass_kg: 3.364
+    inertia_kg_m2: {x: 0.325, y: 0.140, z: 0.400}
+    envelope: {min_forward_speed_m_s: 2, max_speed_m_s: 27, max_alpha_deg: 12, max_beta_deg: 5}
+    controls:
+      - {name: throttle, default: 0.5773431906, lower: 0, upper: 1}
+      - {name: collective-elevon-deg, default: -2.1478876544, lower: -20, upper: 20}
+      - {name: differential-elevon-deg, default: -3.9378035934, lower: -20, upper: 20}
+    actuator: {maximum_moment: 20, maximum_body_rate_deg_s: 360}
+    table_bindings:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_rate_p_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_rate_q_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_rate_r_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_propeller_ct.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_propeller_cq.tbl
+    source:
+      status: public-research-surrogate
+      bundle: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
+      model_path: cruise_class_uav_skywalker_x8
+    audit_problem_globs: [examples/mission_families/slower_x8/*.prb, examples/generated/vehicles/skywalker_x8_*.prb]
+  hummingbird:
+    display_name: AscTec Hummingbird research surrogate
+    family_id: multirotor_direct_wrench
+    mode: rigid-body-6dof
+    trajectory_vehicle: hummingbird
+    earth_model: wgs-84
+    earth_omega_rad_s: 0.0
+    body_frame: source-z-up-adapted-to-taoryx
+    aero_load_mode: direct-wrench
+    aero_wrench_frame: source-z-up
+    reference_area_m2: 1.0
+    reference_length_m: 0.34
+    dry_mass_kg: 0.5
+    inertia_kg_m2: {x: 0.00365, y: 0.00368, z: 0.00703}
+    envelope: {max_speed_m_s: 10}
+    controls:
+      - {name: rotor-speed, default: 468.7244338633868, lower: 0, upper: 1500}
+      - {name: rotor-1-speed, default: 468.7244338633868, lower: 0, upper: 1500}
+      - {name: rotor-2-speed, default: 468.7244338633868, lower: 0, upper: 1500}
+      - {name: rotor-3-speed, default: 468.7244338633868, lower: 0, upper: 1500}
+      - {name: rotor-4-speed, default: 468.7244338633868, lower: 0, upper: 1500}
+    actuator: {maximum_moment: 1, maximum_body_rate_deg_s: 720}
+    table_bindings:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_reaction_torque.tbl
+    source:
+      status: public-research-surrogate
+      bundle: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
+      model_path: quadcopter_hummingbird
+    audit_problem_globs: [examples/mission_families/slower_hummingbird/*.prb, examples/generated/vehicles/hummingbird_*.prb]
+  x15:
+    display_name: North American X-15 research surrogate
+    family_id: rocket_plane
+    mode: rigid-body-6dof
+    trajectory_vehicle: x15
+    earth_model: wgs-84
+    earth_omega_rad_s: 7.2921151467e-5
+    earth_gm_m3_s2: 3.986004418e14
+    body_frame: x-forward-y-right-z-down
+    reference_area_m2: 18.580608
+    reference_length_m: 3.130296
+    dry_mass_kg: 9000.0
+    inertia_kg_m2: {x: 4948.7355, y: 129114.2666, z: 131825.9024}
+    envelope: {}
+    controls:
+      - {name: throttle, default: 1.0, lower: 0.4, upper: 1.0}
+      - {name: symmetric-stabilator-deg, default: 0.0, lower: -14.9, upper: 34.9}
+      - {name: differential-stabilator-deg, default: 0.0, lower: -20.05, upper: 20.05}
+      - {name: rudder-deg, default: 2.0, lower: -29.79, upper: 29.79}
+    actuator: {}
+    table_bindings:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    source:
+      status: public-research-surrogate
+      bundle: tests/fixtures/x15_coherent_6dof_public_research_v1
+      model_path: x15
+    audit_problem_globs: [examples/showcases/x15_6dof_research/*.prb, examples/generated/vehicles/x15_*.prb]

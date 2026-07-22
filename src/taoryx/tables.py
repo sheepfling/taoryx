@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import re
+from bisect import bisect_right
 from collections.abc import Callable, Mapping, MutableMapping, Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -462,7 +463,10 @@ def _bracket(axis: tuple[float, ...], query: float, mode: ExtrapolationMode) -> 
         else:
             query = axis[0] if query > axis[0] else axis[-1]
     if ascending:
-        index = next((i for i in range(len(axis) - 1) if axis[i] <= query <= axis[i + 1]), len(axis) - 2)
+        # Source tables can have dozens of coordinates on an axis and are
+        # queried at every RHS evaluation.  Keep the same bracket semantics
+        # while avoiding an O(n) scan for every RK4 substep.
+        index = min(bisect_right(axis, query) - 1, len(axis) - 2)
     else:
         index = next((i for i in range(len(axis) - 1) if axis[i] >= query >= axis[i + 1]), len(axis) - 2)
     fraction = (query - axis[index]) / (axis[index + 1] - axis[index])

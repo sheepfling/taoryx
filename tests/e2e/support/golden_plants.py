@@ -20,8 +20,10 @@ import yaml
 
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
+from taoryx.language.models import TableDocument
 from taoryx.language.table_parser import table_type_catalog
 from taoryx.runtime.runner import RunReport, run_files
+from taoryx.validation import independent_force_closure, independent_moment_closure
 
 StageStatus = Literal["pass", "fail", "blocked"]
 
@@ -325,6 +327,8 @@ def verify_golden_plant(case: GoldenPlantCase, output_dir: Path) -> GoldenPlantV
             ingested = ingest_file(path)
             if ingested.kind is not FileKind.TABLE or ingested.document is None:
                 raise ValueError(f"{path} did not ingest as a table")
+            if not isinstance(ingested.document, TableDocument):
+                raise ValueError(f"{path} did not produce a table document")
             table_documents.append(ingested.document)
             table_names.update(table_type_catalog(ingested.document))
         axes: dict[str, list[str]] = {}
@@ -431,7 +435,33 @@ def verify_golden_plant(case: GoldenPlantCase, output_dir: Path) -> GoldenPlantV
     def closure() -> Mapping[str, Any]:
         assert run is not None
         run.require_initial_closure()
-        return {"initial_only": True}
+        vehicle = metadata().get("vehicle", {})
+        if not isinstance(vehicle, Mapping):
+            raise RuntimeError("vehicle metadata is not available for rotational closure")
+        inertia = tuple(
+            float(vehicle[key])
+            for key in ("inertia-x", "inertia-y", "inertia-z")
+            if key in vehicle
+        )
+        if len(inertia) != 3:
+            raise RuntimeError("complete principal inertia metadata is required for rotational closure")
+        samples = tuple(
+            {
+                **sample,
+                "inertia_x_kg_m2": inertia[0],
+                "inertia_y_kg_m2": inertia[1],
+                "inertia_z_kg_m2": inertia[2],
+            }
+            for sample in run.history
+        )
+        report = independent_moment_closure(samples)
+        force_report = independent_force_closure(run.history)
+        return {
+            "initial_translation_residual": run.initial["translation_equation_residual_normalized"],
+            "initial_rotation_residual": run.initial["rotation_equation_residual_normalized"],
+            "independent_translation_closure": force_report,
+            "independent_rotation_closure": report,
+        }
 
     def propagation() -> Mapping[str, Any]:
         assert run is not None

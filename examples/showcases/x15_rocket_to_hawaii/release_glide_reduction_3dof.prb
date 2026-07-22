@@ -1,0 +1,28 @@
+(x15-release-glide-parity-reduction-3dof)
+*title X-15 common release unpowered glide translational reduction
+*mode point-mass
+*atmos standard
+*earth wgs-84 omega=7.2921151467e-5
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+
+
+
+
+
+
+*trajectory 1 x15 start on 1
+  *initial geodetic alt=21500.0 long=-118.2 lat=34.0 vel=1283.426096040443 gama=9.16645928861827 psi=299.82170792451166 time=0.0 mass=14641.0545
+  *segment 1 release-glide
+    *integ dtprnt=0.025 dt=0.0125
+    *prop thrust=0 mdot=0
+    *aero cx=(cx) cy=(cy) cz=(cz) sref=18.580608
+    *fly alpha=0.0
+
+    *when time>0.01 stop
+*end

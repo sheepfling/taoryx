@@ -1,0 +1,132 @@
+schema_version: 1
+id: taoryx_shared_fidelity_parity_v1
+description: >-
+  Shared reduction-parity contracts. A complete entry has one physical plant,
+  one initial state, one environment, one command/event schedule, and one
+  termination policy shared by all three dynamics tiers. Blocked entries are
+  retained so the catalog cannot silently omit a vehicle family.
+required_fields:
+  - initial_state_si
+  - environment
+  - source_tables
+  - propulsion
+  - command_schedule
+  - event_schedule
+  - duration_s
+  - termination_policy
+  - state_mapping
+  - reduction_kind
+  - parity_tolerances
+  - continuity_tolerances
+families:
+  - id: b747
+    scenario_id: b747-source-anchor-reduction-v1
+    status: candidate
+    reduction_kind: point-mass-3dof
+    parity_tolerances: {altitude_m: 0.1, speed_m_s: 0.1, mass_kg: 1.0e-6}
+    continuity_tolerances: {altitude_m: 1.0, speed_m_s: 1.0, mass_kg: 1.0}
+    point_output_units: native-fps
+    rigid_output_units: si
+    state_mapping:
+      altitude_m: {point: alt, rigid: altitude_m, point_scale: 0.3048, rigid_scale: 1.0}
+      speed_m_s: {point: vel, rigid: speed_m_s, point_scale: 0.3048, rigid_scale: 1.0}
+      mass_kg: {point: mass, rigid: mass_kg, point_scale: 0.45359237, rigid_scale: 1.0}
+    point_mass_problem: examples/mission_families/slower_b747/SV01_powered_trim_reduction_3dof.prb
+    bridge_source_problem: examples/mission_families/slower_b747/SV01_powered_trim_reduction_3dof.prb
+    constrained_rigid_problem: examples/mission_families/slower_b747/SV01_powered_trim_parity_6dof.prb
+    source_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    initial_state_si: {altitude_m: 100.0, true_airspeed_m_s: 153.0096, mass_kg: 288756.9, alpha_deg: 3.1, beta_deg: 0.0}
+    environment: {atmosphere: standard, wind_m_s: [0.0, 0.0, 0.0], earth_model: wgs-84, earth_omega_rad_s: 0.0}
+    propulsion: {model: constant-thrust, thrust_n: 179539.8975191153, mass_flow_kg_s: 0.0}
+    command_schedule: [{start_s: 0.0, end_s: 0.1, controls: {elevator_deg: 0.3861602391}}]
+    event_schedule: []
+    duration_s: 0.1
+    reduction_duration_s: 10.0
+    termination_policy: {kind: final-condition, condition: time, value_s: 0.1}
+  - id: skywalker_x8
+    scenario_id: x8-source-trim-reduction-v1
+    status: candidate
+    reduction_kind: point-mass-3dof
+    parity_tolerances: {altitude_m: 0.1, speed_m_s: 0.1, mass_kg: 1.0e-6}
+    continuity_tolerances: {altitude_m: 1.0, speed_m_s: 1.0, mass_kg: 1.0}
+    point_output_units: native-fps
+    rigid_output_units: si
+    state_mapping:
+      altitude_m: {point: alt, rigid: altitude_m, point_scale: 0.3048, rigid_scale: 1.0}
+      speed_m_s: {point: vel, rigid: speed_m_s, point_scale: 0.3048, rigid_scale: 1.0}
+      mass_kg: {point: mass, rigid: mass_kg, point_scale: 0.45359237, rigid_scale: 1.0}
+    point_mass_problem: examples/mission_families/slower_x8/SV03_powered_trim_reduction_3dof.prb
+    bridge_source_problem: examples/mission_families/slower_x8/SV03_powered_trim_reduction_3dof.prb
+    constrained_rigid_problem: examples/mission_families/slower_x8/SV03_powered_trim_parity_6dof.prb
+    source_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    initial_state_si: {altitude_m: 178.0, true_airspeed_m_s: 17.9, mass_kg: 3.364, alpha_deg: 7.8095, beta_deg: 0.0}
+    environment: {atmosphere: standard, wind_m_s: [0.0, 0.0, 0.0], earth_model: wgs-84, earth_omega_rad_s: 0.0}
+    propulsion: {model: source-composed-thrust, throttle: 0.6265437663082247, mass_flow_kg_s: 0.0}
+    command_schedule: [{start_s: 0.0, end_s: 0.1, controls: {collective_elevon_deg: -2.097861479714001, differential_elevon_deg: 0.0}}]
+    event_schedule: []
+    duration_s: 0.1
+    reduction_duration_s: 5.0
+    termination_policy: {kind: final-condition, condition: time, value_s: 0.1}
+  - id: hummingbird
+    scenario_id: hummingbird-hover-reduction-v1
+    status: candidate
+    reduction_kind: point-mass-3dof
+    parity_tolerances: {altitude_m: 0.1, speed_m_s: 0.1, mass_kg: 1.0e-6}
+    continuity_tolerances: {altitude_m: 1.0, speed_m_s: 1.0, mass_kg: 1.0}
+    point_output_units: native-fps
+    rigid_output_units: si
+    state_mapping:
+      altitude_m: {point: alt, rigid: altitude_m, point_scale: 0.3048, rigid_scale: 1.0}
+      speed_m_s: {point: vel, rigid: speed_m_s, point_scale: 0.3048, rigid_scale: 1.0}
+      mass_kg: {point: mass, rigid: mass_kg, point_scale: 0.45359237, rigid_scale: 1.0}
+    point_mass_problem: examples/mission_families/slower_hummingbird/SV05_hover_reduction_3dof.prb
+    bridge_source_problem: examples/mission_families/slower_hummingbird/SV05_hover_reduction_3dof.prb
+    constrained_rigid_problem: examples/mission_families/slower_hummingbird/SV05_hover_parity_6dof.prb
+    source_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_reaction_torque.tbl
+    initial_state_si: {altitude_m: 2.0, true_airspeed_m_s: 0.0, mass_kg: 0.5}
+    environment: {atmosphere: standard, wind_m_s: [0.0, 0.0, 0.0], earth_model: wgs-84, earth_omega_rad_s: 0.0}
+    propulsion: {model: individual-rotor-allocation, mass_flow_kg_s: 0.0}
+    command_schedule: [{start_s: 0.0, end_s: 0.1, controls: {collective: hover}}]
+    event_schedule: []
+    duration_s: 0.1
+    reduction_duration_s: 10.0
+    termination_policy: {kind: final-condition, condition: time, value_s: 0.1}
+  - id: x15
+    scenario_id: x15-release-glide-reduction-v1
+    status: candidate
+    reduction_kind: point-mass-3dof
+    parity_tolerances: {altitude_m: 0.25, speed_m_s: 0.05, mass_kg: 1.0e-6}
+    continuity_tolerances: {altitude_m: 3.0, speed_m_s: 1.0, mass_kg: 1.0}
+    point_output_units: native-fps
+    rigid_output_units: si
+    state_mapping:
+      altitude_m: {point: alt, rigid: altitude_m, point_scale: 0.3048, rigid_scale: 1.0}
+      speed_m_s: {point: vel, rigid: aero_airspeed_m_s, point_scale: 0.3048, rigid_scale: 1.0}
+      mass_kg: {point: mass, rigid: mass_kg, point_scale: 0.45359237, rigid_scale: 1.0}
+    point_mass_problem: examples/showcases/x15_rocket_to_hawaii/release_glide_reduction_3dof.prb
+    bridge_source_problem: examples/showcases/x15_rocket_to_hawaii/release_glide_reduction_3dof.prb
+    constrained_rigid_problem: examples/showcases/x15_rocket_to_hawaii/release_glide_parity_6dof.prb
+    source_tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+    initial_state_si: {altitude_m: 21000.0, true_airspeed_m_s: 1300.0, mass_kg: 14641.0545}
+    environment: {atmosphere: standard, wind_m_s: [0.0, 0.0, 0.0], earth_model: wgs-84, earth_omega_rad_s: 0.0}
+    propulsion: {model: unpowered-glide, mass_flow_kg_s: 0.0}
+    command_schedule: [{start_s: 0.0, end_s: 0.01, controls: {bank_deg: 0.0}}]
+    event_schedule: []
+    duration_s: 0.01
+    reduction_duration_s: 30.0
+    termination_policy: {kind: ground-or-time, condition: geodetic-altitude, value_m: 0.0}

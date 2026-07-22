@@ -8,10 +8,10 @@ import re
 import tempfile
 from pathlib import Path
 
-from scipy.optimize import least_squares
-
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.runtime.runner import run_files
+from taoryx.trim import solve_trim
+from taoryx.trim_catalog import load_trim_catalog
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBLEM = ROOT / "examples/mission_families/slower_hummingbird/SV05_hover_validation_6dof.prb"
@@ -34,8 +34,8 @@ def _candidate(source: str, rotor_speed: float) -> str:
     ####
 
 
-def _residual(values: tuple[float], work: Path) -> tuple[float, float, float]:
-    rotor_speed = values[0]
+def _residual(state_values: dict[str, float], control_values: dict[str, float], work: Path) -> dict[str, float]:
+    rotor_speed = control_values["equal_rotor_speed_rad_s"]
     problem = work / "candidate.prb"
     problem.write_text(_candidate(PROBLEM.read_text(encoding="utf-8"), rotor_speed), encoding="utf-8")
     report = run_files(problem, TABLES, output_dir=work / "run", max_steps=2, integrator="rk4", profile=GrammarProfile.TAORYX)
@@ -44,11 +44,11 @@ def _residual(values: tuple[float], work: Path) -> tuple[float, float, float]:
     state = report.results[0].states["1"][0].named
     force_scale = max(float(state["mass_kg"]) * 9.80665, 1.0)
     moment_scale = max(force_scale * 0.34, 1.0)
-    return (
-        float(state["total_force_body_x_n"]) / force_scale,
-        float(state["total_force_body_z_n"]) / force_scale,
-        float(state["total_moment_body_z_nm"]) / moment_scale,
-    )
+    return {
+        "body_x_force": float(state["total_force_body_x_n"]) / force_scale,
+        "body_z_force": float(state["total_force_body_z_n"]) / force_scale,
+        "yaw_moment": float(state["total_moment_body_z_nm"]) / moment_scale,
+    }
     ####
 
 
@@ -57,35 +57,28 @@ def main() -> None:
 
     with tempfile.TemporaryDirectory(prefix="taoryx-hummingbird-trim-") as directory:
         work = Path(directory)
-        result = least_squares(
-            lambda values: _residual((float(values[0]),), work),
-            x0=(469.124102661955,),
-            bounds=([0.0], [1500.0]),
-            xtol=1.0e-12,
-            ftol=1.0e-12,
-            gtol=1.0e-12,
-            max_nfev=50,
-        )
-        rotor_speed = float(result.x[0])
-        residual = _residual((rotor_speed,), work)
+        spec = load_trim_catalog(ROOT / "verification/trim_specs.yaml").get("hummingbird-hover-v1").to_spec()
+        result = solve_trim(spec, lambda state, controls: _residual(dict(state), dict(controls), work), max_nfev=50, residual_tolerance=1.0e-12)
+        rotor_speed = result.controls["equal_rotor_speed_rad_s"]
+        residual = result.residuals
     payload = {
         "vehicle": "asctec-hummingbird",
         "source_anchor": "RotorPy-derived equal-rotor hover",
         "claim": "open-loop hover trim using the native direct-wrench plant",
         "parameters": {"equal_rotor_speed_rad_s": rotor_speed},
-        "residual_normalized": {"body_x": residual[0], "body_z": residual[1], "moment_z": residual[2]},
-        "residual_norm_l2": sum(value * value for value in residual) ** 0.5,
+        "residual_normalized": {"body_x": residual["body_x_force"], "body_z": residual["body_z_force"], "moment_z": residual["yaw_moment"]},
+        "residual_norm_l2": sum(value * value for value in residual.values()) ** 0.5,
         "acceptance_gate": {
             "translation_norm_lt": 0.01,
             "rotation_norm_lt": 0.001,
-            "passed": max(abs(residual[0]), abs(residual[1])) < 0.01 and abs(residual[2]) < 0.001,
+            "passed": max(abs(residual["body_x_force"]), abs(residual["body_z_force"])) < 0.01 and abs(residual["yaw_moment"]) < 0.001,
         },
         "provenance": {
             "problem": str(PROBLEM.relative_to(ROOT)),
             "problem_sha256": _sha256(PROBLEM),
             "runtime_tables": {str(path.relative_to(ROOT)): _sha256(path) for path in TABLES},
         },
-        "solver": {"success": bool(result.success), "status": int(result.status), "message": str(result.message), "nfev": int(result.nfev)},
+        "solver": {"success": result.success, "status": result.status, "message": result.message, "nfev": result.iterations},
     }
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")

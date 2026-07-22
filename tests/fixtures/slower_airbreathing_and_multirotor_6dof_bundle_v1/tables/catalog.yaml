@@ -27,6 +27,14 @@ tables:
     family: propulsion
     axes: [altitude_m, mach, throttle]
     quantities: [thrust]
+  - path: b747_notional_fuel_flow.tbl
+    vehicle: b747
+    family: propulsion-mass-coupling
+    status: taoryx-notional-first-cut
+    axes: [throttle]
+    quantities: [mdot]
+    units: kg/sec
+    envelope: [0, 1]
   - path: skywalker_x8_static_6axis.tbl
     vehicle: skywalker_x8
     family: aerodynamic-static-six-axis

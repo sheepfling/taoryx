@@ -1,0 +1,136 @@
+schema_version: 1
+id: taoryx_vehicle_fidelity_ladder_v1
+description: >-
+  One common staged verification contract for the four source-backed vehicle
+  families. The kinematic case is derived from the same 3-DOF problem at test
+  time so table bindings and translational inputs remain identical.
+families:
+  - id: b747
+    display_name: B747
+    point_mass_problem: examples/mission_families/slower_b747/SV01_powered_trim_reduction_3dof.prb
+    rigid_body_problem: examples/generated/vehicles/b747_canonical_source_anchor_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    rigid_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    max_steps: 100
+    convergence_position_tolerance_m: 1.0e-3
+    convergence_velocity_tolerance_m_s: 1.0e-6
+    point_mass_unit_system: fps
+    rigid_body_unit_system: si
+    showcase_point_mass_problem: examples/mission_families/slower_b747/SV01_climb_cruise_3dof.prb
+    showcase_rigid_body_problem: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
+    showcase_max_steps: 30000
+    source_validation: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/checks/validation_report.json
+  - id: skywalker_x8
+    display_name: Skywalker X8
+    point_mass_problem: examples/generated/vehicles/skywalker_x8_source_trim_reduction_3dof.prb
+    rigid_body_problem: examples/generated/vehicles/skywalker_x8_canonical_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    rigid_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 100
+    convergence_position_tolerance_m: 1.0e-3
+    convergence_velocity_tolerance_m_s: 1.0e-6
+    point_mass_unit_system: fps
+    rigid_body_unit_system: si
+    showcase_point_mass_problem: examples/mission_families/slower_x8/SV03_rectangle_course_3dof.prb
+    showcase_rigid_body_problem: examples/mission_families/slower_x8/SV03_source_trim_hold_30_6dof.prb
+    showcase_max_steps: 30000
+    source_validation: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/checks/validation_report.json
+    diagnostic_cases:
+      - id: source-composed-trim-hold
+        problem: examples/mission_families/slower_x8/SV03_source_trim_hold_30_6dof.prb
+        tables:
+          - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+          - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+          - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+          - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+        max_steps: 7000
+        expected_status: candidate
+  - id: hummingbird
+    display_name: AscTec Hummingbird
+    point_mass_problem: examples/mission_families/slower_hummingbird/SV05_3dof.prb
+    rigid_body_problem: examples/generated/vehicles/hummingbird_canonical_hover_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+    rigid_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_reaction_torque.tbl
+    max_steps: 2500
+    convergence_position_tolerance_m: 1.0e-3
+    convergence_velocity_tolerance_m_s: 1.0e-6
+    point_mass_unit_system: si
+    rigid_body_unit_system: si
+    showcase_point_mass_problem: examples/mission_families/slower_hummingbird/SV05_rectangle_course_3dof.prb
+    showcase_rigid_body_problem: examples/mission_families/slower_hummingbird/SV05_long_hover_6dof.prb
+    showcase_max_steps: 50000
+    source_validation: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/checks/validation_report.json
+  - id: x15
+    display_name: X-15
+    point_mass_problem: examples/showcases/x15_rocket_to_hawaii/mission_3dof.prb
+    rigid_body_problem: examples/generated/vehicles/x15_canonical_research_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    rigid_tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    max_steps: 4000
+    convergence_position_tolerance_m: 5.0
+    convergence_velocity_tolerance_m_s: 5.0e-3
+    point_mass_unit_system: fps
+    rigid_body_unit_system: si
+    showcase_point_mass_problem: examples/showcases/x15_rocket_to_hawaii/mission_3dof.prb
+    showcase_rigid_body_problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_bank_reversal_6dof.prb
+    showcase_max_steps: 30000
+    source_validation: tests/fixtures/x15_coherent_6dof_public_research_v1/checks/validation_report.json
+    diagnostic_cases:
+      - id: source-trim-hold
+        problem: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+        tables:
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl
+        max_steps: 1600
+        expected_status: candidate
+      - id: source-trim-then-propnav
+        problem: examples/showcases/x15_rocket_to_hawaii/source_trim_then_propnav_6dof.prb
+        tables:
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl
+        max_steps: 2000
+        expected_status: candidate
+      - id: route-geometry
+        problem: examples/showcases/x15_rocket_to_hawaii/route_geometry_diagnostic_6dof.prb
+        tables:
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+        max_steps: 6000
+      - id: short-range-propnav
+        problem: examples/showcases/x15_rocket_to_hawaii/short_range_propnav_6dof.prb
+        tables:
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl
+          - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl
+        max_steps: 2000
+        expected_status: blocked

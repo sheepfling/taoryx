@@ -32,8 +32,11 @@ unit-consistent, in-envelope validation case per family.
 - B747 and X8 6-DOF cases must fail closed at table-envelope violations; the
   matrix must distinguish preflight rejection from an initial table-query
   rejection and runtime envelope exit.
-- Hummingbird has preliminary hover evidence, but not yet force/moment closure
-  or disturbed-response evidence.
+- Hummingbird has bounded hover, disturbed-response, waypoint-course, and
+  return-home/landing evidence with direct force/moment closure and timestep
+  convergence. The common controller-manifest case covers the standard
+  return-home problem file; it remains a research-surrogate claim, not a
+  hardware or flight-control claim.
 - CA-HI remains evidence-only and is not part of this family-validation gate.
 
 The goal is a small, reviewable evidence set rather than a larger matrix of
@@ -48,17 +51,36 @@ limits, and the same source-anchored tables used by the plant-golden tests.
 They are bounded response probes, not route-completion claims: the fixed-wing
 tables are local models and the controller must remain inside their envelope.
 
-The Hummingbird entry is explicitly blocked. The current standard runtime
-contract now exposes a generic four-rotor allocation and rate-damping path;
-the first closed-loop rate-response case is covered by
-`SV05_rate_damped_hover_6dof.prb`. Full position/waypoint control remains
-blocked until attitude-command and actuator-state coverage is added.
+The generic Hummingbird controller-contract entry remains explicitly blocked:
+the standard runtime exposes four-rotor allocation and rate damping, but a
+fully general external attitude/actuator command interface is not yet part of
+the canonical vehicle contract. The concrete native waypoint and return-home
+cases are covered separately by the common manifest through
+`SV05_return_home_land_6dof.prb`, with direct equation residual and shutdown
+ordering gates.
 
 The B747 controller probe has been extended to ten seconds with generic
 alpha-hold feedback. The X8 control and rate-effect grids are now imported as
-verified `.tbl` data. The X8 now has a separate five-second
+verified `.tbl` data. The X8 now has a metadata-generated ten-second powered
+longitudinal recovery using the composed static, collective-elevon,
+differential-elevon, and thrust tables. Its enlarged moment allowance is
+explicitly notional and supports a bounded research-controller test rather
+than a published control-law claim. The X8 also has a separate five-second
 `SV03_lateral_rate_response_6dof.prb` gate using differential elevon,
 restoring sideslip, and body-rate damping; it remains within the local source
-envelope without saturation. The 0.5-second collective-elevon longitudinal
-recovery remains the baseline, and a longer coupled recovery is still blocked
-until the two independently bounded responses are combined and re-verified.
+envelope without saturation. The older 0.5-second collective-elevon file is
+retained as a historical diagnostic; it is no longer the active controller
+scenario manifest entry.
+
+The opt-in X8 surface-authority route is intentionally a failing diagnostic at
+this stage. Its pitch response leaves the source alpha envelope before a
+multi-second recovery can be claimed. Aerodynamic `no-extrap` queries now
+reject at that boundary instead of clamping and allowing rotational overflow;
+the next tuning work must therefore repair the surface controller at this
+lowest failing fidelity before the route is promoted to evidence. The source
+authority gate in `tests/unit/test_runtime_table_binding.py` records the
+finite local collective/differential control derivatives and their signs used
+to guide that repair. The generic `surface-control-inversion=true` extension
+now allocates moment demand through those measured derivatives, but its
+120-second rectangle candidate still exits the source beta envelope and is
+not promoted to the evidence packet.

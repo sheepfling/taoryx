@@ -25,6 +25,9 @@
     "skywalker_x8_static_6axis.tbl",
     "skywalker_x8_thrust.tbl"
   ],
+  "taoryx_notional_first_cut": [
+    "b747_notional_fuel_flow.tbl"
+  ],
   "models": {
     "b747": {
       "family": "subsonic-four-engine-jet",

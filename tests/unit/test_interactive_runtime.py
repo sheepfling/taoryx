@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from taoryx.contracts import Frame, FrameVector3, Vector3
+from taoryx.control import ProportionalHoldController, SegmentController, SegmentPlan, SegmentSchedule
 from taoryx.modes import DynamicsMode, Kinematic6DofState
 from taoryx.runtime import (
     ControlSpec,
@@ -110,6 +111,24 @@ def test_control_model_transforms_player_command_before_derivative() -> None:
     snapshot = session.step(0.1, {"stick": 0.25})
 
     assert snapshot.states["player"].values[0] == pytest.approx(0.05)
+
+
+def test_segment_controller_drives_time_steppable_runtime() -> None:
+    segment_controller = SegmentController(
+        ProportionalHoldController({"downrange": "throttle"}, {"downrange": 2.0}),
+        SegmentSchedule((SegmentPlan("capture", 0.0, 1.0, {"downrange": 1.0}),)),
+    )
+    session = InteractiveSession(
+        _problem(),
+        (ControlSpec("throttle", lower=0.0, upper=1.0),),
+        segment_controllers={"player": segment_controller},
+    )
+
+    snapshot = session.step(0.1)
+
+    assert snapshot.states["player"].values[0] == pytest.approx(0.1)
+    assert snapshot.commands[0].applied == pytest.approx(1.0)
+    assert session.command_history[0].commands == {"throttle": 2.0}
 ####
 
 

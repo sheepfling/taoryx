@@ -1,0 +1,31 @@
+schema_version: 1
+id: taoryx_vehicle_family_registry_v1
+description: >-
+  Family-level contracts for extending the vehicle catalog. A vehicle selects
+  one family; the family supplies the dynamics mode, frame contract, required
+  description fields, and problem template.
+families:
+  powered_fixed_wing:
+    title: Powered fixed-wing aircraft
+    dynamics_mode: rigid-body-6dof
+    problem_template: rigid_body_6dof
+    body_frame: x-forward-y-right-z-down
+    required_vehicle_fields: [reference_area_m2, reference_length_m, dry_mass_kg, inertia_kg_m2, envelope, controls, table_bindings]
+    control_roles: [longitudinal, lateral, propulsion]
+    examples: [b747, skywalker_x8]
+  rocket_plane:
+    title: Rocket-plane or high-speed research aircraft
+    dynamics_mode: rigid-body-6dof
+    problem_template: rigid_body_6dof
+    body_frame: x-forward-y-right-z-down
+    required_vehicle_fields: [reference_area_m2, reference_length_m, dry_mass_kg, inertia_kg_m2, envelope, controls, table_bindings]
+    control_roles: [propulsion, longitudinal, lateral]
+    examples: [x15]
+  multirotor_direct_wrench:
+    title: Multirotor with source-frame direct wrench and allocation
+    dynamics_mode: rigid-body-6dof
+    problem_template: rigid_body_6dof
+    body_frame: source-z-up-adapted-to-taoryx
+    required_vehicle_fields: [reference_area_m2, reference_length_m, dry_mass_kg, inertia_kg_m2, envelope, controls, table_bindings, aero_load_mode, aero_wrench_frame]
+    control_roles: [collective, attitude, allocation]
+    examples: [hummingbird]

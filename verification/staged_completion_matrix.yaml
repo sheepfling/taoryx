@@ -1,0 +1,160 @@
+schema_version: 1
+id: taoryx_staged_completion_matrix_v1
+claim_boundary: >-
+  Research-surrogate verification of the declared TAORYX plants and problem-file
+  modes; not flight qualification, global envelope validation, or TAOS 96.0
+  historical compatibility.
+
+modes:
+  point_mass_3dof:
+    label: true 3-DOF translational reduction
+  kinematic_3_plus_3_dof:
+    label: prescribed-kinematic attitude bridge
+  rigid_body_6dof:
+    label: full rigid-body Newton-Euler integration
+
+vehicles:
+  b747:
+    family: powered_fixed_wing
+    source_dataset: slower_airbreathing_and_multirotor_6dof_bundle_v1
+    evidence:
+      source_differential_test: tests/e2e/test_golden_source_differential.py
+      closure_tests:
+        - tests/e2e/test_vehicle_family_validation.py
+      convergence_tests:
+        - tests/e2e/test_vehicle_family_validation.py
+    modes:
+      point_mass_3dof:
+        status: pass
+        problem: examples/mission_families/slower_b747/SV01_powered_trim_reduction_3dof.prb
+        tests:
+          - tests/e2e/test_slower_vehicle_trajectories.py
+      kinematic_3_plus_3_dof:
+        status: pass
+        problem: derived_in_test_from_point_mass_problem
+        derivation: tests/e2e/test_fidelity_ladder.py::_kinematic_problem
+        tests:
+          - tests/e2e/test_fidelity_ladder.py
+      rigid_body_6dof:
+        status: pass_local
+        problem: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
+        tests:
+          - tests/e2e/test_vehicle_family_validation.py
+    recovery:
+      status: pass_local
+      problem: examples/mission_families/slower_b747/SV01_bounded_route_controller_6dof.prb
+    long_validation:
+      status: pass_local
+      problem: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
+      duration_s: 120
+    blockers:
+      - local model only; full heading and altitude-step tracking remain incomplete
+
+  skywalker_x8:
+    family: powered_fixed_wing
+    source_dataset: slower_airbreathing_and_multirotor_6dof_bundle_v1
+    evidence:
+      source_differential_test: tests/e2e/test_golden_source_differential.py
+      closure_tests:
+        - tests/e2e/test_x8_family_validation.py
+      convergence_tests:
+        - tests/e2e/test_x8_family_validation.py
+    modes:
+      point_mass_3dof:
+        status: pass
+        problem: examples/generated/vehicles/skywalker_x8_source_trim_reduction_3dof.prb
+        tests:
+          - tests/e2e/test_x8_reduction_parity.py
+      kinematic_3_plus_3_dof:
+        status: pass
+        problem: derived_in_test_from_point_mass_problem
+        derivation: tests/e2e/test_fidelity_ladder.py::_kinematic_problem
+        tests:
+          - tests/e2e/test_fidelity_ladder.py
+      rigid_body_6dof:
+        status: pass_local
+        problem: examples/mission_families/slower_x8/SV03_source_trim_hold_30_6dof.prb
+        tests:
+          - tests/e2e/test_x8_family_validation.py
+    recovery:
+      status: pass_local
+      problem: examples/mission_families/slower_x8/SV03_basic_waypoint_altitude_6dof.prb
+      gate: native_propnav_range_to_target_m_lt_25
+    long_validation:
+      status: pass_bounded_directional
+      problem: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
+      duration_s: 120
+    blockers:
+      - four-leg fixed-corner capture remains outside the 25 m research gate
+
+  hummingbird:
+    family: multirotor
+    source_dataset: slower_airbreathing_and_multirotor_6dof_bundle_v1
+    evidence:
+      source_differential_test: tests/e2e/test_golden_source_differential.py
+      closure_tests:
+        - tests/e2e/test_hummingbird_family_validation.py
+      convergence_tests:
+        - tests/e2e/test_hummingbird_family_validation.py
+    modes:
+      point_mass_3dof:
+        status: pass
+        problem: examples/mission_families/slower_hummingbird/SV05_3dof.prb
+        tests:
+          - tests/e2e/test_fidelity_ladder.py
+      kinematic_3_plus_3_dof:
+        status: pass
+        problem: derived_in_test_from_point_mass_problem
+        derivation: tests/e2e/test_fidelity_ladder.py::_kinematic_problem
+        tests:
+          - tests/e2e/test_fidelity_ladder.py
+      rigid_body_6dof:
+        status: pass
+        problem: examples/generated/vehicles/hummingbird_canonical_hover_6dof.prb
+        tests:
+          - tests/e2e/test_hummingbird_family_validation.py
+    recovery:
+      status: pass
+      problem: examples/mission_families/slower_hummingbird/SV05_return_home_land_6dof.prb
+    long_validation:
+      status: pass
+      problem: examples/mission_families/slower_hummingbird/SV05_rectangle_course_6dof.prb
+      duration_s: 40
+    blockers: []
+
+  x15:
+    family: unpowered_hypersonic_glider
+    source_dataset: x15_coherent_6dof_public_research_v1
+    evidence:
+      source_differential_test: tests/e2e/test_golden_source_differential.py
+      closure_tests:
+        - tests/e2e/test_glider_family_validation.py
+      convergence_tests:
+        - tests/e2e/test_glider_family_validation.py
+    modes:
+      point_mass_3dof:
+        status: pass
+        problem: examples/showcases/x15_rocket_to_hawaii/mission_3dof.prb
+        tests:
+          - tests/e2e/test_fidelity_ladder.py
+      kinematic_3_plus_3_dof:
+        status: pass
+        problem: derived_in_test_from_point_mass_problem
+        derivation: tests/e2e/test_fidelity_ladder.py::_kinematic_problem
+        tests:
+          - tests/e2e/test_fidelity_ladder.py
+      rigid_body_6dof:
+        status: pass_local
+        problem: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+        tests:
+          - tests/e2e/test_glider_family_validation.py
+    recovery:
+      status: pass_source_trimmed
+      problem: examples/showcases/x15_rocket_to_hawaii/source_trim_then_propnav_6dof.prb
+      gate: native_propnav_active_after_source_trim
+    long_validation:
+      status: pass_bounded_research_case
+      problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
+      duration_s: 120
+    blockers:
+      - direct untrimmed short-range ProNav exits the verified beta envelope

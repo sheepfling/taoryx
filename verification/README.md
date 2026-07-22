@@ -72,6 +72,46 @@ pass rates, worst-case records, and failure classifications. The CA-HI case is
 intentionally evidence-only until it has a declared endpoint requirement and
 an independent route oracle.
 
+`fidelity_ladder.yaml` and `tests/e2e/test_fidelity_ladder.py` define the
+common four-family progression: source 3-DOF, derived kinematic 3+3-DOF, and
+source-anchored rigid-body 6-DOF. The kinematic tier must preserve the same
+translational history as its source 3-DOF case while publishing a normalized
+attitude sidecar; it is a development bridge, not a full rigid-body claim.
+
+`fidelity_parity.yaml` is the stricter shared-experiment catalog. It records
+the physical inputs that must be identical before a 3DOF/3+3/6DOF comparison
+is called reduction parity. `python tools/dev.py check-parity` validates all
+problem/table inputs and writes the hashed generated contract at
+`verification/generated/fidelity_parity_contracts.json`. All four families now
+have explicit candidate contracts; a candidate may still fail its execution
+gate. Candidate execution currently stops at the unit firewall:
+the point-mass artifacts still expose native FPS-style telemetry while the
+rigid-body artifacts expose SI telemetry. That transcode must be made explicit
+before a parity result can be marked pass. The parity runner now performs that
+transcode in its report; the B747, X8, and Hummingbird 0.1-second
+translational windows pass initial-state, history-difference, and continuity
+gates. The X-15 release-glide window is 0.01 seconds because its high-speed
+initial acceleration is more strongly conditioned; its explicit tolerance is
+recorded in the catalog. These are reduction-window results, not
+long-duration or engineering-validity claims. The long X-15 release-glide
+mission remains separate fidelity-separation evidence: over that horizon the
+free rigid-body trajectory diverges from the point-mass reduction as attitude
+and rate dynamics are released.
+
+`staged_completion_matrix.yaml` is the per-vehicle completion ledger for that
+progression. It names the source dataset, problem or derivation for each tier,
+the recovery and long-validation cases, and any remaining blockers. Keep a
+vehicle at its lowest failing tier: a passing bridge or short propagation does
+not promote the corresponding rigid-body or mission claim. Validate the ledger
+with `tests/unit/test_staged_completion_matrix.py` before packaging evidence.
+
+The reproducible packet entrypoint is `python tools/dev.py fidelity-packet`.
+It creates a UUID-scoped directory and ZIP containing the resolved source
+problems, table inputs, tier summaries, and SHA-256 manifest for all four
+families. The packet is evidence of staged execution and provenance; it does
+not promote a family to engineering validity when a lower-tier or source
+differential gate remains open.
+
 The current baseline supports documentary fidelity (D), semantic coherence (S),
 and bounded parser conformance (P) in stated areas. It does not establish
 historical compatibility (H) or engineering validity. The historical TAOS

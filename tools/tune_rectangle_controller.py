@@ -30,6 +30,7 @@ class TuningCase:
     limits: dict[str, float]
     bounds: dict[str, tuple[float, float]]
     baseline: dict[str, float]
+    coordinated_turn: bool
     ####
 
 
@@ -47,13 +48,14 @@ def load_cases(path: Path) -> tuple[TuningCase, ...]:
             limits={str(key): float(value) for key, value in dict(item["limits"]).items()},
             bounds={str(key): (float(value[0]), float(value[1])) for key, value in dict(item["bounds"]).items()},
             baseline={str(key): float(value) for key, value in dict(item.get("baseline", {})).items()},
+            coordinated_turn=bool(item.get("coordinated_turn", True)),
         )
         for item in payload["cases"]
     )
     ####
 
 
-def inject_controls(source: str, values: dict[str, float]) -> str:
+def inject_controls(source: str, values: dict[str, float], *, coordinated_turn: bool = True) -> str:
     """Replace ordinary runtime guidance attributes in a temporary problem."""
 
     result = source
@@ -69,10 +71,21 @@ def inject_controls(source: str, values: dict[str, float]) -> str:
         guidance = re.compile(r"(?P<prefix>^\s*\*runtime\s+status\s+guidance\b[^\n]*)(?P<newline>\n|$)", re.IGNORECASE | re.MULTILINE)
         match = guidance.search(result)
         if match is None:
-            raise ValueError("baseline problem has no *runtime status guidance line for tuning attributes")
+            # Route geometry is a controller input too.  Keep the tuner
+            # generic by allowing route attributes to be searched without
+            # teaching it vehicle-specific problem-file layouts.
+            guidance = re.compile(r"(?P<prefix>^\s*\*runtime\s+status\s+route\b[^\n]*)(?P<newline>\n|$)", re.IGNORECASE | re.MULTILINE)
+            match = guidance.search(result)
+        if match is None:
+            raise ValueError("baseline problem has no *runtime status guidance or route line for tuning attributes")
         additions = "".join(f" {name}={value:.16g}" for name, value in missing.items())
         result = result[: match.end("prefix")] + additions + result[match.start("newline") :]
-    result = re.sub(r"rectangle-coordinated-turn=(?:false|0|no)", "rectangle-coordinated-turn=true", result, flags=re.IGNORECASE)
+    result = re.sub(
+        r"rectangle-coordinated-turn=(?:false|true|0|1|no|yes)",
+        f"rectangle-coordinated-turn={'true' if coordinated_turn else 'false'}",
+        result,
+        flags=re.IGNORECASE,
+    )
     return result
     ####
 
@@ -82,7 +95,10 @@ def evaluate_candidate(case: TuningCase, values: dict[str, float], work: Path) -
 
     work.mkdir(parents=True, exist_ok=True)
     candidate_problem = work / f"{case.identifier}-candidate.prb"
-    candidate_problem.write_text(inject_controls(case.problem.read_text(encoding="utf-8"), values), encoding="utf-8")
+    candidate_problem.write_text(
+        inject_controls(case.problem.read_text(encoding="utf-8"), values, coordinated_turn=case.coordinated_turn),
+        encoding="utf-8",
+    )
     report = run_files(
         candidate_problem,
         case.tables,
@@ -110,12 +126,27 @@ def evaluate_candidate(case: TuningCase, values: dict[str, float], work: Path) -
     final_range = abs(final.get("range_to_target_m", 1.0e6))
     altitude_error = abs(final.get("altitude_m", 0.0) - initial.get("altitude_m", 0.0))
     speed_delta = abs(final.get("speed_m_s", 0.0) - initial.get("speed_m_s", 0.0))
+    corner_capture_errors = tuple(
+        min(
+            float(sample.named[f"route_corner_{index}_error_m"])
+            for sample in history
+            if f"route_corner_{index}_error_m" in sample.named
+        )
+        for index in range(4)
+        if any(f"route_corner_{index}_error_m" in sample.named for sample in history)
+    )
     duration = final_state.time - history[0].time
+    corner_limit = case.limits.get("max_corner_capture_error_m")
+    corner_violations = tuple(
+        max(0.0, error - corner_limit)
+        for error in corner_capture_errors
+    ) if corner_limit is not None else ()
     violations = (
         max(0.0, max_alpha - case.limits["max_alpha_deg"]),
         max(0.0, max_beta - case.limits["max_beta_deg"]),
         max(0.0, altitude_error - case.limits["max_altitude_error_m"]),
         max(0.0, speed_delta - case.limits["max_speed_delta_m_s"]),
+        *corner_violations,
     )
     complete = report.exit_code == 0 and report.results[0].completed
     result.update(
@@ -126,10 +157,12 @@ def evaluate_candidate(case: TuningCase, values: dict[str, float], work: Path) -
             "speed_delta_m_s": speed_delta,
             "max_alpha_deg": max_alpha,
             "max_beta_deg": max_beta,
+            "corner_capture_errors_m": corner_capture_errors,
             "violations": violations,
             "score": final_range
             + 2.0 * altitude_error
             + speed_delta
+            + sum(corner_capture_errors)
             + 1.0e8 * sum(violations)
             + (1.0e6 if not complete else 0.0),
         }
@@ -155,6 +188,7 @@ def _selected_case(case: TuningCase, max_steps: int | None) -> TuningCase:
         limits=case.limits,
         bounds=case.bounds,
         baseline=case.baseline,
+        coordinated_turn=case.coordinated_turn,
     )
     ####
 

@@ -20,6 +20,10 @@ Use `pytest --markers` to inspect the registered marker descriptions directly.
 | `slow` | Long-running tests, including stress and historical runtime cases |
 | `artifact` | Tests that intentionally write human-readable output under `artifacts/` |
 | `spectre` | Spectre problem, segment, and trajectory corpus tests |
+| `b747` | Boeing 747 family plant, trajectory, controller, and artifact tests |
+| `x8` | Skywalker X8 family plant, trajectory, controller, and artifact tests |
+| `hummingbird` | AscTec Hummingbird family plant, rotor, trajectory, and artifact tests |
+| `x15` | X-15 family plant, glider, and artifact tests |
 
 The portable development runner provides the usual selections:
 
@@ -33,6 +37,10 @@ python tools/dev.py test-grammar     # grammar/parser view
 python tools/dev.py test-equations   # equation/provenance view
 python tools/dev.py test-algorithms  # algorithm catalog/binding view
 python tools/dev.py test-views       # print all views and categories
+python tools/dev.py test-b747        # only B747 tests, including slow/artifact cases
+python tools/dev.py test-x8          # only Skywalker X8 tests, including slow/artifact cases
+python tools/dev.py test-hummingbird # only Hummingbird tests, including slow/artifact cases
+python tools/dev.py test-x15         # only X-15 tests, including slow/artifact cases
 ```
 
 The equivalent direct pytest expressions are:
@@ -47,7 +55,17 @@ python -m pytest -m slow
 python -m pytest -m grammar
 python -m pytest -m equations
 python -m pytest -m algorithms
+python -m pytest -m b747
+python -m pytest -m x8
+python -m pytest -m hummingbird
+python -m pytest -m x15
 ```
+
+Vehicle-family markers are selective views, not disjoint CI shards. They are
+applied to the family-specific modules and to mixed catalog parameters where
+possible, so `-m b747` does not pull in X8, Hummingbird, or X-15 scenarios.
+The explicit command-line marker replaces the fast default marker expression;
+therefore family commands include their slow and artifact cases intentionally.
 
 Artifact tests should request the shared `artifact_dir` fixture. It creates a
 test-specific directory below `artifacts/`, which is ignored by Git. A

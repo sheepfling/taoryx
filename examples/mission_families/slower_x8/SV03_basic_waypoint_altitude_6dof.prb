@@ -4,9 +4,9 @@
 *atmos standard
 *earth wgs-84 omega=0
 *runtime status vehicle reference-area=0.75 reference-length=0.36 dry-mass-kg=3.364 inertia-x=0.325 inertia-y=0.140 inertia-z=0.400 envelope-min-forward-speed=2 envelope-max-speed=27 envelope-max-alpha-deg=12 envelope-max-beta-deg=5
-*runtime status target latitude-deg=0.0 longitude-deg=0.0032 altitude-m=190.0
-*runtime status route mode=great-circle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=20.0 powered-end-s=20.0 powered-speed-mps=17.9 powered-climb-rate-mps=0.5 position-capture-gain=0.02
-*runtime status guidance collective-elevon-hold-gain-deg-per-deg=0.5 collective-elevon-hold-target-deg=7.9 collective-elevon-min-deg=-20 collective-elevon-max-deg=20 differential-elevon-hold-gain-deg-per-deg=0.5 differential-elevon-hold-target-deg=0.0 differential-elevon-min-deg=-20 differential-elevon-max-deg=20 sideslip-gain=-5.0 sideslip-rate-damping=1.0 body-rate-damping-nm-s-per-rad=0.1
+*runtime status target latitude-deg=0.0 longitude-deg=0.0035 altitude-m=190.0
+*runtime status route mode=great-circle start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=20.0 powered-end-s=20.0 altitude-profile=linear-target start-altitude-m=178.0 powered-speed-mps=17.9 powered-climb-rate-mps=0.5 position-capture-gain=0.02
+*runtime status guidance collective-elevon-hold-gain-deg-per-deg=0.5 collective-elevon-hold-target-deg=7.9 collective-elevon-min-deg=-20 collective-elevon-max-deg=20 differential-elevon-hold-gain-deg-per-deg=0.5 differential-elevon-hold-target-deg=0.0 differential-elevon-min-deg=-20 differential-elevon-max-deg=20 sideslip-gain=-5.0 sideslip-rate-damping=1.0 body-rate-damping-nm-s-per-rad=0.1 airspeed-hold-target-mps=18.0 airspeed-hold-gain-throttle-per-mps=0.15 airspeed-hold-min-throttle=0.35 airspeed-hold-max-throttle=0.85
 *runtime status actuator maximum-moment=20 maximum-body-rate-deg-s=180
 *runtime control collective-elevon-deg vehicle=1 default=-2.35 lower=-20 upper=20
 *runtime control differential-elevon-deg vehicle=1 default=-2.16 lower=-20 upper=20
@@ -29,5 +29,7 @@
     *integ dtprnt=0.1 dt=0.005
     *prop thrust=(thrust) mdot=0
     *aero cx=x8-cx cy=x8-cy cz=x8-cz cmx=x8-cmx cmy=x8-cmy cmz=x8-cmz
+    *fly propnav=4
+    *when range_to_target_m<25.0 stop
     *when time>20.0 stop
 *end

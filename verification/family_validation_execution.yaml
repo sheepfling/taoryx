@@ -23,6 +23,8 @@ scenarios:
     supporting_problems:
       - examples/mission_families/hypersonic_glide_terminal_guidance/mission.prb
       - examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
+      - examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_bank_reversal_6dof.prb
+      - examples/showcases/x15_rocket_to_hawaii/route_geometry_diagnostic_6dof.prb
     supporting_tables:
       - examples/mission_families/hypersonic_glide_terminal_guidance/aero.tbl
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
@@ -43,6 +45,8 @@ scenarios:
       - aero_sideslip_deg
       - mass_kg
       - range_to_target_m
+      - route_cross_track_error_m
+      - route_heading_error_deg
     phases:
       - release
       - ballistic_coast
@@ -61,7 +65,7 @@ scenarios:
       - id: release-height-plus-one
         input: initial_ecic_z
         expected: bounded_unpowered_envelope
-    blocking_reason: 120 s source-anchored unpowered 6DOF release, energy-management, terminal-descent, convergence, perturbation, and Matplotlib evidence now pass; explicit bank-reversal and deeper energy/heading-capture telemetry remain before validation
+    blocking_reason: 120 s source-anchored unpowered 6DOF release, apogee/energy-management, terminal-descent, convergence, perturbation, and Matplotlib evidence pass; native bank-reversal and source-anchored route geometry telemetry pass, while short-range ProNav departs the local alpha/beta deck and remains blocked
   - id: b747-trim-climb-cruise-maneuver-descent
     family: powered_fixed_wing
     status: candidate
@@ -72,6 +76,12 @@ scenarios:
     candidate_problem: examples/mission_families/slower_b747/SV01_rectangle_course_3dof.prb
     supporting_problems:
       - examples/mission_families/slower_b747/SV01_long_trim_hold_6dof.prb
+      - examples/mission_families/slower_b747/SV01_open_loop_pitch_diagnostic_6dof.prb
+      - examples/mission_families/slower_b747/SV01_open_loop_descent_diagnostic_6dof.prb
+      - examples/mission_families/slower_b747/SV01_flight_path_hold_descent_6dof.prb
+      - examples/mission_families/slower_b747/SV01_descent_recovery_120_6dof.prb
+      - examples/mission_families/slower_b747/SV01_integrated_route_descent_6dof.prb
+      - examples/mission_families/slower_b747/SV01_reduced_fuel_mass_coupling_6dof.prb
       - examples/mission_families/slower_b747/SV01_rectangle_course_6dof.prb
       - examples/mission_families/slower_b747/SV01_approach_go_around_long_6dof.prb
       - examples/mission_families/slower_b747/SV01_climb_cruise_3dof.prb
@@ -109,11 +119,26 @@ scenarios:
       - vehicle-family-validation/b747-trim-hold-contract/convergence-report.json
       - vehicle-family-validation/b747-approach-go-around-6dof/phase-metrics.json
       - vehicle-family-validation/b747-approach-go-around-6dof/convergence-report.json
+      - vehicle-family-validation/b747-trim-120s-generated-6dof/run-report.json
+      - vehicle-family-validation/b747-trim-120s-generated-6dof/plots
+      - vehicle-family-validation/b747-descent-recovery-120s-generated-6dof/run-report.json
+      - vehicle-family-validation/b747-descent-recovery-120s-generated-6dof/plots
       - vehicle-family-validation/b747-climb-cruise-3dof/phase-metrics.json
-    blocking_reason: 320 s rectangle, 60 s 6DOF trim, 60 s approach/go-around, and 60 s climb/cruise pass phase bounds and artifacts; trim and approach convergence plus two perturbations pass, but source-anchored disturbance/fuel, descent, and route semantics remain
+      - vehicle-family-validation/b747-open-loop-pitch-diagnostic/diagnostic-history.json
+      - vehicle-family-validation/b747-flight-path-hold-descent/descent-history.json
+      - vehicle-family-validation/b747-integrated-route-descent/run-report.json
+      - vehicle-family-validation/b747-integrated-route-descent/plots
+      - vehicle-family-validation/b747-reduced-fuel-mass-coupling/mass-history.json
+    blocking_reason: 320 s rectangle, 60 s 6DOF trim, 60 s approach/go-around, 60 s climb/cruise, opposite-elevator sign diagnostic, 60 s controlled descent corridor, 120 s native descent/recovery, 20 s composed route/altitude capture, and table-driven notional mass coupling pass; source-backed JT9D fuel flow, heading/altitude tracking, and longer route closure remain
     blocking_evidence:
       - table: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
         finding: installed thrust map explicitly declares that fuel flow is not modeled
+      - table: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_notional_fuel_flow.tbl
+        finding: notional first-cut throttle-to-mass-flow surrogate used only to exercise runtime coupling
+      - problem: examples/mission_families/slower_b747/SV01_reduced_fuel_mass_coupling_6dof.prb
+        finding: table-driven mdot is a notional first-cut contract, not source-backed JT9D fuel data
+      - problem: examples/mission_families/slower_b747/SV01_integrated_route_descent_6dof.prb
+        finding: 20 s route/altitude capture reaches the declared local corridor but remains a source-scoped research maneuver, not a full mission
       - problem: examples/mission_families/slower_b747/SV01_descent_corridor_6dof.prb
         finding: 20 s run reaches approximately 750 m altitude and 6.97 deg angle of attack from the 100 m start, outside the declared descent corridor
   - id: x8-powered-trim-route-recovery
@@ -128,6 +153,7 @@ scenarios:
       - examples/mission_families/slower_x8/SV03_long_validation_6dof.prb
       - examples/mission_families/slower_x8/SV03_long_powered_recovery_6dof.prb
       - examples/mission_families/slower_x8/SV03_combined_controller_recovery_6dof.prb
+      - examples/mission_families/slower_x8/SV03_basic_waypoint_altitude_6dof.prb
     duration_s: 120
     phases:
       - powered_trim
@@ -149,7 +175,7 @@ scenarios:
         expected: bounded_powered_envelope
       - id: fixed-crosswind-five-mps
         input: problem_wind_geodetic
-        expected: bounded_route_envelope
+        expected: bounded_disturbance_corridor
     artifact_paths:
       - vehicle-family-validation/x8-long-rectangle-route-6dof/run-report.json
       - vehicle-family-validation/x8-long-rectangle-route-6dof/phase-metrics.json
@@ -157,7 +183,9 @@ scenarios:
       - vehicle-family-validation/x8-powered-validation-6dof/run-report.json
       - vehicle-family-validation/x8-powered-validation-6dof/plots
       - vehicle-family-validation/x8-powered-validation-6dof/convergence-report.json
-    blocking_reason: 120 s four-leg powered rectangle now passes route closure, phase bounds, standard plots, and fixed-crosswind rejection; the 60 s anchor passes convergence and two initial-state perturbations, but dedicated climb/level-off evidence remains
+      - vehicle-family-validation/x8-level-settling-corridor-6dof/run-report.json
+      - vehicle-family-validation/x8-level-settling-corridor-6dof/plots
+    blocking_reason: 120 s four-leg powered rectangle passes directional-leg, phase-bound, and declared 5 m/s fixed-crosswind checks. After schedule alignment to the measured X8 ground speed and a capped generic position-capture term, reconstructed corner misses are approximately 54 m, 87 m, and 124 m for the non-origin corners; it is not four-leg waypoint-capture evidence. The generated 120 s level-settling corridor passes bounded altitude/speed/alpha/beta and independent closure gates, and the basic native waypoint now captures within 25 m at approximately 16.9 s. Native multi-leg capture, climb controller authority, propulsion balance, and clean fixture aliasing remain before a long X8 route claim.
   - id: hummingbird-takeoff-hover-translate-disturb-land
     family: quadrotor
     status: validated
@@ -198,4 +226,7 @@ scenarios:
       - vehicle-family-validation/hummingbird-return-home-land/run-report.json
       - vehicle-family-validation/hummingbird-return-home-land/phase-metrics.json
       - vehicle-family-validation/hummingbird-return-home-land/convergence-report.json
+      - slower-vehicle-controllers/hummingbird-waypoint-return-home-land/scenario.json
+      - slower-vehicle-controllers/hummingbird-waypoint-return-home-land/1_taos-altitude-m.png
+      - slower-vehicle-controllers/hummingbird-waypoint-return-home-land/1_taos-range-to-target-m.png
     validation_scope: synthetic Hummingbird direct-wrench quadrotor model and declared low-speed envelope; not flight qualification

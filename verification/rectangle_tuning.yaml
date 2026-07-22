@@ -13,6 +13,7 @@ cases:
       max_beta_deg: 5.0
       max_speed_delta_m_s: 10.0
       max_altitude_error_m: 75.0
+      max_corner_capture_error_m: 25.0
     baseline:
       rectangle-heading-gain-nm-per-rad: 100000.0
       rectangle-bank-gain-nm-per-rad: 100000.0
@@ -28,7 +29,7 @@ cases:
       rectangle-bank-deg: [5.0, 20.0]
       rectangle-lift-compensation-deg: [0.0, 3.0]
   - id: x8
-    problem: examples/mission_families/slower_x8/SV03_rectangle_course_6dof.prb
+    problem: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
     tables:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
@@ -36,22 +37,28 @@ cases:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
     max_steps: 24000
     search_max_steps: 8000
+    coordinated_turn: false
     limits:
       max_alpha_deg: 12.0
       max_beta_deg: 5.0
       max_speed_delta_m_s: 5.0
       max_altitude_error_m: 50.0
+      max_corner_capture_error_m: 25.0
     baseline:
-      rectangle-heading-gain-nm-per-rad: 1.0
-      rectangle-bank-gain-nm-per-rad: 1.0
-      rectangle-heading-rate-damping-nm-s-per-rad: 0.5
-      rectangle-bank-rate-damping-nm-s-per-rad: 0.5
-      rectangle-bank-deg: 20.0
-      rectangle-lift-compensation-deg: 1.0
+      rectangle-heading-gain-nm-per-rad: 0.0
+      rectangle-bank-gain-nm-per-rad: 0.0
+      rectangle-heading-rate-damping-nm-s-per-rad: 0.0
+      rectangle-bank-rate-damping-nm-s-per-rad: 0.0
+      rectangle-bank-deg: 8.0
+      rectangle-lift-compensation-deg: 0.0
+      position-capture-gain: 0.005
+      rectangle-corner-window-s: 45.0
     bounds:
-      rectangle-heading-gain-nm-per-rad: [0.1, 20.0]
-      rectangle-bank-gain-nm-per-rad: [0.1, 20.0]
-      rectangle-heading-rate-damping-nm-s-per-rad: [0.01, 10.0]
-      rectangle-bank-rate-damping-nm-s-per-rad: [0.01, 10.0]
-      rectangle-bank-deg: [5.0, 35.0]
-      rectangle-lift-compensation-deg: [0.0, 5.0]
+      rectangle-heading-gain-nm-per-rad: [0.0, 5.0]
+      rectangle-bank-gain-nm-per-rad: [0.0, 5.0]
+      rectangle-heading-rate-damping-nm-s-per-rad: [0.0, 5.0]
+      rectangle-bank-rate-damping-nm-s-per-rad: [0.0, 5.0]
+      rectangle-bank-deg: [5.0, 12.0]
+      rectangle-lift-compensation-deg: [0.0, 2.0]
+      position-capture-gain: [0.0, 0.5]
+      rectangle-corner-window-s: [15.0, 45.0]
