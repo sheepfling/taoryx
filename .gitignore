@@ -222,6 +222,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 .DS_Store
+1.print
 __pycache__/
 *.py[cod]
 *.egg-info/
