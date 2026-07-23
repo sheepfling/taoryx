@@ -108,7 +108,14 @@ from .engine import ExecutionResult, compute_trajectories
 from .environment_runtime import ExponentialAtmosphereProvider, WindFieldEnvironmentProvider, evaluate_wind
 from .expressions import evaluate_definition_program, evaluate_expression
 from .guidance_control import CoordinatedTurnController, allocate_alpha_bank, limit_vector_norm
-from .lqr import LqrController, solve_continuous_lqr
+from .lqr import (
+    GainScheduledLqrController,
+    LqrController,
+    LqrUncertaintySpec,
+    assess_lqr_robustness,
+    solve_continuous_lqr,
+    solve_scaled_continuous_lqr,
+)
 from .optimization_runtime import resolve_optimize_block
 from .rigid_body import bounded_attitude_moment, rigid_body_vehicle
 from .summaries import evaluate_summary
@@ -1306,7 +1313,8 @@ def _lower_rigid_body_case(
         float(vehicle_attributes.get("inertia-y", "1.0")),
         float(vehicle_attributes.get("inertia-z", "1.0")),
     )
-    attitude_lqr = _build_attitude_lqr(problem, inertia, actuator_attributes, tables)
+    inertia_provider = _runtime_inertia_provider(vehicle_attributes, inertia, named["mass"])
+    attitude_lqr = _build_attitude_lqr(problem, inertia, actuator_attributes, tables, initial_mass_kg=named["mass"])
     segment = segments[trajectory.start_segment]
     step = _segment_step_size(segment, parameters, 0.01)
     earth_omega = _earth_parameters(problem, parameters)[1]
@@ -1327,6 +1335,7 @@ def _lower_rigid_body_case(
         target_attributes=target_attributes,
         guidance_attributes=guidance_attributes,
         route_attributes=route_attributes,
+        vehicle_attributes=vehicle_attributes,
         actuator_attributes=actuator_attributes,
         reference_area=float(vehicle_attributes.get("reference-area", "1.0")),
         reference_length=float(vehicle_attributes.get("reference-length", "1.0")),
@@ -1532,6 +1541,7 @@ def _lower_rigid_body_case(
                 thrust_moment = controller.moment_body
                 controller_saturated["value"] = controller.saturated
             else:
+                current_inertia = inertia_provider(state)
                 lqr_command = attitude_lqr.command({
                     "attitude-error-x": -attitude_error.x,
                     "attitude-error-y": -attitude_error.y,
@@ -1539,7 +1549,7 @@ def _lower_rigid_body_case(
                     "wx": state.body_rate.x,
                     "wy": state.body_rate.y,
                     "wz": state.body_rate.z,
-                })
+                }, mass_kg=state.mass, inertia=(current_inertia.x, current_inertia.y, current_inertia.z))
                 if maximum_body_rate is not None and state.body_rate.norm() > maximum_body_rate:
                     thrust_moment = state.body_rate.scaled(-rate_damping)
                     if maximum_moment is not None and thrust_moment.norm() > maximum_moment:
@@ -1752,6 +1762,7 @@ def _lower_rigid_body_case(
         force_moment,
         gravity,
         dry_mass=float(vehicle_attributes.get("dry-mass-kg", str(named["mass"] - named.get("propellant_mass", 0.0)))),
+        inertia_provider=inertia_provider,
     )
     vehicle = rigid_body_vehicle(str(trajectory.number), initial_state, model, step_size=step, integrator="rk4")
     # A release directive applies to the initial release state as well as to
@@ -2713,6 +2724,12 @@ def _rigid_body_aero_observables(
             "aero_moment_body_x_nm": 0.0,
             "aero_moment_body_y_nm": 0.0,
             "aero_moment_body_z_nm": 0.0,
+            "aero_table_valid": 0.0,
+            "aero_table_min_margin": math.nan,
+            "aero_table_min_normalized_margin": math.nan,
+            "aero_model_uncertainty_fraction": math.nan,
+            "aero_model_estimated": 1.0,
+            "aero_table_operational_margin": math.nan,
         }
     output = model.evaluate(state)
     air_data_valid = output.airspeed_m_s >= minimum_air_data_speed_m_s
@@ -2721,6 +2738,18 @@ def _rigid_body_aero_observables(
     margins = {
         f"aero_table_margin_{name}": value for name, value in output.table_margins.items()
     }
+    margins.update(
+        {
+            f"aero_table_normalized_margin_{name}": value
+            for name, value in output.table_normalized_margins.items()
+        }
+    )
+    margins["aero_table_min_margin"] = min(output.table_margins.values(), default=math.nan)
+    margins["aero_table_min_normalized_margin"] = min(output.table_normalized_margins.values(), default=math.nan)
+    margins["aero_table_valid"] = 1.0
+    margins["aero_model_uncertainty_fraction"] = output.model_uncertainty_fraction
+    margins["aero_model_estimated"] = 1.0 if output.source_quality.casefold() != "verified" else 0.0
+    margins["aero_table_operational_margin"] = margins["aero_table_min_normalized_margin"] - output.model_uncertainty_fraction
     # Preserve the source-qualified margin view used by the vehicle-family
     # evidence harness. The canonical force/moment names above remain the
     # stable runtime contract; these aliases make composed decks auditable by
@@ -2872,6 +2901,7 @@ def _rigid_body_aerodynamic_model(
     target_attributes: Mapping[str, str] = {},
     guidance_attributes: Mapping[str, str] = {},
     route_attributes: Mapping[str, str] = {},
+    vehicle_attributes: Mapping[str, str] = {},
     actuator_attributes: Mapping[str, str] = {},
     reference_area: float = 1.0,
     reference_length: float = 1.0,
@@ -3234,6 +3264,8 @@ def _rigid_body_aerodynamic_model(
             controls,
             source_z_up=aero_wrench_frame.casefold() == "source-z-up",
             rotor_allocation=rotor_allocation,
+            model_uncertainty_fraction=float(vehicle_attributes.get("aero-uncertainty-fraction", "0.0")),
+            source_quality=vehicle_attributes.get("aero-source-quality", "estimated"),
         )
     # Aerodynamic source decks are evidence-bounded.  Do not let their
     # ``no-extrap`` axes silently clamp during force/moment evaluation.
@@ -3303,6 +3335,13 @@ def _rigid_body_aerodynamic_model(
         control_provider=controls,
         alpha_reference_rad=math.radians(alpha_reference_degrees),
         table_margin_provider=coefficients.table_margins if coefficients is not None else lambda values: _runtime_table_margins(tables, values),
+        table_normalized_margin_provider=(
+            coefficients.table_normalized_margins
+            if coefficients is not None
+            else lambda values: _runtime_table_normalized_margins(tables, values)
+        ),
+        model_uncertainty_fraction=float(vehicle_attributes.get("aero-uncertainty-fraction", "0.0")),
+        source_quality=vehicle_attributes.get("aero-source-quality", "estimated"),
     )
 ####
 
@@ -3595,56 +3634,187 @@ def _runtime_lqr_attributes(problem: Problem, name: str) -> dict[str, str]:
 ####
 
 
+def _runtime_inertia_provider(
+    vehicle_attributes: Mapping[str, str],
+    reference_inertia: Vector3,
+    reference_mass_kg: float,
+) -> Callable[[RigidBody6DofState], Vector3]:
+    """Build an explicit constant or source-declared mass/inertia model.
+
+    Mass loss alone does not determine inertia.  The optional linear model
+    therefore requires explicit dry-mass inertia endpoints; it never guesses a
+    scaling exponent from total mass.  The endpoint interpolation is a
+    declared approximation and should be replaced by a source-backed schedule
+    when tank or payload geometry is available.
+    """
+
+    mode = vehicle_attributes.get("inertia-mass-model", "constant").casefold()
+    if mode in {"constant", "fixed"}:
+        return lambda _state: reference_inertia
+    if mode not in {"linear-dry-mass", "linear-dry"}:
+        raise ValueError(f"unsupported inertia-mass-model {mode!r}")
+    dry_mass = float(vehicle_attributes.get("dry-mass-kg", "0.0"))
+    if not math.isfinite(dry_mass) or dry_mass <= 0.0 or dry_mass >= reference_mass_kg:
+        raise ValueError("linear-dry-mass inertia model requires dry mass below the initial mass")
+    dry_values = tuple(
+        float(vehicle_attributes[name])
+        for name in ("inertia-x-dry", "inertia-y-dry", "inertia-z-dry")
+        if name in vehicle_attributes
+    )
+    if len(dry_values) != 3 or not all(math.isfinite(value) and value > 0.0 for value in dry_values):
+        raise ValueError("linear-dry-mass inertia model requires positive inertia-x/y/z-dry values")
+    if any(float(value) <= 0.0 for value in dry_values):
+        raise ValueError("linear-dry-mass inertia endpoints must be positive")
+    dry_inertia = Vector3(*dry_values)
+
+    def provider(state: RigidBody6DofState) -> Vector3:
+        fraction = max(0.0, min(1.0, (state.mass - dry_mass) / max(reference_mass_kg - dry_mass, 1.0e-12)))
+        return Vector3(
+            dry_inertia.x + fraction * (reference_inertia.x - dry_inertia.x),
+            dry_inertia.y + fraction * (reference_inertia.y - dry_inertia.y),
+            dry_inertia.z + fraction * (reference_inertia.z - dry_inertia.z),
+        )
+        ####
+
+    return provider
+    ####
+
+
 def _build_attitude_lqr(
     problem: Problem,
     inertia: Vector3,
     actuator_attributes: Mapping[str, str],
     tables: Mapping[str, RuntimeTable],
-) -> LqrController | None:
+    *,
+    initial_mass_kg: float | None = None,
+) -> GainScheduledLqrController | None:
     """Build the native six-state rigid-body attitude LQR when declared."""
 
     attributes = _runtime_lqr_attributes(problem, "attitude")
     if not attributes:
         return None
+    profile_id = attributes.get("profile")
+    if profile_id is not None:
+        from taoryx.vehicle_registry import lqr_profile_attributes
+
+        profile_attributes = lqr_profile_attributes(profile_id)
+        attributes = {**profile_attributes, **attributes}
     import numpy as np
 
     state_names = ("attitude-error-x", "attitude-error-y", "attitude-error-z", "wx", "wy", "wz")
     control_names = ("moment-x", "moment-y", "moment-z")
     a_matrix = _lqr_matrix_source(tables, attributes.get("a-table"), (6, 6))
     b_matrix = _lqr_matrix_source(tables, attributes.get("b-table"), (6, 3))
+    b_table_supplied = b_matrix is not None
     if a_matrix is None:
         a_matrix = np.zeros((6, 6), dtype=float)
         a_matrix[:3, 3:] = np.eye(3)
-    if b_matrix is None:
-        b_matrix = np.zeros((6, 3), dtype=float)
-        b_matrix[3:, :] = np.diag((1.0 / inertia.x, 1.0 / inertia.y, 1.0 / inertia.z))
     angle_weight = float(attributes.get("q-angle", "1.0"))
     rate_weight = float(attributes.get("q-rate", "1.0"))
     moment_weight = float(attributes.get("r-moment", "1.0"))
     q_matrix = _lqr_weight_source(tables, attributes.get("q-table"), (6, 6), (angle_weight, angle_weight, angle_weight, rate_weight, rate_weight, rate_weight))
     r_matrix = _lqr_weight_source(tables, attributes.get("r-table"), (3, 3), (moment_weight, moment_weight, moment_weight))
-    result = solve_continuous_lqr(
-        cast(Sequence[Sequence[float]], a_matrix),
-        cast(Sequence[Sequence[float]], b_matrix),
-        cast(Sequence[Sequence[float]], q_matrix),
-        cast(Sequence[Sequence[float]], r_matrix),
-        state_names=state_names,
-        control_names=control_names,
-    )
-    if not result.hurwitz:
-        raise ValueError(
-            "attitude LQR closed-loop poles are not strictly stable: "
-            f"maximum real pole={result.maximum_real_pole:.6g}"
-        )
+    state_angle_scale = attributes.get("state-angle-scale-rad")
+    state_rate_scale = attributes.get("state-rate-scale-rad-s")
+    control_moment_scale = attributes.get("control-moment-scale-nm")
+    mass_scale_text = attributes.get("mass-scale-kg")
+    mass_scaling = attributes.get("mass-scaling", "none").casefold()
+    scaled = any(value is not None for value in (state_angle_scale, state_rate_scale, control_moment_scale))
+    if scaled:
+        if any(value is None for value in (state_angle_scale, state_rate_scale, control_moment_scale)):
+            raise ValueError(
+                "scaled attitude LQR requires state-angle-scale-rad, "
+                "state-rate-scale-rad-s, and control-moment-scale-nm"
+            )
+        assert state_angle_scale is not None
+        assert state_rate_scale is not None
+        assert control_moment_scale is not None
+    angle_scale = float(state_angle_scale) if state_angle_scale is not None else 1.0
+    rate_scale = float(state_rate_scale) if state_rate_scale is not None else 1.0
+    moment_scale = float(control_moment_scale) if control_moment_scale is not None else 1.0
+    mass_scale = float(mass_scale_text) if mass_scale_text is not None else None
+    if mass_scale is not None and (not math.isfinite(mass_scale) or mass_scale <= 0.0):
+        raise ValueError("scaled attitude LQR mass-scale-kg must be finite and positive")
     maximum_moment_text = actuator_attributes.get("maximum-moment")
-    if maximum_moment_text is None:
-        return LqrController(result)
-    maximum_moment = abs(float(maximum_moment_text))
-    return LqrController(
-        result,
-        lower={name: -maximum_moment for name in control_names},
-        upper={name: maximum_moment for name in control_names},
+    maximum_moment = abs(float(maximum_moment_text)) if maximum_moment_text is not None else None
+    uncertainty = LqrUncertaintySpec(
+        a_fraction=float(attributes.get("a-uncertainty-fraction", "0.0")),
+        b_fraction=float(attributes.get("b-uncertainty-fraction", "0.0")),
+        samples=int(attributes.get("uncertainty-samples", "9")),
+        seed=int(attributes.get("uncertainty-seed", "1995")),
     )
+
+    def build(current_mass_kg: float | None, current_inertia: tuple[float, float, float] | None) -> LqrController:
+        current = Vector3(*(current_inertia or (inertia.x, inertia.y, inertia.z)))
+        effective_b = cast(Any, b_matrix)
+        if effective_b is None:
+            effective_b = np.zeros((6, 3), dtype=float)
+            effective_b[3:, :] = np.diag((1.0 / current.x, 1.0 / current.y, 1.0 / current.z))
+        if scaled:
+            effective_moment_scale = moment_scale
+            if mass_scaling == "nominal-ratio":
+                if mass_scale is None:
+                    raise ValueError("nominal-ratio mass scaling requires mass-scale-kg")
+                if current_mass_kg is not None:
+                    if not math.isfinite(current_mass_kg) or current_mass_kg <= 0.0:
+                        raise ValueError("nominal-ratio mass scaling requires a positive runtime mass")
+                    effective_moment_scale *= current_mass_kg / mass_scale
+            result = solve_scaled_continuous_lqr(
+                cast(Sequence[Sequence[float]], a_matrix),
+                cast(Sequence[Sequence[float]], effective_b),
+                cast(Sequence[Sequence[float]], q_matrix),
+                cast(Sequence[Sequence[float]], r_matrix),
+                state_scales=(angle_scale,) * 3 + (rate_scale,) * 3,
+                control_scales=(effective_moment_scale,) * 3,
+                state_names=state_names,
+                control_names=control_names,
+            )
+        else:
+            result = solve_continuous_lqr(
+                cast(Sequence[Sequence[float]], a_matrix),
+                cast(Sequence[Sequence[float]], effective_b),
+                cast(Sequence[Sequence[float]], q_matrix),
+                cast(Sequence[Sequence[float]], r_matrix),
+                state_names=state_names,
+                control_names=control_names,
+            )
+        robustness = assess_lqr_robustness(
+            cast(Sequence[Sequence[float]], a_matrix),
+            cast(Sequence[Sequence[float]], effective_b),
+            result,
+            uncertainty,
+        ) if uncertainty.a_fraction > 0.0 or uncertainty.b_fraction > 0.0 else None
+        if not result.hurwitz:
+            raise ValueError(
+                "attitude LQR closed-loop poles are not strictly stable: "
+                f"maximum real pole={result.maximum_real_pole:.6g}"
+            )
+        if robustness is not None and not robustness.stable and attributes.get("uncertainty-policy", "fail-closed").casefold() == "fail-closed":
+            raise ValueError(
+                "attitude LQR is not stable across the declared derivative uncertainty envelope: "
+                f"worst maximum real pole={robustness.worst_max_real_pole:.6g}"
+            )
+        limits = {
+            name: -maximum_moment
+            for name in control_names
+        } if maximum_moment is not None else {}
+        uppers = {
+            name: maximum_moment
+            for name in control_names
+        } if maximum_moment is not None else {}
+        return LqrController(result, lower=limits, upper=uppers, robustness=robustness)
+
+    nominal = build(initial_mass_kg, (inertia.x, inertia.y, inertia.z))
+    update = attributes.get("update", "initial").casefold()
+    if update in {"mass", "operating-point", "schedule"} and b_table_supplied:
+        raise ValueError(
+            "mass-scheduled attitude LQR requires a runtime-generated or per-operating-point B matrix; "
+            "a fixed b-table cannot claim mass scheduling"
+        )
+    if update in {"mass", "operating-point", "schedule"}:
+        mass_tolerance = max(1.0e-6, 1.0e-4 * mass_scale) if mass_scale is not None else 1.0e-6
+        return GainScheduledLqrController(nominal, builder=build, mass_tolerance_kg=mass_tolerance)
+    return GainScheduledLqrController(nominal)
 ####
 
 
@@ -6275,6 +6445,28 @@ def _runtime_table_margins(tables: Mapping[str, RuntimeTable], values: Mapping[s
                 continue
             value = float(query[axis_name])
             result[f"table.{name}.{axis_name}"] = min(abs(value - axis[0]), abs(axis[-1] - value))
+    return result
+####
+
+
+def _runtime_table_normalized_margins(tables: Mapping[str, RuntimeTable], values: Mapping[str, float]) -> dict[str, float]:
+    """Report table margins normalized by each prepared axis span."""
+
+    result: dict[str, float] = {}
+    query = dict(values)
+    if "velocity_m_s" not in query and "airspeed_m_s" in query:
+        query["velocity_m_s"] = query["airspeed_m_s"]
+    if "airspeed_m_s" not in query and "velocity_m_s" in query:
+        query["airspeed_m_s"] = query["velocity_m_s"]
+    for name, table in tables.items():
+        if table.prepared is None:
+            continue
+        for axis_name, axis in zip(table.independent_variables, table.prepared.axes, strict=True):
+            if axis_name not in query:
+                continue
+            span = max(abs(axis[-1] - axis[0]), 1.0e-30)
+            value = float(query[axis_name])
+            result[f"table.{name}.{axis_name}"] = min(abs(value - axis[0]), abs(axis[-1] - value)) / span
     return result
 ####
 ####

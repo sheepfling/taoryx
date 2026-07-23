@@ -3,7 +3,7 @@
 *mode rigid-body-6dof
 *atmos standard
 *earth wgs-84 omega=0.0
-*runtime status vehicle reference-area=0.75 reference-length=0.36 dry-mass-kg=3.364 inertia-x=0.325 inertia-y=0.14 inertia-z=0.4 envelope-min-forward-speed=2 envelope-max-speed=27 envelope-max-alpha-deg=12 envelope-max-beta-deg=5
+*runtime status vehicle reference-area=0.75 reference-length=0.36 dry-mass-kg=3.364 nominal-mass-kg=3.364 inertia-x=0.325 inertia-y=0.14 inertia-z=0.4 envelope-min-forward-speed=2 envelope-max-speed=27 envelope-max-alpha-deg=12 envelope-max-beta-deg=5
 *runtime control throttle vehicle=1 default=0.6265437663082247 lower=0 upper=1
 *runtime control collective-elevon-deg vehicle=1 default=-2.35 lower=-20 upper=20
 *runtime control differential-elevon-deg vehicle=1 default=-2.16 lower=-20 upper=20

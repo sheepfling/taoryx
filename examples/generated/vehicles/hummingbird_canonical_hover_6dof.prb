@@ -3,7 +3,7 @@
 *mode rigid-body-6dof
 *atmos standard
 *earth wgs-84 omega=0.0
-*runtime status vehicle reference-area=1.0 reference-length=0.34 dry-mass-kg=0.5 inertia-x=0.00365 inertia-y=0.00368 inertia-z=0.00703 envelope-max-speed=10 aero-load-mode=direct-wrench aero-wrench-frame=source-z-up
+*runtime status vehicle reference-area=1.0 reference-length=0.34 dry-mass-kg=0.5 nominal-mass-kg=0.5 inertia-x=0.00365 inertia-y=0.00368 inertia-z=0.00703 envelope-max-speed=10 aero-load-mode=direct-wrench aero-wrench-frame=source-z-up
 *runtime control rotor-speed vehicle=1 default=468.7244338633868 lower=0 upper=1500
 *runtime control rotor-1-speed vehicle=1 default=468.7244338633868 lower=0 upper=1500
 *runtime control rotor-2-speed vehicle=1 default=468.7244338633868 lower=0 upper=1500

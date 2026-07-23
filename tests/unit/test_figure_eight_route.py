@@ -35,6 +35,7 @@ ROUTE = {
     [
         Path("examples/mission_families/slower_b747/SV01_figure_eight_route_6dof.prb"),
         Path("examples/mission_families/slower_x8/SV03_figure_eight_route_6dof.prb"),
+        Path("examples/mission_families/slower_hummingbird/SV05_figure_eight_route_6dof.prb"),
     ],
 )
 def test_fixed_wing_figure_eight_fixtures_parse_as_taoryx(path: Path) -> None:

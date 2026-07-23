@@ -116,6 +116,7 @@ class RunArtifact(BaseModel):
     composition: list[dict[str, object]] = Field(default_factory=list)
     resolution_records: list[dict[str, object]] = Field(default_factory=list)
     commands: list[dict[str, object]] = Field(default_factory=list)
+    termination: dict[str, object] = Field(default_factory=dict)
     events: list[dict[str, object]] = Field(default_factory=list)
     visualization: dict[str, object] = Field(default_factory=dict)
 
@@ -137,6 +138,8 @@ class RunArtifact(BaseModel):
             output.write(f"Scenario identity: {self.scenario_identity}\n")
         if self.resolution_records:
             output.write(f"Resolution records: {len(self.resolution_records)}\n")
+        if self.termination:
+            output.write(f"Termination: {self.termination}\n")
         if self.parameters:
             output.write("Parameters:\n")
             for name, value in sorted(self.parameters.items()):
@@ -221,6 +224,7 @@ class RunArtifact(BaseModel):
                 (run_id, "composition", json.dumps(self.composition, sort_keys=True)),
                 (run_id, "resolution_records", json.dumps(self.resolution_records, sort_keys=True)),
                 (run_id, "commands", json.dumps(self.commands, sort_keys=True)),
+                (run_id, "termination", json.dumps(self.termination, sort_keys=True)),
                 (run_id, "events", json.dumps(self.events, sort_keys=True)),
                 (run_id, "visualization", json.dumps(self.visualization, sort_keys=True)),
             ],
@@ -372,6 +376,7 @@ def build_run_artifact(
     composition: Sequence[Mapping[str, object]] = (),
     resolution_records: Sequence[Mapping[str, object]] = (),
     commands: Sequence[Mapping[str, object]] = (),
+    termination: Mapping[str, object] | None = None,
     events: Sequence[Mapping[str, object]] = (),
     visualization: Mapping[str, object] | None = None,
 ) -> RunArtifact:
@@ -402,6 +407,7 @@ def build_run_artifact(
         composition=[dict(item) for item in composition],
         resolution_records=[dict(item) for item in resolution_records],
         commands=[dict(item) for item in commands],
+        termination=dict(termination or {"completed": result.completed, "stop_reason": result.stop_reason}),
         events=[dict(item) for item in events],
         visualization=dict(visualization or {}),
     )

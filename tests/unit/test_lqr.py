@@ -6,7 +6,14 @@ import pytest
 from taoryx.contracts import Vector3
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.problem_parser import parse_problem_text
-from taoryx.runtime import LqrController, solve_continuous_lqr
+from taoryx.runtime import (
+    GainScheduledLqrController,
+    LqrController,
+    LqrUncertaintySpec,
+    assess_lqr_robustness,
+    solve_continuous_lqr,
+    solve_scaled_continuous_lqr,
+)
 from taoryx.runtime.lowering import RuntimeTable, _build_attitude_lqr
 from taoryx.runtime.program import LoadedProgram
 from taoryx.tables import ExtrapolationMode, prepare_table
@@ -29,6 +36,25 @@ def test_continuous_lqr_solves_and_stabilizes_double_integrator() -> None:
     assert result.maximum_real_pole < 0.0
     assert result.unstable_poles == ()
     assert result.state_names == ("position", "velocity")
+
+
+def test_scaled_lqr_returns_a_physical_gain_with_dimensionless_poles() -> None:
+    result = solve_scaled_continuous_lqr(
+        ((0.0, 1.0), (0.0, 0.0)),
+        ((0.0,), (1.0,)),
+        ((1.0, 0.0), (0.0, 1.0)),
+        ((1.0,),),
+        state_scales=(2.0, 4.0),
+        control_scales=(3.0,),
+        state_names=("position", "velocity"),
+        control_names=("acceleration",),
+    )
+
+    assert result.hurwitz
+    assert result.gain.shape == (1, 2)
+    assert result.gain[0, 0] > 0.0
+    assert result.gain[0, 1] > 0.0
+    ####
 
 
 def test_lqr_controller_closes_double_integrator_with_named_bounded_command() -> None:
@@ -118,6 +144,27 @@ def test_attitude_lqr_uses_flattened_matrix_tables() -> None:
     assert controller.result.gain.shape == (3, 6)
 
 
+def test_profile_attitude_lqr_uses_nominal_mass_ratio_and_inertia_scale() -> None:
+    """A catalog profile schedules the normalized design from both mass and inertia."""
+
+    document = parse_problem_text(
+        "(profile-lqr)\n"
+        "*runtime lqr attitude profile=skywalker-x8-standard "
+        "states=attitude-error-x,attitude-error-y,attitude-error-z,wx,wy,wz "
+        "controls=moment-x,moment-y,moment-z\n"
+        "*end\n",
+        profile=GrammarProfile.TAORYX,
+    )
+    controller = _build_attitude_lqr(document.problems[0], Vector3(0.325, 0.140, 0.400), {}, {})
+    assert controller is not None
+    state = {name: 0.01 for name in ("attitude-error-x", "attitude-error-y", "attitude-error-z", "wx", "wy", "wz")}
+    controller.command(state, mass_kg=3.364, inertia=(0.325, 0.140, 0.400))
+    nominal_gain = np.asarray(controller.result.gain)
+    controller.command(state, mass_kg=6.728, inertia=(0.325, 0.140, 0.400))
+    assert controller.schedule_updates == 2
+    assert not np.allclose(nominal_gain, controller.result.gain)
+
+
 @pytest.mark.parametrize(
     "matrices, message",
     [
@@ -129,3 +176,44 @@ def test_attitude_lqr_uses_flattened_matrix_tables() -> None:
 def test_lqr_rejects_invalid_matrix_contract(matrices: tuple[object, ...], message: str) -> None:
     with pytest.raises(ValueError, match=message):
         solve_continuous_lqr(*matrices)  # type: ignore[arg-type]
+
+
+def test_gain_scheduled_lqr_rebuilds_when_inertia_operating_point_changes() -> None:
+    """Mass-property changes select a new plant-scaled gain, not a guessed exponent."""
+
+    a = ((0.0, 1.0), (0.0, 0.0))
+    q = ((1.0, 0.0), (0.0, 1.0))
+    r = ((1.0,),)
+
+    def build(_mass: float | None, inertia: tuple[float, float, float] | None) -> LqrController:
+        value = 1.0 if inertia is None else inertia[0]
+        result = solve_continuous_lqr(
+            a,
+            ((0.0,), (1.0 / value,)),
+            q,
+            r,
+            state_names=("angle", "rate"),
+            control_names=("moment",),
+        )
+        return LqrController(result)
+
+    nominal = build(10.0, (1.0, 1.0, 1.0))
+    scheduled = GainScheduledLqrController(nominal, builder=build)
+    scheduled.command({"angle": 0.1, "rate": 0.0}, mass_kg=10.0, inertia=(1.0, 1.0, 1.0))
+    first_gain = np.asarray(scheduled.result.gain)
+    assert scheduled.schedule_updates == 1
+    scheduled.command({"angle": 0.1, "rate": 0.0}, mass_kg=9.0, inertia=(2.0, 1.0, 1.0))
+    assert scheduled.schedule_updates == 2
+    assert not np.allclose(first_gain, scheduled.result.gain)
+
+
+def test_lqr_uncertainty_screen_reports_sampled_pole_margin() -> None:
+    """Estimated derivatives can be screened without pretending to be exact."""
+
+    a = ((0.0, 1.0), (0.0, 0.0))
+    b = ((0.0,), (1.0,))
+    result = solve_continuous_lqr(a, b, ((1.0, 0.0), (0.0, 1.0)), ((1.0,),))
+    report = assess_lqr_robustness(a, b, result, LqrUncertaintySpec(a_fraction=0.1, b_fraction=0.1, samples=17))
+    assert report.samples == 17
+    assert report.nominal_max_real_pole < 0.0
+    assert report.worst_max_real_pole >= report.nominal_max_real_pole

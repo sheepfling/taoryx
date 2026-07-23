@@ -15,9 +15,11 @@ vehicles:
     reference_area_m2: 510.96672
     reference_length_m: 8.324088
     dry_mass_kg: 288756.9
+    nominal_mass_kg: 288756.9
     inertia_kg_m2: {x: 24675886.7, y: 44877574.1, z: 67384152.0}
     envelope: {min_forward_speed_m_s: 20, max_mach: 0.9, max_alpha_deg: 4, max_beta_deg: 5}
     aero_alpha_reference_deg: 3.1
+    attitude_lqr_profile: b747-standard
     controls:
       - {name: elevator-deg, default: 0.3861602391, lower: -10, upper: 10}
       - {name: aileron-deg, default: 0.0, lower: -10, upper: 10}
@@ -43,8 +45,10 @@ vehicles:
     reference_area_m2: 0.75
     reference_length_m: 0.36
     dry_mass_kg: 3.364
+    nominal_mass_kg: 3.364
     inertia_kg_m2: {x: 0.325, y: 0.140, z: 0.400}
     envelope: {min_forward_speed_m_s: 2, max_speed_m_s: 27, max_alpha_deg: 12, max_beta_deg: 5}
+    attitude_lqr_profile: skywalker-x8-standard
     controls:
       - {name: throttle, default: 0.5773431906, lower: 0, upper: 1}
       - {name: collective-elevon-deg, default: -2.1478876544, lower: -20, upper: 20}
@@ -78,8 +82,10 @@ vehicles:
     reference_area_m2: 1.0
     reference_length_m: 0.34
     dry_mass_kg: 0.5
+    nominal_mass_kg: 0.5
     inertia_kg_m2: {x: 0.00365, y: 0.00368, z: 0.00703}
     envelope: {max_speed_m_s: 10}
+    attitude_lqr_profile: hummingbird-standard
     controls:
       - {name: rotor-speed, default: 468.7244338633868, lower: 0, upper: 1500}
       - {name: rotor-1-speed, default: 468.7244338633868, lower: 0, upper: 1500}
@@ -110,9 +116,11 @@ vehicles:
     earth_omega_rad_s: 7.2921151467e-5
     earth_gm_m3_s2: 3.986004418e14
     body_frame: x-forward-y-right-z-down
+    attitude_lqr_profile: x15-standard
     reference_area_m2: 18.580608
     reference_length_m: 3.130296
     dry_mass_kg: 9000.0
+    nominal_mass_kg: 14641.0545
     inertia_kg_m2: {x: 4948.7355, y: 129114.2666, z: 131825.9024}
     envelope: {}
     controls:
@@ -127,5 +135,5 @@ vehicles:
     source:
       status: public-research-surrogate
       bundle: tests/fixtures/x15_coherent_6dof_public_research_v1
-      model_path: x15
+      model_path: .
     audit_problem_globs: [examples/showcases/x15_6dof_research/*.prb, examples/generated/vehicles/x15_*.prb]

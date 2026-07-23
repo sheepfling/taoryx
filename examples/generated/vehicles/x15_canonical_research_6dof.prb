@@ -3,7 +3,7 @@
 *mode rigid-body-6dof
 *atmos standard
 *earth wgs-84 omega=7.2921151467e-05 gm=3.986004418e14
-*runtime status vehicle reference-area=18.580608 reference-length=3.130296 dry-mass-kg=9000.0 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024
+*runtime status vehicle reference-area=18.580608 reference-length=3.130296 dry-mass-kg=9000.0 nominal-mass-kg=14641.0545 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024
 *runtime control throttle vehicle=1 default=1.0 lower=0.4 upper=1.0
 *runtime control symmetric-stabilator-deg vehicle=1 default=0.0 lower=-14.9 upper=34.9
 *runtime control differential-stabilator-deg vehicle=1 default=0.0 lower=-20.05 upper=20.05

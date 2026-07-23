@@ -1,0 +1,101 @@
+schema_version: 1
+id: taoryx_segment_promotion_matrix_v1
+description: >-
+  Per-vehicle segment contracts. A row is an evidence requirement, not a
+  manual approval. The row becomes promoted only after its focused runtime
+  test produces passing evidence for every required category.
+claim_boundary: >-
+  Promotion proves the named segment contract for the declared source and
+  runtime evidence. It does not promote an untested route, vehicle family, or
+  engineering-validity claim.
+promotions:
+  - id: b747-trim-hold
+    vehicle: b747
+    scenario_id: b747-segmentation-lifecycle
+    segment_id: trim
+    goal_kind: trim_hold
+    required_checks: [entry, goal, quality, exit]
+    focused_test: tests/e2e/test_vehicle_family_validation.py::test_b747_long_6dof_trim_hold_is_bounded
+    claim_boundary: source-anchored rigid-body trim hold only
+  - id: b747-heading-step
+    vehicle: b747
+    scenario_id: b747-segmentation-lifecycle
+    segment_id: heading-step
+    goal_kind: heading_capture
+    required_checks: [entry, goal, transition, quality, exit, termination]
+    focused_test: tests/e2e/test_vehicle_family_validation.py::test_b747_integrated_route_and_altitude_transition_are_bounded
+    claim_boundary: bounded heading capture at the declared local operating point
+  - id: skywalker-x8-powered-trim
+    vehicle: skywalker_x8
+    scenario_id: x8-segmentation-lifecycle
+    segment_id: powered-trim
+    goal_kind: trim_hold
+    required_checks: [entry, goal, quality, exit]
+    focused_test: tests/e2e/test_x8_family_validation.py::test_x8_source_composed_trim_hold_is_bounded_for_30_seconds
+    claim_boundary: powered rigid-body trim hold in the declared table deck
+  - id: skywalker-x8-recovery
+    vehicle: skywalker_x8
+    scenario_id: x8-segmentation-lifecycle
+    segment_id: recovery
+    goal_kind: altitude_capture
+    required_checks: [entry, goal, transition, quality, exit, termination]
+    focused_test: tests/e2e/test_x8_family_validation.py::test_x8_generated_level_settling_corridor_is_bounded_for_120_seconds
+    claim_boundary: bounded altitude recovery, not a complete route claim
+  - id: hummingbird-takeoff
+    vehicle: hummingbird
+    scenario_id: hummingbird-segmentation-lifecycle
+    segment_id: takeoff
+    goal_kind: altitude_capture
+    required_checks: [entry, goal, quality, exit]
+    focused_test: tests/e2e/test_hummingbird_family_validation.py::test_hummingbird_altitude_phase_reaches_declared_checkpoint
+    claim_boundary: two-metre altitude capture before hover handoff
+  - id: hummingbird-hover
+    vehicle: hummingbird
+    scenario_id: hummingbird-segmentation-lifecycle
+    segment_id: hover
+    goal_kind: hover
+    required_checks: [entry, goal, transition, quality, exit, termination]
+    focused_test: tests/e2e/test_hummingbird_family_validation.py::test_hummingbird_symmetric_hover_has_bounded_attitude_and_rotor_state
+    claim_boundary: bounded hover hold with declared position and rate limits
+  - id: x15-release-coast
+    vehicle: x15
+    scenario_id: x15-segmentation-lifecycle
+    segment_id: release-coast
+    goal_kind: separation
+    required_checks: [entry, goal, transition, quality, exit]
+    focused_test: tests/e2e/test_glider_family_validation.py::test_glider_extension_candidate_has_release_and_terminal_phases
+    claim_boundary: release/coast handoff evidence; not a complete glide claim
+  - id: x15-descent
+    vehicle: x15
+    scenario_id: x15-segmentation-lifecycle
+    segment_id: descent
+    goal_kind: ground_contact
+    required_checks: [entry, goal, transition, quality, exit, termination]
+    focused_test: tests/e2e/test_glider_family_validation.py::test_glider_6dof_long_release_energy_management_and_terminal_descent
+    claim_boundary: bounded ground-contact terminal condition, excluding landing certification
+  - id: hummingbird-moving-target-pronav
+    vehicle: hummingbird
+    scenario_id: hummingbird-moving-target-pronav
+    segment_id: moving-target-intercept
+    goal_kind: intercept_geometry
+    required_checks: [entry, goal, quality, exit, termination]
+    required_channels: [pro_nav_active, pro_nav_los_range_m, pro_nav_closing_velocity_m_s, pro_nav_acceleration_response_residual_m_s2]
+    focused_test: tests/e2e/test_hummingbird_family_validation.py::test_hummingbird_moving_target_propnav_segment_exposes_guidance_evidence
+    claim_boundary: bounded moving-target ProNav telemetry and range closure; not an intercept certification
+  - id: x15-moving-target-pronav-trim
+    vehicle: x15
+    scenario_id: x15-moving-target-pronav
+    segment_id: source-trim
+    goal_kind: trim_hold
+    required_checks: [entry, goal, quality, exit]
+    focused_test: tests/e2e/test_glider_family_validation.py::test_glider_6dof_native_propnav_activates_after_source_trim
+    claim_boundary: source trim preceding the X15 moving-target ProNav segment
+  - id: x15-moving-target-pronav-terminal
+    vehicle: x15
+    scenario_id: x15-moving-target-pronav
+    segment_id: terminal-propnav
+    goal_kind: intercept_geometry
+    required_checks: [entry, goal, quality, exit, termination]
+    required_channels: [pro_nav_active, pro_nav_los_range_m, pro_nav_closing_velocity_m_s, pro_nav_acceleration_response_residual_m_s2]
+    focused_test: tests/e2e/test_glider_family_validation.py::test_glider_6dof_native_propnav_activates_after_source_trim
+    claim_boundary: bounded native ProNav activation after source trim; not a terminal hit or landing certification

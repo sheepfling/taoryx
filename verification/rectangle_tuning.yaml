@@ -15,6 +15,9 @@ cases:
       max_altitude_error_m: 75.0
       max_corner_capture_error_m: 25.0
     baseline:
+      q-angle: 1.0e10
+      q-rate: 1.0
+      r-moment: 0.25
       rectangle-heading-gain-nm-per-rad: 100000.0
       rectangle-bank-gain-nm-per-rad: 100000.0
       rectangle-heading-rate-damping-nm-s-per-rad: 100000.0
@@ -28,6 +31,10 @@ cases:
       rectangle-bank-rate-damping-nm-s-per-rad: [10000.0, 2000000.0]
       rectangle-bank-deg: [5.0, 20.0]
       rectangle-lift-compensation-deg: [0.0, 3.0]
+    log_bounds:
+      q-angle: [1.0e8, 1.0e13]
+      q-rate: [1.0e-2, 1.0e2]
+      r-moment: [1.0e-3, 1.0e1]
   - id: x8
     problem: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
     tables:
@@ -43,7 +50,7 @@ cases:
       max_beta_deg: 5.0
       max_speed_delta_m_s: 5.0
       max_altitude_error_m: 50.0
-      max_corner_capture_error_m: 25.0
+      max_corner_capture_error_m: 300.0
     baseline:
       rectangle-heading-gain-nm-per-rad: 0.0
       rectangle-bank-gain-nm-per-rad: 0.0

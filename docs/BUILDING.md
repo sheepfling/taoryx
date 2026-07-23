@@ -12,7 +12,7 @@ The complete documentation and QA workflow uses:
 - `latexmk` and a TeX Live installation with the packages used by `manual/styles/taos.sty`
 - `qpdf`
 - Poppler tools: `pdfinfo`, `pdftotext`, and `pdftoppm`
-- `pandoc` for selected QA reports
+- `pandoc` and `xelatex` for the composite extension PDF and selected QA reports
 
 A typical Debian/Ubuntu installation requires TeX Live's recommended, science, pictures, and extra collections in addition to the PDF and Python tools.
 
@@ -128,6 +128,36 @@ python tools/dev.py manual
 ```
 
 The normalized document is written to `build/manual.pdf`.
+
+## Build the TAORYX successor guide
+
+The reconstructed manual remains historically scoped. Successor-side features
+are documented in a separate LaTeX guide so that fidelity modes, plant data,
+controller synthesis, trajectory scoring, and verification policy can evolve
+without changing the 1995 reconstruction:
+
+```bash
+python tools/dev.py successor-guide
+```
+
+The normalized guide is written to
+`output/pdf/taoryx_extensions_and_verification.pdf`. Its source is
+`docs/latex/taoryx_extensions_and_verification.tex`.
+
+## Build the composite TAORYX extension PDF
+
+The repeatable composite stage combines the LaTeX verification guide with the
+canonical Markdown extension references, then normalizes the merged PDF:
+
+```bash
+python tools/dev.py taoryx-extension-pdf
+```
+
+The result is written to
+`output/pdf/taoryx_extensions_composite.pdf`. The stage rebuilds the base guide,
+renders the extension appendix with Pandoc/XeLaTeX, merges the PDFs in a fixed
+order, and removes its temporary build directory. The full `check` task runs
+this composite stage as its documentation build gate.
 
 ## Rebuild the equation provenance registry
 

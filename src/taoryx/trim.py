@@ -9,12 +9,13 @@ meaning of ``alpha`` versus ``collective`` or any vehicle-specific frame.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 from scipy.optimize import least_squares
 
 TrimEvaluator = Callable[[Mapping[str, float], Mapping[str, float]], Mapping[str, float]]
+DynamicsEvaluator = Callable[[Mapping[str, float], Mapping[str, float]], Mapping[str, float]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -193,6 +194,36 @@ def solve_trim(
     ####
 
 
+@dataclass(frozen=True, slots=True)
+class DynamicsLinearization:
+    """Named state-derivative Jacobian tied to one solved operating point."""
+
+    state_names: tuple[str, ...]
+    control_names: tuple[str, ...]
+    a_matrix: np.ndarray
+    b_matrix: np.ndarray
+    trim_state: Mapping[str, float]
+    trim_controls: Mapping[str, float]
+    metadata: Mapping[str, str | float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if self.a_matrix.shape != (len(self.state_names), len(self.state_names)):
+            raise ValueError("dynamics linearization A shape does not match state names")
+        if self.b_matrix.shape != (len(self.state_names), len(self.control_names)):
+            raise ValueError("dynamics linearization B shape does not match state/control names")
+        if not np.isfinite(self.a_matrix).all() or not np.isfinite(self.b_matrix).all():
+            raise ValueError("dynamics linearization matrices must be finite")
+        ####
+    ####
+
+    @property
+    def metadata_dict(self) -> dict[str, str | float]:
+        """Return provenance metadata without exposing mutable mapping state."""
+
+        return dict(self.metadata)
+    ####
+
+
 def finite_difference_linearization(
     spec: TrimSpec,
     evaluator: TrimEvaluator,
@@ -238,4 +269,66 @@ def finite_difference_linearization(
         b[:, index] = (evaluate(plus) - evaluate(minus)) / (2.0 * step)
     del base, base_state, base_controls
     return a, b
+    ####
+
+
+def finite_difference_dynamics_linearization(
+    spec: TrimSpec,
+    evaluator: DynamicsEvaluator,
+    result: TrimResult,
+    *,
+    state_step: float = 1.0e-6,
+    control_step: float = 1.0e-6,
+    metadata: Mapping[str, str | float] | None = None,
+) -> DynamicsLinearization:
+    """Finite-difference true state derivatives for source-trim LQR design.
+
+    Unlike :func:`finite_difference_linearization`, this route requires the
+    evaluator to return derivatives named exactly like ``spec.state_names``.
+    It therefore produces a dynamics ``A/B`` pair suitable for LQR without
+    silently treating force or moment residuals as state derivatives.
+    """
+
+    if state_step <= 0.0 or control_step <= 0.0 or not np.isfinite(state_step + control_step):
+        raise ValueError("dynamics linearization steps must be finite and positive")
+    state_count = len(spec.state_names)
+    control_count = len(spec.control_names)
+    x = result.vector()
+
+    def evaluate(vector: np.ndarray) -> np.ndarray:
+        split = state_count
+        state = dict(zip(spec.state_names, vector[:split], strict=True))
+        controls = dict(zip(spec.control_names, vector[split:], strict=True))
+        values = evaluator(state, controls)
+        missing = set(spec.state_names) - set(values)
+        if missing:
+            raise KeyError("dynamics evaluator omitted derivatives: " + ", ".join(sorted(missing)))
+        return np.array([float(values[name]) for name in spec.state_names], dtype=float)
+
+    a = np.zeros((state_count, state_count), dtype=float)
+    b = np.zeros((state_count, control_count), dtype=float)
+    for index in range(state_count):
+        step = state_step * max(1.0, abs(x[index]))
+        plus = x.copy()
+        minus = x.copy()
+        plus[index] += step
+        minus[index] -= step
+        a[:, index] = (evaluate(plus) - evaluate(minus)) / (2.0 * step)
+    for index in range(control_count):
+        position = state_count + index
+        step = control_step * max(1.0, abs(x[position]))
+        plus = x.copy()
+        minus = x.copy()
+        plus[position] += step
+        minus[position] -= step
+        b[:, index] = (evaluate(plus) - evaluate(minus)) / (2.0 * step)
+    return DynamicsLinearization(
+        spec.state_names,
+        spec.control_names,
+        a,
+        b,
+        dict(result.state),
+        dict(result.controls),
+        dict(metadata or {}),
+    )
     ####

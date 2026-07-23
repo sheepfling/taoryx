@@ -1,0 +1,91 @@
+schema_version: 1
+id: taoryx_lqr_scaling_profiles_v1
+claim_boundary: >-
+  Provisional dimensionless controller-design scales for research-surrogate
+  plants. These normalize numerical conditioning; they are not source-derived
+  handling-quality requirements or validated gains.
+profiles:
+  b747-gentle:
+    vehicle: b747
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.05235987755982989
+    state_rate_scale_rad_s: 0.15707963267948966
+    control_moment_scale_nm: 42338711.37831559
+    normalized_weights: {q_angle: 0.25, q_rate: 1.0, r_moment: 2.0}
+  b747-standard:
+    vehicle: b747
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.05235987755982989
+    state_rate_scale_rad_s: 0.15707963267948966
+    control_moment_scale_nm: 42338711.37831559
+    normalized_weights: {q_angle: 1.0, q_rate: 1.0, r_moment: 1.0}
+  b747-aggressive:
+    vehicle: b747
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.05235987755982989
+    state_rate_scale_rad_s: 0.15707963267948966
+    control_moment_scale_nm: 42338711.37831559
+    normalized_weights: {q_angle: 4.0, q_rate: 1.0, r_moment: 0.25}
+  skywalker-x8-gentle:
+    vehicle: skywalker_x8
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.065449846949775
+    state_rate_scale_rad_s: 0.6283185307179586
+    control_moment_scale_nm: 11.876245416
+    normalized_weights: {q_angle: 0.25, q_rate: 1.0, r_moment: 2.0}
+  skywalker-x8-standard:
+    vehicle: skywalker_x8
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.065449846949775
+    state_rate_scale_rad_s: 0.6283185307179586
+    control_moment_scale_nm: 11.876245416
+    normalized_weights: {q_angle: 1.0, q_rate: 1.0, r_moment: 1.0}
+  skywalker-x8-aggressive:
+    vehicle: skywalker_x8
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.065449846949775
+    state_rate_scale_rad_s: 0.6283185307179586
+    control_moment_scale_nm: 11.876245416
+    normalized_weights: {q_angle: 4.0, q_rate: 1.0, r_moment: 0.25}
+  hummingbird-gentle:
+    vehicle: hummingbird
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.17453292519943295
+    state_rate_scale_rad_s: 1.0
+    control_moment_scale_nm: 1.6671305
+    normalized_weights: {q_angle: 0.25, q_rate: 1.0, r_moment: 2.0}
+  hummingbird-standard:
+    vehicle: hummingbird
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.17453292519943295
+    state_rate_scale_rad_s: 1.0
+    control_moment_scale_nm: 1.6671305
+    normalized_weights: {q_angle: 1.0, q_rate: 1.0, r_moment: 1.0}
+  hummingbird-aggressive:
+    vehicle: hummingbird
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.17453292519943295
+    state_rate_scale_rad_s: 1.0
+    control_moment_scale_nm: 1.6671305
+    normalized_weights: {q_angle: 4.0, q_rate: 1.0, r_moment: 0.25}
+  x15-gentle:
+    vehicle: x15
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.13089969389925
+    state_rate_scale_rad_s: 0.5
+    control_moment_scale_nm: 449446.9515522355
+    normalized_weights: {q_angle: 0.25, q_rate: 1.0, r_moment: 2.0}
+  x15-standard:
+    vehicle: x15
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.13089969389925
+    state_rate_scale_rad_s: 0.5
+    control_moment_scale_nm: 449446.9515522355
+    normalized_weights: {q_angle: 1.0, q_rate: 1.0, r_moment: 1.0}
+  x15-aggressive:
+    vehicle: x15
+    scale_source: derived-vehicle-contract
+    state_angle_scale_rad: 0.13089969389925
+    state_rate_scale_rad_s: 0.5
+    control_moment_scale_nm: 449446.9515522355
+    normalized_weights: {q_angle: 4.0, q_rate: 1.0, r_moment: 0.25}

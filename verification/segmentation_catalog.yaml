@@ -198,3 +198,72 @@ scenarios:
         target: descent
         transition: {position: continuous, velocity: continuous, attitude: continuous, rates: continuous, mass: continuous}
         reason: source-prescribed release/coast handoff; no synthetic impulse
+  - id: hummingbird-moving-target-pronav
+    vehicle: hummingbird
+    family: multirotor
+    source_problem: examples/mission_families/slower_hummingbird/SV05_moving_target_propnav_6dof.prb
+    output_problem: artifacts/segmentation/examples/hummingbird-moving-target-pronav.prb
+    output_manifest: artifacts/segmentation/manifests/hummingbird-moving-target-pronav.json
+    output_audit: artifacts/segmentation/audits/hummingbird-moving-target-pronav.json
+    runtime_tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_reaction_torque.tbl
+    segments:
+      - id: moving-target-intercept
+        mode: rigid_body_6dof
+        entry: {condition: "time >= 0", frame: ecfc, units: si}
+        exit: {condition: "time > 8", action: stop}
+        controller: hummingbird-position
+        actuator_binding: hummingbird-quad-x
+        table_dependencies: [hummingbird-rotors]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: hummingbird-moving-target-intercept
+          kind: intercept_geometry
+          target: {pro_nav_los_range_m: 0.01, pro_nav_closing_velocity_m_s: 0.0}
+          tolerance: {pro_nav_los_range_m: 0.5, pro_nav_closing_velocity_m_s: 1.0}
+          dwell_time_s: 1.0
+          reference: target-track
+  - id: x15-moving-target-pronav
+    vehicle: x15
+    family: unpowered-hypersonic-glider
+    source_problem: examples/showcases/x15_rocket_to_hawaii/source_trim_then_propnav_6dof.prb
+    output_problem: artifacts/segmentation/examples/x15-moving-target-pronav.prb
+    output_manifest: artifacts/segmentation/manifests/x15-moving-target-pronav.json
+    output_audit: artifacts/segmentation/audits/x15-moving-target-pronav.json
+    runtime_tables:
+      - examples/mission_families/hypersonic_glide_terminal_guidance/aero.tbl
+    segments:
+      - id: source-trim
+        mode: rigid_body_6dof
+        entry: {condition: "time >= 0", frame: ecfc, units: si}
+        exit: {condition: "time > 30", target: terminal-propnav}
+        controller: x15-energy-management
+        actuator_binding: x15-bank
+        table_dependencies: [x15-aero]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: x15-source-trim
+          kind: trim_hold
+          reference: source-trim-envelope
+      - id: terminal-propnav
+        source_segment: 2
+        mode: rigid_body_6dof
+        entry: {condition: "time > 30", frame: ecfc, units: si}
+        exit: {condition: "time > 35", action: stop}
+        controller: x15-energy-management
+        actuator_binding: x15-bank
+        table_dependencies: [x15-aero]
+        environment_dependencies: [standard-atmosphere, wgs84-gravity]
+        goal:
+          id: x15-moving-target-intercept
+          kind: intercept_geometry
+          target: {pro_nav_los_range_m: 25.0, pro_nav_closing_velocity_m_s: 0.0}
+          tolerance: {pro_nav_los_range_m: 2000.0, pro_nav_closing_velocity_m_s: 100.0}
+          reference: route-target

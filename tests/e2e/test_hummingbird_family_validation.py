@@ -27,9 +27,11 @@ TABLES = tuple(
 HOVER = ROOT / "examples/mission_families/slower_hummingbird/SV05_hover_validation_6dof.prb"
 DISTURBED = ROOT / "examples/mission_families/slower_hummingbird/SV05_disturbed_response_6dof.prb"
 RECTANGLE = ROOT / "examples/mission_families/slower_hummingbird/SV05_rectangle_course_6dof.prb"
+FIGURE_EIGHT = ROOT / "examples/mission_families/slower_hummingbird/SV05_figure_eight_route_6dof.prb"
 TAKEOFF = ROOT / "examples/mission_families/slower_hummingbird/SV05_takeoff_6dof.prb"
 LANDING = ROOT / "examples/mission_families/slower_hummingbird/SV05_landing_6dof.prb"
 RETURN_HOME_LAND = ROOT / "examples/mission_families/slower_hummingbird/SV05_return_home_land_6dof.prb"
+MOVING_TARGET_PROPNAV = ROOT / "examples/mission_families/slower_hummingbird/SV05_moving_target_propnav_6dof.prb"
 
 pytestmark = [pytest.mark.slow, pytest.mark.dof6, pytest.mark.hummingbird]
 
@@ -94,6 +96,65 @@ def test_hummingbird_rectangle_route_has_expected_phase_displacements(tmp_path: 
         for sample in history
     )
     assert independent_moment_closure(enriched)["p99_normalized_residual"] < 1.0e-6
+####
+
+
+def test_hummingbird_figure_eight_route_completes_bounded_lobes(tmp_path: Path) -> None:
+    """The powered rotorcraft figure-eight completes all declared phases.
+
+    This is a bounded research-surrogate route gate, not a precision flight
+    demonstration.  The rotorcraft controller is evaluated against the
+    smooth reference's phase coverage, finite tracking error, altitude/speed
+    envelope, and individual rotor limits.
+    """
+
+    report = _run(FIGURE_EIGHT, tmp_path, max_steps=75_000)
+    assert report.exit_code == 0, [(item.code, item.message) for item in report.diagnostics]
+    history = _history(report)
+    assert history[-1]["time_s"] == pytest.approx(60.0, abs=1.0e-10)
+    _require_finite(
+        history,
+        "altitude_m",
+        "latitude_deg",
+        "longitude_deg",
+        "speed_m_s",
+        "route_phase_index",
+        "route_target_error_m",
+        "route_cross_track_error_m",
+        "route_along_track_error_m",
+        "aero_query_rotor_speed",
+    )
+    assert {int(sample["route_phase_index"]) for sample in history} == {0, 1, 2, 3}
+    require_bounded(history, "altitude_m", minimum=1.8, maximum=2.3)
+    require_bounded(history, "speed_m_s", minimum=0.0, maximum=0.2)
+    require_bounded(history, "aero_query_rotor_speed", minimum=0.0, maximum=1500.0)
+    assert max(sample["route_target_error_m"] for sample in history) < 0.5
+    assert max(abs(sample["route_cross_track_error_m"]) for sample in history) < 0.5
+    assert max(abs(sample[name]) for sample in history for name in ("wx", "wy", "wz")) < 0.1
+    assert max(sample["translation_equation_residual_normalized"] for sample in history) < 1.0e-8
+    assert max(sample["rotation_equation_residual_normalized"] for sample in history) < 1.0e-8
+####
+
+
+def test_hummingbird_moving_target_propnav_segment_exposes_guidance_evidence(tmp_path: Path) -> None:
+    """A moving target is evaluated as a guidance segment, not a waypoint."""
+
+    report = _run(MOVING_TARGET_PROPNAV, tmp_path, max_steps=12_000)
+    assert report.exit_code == 0, [(item.code, item.message) for item in report.diagnostics]
+    history = _history(report)
+    _require_finite(
+        history,
+        "pro_nav_active",
+        "pro_nav_los_range_m",
+        "pro_nav_closing_velocity_m_s",
+        "pro_nav_acceleration_response_residual_m_s2",
+        "aero_query_rotor_speed",
+    )
+    assert all(sample["pro_nav_active"] == pytest.approx(1.0) for sample in history)
+    assert history[-1]["pro_nav_los_range_m"] < history[0]["pro_nav_los_range_m"]
+    assert max(sample["pro_nav_los_range_m"] for sample in history) < 0.5
+    assert max(sample["aero_query_rotor_speed"] for sample in history) <= 1500.0
+    assert max(abs(sample["pro_nav_acceleration_response_residual_m_s2"]) for sample in history) < 10.0
 ####
 
 

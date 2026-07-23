@@ -138,6 +138,9 @@ class AerodynamicOutput:
     sideslip_rad: float
     query_values: Mapping[str, float] = field(default_factory=dict)
     table_margins: Mapping[str, float] = field(default_factory=dict)
+    table_normalized_margins: Mapping[str, float] = field(default_factory=dict)
+    model_uncertainty_fraction: float = 0.0
+    source_quality: str = "estimated"
 
 
 AerodynamicCoefficientProvider = Callable[[float, float, float], Vector3]
@@ -207,6 +210,23 @@ class PreparedCoefficientTable:
             query_values["airspeed_m_s"] = query_values["velocity_m_s"]
         return {
             axis_name: min(abs(float(query_values[axis_name]) - min(axis)), abs(max(axis) - float(query_values[axis_name])))
+            for axis_name, axis in zip(self.independent_variables, self.table.axes, strict=True)
+        }
+        ####
+
+    def normalized_margins(self, values: Mapping[str, float]) -> Mapping[str, float]:
+        """Return each axis margin normalized to its full declared span."""
+
+        query_values = dict(values)
+        if "velocity_m_s" in self.independent_variables and "velocity_m_s" not in query_values:
+            query_values["velocity_m_s"] = query_values["airspeed_m_s"]
+        if "airspeed_m_s" in self.independent_variables and "airspeed_m_s" not in query_values:
+            query_values["airspeed_m_s"] = query_values["velocity_m_s"]
+        return {
+            axis_name: min(
+                abs(float(query_values[axis_name]) - min(axis)),
+                abs(max(axis) - float(query_values[axis_name])),
+            ) / max(abs(max(axis) - min(axis)), 1.0e-30)
             for axis_name, axis in zip(self.independent_variables, self.table.axes, strict=True)
         }
         ####
@@ -350,6 +370,25 @@ class PreparedAerodynamicCoefficients:
                         result[f"{family}.{control_family}.{name}.{axis}"] = margin
         return result
         ####
+
+    def table_normalized_margins(self, values: Mapping[str, float]) -> Mapping[str, float]:
+        """Return normalized distance to every force/moment table boundary."""
+
+        result: dict[str, float] = {}
+        for family, tables in (("force", self.force_tables), ("moment", self.moment_tables)):
+            for name, table in tables.items():
+                for axis, margin in table.normalized_margins(values).items():
+                    result[f"{family}.{name}.{axis}"] = margin
+        for family, control_tables in (
+            ("force", self.control_force_tables),
+            ("moment", self.control_moment_tables),
+        ):
+            for control_family, members in control_tables.items():
+                for name, table in members.items():
+                    for axis, margin in table.normalized_margins(values).items():
+                        result[f"{family}.{control_family}.{name}.{axis}"] = margin
+        return result
+        ####
     ####
 
 
@@ -383,10 +422,17 @@ class TableAerodynamicModel:
     control_provider: Callable[[RigidBody6DofState], Mapping[str, float]] | None = None
     alpha_reference_rad: float = 0.0
     table_margin_provider: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
+    table_normalized_margin_provider: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
+    model_uncertainty_fraction: float = 0.0
+    source_quality: str = "estimated"
 
     def __post_init__(self) -> None:
         if self.reference_area_m2 <= 0.0 or self.reference_length_m <= 0.0:
             raise ValueError("aerodynamic reference geometry must be positive")
+        if not math.isfinite(self.model_uncertainty_fraction) or not 0.0 <= self.model_uncertainty_fraction < 1.0:
+            raise ValueError("aerodynamic model uncertainty must be finite and in [0, 1)")
+        if not self.source_quality.strip():
+            raise ValueError("aerodynamic source quality must not be empty")
         ####
     ####
 
@@ -466,6 +512,11 @@ class TableAerodynamicModel:
             sideslip,
             dict(context.values),
             dict(self.table_margin_provider(context.values)) if self.table_margin_provider is not None else {},
+            dict(self.table_normalized_margin_provider(context.values))
+            if self.table_normalized_margin_provider is not None
+            else {},
+            self.model_uncertainty_fraction,
+            self.source_quality,
         )
         ####
     ####
@@ -516,6 +567,16 @@ class DirectWrenchTableModel:
     control_provider: Callable[[RigidBody6DofState], Mapping[str, float]] | None = None
     source_z_up: bool = False
     rotor_allocation: QuadRotorAllocation | None = None
+    model_uncertainty_fraction: float = 0.0
+    source_quality: str = "estimated"
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.model_uncertainty_fraction) or not 0.0 <= self.model_uncertainty_fraction < 1.0:
+            raise ValueError("aerodynamic model uncertainty must be finite and in [0, 1)")
+        if not self.source_quality.strip():
+            raise ValueError("aerodynamic source quality must not be empty")
+        ####
+    ####
 
     def evaluate(self, state: RigidBody6DofState) -> AerodynamicOutput:
         """Resolve direct wrench tables against body-relative velocity."""
@@ -567,6 +628,9 @@ class DirectWrenchTableModel:
             beta,
             dict(query.values),
             dict(self.loads.table_margins(query.values)),
+            dict(self.loads.table_normalized_margins(query.values)),
+            self.model_uncertainty_fraction,
+            self.source_quality,
         )
         ####
 

@@ -19,6 +19,19 @@ TAOS behavior.
   and their expected plots.
 - [LQR](lqr.md): declarative linear-quadratic regulator configuration and
   validated continuous-time solver.
+- [TAORYX extensions and verification guide](../latex/taoryx_extensions_and_verification.tex):
+  buildable LaTeX documentation for the fidelity ladder, plant data contract,
+  automatic tuning, trajectory scoring, and verification gates.
+
+Build the composite PDF, which includes that guide plus this extension reference
+set, with:
+
+```bash
+python tools/dev.py taoryx-extension-pdf
+```
+
+The normalized artifact is
+`output/pdf/taoryx_extensions_composite.pdf`.
 
 ## Claim vocabulary
 

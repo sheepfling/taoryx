@@ -3,7 +3,7 @@
 *mode rigid-body-6dof
 *atmos standard
 *earth wgs-84 omega=7.2921151467e-5 gm=3.986004418e14
-*runtime status vehicle reference-area=18.580608 reference-length=3.130296 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024 dry-mass-kg=14641.0545 envelope-max-mach=6.7 envelope-max-alpha-deg=10 envelope-max-beta-deg=10
+*runtime status vehicle reference-area=18.580608 reference-length=3.130296 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024 dry-mass-kg=14641.0545 envelope-max-mach=6.7 envelope-max-alpha-deg=10 envelope-max-beta-deg=10 nominal-mass-kg=14641.0545
 *runtime control bank-deg vehicle=1 default=0.0 lower=-25.0 upper=25.0
 
 

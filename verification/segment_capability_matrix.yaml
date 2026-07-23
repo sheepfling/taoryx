@@ -1,0 +1,52 @@
+schema_version: 1
+id: taoryx_guidance_segment_capabilities_v1
+description: >-
+  Capability inventory for segment families that are broader than the current
+  lifecycle promotion catalog. A capability row is not a promotion stamp. It
+  records the source, focused evidence, and remaining gates needed before the
+  segment can enter route composition.
+segments:
+  - id: x15-moving-target-pronav
+    vehicle: x15
+    goal_kind: intercept_geometry
+    status: partial
+    source_problem: examples/showcases/x15_rocket_to_hawaii/source_trim_then_propnav_6dof.prb
+    focused_test: tests/e2e/test_glider_family_validation.py::test_glider_6dof_native_propnav_activates_after_source_trim
+    required_channels:
+      - pro_nav_active
+      - pro_nav_los_range_m
+      - pro_nav_closing_velocity_m_s
+      - pro_nav_acceleration_response_residual_m_s2
+    evidence: >-
+      Native ProNav activates after source trim and the target range decreases
+      for the bounded 35-second transition.
+    remaining_gates:
+      - explicit moving-target velocity fixture and target-motion provenance
+      - terminal miss-distance and achieved-versus-commanded acceleration gate
+      - envelope and actuator/saturation quality evidence
+    claim_boundary: >-
+      X15 source-trim to native ProNav transition; not an intercept or landing
+      certification.
+  - id: hummingbird-moving-target-pronav
+    vehicle: hummingbird
+    goal_kind: intercept_geometry
+    status: candidate
+    source_problem: examples/mission_families/slower_hummingbird/SV05_moving_target_propnav_6dof.prb
+    focused_test: tests/e2e/test_hummingbird_family_validation.py::test_hummingbird_moving_target_propnav_segment_exposes_guidance_evidence
+    required_channels:
+      - pro_nav_active
+      - pro_nav_los_range_m
+      - pro_nav_closing_velocity_m_s
+      - pro_nav_acceleration_response_residual_m_s2
+    evidence: >-
+      A dedicated bounded fixture now supplies explicit target velocity and
+      the multirotor runtime exposes active ProNav, LOS, closure, and response
+      channels. The broader Hummingbird route examples still use fixed route
+      targets and are not moving-target evidence.
+    remaining_gates:
+      - validate rotor allocation and attitude response under target motion
+      - prove range/closure, miss distance, saturation, and aero-table bounds
+      - add a segmentation-catalog row and promotion evidence hash
+    claim_boundary: >-
+      Candidate Hummingbird moving-target segment only; do not promote until a
+      dedicated target-motion fixture and focused runtime test pass.

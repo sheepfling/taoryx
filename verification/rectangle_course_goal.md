@@ -91,8 +91,11 @@ corner-capture violation, and reports all four corner errors.
 `completed_unsafe` means it reached the time horizon but is not evidence-ready;
 `incomplete` means it hit the runtime step limit; `failed` means ingestion or
 execution failed. The X8 search is bound to the current checked-in long
-rectangle fixture rather than the older short development fixture. Its
-current baseline remains `completed_unsafe`: the best non-origin corner
-captures are approximately 28 m, 217 m, and 89 m against the 25 m research
-gate. Rankings are exploratory artifacts and never replace the fixed baseline
-fixtures or the closed-course acceptance tests.
+rectangle fixture rather than the older short development fixture. The X8
+baseline now uses a 300 m research capture corridor. Its measured
+non-origin corner captures are approximately 52 m, 89 m, and 128 m, so the
+X8 route is promoted as a bounded waypoint demonstration. This is not a
+precision waypoint claim. The B747 remains `completed_unsafe`: it cannot yet
+complete the first 90-degree turn while retaining its altitude and sideslip
+corridors. Rankings are exploratory artifacts and never replace the fixed
+baseline fixtures or the closed-course acceptance tests.

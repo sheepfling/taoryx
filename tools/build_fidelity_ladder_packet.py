@@ -6,6 +6,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -125,6 +126,18 @@ SCORE_DEFINITION = {
         "quality_limit": "declared desired-performance boundary, distinct from the hard gate target/tolerance",
         "interpretation": "a result near a hard failure limit may pass the gate but receives a low quality score",
         "advisory_objectives": "reported separately and never override required gate status",
+    },
+    "trajectory_resource_metrics": {
+        "table_margin_min_normalized": "minimum distance to any queried table boundary divided by that axis span; dimensionless",
+        "table_margin_average_normalized": "sample mean of the normalized table margin; dimensionless",
+        "table_margin_min_absolute": "minimum raw table margin in mixed source-axis units; diagnostic only",
+        "table_margin_average_absolute": "sample mean of raw table margins in mixed source-axis units; diagnostic only",
+        "control_saturation_fraction": "fraction of saved samples with any saturation flag active; dimensionless",
+        "control_saturation_average": "sample mean of aggregate saturation flags; dimensionless",
+        "control_saturation_max_abs": "maximum absolute aggregate saturation flag; dimensionless",
+        "control_derivative_abs_average": "mean absolute actuator-command derivative; declared command unit per second",
+        "control_derivative_abs_max": "maximum absolute actuator-command derivative; declared command unit per second",
+        "per_control_breakdown": "retained in trajectory_rollup.control_derivative_abs_*_by_channel",
     },
     "legacy_score": "gate_compliance_legacy is retained only when any objective lacks quality_limit",
 }
@@ -249,7 +262,7 @@ def _write_telemetry_csv(output: Path, histories: list[Any]) -> str | None:
     ####
 
 
-def _write_bundle_metadata(packet: Path) -> None:
+def _write_bundle_metadata(packet: Path, *, reproduction_command: str | None = None) -> None:
     """Write reproducibility metadata that travels with the packet."""
 
     evidence = packet / "evidence"
@@ -282,11 +295,12 @@ def _write_bundle_metadata(packet: Path) -> None:
         encoding="utf-8",
     )
     reproduce = packet / "reproduce.sh"
+    command = reproduction_command or "python tools/build_fidelity_ladder_packet.py --output artifacts/verification/fidelity_ladder"
     reproduce.write_text(
         "#!/bin/sh\n"
         "set -eu\n"
         "# Run from the TAORYX repository checkout that produced this packet.\n"
-        "python tools/build_fidelity_ladder_packet.py --output artifacts/verification/fidelity_ladder\n",
+        f"{command}\n",
         encoding="utf-8",
     )
     reproduce.chmod(0o755)
@@ -412,6 +426,85 @@ def _telemetry_metrics(report: Any) -> dict[str, Any]:
     ]
     if not histories:
         return {"sample_count": 0, "duration_s": None, "final": {}, "max": {}, "max_abs": {}}
+
+    numeric_channels: dict[str, list[float]] = {}
+    for state in histories:
+        for name, value in state.named.items():
+            if isinstance(value, (int, float)) and math.isfinite(float(value)):
+                numeric_channels.setdefault(name, []).append(float(value))
+
+    def numeric_series(channel: str) -> list[float]:
+        """Return a cached finite numeric channel without rescanning history."""
+
+        return numeric_channels.get(channel, [])
+
+    def is_control_channel(channel: str) -> bool:
+        """Identify actuator commands, excluding guidance/reference telemetry."""
+
+        lowered = channel.casefold()
+        if lowered in {"throttle", "rotor_speed"} or lowered.startswith("rotor-") and lowered.endswith("-speed"):
+            return True
+        return any(token in lowered for token in ("elevator-deg", "aileron-deg", "rudder-deg", "elevon-deg", "stabilator-deg"))
+
+    saturation_channels = sorted(
+        {
+            name
+            for state in histories
+            for name in state.named
+            if name.casefold().endswith("_saturated") and isinstance(state.named[name], (int, float))
+        }
+    )
+    saturation_values = [
+        max((float(state.named[name]) for name in saturation_channels if name in state.named), default=0.0)
+        for state in histories
+    ]
+    control_channels = sorted(
+        {name for state in histories for name in state.named if is_control_channel(name) and numeric_series(name)}
+    )
+    control_derivatives: dict[str, list[float]] = {name: [] for name in control_channels}
+    for previous, current in zip(histories, histories[1:], strict=False):
+        dt = float(current.time - previous.time)
+        if dt <= 0.0:
+            continue
+        for name in control_channels:
+            if name not in previous.named or name not in current.named:
+                continue
+            previous_value = float(previous.named[name])
+            current_value = float(current.named[name])
+            if math.isfinite(previous_value) and math.isfinite(current_value):
+                control_derivatives[name].append(abs(current_value - previous_value) / dt)
+    all_control_derivatives = [value for values in control_derivatives.values() for value in values]
+    normalized_margin_values = numeric_series("aero_table_min_normalized_margin")
+    absolute_margin_values = numeric_series("aero_table_min_margin")
+    telemetry_rollup = {
+        "table_margin_min_normalized": min(normalized_margin_values, default=None),
+        "table_margin_average_normalized": (
+            sum(normalized_margin_values) / len(normalized_margin_values) if normalized_margin_values else None
+        ),
+        "table_margin_min_absolute": min(absolute_margin_values, default=None),
+        "table_margin_average_absolute": (
+            sum(absolute_margin_values) / len(absolute_margin_values) if absolute_margin_values else None
+        ),
+        "control_saturation_fraction": (
+            sum(value > 0.5 for value in saturation_values) / len(saturation_values) if saturation_values else 0.0
+        ),
+        "control_saturation_average": (
+            sum(saturation_values) / len(saturation_values) if saturation_values else 0.0
+        ),
+        "control_saturation_max_abs": max((abs(value) for value in saturation_values), default=0.0),
+        "control_derivative_abs_average": (
+            sum(all_control_derivatives) / len(all_control_derivatives) if all_control_derivatives else None
+        ),
+        "control_derivative_abs_max": max(all_control_derivatives, default=None),
+        "control_channels": control_channels,
+        "control_derivative_abs_max_by_channel": {
+            name: max(values) for name, values in control_derivatives.items() if values
+        },
+        "control_derivative_abs_average_by_channel": {
+            name: sum(values) / len(values) for name, values in control_derivatives.items() if values
+        },
+        "saturation_channels": saturation_channels,
+    }
     known_channels = (
         "altitude_m",
         "speed_m_s",
@@ -428,7 +521,7 @@ def _telemetry_metrics(report: Any) -> dict[str, Any]:
         "motor_shutdown",
     )
     final_state = histories[-1]
-    all_channels = sorted({name for state in histories for name, value in state.named.items() if isinstance(value, (int, float))})
+    all_channels = sorted(numeric_channels)
     final = {
         channel: float(final_state.named[channel])
         for channel in known_channels
@@ -438,11 +531,7 @@ def _telemetry_metrics(report: Any) -> dict[str, Any]:
     maxima: dict[str, float] = {}
     minimums: dict[str, float] = {}
     for channel in all_channels:
-        values = [
-            float(state.named[channel])
-            for state in histories
-            if channel in state.named and float(state.named[channel]) == float(state.named[channel])
-        ]
+        values = numeric_channels[channel]
         if values:
             maximums[channel] = max(abs(value) for value in values)
             maxima[channel] = max(values)
@@ -465,6 +554,8 @@ def _telemetry_metrics(report: Any) -> dict[str, Any]:
             }
             for channel in all_channels
         },
+        "trajectory_rollup": telemetry_rollup,
+        **telemetry_rollup,
     }
     ####
 
@@ -975,6 +1066,8 @@ def build(
     plots: bool = False,
     family_ids: frozenset[str] | None = None,
     controller_ids: frozenset[str] | None = None,
+    include_long_validation: bool = True,
+    include_controller_missions: bool = True,
 ) -> Path:
     """Build and return the UUID-named ZIP packet."""
 
@@ -985,7 +1078,24 @@ def build(
     run_id = str(uuid.uuid4())
     packet = output / run_id
     packet.mkdir(parents=True, exist_ok=False)
-    _write_bundle_metadata(packet)
+    selected_family_args = "" if family_ids is None else " ".join(
+        f"--family {family}" for family in sorted(family_ids)
+    )
+    selected_controller_args = "" if controller_ids is None else " ".join(
+        f"--controller {controller}" for controller in sorted(controller_ids)
+    )
+    reproduction_command = " ".join(
+        item
+        for item in (
+            "python tools/build_fidelity_ladder_packet.py --output artifacts/verification/fidelity_ladder",
+            selected_family_args,
+            selected_controller_args,
+            "--skip-long-validation" if not include_long_validation else "",
+            "--skip-controller-missions" if not include_controller_missions else "",
+        )
+        if item
+    )
+    _write_bundle_metadata(packet, reproduction_command=reproduction_command)
     manifest: dict[str, Any] = {
         "schema_version": 1,
         "run_id": run_id,
@@ -1004,7 +1114,7 @@ def build(
         "working_tree_status": "working_tree.status",
         "reproduction": {
             "script": "reproduce.sh",
-            "command": "python tools/build_fidelity_ladder_packet.py --output artifacts/verification/fidelity_ladder",
+            "command": reproduction_command,
         },
     }
     evidence_dir = packet / "evidence"
@@ -1165,7 +1275,7 @@ def build(
         long_case = next(
             (
                 item
-                for item in _load_long_cases()
+                for item in (_load_long_cases() if include_long_validation else ())
                 if _family_key(str(item["id"])) == _family_key(family)
             ),
             None,
@@ -1252,6 +1362,9 @@ def build(
             )
             family_report["long_validation"] = long_report
             family_report["closure_gate"] = nominal.get("closure_evaluation", {"status": "unavailable"})
+        elif not include_long_validation:
+            family_report["long_validation"] = {"status": "skipped-by-request"}
+            family_report["closure_gate"] = {"status": "skipped-by-request"}
         manifest["families"].append(family_report)
     controller_catalog = yaml.safe_load(
         (ROOT / "verification/controller_scenarios.yaml").read_text(encoding="utf-8")
@@ -1319,7 +1432,8 @@ def build(
     controller_mission_catalog = yaml.safe_load(CONTROLLER_MISSION_CONFIG.read_text(encoding="utf-8"))
     controller_mission_claim_boundary = str(controller_mission_catalog["claim_boundary"])
     controller_mission_reports: list[dict[str, Any]] = []
-    for mission in _load_controller_missions():
+    missions = _load_controller_missions() if include_controller_missions else ()
+    for mission in missions:
         family = _family_key(str(mission["family"]))
         if family_ids is not None and family not in family_ids:
             continue
@@ -1361,6 +1475,7 @@ def build(
             }
         )
     manifest["controller_missions"] = controller_mission_reports
+    manifest["controller_missions_status"] = "executed" if include_controller_missions else "skipped-by-request"
     _write_case_manifests(packet)
     manifest_path = packet / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -1420,6 +1535,16 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts/verification/fidelity_ladder")
     parser.add_argument("--no-plots", action="store_true", help="accepted for parity with other packet builders")
     parser.add_argument(
+        "--skip-controller-missions",
+        action="store_true",
+        help="build plant/ladder evidence without long controller-mission cases",
+    )
+    parser.add_argument(
+        "--skip-long-validation",
+        action="store_true",
+        help="build the three-tier ladder without the expensive sustained-run refinement",
+    )
+    parser.add_argument(
         "--family",
         action="append",
         dest="families",
@@ -1435,7 +1560,16 @@ def main() -> None:
     arguments.output.mkdir(parents=True, exist_ok=True)
     families = None if not arguments.families else frozenset(_family_key(item) for item in arguments.families)
     controllers = None if not arguments.controllers else frozenset(arguments.controllers)
-    print(build(arguments.output, plots=not arguments.no_plots, family_ids=families, controller_ids=controllers))
+    print(
+        build(
+            arguments.output,
+            plots=not arguments.no_plots,
+            family_ids=families,
+            controller_ids=controllers,
+            include_long_validation=not arguments.skip_long_validation,
+            include_controller_missions=not arguments.skip_controller_missions,
+        )
+    )
     ####
 
 

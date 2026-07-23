@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import random
 import re
 from dataclasses import dataclass
@@ -29,6 +30,7 @@ class TuningCase:
     search_max_steps: int | None
     limits: dict[str, float]
     bounds: dict[str, tuple[float, float]]
+    log_bounds: dict[str, tuple[float, float]]
     baseline: dict[str, float]
     coordinated_turn: bool
     ####
@@ -47,6 +49,7 @@ def load_cases(path: Path) -> tuple[TuningCase, ...]:
             search_max_steps=int(item["search_max_steps"]) if item.get("search_max_steps") is not None else None,
             limits={str(key): float(value) for key, value in dict(item["limits"]).items()},
             bounds={str(key): (float(value[0]), float(value[1])) for key, value in dict(item["bounds"]).items()},
+            log_bounds={str(key): (float(value[0]), float(value[1])) for key, value in dict(item.get("log_bounds", {})).items()},
             baseline={str(key): float(value) for key, value in dict(item.get("baseline", {})).items()},
             coordinated_turn=bool(item.get("coordinated_turn", True)),
         )
@@ -90,6 +93,23 @@ def inject_controls(source: str, values: dict[str, float], *, coordinated_turn: 
     ####
 
 
+def _sample_candidate(case: TuningCase, rng: random.Random) -> dict[str, float]:
+    """Sample linear bounds uniformly and positive bounds logarithmically."""
+
+    values = {
+        name: rng.uniform(lower, upper)
+        for name, (lower, upper) in case.bounds.items()
+    }
+    values.update(
+        {
+            name: 10.0 ** rng.uniform(math.log10(lower), math.log10(upper))
+            for name, (lower, upper) in case.log_bounds.items()
+        }
+    )
+    return values
+    ####
+
+
 def evaluate_candidate(case: TuningCase, values: dict[str, float], work: Path) -> dict[str, Any]:
     """Run and score one native candidate, failing closed on runtime errors."""
 
@@ -121,6 +141,9 @@ def evaluate_candidate(case: TuningCase, values: dict[str, float], work: Path) -
     initial = history[0].named
     final_state = history[-1]
     final = final_state.named
+    saturation_fraction = sum(
+        1 for sample in history if sample.named.get("attitude_controller_saturated", 0.0) >= 0.5
+    ) / max(len(history), 1)
     max_alpha = max((abs(sample.named.get("aero_alpha_deg", 0.0)) for sample in history if sample.named.get("aero_air_data_valid", 1.0) >= 0.5), default=0.0)
     max_beta = max((abs(sample.named.get("aero_sideslip_deg", 0.0)) for sample in history if sample.named.get("aero_air_data_valid", 1.0) >= 0.5), default=0.0)
     final_range = abs(final.get("range_to_target_m", 1.0e6))
@@ -157,12 +180,14 @@ def evaluate_candidate(case: TuningCase, values: dict[str, float], work: Path) -
             "speed_delta_m_s": speed_delta,
             "max_alpha_deg": max_alpha,
             "max_beta_deg": max_beta,
+            "attitude_saturation_fraction": saturation_fraction,
             "corner_capture_errors_m": corner_capture_errors,
             "violations": violations,
             "score": final_range
             + 2.0 * altitude_error
             + speed_delta
             + sum(corner_capture_errors)
+            + 1.0e5 * saturation_fraction
             + 1.0e8 * sum(violations)
             + (1.0e6 if not complete else 0.0),
         }
@@ -187,6 +212,7 @@ def _selected_case(case: TuningCase, max_steps: int | None) -> TuningCase:
         search_max_steps=case.search_max_steps,
         limits=case.limits,
         bounds=case.bounds,
+        log_bounds=case.log_bounds,
         baseline=case.baseline,
         coordinated_turn=case.coordinated_turn,
     )
@@ -202,7 +228,7 @@ def _random_search(case: TuningCase, evaluations: int, seed: int, output: Path) 
     if case.baseline:
         candidates.append(case.baseline)
     candidates.extend(
-        {name: rng.uniform(lower, upper) for name, (lower, upper) in case.bounds.items()}
+        _sample_candidate(case, rng)
         for _ in range(max(0, evaluations - len(candidates)))
     )
     for index, values in enumerate(candidates):
@@ -216,8 +242,10 @@ def _differential_evolution_search(case: TuningCase, evaluations: int, seed: int
 
     from scipy.optimize import differential_evolution
 
-    names = tuple(case.bounds)
-    bounds = tuple(case.bounds[name] for name in names)
+    names = tuple(case.bounds) + tuple(case.log_bounds)
+    search_bounds = tuple(case.bounds[name] for name in case.bounds) + tuple(
+        (math.log10(lower), math.log10(upper)) for lower, upper in case.log_bounds.values()
+    )
     # A small population keeps expensive native trajectory evaluations bounded.
     population = max(4, min(12, evaluations // max(1, len(names))))
     maxiter = max(0, evaluations // max(1, population * len(names)) - 1)
@@ -226,7 +254,16 @@ def _differential_evolution_search(case: TuningCase, evaluations: int, seed: int
 
     def objective(vector: list[float]) -> float:
         nonlocal candidate_index
-        values = {name: float(value) for name, value in zip(names, vector, strict=True)}
+        values = {
+            name: float(value)
+            for name, value in zip(tuple(case.bounds), vector[: len(case.bounds)], strict=True)
+        }
+        values.update(
+            {
+                name: 10.0 ** float(value)
+                for name, value in zip(tuple(case.log_bounds), vector[len(case.bounds) :], strict=True)
+            }
+        )
         result = evaluate_candidate(case, values, output / f"candidate-{candidate_index:03d}")
         candidate_index += 1
         results.append(result)
@@ -234,7 +271,7 @@ def _differential_evolution_search(case: TuningCase, evaluations: int, seed: int
 
     differential_evolution(
         objective,
-        bounds,
+        search_bounds,
         seed=seed,
         maxiter=maxiter,
         popsize=population,

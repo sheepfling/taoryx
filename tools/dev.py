@@ -116,12 +116,14 @@ def test_views() -> None:
     print("  generate-problems render metadata-driven native .prb products")
     print("  check-problems verify generated .prb products are current")
     print("  check-vehicles verify vehicle-family contracts and table bindings")
+    print("  onboard-vehicles diagnose the complete new-vehicle metadata path")
     print("  compile-segments compile external segment catalogs into native .prb products")
     print("  audit-vehicles verify scoped problem files match registry provenance")
     print("  vehicles   run the complete vehicle registry, generation, and provenance check")
     print("  segment-lint/build/run validate, compile, or execute the declarative segment catalog")
     print("  trim-vehicles solve B747, X8, and Hummingbird trims through the common trim solver")
     print("  control-directions run the signed control-direction convention harness")
+    print("  taoryx-extension-pdf build the composite LaTeX and Markdown extension PDF")
     print("Commands: test-grammar, test-equations, test-algorithms, test-slow, test-artifacts, test-spectre")
     print("Vehicle families: test-b747, test-x8, test-hummingbird, test-x15")
     ####
@@ -265,6 +267,12 @@ def check_vehicle_models() -> None:
     ####
 
 
+def onboard_vehicles() -> None:
+    """Diagnose every registered vehicle's metadata and source-contract hooks."""
+    run([project_python(), str(TOOLS / "validate_vehicle_onboarding.py"), "--vehicle", "all"])
+    ####
+
+
 def check_fidelity_parity_contracts() -> None:
     """Verify shared four-family reduction-parity metadata and hashes."""
     run([project_python(), str(TOOLS / "generate_fidelity_parity_contracts.py"), "--check"])
@@ -317,6 +325,7 @@ def audit_vehicle_provenance() -> None:
 def vehicle_check() -> None:
     """Run the one-command vehicle authoring and provenance workflow."""
     check_vehicle_models()
+    onboard_vehicles()
     audit_vehicle_provenance()
     check_problem_files()
     ####
@@ -363,6 +372,33 @@ def manual() -> None:
     run(["latexmk", "manual/manual.tex"])
     run(tool_script("normalize_pdf.py", "build/manual.pdf"))
 ####
+
+
+def successor_guide() -> None:
+    """Build the successor-side TAORYX extensions and verification guide."""
+    output = ROOT / "output" / "pdf"
+    output.mkdir(parents=True, exist_ok=True)
+    run(
+        [
+            "latexmk",
+            "-pdf",
+            "-interaction=nonstopmode",
+            "-halt-on-error",
+            f"-output-directory={output}",
+            "docs/latex/taoryx_extensions_and_verification.tex",
+        ]
+    )
+    run(tool_script("normalize_pdf.py", str(output / "taoryx_extensions_and_verification.pdf")))
+####
+
+
+def taoryx_extension_pdf() -> None:
+    """Build and normalize the composite TAORYX extension reference PDF."""
+
+    successor_guide()
+    run(tool_script("build_taoryx_extension_pdf.py"))
+    run(tool_script("normalize_pdf.py", "output/pdf/taoryx_extensions_composite.pdf"))
+    ####
 
 
 def equation_audit() -> None:
@@ -414,6 +450,7 @@ def handoff() -> None:
 
 def check() -> None:
     check_vehicle_models()
+    onboard_vehicles()
     check_fidelity_parity_contracts()
     compile_segments()
     audit_vehicle_provenance()
@@ -424,6 +461,7 @@ def check() -> None:
     e2e()
     manual_corpus()
     manual()
+    taoryx_extension_pdf()
 ####
 
 
@@ -462,6 +500,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "generate-problems": generate_problem_files,
     "check-problems": check_problem_files,
     "check-vehicles": check_vehicle_models,
+    "onboard-vehicles": onboard_vehicles,
     "check-parity": check_fidelity_parity_contracts,
     "run-parity": run_fidelity_parity,
     "compile-segments": compile_segments,
@@ -475,6 +514,8 @@ TASKS: dict[str, Callable[[], None]] = {
     "e2e": e2e,
     "e2e-all": e2e_all,
     "manual": manual,
+    "successor-guide": successor_guide,
+    "taoryx-extension-pdf": taoryx_extension_pdf,
     "equation-audit": equation_audit,
     "handoff": handoff,
     "check": check,

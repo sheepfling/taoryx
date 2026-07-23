@@ -54,6 +54,16 @@ trim artifact. This prevents a gain or controller configuration from being
 silently reused across vehicles. LQR is therefore the first controller, not a
 permanent architectural dependency.
 
+When mass properties vary, use `GainScheduledLqrController` with an explicit
+operating-point builder. The builder receives the current mass and inertia;
+the controller never infers inertia from mass. The catalog's controller scale
+contract records `mass_scale_kg`, `inertia_scale_kg_m2`, `force_scale_n`,
+`weight_moment_scale_nm`, and `inertia_moment_scale_nm`. A profile may opt
+into nominal-ratio mass conditioning; the current inertia still comes from the
+plant's source-backed mass-property provider. For estimated aerodynamic
+derivatives, attach an `LqrUncertaintySpec` and screen the fixed gain across
+the declared `A/B` envelope before promoting a maneuver result.
+
 ## Directional convention probes
 
 `audit_control_directions` in `taoryx.control_directions` probes a named control

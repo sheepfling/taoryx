@@ -1,0 +1,1397 @@
+\documentclass[11pt]{article}
+
+% This is successor documentation.  It is intentionally not included in the
+% reconstructed 1995 manual, whose historical text and pagination are frozen.
+\usepackage[letterpaper,margin=0.82in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{array,booktabs,longtable,tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{navy}{HTML}{17365D}
+\definecolor{bluegray}{HTML}{475569}
+\definecolor{paleblue}{HTML}{EEF5FB}
+\definecolor{paleyellow}{HTML}{FFF8E7}
+\definecolor{palered}{HTML}{FFF0F0}
+\definecolor{codegray}{HTML}{F5F7FA}
+
+\hypersetup{
+  pdftitle={TAORYX Extensions and Verification Guide},
+  pdfauthor={TAORYX project},
+  pdfsubject={Fidelity modes, controller synthesis, trajectory scoring, and verification}
+}
+
+\setlist{nosep,leftmargin=*}
+\setlist[itemize]{label=\textbullet}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\renewcommand{\arraystretch}{1.18}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\taoryx}{TAORYX}
+\newcommand{\pathcode}[1]{\path{#1}}
+\newcommand{\warningbox}[1]{%
+  \par\noindent\colorbox{paleyellow}{\parbox{0.94\linewidth}{#1}}\par
+}
+\newcommand{\claimbox}[1]{%
+  \par\noindent\colorbox{paleblue}{\parbox{0.94\linewidth}{#1}}\par
+}
+
+\lstdefinestyle{taoryxcode}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codegray},
+  frame=single,
+  rulecolor=\color{bluegray!35},
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2
+}
+\lstset{style=taoryxcode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textsc{TAORYX extensions and verification}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\title{\textcolor{navy}{TAORYX Extensions and Verification Guide}\\
+  \large Fidelity modes, plant data, controller synthesis, and trajectory evidence}
+\author{TAORYX project}
+\date{Successor documentation --- July 2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\claimbox{\textbf{Scope and claim boundary.} This guide documents successor-side
+\taoryx{} behavior. It is not a revision of the reconstructed TAOS User's Manual
+and does not establish TAOS 96.0 behavioral compatibility. The historical manual
+remains the authority for documented 1995 syntax; these extensions are explicitly
+labelled \texttt{taoryx-extension} unless a separate source claim is recorded.}
+
+This PDF is the narrative design and verification guide. The canonical
+extension Markdown pages are the operational reference for exact problem-file
+syntax, command examples, and extension-specific contracts; the composite
+build packages both views together. When a detail changes, update the
+operational page and its tests first, then keep this guide's rationale and
+claim boundary aligned with it.
+
+\tableofcontents
+\newpage
+
+\section{Purpose and operating principles}
+
+The practical goal is to make a new vehicle and a new controlled trajectory
+repeatable without hiding physical assumptions in a bespoke Python runner. A
+vehicle enters through catalog metadata, verified source tables, a plant adapter,
+and ordinary problem files. The same harness then exercises the vehicle from a
+low-fidelity model to a full rigid-body model.
+
+The workflow has four governing principles:
+
+\begin{enumerate}
+  \item \textbf{One canonical plant contract.} A vehicle adapter owns frames,
+    units, tables, mass properties, propulsion, actuators, and force/moment
+    evaluation. Integrators consume the resulting canonical SI state and wrench.
+  \item \textbf{Progressive fidelity.} Begin with true 3-DOF translation, add a
+    kinematic attitude bridge, and only then release six-degree-of-freedom
+    attitude and rate dynamics.
+  \item \textbf{Plant truth before controller tuning.} Trimming, local
+    linearization, control-direction probes, and table-margin checks precede any
+    waypoint or mission score.
+  \item \textbf{Gates and scores are different.} A required validity gate can
+    block a claim. A quality score describes how much margin a passing objective
+    retained; it cannot turn a failed gate green.
+\end{enumerate}
+
+The main authoring locations are:
+
+\begin{itemize}
+  \item \pathcode{verification/vehicle_models.yaml}: SI vehicle and source
+    contract;
+  \item \pathcode{verification/vehicle_catalog.yaml}: public vehicle and table
+    discovery for the common harness;
+  \item \pathcode{verification/trim_specs.yaml}: bounded operating points and
+    plant residual names;
+  \item \pathcode{verification/controller_designs.yaml}: controller channels,
+    allocation, and design method;
+  \item \pathcode{verification/lqr_scaling_profiles.yaml}: gentle, standard,
+    and aggressive controller profiles;
+  \item \pathcode{verification/fidelity_ladder.yaml}: matched 3-DOF, bridge,
+    and 6-DOF scenario products;
+  \item \pathcode{examples/}: generated or hand-authored ordinary \texttt{.prb}
+    examples, never hidden runner inputs.
+\end{itemize}
+
+\section{The fidelity ladder}
+\label{sec:fidelity}
+
+The scenario contract names three tiers. The contract uses the stable names
+\texttt{3dof}, \texttt{pseudo\_6dof}, and \texttt{6dof}; problem files use the
+current mode directives shown below.
+
+\begin{longtable}{p{0.19\linewidth}p{0.27\linewidth}p{0.45\linewidth}}
+\toprule
+\textbf{Tier} & \textbf{Problem-file mode} & \textbf{Physical content and evidence meaning}\\
+\midrule
+\endhead
+True 3-DOF & \pathcode{*mode point-mass} &
+  Translational position and velocity are integrated. Aerodynamic angles,
+  bank, thrust direction, and applicable controls are prescribed or solved by
+  the point-mass guidance layer. This is a vehicle reduction only when it uses
+  the same atmosphere, tables, propulsion, mass, and command history as the
+  higher-fidelity cases.\\
+Kinematic 3+3 bridge & \pathcode{*mode kinematic-6dof} &
+  Translation remains the point-mass plant while attitude is prescribed,
+  scheduled, or lagged. This is useful for frame, attitude-command, force
+  direction, and controller development. It is not free rotational dynamics;
+  its overlapping position and speed curves are not independent evidence.\\
+Full rigid-body 6-DOF & \pathcode{*mode rigid-body-6dof} &
+  Quaternion attitude, body rates, inertia, moments, actuators, allocation,
+  propulsion moments, and applicable mass/event dynamics are integrated. This
+  is the tier required for a full rigid-body plant or controller claim.\\
+\bottomrule
+\end{longtable}
+
+Minimal examples are ordinary problem files:
+
+\begin{lstlisting}
+*mode point-mass
+*mode kinematic-6dof
+*mode rigid-body-6dof
+\end{lstlisting}
+
+The bridge is intentionally a development rung. It can expose an incorrect
+body-to-world rotation or a wrong alpha/beta sign before the full attitude
+solver is introduced. It must report prescribed versus achieved attitude,
+attitude lag, body rates, and force-direction consistency; plotting the same
+altitude three times is not a fidelity demonstration.
+
+\subsection{Matched parity versus fidelity separation}
+
+There are two valid experiments, and they must not be mixed.
+
+\begin{description}[leftmargin=1.45in,labelwidth=1.25in,style=sameline]
+  \item[Reduction parity] Use identical initial state, mass, environment,
+    tables, propulsion, commands, events, duration, integrator, and termination
+    policy. Constrain the 6-DOF attitude and rates to the 3-DOF assumptions.
+    Compare initial $\dot V$, $\dot h$, $\dot\gamma$, and $\dot\chi$ before
+    comparing histories.
+  \item[Fidelity separation] Release attitude, rates, actuator lag, allocation,
+    and moments. The resulting six-axis trajectory is not expected to overlay
+    the 3-DOF curve. Its success criteria are plant/source agreement, closure,
+    convergence, bounded controls, and family-appropriate mission behavior.
+\end{description}
+
+Every run carries a \texttt{ScenarioContract}. The overlay tool must refuse a
+comparison when any physical input hash differs; only the dynamics tier may
+differ in a reduction-parity overlay. This prevents a unit conversion or a
+different vehicle mass from being mistaken for a dynamics effect.
+
+\section{Vehicle data required by each mode}
+\label{sec:data-contract}
+
+The amount of data grows with the physical effects being released. A missing
+source value is not silently replaced by a convenient constant; it is recorded
+as a warning, diagnostic, or block in the onboarding and plant reports.
+
+\begin{longtable}{p{0.21\linewidth}p{0.23\linewidth}p{0.45\linewidth}}
+\toprule
+\textbf{Data} & \textbf{3-DOF / bridge} & \textbf{Full 6-DOF addition}\\
+\midrule
+\endhead
+Canonical state & Position, velocity, epoch, and local navigation frame. &
+  Quaternion body-to-world convention, body rates, CG location, and a declared
+  state ordering.\\
+Units and geometry & Mass, reference area, and any lift/drag reference. &
+  $S$, $b$, $c$, CG and aerodynamic moment reference, thrust stations, and
+  SI-converted inertia tensor.\\
+Environment & Gravity, atmosphere, wind, and geodetic/ECEF conversion. &
+  The same environment, plus gravity projection into the body frame and all
+  rotating-frame derivative conventions used by the rigid-body RHS.\\
+Aerodynamics & $C_L$, $C_D$, side force, angle ranges, bank/force direction. &
+  Six body or wind-axis force coefficients, $C_l$, $C_m$, $C_n$, rate
+  derivatives, control increments, query margins, and out-of-envelope policy.\\
+Propulsion & Thrust magnitude and mass flow when active. &
+  Body thrust vector, thrust moment, actuator or throttle dynamics, fuel flow,
+  and event behavior.\\
+Mass model & Mass and, if changing, a continuous mass-flow rule. &
+  $m(t)$, CG migration, inertia update, propellant tanks, separation/jettison
+  events, and parallel-axis bookkeeping.\\
+Controls & Prescribed angle, bank, thrust, or reduced control command. &
+  Command/achieved positions, rates, limits, lag, saturation, allocator, and
+  signed direction probes for every control channel.\\
+\bottomrule
+\end{longtable}
+
+For a six-axis source model, the minimum dimensionalization contract is:
+
+\begin{align}
+  \boldsymbol F_{A,B} &= q S\begin{bmatrix}C_X&C_Y&C_Z\end{bmatrix}^{T},\\
+  \boldsymbol M_{A,B} &= q S\begin{bmatrix}b C_l&c C_m&b C_n\end{bmatrix}^{T},\\
+  q &= \tfrac{1}{2}\rho V_{\mathrm{rel}}^2.
+\end{align}
+
+The reference dimensions, coefficient normalization, axis ordering, and table
+clamp/extrapolation policy belong to the source record. The harness checks these
+before it runs a trajectory.
+
+\subsection{How to read the vehicle data contract}
+
+The data table is not a shopping list of optional tuning constants. Each entry
+answers a physical question that becomes active when a fidelity tier releases
+that effect:
+
+\begin{description}[leftmargin=1.55in,labelwidth=1.35in,style=sameline]
+  \item[State and frames] What does each state component mean, in which frame
+    is it stored, and which direction does a positive rotation or force use?
+  \item[Reference geometry] Which area, span, chord, CG, and moment reference
+    were used to nondimensionalize the source coefficients?
+  \item[Aerodynamic model] Which coefficient names, axes, interpolation rules,
+    and valid ranges produce the force and moment queried by the plant?
+  \item[Mass properties] What are $m$, CG, and $I$ at this operating point, and
+    what explicit provider updates them as fuel, payload, or stages change?
+  \item[Effectors] Which command produces which signed force or moment, through
+    which actuator, lag, limit, and allocation rule?
+  \item[Provenance] Which source file, page, hash, digitization method, and
+    uncertainty basis support each estimate?
+\end{description}
+
+For example, the following metadata declares a small fixed-wing reference
+point, but does not by itself claim that the aerodynamic coefficients are
+truth:
+
+\begin{lstlisting}
+*runtime status vehicle
+  reference-area=16.0 reference-span=10.0 reference-length=1.6
+  mass-kg=1200 dry-mass-kg=950
+  inertia-x=4200 inertia-y=5100 inertia-z=8600
+  inertia-mass-model=linear-dry-mass
+  inertia-x-dry=3900 inertia-y-dry=4700 inertia-z-dry=7800
+  aero-source-quality=estimated aero-uncertainty-fraction=0.15
+*runtime actuator elevator minimum=-0.35 maximum=0.35
+*runtime actuator rudder minimum=-0.30 maximum=0.30
+\end{lstlisting}
+
+The corresponding source record must still identify the coefficient table axes
+and their units. If the table uses $\alpha$ in degrees but the state uses
+radians, the adapter converts before the lookup and records that conversion.
+If the source reports $C_D$ and $C_L$ in wind axes, the adapter transforms the
+wind-axis force into the body frame before combining it with propulsion and
+gravity. Never place a coefficient named $C_D$ directly into a body-$x$ force
+without checking the source convention.
+
+\subsection{Worked data dimensionalization example}
+
+Suppose a source-backed fixed-wing case declares
+
+\begin{center}
+\begin{tabular}{llllll}
+\toprule
+$m$ & $V$ & $\rho$ & $S$ & $b$ & $c$\\
+\midrule
+1200 kg & 60 m/s & 1.225 kg/m$^3$ & 16 m$^2$ & 10 m & 1.6 m\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The dynamic pressure is
+\[
+  q=\tfrac12(1.225)(60)^2=2205\ {\rm Pa}.
+\]
+In straight, level flight the first estimate of required lift is $mg$, so
+
+\[
+  C_{L,\mathrm{required}}
+  \approx \frac{1200(9.81)}{2205(16)}=0.334.
+\]
+
+If the source coefficient at the trimmed angle is $C_L=0.334$, the lift
+balance is plausible. If $C_D=0.030$, its dimensional drag is approximately
+$1058$ N, so the first propulsion estimate is a thrust of that order, before
+including climb angle, propulsion inclination, or other force components. These
+are pre-solve checks, not a replacement for the full residual evaluator. They
+catch a factor-of-1000 density error, a square-degree/radian mistake, or a
+wrong reference area before an optimizer hides it in a control command.
+
+The same discipline applies to moments. For a source moment reference point,
+first compute
+\[
+  \boldsymbol M_{\mathrm{ref}}
+  =qS\begin{bmatrix}bC_l&cC_m&bC_n\end{bmatrix}^{T}.
+\]
+If $\boldsymbol r_{\mathrm{ref}\to CG}$ is the vector from the aerodynamic
+reference to the CG, transfer the force-induced moment explicitly:
+\[
+  \boldsymbol M_{CG}
+  =\boldsymbol M_{\mathrm{ref}}
+   -\boldsymbol r_{\mathrm{ref}\to CG}\times\boldsymbol F_{A}.
+\]
+The sign follows from the declared vector direction; the adapter should test
+the transfer with a simple off-axis force. Propulsion uses the same rule,
+\[
+  \boldsymbol M_{T,CG}
+  =\boldsymbol M_{T,local}
+   +\boldsymbol r_{CG\to T}\times\boldsymbol F_T,
+\]
+where the vector is explicitly from CG to the thrust application point.
+
+\subsection{Data validation before trim}
+
+A new vehicle should not begin with LQR weights. It should produce a small
+data packet containing:
+
+\begin{enumerate}
+  \item a source-to-SI table with every unit conversion and reference quantity;
+  \item a frame diagram or written basis definition for body, wind, world,
+    gravity, and thrust vectors;
+  \item coefficient names, table axis order, valid bounds, interpolation policy,
+    and at least one in-range and boundary query;
+  \item mass, CG, inertia, dry-mass, and mass-property-provider behavior at
+    every intended operating point;
+  \item control direction probes showing the sign of each force and moment
+    response, including actuator limits and achieved-command telemetry; and
+  \item an uncertainty note distinguishing measured, digitized, estimated, and
+    assumed aerodynamic quantities.
+\end{enumerate}
+
+The onboarding report should point to each missing item. A visually plausible
+trajectory is not a substitute for this packet: a wrong moment reference or
+body-axis sign can still produce a stable-looking trajectory with the wrong
+physics.
+
+\subsection{What a new vehicle author supplies}
+
+The generic onboarding path is deliberately small:
+
+\begin{enumerate}
+  \item preserve the source bundle and record its provenance and model path;
+  \item add one SI vehicle entry and select a family contract;
+  \item bind every verified \texttt{.tbl} file and add one golden catalog case;
+  \item add a metadata problem-generation profile; generated \texttt{.prb}
+    files are products, not the source of truth;
+  \item add a bounded trim specification and controller design;
+  \item add signed control-direction probes;
+  \item add gentle, standard, and aggressive LQR profile entries;
+  \item run the onboarding report before running a mission.
+\end{enumerate}
+
+\begin{lstlisting}
+python tools/validate_vehicle_onboarding.py --vehicle new_vehicle
+python tools/dev.py generate-problems
+python tools/dev.py vehicles
+python tools/dev.py control-directions
+python tools/auto_tune_controllers.py --vehicle new_vehicle
+\end{lstlisting}
+
+The report points to the exact catalog path, diagnostic code, missing file or
+field, and repair hint. A vehicle reaches \texttt{ready} before it can be
+considered for a plant-golden claim. A source-only trim remains a warning or
+block until its residual adapter exists.
+
+\section{Trim, local derivatives, and the controller architecture}
+\label{sec:controllers}
+
+The controller stack is separated from the plant adapter:
+
+\begin{enumerate}
+  \item \textbf{Plant and convention firewall:} ingest tables, resolve units,
+    construct frames, verify quaternion identity, check alpha/beta signs, and
+    evaluate force/moment directions.
+  \item \textbf{Bounded trim:} solve the source-backed equilibrium with the
+    exact evaluator used for propagation.
+  \item \textbf{Local linearization:} obtain true state-derivative Jacobians at
+    the accepted trim, not an unlabelled force or moment Jacobian.
+  \item \textbf{Controller synthesis:} build LQR, rate, attitude, and outer
+    guidance layers through an explicit control contract and allocator.
+  \item \textbf{Mission evaluation:} run the fixed problem file, preserve raw
+    telemetry, and score objectives only after plant gates pass.
+\end{enumerate}
+
+\subsection{Plant-bound trim}
+
+Each trim entry names state variables, control variables, residual variables,
+bounds, initial guesses, and residual scales. The vehicle-specific adapter is
+the function
+\[
+  r = \operatorname{plant\_residual}(x,u),
+\]
+which must call the same source tables, frames, actuators, propulsion, and mass
+model used during propagation. The common solver uses bounded nonlinear least
+squares and retains both scaled and unscaled residuals.
+
+For a fixed-wing equilibrium, a typical residual vector is
+\[
+  r_{\mathrm{trim}} =
+  \begin{bmatrix}
+    \dot u & \dot v & \dot w & \dot p & \dot q & \dot r
+  \end{bmatrix}^{T}.
+\]
+For a rotorcraft, the residual may instead include translational acceleration,
+angular acceleration, and the rotor/motor equilibrium. The residual names and
+units are part of the trim artifact.
+
+The trim result records the solved state, solved controls, residual components,
+solver status, iteration count, bounds, and acceptance tolerance. A numerical
+solver success flag is not a plant success flag: table margins, saturation, and
+independent closure remain separate gates.
+
+\subsection{What a trim means}
+
+A trim is one declared operating point, not a universal vehicle state. The
+author first fixes the external conditions and targets: for example, mass,
+altitude, atmosphere, wind, speed, flight-path angle, heading, and whether the
+case is straight flight, a coordinated turn, a hover, or a powered climb. The
+unknowns then contain only the state and controls that the adapter is allowed
+to change. Everything else is held by the trim specification or derived from
+it.
+
+For a straight, level fixed-wing example, a useful local choice is
+\[
+  x_{\mathrm{trim}}=[\alpha,\beta,p,q,r]^{T},\qquad
+  u_{\mathrm{trim}}=[\delta_e,\delta_a,\delta_r,\delta_T]^{T},
+\]
+with target $V$, altitude, and $\gamma=0$. The body velocity is reconstructed
+from the air-relative speed and angle convention. In one common convention,
+\[
+  u=V\cos\alpha\cos\beta,\qquad
+  v=V\sin\beta,\qquad
+  w=V\sin\alpha\cos\beta.
+\]
+The source convention may differ, especially for projected versus Euler
+sideslip, so the adapter must use the repository's declared angle contract.
+The trim controls are not guessed from a waypoint. They are solved so that
+the forces, moments, and any target kinematic conditions close at this one
+operating point.
+
+\subsection{Body-frame trim equations}
+
+Let $\boldsymbol v_B=[u,v,w]^T$ be body velocity, let
+$\boldsymbol\omega_B=[p,q,r]^T$ be body angular rate, and let all forces and
+moments below be resolved about the CG in body axes. The translational Newton
+equation used by the residual adapter is
+\[
+  m\left(\dot{\boldsymbol v}_B
+    +\boldsymbol\omega_B\times\boldsymbol v_B\right)
+  =\boldsymbol F_{A,B}+\boldsymbol F_{T,B}+\boldsymbol F_{g,B},
+  \qquad
+  \boldsymbol F_{g,B}=R_{I\to B}\,m\boldsymbol g_I.
+\]
+The rotational Euler equation is
+\[
+  I\dot{\boldsymbol\omega}_B
+  +\boldsymbol\omega_B\times(I\boldsymbol\omega_B)
+  =\boldsymbol M_{A,B}+\boldsymbol M_{T,B}+\boldsymbol M_{\mathrm{control},B}.
+\]
+For diagonal principal inertia,
+$I=\operatorname{diag}(I_x,I_y,I_z)$; for a source tensor, retain the full
+tensor and its declared frame. The residuals should be formed as left side
+minus right side:
+\begin{align}
+  \boldsymbol r_F &\equiv
+    m\left(\dot{\boldsymbol v}_B+\boldsymbol\omega_B\times\boldsymbol v_B\right)
+    -\boldsymbol F_{\mathrm{total},B},\\
+  \boldsymbol r_M &\equiv
+    I\dot{\boldsymbol\omega}_B
+    +\boldsymbol\omega_B\times(I\boldsymbol\omega_B)
+    -\boldsymbol M_{\mathrm{total},B}.
+\end{align}
+
+For straight, level, constant-speed flight with zero body rates, these reduce
+to $\boldsymbol F_{\mathrm{total},B}=0$ and
+$\boldsymbol M_{\mathrm{total},B}=0$. For a coordinated turn or a hover with
+nonzero rates, do not force those terms to zero: retain the target acceleration
+and angular-rate terms in the residual. This distinction is why a trim adapter
+must know the maneuver condition rather than merely set every derivative to
+zero.
+
+The force and moment assembly follows a fixed sequence:
+
+\begin{enumerate}
+  \item Compute relative air velocity from vehicle velocity and wind, then
+    derive the source-defined $\alpha$, $\beta$, Mach, and dynamic pressure.
+  \item Query each aerodynamic table at those coordinates and retain the query
+    point, interpolation bracket, axis margins, and source-quality label.
+  \item Convert coefficients into dimensional wind or body forces, transform
+    into body axes, and add gravity in the same body frame.
+  \item Compute propulsion force and mass flow, then transfer propulsion and
+    aerodynamic moments to the CG using the declared application points.
+  \item Apply actuator maps, limits, and allocation before evaluating the
+    derivative. The trim must see the same achieved control that propagation
+    will see.
+  \item Return named residual components in SI units, for example
+    \pathcode{u-dot}, \pathcode{v-dot}, \pathcode{w-dot},
+    \pathcode{p-dot}, \pathcode{q-dot}, and \pathcode{r-dot}.
+\end{enumerate}
+
+The first estimate from the dimensionalization example is useful here. With
+$m=1200$ kg, $V=60$ m/s, $\rho=1.225$ kg/m$^3$, and $S=16$ m$^2$,
+$q_\infty=2205$ Pa and $C_L\approx0.334$ supports level lift. The actual
+residual still includes body-axis transformation, drag, thrust direction,
+gravity projection, moment reference transfer, and the selected controls.
+The estimate tells the author whether a failed trim is a numerical problem or
+an order-of-magnitude data problem.
+
+\begin{lstlisting}
+def plant_residual(state, controls):
+    params = vehicle_parameters_at(state["mass"])
+    air = relative_air_data(state, params)
+    coeffs = aero_tables(air.alpha, air.beta, air.mach, controls)
+    forces = dimensional_aero_forces(coeffs, air, params)
+    moments = dimensional_aero_moments(coeffs, air, params)
+    load = assemble_body_loads(state, controls, forces, moments, params)
+    rates = rigid_body_derivative(state, load, params)
+    return {name: rates[name] for name in
+            ("u-dot", "v-dot", "w-dot", "p-dot", "q-dot", "r-dot")}
+\end{lstlisting}
+
+This is intentionally an adapter outline, not a second physics implementation.
+The functions must call the same source tables and mass-property provider as
+the propagation RHS. If trim and propagation have different force assembly,
+the resulting $A/B$ matrix is a derivative of the wrong plant.
+
+\subsection{\texorpdfstring{Generating the $A$ and $B$ matrices}{Generating the A and B matrices}}
+
+Let $f(x,u)$ be the actual plant state-rate evaluator at a source-backed trim
+$(x_0,u_0)$. The local continuous model is
+\[
+  \delta\dot{x} = A\,\delta x + B\,\delta u,
+  \qquad
+  A = \left.\frac{\partial f}{\partial x}\right|_{x_0,u_0},
+  \qquad
+  B = \left.\frac{\partial f}{\partial u}\right|_{x_0,u_0}.
+\]
+
+For a central finite-difference estimate, each perturbation must be applied
+through the same adapter and must remain inside the declared table and actuator
+envelopes:
+\begin{align}
+  A_{ij} &\approx
+  \frac{f_i(x_0+\Delta x_j,u_0)-f_i(x_0-\Delta x_j,u_0)}{2\Delta x_j},\\
+  B_{ik} &\approx
+  \frac{f_i(x_0,u_0+\Delta u_k)-f_i(x_0,u_0-\Delta u_k)}{2\Delta u_k}.
+\end{align}
+
+The step is a physical perturbation with a declared unit, not a generic
+dimensionless epsilon. Perturbations that cross a table boundary, actuator
+limit, branch, or event are rejected or reported separately. A force/moment
+Jacobian is not automatically an $A,B$ dynamics pair; it must first be mapped
+through mass, inertia, kinematics, and the selected state ordering.
+
+The bridge model may use the six-state local attitude system
+\[
+  x_{\mathrm{bridge}} =
+  [\,\delta\phi,\delta\theta,\delta\psi,p,q,r\,]^{T},
+\]
+but it remains a kinematic or prescribed-attitude model unless the moments and
+inertia are released into the full rigid-body RHS.
+
+\subsection{A slow linearization walkthrough}
+
+The following procedure makes the vehicle parameters visible in every matrix
+column. It is deliberately slower than calling a generic numerical Jacobian:
+
+\begin{enumerate}
+  \item \textbf{Freeze the accepted trim.} Save $x_0$, $u_0$, mass, CG,
+    inertia, atmosphere, wind, table hashes, actuator state, and the exact
+    source-quality and uncertainty metadata. The derivative must be local to
+    this packet.
+  \item \textbf{Declare the order.} For a body-rate design, write the exact
+    state and control vectors, for example
+    \[
+      x=[u,v,w,p,q,r]^T,\qquad
+      u_c=[\delta_e,\delta_a,\delta_r,\delta_T]^T.
+    \]
+    For an attitude bridge, use the six names
+    $[\delta\phi,\delta\theta,\delta\psi,p,q,r]$ and do not silently mix
+    them with aerodynamic $[\alpha,\beta]$ states.
+  \item \textbf{Rebuild dependent quantities.} A perturbed state changes
+    relative air velocity, angle coordinates, dynamic pressure, coefficients,
+    forces, moments, mass-dependent acceleration, and possibly inertia. The
+    evaluator must recompute all of them rather than perturbing only a printed
+    telemetry channel.
+  \item \textbf{Choose physical steps.} Use a central perturbation that is
+    large enough to rise above numerical noise and small enough to remain in
+    one smooth table and actuator region. Typical starting points might be
+    $0.001$ rad for an angle, $0.01$ rad/s for a body rate, and $0.5$ degrees
+    for a control surface, but the source table resolution determines the final
+    choice. Record the step and units for every state and control.
+  \item \textbf{Evaluate both sides.} For state column $j$, evaluate
+    $f(x_0+\Delta x_j,u_0)$ and $f(x_0-\Delta x_j,u_0)$. For control column
+    $k$, evaluate $f(x_0,u_0+\Delta u_k)$ and
+    $f(x_0,u_0-\Delta u_k)$. Reject a pair that crosses a table boundary,
+    actuator clamp, event, or branch.
+  \item \textbf{Form the columns.} Divide the difference of each derivative
+    component by the physical perturbation. Preserve the state/control names,
+    trim values, steps, and source metadata alongside the numeric matrices.
+  \item \textbf{Check parameter signatures.} The direct force and moment
+    sensitivities should show the expected mass-property scale:
+    \[
+      \frac{\partial\dot u}{\partial F_x}\approx\frac{1}{m},\qquad
+      \frac{\partial\dot p}{\partial M_x}\approx\frac{1}{I_x}.
+    \]
+    At $m=1200$ kg and $I_x=4200$ kg m$^2$, these are approximately
+    $8.33\times10^{-4}$ and $2.38\times10^{-4}$ in SI units. Cross terms from
+    $\boldsymbol\omega\times\boldsymbol v$ and
+    $\boldsymbol\omega\times(I\boldsymbol\omega)$ are expected away from a
+    zero-rate trim.
+  \item \textbf{Repeat the step test.} Recompute with half and double steps
+    where the table remains smooth. Stable columns should converge within the
+    declared numerical tolerance; a large change identifies a table kink,
+    branch, saturation, or an unsuitable step.
+  \item \textbf{Only then synthesize.} Check dimensions, finite values,
+    controllability, conditioning, closed-loop poles, table margin, and
+    uncertainty robustness before the matrix enters a controller report.
+\end{enumerate}
+
+The implementation artifact is produced by:
+
+\begin{lstlisting}
+from taoryx.trim import finite_difference_dynamics_linearization
+
+linearization = finite_difference_dynamics_linearization(
+    trim_spec,
+    plant_state_derivatives,  # returns one derivative per state name
+    trim_result,
+    state_step=1.0e-6,
+    control_step=1.0e-6,
+    metadata={
+        "mass-kg": trim_result.state["mass"],
+        "inertia-source": "vehicle-provider",
+        "aero-source-quality": "estimated",
+    },
+)
+\end{lstlisting}
+
+The helper's steps are fractional scales applied to each variable. For
+variables with very different physical units, a vehicle adapter should first
+verify the resulting absolute perturbations and, if necessary, expose a
+scaled local state or a more specialized perturbation wrapper. The artifact's
+state names, control names, trim state, trim controls, $A$, $B$, and metadata
+must travel together into profile synthesis.
+
+Mass and aerodynamic estimates remain in context at this stage. If mass or CG
+changes materially, repeat the trim and linearization or supply a schedule of
+local designs. If the aerodynamic tables are estimated, apply the declared
+uncertainty screen and retain table-margin reserve; do not turn a numerically
+stable local gain into a claim that the aero model is ground truth.
+
+\subsection{Changing mass and inertia}
+
+The rigid-body model has a generic mass-property seam: an optional
+\pathcode{inertia\_provider(state)} is queried by both the derivative and
+telemetry paths. With no provider, the registered principal inertias remain
+constant. With a provider, the vehicle adapter owns the relationship between
+mass, configuration, tank state, payload, center of gravity, and inertia. The
+integrator does not infer that inertia is proportional to total mass.
+
+The current declarative extension supplies an explicit dry-mass interpolation
+when a source-backed schedule is not yet available:
+
+\begin{lstlisting}
+*runtime status vehicle inertia-mass-model=linear-dry-mass
+  dry-mass-kg=100
+  inertia-x=12 inertia-y=18 inertia-z=25
+  inertia-x-dry=9 inertia-y-dry=14 inertia-z-dry=20
+*runtime lqr attitude update=mass ...
+\end{lstlisting}
+
+The reference inertias are the values at the initial mass. The runtime
+interpolates to the three explicitly supplied dry-mass inertias, clamps beyond
+the declared interval, and publishes
+\pathcode{mass\_kg}, \pathcode{propellant\_mass\_kg}, and
+\pathcode{inertia\_{x,y,z}\_kg\_m2}. This is a declared approximation, not a
+claim about tank geometry or a hidden mass-scaling law. A vehicle with center
+of gravity migration, jettison, or an off-diagonal inertia tensor needs a
+vehicle-specific provider instead.
+
+For the direct-moment attitude bridge, the scheduled input block is
+\[
+  B_{\omega M}(m) =
+  \operatorname{diag}\!\left(\frac{1}{I_x(m)},
+  \frac{1}{I_y(m)},\frac{1}{I_z(m)}\right).
+\]
+\pathcode{update=mass} rebuilds the cached gain when the supplied mass or
+inertia leaves its tolerance band. This accounts for changing rotational
+authority; it does not pretend that an attitude-only six-state bridge contains
+the translational effects of mass. To include those effects, generate a full
+source-trim $A/B$ pair whose state-rate evaluator includes the current mass,
+inertia, propulsion, and aerodynamic model. A fixed \pathcode{b-table} cannot
+claim mass scheduling.
+
+\subsection{Scaled continuous-time LQR}
+
+The continuous-time LQR minimizes
+\[
+  J = \int_0^\infty
+  \left(x^{T}Qx+u^{T}Ru\right)\,dt
+\]
+for
+\[
+  \dot x=Ax+Bu, \qquad u=-Kx.
+\]
+The gain is obtained from the positive semidefinite solution $P$ of the
+continuous algebraic Riccati equation:
+\[
+  A^{T}P+PA-PBR^{-1}B^{T}P+Q=0,
+  \qquad K=R^{-1}B^{T}P.
+\]
+
+Raw SI values can make $Q$ and $R$ ill-conditioned across vehicles. Define
+diagonal state and control scales $S_x$ and $S_u$ by
+\[
+  \widetilde{x}=S_x x, \qquad \widetilde{u}=S_u u.
+\]
+The normalized system is
+\[
+  \widetilde A=S_x A S_x^{-1}, \qquad
+  \widetilde B=S_x B S_u^{-1},
+\]
+and the physical gain is recovered with
+\[
+  K_{\mathrm{physical}}=S_u^{-1}\widetilde K S_x.
+\]
+
+The current scale contract derives angle, rate, and moment scales from the
+registered vehicle parameters, actuator authority, and table extents. These
+scales improve conditioning; they are not permission to command beyond a table
+or actuator limit.
+
+\subsection{Automatic profiles and fail-closed selection}
+
+Every vehicle has three named profiles:
+
+\begin{description}[leftmargin=1.1in,labelwidth=0.9in,style=sameline]
+  \item[gentle] Higher control penalty and slower response for early plant
+    development or a narrow local envelope.
+  \item[standard] The default development profile, balanced for local recovery
+    and nominal actuator use.
+  \item[aggressive] Faster response for cases with demonstrated authority and
+    sufficient table margin; it is never a default claim.
+\end{description}
+
+\pathcode{python tools/auto_tune_controllers.py --vehicle all} synthesizes the
+profiles from the registry. The default report is explicitly
+\texttt{runtime-inertia-attitude-bridge, synthesis-only} when no vehicle
+source-trim Jacobian and maneuver evaluator are supplied. That report proves
+matrix conditioning and closed-loop pole placement only.
+
+A source-backed candidate must also pass the supplied limits for:
+
+\begin{itemize}
+  \item maximum closed-loop pole real part;
+  \item minimum normalized table margin;
+  \item control saturation fraction;
+  \item absolute control-rate maximum;
+  \item tracking error, when a maneuver evaluator is available.
+\end{itemize}
+
+The tuner serializes the scales, their provenance, table axis limits, weights,
+closed-loop eigenvalues, condition number, metrics, violations, score, and
+status. A stable pole set with table extrapolation or persistent saturation is
+not a safe candidate. The winning candidate is copied into a fixed problem
+configuration and rerun through closure, convergence, source parity, and
+mission gates; auto-tuning alone is not mission evidence.
+
+\subsection{From a bounded trim to a source-informed controller}
+
+The minimum reusable adapter has two distinct evaluators. The trim evaluator
+returns named residuals such as force and moment balance. The dynamics
+evaluator returns named state derivatives in exactly the same state ordering;
+it must not return residual forces or moments in their place. A typical source
+informed tuning path is:
+
+\begin{lstlisting}
+from taoryx.controller_autotune import AutoTuneLimits, auto_tune_lqr_profiles
+from taoryx.runtime import LqrUncertaintySpec
+from taoryx.trim import finite_difference_dynamics_linearization
+
+trim = solve_trim(trim_spec, plant_residual)
+linearization = finite_difference_dynamics_linearization(
+    trim_spec,
+    plant_state_derivatives,
+    trim,
+    state_step=1.0e-6,
+    control_step=1.0e-6,
+    metadata={"source": "vehicle-adapter", "mass-kg": trim.state["mass"]},
+)
+report = auto_tune_lqr_profiles(
+    "new-vehicle",
+    linearization=linearization,
+    limits=AutoTuneLimits(
+        derivative_uncertainty=LqrUncertaintySpec(
+            a_fraction=0.15, b_fraction=0.20, samples=25,
+        ),
+    ),
+    evaluator=run_bounded_maneuver,
+)
+\end{lstlisting}
+
+The resulting report is labelled
+\texttt{source-trim-dynamics-linearization}, retains the trim state and
+control names, records the perturbation steps and metadata, and can gate on
+closed-loop poles, table margin, saturation, rate, tracking error, and sampled
+uncertainty. The source-trim Jacobian is local: repeat the trim and design at
+each materially different mass, center of gravity, or flight condition, or
+provide an explicit schedule of local designs.
+
+\subsection{Estimated aerodynamic data and design reserve}
+
+Aerodynamic tables and derivatives are estimates unless their provenance says
+otherwise. The controller workflow therefore separates three claims:
+
+\begin{enumerate}
+  \item table validity: the query remains inside the hard source-table
+    boundary;
+  \item operational reserve: the normalized table margin remains above the
+    declared reserve after subtracting the model uncertainty fraction; and
+  \item local robustness: the fixed gain remains stable for the deterministic
+    bounded perturbations used by the uncertainty screen.
+\end{enumerate}
+
+For example:
+
+\begin{lstlisting}
+*runtime status vehicle aero-uncertainty-fraction=0.15
+  aero-source-quality=estimated
+*runtime lqr attitude a-uncertainty-fraction=0.15
+  b-uncertainty-fraction=0.20 uncertainty-samples=25
+  uncertainty-policy=fail-closed ...
+\end{lstlisting}
+
+The sampled screen is evidence about the declared local envelope, not a formal
+robust-control proof, confidence interval, or correction to the aerodynamic
+table. Uncertainty values must be traceable to source scatter, digitization,
+validation data, or an explicitly recorded engineering assumption. A stable
+gain with an estimated aerodynamic model is still an estimated-model result.
+
+\section{Trajectory objectives and scoring}
+\label{sec:scoring}
+
+Trajectory evaluation consumes canonical SI telemetry and declared events. It
+does not infer units from a plot label and it does not score a reference command
+as if it were the actual state. Every objective declares an identifier, kind,
+channel, target or bound, tolerance, unit, comparison, phase, weight, and
+severity.
+
+\subsection{Objective types}
+
+The common evaluator supports:
+
+\begin{itemize}
+  \item state targets: position, altitude, speed, heading, alpha, beta, or
+    body rates;
+  \item bounded channels: Mach, dynamic pressure, heating proxy, load factor,
+    table margin, actuator position, or actuator rate;
+  \item events: waypoint capture, segment transition, separation, mode handoff,
+    ground contact, or declared termination;
+  \item trajectory properties: cross-track error, route completion, return to
+    start, and recovery after a disturbance;
+  \item invariants: continuity, mass balance, quaternion norm, force/moment
+    closure, and step-size convergence.
+\end{itemize}
+
+A waypoint is an event plus a measured objective. Its result must retain the
+actual position, target position, arrival time, distance error, tolerance, and
+slack. For a rectangle or figure-eight, score each corner and the whole route;
+do not replace the route with only the final point.
+
+\subsection{Per-objective result}
+
+For an absolute-error objective, the evaluator computes
+\[
+  e=|y-y^{\star}|, \qquad
+  s=\tau-e, \qquad
+  e_{\mathrm{norm}}=\frac{e}{\tau}, \qquad
+  q=\max(0,1-e_{\mathrm{norm}}),
+\]
+where $\tau$ is the declared tolerance. The raw result retains the unit and
+time or event location:
+
+\begin{lstlisting}
+{
+  "id": "waypoint-2",
+  "status": "pass",
+  "actual": 301.4,
+  "target": 300.0,
+  "error": 1.4,
+  "tolerance": 2.0,
+  "slack": 0.6,
+  "normalized_error": 0.7,
+  "unit": "m",
+  "time_s": 42.0,
+  "weight": 1.0,
+  "severity": "required"
+}
+\end{lstlisting}
+
+For a band, the error is the distance outside the band. For an event, the
+result records whether the declared event occurred and its event audit. Missing
+or unitless telemetry is \texttt{blocked}, not zero.
+
+\subsection{Trajectory rollup}
+
+The rollup contains two layers.
+
+\paragraph{Validity gates.} Required objectives, source parity, continuity,
+convergence, equation closure, full table-envelope validity, actuator
+feasibility, and declared mission completion are gates. Any required failure or
+missing channel blocks the claim. Advisory objectives can produce a
+\texttt{diagnostic} status but cannot hide a required failure.
+
+\paragraph{Quality score.} After the declared gate policy is applied, an
+informative composite may be calculated as
+\[
+  \operatorname{score}=100\frac{\sum_i w_i q_i}{\sum_i w_i},
+  \qquad 0\leq q_i\leq1.
+\]
+The rollup must also expose the worst required normalized error and every
+negative slack. A trajectory that barely stays inside a 300 m hard limit must
+not receive the same quality score as one that closes to 2 m.
+
+The resource and validity metrics are part of the rollup, with units and
+sampling definitions:
+
+{\small
+\begin{longtable}{p{0.35\linewidth}p{0.2\linewidth}p{0.35\linewidth}}
+\toprule
+\textbf{Metric} & \textbf{Unit} & \textbf{Meaning}\\
+\midrule
+\endhead
+\texttt{table\_margin\_min\_normalized} & dimensionless &
+  Minimum distance to any queried table edge divided by that axis span; zero is
+  the hard validity boundary.\\
+\texttt{table\_margin\_average\_normalized} & dimensionless &
+  Time-sample average of the normalized margin.\\
+\texttt{control\_saturation\_fraction} & dimensionless &
+  Fraction of samples with any saturation flag active.\\
+\texttt{control\_saturation\_average} / \texttt{max\_abs} & dimensionless &
+  Aggregate saturation severity, with the per-channel breakdown retained.\\
+\texttt{control\_derivative\_abs\_average} & command unit/s &
+  Mean absolute command derivative over saved samples.\\
+\texttt{control\_derivative\_abs\_max} & command unit/s &
+  Maximum absolute command derivative; report each control separately.\\
+\bottomrule
+\end{longtable}
+}
+
+The final composite dictionary contains status, score, gate score, quality
+score when available, required counts, worst normalized error, all objective
+records, termination information, and the scenario-contract hash. The source
+file is \pathcode{src/taoryx/objectives.py}; the evidence packet also carries
+\pathcode{score_definition.json} and the metric dictionary so that a reviewer
+can recompute the rollup.
+
+\subsection{Family-specific objective phases}
+
+Objectives must follow the mechanics of the vehicle:
+
+\begin{itemize}
+  \item \textbf{Powered fixed-wing:} trim hold, altitude capture, heading or
+    bank corner, speed recovery, waypoint sequence, and return corridor.
+  \item \textbf{Unpowered glider or X-15 segment:} release state, energy or
+    descent corridor, alpha/beta and table margins, bank reversal, and valid
+    ground-contact or termination event.
+  \item \textbf{Quadrotor:} takeoff, hover, north/east waypoint, yaw step,
+    disturbance recovery, return, and landing. Include rotor commands and
+    achieved speeds in the objective evidence.
+\end{itemize}
+
+Event markers belong to the owning family and phase. The showcase plot should
+show the target waypoint or objective, capture time, active phase, and the
+change in controller mode. It must not place unrelated family events on a
+shared timeline.
+
+\section{Verification sequence}
+\label{sec:verification}
+
+The common harness follows the same sequence for every 3-DOF, bridge, or
+6-DOF vehicle. A later stage cannot promote a blocked earlier stage.
+
+\begin{enumerate}
+  \item \textbf{Table ingestion and axis order:} parse every bound table,
+    verify cardinality, independent-variable order, coefficient names, and
+    source hash.
+  \item \textbf{Units and reference geometry:} check native-to-SI conversion,
+    area/span/chord, mass, CG, and moment reference.
+  \item \textbf{Body/world frames:} verify basis orientation, handedness,
+    active/passive transforms, gravity, and wind direction.
+  \item \textbf{Quaternion identity:} confirm ordering, identity rotation,
+    normalization, determinant, and round trips.
+  \item \textbf{Alpha/beta conventions:} derive angles from relative velocity,
+    exercise sign probes, zero-speed behavior, and branch limits.
+  \item \textbf{Coefficient lookup and margins:} compare source evaluator and
+    table evaluator, record exact query coordinates, and fail closed on
+    extrapolation.
+  \item \textbf{Force/moment dimensionalization:} compare coefficient-based
+    and dimensional wrenches with separate axes and units.
+  \item \textbf{Mass, CG, and inertia:} verify positivity, symmetry,
+    continuity, eigenvalues, and parallel-axis updates.
+  \item \textbf{Static wrench or trim closure:} solve or import a bounded trim;
+    retain unscaled force and moment residuals.
+  \item \textbf{Short bounded propagation:} run a small deterministic case with
+    complete telemetry and a declared termination policy.
+  \item \textbf{Integration convergence:} compare $\Delta t$, $\Delta t/2$,
+    $\Delta t/4$, and an adaptive reference on smooth intervals.
+  \item \textbf{Controller and mission tests:} only now score waypoint,
+    altitude, recovery, disturbance, and whole-trajectory objectives.
+\end{enumerate}
+
+The standard plant report exposes each stage as \texttt{pass}, \texttt{diagnostic},
+\texttt{blocked}, or \texttt{not\_run}. For each four-family report the first
+eleven stages are plant/convention evidence; controller and mission claims are
+not implied by a plant-golden result.
+
+\subsection{The validation ladder for a new vehicle}
+
+The twelve checks above are the core harness, but a new vehicle also needs a
+clear promotion path. The rule is monotonic: a later green trajectory cannot
+promote an earlier blocked data, frame, table, or trim check. Each stage must
+leave an inspectable artifact for the next stage.
+
+\begin{center}
+\begin{tabularx}{0.96\linewidth}{>{\bfseries}p{0.19\linewidth}p{0.27\linewidth}Y}
+\toprule
+Stage & Question & Required evidence \\
+\midrule
+Registry and data & Can the model be found and loaded? & SI metadata, family contract, table bindings, source provenance/hash, generated problem profile, onboarding report. \\
+Grammar and lowering & Does the declaration mean what the author intended? & Grammar diagnostics, segment lint/build, resolved manifest, and transition audit. \\
+Convention firewall & Are frames, table axes, signs, and controls correct? & Table inspection, nominal/boundary queries, frame and quaternion tests, and signed control probes. \\
+Plant validity & Does the model satisfy its equations? & Initial-condition audit, trim residuals, dimensional wrench checks, independent closure, and bounded propagation. \\
+Numerical quality & Is the result reproducible and time-step credible? & $\Delta t$, $\Delta t/2$, $\Delta t/4$, adaptive comparison, event-aware exclusions, and output hashes. \\
+Controller validity & Does the controller stabilize the local plant? & Named $A/B$ provenance, controllability, LQR poles, uncertainty screen, and actuator/slew/allocation telemetry. \\
+Segment validity & Do entry, handoff, and exit contracts hold? & Inherited/reset state audit, controller reset events, goals, and termination evidence. \\
+Checkpoint mission & Does the complete scenario meet bounded objectives? & Generated fidelity packet, objective gates, quality metrics, plots, and claim status. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+This separates four questions that are often accidentally combined: \emph{is
+the model registered}, \emph{is the plant physically and numerically valid},
+\emph{is the controller valid for that plant}, and \emph{does this particular
+scenario meet its bounded objectives}. A model can be ready for the first
+question and still be blocked at the other three.
+
+\subsection{Initial vehicle addition and data firewall}
+
+The initial addition process is metadata-first. Preserve the source bundle and
+its provenance, add one SI entry to
+\pathcode{verification/vehicle_models.yaml}, select a family contract, bind
+the tables, add a generated-problem profile and golden catalog case, then add
+the trim, controller, control-direction, and LQR profile records. The focused
+validator checks completeness of that path; it does not claim that a trim or
+mission has passed.
+
+\begin{lstlisting}
+python tools/validate_vehicle_onboarding.py --vehicle new_vehicle --strict
+python tools/dev.py generate-problems
+python tools/dev.py vehicles
+taoryx table inspect path/to/vehicle.tbl --html build/table-explorer.html
+python tools/dev.py control-directions
+python tools/dev.py trim-vehicles
+\end{lstlisting}
+
+The data packet supplied before trim should answer all of the following:
+
+\begin{enumerate}
+  \item What is the exact state and control order, and which variables are
+    body, wind, inertial, or world quantities?
+  \item What are the SI conversions, reference area, span, chord, mass, CG,
+    moment reference, and declared operating envelope?
+  \item What is the table independent-variable order, cardinality, monotonicity,
+    interpolation policy, valid bound, coefficient frame, and source hash?
+  \item What happens at a nominal point, every relevant boundary, and a
+    deliberately out-of-range query? Extrapolation must be a declared
+    diagnostic or block, not a silent continuation.
+  \item Are mass, CG, and inertia positive, symmetric, continuous, and
+    supplied by the intended provider at every operating point?
+  \item Which aerodynamic quantities are measured, executable-source values,
+    digitized, estimated, or assumed, and what uncertainty bound applies?
+\end{enumerate}
+
+The table firewall must preserve source orientation and signs. Never reverse an
+axis, negate a coefficient, or change a moment reference solely because the
+first trajectory looks wrong. Compare the source evaluator with the table
+evaluator at recorded coordinates and report the table margin, source/table
+error, and worst query. A force or moment coefficient is not a body-axis force
+or moment until its wind-to-body transform and reference transfer are explicit.
+
+The control convention harness uses the same baseline for the plus and minus
+perturbations of one control. It records the signed body-force or body-moment
+response, antisymmetry error, expected source sign, and achieved bounded
+command. Representative assertions include the B747 elevator's body-$y$
+moment sign, the X8 collective and differential elevon separation of body-$y$
+and body-$x$ response, the Hummingbird rotor-speed body-$z$ force sign, and the
+X-15 stabilator/rudder body-axis signs. These tests are a firewall against a
+wrong table orientation or actuator convention; they are not controller tuning
+tests.
+
+\subsection{LQR stability and controller gates}
+
+An LQR result is promotable only when the plant and the controller agree on
+names, units, and directions. The controller artifact must include the trim
+identifier, exact state/control ordering, perturbation sizes, $A$ and $B$
+matrices, $Q$ and $R$, scaling, controllability result, nominal closed-loop
+eigenvalues, actuator limits, slew limits, allocator status, table margins,
+and the uncertainty cases used for the design.
+
+The minimum pole gate is
+\[
+  \max_i \operatorname{Re}\lambda_i(A-BK)<0,
+\]
+with a declared numerical margin and no unstable allowed uncertainty corner.
+Check the controllability rank before solving, and check the saturated and
+rate-limited command path after solving. A stable pole set with reversed
+control signs, table extrapolation, or persistent saturation is a failed
+controller gate, not a qualified design.
+
+For changing mass properties, the runtime may use a declared generic inertia
+provider and a mass-scheduled attitude update. That provider updates the
+attitude inertia seen by the bridge; it does not infer inertia from mass, and it
+does not replace a fresh plant-bound $A/B$ design when mass changes CG,
+translation, propulsion, or aerodynamic derivatives. For estimated
+aerodynamics, evaluate the declared parameter corners or perturbation model
+and fail closed when the worst-case pole, table margin, or actuator reserve is
+not acceptable.
+
+\subsection{Parametric validity trajectories}
+
+Checkpoint trajectories should be generated from machine-readable catalogs,
+not chosen after inspecting which run looks attractive. The principal sources
+are:
+
+\begin{itemize}
+  \item \pathcode{verification/fidelity_ladder.yaml};
+  \item \pathcode{verification/long_validation_trajectories.yaml};
+  \item \pathcode{verification/controller_missions.yaml};
+  \item \pathcode{verification/vehicle_maneuver_matrix.yaml}; and
+  \item \pathcode{verification/segmentation_catalog.yaml}.
+\end{itemize}
+
+These catalogs parameterize the
+vehicle, source problem and tables, duration, maximum steps, integration
+factors, envelope bounds, objective targets, and termination policy.
+
+The generated fidelity sequence is:
+
+\begin{enumerate}
+  \item source or static trim hold;
+  \item historical or source 3-DOF anchor;
+  \item derived kinematic 3+3 bridge, with translational parity and an
+    attitude sidecar;
+  \item short source-anchored rigid-body 6-DOF propagation;
+  \item $\Delta t$, $\Delta t/2$, $\Delta t/4$, and adaptive convergence;
+  \item source differential and independent closure;
+  \item bounded recovery, disturbance, or control maneuver; and
+  \item long validation and checkpoint mission.
+\end{enumerate}
+
+\begin{lstlisting}
+python tools/dev.py fidelity-packet
+python tools/dev.py maneuver-matrix
+\end{lstlisting}
+
+These commands produce the UUID-scoped ladder packet and bound maneuver
+catalog. A valid packet contains the resolved inputs and hashes, initial
+condition audit, event timeline, closure metrics, convergence report, source
+differential result, objectives, and plots. The required artifact set is
+defined by the long-validation catalog; a trajectory that merely completes is
+not sufficient evidence.
+
+\subsection{Segment entry, transition, and exit validation}
+
+The segmentation catalog is an orchestration contract around a source problem.
+Each ordered segment names its entry condition, exit condition and target or
+action, initial or inherited state, controller, actuator binding, table and
+environment dependencies, goal, and transition policy. The compiler rejects
+duplicate identifiers, missing targets, accidental cycles, invalid
+\texttt{stop}/\texttt{goto} forms, missing source segments, and source
+segments without an integration block.
+
+Validate a segment in three separate moments:
+
+\begin{enumerate}
+  \item \textbf{Entry:} confirm the initial or inherited state is complete and
+    unit-bearing; position, velocity, attitude, rates, mass, CG, and
+    quaternion are finite and valid; tables are in range; and the active
+    controller and actuator binding agree with the segment contract.
+  \item \textbf{Transition:} verify continuity of every declared field, or
+    verify an explicit reset, impulse, separation, or mass change. Record the
+    event in the transition audit and reset the controller at the first
+    segment and at every handoff.
+  \item \textbf{Exit:} prove that the declared condition was observed, the
+    target or action exists, the final state remains valid, and the termination
+    reason is intentional rather than a timeout, table failure, safety clamp,
+    or numerical exception.
+\end{enumerate}
+
+Run \texttt{segment-lint}, \texttt{segment-build}, and \texttt{segment-run},
+then inspect the generated manifest and transition audit. Compilation proves
+composition and syntax only; it does not prove plant closure, convergence,
+envelope validity, or controller quality.
+
+\subsection{Checkpoint quality and promotion}
+
+Keep hard validity gates separate from quality metrics. Required gates include
+completion under the declared termination policy, initial-condition validity,
+table margin, source differential where applicable, force/moment closure,
+time-step convergence, mass and quaternion continuity, envelope limits,
+saturation and rate limits, segment events, and controller poles. Quality
+metrics may then report waypoint capture error, drift, recovery time, margin
+reserve, control effort, and smoothness.
+
+The status in \pathcode{verification/staged_completion_matrix.yaml} is bounded
+by the lowest failing tier. Use \texttt{pass}, \texttt{pass\_local}, or the
+catalog's more limited directional/source-backed status only when the named
+evidence exists; use \texttt{blocked} when a required gate is absent or fails.
+The final report must name the vehicle, fidelity tier, source status, model
+uncertainty, controller profile, scenario, and limitations. No plot, score, or
+stable eigenvalue may silently substitute for missing source data or a failed
+validity gate.
+
+\subsection{Independent equation closure}
+
+Closure must be computed from the saved right-hand-side derivative and an
+independent force/moment recomputation, with every vector carrying an explicit
+frame. For body-frame translation and rotation:
+\begin{align}
+  r_F &= m\left(\dot{\boldsymbol v}_B+
+    \boldsymbol\omega_B\times\boldsymbol v_B\right)
+    -\left(\boldsymbol F_{A,B}+\boldsymbol F_{P,B}+\boldsymbol F_{G,B}\right),\\
+  r_M &= I\dot{\boldsymbol\omega}_B+
+    \boldsymbol\omega_B\times(I\boldsymbol\omega_B)-\boldsymbol M_B.
+\end{align}
+Normalized values use declared scales, for example
+\[
+  \epsilon_F=\frac{\lVert r_F\rVert}{\max(mg,\lVert F_B\rVert)},
+  \qquad
+  \epsilon_M=\frac{\lVert r_M\rVert}{\max(1\ {\rm N\,m},\lVert M_B\rVert)}.
+\]
+
+If a separate finite-difference closure is also emitted, it must be labelled
+separately from the algebraic RHS closure. Events such as ignition, separation,
+control clamps, and ground contact are one-sided samples or explicitly excluded
+with an event reason; they must not be silently folded into a p99 statistic.
+
+\subsection{Source differential evidence}
+
+Before a long trajectory, sample the declared source envelope and compare the
+source evaluator with the \taoryx{} table or wrench evaluator. Publish sample
+count, maximum absolute and relative error, RMS error, worst input state, and
+source/table hashes. Exact executable transcodes can target near floating-point
+agreement; digitized or rounded public data require a documented uncertainty
+bound. A trajectory that looks plausible does not replace this test.
+
+\subsection{Convergence and reproducibility}
+
+Each golden case records the integrator, step sizes, output rate, tolerances,
+software commit, Python/dependency environment, problem and table hashes,
+controller configuration, termination policy, and all output hashes. The
+evidence packet is UUID-scoped and contains raw telemetry, events, objectives,
+closure, convergence, source parity, plots, and the manifest. Generated
+showcases are presentation products; they do not replace the machine-readable
+packet.
+
+\section{A repeatable authoring workflow}
+
+The shortest safe route for a new vehicle is:
+
+\begin{lstlisting}
+# 1. Diagnose the metadata and source contract.
+python tools/validate_vehicle_onboarding.py --vehicle new_vehicle
+
+# 2. Generate ordinary problem files from catalog metadata.
+python tools/dev.py generate-problems
+
+# 3. Verify tables, provenance, signed controls, and generated products.
+python tools/dev.py vehicles
+python tools/dev.py control-directions
+
+# 4. Solve the bounded source-backed trim and synthesize profiles.
+python tools/dev.py trim-vehicles
+python tools/auto_tune_controllers.py --vehicle new_vehicle
+
+# 5. Run only the selected family view while developing.
+python tools/dev.py test-x8
+
+# 6. Build the composite extension PDF and complete repository checks.
+python tools/dev.py taoryx-extension-pdf
+python tools/dev.py check
+\end{lstlisting}
+
+The exact family command changes with the vehicle; the workflow does not. A new
+family is justified only when its frame, dynamics, actuator, or control
+semantics cannot be represented by an existing family contract. New problem
+files should be generated from metadata rather than copied with constants
+embedded in each test.
+
+\section{Claim vocabulary and release checklist}
+
+The evidence packet uses explicit claim labels:
+
+\begin{center}
+\begin{tabularx}{0.94\linewidth}{>{\bfseries}p{0.22\linewidth}Y}
+\toprule
+manual-bounded & Supported by the reconstructed 1995 manual within its documented scope.\\
+taoryx-extension & Successor behavior deliberately outside the historical claim.\\
+scaffolded & The source or contract exists, but the complete runtime or independent oracle is unfinished.\\
+verified & The declared source, runtime behavior, and independent assertions pass the stated gates.\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Before a controller-mission claim is released, confirm:
+
+\begin{itemize}
+  \item the selected vehicle is onboarding \texttt{ready};
+  \item tables, units, frames, quaternion, angle signs, and control directions
+    pass the convention firewall;
+  \item trim and source differential artifacts are packaged;
+  \item $A$ and $B$ provenance, perturbation sizes, eigenvalues, and scaling
+    are recorded;
+  \item all required objectives have unit-bearing results and nonnegative
+    slack, or the run is explicitly failed/blocked;
+  \item table margins, saturation, command derivatives, closure, continuity,
+    convergence, and termination are reported;
+  \item the final claim names the fidelity tier, source status, family, and
+    limitations; and
+  \item no score, plot, or green test silently substitutes for missing source
+    data or a failed validity gate.
+\end{itemize}
+
+\warningbox{\textbf{Do not overclaim.} A stable LQR pole set, a finite trajectory,
+or a high quality score does not establish global aerodynamic validity,
+historical TAOS compatibility, or engineering certification. Those claims
+require their own source authority, independent evidence, and release gate.}
+
+\section{Traceability map}
+
+This guide is an entry point, not a second source of truth. The executable
+contracts and tests remain authoritative for current successor behavior:
+
+\begin{center}
+\begin{tabularx}{0.94\linewidth}{>{\raggedright\arraybackslash}p{0.34\linewidth}Y}
+\toprule
+\textbf{Topic} & \textbf{Repository authority}\\
+\midrule
+Fidelity tiers and parity & \pathcode{src/taoryx/scenario_contract.py}, \pathcode{verification/fidelity_ladder.yaml}\\
+Vehicle onboarding & \pathcode{src/taoryx/vehicle_onboarding.py}, \pathcode{docs/plan/vehicle-onboarding.md}\\
+Trim and local derivatives & \pathcode{src/taoryx/trim.py}, \pathcode{verification/trim_specs.yaml}\\
+LQR solve and runtime contract & \pathcode{src/taoryx/runtime/lqr.py}, \pathcode{docs/extensions/lqr.md}\\
+Profile auto-tuning & \pathcode{src/taoryx/controller_autotune.py}, \pathcode{tools/auto_tune_controllers.py}\\
+Objective scoring & \pathcode{src/taoryx/objectives.py}, \pathcode{docs/plan/scored-fidelity-and-mission-evidence-v1.md}\\
+Plant firewall & \pathcode{tests/e2e/support/golden_plants.py}, \pathcode{tests/e2e/test_golden_vehicle_plants.py}\\
+Build entry point & \pathcode{tools/dev.py} \pathcode{taoryx-extension-pdf}, \pathcode{docs/BUILDING.md}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\end{document}

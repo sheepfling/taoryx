@@ -35,16 +35,16 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def test_repository_segmentation_catalog_compiles_all_vehicle_families(tmp_path: Path) -> None:
     outputs = compile_catalog(ROOT / "verification/segmentation_catalog.yaml", ROOT)
-    assert len(outputs) == 4
+    assert len(outputs) == 6
     for problem, manifest, audit in outputs:
         assert problem.is_file()
         assert manifest.is_file()
         assert audit.is_file()
         assert "*segment 1" in problem.read_text(encoding="utf-8")
-        assert "*segment 2" in problem.read_text(encoding="utf-8")
         assert "historical_syntax" in manifest.read_text(encoding="utf-8")
         assert json.loads(audit.read_text(encoding="utf-8"))["status"] == "compiled"
         manifest_payload = json.loads(manifest.read_text(encoding="utf-8"))
+        assert f"*segment {len(manifest_payload['segments'])}" in problem.read_text(encoding="utf-8")
         assert manifest_payload["historical_syntax"] == "unchanged; segmentation metadata is external"
         assert not parse_problem_file(problem, profile=GrammarProfile.TAORYX).diagnostics
     ####

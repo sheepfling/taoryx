@@ -78,6 +78,35 @@ def test_rigid_body_force_and_moment_produce_independent_translation_and_rotatio
     ####
 
 
+def test_rigid_body_inertia_provider_tracks_declared_mass_property_change() -> None:
+    """The dynamics and telemetry use the same changing inertia contract."""
+
+    model = RigidBody6DofModel(
+        inertia=Vector3(2.0, 4.0, 8.0),
+        force_moment=lambda state: RigidBodyForceMoment(
+            Vector3(0.0, 0.0, 0.0),
+            Vector3(8.0, 0.0, 0.0),
+        ),
+        inertia_provider=lambda state: Vector3(2.0 if state.mass >= 50.0 else 4.0, 4.0, 8.0),
+    )
+
+    full_mass = model.derivative(initial_state())
+    reduced_mass = model.derivative(
+        RigidBody6DofState(
+            0.0,
+            FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECIC),
+            FrameVector3(Vector3(100.0, 0.0, 0.0), Frame.ECIC),
+            Quaternion.identity(),
+            Vector3(0.0, 0.0, 0.0),
+            40.0,
+            0.0,
+        )
+    )
+    assert full_mass[10] == pytest.approx(4.0)
+    assert reduced_mass[10] == pytest.approx(2.0)
+    ####
+
+
 def test_rigid_body_load_pipeline_adds_force_moment_mass_flow_and_heat() -> None:
     pipeline = RigidBodyLoadPipeline(
         (
@@ -184,6 +213,11 @@ def test_prepared_aerodynamic_coefficients_interpolate_and_reject_envelope() -> 
 
     assert coefficients == Vector3(-1.5, 0.05, -0.1)
     assert tables.table_margins({"mach": 1.5}) == {
+        "force.cx.mach": pytest.approx(0.5),
+        "force.cy.mach": pytest.approx(0.5),
+        "force.cz.mach": pytest.approx(0.5),
+    }
+    assert tables.table_normalized_margins({"mach": 1.5}) == {
         "force.cx.mach": pytest.approx(0.5),
         "force.cy.mach": pytest.approx(0.5),
         "force.cz.mach": pytest.approx(0.5),

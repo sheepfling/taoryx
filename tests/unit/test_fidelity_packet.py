@@ -6,10 +6,53 @@ import hashlib
 import json
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from tools import build_fidelity_ladder_packet as packet
+
+
+def test_telemetry_rollup_includes_margin_saturation_and_control_rate_metrics() -> None:
+    """The packet scorer retains trajectory-quality telemetry beyond final error."""
+
+    states = [
+        SimpleNamespace(
+            time=0.0,
+            named={
+                "aero_table_min_normalized_margin": 0.30,
+                "attitude_controller_saturated": 0.0,
+                "elevator-deg": 0.0,
+            },
+        ),
+        SimpleNamespace(
+            time=0.5,
+            named={
+                "aero_table_min_normalized_margin": 0.10,
+                "attitude_controller_saturated": 1.0,
+                "elevator-deg": 5.0,
+            },
+        ),
+        SimpleNamespace(
+            time=1.0,
+            named={
+                "aero_table_min_normalized_margin": 0.20,
+                "attitude_controller_saturated": 0.0,
+                "elevator-deg": 3.0,
+            },
+        ),
+    ]
+    report = SimpleNamespace(results=[SimpleNamespace(states={"1": states})])
+
+    metrics = packet._telemetry_metrics(report)
+
+    assert metrics["table_margin_min_normalized"] == pytest.approx(0.10)
+    assert metrics["control_saturation_fraction"] == pytest.approx(1.0 / 3.0)
+    assert metrics["control_saturation_average"] == pytest.approx(1.0 / 3.0)
+    assert metrics["control_saturation_max_abs"] == pytest.approx(1.0)
+    assert metrics["control_derivative_abs_average"] == pytest.approx(7.0)
+    assert metrics["control_derivative_abs_max"] == pytest.approx(10.0)
+    ####
 
 
 def test_packet_contains_all_families_and_hashes_inputs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

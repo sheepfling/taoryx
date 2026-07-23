@@ -121,6 +121,7 @@ ipython_config.py
 /INBOX/
 /qa/
 /artifacts/
+/output/
 analysis/tumbling/generated/
 analysis/tumbling/artifacts/
 #   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.

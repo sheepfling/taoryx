@@ -168,6 +168,7 @@ class ThermalAssessment:
 
 ForceMomentProvider = Callable[[RigidBody6DofState], RigidBodyForceMoment]
 GravityProvider = Callable[[RigidBody6DofState], Vector3]
+InertiaProvider = Callable[[RigidBody6DofState], Vector3]
 
 
 @dataclass(frozen=True, slots=True)
@@ -184,12 +185,22 @@ class RigidBody6DofModel:
     force_moment: ForceMomentProvider
     gravity: GravityProvider = lambda state: Vector3(0.0, 0.0, 0.0)
     dry_mass: float | None = None
+    inertia_provider: InertiaProvider | None = None
 
     def __post_init__(self) -> None:
         if min(self.inertia.x, self.inertia.y, self.inertia.z) <= 0.0:
             raise ValueError("all principal moments of inertia must be positive")
         if self.dry_mass is not None and self.dry_mass <= 0.0:
             raise ValueError("dry mass must be positive")
+        ####
+
+    def inertia_at(self, state: RigidBody6DofState) -> Vector3:
+        """Return the source-backed inertia at the current mass/configuration."""
+
+        inertia = self.inertia_provider(state) if self.inertia_provider is not None else self.inertia
+        if not all(math.isfinite(value) and value > 0.0 for value in (inertia.x, inertia.y, inertia.z)):
+            raise ValueError("runtime inertia provider returned non-positive or non-finite values")
+        return inertia
         ####
 
     def _load(self, state: RigidBody6DofState) -> RigidBodyForceMoment:
@@ -220,10 +231,11 @@ class RigidBody6DofModel:
         gravity = self.gravity(state)
         force_ecic = state.attitude.rotate(load.force_body) + gravity.scaled(state.mass)
         acceleration = force_ecic.scaled(1.0 / state.mass)
+        inertia = self.inertia_at(state)
         angular_momentum = Vector3(
-            self.inertia.x * state.body_rate.x,
-            self.inertia.y * state.body_rate.y,
-            self.inertia.z * state.body_rate.z,
+            inertia.x * state.body_rate.x,
+            inertia.y * state.body_rate.y,
+            inertia.z * state.body_rate.z,
         )
         try:
             gyroscopic_term = state.body_rate.cross(angular_momentum)
@@ -233,9 +245,9 @@ class RigidBody6DofModel:
                 f"body_rate={state.body_rate!r}, angular_momentum={angular_momentum!r}"
             ) from error
         angular_acceleration = Vector3(
-            (load.moment_body.x - gyroscopic_term.x) / self.inertia.x,
-            (load.moment_body.y - gyroscopic_term.y) / self.inertia.y,
-            (load.moment_body.z - gyroscopic_term.z) / self.inertia.z,
+            (load.moment_body.x - gyroscopic_term.x) / inertia.x,
+            (load.moment_body.y - gyroscopic_term.y) / inertia.y,
+            (load.moment_body.z - gyroscopic_term.z) / inertia.z,
         )
         quaternion_rate = state.attitude.derivative(state.body_rate)
         derivative = (
@@ -280,6 +292,7 @@ class RigidBody6DofModel:
         force_ecic = state.attitude.rotate(load.force_body)
         total_force_ecic = force_ecic + gravity.scaled(state.mass)
         acceleration = total_force_ecic.scaled(1.0 / state.mass)
+        inertia = self.inertia_at(state)
         gravity_force_body = state.attitude.conjugate().rotate(gravity.scaled(state.mass))
         total_force_body = load.force_body + gravity_force_body
         acceleration_body = state.attitude.conjugate().rotate(acceleration)
@@ -303,7 +316,7 @@ class RigidBody6DofModel:
         propulsion_force = load.propulsion_force_body or (load.force_body - aero_force)
         aero_moment = load.aero_moment_body or Vector3(0.0, 0.0, 0.0)
         propulsion_moment = load.propulsion_moment_body or (load.moment_body - aero_moment)
-        angular_momentum = Vector3(self.inertia.x * state.body_rate.x, self.inertia.y * state.body_rate.y, self.inertia.z * state.body_rate.z)
+        angular_momentum = Vector3(inertia.x * state.body_rate.x, inertia.y * state.body_rate.y, inertia.z * state.body_rate.z)
         try:
             gyroscopic_term = state.body_rate.cross(angular_momentum)
         except ValueError as error:
@@ -312,14 +325,14 @@ class RigidBody6DofModel:
                 f"body_rate={state.body_rate!r}, angular_momentum={angular_momentum!r}"
             ) from error
         angular_acceleration = Vector3(
-            (load.moment_body.x - gyroscopic_term.x) / self.inertia.x,
-            (load.moment_body.y - gyroscopic_term.y) / self.inertia.y,
-            (load.moment_body.z - gyroscopic_term.z) / self.inertia.z,
+            (load.moment_body.x - gyroscopic_term.x) / inertia.x,
+            (load.moment_body.y - gyroscopic_term.y) / inertia.y,
+            (load.moment_body.z - gyroscopic_term.z) / inertia.z,
         )
         moment_residual = Vector3(
-            self.inertia.x * angular_acceleration.x,
-            self.inertia.y * angular_acceleration.y,
-            self.inertia.z * angular_acceleration.z,
+            inertia.x * angular_acceleration.x,
+            inertia.y * angular_acceleration.y,
+            inertia.z * angular_acceleration.z,
         ) + gyroscopic_term - load.moment_body
         force_scale = max(state.mass * gravity.norm(), total_force_body.norm(), 1.0e-12)
         moment_scale = max(load.moment_body.norm(), 1.0)
@@ -366,6 +379,9 @@ class RigidBody6DofModel:
             "acceleration_ecic_y_m_s2": acceleration.y,
             "acceleration_ecic_z_m_s2": acceleration.z,
             "propellant_mass_rate_kg_s": load.propellant_mass_rate,
+            "inertia_x_kg_m2": inertia.x,
+            "inertia_y_kg_m2": inertia.y,
+            "inertia_z_kg_m2": inertia.z,
             "heat_rate_w_m2": load.heat_rate,
             "roll_deg": math.degrees(roll),
             "pitch_deg": math.degrees(pitch),

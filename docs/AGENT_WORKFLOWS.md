@@ -51,10 +51,118 @@ grammar behavior.
 
 ## Segments and composition
 
+For a normal waypoint or segment course, use the high-level composition
+builder. It keeps the source problem and native compiler boundary intact while
+removing most of the graph bookkeeping:
+
+~~~python
+from pathlib import Path
+
+from taoryx.composition import TrajectoryBuilder, WaypointSpec
+
+builder = TrajectoryBuilder(
+    "demo-course",
+    vehicle="skywalker_x8",
+    family="fixed-wing-uav",
+    source_problem="examples/mission.prb",
+)
+builder.use(
+    "trim_hold",
+    "trim",
+    duration_s=20.0,
+    target={"speed_m_s": 18.0},
+    tolerance={"speed_m_s": 1.0},
+)
+builder.waypoint_course(
+    (
+        WaypointSpec(
+            id="north",
+            target={"north_m": 100.0},
+            tolerance={"north_m": 15.0},
+            duration_s=30.0,
+        ),
+        WaypointSpec(
+            id="east",
+            target={"east_m": 100.0},
+            tolerance={"east_m": 15.0},
+            duration_s=30.0,
+        ),
+    )
+)
+scenario = builder.build()
+problem, manifest, audit = builder.compile(Path("repo-root"))
+~~~
+
+Use `SegmentCompositionRegistry.standard().names()` to discover the reviewed
+templates: `trim_hold`, `hover`, `waypoint`, `altitude_capture`,
+`heading_capture`, and `moving_target_intercept`. The last one is intentionally
+more demanding than a waypoint: it requires a target reference plus explicit
+LOS/closure targets and tolerances.
+builder.evaluate() returns a structural report; warnings are visible and
+invalid capture goals, graph edges, or termination policies fail before
+compilation. Use the lower-level catalog only when a component needs custom
+events, state transitions, or non-time entry/exit expressions.
+
 Use native `.prb` `*segment`, `*when`, `goto`, and `stop` constructs when the
 change belongs to the documented source language. Use the external
 segmentation catalog when the task needs reusable orchestration metadata,
 controller bindings, goals, events, or transition policies.
+
+After execution, score the composed run instead of inspecting plots by eye:
+
+```python
+from taoryx.composition import RuntimeEvaluationOptions, evaluate_run
+
+evidence = evaluate_run(
+    scenario,
+    artifact,
+    options=RuntimeEvaluationOptions(
+        channel_aliases={"altitude_m": "position.altitude.geodetic"},
+        transition_tolerances={"mass.total": 1.0e-6},
+        max_saturation_fraction=0.05,
+    ),
+)
+evidence.raise_for_failure()
+```
+
+This is a segment-level validation ladder: entry state, goal capture and
+dwell, transition event/continuity, exit or terminal coverage, finite required
+telemetry, and optional saturation. Missing channels produce `blocked`, a
+contract violation produces `fail`, and omitted optional channels produce a
+visible `warning`. Use canonical semantic output names or provide explicit
+aliases; the evaluator never guesses that `altitude_m` or `north_m` means a
+particular vehicle channel. For non-time segments, require runtime spans so
+the evaluator does not infer boundaries from source text.
+
+### Segment promotion before route verification
+
+Do not promote a controller directly into a route. The segment promotion
+matrix at `verification/segment_promotion.yaml` is the intermediate gate. Each
+row names one vehicle/scenario/segment pair, its goal kind, the evidence
+categories that must pass, and the focused test that produced the evidence.
+Validate its coverage against the segmentation catalog with:
+
+```python
+from taoryx.segment_promotion import (
+    load_segment_promotion_catalog,
+    validate_promotion_coverage,
+)
+from taoryx.segmentation import load_catalog
+
+segmentation = load_catalog("verification/segmentation_catalog.yaml")
+promotions = load_segment_promotion_catalog("verification/segment_promotion.yaml")
+errors = validate_promotion_coverage(promotions, segmentation)
+assert not errors, errors
+```
+
+After running a focused segment scenario, pass its runtime report through
+`evaluate_promotion_catalog(...)`. A segment is promoted only when every
+required category is present and every required check is `pass`; a missing
+channel, missing event, incomplete termination, or untested quality category
+remains `blocked`. The resulting evidence hash is the stamp consumed by route
+review. The matrix is coverage metadata, not a manual “green” override: the
+existing family tests are evidence inputs, while the promotion report is the
+decision boundary.
 
 ```bash
 python tools/dev.py segment-lint
@@ -66,6 +174,46 @@ The compiler produces a generated `.prb`, resolved manifest, and transition
 audit. Review the YAML catalog and source problem, not generated outputs.
 Compilation proves composition and syntax, not plant or trajectory validity;
 add closure, convergence, envelope, and controller tests.
+
+For moving-target guidance, compose the segment with an explicit reference and
+score the native guidance channels rather than treating a route waypoint as an
+intercept:
+
+```python
+builder.moving_target_intercept(
+    "terminal-intercept",
+    duration_s=10.0,
+    reference="target-2",
+    target={
+        "pro_nav_los_range_m": 25.0,
+        "pro_nav_closing_velocity_m_s": 0.0,
+    },
+    tolerance={
+        "pro_nav_los_range_m": 25.0,
+        "pro_nav_closing_velocity_m_s": 5.0,
+    },
+)
+
+evidence = evaluate_run(
+    scenario,
+    artifact,
+    options=RuntimeEvaluationOptions(
+        required_channels=(
+            "pro_nav_active",
+            "pro_nav_los_range_m",
+            "pro_nav_closing_velocity_m_s",
+            "pro_nav_acceleration_response_residual_m_s2",
+        ),
+    ),
+)
+```
+
+The required-channel list is a hard evidence contract. Missing or non-finite
+channels produce `blocked`; aliases must be declared explicitly. Consult
+`verification/segment_capability_matrix.yaml` for the current vehicle
+boundary: X15 has partial source-trim-to-ProNav evidence, while Hummingbird
+has a bounded focused fixture but remains a candidate until the remaining
+vehicle-quality gates and promotion hash exist.
 
 For typed initialization/configuration changes, use `ScenarioCompiler` instead
 of editing state tuples or source text in place:
@@ -82,6 +230,97 @@ artifacts = scenario.run(output_dir="artifacts/mission")
 
 Composition patches are ordered, unit-aware, recorded in resolution metadata,
 and must not bypass declared control or actuator routes.
+
+## Vehicle addition and the validation ladder
+
+Treat a new vehicle as a staged evidence problem. Each stage consumes the
+artifacts from the previous stage; a later green plot does not promote an
+earlier blocked convention or data check.
+
+| Stage | Question | Required evidence |
+| --- | --- | --- |
+| Registry/data | Can the model be discovered and loaded? | SI metadata, family contract, table bindings, source provenance/hash, generated problem profile, onboarding report |
+| Grammar/lowering | Does the declared source and composition mean what the author intended? | `taoryx-validate`, segment lint/build, resolved manifest, transition audit |
+| Convention firewall | Are frames, axes, table orientation, coefficient signs, and controls correct? | table inspection, in-range/boundary queries, frame/quaternion tests, signed control-direction probes |
+| Plant validity | Does the model satisfy its own equations? | initial-condition audit, trim residuals, force/moment dimensionalization, independent closure, bounded propagation |
+| Numerical quality | Is the result reproducible and time-step credible? | `dt`, `dt/2`, `dt/4`, adaptive comparison, event-aware exclusions, output hashes |
+| Controller validity | Does the controller stabilize the local plant without violating the interface? | named `A/B` provenance, controllability, LQR poles, uncertainty screen, actuator/slew/allocation telemetry |
+| Segment validity | Do entry, handoff, and exit contracts hold? | segment manifest, inherited/reset state audit, controller reset events, goal/termination evidence |
+| Checkpoint mission | Does the complete scenario meet bounded objectives? | generated fidelity-ladder packet, objective gates, quality metrics, plots, claim status |
+
+Use the following commands as the normal progression:
+
+```bash
+python tools/validate_vehicle_onboarding.py --vehicle new_vehicle --strict
+python tools/dev.py generate-problems
+python tools/dev.py vehicles
+taoryx table inspect path/to/vehicle.tbl --html build/table-explorer.html
+python tools/dev.py control-directions
+python tools/dev.py trim-vehicles
+python tools/dev.py segment-lint
+python tools/dev.py segment-build
+python tools/dev.py segment-run
+python tools/dev.py fidelity-packet
+python tools/dev.py maneuver-matrix
+```
+
+The onboarding validator answers whether the metadata path is complete; it
+does not prove trim or mission behavior. `vehicles` checks registry and
+provenance coverage, the control harness checks signed responses, and the
+fidelity packet owns the multi-tier trajectory evidence. Keep the first
+failing stage visible in the report instead of replacing it with a score.
+
+### Data and convention firewall
+
+Before tuning, make a small model packet and inspect it by hand. It should
+state the state/control order, body/wind/world bases, SI conversions, reference
+area/span/chord, mass/CG/inertia behavior, table axis order and bounds,
+interpolation policy, coefficient source status, and actuator bounds. Query a
+nominal point, every relevant boundary, and one deliberately out-of-range
+point. Out-of-range behavior must be an explicit block or diagnostic; never
+reverse an axis or negate a coefficient merely to make a trajectory look right.
+
+The control-direction harness is a firewall, not a tuning test. It perturbs one
+declared control around an identical baseline and records the signed body
+force/moment response, antisymmetry error, expected source sign, and achieved
+command. For example, the B747 elevator should produce the declared negative
+body-`y` moment, the X8 collective and differential elevon probes should test
+body-`y` and body-`x` independently, and the Hummingbird rotor-speed probe
+should test the declared body-`z` force sign. Frame transforms and
+force/moment reference transfers must be checked separately from table lookup.
+
+### Trim, LQR, and mass-property gates
+
+The accepted trim must identify the exact state/control ordering and carry
+unscaled force and moment residuals. Linearize the state-rate evaluator at that
+trim with the same tables, atmosphere, propulsion, mass, CG, and inertia used
+by propagation. Record perturbation sizes, `A/B` names, `Q/R`, controllability,
+closed-loop eigenvalues, table margins, and actuator/slew/allocation behavior.
+Require the nominal poles to be Hurwitz and fail closed if an allowed mass,
+CG, inertia, or aerodynamic uncertainty corner produces an unstable pole or a
+missing table query. A mass-dependent inertia provider can update attitude
+gains, but it does not replace a fresh plant-bound `A/B` design when mass also
+changes translation, propulsion, CG, or aerodynamic derivatives.
+
+### Generated trajectories and segments
+
+The checkpoint trajectories are catalog-driven, not hand-selected after the
+fact. The fidelity ladder and long-validation catalogs parameterize vehicle,
+source problem/table set, duration, step factors, bounds, objectives, and
+termination rules. The generated packet must include a manifest, initial
+condition audit, event timeline, closure metrics, convergence report, plots,
+and hashes. The usual order is source/static trim hold, 3-DOF anchor, derived
+kinematic bridge, short rigid-body 6-DOF run, time-step convergence, source
+differential, bounded recovery/control maneuver, then long checkpoint mission.
+
+For each segment, validate the entry state and inherited/reset fields before
+integrating; validate continuity or an explicit impulse/mass change at the
+handoff; and validate the exit condition, target/action, final state, and
+termination reason. The compiler rejects duplicate IDs, missing targets,
+cycles, invalid `stop`/`goto` forms, missing source segments, and missing
+integration blocks. The controller must reset at the first segment and each
+transition. Compilation is only composition evidence; plant closure,
+convergence, envelope, and controller gates still apply.
 
 ## Batch runs, timesteps, and plots
 
@@ -155,10 +394,20 @@ plant -> TrimResult -> local A/B -> controller -> demand -> allocator -> plant
 
 `plant_residual` in `solve_trim` must use the same frames, tables, mass
 properties, actuators, and propulsion as propagation. After trim, use
-`finite_difference_linearization` to obtain true state-derivative Jacobians;
-force/moment derivatives are not automatically an `A,B` pair. Bind named
-states and controls exactly to the trim artifact, then apply bounds, slew
-limits, and family-specific allocation through the control contracts.
+`finite_difference_dynamics_linearization` with a state-rate evaluator to
+obtain true state-derivative Jacobians; `finite_difference_linearization` is
+for residual diagnostics, and force/moment derivatives are not automatically
+an `A,B` pair. Bind named states and controls exactly to the trim artifact,
+then apply bounds, slew limits, and family-specific allocation through the
+control contracts.
+
+For changing mass properties, provide the rigid-body model's
+`inertia_provider(state)` from the vehicle adapter. The runtime has an explicit
+`linear-dry-mass` interpolation for declared reference and dry-mass inertias,
+but it never infers inertia from mass. Pair that provider with
+`*runtime lqr attitude update=mass` when the direct-moment attitude bridge is
+appropriate. A full source-trim `A/B` design is still required when changing
+mass also changes translational, propulsion, CG, or aerodynamic derivatives.
 
 ```bash
 python tools/dev.py trim-vehicles

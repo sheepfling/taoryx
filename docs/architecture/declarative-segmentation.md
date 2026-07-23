@@ -44,6 +44,157 @@ transitions emit no synthetic state jump; reset, impulse, and mass-change
 transitions require explicit values and are recorded in the transition audit.
 Source `*when` clauses are preserved additively.
 
+## Build segments without hand-writing the catalog
+
+Most authors should start with the composition layer in
+taoryx.composition, not with SegmentSpec or YAML. It provides a small
+reviewed registry and a sequential builder that assigns time windows, links
+segment exits, validates typed goals, and terminates the final segment with
+stop.
+
+~~~python
+from pathlib import Path
+
+from taoryx.composition import TrajectoryBuilder, WaypointSpec
+
+builder = TrajectoryBuilder(
+    "x8-demo-course",
+    vehicle="skywalker_x8",
+    family="fixed-wing-uav",
+    source_problem="examples/mission.prb",
+    runtime_tables=("tables/x8.tbl",),
+    mode="rigid_body_6dof",
+)
+builder.use(
+    "trim_hold",
+    "trim",
+    duration_s=20.0,
+    target={"speed_m_s": 18.0, "altitude_m": 100.0},
+    tolerance={"speed_m_s": 1.0, "altitude_m": 5.0},
+    controller="x8-trim-hold",
+    actuator_binding="x8-elevons",
+)
+builder.waypoint_course(
+    (
+        WaypointSpec(
+            id="north",
+            target={"north_m": 100.0, "altitude_m": 100.0},
+            tolerance={"north_m": 15.0, "altitude_m": 5.0},
+            duration_s=30.0,
+            dwell_time_s=5.0,
+            controller="x8-recovery",
+            actuator_binding="x8-elevons",
+        ),
+        WaypointSpec(
+            id="east",
+            target={"east_m": 100.0, "altitude_m": 100.0},
+            tolerance={"east_m": 15.0, "altitude_m": 5.0},
+            duration_s=30.0,
+            controller="x8-recovery",
+            actuator_binding="x8-elevons",
+        ),
+    )
+)
+
+scenario = builder.build()
+problem, manifest, audit = builder.compile(Path("repo-root"))
+~~~
+
+The builder produces an ordinary SegmentationScenario, so the existing
+compiler, manifest, transition audit, runtime, plots, and validation ladder
+remain the execution path. Use builder.evaluate() or
+evaluate_composition(scenario) to inspect warnings before compilation.
+Warnings such as an omitted controller or actuator binding are visible; failed
+capture goals, invalid transitions, duplicate IDs, and non-terminating graphs
+are rejected.
+
+Agents can discover the built-in vocabulary without reading implementation
+details:
+
+~~~python
+from taoryx.composition import SegmentCompositionRegistry
+
+registry = SegmentCompositionRegistry.standard()
+print(registry.names())
+print(registry.describe("waypoint").description)
+~~~
+
+The built-ins are trim_hold, hover, waypoint, altitude_capture, and
+heading_capture. A project-specific reusable component can be added with
+registry.register(...); custom factories still return the validated
+SegmentSpec, and therefore cannot bypass the graph and goal checks.
+
+### Evaluate a recorded run
+
+`evaluate_composition(scenario)` is a pre-run structural check. After a run,
+use `evaluate_composition_runtime(scenario, artifact)` to evaluate the
+evidence in the normalized `RunArtifact`:
+
+~~~python
+from taoryx.composition import RuntimeEvaluationOptions, evaluate_composition_runtime
+
+runtime_report = evaluate_composition_runtime(
+    scenario,
+    artifact,
+    options=RuntimeEvaluationOptions(
+        # Keep author-friendly goal names separate from emitted channels.
+        channel_aliases={"altitude_m": "position.altitude.geodetic"},
+        # Optional numeric handoff gates. Keys may be semantic channels or
+        # source names; they are checked against the segment transition policy.
+        transition_tolerances={"mass.total": 1.0e-6},
+        max_saturation_fraction=0.05,
+    ),
+)
+runtime_report.raise_for_failure()
+~~~
+
+The report evaluates each segment in order:
+
+- entry checks compare declared `initial_state` values with the first sample;
+- goal checks require every target channel to be within tolerance at exit and
+  require the declared trailing dwell time;
+- transition checks look for the recorded segment event and, when tolerances
+  are supplied, audit the declared continuity policy at the handoff;
+- exit checks verify the next segment or terminal coverage; and
+- quality checks require finite goal/entry telemetry and optionally gate
+  actuator saturation.
+
+`pass` means the checks ran and passed. `warning` means the required evidence
+passed but optional evidence was not emitted, such as a typed stop reason or a
+saturation channel. `fail` means a recorded value violated a declared
+contract. `blocked` means the evidence needed to decide is absent, most often
+because a goal channel was not emitted or a non-time segment has no runtime
+span. A blocked result must not be converted into a pass by supplying a
+vehicle-specific guess. If the runtime did not emit `SegmentSpan` records,
+standard time-window segments can be reconstructed with a warning; use
+`require_explicit_segment_spans=True` when that inference is not acceptable.
+
+Goal keys should normally be canonical output names such as
+`position.altitude.geodetic`. If an authoring layer uses `altitude_m`, `north_m`,
+or another local name, provide an explicit `channel_aliases` mapping for that
+scenario. This is the firewall between composable authoring vocabulary and
+vehicle-specific telemetry.
+
+### Promotion boundary
+
+The lifecycle catalog is not itself a promotion certificate. Before a segment
+is reused in a route, validate the corresponding row in
+`verification/segment_promotion.yaml`. The row must match the segmentation
+scenario and goal kind and must name the focused evidence test. Feed the
+runtime report into `taoryx.segment_promotion.evaluate_promotion_catalog` and
+require `report.composition_ready` before route-level verification. This
+separates the questions cleanly:
+
+1. Does the controller run?
+2. Does this vehicle/segment pair enter correctly, achieve its own goal, hand
+   off correctly, and terminate with usable evidence?
+3. Only then, does the composed route work?
+
+The current matrix deliberately exposes coverage gaps rather than declaring
+every goal kind available for every vehicle. `waypoint`, `racetrack`, and
+other segment types still need concrete vehicle rows and focused runtime
+evidence before they can be promoted.
+
 ## Workflow
 
 ```bash

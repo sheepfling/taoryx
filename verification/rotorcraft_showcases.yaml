@@ -1,0 +1,17 @@
+schema_version: 1
+id: taoryx_rotorcraft_showcases_v1
+claim_boundary: >-
+  Family-specific powered rotorcraft research-surrogate showcases. These are
+  controller and convention demonstrations, not flight qualification or
+  global-envelope validation.
+showcases:
+  - id: hummingbird-square-waypoint
+    family: hummingbird
+    shape: square
+    problem: examples/mission_families/slower_hummingbird/SV05_rectangle_course_6dof.prb
+    evidence: bounded takeoff, elevated corner, return, and rotor allocation
+  - id: hummingbird-figure-eight
+    family: hummingbird
+    shape: figure-eight
+    problem: examples/mission_families/slower_hummingbird/SV05_figure_eight_route_6dof.prb
+    evidence: four smooth route phases, bounded position error, altitude hold, and rotor limits

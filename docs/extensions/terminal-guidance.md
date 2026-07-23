@@ -77,6 +77,26 @@ Historical `*fly propnav` behavior and a modern TAORYX ProNav controller are
 separate claims. Agreement of endpoint position alone does not establish
 historical compatibility.
 
+## Segment-level promotion
+
+Moving-target ProNav is a segment contract, not merely a route option. The
+composable name is `moving_target_intercept`, and its goal kind is
+`intercept_geometry`. A valid contract names the target track, terminal range
+and closure tolerances, and the emitted guidance evidence:
+
+- `pro_nav_active` proves activation in the intended segment;
+- `pro_nav_los_range_m` and `pro_nav_closing_velocity_m_s` prove the geometry
+  and closure trend;
+- `pro_nav_acceleration_response_residual_m_s2` separates demanded guidance
+  from achieved aerodynamic response.
+
+The vehicle capability boundary is recorded in
+`verification/segment_capability_matrix.yaml`. The X15 source-trim-to-ProNav
+case has partial focused evidence. Hummingbird now has a dedicated bounded
+moving-target fixture and focused guidance telemetry test, but remains a
+candidate until rotor-allocation, saturation, aero-envelope, and terminal
+miss-distance gates are promoted into the segment catalog.
+
 ## Segment-scoped route activation
 
 For staged rigid-body showcases, route attitude steering is activated by the

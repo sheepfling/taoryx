@@ -80,6 +80,29 @@ Supported objective families should include:
 Each measurement retains its physical unit and source channel. No objective
 may be scored from a unitless display value.
 
+### Trajectory resource rollup
+
+Every controller-mission rollup also records resource and validity metrics,
+not just terminal error:
+
+- `table_margin_min_normalized`: worst distance to any queried table edge,
+  dimensionless; `0` is the hard validity boundary.
+- `table_margin_average_normalized`: time-sample average of the same margin.
+- `control_saturation_fraction`: fraction of samples with any actuator
+  saturation flag active.
+- `control_saturation_average` and `control_saturation_max_abs`: aggregate
+  saturation severity, dimensionless.
+- `control_derivative_abs_average` and `control_derivative_abs_max`: absolute
+  actuator-command derivative statistics, in the declared command unit per
+  second, with per-control breakdowns retained.
+
+These metrics are included in the quality score through advisory objectives.
+They do not silently turn a diagnostic trajectory into a valid mission: hard
+gates for table extrapolation, sustained saturation, continuity, and declared
+mission completion remain separate. Rate limits are vehicle-family/controller
+profile parameters and must not be interpreted as universal engineering
+limits.
+
 ## Slack-aware scoring
 
 The evaluator must preserve the raw result rather than returning only pass or

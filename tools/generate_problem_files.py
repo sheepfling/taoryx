@@ -47,6 +47,7 @@ def _values(catalog: dict[str, Any], scenario: dict[str, Any]) -> dict[str, str]
     }
     values.update({key: str(value) for key, value in profile.items() if key != "vehicle"})
     values.update({key: str(value) for key, value in scenario.items() if key not in {"output", "profile"}})
+    values["vehicle_runtime"] = _complete_vehicle_runtime(vehicle_id, values["vehicle_runtime"])
     for key in ("target_line", "route_line", "guidance_line", "fly_line", "file_line", "definition_line"):
         values.setdefault(key, "")
     if "propulsion_line" not in values:
@@ -65,6 +66,33 @@ def _values(catalog: dict[str, Any], scenario: dict[str, Any]) -> dict[str, str]
         values["file_line"] = ""
     values["problem_id"] = str(scenario["id"])
     return values
+####
+
+
+def _complete_vehicle_runtime(vehicle_id: str, runtime_line: str) -> str:
+    """Add canonical contract fields to profile-specific runtime overrides.
+
+    A parity profile may intentionally override source-native fields such as
+    the release mass or frame adapter.  It must still carry the shared
+    controller contract, including the source-backed nominal mass, so the
+    generated problem cannot silently fall back to an incomplete scale basis.
+    """
+
+    canonical = vehicle_status_line(vehicle_id)
+    if not runtime_line.strip():
+        return canonical
+    canonical_attributes = canonical.split(" vehicle ", 1)[1].split()
+    existing_keys = {
+        token.split("=", 1)[0]
+        for token in runtime_line.split()
+        if "=" in token
+    }
+    missing = [
+        token
+        for token in canonical_attributes
+        if token.split("=", 1)[0] not in existing_keys
+    ]
+    return runtime_line.rstrip() + (" " + " ".join(missing) if missing else "")
 ####
 
 

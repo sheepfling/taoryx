@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from taoryx.trim import TrimSpec, finite_difference_linearization, solve_trim
+from taoryx.trim import TrimSpec, finite_difference_dynamics_linearization, finite_difference_linearization, solve_trim
 
 
 def _plant(state: dict[str, float], controls: dict[str, float]) -> dict[str, float]:
@@ -44,6 +44,28 @@ def test_trim_finite_difference_linearization_is_named_and_local() -> None:
 
     np.testing.assert_allclose(a, [[1.0], [2.0]], rtol=1e-6, atol=1e-8)
     np.testing.assert_allclose(b, [[1.0], [-1.0]], rtol=1e-6, atol=1e-8)
+
+
+def test_dynamics_linearization_requires_true_named_state_derivatives() -> None:
+    spec = TrimSpec(
+        state_names=("x", "v"),
+        control_names=("u",),
+        residual_names=("force",),
+        state_initial={"x": 0.0, "v": 0.0},
+        control_initial={"u": 0.0},
+    )
+    trim = solve_trim(spec, lambda state, controls: {"force": state["x"] + controls["u"]})
+
+    linearization = finite_difference_dynamics_linearization(
+        spec,
+        lambda state, controls: {"x": state["v"], "v": -state["x"] + controls["u"]},
+        trim,
+        metadata={"source_quality": "estimated", "mass_kg": 10.0},
+    )
+
+    np.testing.assert_allclose(linearization.a_matrix, [[0.0, 1.0], [-1.0, 0.0]], rtol=1e-6, atol=1e-8)
+    np.testing.assert_allclose(linearization.b_matrix, [[0.0], [1.0]], rtol=1e-6, atol=1e-8)
+    assert linearization.metadata_dict["source_quality"] == "estimated"
 
 
 def test_trim_rejects_duplicate_state_and_control_names() -> None:
