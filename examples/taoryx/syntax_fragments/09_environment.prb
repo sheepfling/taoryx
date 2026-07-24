@@ -1,0 +1,12 @@
+(environment-extension)
+*sixdof
+*atmos rcc ktf-annual
+*earth wgs-84
+*method rk4-fixed variable-mass
+*wind geodetic file=environment_wind.dat units=ft/sec
+
+*trajectory 1 wind_vehicle start on 1
+  *initial geodetic time=0 wt=1000 alt=100 lat=0 long=0 vel=100 gama=0 psi=90
+  *segment 1 wind-flight
+    *when time>1 stop
+*end

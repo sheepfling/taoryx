@@ -1,0 +1,117 @@
+schema_version: 1
+release: taoryx-alpha-1
+status: planned
+historical_reference:
+  report: SAND95-1652
+  printed: '1995-12'
+  software_title: TAOS Version 96.0
+  historical_scope: point-mass 3DOF and documented table/problem language
+  historical_runtime_oracle: unavailable
+  compatibility_claim: excluded
+dynamics_modes:
+  - id: 3dof
+    name: point-mass translational
+    claim: TAOS-bounded successor implementation
+  - id: pseudo-6dof
+    name: kinematic 3+3 bridge
+    claim: TAORYX extension; prescribed or lagged attitude sidecar
+  - id: rigid-6dof
+    name: rigid-body 6-DOF
+    claim: TAORYX extension; free translation and rotation
+claims:
+  - id: D
+    name: documentary-fidelity
+    required: true
+  - id: S
+    name: semantic-coherence
+    required: true
+  - id: P
+    name: parser-conformance
+    required: true
+  - id: N
+    name: numerical-correctness
+    required: true
+  - id: C
+    name: composition-and-execution
+    required: true
+  - id: H
+    name: historical-compatibility
+    required: false
+    status: excluded-without-oracle
+manual_examples:
+  - id: ballistic-reentry
+    mode: 3dof
+    required: true
+  - id: ballistic-rocket
+    mode: 3dof
+    required: true
+  - id: air-launched-intercept
+    mode: 3dof
+    required: true
+  - id: ground-launched-intercept
+    mode: 3dof
+    required: true
+vehicle_families:
+  - id: b747
+    required: true
+    minimum_mode: rigid-6dof
+  - id: skywalker_x8
+    required: true
+    minimum_mode: rigid-6dof
+  - id: hummingbird
+    required: true
+    minimum_mode: rigid-6dof
+  - id: x15
+    required: true
+    minimum_mode: rigid-6dof
+gates:
+  - id: R0
+    name: claim-freeze
+    required: true
+  - id: R1
+    name: requirement-inventory
+    required: true
+  - id: R2
+    name: language-safety
+    required: true
+  - id: R3
+    name: canonical-runtime-transition
+    required: true
+  - id: R4
+    name: manual-example-execution
+    required: true
+  - id: R5
+    name: reusable-composition
+    required: true
+  - id: R6
+    name: fidelity-ladder-contracts
+    required: true
+  - id: R7
+    name: vehicle-evidence
+    required: true
+  - id: R8
+    name: artifact-reproducibility
+    required: true
+  - id: R9
+    name: clean-handoff
+    required: true
+release_profile:
+  commands:
+    - python tools/dev.py manual
+    - python tools/dev.py equation-audit
+    - python tools/dev.py alpha1-feature-matrix
+    - python tools/dev.py alpha1-manual-examples
+    - python tools/dev.py alpha1-composition-case
+    - python tools/dev.py audit-alpha1
+    - python tools/dev.py alpha1-packet
+    - python tools/dev.py generate-problems
+    - python tools/dev.py check
+    - python -m pytest
+    - python tools/dev.py test-spectre
+    - python -m pytest -m 'slow or artifact or spectre'
+    - python tools/dev.py handoff
+  default_pytest_excludes:
+    - slow
+    - artifact
+    - spectre
+####

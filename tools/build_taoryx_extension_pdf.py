@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "output" / "pdf" / "taoryx_extensions_composite.pdf"
 REFERENCE_SOURCES = (
     ROOT / "docs" / "extensions" / "README.md",
+    ROOT / "docs" / "extensions" / "taoryx-language-reference.md",
     ROOT / "docs" / "extensions" / "problem-file-guide.md",
     ROOT / "docs" / "extensions" / "lqr.md",
     ROOT / "docs" / "extensions" / "terminal-guidance.md",
@@ -21,6 +22,7 @@ REFERENCE_SOURCES = (
     ROOT / "docs" / "extensions" / "showcase-catalog.md",
 )
 BASE_GUIDE = ROOT / "output" / "pdf" / "taoryx_extensions_and_verification.pdf"
+LANGUAGE_GUIDE = ROOT / "output" / "pdf" / "taoryx_language_reference.pdf"
 
 
 def run(command: list[str], *, cwd: Path = ROOT) -> None:
@@ -60,11 +62,11 @@ def reference_markdown(start_page: int) -> str:
     ####
 
 
-def merge_pdfs(base: Path, appendix: Path, output: Path) -> None:
-    """Merge the built guide and generated reference appendix in order."""
+def merge_pdfs(sources: tuple[Path, ...], output: Path) -> None:
+    """Merge the built LaTeX guides and generated Markdown appendix in order."""
 
     writer = PdfWriter()
-    for source in (base, appendix):
+    for source in sources:
         reader = PdfReader(str(source))
         for page in reader.pages:
             writer.add_page(page)
@@ -77,9 +79,10 @@ def merge_pdfs(base: Path, appendix: Path, output: Path) -> None:
 def build(output: Path = DEFAULT_OUTPUT) -> None:
     """Build the composite PDF from the current canonical documentation."""
 
-    if not BASE_GUIDE.is_file():
+    if not BASE_GUIDE.is_file() or not LANGUAGE_GUIDE.is_file():
         raise FileNotFoundError(
-            f"base guide is missing: {BASE_GUIDE}; run 'python tools/dev.py successor-guide' first"
+            "a TAORYX LaTeX guide is missing; run "
+            "'python tools/dev.py taoryx-extension-pdf' first"
         )
     pandoc = shutil.which("pandoc")
     if pandoc is None:
@@ -91,8 +94,8 @@ def build(output: Path = DEFAULT_OUTPUT) -> None:
         workspace = Path(temporary)
         source = workspace / "extension-reference.md"
         appendix = workspace / "extension-reference.pdf"
-        base_pages = len(PdfReader(str(BASE_GUIDE)).pages)
-        source.write_text(reference_markdown(base_pages + 1), encoding="utf-8")
+        guide_pages = len(PdfReader(str(BASE_GUIDE)).pages) + len(PdfReader(str(LANGUAGE_GUIDE)).pages)
+        source.write_text(reference_markdown(guide_pages + 1), encoding="utf-8")
         run(
             [
                 pandoc,
@@ -107,7 +110,7 @@ def build(output: Path = DEFAULT_OUTPUT) -> None:
             ],
             cwd=workspace,
         )
-        merge_pdfs(BASE_GUIDE, appendix, output)
+        merge_pdfs((BASE_GUIDE, LANGUAGE_GUIDE, appendix), output)
     print(f"Wrote composite TAORYX extension PDF: {output}")
     ####
 

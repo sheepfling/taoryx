@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=77.0.3", "wheel"]
+requires = ["setuptools>=75.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,8 +9,7 @@ description = "A Python successor to the TAOS 1995 simulation system"
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [{name = "taoryx contributors"}]
-license = "MIT"
-license-files = ["LICENSE"]
+license = {file = "LICENSE"}
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Programming Language :: Python :: 3",
@@ -63,6 +62,8 @@ markers = [
   "runtime: requires a historical or separately verified TAOS executable",
   "historical: exploratory or historically sourced runtime cases",
   "stress: intentionally large or long-running runtime cases",
+  "segment: isolated segment contract and maneuver-gate validation",
+  "plot: plotting and visualization-only view",
   "negative_runtime: malformed inputs for executable-level rejection checks",
   "metamorphic: compares multiple TAOS executions",
   "b747: Boeing 747 vehicle-family validation and evidence",

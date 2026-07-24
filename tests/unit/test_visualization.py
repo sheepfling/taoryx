@@ -7,6 +7,8 @@ import pytest
 from taoryx.tables import ExtrapolationMode, prepare_table
 from taoryx.visualization import render_table_png, render_table_svg, slice_table, table_dimension
 
+pytestmark = pytest.mark.plot
+
 
 def _scalar_svg(value: float) -> ET.Element:
     svg = render_table_svg(value, title="scalar")

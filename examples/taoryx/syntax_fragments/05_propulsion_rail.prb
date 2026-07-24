@@ -1,0 +1,16 @@
+(propulsion-rail-extension)
+*sixdof
+*method rk4-fixed variable-mass
+*trajectory 1 rail_vehicle start on 1
+  *initial geodetic time=0 wt=1000 alt=0 lat=0 long=0 vel=0 gama=90 psi=90
+  *segment 1 guided-rail-launch
+    *mass xcg=0 ixx=2 iyy=2 izz=1
+    *aero caxial=0.15 cnormal=0.20
+    *prop vacuum thrust=25000 mdot=3.0 snoz=2.5
+    *rail launch azm=325 elev=70 cfstat=0.12 cfslid=0.01
+    *increment q_rail=-0.20
+    *when tseg>2 goto 2
+  *segment 2 coast
+    *ptmass
+    *when alt<0 stop
+*end

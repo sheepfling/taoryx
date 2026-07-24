@@ -10,7 +10,9 @@ import tempfile
 from pathlib import Path
 
 from taoryx.language.grammar_contracts import GrammarProfile
-from taoryx.runtime.runner import run_files
+from taoryx.modes import Quaternion
+from taoryx.runtime.common import RuntimeState, RuntimeVehicle
+from taoryx.runtime.program import LoadedProgram
 from taoryx.trim import solve_trim
 from taoryx.trim_catalog import load_trim_catalog
 from taoryx.vehicle_registry import vehicle_definition
@@ -46,22 +48,57 @@ def _candidate(source: str, state: dict[str, float], controls: dict[str, float])
     ####
 
 
-def _residual(state_values: dict[str, float], control_values: dict[str, float], work: Path) -> dict[str, float]:
-    candidate = work / "candidate.prb"
-    candidate.write_text(_candidate(PROBLEM.read_text(encoding="utf-8"), state_values, control_values), encoding="utf-8")
-    report = run_files(candidate, TABLES, output_dir=work / "run", max_steps=10, integrator="rk4", profile=GrammarProfile.TAORYX)
-    if not report.results:
-        raise RuntimeError([(item.code, item.message) for item in report.diagnostics])
-    states = report.results[0].states
-    state = next(iter(states.values()))[0].named
-    force_scale = max(float(state["mass_kg"]) * 9.80665, 1.0)
+def _state_at_alpha(base: RuntimeState, base_alpha_deg: float, alpha_deg: float) -> RuntimeState:
+    """Apply an alpha perturbation about the source release attitude.
+
+    The source problem carries a rigid-body attitude and inertial velocity;
+    alpha is therefore represented by a body-pitch perturbation, not by
+    rewriting a guidance placeholder.  This keeps the trim variable tied to
+    the same air-data calculation used by the rigid-body plant.
+    """
+
+    delta = math.radians(alpha_deg - base_alpha_deg)
+    current = Quaternion(
+        float(base.named["qw"]),
+        float(base.named["qx"]),
+        float(base.named["qy"]),
+        float(base.named["qz"]),
+    )
+    perturbation = Quaternion(math.cos(delta / 2.0), 0.0, math.sin(delta / 2.0), 0.0)
+    attitude = current.multiply(perturbation).normalized()
+    values = list(base.values)
+    for name, value in zip(("qw", "qx", "qy", "qz"), (attitude.w, attitude.x, attitude.y, attitude.z), strict=True):
+        values[base.value_names.index(name)] = value
+    return base.with_values(values)
+    ####
+
+
+def _residual(
+    state_values: dict[str, float],
+    control_values: dict[str, float],
+    vehicle: RuntimeVehicle,
+    base_state: RuntimeState,
+    base_alpha_deg: float,
+) -> dict[str, float]:
+    """Evaluate one cached source-bound plant residual in memory."""
+
+    alpha_deg = float(state_values["alpha_deg"])
+    candidate_state = _state_at_alpha(base_state, base_alpha_deg, alpha_deg)
+    vehicle.state = candidate_state
+    vehicle.history[0] = candidate_state
+    for name, value in control_values.items():
+        vehicle.control_values[name.replace("_", "-")] = float(value)
+    if vehicle.environment_evaluator is None:
+        raise RuntimeError("X-15 cached program has no rigid-body observable evaluator")
+    observed = vehicle.environment_evaluator(candidate_state.named)
+    force_scale = max(float(candidate_state.named["mass"]) * 9.80665, 1.0)
     moment_scale = max(force_scale * float(X15["reference_length_m"]), 1.0)
     return {
-        "body_x_force": float(state["total_force_body_x_n"]) / force_scale,
-        "body_z_force": float(state["total_force_body_z_n"]) / force_scale,
-        "roll_moment": float(state["total_moment_body_x_nm"]) / moment_scale,
-        "pitch_moment": float(state["total_moment_body_y_nm"]) / moment_scale,
-        "yaw_moment": float(state["total_moment_body_z_nm"]) / moment_scale,
+        "body_x_force": float(observed["total_force_body_x_n"]) / force_scale,
+        "body_z_force": float(observed["total_force_body_z_n"]) / force_scale,
+        "roll_moment": float(observed["total_moment_body_x_nm"]) / moment_scale,
+        "pitch_moment": float(observed["total_moment_body_y_nm"]) / moment_scale,
+        "yaw_moment": float(observed["total_moment_body_z_nm"]) / moment_scale,
     }
     ####
 
@@ -72,9 +109,25 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="taoryx-x15-trim-") as directory:
         work = Path(directory)
         spec = load_trim_catalog(ROOT / "verification/trim_specs.yaml").get("x15-release-glide-v1").to_spec()
+        candidate = work / "candidate.prb"
+        candidate.write_text(
+            _candidate(
+                PROBLEM.read_text(encoding="utf-8"),
+                dict(spec.state_initial),
+                dict(spec.control_initial),
+            ),
+            encoding="utf-8",
+        )
+        program = LoadedProgram.load(candidate, TABLES, profile=GrammarProfile.TAORYX)
+        vehicle = program.case().vehicles["1"]
+        if vehicle.environment_evaluator is None:
+            raise RuntimeError("X-15 source candidate did not produce a runtime evaluator")
+        base_state = vehicle.state
+        base_observables = vehicle.environment_evaluator(base_state.named)
+        base_alpha_deg = float(base_observables["aero_alpha_deg"])
         result = solve_trim(
             spec,
-            lambda state, controls: _residual(dict(state), dict(controls), work),
+            lambda state, controls: _residual(dict(state), dict(controls), vehicle, base_state, base_alpha_deg),
             max_nfev=100,
             residual_tolerance=1.0e-10,
             acceptance_tolerance=1.0e-3,
@@ -82,19 +135,41 @@ def main() -> None:
     payload = {
         "vehicle": "x15",
         "source_anchor": "source-trimmed release glide",
-        "claim": "local source-trim candidate through the common trim solver",
+        "claim": "local source-trim candidate through the common trim solver and cached rigid-body residual adapter",
         "status": "pass" if result.success else "blocked",
         "state": dict(result.state),
         "controls": dict(result.controls),
         "residual_normalized": dict(result.residuals),
         "residual_norm_l2": math.sqrt(sum(value * value for value in result.residuals.values())),
         "acceptance_gate": {"translation_norm_lt": 0.01, "rotation_norm_lt": 0.001, "passed": result.success},
+        "diagnostic": {
+            "source_only_preserved": not result.success,
+            "reason": (
+                "bounded residual solve reached the declared alpha lower bound without satisfying the "
+                "zero-wrench equilibrium gate; the source release state is not silently reclassified as a trim"
+                if not result.success
+                else "bounded residual solve satisfied the declared source-trim equilibrium gate"
+            ),
+            "state_bound_hit": bool(
+                result.state.get("alpha_deg") == result.spec.state_lower.get("alpha_deg")
+                if result.spec.state_lower
+                else False
+            ),
+            "source_release_is_equilibrium_claim": False,
+        },
         "provenance": {
             "problem": str(PROBLEM.relative_to(ROOT)),
             "problem_sha256": _sha256(PROBLEM),
             "runtime_tables": {str(path.relative_to(ROOT)): _sha256(path) for path in TABLES},
         },
-        "solver": {"success": result.success, "status": result.status, "message": result.message, "nfev": result.iterations},
+        "solver": {
+            "success": result.success,
+            "status": result.status,
+            "message": result.message,
+            "nfev": result.iterations,
+            "evaluation_path": "loaded-program-in-memory",
+            "tables_rebound_per_evaluation": False,
+        },
     }
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")

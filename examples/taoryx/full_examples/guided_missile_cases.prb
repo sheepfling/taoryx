@@ -1,0 +1,42 @@
+(guided-missile-cases)
+*title Named launch-geometry case study
+*method rk4-fixed
+*atmos 1
+*earth wgs-84
+*file guided_missile_cases.dat time alt vel range gamgd psigd wt
+
+*define initial variables
+  launch_lat = 22.0;
+  launch_long = -159.8;
+  target_lat = 39.5;
+  target_long = -175.5;
+  surface_ref(launch_lat,launch_long);
+  launch_azimuth = surface_azm(target_lat,target_long);
+  target_distance = surface_dist(target_lat,target_long);
+
+*trajectory 1 guided_vehicle start on 1
+  *initial geodetic time=0 wt=40400 alt=0 lat=launch_lat long=launch_long vel=0 gama=90 psi=launch_azimuth
+  *print time alt latgd long vel range gamgd psigd wt launch_azimuth
+  *segment 1 powered-ascent
+    *integ dtprnt=1 dt=0.05
+    *aero caxial=0.7 cnormal=0.1
+    *prop vacuum thrust=96500 mdot=396.5 snoz=3.928
+    *when tseg>5 goto 2
+  *segment 2 coast-to-apogee
+    *aero constant_beta=2000
+    *when gamgd<0 goto 3
+  *segment 3 impact
+    *aero constant_beta=2000
+    *when alt<0 stop
+
+*optimize a for vel=max on segment 3, trajectory 1
+  par-1=launch_azimuth lo-1=-180 hi-1=180 ref-1=90
+*cases
+  case launch_lat launch_long target_lat target_long
+  1 22.0 -159.8 39.5 -175.5
+  2 35.0 -106.5 37.0 -83.05
+*summarize apogee decm=0
+  add maxfit(alt[1])
+*summarize final_distance decm=2
+  add target_distance
+*end

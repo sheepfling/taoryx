@@ -94,8 +94,8 @@ TABLE_TYPES = {
     "windd",
     "output",
 }
-TAORYX_TABLE_TYPES = {"cmx", "cmy", "cmz"}
-COEFFICIENT_TABLE_TYPES = {"ca", "cn", "cl", "cd", "cs", "cx", "cy", "cz", *TAORYX_TABLE_TYPES}
+TAORYX_TABLE_TYPES = {"cmx", "cmy", "cmz", "aero_force", "aero_moment", "inertia"}
+COEFFICIENT_TABLE_TYPES = {"ca", "cn", "cl", "cd", "cs", "cx", "cy", "cz", "aero_force", "aero_moment", *TAORYX_TABLE_TYPES}
 THRUST_UNITS = {"lb", "n", "kn"}
 MASS_FLOW_UNITS = {
     "lb/sec",
@@ -286,12 +286,19 @@ def _strip_comment(line: str) -> str:
 
 def _validate_table_options(table_type: str, options: dict[str, str | float], line: int, issues: list[ParseIssue]) -> None:
     """Apply the table-parameter rules documented in Chapter 3."""
-    allowed_parameter = "sref" if table_type in COEFFICIENT_TABLE_TYPES else "units" if table_type in {"thrust", "mdot"} else None
+    if table_type in {"aero_force", "aero_moment"}:
+        allowed_parameters = {"sref", "lrefx", "lrefy"}
+    elif table_type in COEFFICIENT_TABLE_TYPES and table_type != "inertia":
+        allowed_parameters = {"sref"}
+    elif table_type in {"thrust", "mdot"}:
+        allowed_parameters = {"units"}
+    else:
+        allowed_parameters = set()
     for name, value in options.items():
         if name == "extrapolation":
             continue
         ####
-        if name != allowed_parameter:
+        if name not in allowed_parameters:
             issues.append(
                 ParseIssue(
                     severity="error",
@@ -302,7 +309,7 @@ def _validate_table_options(table_type: str, options: dict[str, str | float], li
             )
             continue
         ####
-        if name == "sref":
+        if name in {"sref", "lrefx", "lrefy"}:
             if not isinstance(value, float):
                 issues.append(
                     ParseIssue(

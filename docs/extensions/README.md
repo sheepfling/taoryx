@@ -15,6 +15,8 @@ TAOS behavior.
   terminal ProNav boundaries.
 - [Problem-file guide](problem-file-guide.md): the documentation contract for
   every `.prb`/`.tbl` fixture.
+- [Taoryx language extension reference](taoryx-language-reference.md): focused
+  syntax, aliases, AST mappings, validation, and end-to-end artifact commands.
 - [Showcase catalog](showcase-catalog.md): polished, reproducible examples
   and their expected plots.
 - [LQR](lqr.md): declarative linear-quadratic regulator configuration and
@@ -22,6 +24,8 @@ TAOS behavior.
 - [TAORYX extensions and verification guide](../latex/taoryx_extensions_and_verification.tex):
   buildable LaTeX documentation for the fidelity ladder, plant data contract,
   automatic tuning, trajectory scoring, and verification gates.
+- [TAORYX language and mathematics reference](../latex/taoryx_language_reference.tex):
+  manual-parallel coverage of successor math, problem grammar, and table syntax.
 
 Build the composite PDF, which includes that guide plus this extension reference
 set, with:

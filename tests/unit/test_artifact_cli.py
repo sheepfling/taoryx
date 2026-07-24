@@ -2,10 +2,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from taoryx.runtime.cli import main
 from taoryx.scenario import ScenarioCompiler
 
 ROOT = Path(__file__).resolve().parents[2]
+
+pytestmark = pytest.mark.plot
 
 
 def test_artifact_html_cli_consumes_json_artifact(tmp_path: Path, capsys) -> None:

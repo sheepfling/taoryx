@@ -17,6 +17,19 @@ validating, and visualizing successor-side scenarios is maintained in
 Checkpoint/restart is a release-level product goal tracked in
 [`checkpoint-restart.md`](checkpoint-restart.md).
 
+The first release-level definition of done is maintained in
+[`taoryx-alpha-1.md`](taoryx-alpha-1.md), with its machine-readable gate
+inventory in [`../../verification/alpha1_release_plan.yaml`](../../verification/alpha1_release_plan.yaml).
+That plan is the umbrella for the language, runtime, composition, fidelity
+ladder, vehicle evidence, and reproducible handoff work below.
+
+The next release-level plan is
+[`taoryx-alpha-2.md`](taoryx-alpha-2.md), with its machine-readable gate
+inventory in [`../../verification/alpha2_release_plan.yaml`](../../verification/alpha2_release_plan.yaml).
+Alpha 2 builds the catalog, immutable `ResolvedCase`, fidelity adapters, and
+explicit control-authority layer on top of Alpha 1; it is the path away from
+bespoke vehicle/mission runners.
+
 ## Completion target for the next major milestone
 
 Deliver a first integrated vertical slice:

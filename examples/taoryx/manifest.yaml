@@ -1,0 +1,52 @@
+family: taoryx
+profile: taoryx
+claim_boundary: successor grammar and explicitly supported runtime features
+syntax_fragments:
+  directory: syntax_fragments
+  output: parser-report.json
+full_examples:
+  directory: full_examples
+  output_contract: output_contract.yaml
+  cases:
+    - id: ballistic-reentry-trace
+      problem: full_examples/ballistic_reentry_trace.prb
+      execution: runtime-and-artifacts
+    - id: guided-missile-cases
+      problem: full_examples/guided_missile_cases.prb
+      execution: runtime-and-artifacts
+    - id: intercept-pair-trace
+      problem: full_examples/intercept_pair_trace.prb
+      execution: runtime-and-artifacts
+    - id: rail-guidance-trace
+      problem: full_examples/rail_guidance_trace.prb
+      execution: runtime-and-artifacts
+    - id: reentry-transition-trace
+      problem: full_examples/reentry_transition_trace.prb
+      execution: runtime-and-artifacts
+    - id: sixdof-ballistic-trace
+      problem: full_examples/sixdof_ballistic_trace.prb
+      execution: runtime-and-artifacts
+    - id: staged-rocket-trace
+      problem: full_examples/staged_rocket_trace.prb
+      execution: runtime-and-artifacts
+    - id: wind-variable-mass-trace
+      problem: full_examples/wind_variable_mass_trace.prb
+      tables:
+        - full_examples/wind_variable_mass.dat
+      execution: runtime-and-artifacts
+runtime_examples:
+  directory: full_examples/runtime
+  output_contract: output_contract.yaml
+  cases:
+    - id: suborbital_ballistic_return
+      canonical_source: showcases/suborbital_ballistic_return
+      execution: runtime-and-plots
+    - id: orbital_insertion_coast_reentry
+      canonical_source: showcases/orbital_insertion_coast_reentry
+      execution: runtime-and-plots
+    - id: quadcopter_drone_racetrack
+      canonical_source: showcases/quadcopter_drone_racetrack
+      execution: runtime-and-plots
+    - id: california_to_hawaii
+      canonical_source: showcases/california_to_hawaii
+      execution: runtime-and-plots

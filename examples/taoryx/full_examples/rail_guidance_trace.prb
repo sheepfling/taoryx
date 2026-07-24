@@ -1,0 +1,23 @@
+(rail-guidance-trace)
+*title Named variable-mass rail guidance trace
+*sixdof
+*method rk45-var variable-mass
+*atmos standard
+*earth wgs-84
+*file rail_guidance_trace.dat time alt vel range gamgd psigd wt
+
+*trajectory 1 rail_vehicle start on 1
+  *initial geodetic time=0 wt=2000 alt=0 lat=0 long=0 vel=0 gama=90 psi=90
+  *print time alt vel range gamgd psigd wt plength q_rail azm elev
+  *segment 1 guided-launch
+    *integ dtprnt=0.5 dt=0.01
+    *mass xcg=0 ixx=20 iyy=20 izz=5
+    *aero sref=1.069 lrefx=1.16667 lrefy=1.16667 caxial=0.6 cnormal=0.12
+    *prop x=-14.46 y=0 z=0 thrust=50000 mdot=6
+    *rail launch azm=325 elev=70 cfstat=0.12 cfslid=0.01
+    *increment q_rail=-0.5
+    *when plength>30 goto 2
+  *segment 2 free-flight
+    *aero caxial=0.2 cnormal=0.05
+    *when alt<0 stop
+*end

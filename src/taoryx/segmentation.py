@@ -39,6 +39,12 @@ GoalKind = Literal[
     "separation",
     "ground_contact",
     "intercept_geometry",
+    "powered_ascent",
+    "ballistic_coast",
+    "bank_maneuver",
+    "alpha_maneuver",
+    "skip_maneuver",
+    "terminal_guidance",
 ]
 EventKind = Literal[
     "time",

@@ -1,0 +1,14 @@
+(deployment-extension)
+*method rk4-fixed
+*trajectory 1 booster start on 1
+  *initial geodetic time=0 wt=1000 alt=0 lat=0 long=0 vel=1 gama=90 psi=90
+  *segment 1 powered
+    *when time>1 goto 2
+  *segment 2 coast
+    *when alt<0 stop
+
+*trajectory 2 payload start on 1
+  *deployed from trajectory 1, segment 1, wt=250
+  *segment 1 payload-coast
+    *when alt<0 stop
+*end

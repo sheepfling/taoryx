@@ -298,6 +298,24 @@ def _standard_templates() -> dict[str, tuple[SegmentTemplateInfo, SegmentFactory
     def moving_target_intercept(**kwargs: object) -> SegmentSpec:
         return _goal_segment(goal_kind="intercept_geometry", **cast(Any, kwargs))
 
+    def powered_ascent(**kwargs: object) -> SegmentSpec:
+        return _goal_segment(goal_kind="powered_ascent", **cast(Any, kwargs))
+
+    def ballistic_coast(**kwargs: object) -> SegmentSpec:
+        return _goal_segment(goal_kind="ballistic_coast", **cast(Any, kwargs))
+
+    def bank_maneuver(**kwargs: object) -> SegmentSpec:
+        return _goal_segment(goal_kind="bank_maneuver", **cast(Any, kwargs))
+
+    def alpha_profile(**kwargs: object) -> SegmentSpec:
+        return _goal_segment(goal_kind="alpha_maneuver", **cast(Any, kwargs))
+
+    def skip_maneuver(**kwargs: object) -> SegmentSpec:
+        return _goal_segment(goal_kind="skip_maneuver", **cast(Any, kwargs))
+
+    def terminal_pronav(**kwargs: object) -> SegmentSpec:
+        return _goal_segment(goal_kind="terminal_guidance", **cast(Any, kwargs))
+
     return {
         "trim_hold": (
             SegmentTemplateInfo(
@@ -355,6 +373,57 @@ def _standard_templates() -> dict[str, tuple[SegmentTemplateInfo, SegmentFactory
                 requires_reference=True,
             ),
             moving_target_intercept,
+        ),
+        "powered_ascent": (
+            SegmentTemplateInfo(
+                name="powered_ascent",
+                description="Run a bounded thrust-driven ascent or boost phase.",
+                goal_kind="powered_ascent",
+            ),
+            powered_ascent,
+        ),
+        "ballistic_coast": (
+            SegmentTemplateInfo(
+                name="ballistic_coast",
+                description="Propagate a passive or low-control ballistic coast phase.",
+                goal_kind="ballistic_coast",
+            ),
+            ballistic_coast,
+        ),
+        "bank_maneuver": (
+            SegmentTemplateInfo(
+                name="bank_maneuver",
+                description="Execute a bounded bank or lateral steering maneuver.",
+                goal_kind="bank_maneuver",
+            ),
+            bank_maneuver,
+        ),
+        "alpha_profile": (
+            SegmentTemplateInfo(
+                name="alpha_profile",
+                description="Execute a bounded angle-of-attack or phugoid profile.",
+                goal_kind="alpha_maneuver",
+            ),
+            alpha_profile,
+        ),
+        "skip_maneuver": (
+            SegmentTemplateInfo(
+                name="skip_maneuver",
+                description="Execute a bounded skip-flight entry/exit maneuver.",
+                goal_kind="skip_maneuver",
+            ),
+            skip_maneuver,
+        ),
+        "terminal_pronav": (
+            SegmentTemplateInfo(
+                name="terminal_pronav",
+                description="Hand off to terminal proportional-navigation guidance.",
+                goal_kind="terminal_guidance",
+                requires_target=True,
+                requires_tolerance=True,
+                requires_reference=True,
+            ),
+            terminal_pronav,
         ),
     }
     ####
@@ -1320,15 +1389,15 @@ def evaluate_segment(segment: SegmentSpec) -> SegmentEvaluation:
         messages.append("segment has no typed goal")
     else:
         checks.append(f"goal:{segment.goal.kind}")
-        if segment.goal.kind in {"waypoint", "altitude_capture", "heading_capture", "intercept_geometry"} and not segment.goal.target:
+        if segment.goal.kind in {"waypoint", "altitude_capture", "heading_capture", "intercept_geometry", "terminal_guidance"} and not segment.goal.target:
             status = "fail"
             messages.append("capture segment requires a non-empty target")
-        if segment.goal.kind in {"waypoint", "altitude_capture", "heading_capture", "intercept_geometry"} and not segment.goal.tolerance:
+        if segment.goal.kind in {"waypoint", "altitude_capture", "heading_capture", "intercept_geometry", "terminal_guidance"} and not segment.goal.tolerance:
             status = "fail"
             messages.append("capture segment requires a non-empty tolerance")
-        if segment.goal.kind == "intercept_geometry" and not segment.goal.reference:
+        if segment.goal.kind in {"intercept_geometry", "terminal_guidance"} and not segment.goal.reference:
             status = "fail"
-            messages.append("moving-target intercept requires a target reference")
+            messages.append("terminal guidance requires a target reference")
     if segment.controller is None:
         status = "warning" if status == "pass" else status
         messages.append("no controller binding declared")

@@ -1,0 +1,11 @@
+(mass-transition-extension)
+*sixdof
+*method rk45-var variable-mass
+
+*trajectory 1 rigid_body start on 1
+  *initial ecic x=20925646.3255 y=0 z=0 xdt=0 ydt=300 zdt=0 time=0 mass=100
+  *segment 1 rigid-body coast
+    *mass xcg=0 ixx=10 iyy=11 izz=12
+    *ptmass
+    *when time>0.2 stop
+*end

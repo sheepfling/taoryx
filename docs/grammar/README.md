@@ -23,6 +23,8 @@ python tools/dev.py test-spectre
 - [taoryx extensions](../../grammars/taoryx_extensions.ebnf) — successor-only mode syntax,
   explicitly separate from the 1995 TAOS grammar
 - [Grammar profiles](profiles.md) — selectable `taos96` and `taoryx` claim boundaries
+- [Taoryx extension reference](../extensions/taoryx-language-reference.md) — focused
+  successor syntax, aliases, AST mapping, and runtime/artifact boundary
 - `src/taoryx/language/` — parser, AST models, diagnostics, and semantic validation
 - `examples/chapter03/` and `examples/chapter04/` — extracted manual fixtures
 - `metadata/fixture_provenance.yaml` — fixture provenance and expected status

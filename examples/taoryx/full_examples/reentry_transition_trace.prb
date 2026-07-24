@@ -1,0 +1,19 @@
+(reentry-transition-trace)
+*sixdof
+*method rk4-fixed variable-mass
+*atmos standard
+*earth wgs-84
+*file reentry_transition_trace.dat time alt vel range gamgd psigd wt
+
+*trajectory 1 transition_vehicle start on 1
+  *initial ecic x=20925646 y=0 z=0 xdt=0 ydt=300 zdt=0 time=0 mass=100
+  *print time alt vel p q r yawgd pitchgd rollgd wt
+  *segment 1 attitude-controlled
+    *mass xcg=0 ixx=8 iyy=9 izz=10
+    *aero caxial=0.2 cnormal=0.1 cm=0.02 cmq=-0.01
+    *when time>1 goto 2
+  *segment 2 point-mass-handoff
+    *ptmass
+    *aero caxial=0.08
+    *when alt<0 stop
+*end

@@ -454,6 +454,7 @@ def _refresh_runtime_state(vehicle: RuntimeVehicle, state: RuntimeState, *, publ
             {key: value for key, value in named.items() if key not in vehicle.derived_definitions},
             parameters=vehicle.parameters,
             table_evaluators=vehicle.table_evaluators,
+            call_handler=vehicle.definition_call_handler,
         )
     if vehicle.definition_evaluator is not None:
         named.update(vehicle.definition_evaluator(named))

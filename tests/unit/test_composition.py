@@ -21,16 +21,23 @@ def test_standard_registry_is_discoverable() -> None:
     registry = SegmentCompositionRegistry.standard()
 
     assert registry.names() == (
+        "alpha_profile",
         "altitude_capture",
+        "ballistic_coast",
+        "bank_maneuver",
         "heading_capture",
         "hover",
         "moving_target_intercept",
+        "powered_ascent",
+        "skip_maneuver",
+        "terminal_pronav",
         "trim_hold",
         "waypoint",
     )
     assert registry.describe("waypoint").requires_target
     assert registry.describe("waypoint").requires_tolerance
     assert registry.describe("moving_target_intercept").requires_reference
+    assert registry.describe("terminal_pronav").goal_kind == "terminal_guidance"
 
 
 def test_waypoint_spec_rejects_invalid_dwell_and_tolerance() -> None:

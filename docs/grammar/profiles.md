@@ -18,6 +18,28 @@ document = parse_problem_file("mission.prb", profile=GrammarProfile.TAORYX)
 
 The default is `taos96` so callers must opt into the successor claim. Existing
 TAOS fixtures remain valid and continue to be parsed without a TAORYX profile.
+
+## Runtime boundary
+
+The repository has a local TAOS96-compatible runtime emulator. It can execute
+historical `.prb` files whose referenced table decks are available, including
+survey cases, and can emit normalized artifacts, telemetry, and plots. Missing
+historical table decks are reported as unavailable inputs. This is execution
+of the reconstructed local subset, not a claim of bit-for-bit compatibility
+with the original TAOS 96 executable or table library.
+
+Run the complete indexed corpus with:
+
+```bash
+PYTHONPATH=src .venv/bin/python examples/run_corpus.py \
+  --family all --execute --output artifacts/examples/all
+```
+
+The report separates parse errors, runtime failures, incomplete step-budget
+runs, and unavailable table inputs. TAORYX examples use the successor runtime
+path and may include explicitly supported rigid-body, deployment, and artifact
+features.
+
 The current dynamics directives are:
 
 ```text
@@ -43,9 +65,9 @@ replaces the file declarations; this avoids silently merging contradictory
 control definitions. Batch model-specific actuator application remains an
 explicit adapter responsibility.
 The new `*3dof`/`*6dof` directives are successor-only and are rejected unless
-the `taoryx` profile is selected. Runtime lowering will not claim execution of
-`*6dof` until the rigid-body problem builder is connected to the main runtime
-kernel.
+the `taoryx` profile is selected. Explicitly supported successor runtime cases
+lower into the shared runtime kernel; unsupported features produce a located
+runtime diagnostic rather than being silently treated as historical TAOS.
 
 A future extension must provide all of the following before it is considered
 part of the TAORYX profile:

@@ -1,0 +1,18 @@
+schema_version: 1
+generated_root: artifacts/examples/taoryx
+files:
+  run_report: run.json
+  normalized_artifact: artifact.json
+  telemetry: telemetry.csv
+  plots: plots/
+  html_report: report.html
+run_command: >-
+  taoryx run <problem> [tables...] --profile taoryx
+  --output-dir artifacts/examples/taoryx/<case-id>
+plot_command: >-
+  taoryx artifact plot artifacts/examples/taoryx/<case-id>/artifact.json
+  --output-dir artifacts/examples/taoryx/<case-id>/plots
+analysis_entry_points:
+  - artifact.json
+  - telemetry.csv
+  - run.json

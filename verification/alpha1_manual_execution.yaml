@@ -1,0 +1,67 @@
+schema_version: 1
+release: taoryx-alpha-1
+description: >-
+  Metadata-driven execution profiles for the four manual Chapter 4 families.
+  The source profile is always attempted first. The companion profile resolves
+  synthetic optimization placeholders and only changes synthetic stand-in
+  data; it is runtime-plumbing evidence, not historical output evidence.
+claim_boundary: >-
+  Companion execution proves bounded TAORYX 3-DOF route composition for the
+  documented family shape. It does not prove historical TAOS 96.0 optimizer
+  behavior, source trajectory values, or intercept performance.
+cases:
+  - id: ballistic-reentry
+    source_problem: examples/chapter04/ballistic-reentry.prb
+    fixture: p032_manual_ballistic_reentry
+    source_section: 4.5.1
+    companion:
+      remove_optimization: false
+      substitutions: {}
+      table_overrides: []
+  - id: ballistic-rocket
+    source_problem: examples/chapter04/ballistic-rocket.prb
+    fixture: p033_manual_ballistic_rocket_synthetic
+    source_section: 4.5.2
+    companion:
+      remove_optimization: true
+      substitutions:
+        opta-1: '85.0'
+        opta-2: '-90.0'
+        opta-3: '200.0'
+      table_overrides: []
+  - id: air-launched-intercept
+    source_problem: examples/chapter04/air-launched-intercept.prb
+    fixture: p034_manual_air_intercept_synthetic
+    source_section: 4.5.3
+    companion:
+      remove_optimization: true
+      substitutions:
+        opta-1: '0.0'
+        opta-2: '1.25'
+        opta-3: '2.50'
+        opta-4: '3.75'
+        opta-5: '5.00'
+        opta-6: '0.0'
+        opta-7: '2.0'
+        opta-8: '4.0'
+        opta-9: '6.0'
+        opta-10: '8.0'
+        opta-11: '10.0'
+        opta-12: '13.1'
+        opta-13: '3.50'
+      table_overrides:
+        - file: synthetic-017.tbl
+          find: '10000,10000'
+          replace: '20000,20000'
+          reason: >-
+            The original synthetic target deck is not strong enough to leave
+            the rail; this companion-only override supplies positive launch
+            acceleration and is not a source-data claim.
+  - id: ground-launched-intercept
+    source_problem: examples/chapter04/ground-launched-intercept.prb
+    fixture: p035_manual_ground_intercept_synthetic
+    source_section: 4.5.4
+    companion:
+      remove_optimization: false
+      substitutions: {}
+      table_overrides: []

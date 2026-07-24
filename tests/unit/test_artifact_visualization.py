@@ -7,6 +7,10 @@ from taoryx.visualization import render_run_artifact_html, render_run_artifact_p
 
 ROOT = Path(__file__).resolve().parents[2]
 
+import pytest
+
+pytestmark = pytest.mark.plot
+
 
 def test_run_artifact_html_records_missing_channels_without_source_parsing(tmp_path: Path) -> None:
     scenario = ScenarioCompiler().compile(

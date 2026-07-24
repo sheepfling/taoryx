@@ -63,6 +63,42 @@ the verification baseline.
 states what must be true before the layer is considered strong enough for a
 release claim.
 
+`alpha1_release_plan.yaml` is the machine-readable Alpha 1 release inventory.
+The human-readable release plan is
+[`docs/plan/taoryx-alpha-1.md`](../docs/plan/taoryx-alpha-1.md). It combines the
+language, canonical step transition, composition, fidelity-ladder, vehicle
+evidence, and reproducible-handoff gates without widening the historical TAOS
+96.0 claim.
+
+Regenerate the bounded Alpha 1 feature matrix and current gate report with:
+
+```bash
+python tools/dev.py alpha1-feature-matrix
+python tools/dev.py alpha1-composition-case
+python tools/dev.py audit-alpha1
+python tools/dev.py alpha1-packet
+```
+
+The matrix is derived from the documented-surface coverage registry and links
+each scoped block, table type, and table operation to its grammar, semantic
+registry, implementation owner, fixture cases, tests, and requirement group.
+The report is evidence status, not a historical TAOS 96.0 compatibility claim.
+
+`alpha2_release_plan.yaml` is the machine-readable Alpha 2 release inventory.
+The human-readable plan is
+[`docs/plan/taoryx-alpha-2.md`](../docs/plan/taoryx-alpha-2.md). It adds the
+versioned Vehicle Family Package, immutable `ResolvedCase`, fidelity adapters,
+loadouts, reusable mission segments, and explicit autopilot/AI/player control
+authority on top of Alpha 1.
+
+The companion [Vehicle Readiness Guide](../docs/plan/vehicle-readiness-guide.md)
+defines the M0–M6 maturity ladder, per-dimension qualification scorecard,
+graded composition statuses, typed start contracts, classified finality,
+trajectory evaluation, evidence classes, and readiness badges. M5
+`Qualified / Pickup-Ready` is a bounded qualification claim, not a claim that
+one runnable example proves the entire family or its real-world predictive
+accuracy.
+
 `acceptance/robustness_matrix_v1.yaml` is the executable claim boundary for
 the paired slower-vehicle examples. Run it with `python tools/dev.py
 robustness-matrix`; the ignored report is written below

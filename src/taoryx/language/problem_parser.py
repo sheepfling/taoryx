@@ -23,6 +23,8 @@ from taoryx.language.grammar_contracts import (
     SUPPORTED_PROBLEM_BLOCKS,
     SUPPORTED_SEGMENT_BLOCKS,
     SUPPORTED_TAORYX_PROBLEM_BLOCKS,
+    SUPPORTED_TAORYX_SEGMENT_BLOCKS,
+    SUPPORTED_TAORYX_TRAJECTORY_BLOCKS,
     SUPPORTED_TRAJECTORY_BLOCKS,
     GrammarProfile,
 )
@@ -39,6 +41,7 @@ from taoryx.language.models import (
     DownrangeCrossrangeBlock,
     EarthBlock,
     EgsBlock,
+    ExtensionBlock,
     FileBlock,
     FlyBlock,
     FlyPoint,
@@ -110,13 +113,14 @@ _SURVEY_SETTING_RE = re.compile(r"(?P<name>lo|hi|inc|vals)\s*=\s*(?P<values>.*?)
 _SURVEY_NUMBER_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[EeDd][+-]?\d+)?$")
 _SEARCH_CONTROL_NAMES = {"xlo", "xhi", "xest", "dx", "tol", "xref", "fref", "maxitr", "integ", "print"}
 _RADAR_PARAMETER_NAMES = {"alt", "long", "latgd", "diste", "distn", "distd", "reqtr", "rpolr", "flat", "ecc"}
-_RAIL_PARAMETER_NAMES = {"cfstat", "cfslid"}
+_RAIL_PARAMETER_NAMES = {"cfstat", "cfslid", "azm", "elev"}
 _INTEGRATION_PARAMETER_NAMES = {"dt", "dtprnt", "dtguid"}
 _RESET_INCREMENT_VARIABLE_NAMES = {
     "alt", "long", "latgd", "rcm", "latgc", "xecfc", "yecfc", "zecfc", "xecic", "yecic", "zecic",
     "dxb", "dyb", "dzb", "vel", "gamgc", "psigc", "gamgd", "psigd", "xecfcdt", "yecfcdt", "zecfcdt",
     "xecicdt", "yecicdt", "zecicdt", "wt", "mass", "fuel", "time", "tseg", "tmark", "range", "grseg",
     "grmark", "plength", "plseg", "plmark", "iip_beta", "velibx",
+    "q_rail", "azm", "elev",
 }
 _RESET_INCREMENT_COORDINATE_FAMILIES = {
     "geodetic": {"alt", "latgd", "gamgd", "psigd"},
@@ -131,7 +135,7 @@ _AERO_COEFFICIENT_SETS = (
 )
 _FORMAT_RE = re.compile(r"^[ef]\.\d+$", re.IGNORECASE)
 _RUNTIME_ATTRIBUTE_RE = re.compile(r"(?P<name>[A-Za-z_][A-Za-z0-9_.-]*)=(?P<value>\"[^\"]*\"|'[^']*'|[^\s]+)")
-_ATMOS_STANDARD_MODELS = {"none", "standard", *{str(number) for number in range(21)}}
+_ATMOS_STANDARD_MODELS = {"none", "standard", "rcc", *{str(number) for number in range(21)}}
 _EARTH_MODELS = {"spherical", "wgs-72", "wgs-84", "tsap-72", "tsap-84", "wgs-84-full", "gem-t1-full"}
 _EARTH_PARAMETER_NAMES = {"reqtr", "rpolr", "ecc", "flat", "omega", "g", "gm", "j2", "j3", "j4", "c20", "c22", "c30", "c31", "c32", "c33", "c40", "c41", "c42", "c43", "c44", "s22", "s31", "s32", "s33", "s41", "s42", "s43", "s44"}
 _OUTPUT_VARIABLE_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*(?:\[\d+\])*$")
@@ -140,8 +144,8 @@ _WIND_COMPONENT_NAMES = {"winde", "windn", "windd"}
 _SUMMARY_OPERATIONS_WITH_OPERAND = {"add", "sub", "mult", "div", "idiv", "exp", "iexp"}
 _SUMMARY_OPERATIONS_WITHOUT_OPERAND = {"abs", "neg", "sqr", "sqrt", "ln", "log", "e", "sin", "cos", "tan", "asin", "acos", "atan"}
 _FORBIDDEN_LIMIT_VARIABLES = {"intercept", "prop", "propnav", "downria", "upria", "l/d-max", "l/d_max"}
-_SUMMARY_FUNCTION_RE = re.compile(r"^(?P<function>max|min|first|last)\((?P<value>[^()]+)\)(?:\s+trajectory\s+(?P<trajectory>\d+))?$", re.IGNORECASE)
-_SUMMARY_SEGMENT_RE = re.compile(r"^(?P<value>\S+)\s+on\s+segment\s+(?P<segment>\d+)(?:\s*,?\s*trajectory\s+(?P<trajectory>\d+))?$", re.IGNORECASE)
+_SUMMARY_FUNCTION_RE = re.compile(r"^(?P<function>max|min|first|last|maxfit|minfit)\((?P<value>[^()]+)\)(?:\s+trajectory\s+(?P<trajectory>\d+))?$", re.IGNORECASE)
+_SUMMARY_SEGMENT_RE = re.compile(r"^(?P<value>[^,\s]+)\s*,?\s+on\s+segment\s+(?P<segment>\d+)(?:\s*,?\s*trajectory\s+(?P<trajectory>\d+))?$", re.IGNORECASE)
 _INITIAL_VARIABLES = {
     "geodetic": {"alt", "long", "lat", "vel", "gamma", "gama", "psi", "mach", "wt", "mass", "time", "range", "path", "t_0", "t_epoch", "omega_0"},
     "geocentric": {"rcm", "long", "lat", "vel", "gamma", "gama", "psi", "mach", "wt", "mass", "time", "range", "path", "t_0", "t_epoch", "omega_0"},
@@ -249,9 +253,9 @@ _PROP_THRUST_UNITS = {"lb", "n", "kn"}
 _PROP_MASS_FLOW_UNITS = {"lb/sec", "lb/min", "lb/hr", "slugs/sec", "slugs/min", "slugs/hr", "g/sec", "g/min", "g/hr", "kg/sec", "kg/min", "kg/hr"}
 _DOCUMENTED_DEFINE_FUNCTIONS = {
     "abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "cosh", "exp", "floor",
-    "log", "log10", "max", "sin", "sinh", "sqrt", "table", "tan", "tanh",
+    "log", "log10", "max", "sin", "sinh", "sqrt", "surface_azm", "surface_dist", "table", "tan", "tanh",
 }
-_DOCUMENTED_DEFINE_FUNCTION_ARITY = {name: 1 for name in _DOCUMENTED_DEFINE_FUNCTIONS} | {"atan2": 2}
+_DOCUMENTED_DEFINE_FUNCTION_ARITY = {name: 1 for name in _DOCUMENTED_DEFINE_FUNCTIONS} | {"atan2": 2, "surface_azm": 2, "surface_dist": 2}
 _CONTINUATION_PARAMETER_NAMES = {
     "dwn/crs": {"latgd", "long", "azm"},
     "earth": _EARTH_PARAMETER_NAMES,
@@ -702,7 +706,7 @@ def _validate_segment_termination(trajectory: Trajectory, diagnostics: list[Diag
 
 def _validate_trajectory_structure(trajectory: Trajectory, diagnostics: list[Diagnostic]) -> None:
     """Require the documented initial-condition and segment children."""
-    if not any(isinstance(block, InitialBlock) for block in trajectory.blocks):
+    if not any(isinstance(block, InitialBlock) for block in trajectory.blocks) and not any(block.keyword == "deployed" for block in trajectory.blocks):
         diagnostics.append(
             Diagnostic(
                 severity=Severity.ERROR,
@@ -1282,7 +1286,7 @@ def _validate_search_controls(assignments: list[Assignment], path: str, line: in
 ####
 
 
-def _validate_optimize_controls(assignments: list[Assignment], path: str, line: int, diagnostics: list[Diagnostic]) -> None:
+def _validate_optimize_controls(assignments: list[Assignment], path: str, line: int, diagnostics: list[Diagnostic], *, allow_symbolic: bool = False) -> None:
     seen: set[str] = set()
     for assignment in assignments:
         name = assignment.name.casefold()
@@ -1297,7 +1301,7 @@ def _validate_optimize_controls(assignments: list[Assignment], path: str, line: 
             )
         seen.add(name)
         if name in _OPTIMIZE_CONTROL_NAMES or re.fullmatch(r"(?:par|lo|hi|ref)-\d+", name):
-            if not _is_numeric_parameter_value(assignment.value):
+            if not _is_numeric_parameter_value(assignment.value) and not (allow_symbolic and isinstance(assignment.value, NameExpression)):
                 diagnostics.append(
                     Diagnostic(
                         severity=Severity.ERROR,
@@ -2168,12 +2172,18 @@ def _make_block(
         common["assignments"] = []
     words = _free_fields(header)
     mapping = {
+        "method": ExtensionBlock,
+        "mass": ExtensionBlock,
+        "ptmass": ExtensionBlock,
+        "deployed": ExtensionBlock,
+        "cases": ExtensionBlock,
         "atmos": AtmosBlock,
         "earth": EarthBlock,
         "title": TitleBlock,
         "mode": ModeBlock,
         "3dof": DofDirectiveBlock,
         "6dof": DofDirectiveBlock,
+        "sixdof": DofDirectiveBlock,
         "define": DefineBlock,
         "egs": EgsBlock,
         "file": FileBlock,
@@ -2210,6 +2220,28 @@ def _make_block(
         return None
     ####
     extra: dict[str, Any] = {}
+    if cls is ExtensionBlock:
+        if keyword == "method":
+            fields = _free_fields(header)
+            extra["method"] = fields[0].casefold() if fields else None
+            extra["options"] = [field.casefold() for field in fields[1:]]
+        elif keyword == "deployed":
+            match = re.fullmatch(
+                r"\s*from\s+trajectory\s+(?P<trajectory>\d+)\s*,?\s*segment\s+(?P<segment>\d+)\s*(?:,?\s*wt\s*=\s*(?P<weight>.+))?\s*",
+                header,
+                re.IGNORECASE,
+            )
+            if match:
+                extra["source_trajectory"] = int(match.group("trajectory"))
+                extra["source_segment"] = int(match.group("segment"))
+                if match.group("weight"):
+                    try:
+                        extra["deployed_weight"] = _parse_value(match.group("weight"))
+                    except ExpressionSyntaxError as exc:
+                        diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-deployed-weight", message=str(exc), location=_location(path, line)))
+            else:
+                diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-deployed-header", message="Expected '*deployed from trajectory N, segment N, wt=value'.", location=_location(path, line)))
+        return cls(**common, **extra)
     if keyword == "runtime":
         fields = _free_fields(header)
         declaration = fields[0].casefold() if fields else None
@@ -2233,8 +2265,10 @@ def _make_block(
         extra["model"] = words[0] if words else None
         if keyword == "atmos":
             model = (words[0] if words else "").casefold()
-            if model not in _ATMOS_STANDARD_MODELS | {"user", "site"} or len(words) != 1:
+            if model not in _ATMOS_STANDARD_MODELS | {"user", "site"} or (model != "rcc" and len(words) != 1) or (model == "rcc" and len(words) not in {1, 2}):
                 diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-atmos-header", message="Expected '*atmos 0..20', '*atmos standard|none', '*atmos user', or '*atmos site'.", location=_location(path, line)))
+            else:
+                extra["options"] = [word.casefold() for word in words[1:]]
         else:
             model = (words[0] if words else "").casefold()
             if model not in _EARTH_MODELS:
@@ -2254,7 +2288,7 @@ def _make_block(
                     location=_location(path, line),
                 )
             )
-    elif keyword in {"3dof", "6dof"}:
+    elif keyword in {"3dof", "6dof", "sixdof"}:
         extra["mode"] = "point-mass" if keyword == "3dof" else "rigid-body-6dof"
     elif keyword == "define":
         integral_match = re.fullmatch(r"\s*integral\s+([A-Za-z_][A-Za-z0-9_.-]*)\s*=\s*(.+?)\s*", header, re.IGNORECASE)
@@ -2276,7 +2310,11 @@ def _make_block(
                     )
                 )
         else:
-            extra["variable"] = words[0] if words else None
+            if re.fullmatch(r"\s*initial\s+variables\s*", header, re.IGNORECASE):
+                extra["declaration"] = "initial variables"
+                extra["variable"] = None
+            else:
+                extra["variable"] = words[0] if words else None
     elif keyword in {"egs", "file"}:
         if keyword == "egs" and words and words[0].casefold() == "summary":
             extra["summary"] = True
@@ -2330,8 +2368,12 @@ def _make_block(
         else:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-survey-header", message="Expected '*survey N name'.", location=_location(path, line)))
     elif keyword == "summarize":
-        extra["name"] = words[0] if words else None
-        if len(words) != 1:
+        summary_match = re.fullmatch(r"\s*(?P<name>\S+)(?:\s+decm\s*=\s*(?P<decm>\d+))?\s*", header, re.IGNORECASE)
+        if summary_match:
+            extra["name"] = summary_match.group("name")
+            extra["options"] = {"decm": summary_match.group("decm")} if summary_match.group("decm") is not None else {}
+        else:
+            extra["name"] = words[0] if words else None
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-summarize-header", message="Expected '*summarize name'.", location=_location(path, line)))
     elif keyword == "radar":
         match = re.fullmatch(r"\s*(\d+)\s+(\S+)(?:\s+(.*?))?\s*", header)
@@ -2353,10 +2395,17 @@ def _make_block(
         if coordinate is None:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-wind-header", message="Expected '*wind geocentric' or '*wind geodetic'.", location=_location(path, line)))
         assignment_header = header[coordinate_match.end() :].strip() if coordinate_match else header
-        _validate_named_header("wind", assignment_header, common["assignments"], _WIND_SPEED_NAMES | _WIND_COMPONENT_NAMES, path, line, diagnostics)
-        if common["assignments"]:
-            _validate_wind(common["assignments"], path, line, diagnostics)
-        extra["wind_form"] = _wind_form(common["assignments"])
+        file_match = re.search(r"\bfile\s*=\s*([^\s]+)", assignment_header, re.IGNORECASE)
+        units_match = re.search(r"\bunits\s*=\s*([^\s]+)", assignment_header, re.IGNORECASE)
+        if file_match:
+            extra["filename"] = file_match.group(1)
+            extra["units"] = units_match.group(1) if units_match else None
+            common["assignments"] = []
+        else:
+            _validate_named_header("wind", assignment_header, common["assignments"], _WIND_SPEED_NAMES | _WIND_COMPONENT_NAMES, path, line, diagnostics)
+            if common["assignments"]:
+                _validate_wind(common["assignments"], path, line, diagnostics)
+            extra["wind_form"] = _wind_form(common["assignments"])
     elif keyword == "fly":
         extra.update(_parse_fly(header, path, line, diagnostics))
     elif keyword == "rail":
@@ -2394,7 +2443,11 @@ def _make_block(
     elif keyword == "tangent":
         _validate_named_header(keyword, header, common["assignments"], {"latgd", "long", "alt", "azm"}, path, line, diagnostics)
     elif keyword in {"aero", "constants", "cg", "prop"}:
-        _validate_named_header(keyword, header, common["assignments"], None, path, line, diagnostics)
+        if keyword == "prop" and re.match(r"\s*vacuum\b", header, re.IGNORECASE):
+            common["assignments"] = _assignments(re.sub(r"^\s*vacuum\b", "", header, flags=re.IGNORECASE), path, line, diagnostics)
+            extra["variant"] = "vacuum"
+        else:
+            _validate_named_header(keyword, header, common["assignments"], None, path, line, diagnostics)
     elif keyword == "integ":
         _validate_named_header(keyword, header, common["assignments"], _INTEGRATION_PARAMETER_NAMES, path, line, diagnostics)
     elif keyword in {"reset", "increment"}:
@@ -2774,17 +2827,22 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
                 continue
             ####
             problem_keywords = (SUPPORTED_PROBLEM_BLOCKS | SUPPORTED_TAORYX_PROBLEM_BLOCKS) - {"define", "file", "print"}
-            trajectory_keywords = SUPPORTED_TRAJECTORY_BLOCKS - {"define", "file", "print"}
+            # Keep successor directives in the dispatch set even when a
+            # profile catalog is narrowed by an embedding application.
+            problem_keywords |= {"3dof", "6dof", "sixdof"}
+            trajectory_catalog = SUPPORTED_TRAJECTORY_BLOCKS | (SUPPORTED_TAORYX_TRAJECTORY_BLOCKS if document.grammar_profile is GrammarProfile.TAORYX else set())
+            segment_catalog = SUPPORTED_SEGMENT_BLOCKS | (SUPPORTED_TAORYX_SEGMENT_BLOCKS if document.grammar_profile is GrammarProfile.TAORYX else set())
+            trajectory_keywords = trajectory_catalog - {"define", "file", "print"}
             if keyword in problem_keywords:
                 scope = "problem"
                 current_segment = None
                 current_trajectory = None
-                if keyword in {"3dof", "6dof", "random", "runtime"} and document.grammar_profile is GrammarProfile.TAOS96:
+                if keyword in {"3dof", "6dof", "sixdof", "random", "runtime", "method", "cases"} and document.grammar_profile is GrammarProfile.TAOS96:
                     document.diagnostics.append(
                         Diagnostic(
                             severity=Severity.ERROR,
                             code="taoryx-extension-requires-profile",
-                            message=f"*{keyword} is a TAORYX extension; parse with profile=taoryx.",
+                            message=f"*{keyword} is a Taoryx extension; parse with profile=taoryx.",
                             location=_location(path, number),
                         )
                     )
@@ -2807,7 +2865,7 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
                 # Preserve the established segment-level compatibility form
                 # for *print; *file has a distinct manual-level boundary.
                 scope = "segment" if current_segment is not None else "trajectory" if current_trajectory is not None else "problem"
-            elif keyword in SUPPORTED_SEGMENT_BLOCKS:
+            elif keyword in segment_catalog:
                 # Segment blocks never change meaning based on the current
                 # enclosing scope.  Keep the declared scope so the attachment
                 # check below can reject a misplaced block instead of giving
@@ -2913,6 +2971,11 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
             current_block.statements.append(RawStatement(text=original, location=_location(path, number)))
             if isinstance(current_block, DefineBlock):
                 stripped = line.strip()
+                helper_match = re.fullmatch(r"(surface_ref)\s*\(([^()]*)\)\s*;?", stripped, re.IGNORECASE)
+                if helper_match:
+                    current_block.helper_calls.append(stripped)
+                    pending_define = ""
+                    continue
                 if match := _IF_BRACE_RE.fullmatch(stripped):
                     try:
                         condition = parse_expression(match.group("condition").strip())
@@ -3050,7 +3113,7 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
                 diagnostic_start = len(document.diagnostics)
                 assignments = _assignments(line, path, number, document.diagnostics)
                 recover_assignment_diagnostics(diagnostic_start, number, line)
-                _validate_optimize_controls(assignments, path, number, document.diagnostics)
+                _validate_optimize_controls(assignments, path, number, document.diagnostics, allow_symbolic=document.grammar_profile is GrammarProfile.TAORYX)
                 if assignments and _diagnose_assignment_residual(line, "optimize", path, number, document.diagnostics):
                     recover_diagnostic(document.diagnostics[-1])
                 elif not assignments and len(document.diagnostics) == diagnostic_start:
@@ -3296,6 +3359,14 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
                 _parse_atmos_body(current_block, line.strip(), path, number, document.diagnostics)
                 if len(document.diagnostics) > before:
                     recover(line, document.diagnostics[-1].code, number)
+            elif isinstance(current_block, ExtensionBlock):
+                current_block.raw_lines.append(line)
+                fields = line.strip().split()
+                if current_block.keyword == "cases" and fields:
+                    if not current_block.columns:
+                        current_block.columns.extend(fields)
+                    else:
+                        current_block.rows.append(fields)
             else:
                 diagnostic_start = len(document.diagnostics)
                 assignments = _assignments(line, path, number, document.diagnostics)
@@ -3450,7 +3521,7 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
                 _validate_limits(block, document.diagnostics)
                 for diagnostic in document.diagnostics[before:]:
                     recover_diagnostic(diagnostic)
-            if isinstance(block, AeroBlock):
+            if isinstance(block, AeroBlock) and document.grammar_profile is GrammarProfile.TAOS96:
                 coefficient_names = {assignment.name.casefold() for assignment in block.assignments}
                 present_sets = [coefficient_set & coefficient_names for coefficient_set in _AERO_COEFFICIENT_SETS if coefficient_set & coefficient_names]
                 if len(present_sets) > 1:
@@ -3473,7 +3544,7 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
                 _validate_reset_increment(block, problem, document.diagnostics)
                 for diagnostic in document.diagnostics[before:]:
                     recover_diagnostic(diagnostic)
-            if isinstance(block, WindBlock) and block.coordinate_system is not None and len(block.assignments) != 3:
+            if isinstance(block, WindBlock) and block.coordinate_system is not None and block.filename is None and len(block.assignments) != 3:
                 document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-wind-components", message="A '*wind' block requires exactly windd plus either windv/windh or winde/windn.", location=block.location))
                 recover_diagnostic(document.diagnostics[-1])
             if isinstance(block, WindBlock) and block.wind_form is None and len(block.assignments) == 3:
@@ -3490,7 +3561,7 @@ def parse_problem_text(text: str, path: str = "<memory>", *, profile: GrammarPro
             if isinstance(block, (FileBlock, EgsBlock)) and block.filename is not None and not getattr(block, "summary", False) and not block.variables:
                 document.diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-output-variables", message=f"'*{block.keyword}' requires at least one output variable.", location=block.location))
                 recover_diagnostic(document.diagnostics[-1])
-            if isinstance(block, PrintBlock) and len(block.variables) > 10:
+            if isinstance(block, PrintBlock) and len(block.variables) > 10 and document.grammar_profile is GrammarProfile.TAOS96:
                 document.diagnostics.append(
                     Diagnostic(
                         severity=Severity.ERROR,

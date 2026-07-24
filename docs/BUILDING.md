@@ -60,6 +60,19 @@ python3 tools/dev.py doctor
 python3 scripts/doctor.py --strict
 ```
 
+For the complete PDF workflow, use the documentation-specific diagnosis:
+
+```bash
+python3 tools/dev.py docs-doctor
+```
+
+This checks Python packages, both LaTeX engines, `latexmk`, Pandoc, Poppler,
+`qpdf`, and the frozen manual plus successor LaTeX sources. A missing tool is
+reported with its PATH status. On macOS, the external tool bundle is typically
+installed with `brew install mactex-no-gui pandoc poppler qpdf`; on Debian or
+Ubuntu, install `texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+latexmk pandoc poppler-utils qpdf`.
+
 The strict form fails when required Python packages or core manual-build tools
 are unavailable. Optional audit/report tools are reported as warnings.
 
@@ -144,10 +157,47 @@ The normalized guide is written to
 `output/pdf/taoryx_extensions_and_verification.pdf`. Its source is
 `docs/latex/taoryx_extensions_and_verification.tex`.
 
+The manual-parallel language and mathematics reference is built separately:
+
+```bash
+python tools/dev.py language-reference
+```
+
+Its normalized output is
+`output/pdf/taoryx_language_reference.pdf`, sourced from
+`docs/latex/taoryx_language_reference.tex`. It is organized around successor
+mathematics, problem grammar, and table syntax to parallel the historical
+manual's Methods, Problem Files, and Table Files coverage.
+
+## Junior PDF workflow
+
+Run the doctor first, then choose either the complete build or one target:
+
+```bash
+python tools/dev.py docs-doctor
+python tools/dev.py all-pdfs
+```
+
+The individual targets are:
+
+| Command | Output |
+| --- | --- |
+| `python tools/dev.py manual` | `build/manual.pdf` — frozen historical manual rebuild |
+| `python tools/dev.py successor-guide` | `output/pdf/taoryx_extensions_and_verification.pdf` |
+| `python tools/dev.py language-reference` | `output/pdf/taoryx_language_reference.pdf` |
+| `python tools/dev.py taoryx-extension-pdf` | `output/pdf/taoryx_extensions_composite.pdf` |
+| `python tools/dev.py all-pdfs` | all four outputs above |
+
+`all-pdfs` never edits the historical manual source. It rebuilds the existing
+frozen manual PDF, the separate successor LaTeX documents, and their composite.
+If a build fails, rerun `docs-doctor`, then run the individual target named in
+the failing command to isolate the missing tool or source problem.
+
 ## Build the composite TAORYX extension PDF
 
-The repeatable composite stage combines the LaTeX verification guide with the
-canonical Markdown extension references, then normalizes the merged PDF:
+The repeatable composite stage combines the LaTeX verification guide, the
+manual-parallel language reference, and the canonical Markdown extension
+references, then normalizes the merged PDF:
 
 ```bash
 python tools/dev.py taoryx-extension-pdf

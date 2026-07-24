@@ -16,9 +16,9 @@ def evaluate_summary(values: Sequence[float], operation: str, *, argument: float
         return numbers[0]
     if name == "last":
         return numbers[-1]
-    if name == "min":
+    if name in {"min", "minfit"}:
         return min(numbers)
-    if name == "max":
+    if name in {"max", "maxfit"}:
         return max(numbers)
     if name == "interpolate":
         if argument is None or not 0.0 <= argument <= 1.0:

@@ -9,7 +9,15 @@ import pytest
 
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.runtime.runner import RunReport, run_files
-from taoryx.validation import PhaseWindow, independent_force_closure, independent_moment_closure, require_bounded, require_net_change, specific_energy
+from taoryx.validation import (
+    PhaseWindow,
+    independent_force_closure,
+    independent_moment_closure,
+    require_bounded,
+    require_change_of_sign,
+    require_net_change,
+    specific_energy,
+)
 from taoryx.visualization import render_run_artifact_plots
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -19,6 +27,8 @@ GLIDER_6DOF = ROOT / "examples/showcases/x15_rocket_to_hawaii/long_unpowered_gli
 GLIDER_ROUTE_GEOMETRY_6DOF = ROOT / "examples/showcases/x15_rocket_to_hawaii/route_geometry_diagnostic_6dof.prb"
 GLIDER_6DOF_TABLES = (ROOT / "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl",)
 GLIDER_BANK_REVERSAL_6DOF = ROOT / "examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_bank_reversal_6dof.prb"
+X15_PHUGOID_3DOF = ROOT / "examples/showcases/x15_rocket_to_hawaii/x15_phugoid_3dof.prb"
+X15_WEAVE_6DOF = ROOT / "examples/showcases/x15_rocket_to_hawaii/x15_weave_6dof.prb"
 GLIDER_TRIM_HOLD_6DOF = ROOT / "examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb"
 GLIDER_TRIM_THEN_PROPNAV_6DOF = ROOT / "examples/showcases/x15_rocket_to_hawaii/source_trim_then_propnav_6dof.prb"
 X15_SURFACE_HOLD_PROBLEM = ROOT / "examples/showcases/x15_rocket_to_hawaii/short_range_propnav_6dof.prb"
@@ -64,12 +74,28 @@ def _run_glider_6dof(problem: Path, output_dir: Path, *, max_steps: int = 6_000)
 ####
 
 
+def _run_x15_phugoid_3dof(output_dir: Path) -> RunReport:
+    """Run the source-deck point-mass alpha/energy profile."""
+
+    return run_files(
+        X15_PHUGOID_3DOF,
+        (ROOT / "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl",),
+        output_dir=output_dir,
+        max_steps=3_000,
+        integrator="rk4",
+        profile=GrammarProfile.TAORYX,
+    )
+####
+
+
 def _history(report: RunReport) -> tuple[dict[str, float], ...]:
     assert report.results and report.results[0].completed
     return tuple({"time_s": state.time, **dict(state.named)} for state in report.results[0].states["1"])
 ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof3
 def test_glider_extension_candidate_has_release_and_terminal_phases(tmp_path: Path) -> None:
     """The current 3DOF glider path remains unpowered and loses energy."""
 
@@ -91,6 +117,8 @@ def test_glider_extension_candidate_has_release_and_terminal_phases(tmp_path: Pa
 ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_glider_6dof_long_release_energy_management_and_terminal_descent(tmp_path: Path) -> None:
     """The source-anchored glider trades energy and reaches terminal descent."""
 
@@ -116,6 +144,8 @@ def test_glider_6dof_long_release_energy_management_and_terminal_descent(tmp_pat
 ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_glider_6dof_source_trim_hold_stays_inside_strict_envelope(tmp_path: Path) -> None:
     """A source-table rudder trim establishes a bounded 30-second plant case."""
 
@@ -140,6 +170,8 @@ def test_glider_6dof_source_trim_hold_stays_inside_strict_envelope(tmp_path: Pat
 ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_glider_6dof_native_propnav_activates_after_source_trim(tmp_path: Path) -> None:
     """Native ProNav activates through a normal segment transition after trim."""
 
@@ -164,6 +196,8 @@ def test_glider_6dof_native_propnav_activates_after_source_trim(tmp_path: Path) 
 ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_x15_direct_untrimmed_propnav_fails_closed_at_beta_envelope(tmp_path: Path) -> None:
     """The unsafe direct launch path is rejected before false capture evidence."""
 
@@ -182,6 +216,8 @@ def test_x15_direct_untrimmed_propnav_fails_closed_at_beta_envelope(tmp_path: Pa
     ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_glider_6dof_energy_contract_has_apogee_and_post_apogee_loss(tmp_path: Path) -> None:
     """The unpowered run has an identifiable apogee and loses specific energy."""
 
@@ -212,6 +248,8 @@ def test_glider_6dof_energy_contract_has_apogee_and_post_apogee_loss(tmp_path: P
 ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_glider_bank_reversal_contract_is_explicitly_machine_checked(tmp_path: Path) -> None:
     """Native bank control recovers without leaving the source envelope."""
 
@@ -250,6 +288,63 @@ def test_glider_bank_reversal_contract_is_explicitly_machine_checked(tmp_path: P
 ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof3
+def test_x15_phugoid_alpha_profile_exercises_bounded_energy_exchange(tmp_path: Path) -> None:
+    """The X-15 point-mass profile changes alpha while trading speed for altitude."""
+
+    report = _run_x15_phugoid_3dof(tmp_path)
+    assert report.exit_code == 0, [(item.code, item.message) for item in report.diagnostics]
+    history = _history(report)
+    assert history[-1]["time_s"] == pytest.approx(120.0, abs=1.0e-10)
+    require_change_of_sign(history, "alpha", minimum_before=0.5, minimum_after=0.5)
+    require_bounded(history, "alpha", minimum=-1.51, maximum=1.51)
+    require_bounded(history, "mach", minimum=1.0, maximum=6.7)
+    require_bounded(history, "alt", minimum=0.0, maximum=500_000.0)
+    require_bounded(history, "vel", minimum=0.0, maximum=15_000.0)
+    require_net_change(history, "alt", "increasing", minimum=1_000.0)
+    require_net_change(history, "vel", "decreasing", minimum=100.0)
+    assert all(sample["thrust"] == pytest.approx(0.0) for sample in history)
+    assert all(sample["mass"] == pytest.approx(history[0]["mass"]) for sample in history)
+####
+
+
+@pytest.mark.segment
+@pytest.mark.dof6
+def test_x15_weave_reverses_bank_twice_inside_glide_envelope(tmp_path: Path) -> None:
+    """The multi-cycle weave reuses the source bank-reversal seam without leaving bounds."""
+
+    report = _run_glider_6dof(X15_WEAVE_6DOF, tmp_path / "weave", max_steps=12_000)
+    assert report.exit_code == 0, [(item.code, item.message) for item in report.diagnostics]
+    history = _history(report)
+    assert history[-1]["time_s"] == pytest.approx(90.0, abs=1.0e-10)
+    segments = {int(sample["_segment"]) for sample in history}
+    assert segments == {1, 2, 3, 4, 5}
+    positive = [sample for sample in history if int(sample["_segment"]) in {1, 3}]
+    negative = [sample for sample in history if int(sample["_segment"]) in {2, 4}]
+    assert max(sample["bank_command_deg"] for sample in positive) >= 10.0
+    assert min(sample["bank_command_deg"] for sample in negative) <= -10.0
+    assert all(math.isfinite(sample["bank_achieved_deg"]) for sample in history)
+    require_bounded(history, "altitude_m", minimum=0.0, maximum=30_000.0)
+    require_bounded(history, "mach", minimum=1.0, maximum=6.7)
+    require_bounded(history, "aero_alpha_deg", minimum=-10.0, maximum=10.0)
+    require_bounded(history, "aero_sideslip_deg", minimum=-10.0, maximum=10.0)
+    assert independent_force_closure(history)["p99_normalized_residual"] < 1.0e-2
+    enriched = tuple(
+        {
+            **sample,
+            "inertia_x_kg_m2": 4948.7355,
+            "inertia_y_kg_m2": 129114.2666,
+            "inertia_z_kg_m2": 131825.9024,
+        }
+        for sample in history
+    )
+    assert independent_moment_closure(enriched)["p99_normalized_residual"] < 1.0e-1
+####
+
+
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_glider_great_circle_route_geometry_is_source_anchored(tmp_path: Path) -> None:
     """Route telemetry starts at the actual source release point and stays diagnostic."""
 
@@ -265,6 +360,8 @@ def test_glider_great_circle_route_geometry_is_source_anchored(tmp_path: Path) -
     assert history[-1]["range_to_target_m"] > 1_000_000.0
 
 
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_x15_surface_holds_use_declared_stabilator_controls(tmp_path: Path) -> None:
     """Generic alpha/beta holds bind X-15 stabilators through normal ingestion."""
 
@@ -287,6 +384,8 @@ def test_x15_surface_holds_use_declared_stabilator_controls(tmp_path: Path) -> N
 ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_x15_initial_airflow_release_alignment_is_applied_before_first_rhs(tmp_path: Path) -> None:
     """An initial release directive is active before table evaluation begins."""
 
@@ -312,6 +411,8 @@ def test_x15_initial_airflow_release_alignment_is_applied_before_first_rhs(tmp_p
         ("release-height-plus-one", "z=3608628.71159", "z=3608629.71159"),
     ),
 )
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_glider_6dof_accepts_small_release_perturbations(
     label: str,
     source: str,
@@ -360,6 +461,8 @@ def _glider_6dof_convergence(output_dir: Path) -> dict[str, object]:
 ####
 
 
+@pytest.mark.segment
+@pytest.mark.dof6
 def test_glider_6dof_converges_under_timestep_refinement(tmp_path: Path) -> None:
     """The terminal glider endpoint remains stable as the step is refined."""
 

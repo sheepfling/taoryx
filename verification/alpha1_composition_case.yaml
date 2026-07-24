@@ -1,0 +1,29 @@
+schema_version: 1
+release: taoryx-alpha-1
+case_id: alpha1-metadata-composition
+description: >-
+  A new two-segment case assembled from the standard composition templates. The
+  manifest is intentionally vehicle-specific only through data values; the
+  runner uses the generic TrajectoryBuilder and common runtime path.
+vehicle: b747
+family: fixed-wing-jet
+mode: rigid_body_6dof
+source_problem: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
+runtime_tables:
+  - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+max_steps: 2000
+segments:
+  - template: trim_hold
+    id: trim
+    duration_s: 10.0
+    target: {speed_m_s: 153.0, altitude_m: 100.0}
+    tolerance: {speed_m_s: 1.0, altitude_m: 5.0}
+    controller: b747-trim-hold
+    actuator_binding: b747-standard
+  - template: heading_capture
+    id: heading
+    duration_s: 10.0
+    target: {heading_deg: 10.0}
+    tolerance: {heading_deg: 2.0, altitude_m: 10.0}
+    controller: b747-heading-hold
+    actuator_binding: b747-standard

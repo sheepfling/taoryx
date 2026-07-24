@@ -1,0 +1,17 @@
+(sixdof-ballistic-trace)
+*title Named rigid-body ballistic coefficient trace
+*sixdof
+*method rk4-fixed
+*atmos standard
+*earth wgs-84
+*file sixdof_ballistic_trace.dat time alt vel range gamgd psigd wt
+
+*trajectory 1 rigid_body_vehicle start on 1
+  *initial ecic x=20925646 y=0 z=0 xdt=0 ydt=300 zdt=0 time=0 mass=100
+  *print time alt vel gamgd psigd p q r alpha beta dynprs
+  *segment 1 rigid-body-coast
+    *mass xcg=0 ixx=10 iyy=11 izz=12
+    *aero sref=5.241 lrefx=2.58333 lrefy=2.58333
+    *aero cx=0.12 cybeta=-0.02 cyr=0.01 czalpha=0.04 czq=-0.03 cl=0.01 clp=-0.02 cm=0.03 cmalpha=-0.04 cmq=-0.01 cnbeta=0.02 cnr=-0.03
+    *when time>2 stop
+*end

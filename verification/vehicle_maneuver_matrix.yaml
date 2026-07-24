@@ -53,6 +53,8 @@ vehicles:
       - {id: powered-ascent, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Exercise powered ascent and mass flow.}
       - {id: release-coast, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Propagate release, coast, and apogee events.}
       - {id: bank-energy-management, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Manage descent energy inside the coefficient deck.}
+      - {id: phugoid-alpha-profile, dimension: 3dof, status: in_progress, tags: [dof3, slow, artifact], objective: Exercise a bounded alpha profile and longitudinal energy exchange.}
+      - {id: weave, dimension: 6dof, status: in_progress, tags: [dof6, slow, artifact], objective: Execute two bounded bank reversals and preserve the glide envelope.}
       - {id: terminal-waypoint, dimension: [3dof, 6dof], status: in_progress, tags: [dof3, dof6, slow, artifact], objective: Capture a benign ground waypoint.}
       - id: certified-landing
         dimension: 6dof

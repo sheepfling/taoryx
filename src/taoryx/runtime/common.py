@@ -110,6 +110,7 @@ class RuntimeVehicle:
     max_step_size: float | None = None
     derived_definitions: Mapping[str, ExpressionType] = field(default_factory=dict)
     definition_evaluator: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
+    definition_call_handler: Callable[[str, Sequence[float]], float] | None = None
     parameters: Mapping[str, float] = field(default_factory=dict)
     control_values: Mapping[str, float] = field(default_factory=dict)
     table_evaluators: Mapping[str, Callable[[Mapping[str, float]], float]] = field(default_factory=dict)

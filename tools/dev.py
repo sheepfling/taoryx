@@ -60,6 +60,12 @@ def doctor() -> None:
 ####
 
 
+def docs_doctor() -> None:
+    """Check all tools needed to build and render every documentation PDF."""
+    run(python_tool("doctor.py", "--docs", "--strict"))
+    ####
+
+
 def lint() -> None:
     run([project_python(), "-m", "ruff", "check", "src", "tests", "tools", "scripts"])
 ####
@@ -87,6 +93,33 @@ def test_category(marker: str) -> None:
     ####
 
 
+def test_slice(paths: tuple[str, ...], expression: str) -> None:
+    """Run a named test slice without inheriting the repository fast default."""
+    run([project_python(), "-m", "pytest", *paths, "-m", expression, "-o", "addopts="])
+    ####
+
+
+def test_x15_segments() -> None:
+    """Run only catalog and isolated X-15 segment-gate tests."""
+    test_slice(
+        ("tests/unit/test_x15_maneuvers.py", "tests/e2e/test_glider_family_validation.py"),
+        "segment",
+    )
+    ####
+
+
+def test_x15_catalog() -> None:
+    """Run the fast X-15 catalog and source/table traceability checks."""
+    test_slice(("tests/unit/test_x15_maneuvers.py",), "segment")
+    ####
+
+
+def test_spectre_segments() -> None:
+    """Run the isolated Spectre segment fixture-quality ladder."""
+    test_slice(("tests/e2e/test_spectre_segment_validation.py",), "spectre and segment")
+    ####
+
+
 def test_vehicle_family(family: str) -> None:
     """Run only one vehicle family, including its opt-in slow tests."""
 
@@ -100,6 +133,8 @@ def test_views() -> None:
     print("  grammar      parser, lexer, EBNF, corpus, and language validation")
     print("  equations    equation catalog, implementations, provenance, verification")
     print("  algorithms   algorithm catalog, runtime bindings, verification")
+    print("  segment      isolated segment contracts and maneuver gates")
+    print("  plot         plotting and visualization-only tests")
     print("Cost/output categories:")
     print("  slow         long-running or historical/stress tests")
     print("  artifact     human-readable outputs written below artifacts/")
@@ -114,6 +149,8 @@ def test_views() -> None:
     print("  maneuver-matrix   run bound native vehicle maneuvers and write classified evidence")
     print("  slower-tables regenerate B747, Skywalker X8, and Hummingbird research decks")
     print("  generate-problems render metadata-driven native .prb products")
+    print("  alpha1-composition-case prove metadata-driven new-case composition")
+    print("  alpha1-packet   build the self-contained Alpha 1 evidence packet")
     print("  check-problems verify generated .prb products are current")
     print("  check-vehicles verify vehicle-family contracts and table bindings")
     print("  onboard-vehicles diagnose the complete new-vehicle metadata path")
@@ -124,6 +161,9 @@ def test_views() -> None:
     print("  trim-vehicles solve B747, X8, and Hummingbird trims through the common trim solver")
     print("  control-directions run the signed control-direction convention harness")
     print("  taoryx-extension-pdf build the composite LaTeX and Markdown extension PDF")
+    print("  language-reference build the manual-parallel TAORYX language reference PDF")
+    print("  docs-doctor diagnose tools needed for every documentation PDF")
+    print("  all-pdfs rebuild the historical and successor documentation PDFs")
     print("Commands: test-grammar, test-equations, test-algorithms, test-slow, test-artifacts, test-spectre")
     print("Vehicle families: test-b747, test-x8, test-hummingbird, test-x15")
     ####
@@ -234,6 +274,59 @@ def audit_fidelity() -> None:
         command.extend(["--reproduced-from", str(reproductions[-1])])
     command.append("--json")
     run(command)
+    ####
+
+
+def audit_alpha1() -> None:
+    """Write the current Alpha 1 release-gate status report."""
+    run(
+        [
+            project_python(),
+            str(TOOLS / "audit_alpha1_release.py"),
+            "--output",
+            "artifacts/verification/alpha1/alpha1-status.json",
+        ]
+    )
+    ####
+
+
+def alpha1_feature_matrix() -> None:
+    """Generate the bounded Alpha 1 language feature matrix."""
+    run([project_python(), str(TOOLS / "build_alpha1_feature_matrix.py")])
+    ####
+
+
+def alpha1_manual_examples() -> None:
+    """Execute and classify the four Alpha 1 manual-example families."""
+    run(
+        [
+            project_python(),
+            str(TOOLS / "run_alpha1_manual_examples.py"),
+            "--output",
+            "artifacts/verification/alpha1/manual_examples/report.json",
+        ],
+    )
+    ####
+
+
+def alpha1_composition_case() -> None:
+    """Resolve and execute the generic Alpha 1 composition proof case."""
+    run(
+        [
+            project_python(),
+            str(TOOLS / "run_alpha1_composition_case.py"),
+            "--case",
+            "verification/alpha1_composition_case.yaml",
+            "--report",
+            "artifacts/verification/alpha1/composition_case/report.json",
+        ],
+    )
+    ####
+
+
+def alpha1_packet() -> None:
+    """Build the self-contained, path-sanitized Alpha 1 evidence packet."""
+    run([project_python(), str(TOOLS / "build_alpha1_packet.py")])
     ####
 
 
@@ -392,12 +485,46 @@ def successor_guide() -> None:
 ####
 
 
+def language_reference() -> None:
+    """Build the manual-parallel TAORYX language and mathematics reference."""
+    output = ROOT / "output" / "pdf"
+    output.mkdir(parents=True, exist_ok=True)
+    run(
+        [
+            "latexmk",
+            "-pdf",
+            "-interaction=nonstopmode",
+            "-halt-on-error",
+            f"-output-directory={output}",
+            "docs/latex/taoryx_language_reference.tex",
+        ]
+    )
+    run(tool_script("normalize_pdf.py", str(output / "taoryx_language_reference.pdf")))
+    ####
+
+
+def _composite_extension_pdf() -> None:
+    """Build and normalize the composite successor documentation PDF."""
+    run(tool_script("build_taoryx_extension_pdf.py"))
+    run(tool_script("normalize_pdf.py", "output/pdf/taoryx_extensions_composite.pdf"))
+    ####
+
+
 def taoryx_extension_pdf() -> None:
     """Build and normalize the composite TAORYX extension reference PDF."""
 
     successor_guide()
-    run(tool_script("build_taoryx_extension_pdf.py"))
-    run(tool_script("normalize_pdf.py", "output/pdf/taoryx_extensions_composite.pdf"))
+    language_reference()
+    _composite_extension_pdf()
+    ####
+
+
+def all_pdfs() -> None:
+    """Rebuild the frozen-manual PDF and every successor documentation PDF."""
+    manual()
+    successor_guide()
+    language_reference()
+    _composite_extension_pdf()
     ####
 
 
@@ -435,7 +562,10 @@ def equation_audit() -> None:
 def handoff() -> None:
     equation_audit()
     check()
-    run([project_python(), "-m", "build", "--wheel", "--outdir", "dist"])
+    # The repository bootstrap may be intentionally offline.  Dependencies
+    # are provisioned by `bootstrap`; avoid making the release handoff reach
+    # out to PyPI for an isolated build environment.
+    run([project_python(), "-m", "build", "--wheel", "--no-isolation", "--outdir", "dist"])
     run(
         tool_script(
             "build_handoff_bundle.py",
@@ -468,6 +598,7 @@ def check() -> None:
 TASKS: dict[str, Callable[[], None]] = {
     "bootstrap": bootstrap,
     "doctor": doctor,
+    "docs-doctor": docs_doctor,
     "source-pdf": source_pdf,
     "lint": lint,
     "typecheck": typecheck,
@@ -480,12 +611,17 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-algorithms": lambda: test_category("algorithms"),
     "test-equations": lambda: test_category("equations"),
     "test-grammar": lambda: test_category("grammar"),
+    "test-segments": lambda: test_category("segment"),
+    "test-plots": lambda: test_category("plot"),
     "test-slow": lambda: test_category("slow"),
     "test-spectre": lambda: test_category("spectre"),
+    "test-spectre-segments": test_spectre_segments,
     "test-b747": lambda: test_vehicle_family("b747"),
     "test-x8": lambda: test_vehicle_family("x8"),
     "test-hummingbird": lambda: test_vehicle_family("hummingbird"),
     "test-x15": lambda: test_vehicle_family("x15"),
+    "test-x15-segments": test_x15_segments,
+    "test-x15-catalog": test_x15_catalog,
     "test-views": test_views,
     "showcase-california-hawaii": showcase_california_hawaii,
     "dof-matrix": dof_matrix,
@@ -495,6 +631,11 @@ TASKS: dict[str, Callable[[], None]] = {
     "b747-x8-evidence": b747_x8_evidence,
     "fidelity-packet": fidelity_packet,
     "audit-fidelity": audit_fidelity,
+    "alpha1-feature-matrix": alpha1_feature_matrix,
+    "alpha1-manual-examples": alpha1_manual_examples,
+    "alpha1-composition-case": alpha1_composition_case,
+    "alpha1-packet": alpha1_packet,
+    "audit-alpha1": audit_alpha1,
     "maneuver-matrix": maneuver_matrix,
     "slower-tables": import_slower_tables,
     "generate-problems": generate_problem_files,
@@ -515,7 +656,9 @@ TASKS: dict[str, Callable[[], None]] = {
     "e2e-all": e2e_all,
     "manual": manual,
     "successor-guide": successor_guide,
+    "language-reference": language_reference,
     "taoryx-extension-pdf": taoryx_extension_pdf,
+    "all-pdfs": all_pdfs,
     "equation-audit": equation_audit,
     "handoff": handoff,
     "check": check,

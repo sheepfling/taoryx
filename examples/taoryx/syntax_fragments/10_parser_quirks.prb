@@ -1,0 +1,15 @@
+(parser-quirks)
+*method rk4-fixed
+
+# Deliberately preserves common legacy input quirks: flexible spacing, mixed
+# case in names, underscores, and a trajectory whose first active segment is not one.
+*trajectory  1   Interceptor  start on 1
+  *initial geodetic time=0 wt=1000 alt=0 lat=0 long=0 vel=1 gama=90 psi=90
+  *segment 1 launch
+    *when time>1 stop
+
+*trajectory  2   2nd_Stg  start on 21
+  *initial geodetic time=0 wt=250 alt=0 lat=0 long=0 vel=1 gama=90 psi=90
+  *segment 21 delayed-start
+    *when time>1 stop
+*end

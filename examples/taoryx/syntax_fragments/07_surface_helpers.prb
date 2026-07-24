@@ -1,0 +1,10 @@
+(surface-helper-extension)
+*define initial variables
+  launch_lat = 22.0;
+  launch_long = -159.8;
+  target_lat = 39.5;
+  target_long = -175.5;
+  surface_ref(launch_lat,launch_long);
+  launch_azimuth = surface_azm(target_lat,target_long);
+  target_distance = surface_dist(target_lat,target_long);
+*end

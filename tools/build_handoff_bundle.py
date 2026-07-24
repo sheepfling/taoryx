@@ -17,33 +17,36 @@ FINAL_PRODUCTS: dict[str, Path] = {
     "TAOS_equation_provenance_audit_v21.pdf": ROOT
     / "qa"
     / "TAOS_equation_provenance_audit_v21.pdf",
-    "TAOS_manual_visual_comparison_v19.pdf": ROOT
-    / "qa"
-    / "build"
-    / "figure_comparison.pdf",
-    "TAOS_targeted_figure_review_v19.pdf": ROOT
-    / "qa"
-    / "TAOS_targeted_figure_review_v19.pdf",
-    "TAOS_source_text_fidelity_audit_v19.pdf": ROOT
-    / "qa"
-    / "TAOS_source_text_fidelity_audit_v19.pdf",
-    "TAOS_fixture_validation_v19.pdf": ROOT
-    / "qa"
-    / "TAOS_fixture_validation_v19.pdf",
-    "TAOS_chapter04_residual_audit_v19.pdf": ROOT
-    / "qa"
-    / "TAOS_chapter04_residual_audit_v19.pdf",
-    "taoryx.language-0.1.0-py3-none-any.whl": ROOT
+    # These extension products are built by the required handoff workflow.
+    # The historical v19 visual-review PDFs were retired from the repository;
+    # requiring their old paths made a clean handoff depend on stale artifacts.
+    "taoryx_extensions_composite.pdf": ROOT
+    / "output"
+    / "pdf"
+    / "taoryx_extensions_composite.pdf",
+    "taoryx_extensions_and_verification.pdf": ROOT
+    / "output"
+    / "pdf"
+    / "taoryx_extensions_and_verification.pdf",
+    "taoryx_language_reference.pdf": ROOT
+    / "output"
+    / "pdf"
+    / "taoryx_language_reference.pdf",
+    "taoryx-0.1.0a0-py3-none-any.whl": ROOT
     / "dist"
-    / "taoryx.language-0.1.0-py3-none-any.whl",
+    / "taoryx-0.1.0a0-py3-none-any.whl",
 }
 
 
 TRANSIENT_NAMES = {
     ".git",
+    ".DS_Store",
     ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
     "__pycache__",
     "taoryx.language.egg-info",
+    "taoryx.egg-info",
     "equation-audit-build",
     "targeted-build",
     "build-v19-targeted",
@@ -99,12 +102,10 @@ This directory contains the principal generated deliverables. The repository roo
 
 - `TAOS_manual_reconstruction_v21_codex_handoff.pdf`: normalized reconstructed manual.
 - `TAOS_equation_provenance_audit_v21.pdf`: complete 326-equation provenance audit.
-- `TAOS_manual_visual_comparison_v19.pdf`: complete 72-figure comparison report; still current because later releases did not alter numbered figures.
-- `TAOS_targeted_figure_review_v19.pdf`: focused review of Figures 1-5, 1-6, 2-1, and 4-2.
-- `TAOS_source_text_fidelity_audit_v19.pdf`: latest complete manual-wide source-text audit included in the codebase.
-- `TAOS_fixture_validation_v19.pdf`: parser-backed fixture validation report.
-- `TAOS_chapter04_residual_audit_v19.pdf`: classified residual Chapter 4 audit.
-- `taoryx.language-0.1.0-py3-none-any.whl`: installable Phase 1 parser/validator package.
+- `taoryx_extensions_composite.pdf`: merged TAORYX extension documentation.
+- `taoryx_extensions_and_verification.pdf`: extension and verification guide.
+- `taoryx_language_reference.pdf`: TAORYX language reference.
+- `taoryx-0.1.0a0-py3-none-any.whl`: installable Alpha 1 TAORYX package.
 
 The original `TAOS_manual_1995.pdf` is included at the bundle root.
 """
@@ -153,6 +154,42 @@ def remove_transients(staged_root: Path, output_name: str) -> None:
             shutil.rmtree(path)
         ####
     ####
+####
+
+
+def handoff_copy_ignore(directory: str, names: list[str]) -> set[str]:
+    """Exclude local environments and generated evidence from the source copy.
+
+    The Alpha evidence packet is the appropriate carrier for large, generated
+    trajectory artifacts.  The manual handoff should remain a source/tooling
+    bundle; copying the ignored ``artifacts/`` tree or the local virtualenv
+    first and deleting it afterwards can expand the temporary archive by many
+    gigabytes.
+    """
+
+    relative = Path(directory).resolve().relative_to(ROOT)
+    excluded = {
+        ".git",
+        ".DS_Store",
+        ".venv",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".coverage",
+        "1.print",
+        "artifacts",
+        "build",
+        "output",
+        "tmp",
+        "__pycache__",
+    }
+    if relative == Path("dist"):
+        excluded.update(
+            name
+            for name in names
+            if name != "final" and not name.endswith(".whl")
+        )
+    return {name for name in names if name in excluded}
 ####
 
 
@@ -250,7 +287,7 @@ def main() -> None:
     prepare_final_products(args.version)
     with tempfile.TemporaryDirectory(prefix="taos-codex-handoff-") as directory:
         staged_root = Path(directory) / f"taos-manual-codex-handoff-v{args.version}"
-        shutil.copytree(ROOT, staged_root)
+        shutil.copytree(ROOT, staged_root, ignore=handoff_copy_ignore)
         remove_transients(staged_root, args.output.name)
         write_bundle_metadata(staged_root, args.version)
         create_zip(staged_root, args.output)

@@ -1,0 +1,20 @@
+(batch-case-extension)
+*trajectory 1 case_vehicle start on 1
+  *initial geodetic time=0 wt=100 alt=0 lat=0 long=0 vel=1 gama=90 psi=90
+  *segment 1 flight
+    *when time>1 stop
+
+*optimize a for vel=max on segment 1, trajectory 1
+  par-1=launch_azimuth lo-1=-180 hi-1=180 ref-1=90
+
+*cases
+  case launch_lat launch_long target_lat target_long
+  1 22.0 -159.8 39.5 -175.5
+  2 35.0 -106.5 37.0 -83.05
+
+*summarize apogee decm=0
+  add maxfit(alt[1])
+  add alt[1], on segment 1
+*summarize final_lat decm=5
+  add last(latgd[1])
+*end

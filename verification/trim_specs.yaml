@@ -48,5 +48,7 @@ entries:
     control_names: [symmetric_stabilator_deg, differential_stabilator_deg, rudder_deg]
     residual_names: [body_x_force, body_z_force, roll_moment, pitch_moment, yaw_moment]
     state_initial: {alpha_deg: 0.0}
+    state_lower: {alpha_deg: -5.0}
+    state_upper: {alpha_deg: 25.0}
     control_initial: {symmetric_stabilator_deg: 0.0, differential_stabilator_deg: 0.0, rudder_deg: 2.0}
     notes: Source-trimmed release artifact; independent residual adapter still required.

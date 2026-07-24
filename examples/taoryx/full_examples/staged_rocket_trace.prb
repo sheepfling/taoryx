@@ -1,0 +1,32 @@
+(staged-rocket-trace)
+*title Named staged rocket trace with payload deployment
+*method rk4-fixed variable-mass
+*atmos standard
+*earth wgs-84
+*file staged_rocket_trace.dat time alt vel range gamgd psigd wt
+
+*trajectory 1 launch_vehicle start on 1
+  *initial geodetic time=0 wt=12000 alt=0 lat=0 long=0 vel=0 gama=90 psi=90
+  *print time alt vel range gamgd psigd wt plength
+  *segment 1 rail-and-first-stage
+    *integ dtprnt=1 dt=0.02
+    *rail launch azm=90 elev=85 cfstat=0.15 cfslid=0.01
+    *aero caxial=0.8 cnormal=0.1
+    *prop thrust=60000 mdot=8
+    *when plength>50 goto 2
+  *segment 2 staging
+    *increment wt=-350
+    *aero caxial=0.5 cnormal=0.08
+    *prop thrust=42000 mdot=5
+    *when tseg>40 goto 3
+  *segment 3 coast
+    *aero constant_beta=200
+    *when alt<0 stop
+
+*trajectory 2 payload start on 1
+  *deployed from trajectory 1, segment 2, wt=2100
+  *print time alt vel range gamgd psigd wt
+  *segment 1 payload-coast
+    *aero constant_beta=200
+    *when alt<0 stop
+*end

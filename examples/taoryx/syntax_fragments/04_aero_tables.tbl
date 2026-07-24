@@ -1,0 +1,20 @@
+(force-coefficients) table aero_force ca(mach) sref=5.241 lrefx=2.58333
+start
+add ca(mach)
+mach=0.0 1.0 2.0
+ca=0.20 0.18 0.16
+end
+
+(moment-coefficients) table aero_moment cm(alpha) lrefy=2.58333
+start
+add cm(alpha)
+alpha=-5.0 0.0 5.0
+cm=0.08 0.00 -0.08
+end
+
+(mass-properties) table inertia ixx(mass)
+start
+add ixx(mass)
+mass=0.0 100.0 200.0
+ixx=1.0 10.0 18.0
+end

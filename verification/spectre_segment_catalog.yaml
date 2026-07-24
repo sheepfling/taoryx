@@ -1,0 +1,89 @@
+schema_version: 1
+id: taoryx_spectre_specialized_segments_v1
+description: >-
+  Reusable phase contracts extracted from the synthetic Spectre simple-aero
+  fixtures. These are orchestration and validation templates, not a claim of
+  historical Spectre runtime compatibility.
+source_workspaces:
+  segment_dumps: tests/fixtures/problem_file_dumps/spectre_segments
+  trajectory_dumps: tests/fixtures/problem_file_dumps/spectre_trajectories
+  source_bundle: tests/fixtures/spectre_simple_aero_v1
+supported_dynamics:
+  - point_mass_3dof
+  - kinematic_3_plus_3
+  - rigid_body_6dof
+promotion_rule: >-
+  A family may reuse a phase template only after its own data/convention,
+  plant closure, numerical convergence, controller/allocator, entry/exit, and
+  terminal evidence gates pass. A synthetic fixture passing parser tests is
+  not runtime or vehicle validation.
+templates:
+  - name: powered_ascent
+    goal_kind: powered_ascent
+    quality_gates: [mass-flow-sign, propulsion-closure, bounded-acceleration, timestep-convergence]
+  - name: ballistic_coast
+    goal_kind: ballistic_coast
+    quality_gates: [force-closure, gravity-frame-convention, apogee-or-ground-termination, timestep-convergence]
+  - name: bank_maneuver
+    goal_kind: bank_maneuver
+    quality_gates: [signed-bank-response, crossrange-direction, alpha-beta-envelope, actuator-slew]
+  - name: alpha_profile
+    goal_kind: alpha_maneuver
+    quality_gates: [alpha-interpolation, aero-table-bounds, energy-closure, timestep-convergence]
+  - name: skip_maneuver
+    goal_kind: skip_maneuver
+    quality_gates: [entry-exit-event, heat-or-dynamic-pressure, alpha-beta-envelope, timestep-convergence]
+  - name: terminal_pronav
+    goal_kind: terminal_guidance
+    quality_gates: [handoff-event, los-range-closure, achieved-commanded-response, terminal-miss-distance]
+families:
+  - name: ballistic
+    fixture: ballistic.prb
+    source: ballistic.yaml
+    templates: [powered_ascent, ballistic_coast]
+    status: fixture-ready
+  - name: cbcr
+    fixture: cbcr_left.prb
+    source: cbcr.yaml
+    templates: [powered_ascent, ballistic_coast, bank_maneuver, terminal_pronav]
+    status: fixture-ready
+  - name: crossrange
+    fixture: crossrange.prb
+    source: crossrange.yaml
+    templates: [powered_ascent, ballistic_coast, bank_maneuver, terminal_pronav]
+    status: fixture-ready
+  - name: marv
+    fixture: marv.prb
+    source: marv.yaml
+    templates: [powered_ascent, ballistic_coast, bank_maneuver, terminal_pronav]
+    status: fixture-ready
+  - name: phugoid
+    fixture: phugoid.prb
+    source: phugoid.yaml
+    templates: [powered_ascent, ballistic_coast, alpha_profile, terminal_pronav]
+    status: fixture-ready
+  - name: range_extension
+    fixture: range_extension.prb
+    source: range_extension.yaml
+    templates: [powered_ascent, ballistic_coast, alpha_profile, terminal_pronav]
+    status: fixture-ready
+  - name: skip
+    fixture: skip.prb
+    source: skip.yaml
+    templates: [powered_ascent, ballistic_coast, skip_maneuver, terminal_pronav]
+    status: fixture-ready
+  - name: slalom
+    fixture: slalom.prb
+    source: slalom.yaml
+    templates: [powered_ascent, ballistic_coast, bank_maneuver, terminal_pronav]
+    status: fixture-ready
+  - name: weave
+    fixture: weave.prb
+    source: weave.yaml
+    templates: [powered_ascent, ballistic_coast, bank_maneuver, terminal_pronav]
+    status: fixture-ready
+  - name: propnav
+    fixture: propnav.prb
+    source: p027_proportional_navigation
+    templates: [powered_ascent, ballistic_coast, bank_maneuver, terminal_pronav]
+    status: fixture-ready

@@ -25,6 +25,7 @@ def evaluate_definition_program(
     parameters: Mapping[str, float] | None = None,
     tables: Mapping[str, float] | None = None,
     table_evaluators: Mapping[str, Callable[[Mapping[str, float]], float]] | None = None,
+    call_handler: Callable[[str, Sequence[float]], float] | None = None,
 ) -> dict[str, float]:
     """Resolve a define program with memoized, cycle-checked dependencies.
 
@@ -46,7 +47,14 @@ def evaluate_definition_program(
         if name not in expressions:
             raise KeyError(f"undefined variable: {name}")
         resolving.add(name)
-        result[name] = evaluate_expression(expressions[name], result, context, resolve, table_evaluators)
+        result[name] = evaluate_expression(
+            expressions[name],
+            result,
+            context,
+            resolve,
+            table_evaluators,
+            call_handler,
+        )
         resolving.remove(name)
         return result[name]
 

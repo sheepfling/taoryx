@@ -62,9 +62,25 @@ class BlockBase(BaseModel):
 ####
 
 
+class ExtensionBlock(BlockBase):
+    """Lossless container for successor-only Taoryx directives."""
+
+    keyword: Literal["method", "mass", "ptmass", "deployed", "cases"]
+    raw_lines: list[str] = Field(default_factory=list)
+    method: str | None = None
+    options: list[str] = Field(default_factory=list)
+    source_trajectory: int | None = None
+    source_segment: int | None = None
+    deployed_weight: ExpressionType | None = None
+    columns: list[str] = Field(default_factory=list)
+    rows: list[list[str]] = Field(default_factory=list)
+####
+
+
 class AtmosBlock(BlockBase):
     keyword: Literal["atmos"] = "atmos"
     model: str | None = None
+    options: list[str] = Field(default_factory=list)
     columns: list[str] = Field(default_factory=list)
     rows: list[list[float]] = Field(default_factory=list)
     row_locations: list[SourceLocation] = Field(default_factory=list)
@@ -100,7 +116,7 @@ class RandomBlock(BlockBase):
 class DofDirectiveBlock(BlockBase):
     """TAORYX top-level directive selecting the translational state model."""
 
-    keyword: Literal["3dof", "6dof"]
+    keyword: Literal["3dof", "6dof", "sixdof"]
     mode: Literal["point-mass", "rigid-body-6dof"]
     ####
 
@@ -122,6 +138,8 @@ class DefineBlock(BlockBase):
     initial_value: ExpressionType | None = None
     control_statements: list[DefineControlStatement] = Field(default_factory=list)
     typed_statements: list[DefineAssignmentStatement | DefineControlStatement] = Field(default_factory=list)
+    helper_calls: list[str] = Field(default_factory=list)
+    declaration: str | None = None
 ####
 
 
@@ -203,13 +221,14 @@ class SearchBlock(BlockBase):
 class SummarizeBlock(BlockBase):
     keyword: Literal["summarize"] = "summarize"
     name: str | None = None
+    options: dict[str, str] = Field(default_factory=dict)
     operations: list["SummaryOperation"] = Field(default_factory=list)
 
 
 class SummaryOperand(BaseModel):
     text: str
     expression: ExpressionType | None = None
-    function: Literal["max", "min", "first", "last"] | None = None
+    function: Literal["max", "min", "first", "last", "maxfit", "minfit"] | None = None
     segment: int | None = None
     trajectory: int | None = None
 
@@ -258,6 +277,8 @@ class WindBlock(BlockBase):
     keyword: Literal["wind"] = "wind"
     coordinate_system: Literal["geocentric", "geodetic"] | None = None
     wind_form: Literal["speed-heading", "east-north"] | None = None
+    filename: str | None = None
+    units: str | None = None
 ####
 
 
@@ -349,6 +370,7 @@ class LimitsBlock(BlockBase):
 
 class PropulsionBlock(BlockBase):
     keyword: Literal["prop"] = "prop"
+    variant: str | None = None
 ####
 
 
@@ -389,12 +411,13 @@ ProblemBlock = Annotated[
     | ModeBlock
     | DofDirectiveBlock
     | UnitsFormatBlock
-    | WindBlock,
+    | WindBlock
+    | ExtensionBlock,
     Field(discriminator="keyword"),
 ]
 
 TrajectoryBlock = Annotated[
-    DefineBlock | DownrangeCrossrangeBlock | FileBlock | IipBlock | InitialBlock | PrintBlock | TangentBlock,
+    DefineBlock | DownrangeCrossrangeBlock | FileBlock | IipBlock | InitialBlock | PrintBlock | TangentBlock | ExtensionBlock,
     Field(discriminator="keyword"),
 ]
 
@@ -410,11 +433,12 @@ SegmentBlock = Annotated[
     | PropulsionBlock
     | RailBlock
     | ResetBlock
-    | WhenBlock,
+    | WhenBlock
+    | ExtensionBlock,
     Field(discriminator="keyword"),
 ]
 
-AnyBlock = ProblemBlock | TrajectoryBlock | SegmentBlock
+AnyBlock = ProblemBlock | TrajectoryBlock | SegmentBlock | ExtensionBlock
 
 
 class Segment(BaseModel):

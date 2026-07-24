@@ -1,0 +1,4 @@
+(dynamics-method-extension)
+*3dof
+*method rk4-fixed
+*end

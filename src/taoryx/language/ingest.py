@@ -9,7 +9,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from taoryx.language.diagnostics import Diagnostic, Severity
-from taoryx.language.grammar_contracts import GrammarProfile
+from taoryx.language.grammar_contracts import SUPPORTED_TAORYX_TABLE_TYPES, GrammarProfile
 from taoryx.language.lexical import LexicalDocument, lex_text
 from taoryx.language.lossless import LosslessDocument, parse_lossless_bytes
 from taoryx.language.models import ProblemDocument, RecoveredRecord, TableDocument
@@ -52,6 +52,21 @@ def _attach_diagnostic_recovery(
     ####
     document.recovered_records.sort(key=lambda record: (record.location.line, record.location.column))
     ####
+
+
+def _validate_table_profile(document: TableDocument, profile: GrammarProfile) -> list[Diagnostic]:
+    if profile is GrammarProfile.TAORYX:
+        return []
+    return [
+        Diagnostic(
+            severity=Severity.ERROR,
+            code="taoryx-extension-requires-profile",
+            message=f"Table type '{table.table_type}' is a Taoryx extension; parse with profile=taoryx.",
+            location=table.location,
+        )
+        for table in document.tables
+        if table.table_type.casefold() in SUPPORTED_TAORYX_TABLE_TYPES
+    ]
 
 
 class IngestedDocument(BaseModel):
@@ -99,7 +114,7 @@ def ingest_text(
         )
     else:
         document = parse_table_text(text, source_path)
-        diagnostics = validate_table_file(document)
+        diagnostics = validate_table_file(document) + _validate_table_profile(document, GrammarProfile(profile))
     _attach_diagnostic_recovery(document, diagnostics, text)
     return IngestedDocument(
         kind=kind,
@@ -133,6 +148,6 @@ def ingest_file(
         )
     else:
         document = parse_table_text(text, str(source_path))
-        diagnostics = validate_table_file(document)
+        diagnostics = validate_table_file(document) + _validate_table_profile(document, GrammarProfile(profile))
     _attach_diagnostic_recovery(document, diagnostics, text)
     return IngestedDocument(kind=kind, source=source, lexical=lexical, document=document, diagnostics=tuple(diagnostics))

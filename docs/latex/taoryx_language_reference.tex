@@ -1,0 +1,442 @@
+\documentclass[11pt,twoside,openany]{book}
+
+% This is a successor-side companion to the reconstructed 1995 manual.
+% It deliberately does not modify or re-paginate manual/manual.tex.
+\usepackage[letterpaper,margin=0.86in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{array,booktabs,longtable}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{navy}{HTML}{17365D}
+\definecolor{bluegray}{HTML}{475569}
+\definecolor{paleblue}{HTML}{EEF5FB}
+\definecolor{paleyellow}{HTML}{FFF8E7}
+\definecolor{codegray}{HTML}{F5F7FA}
+
+\hypersetup{
+  pdftitle={TAORYX Language and Mathematics Reference},
+  pdfauthor={TAORYX project},
+  pdfsubject={Successor mathematics, problem grammar, and table syntax}
+}
+
+\setlist{nosep,leftmargin=*}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\renewcommand{\arraystretch}{1.18}
+\newcommand{\taoryx}{TAORYX}
+\newcommand{\pathcode}[1]{\path{#1}}
+\newcommand{\claimbox}[1]{%
+  \par\noindent\colorbox{paleblue}{\parbox{0.94\linewidth}{#1}}\par
+}
+\newcommand{\warningbox}[1]{%
+  \par\noindent\colorbox{paleyellow}{\parbox{0.94\linewidth}{#1}}\par
+}
+
+\lstdefinestyle{taoryxcode}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codegray},
+  frame=single,
+  rulecolor=\color{bluegray!35},
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2
+}
+\lstset{style=taoryxcode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textsc{TAORYX language and mathematics reference}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\title{\textcolor{navy}{TAORYX Language and Mathematics Reference}\\
+  \large A successor-side companion to the TAOS User's Manual}
+\author{TAORYX project}
+\date{Successor documentation --- July 2026}
+
+\begin{document}
+
+\frontmatter
+\maketitle
+\thispagestyle{empty}
+
+\claimbox{\textbf{Scope and relationship.} This document is organized to run
+parallel to the reconstructed TAOS User's Manual: mathematical conventions
+parallel the manual's Methods chapter, successor table syntax parallels Table
+Files, and successor problem syntax parallels Problem Files. The original
+manual remains authoritative for historical TAOS 96.0 wording and syntax. This
+document records explicitly labelled \texttt{taoryx} successor behavior and
+does not alter \pathcode{manual/manual.tex}.}
+
+The companion documents have distinct jobs:
+
+\begin{itemize}
+  \item \pathcode{TAOS_manual_1995.pdf} and \pathcode{manual/} preserve the
+    historical manual and its source traceability;
+  \item \pathcode{docs/latex/taoryx_extensions_and_verification.tex} explains
+    plant contracts, fidelity, controllers, scoring, and verification;
+  \item this reference defines the successor language surface, equations,
+    typed AST boundary, and example-run contract;
+  \item \pathcode{docs/extensions/} and \pathcode{examples/taoryx/} provide
+    the operational Markdown pages and executable fixtures.
+\end{itemize}
+
+\tableofcontents
+
+\mainmatter
+
+\chapter{Mathematical conventions and successor models}
+\label{chap:successor-math}
+
+\section{Claim boundary and notation}
+
+The equations in this chapter are the semantic and runtime contracts used by
+the successor examples. They are not a claim that every equation is present in
+the 1995 executable, nor that the local runtime reproduces the historical
+table library. Every implementation must declare its frames, signs, units,
+state order, and coefficient conventions before numerical comparison.
+
+The common variables are position $\boldsymbol r$, velocity
+$\boldsymbol v$, body angular rate $\boldsymbol\omega_B$, mass $m$, density
+$\rho$, relative speed $V_{\mathrm{rel}}$, reference area $S$, span $b$,
+chord $c$, and dynamic pressure
+
+\begin{equation}
+  q_\infty = \tfrac{1}{2}\rho V_{\mathrm{rel}}^2.
+\end{equation}
+
+\section{Fidelity modes}
+
+The successor profile exposes three related model choices. A mode is a model
+selection, not an automatic assertion that a particular adapter can execute it.
+
+\begin{longtable}{p{0.22\linewidth}p{0.27\linewidth}p{0.40\linewidth}}
+\toprule
+\textbf{Mode} & \textbf{Problem syntax} & \textbf{Semantic content}\\
+\midrule
+\endhead
+Point mass & \pathcode{*3dof} or \pathcode{*mode point-mass} &
+  Translational position and velocity with prescribed or reduced attitude and
+  control effects.\\
+Kinematic bridge & \pathcode{*mode kinematic-6dof} &
+  Point-mass translation with prescribed or scheduled attitude variables; it
+  is not free rotational dynamics.\\
+Rigid-body 6-DOF & \pathcode{*6dof}, \pathcode{*sixdof}, or
+  \pathcode{*mode rigid-body-6dof} &
+  Translation, attitude, body rates, forces, moments, mass properties, and
+  released control effects.\\
+\bottomrule
+\end{longtable}
+
+The aliases are normalized in the AST while their source spelling remains
+losslessly available: \pathcode{*3dof} denotes \texttt{point-mass}, and
+\pathcode{*6dof} and \pathcode{*sixdof} denote \texttt{rigid-body-6dof}.
+
+\section{Force, moment, and translational equations}
+
+For a coefficient source using body-axis force coefficients and rolling,
+ pitching, and yawing moment coefficients, dimensionalization is
+
+\begin{align}
+  \boldsymbol F_{A,B} &= q_\infty S
+    \begin{bmatrix} C_X & C_Y & C_Z \end{bmatrix}^{T},\\
+  \boldsymbol M_{A,B} &= q_\infty S
+    \begin{bmatrix} b C_l & c C_m & b C_n \end{bmatrix}^{T}.
+\end{align}
+
+If the source uses wind-axis coefficients, the adapter must transform the
+force into body axes before adding gravity and propulsion. The moment reference
+must also be transferred explicitly:
+
+\begin{equation}
+  \boldsymbol M_{CG} = \boldsymbol M_{\mathrm{ref}}
+    - \boldsymbol r_{\mathrm{ref}\to CG}\times\boldsymbol F_A.
+\end{equation}
+
+The body translational equation is
+
+\begin{equation}
+  m\left(\dot{\boldsymbol v}_B
+    +\boldsymbol\omega_B\times\boldsymbol v_B\right)
+  =\boldsymbol F_{A,B}+\boldsymbol F_{T,B}+\boldsymbol F_{g,B}.
+\end{equation}
+
+The full rigid-body rotational contract is
+
+\begin{equation}
+  I\dot{\boldsymbol\omega}_B
+  +\boldsymbol\omega_B\times(I\boldsymbol\omega_B)
+  =\boldsymbol M_{A,B}+\boldsymbol M_{T,B}+\boldsymbol M_{\mathrm{control},B}.
+\end{equation}
+
+The inertia tensor, quaternion convention, gravity model, and derivative
+definitions are source contracts. They must not be inferred from coefficient
+names or silently replaced by diagonal or constant values.
+
+\section{Mass transitions and deployment}
+
+Variable-mass propagation declares its method and mass property updates in the
+problem file. The minimum mass-flow relationship is
+
+\begin{equation}
+  \dot m = -\dot m_{\mathrm{prop}},
+\end{equation}
+
+with CG and inertia updates supplied by the active mass model. A successor
+deployment can initialize a new trajectory from a prior trajectory and segment:
+
+\begin{lstlisting}
+*method rk45-var variable-mass
+*trajectory 2 payload start on 1
+  *deployed from trajectory 1, segment 2, wt=250
+\end{lstlisting}
+
+The deployment source and optional weight are typed AST fields. Runtime support
+still depends on the selected adapter and available mass properties.
+
+\chapter{Problem files and grammar}
+\label{chap:successor-problem}
+
+\section{Profiles and claim modes}
+
+TAORYX has two explicit profiles. \texttt{taos96} is the default historical
+profile; \texttt{taoryx} opts into the successor surface. The parser does not
+silently reinterpret successor directives as TAOS syntax.
+
+\begin{lstlisting}[language=Python]
+from taoryx.language import GrammarProfile, parse_problem_file
+
+document = parse_problem_file(
+    "mission.prb", profile=GrammarProfile.TAORYX
+)
+\end{lstlisting}
+
+The selected profile is recorded on \texttt{ProblemDocument.grammar\_profile}.
+Parsing returns lossless source, typed AST nodes, and source-located
+diagnostics. A parsed file is not automatically runtime-complete.
+
+\section{Hierarchy and extension blocks}
+
+The historical hierarchy remains the organizing structure:
+
+\begin{center}
+problem $\rightarrow$ trajectory $\rightarrow$ segment $\rightarrow$ block body.
+\end{center}
+
+Successor blocks add to that hierarchy without replacing the manual-bounded
+blocks:
+
+\begin{longtable}{p{0.31\linewidth}p{0.20\linewidth}p{0.36\linewidth}}
+\toprule
+\textbf{Syntax family} & \textbf{Scope} & \textbf{AST/runtime meaning}\\
+\midrule
+\endhead
+\pathcode{*3dof}, \pathcode{*6dof}, \pathcode{*sixdof} & problem &
+  \texttt{DofDirectiveBlock}; normalized dynamics mode.\\
+\pathcode{*mode ...} & problem & \texttt{ModeBlock}; explicit mode selection.\\
+\pathcode{*method ...} & problem & \texttt{ExtensionBlock}; method and options.\\
+\pathcode{*cases} & problem & \texttt{ExtensionBlock}; case columns and rows.\\
+\pathcode{*mass ...}, \pathcode{*ptmass} & segment &
+  \texttt{ExtensionBlock}; mass-model transition.\\
+\pathcode{*deployed ...} & trajectory &
+  \texttt{ExtensionBlock}; deployment source and weight.\\
+\pathcode{surface\_ref(...)} & define body & typed helper declaration.\\
+\pathcode{surface\_azm(...)} and \pathcode{surface\_dist(...)} & expressions &
+  expression AST helper calls.\\
+\pathcode{*runtime ...} & problem & \texttt{RuntimeBlock}; shared runtime contract.\\
+\bottomrule
+\end{longtable}
+
+The full syntax and recovery behavior are maintained in the focused Markdown
+reference, the documentary EBNF, and the typed parser sources:
+
+\begin{itemize}
+  \item \pathcode{docs/extensions/taoryx-language-reference.md};
+  \item \pathcode{grammars/taoryx\_extensions.ebnf}; and
+  \item \pathcode{src/taoryx/language/}.
+\end{itemize}
+
+The documentary EBNF is intentionally a
+compact extension catalog; parser behavior and typed contracts are the
+executable source of truth.
+
+\section{Representative problem file}
+
+\begin{lstlisting}
+(successor-example)
+*sixdof
+*method rk4-fixed variable-mass
+*atmos rcc ktf-annual
+*wind geodetic file=wind.dat units=ft/sec
+
+*trajectory 1 vehicle start on 1
+  *initial ecic x=20925646 y=0 z=0 xdt=0 ydt=300 zdt=0 time=0 mass=100
+  *segment 1 powered
+    *mass xcg=0 ixx=10 iyy=11 izz=12
+    *when time>1 stop
+
+*trajectory 2 payload start on 1
+  *deployed from trajectory 1, segment 1, wt=25
+  *segment 1 coast
+    *ptmass
+    *when alt<0 stop
+*end
+\end{lstlisting}
+
+\section{Validation and execution}
+
+Focused syntax and negative-diagnostic fixtures use the successor profile:
+
+\begin{lstlisting}[language=bash]
+taoryx-validate --profile taoryx \
+  examples/taoryx/syntax_fragments/*.prb \
+  examples/taoryx/syntax_fragments/*.tbl
+python tools/dev.py test-grammar
+\end{lstlisting}
+
+The local runtime can execute the explicitly supported subset and produce
+normalized artifacts, telemetry, and plots:
+
+\begin{lstlisting}[language=bash]
+PYTHONPATH=src .venv/bin/python examples/run_corpus.py \
+  --family taoryx --execute --output artifacts/examples/taoryx
+\end{lstlisting}
+
+\chapter{Table files and successor syntax}
+\label{chap:successor-tables}
+
+\section{Relationship to historical table files}
+
+The successor table families use the same source-preserving philosophy as the
+historical table parser: table names, headers, axes, assignments, operations,
+comments, and diagnostics remain inspectable. New families are opt-in
+successor syntax and must not be added to the TAOS 96 claim by catalog drift.
+
+\begin{longtable}{p{0.25\linewidth}p{0.25\linewidth}p{0.37\linewidth}}
+\toprule
+\textbf{Table family} & \textbf{Typical independent axis} & \textbf{Purpose}\\
+\midrule
+\endhead
+\pathcode{aero\_force} & Mach, alpha, beta, or control &
+  Force coefficient channels such as $C_X$, $C_Y$, and $C_Z$.\\
+\pathcode{aero\_moment} & alpha, beta, rates, or control &
+  Moment coefficient channels such as $C_l$, $C_m$, and $C_n$.\\
+\pathcode{inertia} & mass, time, or configuration &
+  Mass-dependent inertia or mass-property channels.\\
+\pathcode{cmx}, \pathcode{cmy}, \pathcode{cmz} & source-defined &
+  Reviewed moment-table type aliases retained by the successor contract.\\
+\bottomrule
+\end{longtable}
+
+\newpage
+\section{New table declaration form}
+
+The compact successor form declares an identification name, a successor type,
+an output channel, an independent axis, and optional reference parameters:
+
+\begin{lstlisting}
+(force-coefficients) table aero_force ca(mach) sref=5.241 lrefx=2.58333
+start
+add ca(mach)
+mach=0.0 1.0 2.0
+ca=0.20 0.18 0.16
+end
+
+(mass-properties) table inertia ixx(mass)
+start
+add ixx(mass)
+mass=0.0 100.0 200.0
+ixx=1.0 10.0 18.0
+end
+\end{lstlisting}
+
+The table parser retains the original source while typing the declaration,
+axis, assignment, and operation records. It checks table-family membership,
+axis order, assignment cardinality, supported header parameters, duplicate
+assignments, and references supplied by problem files.
+
+\section{Table-to-plant contract}
+
+Before a table is used by a successor runtime, the adapter must declare the
+coefficient convention and dimensionalization:
+
+\begin{enumerate}
+  \item identify the table family and coefficient frame;
+  \item identify units and reference dimensions such as $S$, $b$, and $c$;
+  \item declare interpolation, clamping, and out-of-envelope behavior;
+  \item preserve table name and source hash in the run artifact; and
+  \item verify that every problem-file reference resolves to the expected
+    table family.
+\end{enumerate}
+
+The table type alone does not establish a physical truth claim. Source
+provenance, valid ranges, and adapter behavior remain separate verification
+inputs.
+
+\chapter{Examples, artifacts, and traceability}
+\label{chap:successor-examples}
+
+\section{Corpus layout}
+
+The examples are intentionally parallel to the manual's fragments and full
+examples:
+
+\begin{itemize}
+  \item \pathcode{examples/taoryx/syntax\_fragments/} contains one focused
+    fixture per extension family;
+  \item \pathcode{examples/taoryx/full\_examples/} combines several features
+    into realistic problem files;
+  \item \pathcode{examples/taoryx/manifest.yaml} records profile, claim
+    boundary, source paths, and execution expectations; and
+  \item \pathcode{examples/taoryx/output\_contract.yaml} defines the common
+    report, artifact, telemetry, and plot products.
+\end{itemize}
+
+\section{Traceability map}
+
+\begin{longtable}{p{0.29\linewidth}p{0.57\linewidth}}
+\toprule
+\textbf{Question} & \textbf{Authoritative location}\\
+\midrule
+What did the original manual say? & \pathcode{manual/} and the source PDF.\\
+What successor syntax is accepted? & \pathcode{src/taoryx/language/}, the grammar contracts, and focused fixtures.\\
+What syntax is documented? & \pathcode{docs/extensions/taoryx-language-reference.md} and this reference.\\
+What ran? & \pathcode{run.json}, \pathcode{artifact.json}, and \pathcode{telemetry.csv}.\\
+What can be plotted? & The plot directory under the declared output contract.\\
+\bottomrule
+\end{longtable}
+
+\warningbox{\textbf{Compatibility wording.} The local runtime executes the
+explicitly supported TAOS96-compatible and TAORYX successor subsets. The
+repository does not contain the historical executable and complete table
+library, so neither this reference nor the verification guide claims bit-for-
+bit TAOS 96.0 behavioral compatibility.}
+
+\backmatter
+\chapter*{Build commands}
+
+Build this manual-like language reference with:
+
+\begin{lstlisting}[language=bash]
+python tools/dev.py language-reference
+\end{lstlisting}
+
+The normalized PDF is written to
+\pathcode{output/pdf/taoryx_language_reference.pdf}. The composite successor
+PDF includes this reference, the verification guide, and the Markdown
+extension appendix:
+
+\begin{lstlisting}[language=bash]
+python tools/dev.py taoryx-extension-pdf
+\end{lstlisting}
+
+\end{document}

@@ -105,7 +105,9 @@ class AutoTuneReport:
         """Return the lowest-scoring safe candidate, if one exists."""
 
         safe = tuple(candidate for candidate in self.candidates if candidate.safe)
-        return min(safe, key=lambda candidate: candidate.score, default=None)
+        if not safe:
+            return None
+        return min(safe, key=lambda candidate: candidate.score)
     ####
 
     def as_dict(self) -> dict[str, Any]:

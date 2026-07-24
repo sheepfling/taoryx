@@ -1,0 +1,167 @@
+schema_version: 1
+id: x15-selectable-maneuvers-v1
+vehicle: x15
+description: >-
+  Low-code X-15 maneuver menu. Settled rows have passing focused segment
+  gates; they still require route-level entry, transition, and terminal checks.
+maneuvers:
+  - id: powered-ascent
+    display_name: Powered ascent
+    kind: powered_ascent
+    mode: rigid_body_6dof
+    source_problem: examples/showcases/x15_rocket_to_hawaii/mission_matrix_prefix_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    focused_test: tests/e2e/test_fidelity_ladder.py::test_each_family_progresses_through_the_three_dynamics_tiers
+    status: settled
+    quality_gates:
+      - name: entry-initial-condition
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/powered-ascent
+      - name: mass-flow-and-propulsion-closure
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/powered-ascent
+      - name: envelope-and-termination
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/powered-ascent
+      - name: dynamics-tier-progression
+        status: pass
+        evidence: tests/e2e/test_fidelity_ladder.py::test_each_family_progresses_through_the_three_dynamics_tiers
+    claim_boundary: >-
+      Reusable X-15 powered-ascent fixture with bounded source-deck behavior;
+      this is not propulsion certification or a flight-performance claim.
+
+  - id: release-coast
+    display_name: Release and unpowered coast
+    kind: release_coast
+    mode: rigid_body_6dof
+    source_problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+    focused_test: tests/e2e/test_glider_family_validation.py::test_glider_6dof_long_release_energy_management_and_terminal_descent
+    status: settled
+    quality_gates:
+      - name: release-entry
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/release-coast
+      - name: energy-and-force-closure
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/release-coast
+      - name: alpha-beta-envelope
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/release-coast
+      - name: terminal-termination
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/release-coast
+    claim_boundary: >-
+      Reusable bounded source-deck release/coast segment; it is not a landing
+      guarantee or a complete terminal guidance result.
+
+  - id: bank-energy-management
+    display_name: Bank-reversal energy management
+    kind: bank_energy_management
+    mode: rigid_body_6dof
+    source_problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_bank_reversal_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+    focused_test: tests/e2e/test_glider_family_validation.py::test_glider_bank_reversal_contract_is_explicitly_machine_checked
+    status: settled
+    quality_gates:
+      - name: signed-bank-response
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/bank-energy-management
+      - name: alpha-beta-envelope
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/bank-energy-management
+      - name: force-and-moment-closure
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/bank-energy-management
+      - name: event-termination
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/bank-energy-management
+    claim_boundary: >-
+      Reusable bounded bank-reversal energy-management segment; it is not
+      crossrange optimization or route promotion.
+
+  - id: phugoid-alpha-profile
+    display_name: Phugoid-like alpha and energy exchange
+    kind: phugoid_alpha_profile
+    mode: point_mass_3dof
+    source_problem: examples/showcases/x15_rocket_to_hawaii/x15_phugoid_3dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+    focused_test: tests/e2e/test_glider_family_validation.py::test_x15_phugoid_alpha_profile_exercises_bounded_energy_exchange
+    status: settled
+    quality_gates:
+      - name: alpha-interpolation-and-sign
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/phugoid-alpha-profile
+      - name: source-table-envelope
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/phugoid-alpha-profile
+      - name: speed-altitude-energy-exchange
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/phugoid-alpha-profile
+      - name: bounded-termination
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/phugoid-alpha-profile
+    claim_boundary: >-
+      Reusable bounded 3-DOF alpha/energy excitation for maneuver testing; it
+      is not proof of an identified natural phugoid mode.
+
+  - id: weave
+    display_name: Two-cycle bank weave
+    kind: weave
+    mode: rigid_body_6dof
+    source_problem: examples/showcases/x15_rocket_to_hawaii/x15_weave_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+    focused_test: tests/e2e/test_glider_family_validation.py::test_x15_weave_reverses_bank_twice_inside_glide_envelope
+    status: settled
+    quality_gates:
+      - name: two-signed-bank-reversals
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/weave
+      - name: alpha-beta-envelope
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/weave
+      - name: force-and-moment-closure
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/weave
+      - name: neutral-glide-termination
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/weave
+    claim_boundary: >-
+      Reusable bounded two-cycle weave for X-15 maneuver testing; it is not
+      crossrange optimization or route-level promotion.
+
+  - id: terminal-pronav
+    display_name: Trim-to-terminal proportional navigation
+    kind: terminal_pronav
+    mode: rigid_body_6dof
+    source_problem: examples/showcases/x15_rocket_to_hawaii/source_trim_then_propnav_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl
+    focused_test: tests/e2e/test_glider_family_validation.py::test_glider_6dof_native_propnav_activates_after_source_trim
+    status: candidate
+    quality_gates:
+      - name: source-trim-entry
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/terminal-waypoint
+      - name: native-guidance-handoff
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/terminal-waypoint
+      - name: los-range-closure
+        status: pass
+        evidence: verification/maneuver_evidence.yaml:x15/terminal-waypoint
+      - name: terminal-miss-distance
+        status: pending
+        evidence: verification/segment_capability_matrix.yaml:x15-moving-target-pronav
+    claim_boundary: >-
+      Candidate trim-to-terminal guidance fixture; terminal miss distance,
+      landing, and route-level promotion remain unproven.
+

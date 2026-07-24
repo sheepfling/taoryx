@@ -13,6 +13,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+DOCUMENTATION_REQUIRED_TOOLS = frozenset(
+    {"latexmk", "pdflatex", "xelatex", "pandoc", "pdfinfo", "pdftotext", "pdftoppm"}
+)
+
 
 @dataclass(frozen=True, slots=True)
 class Check:
@@ -54,7 +58,7 @@ def command_check(name: str, *, required: bool = False) -> Check:
     )
 
 
-def run_check() -> list[Check]:
+def run_check(*, documentation: bool = False) -> list[Check]:
     checks = [
         Check(
             "Python runtime",
@@ -86,10 +90,11 @@ def run_check() -> list[Check]:
         )
     )
     checks.extend(
-        command_check(name, required=required)
+        command_check(name, required=(documentation and name in DOCUMENTATION_REQUIRED_TOOLS) or required)
         for name, required in (
             ("latexmk", True),
             ("pdflatex", True),
+            ("xelatex", False),
             ("pdfinfo", False),
             ("pdftotext", False),
             ("pdftoppm", False),
@@ -97,13 +102,25 @@ def run_check() -> list[Check]:
             ("pandoc", False),
         )
     )
+    repository_paths = [
+        "pyproject.toml",
+        "manual/manual.tex",
+        "grammars/taos_problem.ebnf",
+    ]
+    if documentation:
+        repository_paths.extend(
+            (
+                "docs/latex/taoryx_extensions_and_verification.tex",
+                "docs/latex/taoryx_language_reference.tex",
+            )
+        )
     checks.extend(
         Check(
             f"Repository path: {path}",
             (ROOT / path).exists(),
             "present" if (ROOT / path).exists() else "missing",
         )
-        for path in ("pyproject.toml", "manual/manual.tex", "grammars/taos_problem.ebnf")
+        for path in repository_paths
     )
     return checks
 
@@ -115,10 +132,16 @@ def main() -> int:
         action="store_true",
         help="return non-zero for any missing required package or tool",
     )
+    parser.add_argument(
+        "--docs",
+        action="store_true",
+        help="check every dependency required to build and render the documentation PDFs",
+    )
     args = parser.parse_args()
 
-    checks = run_check()
-    print(f"taoryx doctor — Python {platform.python_version()} on {platform.system()}")
+    checks = run_check(documentation=args.docs)
+    scope = "documentation PDF workflow" if args.docs else "development workflow"
+    print(f"taoryx doctor — {scope} — Python {platform.python_version()} on {platform.system()}")
     for check in checks:
         marker = "OK" if check.ok else ("FAIL" if check.required else "WARN")
         print(f"[{marker:4}] {check.label}: {check.detail}")

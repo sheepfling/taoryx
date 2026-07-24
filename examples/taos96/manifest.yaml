@@ -1,0 +1,25 @@
+family: taos96
+profile: taos96
+claim_boundary: historical source reconstruction and parser validation
+syntax_fragments:
+  - path: syntax_fragments/chapter03
+    canonical_source: ../chapter03
+full_examples:
+  - id: ballistic-reentry
+    problem: full_examples/chapter04/ballistic-reentry.prb
+    tables:
+      - full_examples/chapter04/ballistic-reentry.tbl
+    source_outputs:
+      - full_examples/chapter04/ballistic-reentry-printout.txt
+      - full_examples/chapter04/ballistic-reentry-summary.txt
+    execution: historical-transcription-only
+  - id: ballistic-rocket
+    problem: full_examples/chapter04/ballistic-rocket.prb
+    source_outputs:
+      - full_examples/chapter04/ballistic-rocket-printout.txt
+    execution: historical-transcription-only
+  - id: air-launched-intercept
+    problem: full_examples/chapter04/air-launched-intercept.prb
+    source_outputs:
+      - full_examples/chapter04/air-intercept-printout.txt
+    execution: historical-transcription-only

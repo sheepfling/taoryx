@@ -1,0 +1,386 @@
+schema_version: 1
+release: taoryx-alpha-2
+target_version: v0.2.0-alpha
+status: planned
+depends_on:
+  - taoryx-alpha-1
+historical_reference:
+  report: SAND95-1652
+  software_title: TAOS Version 96.0
+  historical_compatibility_claim: excluded
+  alpha2_scope: successor-side vehicle-family configuration and control tooling
+contracts:
+  neutral_package_boundary:
+    - trajectory-contracts
+    - trajectory-adapter-sdk
+    - trajectory-host
+    - trajectory-conformance
+    - trajectory-env-*
+  provider_packages:
+    - trajectory-adapter-taoryx
+    - trajectory-provider-reference
+  case_representations:
+    - CaseIntent
+    - ResolvedCase
+    - CompiledCase
+  capability_statuses:
+    - native
+    - emulated
+    - approximated
+    - unsupported
+  legacy_contracts:
+    - VehicleFamilyPackage
+    - ParameterSpec
+    - ControlSpec
+    - ObservationSpec
+    - ControlFrame
+    - ObservationFrame
+    - RunArtifact
+dynamics_profiles:
+  - point_mass_3dof
+  - pseudo_6dof
+  - rigid_body_6dof
+authority_modes:
+  - autopilot
+  - commanded
+  - overlay
+  - direct
+  - mixed
+proof_families:
+  - id: reference_provider_boundary
+    required: true
+    provider_kind: non_taoryx
+    acceptable_implementations:
+      - analytical_ballistic
+      - minimal_point_mass
+      - replay
+    required_capabilities:
+      - provider_discovery
+      - common_validation
+      - common_compilation
+      - batch_execution
+      - normalized_results
+      - native_artifacts
+  - id: spectre_configurable_3dof
+    required: true
+    fidelity: point_mass_3dof
+    required_capabilities:
+      - booster_loadouts
+      - payload_or_mass_variants
+      - fixed_ld_segments
+      - launch_and_aim_points
+      - physical_and_commanded_cutoff
+      - bounded_external_overlay
+  - id: complete_fidelity_ladder
+    required: true
+    fidelities:
+      - point_mass_3dof
+      - pseudo_6dof
+      - rigid_body_6dof
+    required_capabilities:
+      - common_mission_projection
+      - parameter_adapter
+      - initial_state_adapter
+      - command_adapter
+      - output_projection
+  - id: dual_launch_glider
+    required: true
+    launch_modes:
+      - air_release
+      - attached_booster
+    required_capabilities:
+      - separation_handoff
+      - waypoint_guidance
+      - autopilot_authority
+      - overlay_authority
+      - direct_effector_authority
+gates:
+  - id: A2-R0
+    name: neutral-contract-freeze
+    required: true
+  - id: A2-R1
+    name: host-and-adapter-sdk
+    required: true
+  - id: A2-R2
+    name: catalog-foundation
+    required: true
+  - id: A2-R3
+    name: resolver-and-provenance
+    required: true
+  - id: A2-R4
+    name: fixed-runtime-schemas
+    required: true
+  - id: A2-R5
+    name: reference-provider-parity
+    required: true
+  - id: A2-R6
+    name: taoryx-adapter
+    required: true
+  - id: A2-R7
+    name: provider-lab-parity
+    required: true
+  - id: A2-R8
+    name: spectre-proof-family
+    required: true
+  - id: A2-R9
+    name: control-authority
+    required: true
+  - id: A2-R10
+    name: fidelity-ladder
+    required: true
+  - id: A2-R11
+    name: dual-launch-glider
+    required: true
+  - id: A2-R12
+    name: lab-testbed
+    required: true
+  - id: A2-R13
+    name: tooling-and-artifacts
+    required: true
+  - id: A2-R14
+    name: release-reproducibility
+    required: true
+tranches:
+  - id: A2-T1
+    release_point: case-contracts
+    status: planned
+    gates:
+      - A2-R0
+      - A2-R2
+      - A2-R3
+      - A2-R4
+    scope:
+      - neutral typed schemas
+      - Spectre point-mass family catalog seed
+      - CaseIntent and immutable ResolvedCase
+      - canonical units and frames
+      - precedence and derived-value provenance
+      - case validate/resolve/explain/diff
+      - parameter/control/observation schema export
+    deferred:
+      - provider discovery and execution
+      - Taoryx Lab
+      - controller arbitration
+      - pseudo_6dof
+      - rigid_body_6dof
+    required_artifacts:
+      - resolved_case.json
+      - provenance.json
+      - controls.schema.json
+      - observations.schema.json
+      - diagnostics.json
+      - case-manifest.json
+    exit_criteria:
+      - identical input produces identical canonical JSON and case identity hash
+      - every resolved value has source, override, default, or derivation provenance
+      - unknown/unused overrides, unit mismatches, and precedence conflicts fail
+      - generated schemas have stable IDs and are fixed after resolution
+      - neutral import-boundary test passes without Taoryx runtime imports
+      - failed resolution cannot compile or run
+    stop_ship:
+      - silent default or ignored override
+      - bespoke vehicle runner required for catalog resolution
+      - generated problem file is treated as configuration authority
+    completion_signal: A2-T1-PASS
+  - id: A2-T2
+    release_point: provider-session
+    status: planned
+    gates:
+      - A2-R1
+      - A2-R5
+      - A2-R6
+      - A2-R7
+    scope:
+      - provider discovery and capability negotiation
+      - analytical or replay reference provider
+      - Taoryx execution adapter
+      - canonical reset/step/run/result lifecycle
+      - batch versus repeated-step parity
+    deferred:
+      - learning rewards and curricula
+      - direct effectors
+      - broad vehicle-family migration
+    required_artifacts:
+      - provider-capabilities.json
+      - translation-report.json
+      - batch-result.json
+      - stepped-result.json
+      - parity-report.json
+    exit_criteria:
+      - reference provider passes common lifecycle without provider-specific host branches
+      - required unsupported capabilities are reported, not emulated silently
+      - batch execution equals repeated canonical transitions for the proof case
+      - provider and adapter errors retain stable diagnostic codes
+    completion_signal: A2-T2-PASS
+  - id: A2-T3
+    release_point: control-authority
+    status: planned
+    gates:
+      - A2-R4
+      - A2-R9
+    scope:
+      - ControlFrame and authority metadata
+      - autopilot, commanded, overlay, direct, and mixed modes
+      - cadence, hold, limits, failsafe, and activity masks
+      - command arbitration and applied-control telemetry
+    deferred:
+      - policy transfer
+      - unbounded control mixing
+      - vehicle-specific direct-control missions
+    required_artifacts:
+      - control-schema.json
+      - authority-config.json
+      - control-arbitration.csv
+      - control-replay-report.json
+    exit_criteria:
+      - every accepted command records source, arbitration stages, limits, and applied value
+      - external control cannot bypass bounds, rates, or actuator dynamics
+      - cadence and hold behavior replay deterministically
+      - unsupported control levels fail at resolution or compilation
+    completion_signal: A2-T3-PASS
+  - id: A2-T4
+    release_point: spectre-3dof
+    status: planned
+    gates:
+      - A2-R8
+    scope:
+      - two booster/loadout variants
+      - fixed-L/D reusable segments
+      - launch and aim-point configuration
+      - physical burnout and commanded cutoff
+      - bounded overlay and parameter sweep
+    deferred:
+      - pseudo_6dof
+      - rigid_body_6dof
+      - historical TAOS compatibility
+    required_artifacts:
+      - resolved-case.json
+      - segment-graph.json
+      - events.csv
+      - trajectory.parquet
+      - mission-metrics.json
+      - plot-manifest.json
+    exit_criteria:
+      - loadout and segment changes require data changes, not source edits
+      - physical and commanded cutoff are distinct annotated events
+      - all declared waypoints/cutoffs complete within case tolerances
+      - at least one negative envelope or invalid-configuration case fails closed
+      - two parameter sweeps reproduce with stable hashes
+    completion_signal: A2-T4-PASS
+  - id: A2-T5
+    release_point: fidelity-ladder
+    status: planned
+    gates:
+      - A2-R10
+    scope:
+      - one small complete-fidelity family
+      - point_mass_3dof
+      - pseudo_6dof
+      - rigid_body_6dof
+      - common mission and cross-fidelity projections
+    deferred:
+      - dual-launch handoff
+      - broad source-validity claims
+      - automatic policy transfer
+    required_artifacts:
+      - fidelity-contract.json
+      - initial-state-adapter.json
+      - command-adapter.json
+      - cross-fidelity-comparison.json
+      - convergence-report.json
+    exit_criteria:
+      - same mission intent resolves at all three requested fidelities
+      - adapters and expected divergence are explicit
+      - constrained reduction parity passes declared tolerances
+      - free rigid-body behavior reports moments, rates, actuators, and envelope margins
+      - pseudo_6dof is never labeled as rigid-body evidence
+    completion_signal: A2-T5-PASS
+  - id: A2-T6
+    release_point: dual-launch-glider
+    status: planned
+    gates:
+      - A2-R11
+    scope:
+      - air release
+      - attached-booster launch
+      - explicit separation handoff
+      - waypoint guidance and authority modes
+    deferred:
+      - global glider envelope validity
+      - historical flight reconstruction
+    required_artifacts:
+      - air-release-case.json
+      - booster-launch-case.json
+      - separation-event.json
+      - shared-comparison.json
+    exit_criteria:
+      - both launch forms use the same family and mission contracts
+      - handoff is continuous or explicitly impulsive and event-annotated
+      - all state/control/frame changes at separation are recorded
+      - both cases are reproducible from clean inputs and hashes
+    completion_signal: A2-T6-PASS
+  - id: A2-T7
+    release_point: alpha-2-release
+    status: planned
+    gates:
+      - A2-R12
+      - A2-R13
+      - A2-R14
+    scope:
+      - Lab task/testbed contracts
+      - schema/catalog documentation
+      - plots and evidence packet generation
+      - clean-checkout reproducibility
+    deferred:
+      - remote model marketplace
+      - untrusted hot-loading
+      - universal autopilot
+    required_artifacts:
+      - alpha2-status.json
+      - evidence-packet.zip
+      - bundle-manifest.json
+      - schema-reference.pdf
+      - reproducibility-report.json
+    exit_criteria:
+      - all prior tranche completion signals are present
+      - clean checkout reproduces proof cases and hashes
+      - provider/Lab action-to-applied-control provenance is complete
+      - plots regenerate from machine-readable artifacts
+      - no stop-ship condition is present
+    completion_signal: A2-RELEASE-PASS
+stop_ship:
+  - neutral_contract_imports_taoryx
+  - common_host_contains_provider_specific_branch
+  - taoryx_reachable_outside_registered_adapter
+  - reference_provider_cannot_use_common_lifecycle
+  - required_translation_report_missing_or_incomplete
+  - unsupported_required_concept_silently_dropped
+  - interactive_capability_assumed_without_negotiation
+  - provider_and_lab_use_separate_transition_implementations
+  - reward_or_episode_rules_embedded_in_vehicle_physics
+  - action_to_applied_control_provenance_missing
+  - seeded_reset_or_evaluation_replay_not_reproducible
+  - fidelity_and_control_abstraction_conflated
+  - bespoke_runner_required_for_supported_family_combination
+  - unknown_override_silently_ignored
+  - derived_value_without_provenance
+  - pseudo_6dof_presented_as_rigid_body_6dof
+  - external_control_bypasses_authority_or_limits
+  - runtime_schema_changes_silently_after_reset
+  - physical_and_commanded_cutoff_conflated
+  - separation_handoff_not_explicitly_event_annotated
+  - normalized_values_replace_canonical_artifact_channels
+  - missing_physics_hidden_behind_guessed_defaults
+implementation_order:
+  - A2-0 neutral-contracts-and-import-boundary
+  - A2-1 host-adapter-sdk-and-reference-provider
+  - A2-1b canonical-session-and-taoryx-lab-facade
+  - A2-2 semantic-schema-and-catalog
+  - A2-3 resolver-and-provenance
+  - A2-4 spectre-3dof-family-and-taoryx-binding
+  - A2-5 common-control-stack
+  - A2-6 pseudo-6dof-profile
+  - A2-7 rigid-body-6dof-profile
+  - A2-8 dual-launch-glider
+  - A2-9 documentation-and-hardening
+####

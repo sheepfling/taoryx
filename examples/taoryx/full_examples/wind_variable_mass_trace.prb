@@ -1,0 +1,22 @@
+(wind-variable-mass-trace)
+*title Named RCC-atmosphere wind-file trace
+*sixdof
+*atmos rcc ktf-annual
+*earth wgs-84
+*method rk4-fixed variable-mass
+*wind geodetic file=wind_variable_mass.dat units=ft/sec
+*file wind_variable_mass_trace.dat time alt vel range gamgd psigd wt
+
+*trajectory 1 wind_vehicle start on 1
+  *initial geodetic time=0 wt=2000 alt=100 lat=0 long=0 vel=100 gama=0 psi=90
+  *print time alt vel range gamgd psigd wt winde windn windd
+  *segment 1 powered-through-wind
+    *mass xcg=0 ixx=20 iyy=20 izz=5
+    *aero sref=5.241 lrefx=2.58333 lrefy=2.58333 caxial=0.3 cnormal=0.08
+    *prop x=0 thrust=30000 mdot=4
+    *when time>5 goto 2
+  *segment 2 wind-coast
+    *ptmass
+    *aero cx=0.08
+    *when alt<0 stop
+*end

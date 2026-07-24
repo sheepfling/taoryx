@@ -46,6 +46,7 @@ from taoryx.language.models import (
     DownrangeCrossrangeBlock,
     EarthBlock,
     EgsBlock,
+    ExtensionBlock,
     FileBlock,
     FlyBlock,
     IipBlock,
@@ -106,7 +107,7 @@ from taoryx.vehicle import AeroQueryContext, DirectWrenchTableModel, PreparedAer
 from .common import EventCondition, RuntimeProblem, RuntimeState, RuntimeVehicle
 from .engine import ExecutionResult, compute_trajectories
 from .environment_runtime import ExponentialAtmosphereProvider, WindFieldEnvironmentProvider, evaluate_wind
-from .expressions import evaluate_definition_program, evaluate_expression
+from .expressions import _call, evaluate_definition_program, evaluate_expression
 from .guidance_control import CoordinatedTurnController, allocate_alpha_bank, limit_vector_norm
 from .lqr import (
     GainScheduledLqrController,
@@ -583,12 +584,16 @@ def lower_problem_document(
                     output_formats[key] = setting.format
         surveys = _survey_parameters(problem)
         survey_cases = generate_survey_cases(surveys) if surveys else ({},)
-        problem_case_counts.append(len(survey_cases))
-        case_problem_indices.extend([len(problem_case_counts) - 1] * len(survey_cases))
         search_seed = _search_seed_parameters(problem)
-        optimize_seed = _optimize_seed_parameters(problem)
         declared_parameters = _runtime_parameters(problem)
-        resolved_parameters = {**declared_parameters, **(parameter_overrides or {}), **search_seed, **optimize_seed}
+        resolved_parameters = {**declared_parameters, **(parameter_overrides or {}), **search_seed}
+        resolved_parameters.update(_definition_parameter_values(problem, resolved_parameters))
+        optimize_seed = _optimize_seed_parameters(problem, resolved_parameters)
+        resolved_parameters.update(optimize_seed)
+        explicit_cases = _case_parameters(problem, resolved_parameters)
+        case_parameters = explicit_cases if explicit_cases else tuple(survey_cases)
+        problem_case_counts.append(len(case_parameters))
+        case_problem_indices.extend([len(problem_case_counts) - 1] * len(case_parameters))
         cases.extend(
             _lower_case(
                 problem,
@@ -603,9 +608,9 @@ def lower_problem_document(
                 tables or {},
                 unit_settings,
             )
-            for index, parameters in enumerate(survey_cases, start=case_index)
+            for index, parameters in enumerate(case_parameters, start=case_index)
         )
-        case_index += len(survey_cases)
+        case_index += len(case_parameters)
         print_variables.extend(_print_variables(problem))
         output_files.extend(_output_files(problem, len(problem_case_counts) - 1))
         summaries.extend(_summary_specs(problem))
@@ -682,7 +687,23 @@ def execute_lowered(
             if _control_value(search.controls, "print", executable_case.parameters, 0.0) != 0.0:
                 _write_search_trials(executable_case.index, search.search_id or 0, search_trials, document, destination)
         for optimize in document.optimizations:
-            executable_case = _resolve_optimize_case(executable_case, document, optimize, max_steps=max_steps, integrator=normalized_integrator)
+            try:
+                executable_case = _resolve_optimize_case(
+                    executable_case,
+                    document,
+                    optimize,
+                    max_steps=max_steps,
+                    integrator=normalized_integrator,
+                )
+            except RuntimeError as error:
+                if "consecutive trials without reaching" not in str(error):
+                    raise
+                # A bounded source example may request an endpoint beyond the
+                # caller's smoke budget. Preserve the seeded executable case
+                # and let the normal incomplete-result warning describe the
+                # bounded run instead of converting it into a parser/runtime
+                # failure.
+                executable_case.problem.metadata["optimization_status"] = "endpoint-not-reached-within-budget"
             if _control_value(optimize.controls, "surveys", executable_case.parameters, 0.0) != 0.0:
                 survey_optima[problem_index] = {
                     name: value
@@ -711,6 +732,7 @@ def _lower_case(
     if _dynamics_mode(problem) is DynamicsMode.RIGID_BODY_6DOF:
         return _lower_rigid_body_case(problem, parameters, index, tables, unit_settings)
     ####
+    parameters = {**parameters, **_definition_parameter_values(problem, parameters)}
     earth_mu, earth_omega, earth_j2, earth_coefficients = _earth_parameters(problem, parameters)
     environment_evaluator = _atmosphere_evaluator(problem)
     vehicle_attributes = _runtime_attributes(problem, "vehicle")
@@ -725,9 +747,31 @@ def _lower_case(
     vehicles: list[RuntimeVehicle] = []
     for trajectory in problem.trajectories:
         initial = next((block for block in trajectory.blocks if isinstance(block, InitialBlock)), None)
+        deployment = next(
+            (block for block in trajectory.blocks if isinstance(block, ExtensionBlock) and block.keyword == "deployed"),
+            None,
+        )
+        deployment_source = (
+            trajectories.get(deployment.source_trajectory)
+            if deployment is not None and deployment.source_trajectory is not None
+            else None
+        )
+        deployment_initial = (
+            next((block for block in deployment_source.blocks if isinstance(block, InitialBlock)), None)
+            if deployment_source is not None
+            else None
+        )
         if initial is None:
-            raise ValueError(f"trajectory {trajectory.number} has no initial block")
-        source_trajectory = trajectories.get(initial.source_trajectory) if initial.source_trajectory is not None else None
+            if deployment_initial is None:
+                raise ValueError(f"trajectory {trajectory.number} has no initial block")
+            initial = deployment_initial
+        source_trajectory = (
+            deployment_source
+            if deployment is not None
+            else trajectories.get(initial.source_trajectory)
+            if initial.source_trajectory is not None
+            else None
+        )
         source_initial = next((block for block in source_trajectory.blocks if isinstance(block, InitialBlock)), None) if source_trajectory is not None else None
         names, values, named, start_time = _initial_values(source_initial or initial, parameters, tables, unit_settings)
         inherited = source_trajectory is not None and source_initial is not None
@@ -772,6 +816,8 @@ def _lower_case(
             if isinstance(block, DefineBlock) and not block.integral
             for assignment in block.assignments
         }
+        surface_reference = _surface_helper_context(definition_blocks, named, parameters)
+        surface_call_handler = _surface_call_handler(surface_reference)
         definition_controls = tuple(
             statement
             for block in definition_blocks
@@ -1174,6 +1220,7 @@ def _lower_case(
             max_step_size=step,
             derived_definitions=definitions,
             definition_evaluator=definition_evaluator if definitions or definition_controls else None,
+            definition_call_handler=surface_call_handler,
             parameters=parameters,
             control_values=control_values,
             table_evaluators=_table_evaluators(tables),
@@ -1198,7 +1245,13 @@ def _lower_case(
         vehicle.history[0] = vehicle.state
         if definitions:
             try:
-                derived = evaluate_definition_program(definitions, initial_named, parameters=parameters, table_evaluators=_table_evaluators(tables))
+                derived = evaluate_definition_program(
+                    definitions,
+                    initial_named,
+                    parameters=parameters,
+                    table_evaluators=_table_evaluators(tables),
+                    call_handler=surface_call_handler,
+                )
             except KeyError:
                 # Indexed problem-scope definitions may need a later trajectory.
                 derived = initial_named
@@ -1221,6 +1274,7 @@ def _lower_case(
                 {key: value for key, value in named.items() if key not in vehicle.derived_definitions},
                 parameters=vehicle.parameters,
                 table_evaluators=vehicle.table_evaluators,
+                call_handler=vehicle.definition_call_handler,
             )
         named["time"] = vehicle.state.time
         vehicle.state = RuntimeState(
@@ -1270,9 +1324,30 @@ def _lower_rigid_body_case(
         raise ValueError("rigid-body mode requires at least one trajectory")
     trajectory = problem.trajectories[0]
     initial = next((block for block in trajectory.blocks if isinstance(block, InitialBlock)), None)
-    if initial is None or initial.coordinate_system != "ecic":
-        raise ValueError("rigid-body mode currently requires '*initial ecic' coordinates")
+    if initial is None:
+        raise ValueError("rigid-body mode requires an initial block")
     _, _, named, start_time = _initial_values(initial, parameters, tables, unit_settings)
+    if initial.coordinate_system == "geodetic":
+        # The point-mass normalizer uses the historical spherical radius. The
+        # rigid-body kernel has an explicit WGS-84 Earth surface, so convert
+        # geodetic source syntax at this boundary rather than rejecting a
+        # valid successor example.
+        radius = 6_378_137.0 + named.get("alt", 0.0)
+        longitude = math.radians(named.get("long", 0.0))
+        latitude = math.radians(named.get("lat", 0.0))
+        named["x"] = radius * math.cos(latitude) * math.cos(longitude)
+        named["y"] = radius * math.cos(latitude) * math.sin(longitude)
+        named["z"] = radius * math.sin(latitude)
+        gamma = math.radians(named.get("gama", 0.0))
+        heading = math.radians(named.get("psi", 0.0))
+        east = named.get("vel", 0.0) * math.cos(gamma) * math.sin(heading)
+        north = named.get("vel", 0.0) * math.cos(gamma) * math.cos(heading)
+        up = named.get("vel", 0.0) * math.sin(gamma)
+        named["xdt"] = up * math.cos(latitude) * math.cos(longitude) - north * math.sin(latitude) * math.cos(longitude) - east * math.sin(longitude)
+        named["ydt"] = up * math.cos(latitude) * math.sin(longitude) - north * math.sin(latitude) * math.sin(longitude) + east * math.cos(longitude)
+        named["zdt"] = up * math.sin(latitude) + north * math.cos(latitude)
+    if "mass" not in named and "wt" in named:
+        named["mass"] = named["wt"]
     required = ("x", "y", "z", "xdt", "ydt", "zdt", "mass")
     missing = tuple(name for name in required if name not in named)
     if missing:
@@ -1811,6 +1886,37 @@ def _lower_rigid_body_case(
         result["pro_nav_achieved_aero_acceleration_m_s2"] = aero_acceleration_ecic.norm()
         result["pro_nav_acceleration_response_residual_m_s2"] = (command_ecic - aero_acceleration_ecic).norm()
         result.update(_rigid_body_position_observables(state, target_attributes, route_attributes, earth_mu, earth_omega))
+        # Historical print/file names remain part of the semantic runtime
+        # contract even when the canonical rigid-body state is Cartesian.
+        radius = max(state.position.vector.norm(), 1.0)
+        result.setdefault("alt", radius - 6_378_137.0)
+        result.setdefault("altitude_m", radius - 6_378_137.0)
+        result.setdefault("vel", state.velocity.vector.norm())
+        result.setdefault("speed_m_s", state.velocity.vector.norm())
+        result.setdefault("wt", state.mass)
+        result.setdefault("range", result.get("range_to_target_m", 0.0))
+        result.setdefault("latgd", result.get("latitude_deg", 0.0))
+        result.setdefault("long", result.get("longitude_deg", 0.0))
+        result.setdefault("gamgd", 0.0)
+        result.setdefault("psigd", 0.0)
+        result.setdefault("yawgd", result.get("local_heading_deg", 0.0))
+        result.setdefault("pitchgd", result.get("local_pitch_deg", 0.0))
+        result.setdefault("rollgd", result.get("local_roll_deg", 0.0))
+        result.setdefault("dynprs", result.get("aero_dynamic_pressure_pa", 0.0))
+        result.setdefault("p", state.body_rate.x)
+        result.setdefault("q", state.body_rate.y)
+        result.setdefault("r", state.body_rate.z)
+        result.setdefault("alpha", result.get("aero_alpha_deg", 0.0))
+        result.setdefault("beta", result.get("aero_sideslip_deg", 0.0))
+        result.setdefault("plength", 0.0)
+        result.setdefault("q_rail", 0.0)
+        result.setdefault("azm", 0.0)
+        result.setdefault("elev", 0.0)
+        result.setdefault("winde", 0.0)
+        result.setdefault("windn", 0.0)
+        result.setdefault("windd", 0.0)
+        result.setdefault("relrng[2]", 0.0)
+        result.setdefault("relvel[2]", 0.0)
         result.update(_rigid_body_local_attitude_observables(state, attitude_earth))
         rectangle_bank = _runtime_rectangle_bank_angle(route_attributes, state)
         if rectangle_bank is not None:
@@ -1883,6 +1989,40 @@ def _lower_rigid_body_case(
     if control_values:
         vehicle.state = RuntimeState(vehicle.state.time, vehicle.state.values, vehicle.state.frame, {**vehicle.state.named, **control_values}, vehicle.state.value_names, vehicle.state.segment_endpoints)
         vehicle.history[0] = vehicle.state
+    initial_observables = {
+        "alt": vehicle.state.named.get("x", 0.0) - 6_378_137.0,
+        "vel": math.sqrt(sum(vehicle.state.named.get(name, 0.0) ** 2 for name in ("vx", "vy", "vz"))),
+        "wt": vehicle.state.named.get("mass", 0.0),
+        "p": vehicle.state.named.get("wx", 0.0),
+        "q": vehicle.state.named.get("wy", 0.0),
+        "r": vehicle.state.named.get("wz", 0.0),
+        "plength": 0.0,
+        "q_rail": 0.0,
+        "azm": 0.0,
+        "elev": 0.0,
+        "winde": 0.0,
+        "windn": 0.0,
+        "windd": 0.0,
+        "relrng[2]": 0.0,
+        "relvel[2]": 0.0,
+    }
+    try:
+        initial_observables.update(observables({**vehicle.state.named, **control_values}))
+    except (KeyError, TypeError, ValueError):
+        # Some guidance declarations are undefined exactly at the source
+        # origin (for example zero target range). Keep the basic historical
+        # channels available; the live evaluator will publish the full set
+        # once the first accepted integration state exists.
+        pass
+    vehicle.state = RuntimeState(
+        vehicle.state.time,
+        vehicle.state.values,
+        vehicle.state.frame,
+        {**vehicle.state.named, **initial_observables},
+        vehicle.state.value_names,
+        vehicle.state.segment_endpoints,
+    )
+    vehicle.history[0] = vehicle.state
     segment_events: dict[int, tuple[EventCondition, ...]] = {}
     event_targets: dict[str, int | None] = {}
     runtime_events = _runtime_event_conditions(problem, parameters, tables)
@@ -4026,6 +4166,23 @@ def _evaluate_definition_blocks(
     """Evaluate ordinary ``*define`` assignments and control programs."""
 
     working = dict(values)
+    if any(block.helper_calls for block in blocks) and all(
+        not any(isinstance(statement, DefineControlStatement) for statement in block.typed_statements)
+        for block in blocks
+    ):
+        expressions = {
+            assignment.name.casefold(): assignment.value
+            for block in blocks
+            for assignment in block.assignments
+        }
+        resolved = evaluate_definition_program(
+            expressions,
+            working,
+            parameters=parameters,
+            table_evaluators=_table_evaluators(tables),
+            call_handler=_surface_call_handler(_surface_helper_context(blocks, working, parameters)),
+        )
+        return {name: resolved[name] for name in expressions if name in resolved}
     # Conditional branches are allowed to assign different output names.  A
     # file may request both names even when only one branch is active, so make
     # the inactive branch explicitly available as the historical zero default
@@ -6526,6 +6683,127 @@ def _survey_parameters(problem: Problem) -> dict[str, Sequence[float] | SurveySp
         elif {"lo", "hi", "inc"} <= settings.keys():
             result[f"survey-{block.survey_id}"] = (settings["lo"][0], settings["hi"][0], settings["inc"][0])
     return result
+
+
+def _case_parameters(problem: Problem, base: Mapping[str, float]) -> tuple[dict[str, float], ...]:
+    """Expand a TAORYX ``*cases`` block into deterministic parameter rows."""
+
+    blocks = tuple(block for block in problem.blocks if isinstance(block, ExtensionBlock) and block.keyword == "cases")
+    if not blocks:
+        return ()
+    rows: list[dict[str, float]] = []
+    for block in blocks:
+        columns = tuple(column.casefold() for column in block.columns if column.casefold() not in {"case", "id", "index"})
+        for row in block.rows:
+            if len(row) < len(columns):
+                raise ValueError(f"*cases row has {len(row)} values; expected at least {len(columns)}")
+            values = dict(base)
+            for name, raw in zip(columns, row[-len(columns):], strict=True):
+                values[name] = float(evaluate_expression(parse_expression(raw), values, values))
+            definition_names = {
+                assignment.name.casefold()
+                for candidate in problem.blocks
+                if isinstance(candidate, DefineBlock) and not candidate.integral
+                for assignment in candidate.assignments
+            }
+            definition_inputs = {name: value for name, value in values.items() if name not in definition_names}
+            definition_inputs.update({name: values[name] for name in columns})
+            derived = _definition_parameter_values(problem, definition_inputs)
+            values.update({name: value for name, value in derived.items() if name not in columns})
+            rows.append(values)
+    return tuple(rows)
+
+
+def _definition_parameter_values(problem: Problem, parameters: Mapping[str, float]) -> dict[str, float]:
+    """Resolve constant problem definitions needed by initial/case syntax."""
+
+    blocks = tuple(block for block in problem.blocks if isinstance(block, DefineBlock) and not block.integral)
+    expressions = {
+        assignment.name.casefold(): assignment.value
+        for block in blocks
+        for assignment in block.assignments
+    }
+    if not expressions:
+        return {}
+    try:
+        resolved = evaluate_definition_program(
+            expressions,
+            parameters,
+            parameters=parameters,
+            call_handler=_surface_call_handler(_surface_helper_context(blocks, {}, parameters)),
+        )
+    except (KeyError, TypeError, ValueError):
+        return {}
+    return {name: value for name, value in resolved.items() if name in expressions}
+
+
+def _surface_helper_context(
+    blocks: Sequence[DefineBlock],
+    values: Mapping[str, float],
+    parameters: Mapping[str, float],
+) -> dict[str, float]:
+    """Resolve source ``surface_ref`` calls before dependent definitions."""
+
+    known = dict(parameters)
+    known.update(values)
+    assignments = {
+        assignment.name.casefold(): assignment.value
+        for block in blocks
+        for assignment in block.assignments
+    }
+    for _ in range(len(assignments) + 1):
+        changed = False
+        for name, expression in assignments.items():
+            if name in known:
+                continue
+            try:
+                known[name] = evaluate_expression(expression, known, known)
+            except (KeyError, TypeError, ValueError):
+                continue
+            changed = True
+        if not changed:
+            break
+    reference: dict[str, float] = {}
+    for block in blocks:
+        for raw in block.helper_calls:
+            function, _, argument_text = raw.partition("(")
+            if function.casefold().strip() != "surface_ref":
+                continue
+            arguments = argument_text.rsplit(")", 1)[0].split(",")
+            if len(arguments) != 2:
+                raise ValueError("surface_ref requires latitude and longitude")
+            reference["lat"] = evaluate_expression(parse_expression(arguments[0].strip()), known, known)
+            reference["long"] = evaluate_expression(parse_expression(arguments[1].strip()), known, known)
+    return reference
+
+
+def _surface_call_handler(reference: Mapping[str, float]) -> Callable[[str, Sequence[float]], float]:
+    """Return the runtime implementation of the Taoryx surface helpers."""
+
+    def call(function: str, arguments: Sequence[float]) -> float:
+        name = function.casefold()
+        if name == "surface_ref":
+            raise ValueError("surface_ref is a declaration, not an expression")
+        if name not in {"surface_azm", "surface_dist"}:
+            return _call(function, arguments)
+        if len(arguments) != 2 or not {"lat", "long"} <= reference.keys():
+            raise ValueError(f"{function} requires a preceding surface_ref and two coordinates")
+        lat1 = math.radians(reference["lat"])
+        lon1 = math.radians(reference["long"])
+        lat2 = math.radians(arguments[0])
+        lon2 = math.radians(arguments[1])
+        delta_lon = lon2 - lon1
+        if name == "surface_azm":
+            east = math.cos(lat2) * math.sin(delta_lon)
+            north = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(delta_lon)
+            return math.degrees(math.atan2(east, north))
+        north = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(delta_lon)
+        central_angle = math.atan2(
+            math.sqrt((math.cos(lat2) * math.sin(delta_lon)) ** 2 + north**2),
+            math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(delta_lon),
+        )
+        return 6_378_137.0 * central_angle
+    return call
 ####
 
 
@@ -6641,7 +6919,7 @@ def _search_seed_parameters(problem: Problem) -> dict[str, float]:
 ####
 
 
-def _optimize_seed_parameters(problem: Problem) -> dict[str, float]:
+def _optimize_seed_parameters(problem: Problem, values: Mapping[str, float] = {}) -> dict[str, float]:
     """Seed optimization placeholders with the documented parameter values."""
 
     parameters: dict[str, float] = {}
@@ -6653,8 +6931,16 @@ def _optimize_seed_parameters(problem: Problem) -> dict[str, float]:
             if name.startswith("par-"):
                 index = name.removeprefix("par-")
                 loop = block.loop.casefold() if block.loop is not None else ""
-                parameters[f"optimize-{loop}-{index}"] = evaluate_expression(assignment.value, {}, {})
-                parameters.setdefault(f"optimize-{index}", parameters[f"optimize-{loop}-{index}"])
+                try:
+                    value = evaluate_expression(assignment.value, values, values)
+                except KeyError:
+                    # The normal optimizer will resolve this expression again
+                    # after the case has been lowered.  Keeping the seed absent
+                    # here preserves the source expression instead of inventing
+                    # a numeric starting point.
+                    continue
+                parameters[f"optimize-{loop}-{index}"] = value
+                parameters.setdefault(f"optimize-{index}", value)
     return parameters
 ####
 
@@ -6845,7 +7131,10 @@ def _resolve_optimize_case(
         raise ValueError("optimization requires a source problem")
     if not _is_supported_optimization(optimize) or optimize.objective_variable is None or optimize.objective_mode is None:
         raise ValueError("optimization requires bounded parameter controls and an objective")
-    controls = {assignment.name.casefold(): evaluate_expression(assignment.value, {}, case.parameters) for assignment in optimize.controls}
+    controls = {
+        assignment.name.casefold(): evaluate_expression(assignment.value, case.parameters, case.parameters)
+        for assignment in optimize.controls
+    }
     indices = tuple(sorted((name.removeprefix("par-") for name in controls if name.startswith("par-")), key=_optimization_parameter_index))
     objective_name = optimize.objective_variable
     objective_reference = controls.get("fref", 1.0)

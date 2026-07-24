@@ -389,6 +389,20 @@ cases:
     max_steps: 1801
     allow_ground_termination: true
     limits: {max_speed_m_s: 2500.0, min_altitude_m: 0.0}
+  - id: x15/phugoid-alpha-profile
+    dimension: 3dof
+    problem: examples/showcases/x15_rocket_to_hawaii/x15_phugoid_3dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+    max_steps: 3000
+    limits: {max_speed_m_s: 15000.0, min_altitude_m: 0.0}
+  - id: x15/weave
+    dimension: 6dof
+    problem: examples/showcases/x15_rocket_to_hawaii/x15_weave_6dof.prb
+    tables:
+      - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl
+    max_steps: 12000
+    limits: {max_abs_aero_alpha_deg: 10.0, max_abs_aero_sideslip_deg: 10.0, min_altitude_m: 0.0}
   - id: x15/certified-landing
     dimension: 6dof
     problem: examples/showcases/x15_rocket_to_hawaii/certified_landing_checkpoint_6dof.prb

@@ -1,0 +1,101 @@
+schema_version: 1
+id: taoryx_alpha1_vehicle_evidence_v1
+release_gate: R7
+claim_boundary: >-
+  Alpha 1 vehicle evidence means source/provenance-backed convention and plant
+  evidence at the declared fidelity, with at least one reproducible bounded
+  scenario per family. It does not claim a global flight envelope, controller
+  mission completion, or historical TAOS compatibility. Higher-order mission
+  candidates and their blockers remain visible in the family-validation
+  registry and are not promoted by this gate.
+required_families: [b747, skywalker_x8, hummingbird, x15]
+accepted_rigid_statuses: [pass, pass_local, pass_bounded_research_case]
+vehicles:
+  - id: b747
+    release_status: pass
+    family: powered_fixed_wing
+    claimed_fidelity: rigid-body-6dof
+    source_differential_test: tests/e2e/test_golden_source_differential.py
+    convention_firewall: verification/staged_completion_matrix.yaml
+    mode_contracts:
+      point_mass_3dof: pass
+      pseudo_6dof: pass
+      rigid_body_6dof: pass_local
+    baseline:
+      problem: examples/generated/vehicles/b747_canonical_source_anchor_6dof.prb
+      trim_report: artifacts/golden_plants/b747_condition3_trim_report.json
+      long_scenario: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
+    source_trim:
+      status: pass
+      claim: source-anchored local powered trim
+    higher_order_mission:
+      status: candidate
+      blockers:
+        - full JT9D fuel-flow provenance remains outside the installed thrust map
+        - longer route and altitude-step closure remain a research candidate
+  - id: skywalker_x8
+    release_status: pass
+    family: powered_fixed_wing
+    claimed_fidelity: rigid-body-6dof
+    source_differential_test: tests/e2e/test_golden_source_differential.py
+    convention_firewall: verification/staged_completion_matrix.yaml
+    mode_contracts:
+      point_mass_3dof: pass
+      pseudo_6dof: pass
+      rigid_body_6dof: pass_local
+    baseline:
+      problem: examples/generated/vehicles/skywalker_x8_canonical_6dof.prb
+      trim_report: artifacts/golden_plants/x8_powered_trim_report.json
+      long_scenario: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
+    source_trim:
+      status: pass
+      claim: source-bounded local powered trim
+    higher_order_mission:
+      status: candidate
+      blockers:
+        - four-leg corner capture remains outside the declared research gate
+        - propulsion balance and native multi-leg authority remain incomplete
+  - id: hummingbird
+    release_status: pass
+    family: multirotor
+    claimed_fidelity: rigid-body-6dof
+    source_differential_test: tests/e2e/test_golden_source_differential.py
+    convention_firewall: verification/staged_completion_matrix.yaml
+    mode_contracts:
+      point_mass_3dof: pass
+      pseudo_6dof: pass
+      rigid_body_6dof: pass
+    baseline:
+      problem: examples/generated/vehicles/hummingbird_canonical_hover_6dof.prb
+      trim_report: artifacts/golden_plants/hummingbird_hover_trim_report.json
+      long_scenario: examples/mission_families/slower_hummingbird/SV05_rectangle_course_6dof.prb
+    source_trim:
+      status: pass
+      claim: source-frame equal-rotor hover equilibrium
+    higher_order_mission:
+      status: validated
+      blockers: []
+  - id: x15
+    release_status: pass
+    family: unpowered_hypersonic_glider
+    claimed_fidelity: rigid-body-6dof
+    source_differential_test: tests/e2e/test_golden_source_differential.py
+    convention_firewall: verification/staged_completion_matrix.yaml
+    mode_contracts:
+      point_mass_3dof: pass
+      pseudo_6dof: pass
+      rigid_body_6dof: pass_local
+    baseline:
+      problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
+      trim_report: artifacts/golden_plants/x15_release_glide_trim_report.json
+      long_scenario: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_6dof.prb
+    source_trim:
+      status: source_only
+      claim: source-prescribed release/glide initialization; not an equilibrium trim
+      claim_excluded: true
+      adjudication: verification/x15_trim_adjudication.yaml
+    higher_order_mission:
+      status: blocked
+      blockers:
+        - direct short-range ProNav leaves the verified beta envelope
+        - release-state target alpha, beta, and angular-rate adjudication remains open

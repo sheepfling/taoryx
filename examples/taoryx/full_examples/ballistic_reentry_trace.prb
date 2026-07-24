@@ -1,0 +1,22 @@
+(ballistic-reentry-trace)
+*title Named ballistic reentry trace with survey summaries
+*method rk4-fixed
+*atmos standard
+*earth wgs-84 omega=0
+*file ballistic_reentry_trace.dat time alt vel range gamgd psigd wt
+
+*trajectory 1 reentry_vehicle start on 1
+  *initial geodetic time=0 wt=550 alt=300000 lat=0 long=0 vel=7200 gama=-20 psi=90
+  *print time alt vel range gamgd psigd wt dynprs nx
+  *segment 1 atmospheric-reentry
+    *integ dtprnt=0.5 dt=0.1
+    *aero caxial=0.08
+    *when alt<0 stop
+
+*survey 1 entry_angle vals=-20,-25,-30
+*survey 2 entry_speed lo=6500 hi=7500 inc=500
+*summarize peak_dynamic_pressure decm=1
+  add maxfit(dynprs[1])
+*summarize peak_lateral_load decm=2
+  add minfit(nx[1])
+*end

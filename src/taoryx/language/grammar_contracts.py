@@ -65,9 +65,12 @@ TAORYX_MODE_CONTRACT = GrammarContract(
 SUPPORTED_PROBLEM_BLOCKS = frozenset(
     {"atmos", "define", "earth", "egs", "file", "optimize", "print", "radar", "search", "summarize", "survey", "title", "units/fmt", "wind"}
 )
-SUPPORTED_TAORYX_PROBLEM_BLOCKS = frozenset({"mode", "3dof", "6dof", "random", "runtime"})
+SUPPORTED_TAORYX_PROBLEM_BLOCKS = frozenset({"mode", "3dof", "6dof", "sixdof", "random", "runtime", "method", "cases"})
+SUPPORTED_TAORYX_TABLE_TYPES = frozenset({"aero_force", "aero_moment", "inertia"})
 SUPPORTED_TRAJECTORY_BLOCKS = frozenset({"define", "dwn/crs", "file", "iip", "initial", "print", "tangent"})
 SUPPORTED_SEGMENT_BLOCKS = frozenset({"aero", "constants", "cg", "fly", "increment", "inertial", "integ", "limits", "prop", "rail", "reset", "when"})
+SUPPORTED_TAORYX_TRAJECTORY_BLOCKS = frozenset({"deployed"})
+SUPPORTED_TAORYX_SEGMENT_BLOCKS = frozenset({"mass", "ptmass"})
 SUPPORTED_FLY_GUIDANCE_RULES = frozenset(
     {
         "alt", "cl", "cs", "downria", "dynprs", "gamgc", "gamgd", "intercept", "l/d", "l/d-max",

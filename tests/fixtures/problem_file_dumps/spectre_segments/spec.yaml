@@ -15,7 +15,7 @@ problems:
     earth: wgs-84 omega=0
     trajectory_line: "*trajectory 1 vehicle start on 1"
     initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=350.0"
-    file_line: "*file ballistic.dat time alt vel gamgd alpha bankgd thrust"
+    file_line: "*file ballistic.dat time alt vel gamgd alpha thrust"
     segments:
       - number: 1
         title: ballistic
@@ -135,7 +135,7 @@ problems:
     earth: wgs-84 omega=0
     trajectory_line: "*trajectory 1 vehicle start on 1"
     initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0"
-    file_line: "*file range-extension.dat time alt vel gamgd alpha bankgd thrust"
+    file_line: "*file range-extension.dat time alt vel gamgd alpha thrust"
     segments:
       - number: 1
         title: range_extension
@@ -181,7 +181,7 @@ problems:
     earth: wgs-84 omega=0
     trajectory_line: "*trajectory 1 vehicle start on 1"
     initial_line: "*initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0"
-    file_line: "*file slalom.dat time alt vel gamgd alpha bankgd thrust"
+    file_line: "*file slalom.dat time alt vel gamgd alpha thrust"
     segments:
       - number: 1
         title: slalom

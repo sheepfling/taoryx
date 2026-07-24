@@ -49,6 +49,20 @@ records rather than discarding source evidence. Add independent positive and
 negative fixtures under `tests/fixtures/grammar_baseline/` when changing
 grammar behavior.
 
+For junior-friendly corpus regeneration, use the batch command from the
+repository root:
+
+```bash
+PYTHONPATH=src .venv/bin/python examples/run_corpus.py \
+  --family all --execute --output artifacts/examples/all
+```
+
+This writes AST/parser reports for both profiles, attempts the TAOS96-compatible
+local runtime where bundled tables permit execution, executes Taoryx full
+examples, and regenerates the indexed runtime showcases. Each successful case
+gets a run report, normalized artifact, telemetry CSV, and plots. A short run
+may be incomplete at the step budget; that is distinct from a runtime failure.
+
 ## Segments and composition
 
 For a normal waypoint or segment course, use the high-level composition
@@ -107,6 +121,110 @@ Use native `.prb` `*segment`, `*when`, `goto`, and `stop` constructs when the
 change belongs to the documented source language. Use the external
 segmentation catalog when the task needs reusable orchestration metadata,
 controller bindings, goals, events, or transition policies.
+
+### Spectre-style specialized segments
+
+For the synthetic Spectre corpus, start with
+[`docs/architecture/spectre-segments.md`](architecture/spectre-segments.md) and
+[`verification/spectre_segment_catalog.yaml`](../verification/spectre_segment_catalog.yaml).
+The reusable templates are `powered_ascent`, `ballistic_coast`,
+`bank_maneuver`, `alpha_profile`, `skip_maneuver`, `terminal_pronav`, and
+`moving_target_intercept`. They apply to point-mass 3-DOF, kinematic
+pseudo-6-DOF, and—after additional plant gates—rigid-body 6-DOF.
+
+The Spectre fixture status is deliberately separate from vehicle promotion:
+`fixture-ready` means the synthetic source translation and provenance are
+available. It does not prove a vehicle's thrust, aero tables, bank sign, alpha
+response, target closure, or terminal behavior. Reuse the phase contract and
+retune the vehicle-specific controls, tables, limits, and time-to-go values;
+never copy those values blindly from the Spectre surrogate.
+
+Before composing a Spectre phase into a vehicle route, run the isolated fixture
+ladder:
+
+```bash
+python tools/dev.py test-spectre-segments
+```
+
+This Spectre-specific runtime view proves grammar, completion, telemetry,
+finite samples, time ordering, and isolated segment span. It does not promote
+the phase: vehicle-quality gates remain deferred until a vehicle adapter
+supplies bounded aero/plant, control, convergence, and terminal evidence.
+
+For the shortest path to a runnable reduced-order case, use the parameter
+builder instead of hand-writing four native segments:
+
+```python
+from taoryx.spectre_builder import build_fixed_ld_3dof
+
+build = build_fixed_ld_3dof(
+    vehicle_id="generic-3dof",
+    vbo_m_s=900.0,
+    apogee_altitude_m=20_000.0,
+    pitch_over_angle_deg=75.0,
+    target_range_m=100_000.0,
+    target_bearing_deg=90.0,
+    initial_heading_offset_deg=8.0,
+    lift_to_drag=4.0,
+)
+build.write("build/spectre-demo.prb", "build/spectre-demo.manifest.json")
+```
+
+Validate the generated extension with `taoryx`, then run it through the same
+profile explicitly:
+
+```bash
+taoryx-validate --profile taoryx build/spectre-demo.prb
+```
+
+The generated manifest shows the computed phase durations, initial heading,
+target location, and fixed-L/D assumptions. `vbo_m_s`, apogee, pitch-over,
+heading offset, and `lift_to_drag` are convenience parameters—not claims that
+the resulting trajectory exactly reaches those values. For a promoted vehicle,
+override phase durations as needed, bind vehicle tables/controllers, and run
+the segment evidence ladder before route verification.
+
+For the X-15, the focused follow-on fixtures are the bounded 3-DOF
+`x15_phugoid_3dof.prb` alpha/energy profile and the 6-DOF
+`x15_weave_6dof.prb` two-cycle bank reversal. Their machine-checked gates live
+in `tests/e2e/test_glider_family_validation.py`; the current claim boundary is
+segment response, not natural-mode identification, crossrange optimization, or
+route promotion.
+
+For a low-code X-15 menu, use
+[`verification/x15_maneuver_catalog.yaml`](../verification/x15_maneuver_catalog.yaml):
+
+```python
+from taoryx.x15_maneuvers import load_x15_maneuver_catalog
+
+catalog = load_x15_maneuver_catalog("verification/x15_maneuver_catalog.yaml")
+settled = catalog.select("settled")
+```
+
+Use only `settled` rows as inputs to new composition work. Inspect each row's
+`focused_test`, `tables`, and `quality_gates` before changing parameters. The
+catalog currently settles five X-15 maneuvers; its trim-to-terminal ProNav row
+is still a candidate pending terminal miss-distance evidence. This menu is a
+segment-quality checkpoint, not a route-promotion or flight-certification
+shortcut.
+
+Use the smallest test slice for the change. The X-15 module marks isolated
+segment tests with `segment` and their dynamics tier with `dof3` or `dof6`:
+
+```bash
+python tools/dev.py test-x15-catalog
+python -m pytest tests/e2e/test_glider_family_validation.py \
+  -m 'x15 and segment and dof3' -k phugoid -o addopts=''
+python -m pytest tests/e2e/test_glider_family_validation.py \
+  -m 'x15 and segment and dof6' -k weave -o addopts=''
+```
+
+Use `python tools/dev.py test-plots` for visualization-only checks and
+`python tools/dev.py test-grammar` for parser work. Reserve
+`python tools/dev.py test-x15` and the full `check`/`pytest` gates for a
+promotion checkpoint or a handoff; they intentionally include much more
+vehicle and artifact coverage. The complete slice map is in
+[`docs/BUILDING_TESTS.md`](BUILDING_TESTS.md).
 
 After execution, score the composed run instead of inspecting plots by eye:
 

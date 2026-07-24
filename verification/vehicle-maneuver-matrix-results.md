@@ -47,6 +47,10 @@ dimensions remain visible and are not erased.
   3-DOF point-mass reductions run their 180-second staging/coast schedule but
   are classified unsafe when they cross the declared ground boundary. Neither
   is full Hawaii-mission evidence.
+- X-15 phugoid-alpha-profile and two-cycle weave are now separate focused
+  bindings. The phugoid row is a bounded 3-DOF source-deck alpha/energy
+  excitation; the weave row is a bounded 6-DOF bank-reversal case. Neither is
+  yet a natural-mode, crossrange-optimization, or route-promotion claim.
 - The paired B747, X8, and Hummingbird point-mass route reductions now use the
   shared `*runtime status route` contract and the same source tables where the
   reduction is defined. Their results remain reductions, not attitude-control
@@ -67,11 +71,11 @@ The matrix status is therefore a research-surrogate execution inventory, not a
 claim of TAOS 96 compatibility, flight qualification, or globally valid
 vehicle models.
 
-The current consolidated packet contains 43 binding summaries: 36 completed
+The current consolidated packet contains 45 binding summaries: 38 completed
 within declared limits and 7 completed-but-unsafe. The unsafe cases are
-preserved as useful diagnostics. All 24 matrix rows now have a completed,
+preserved as useful diagnostics. All 26 matrix rows now have a completed,
 limit-respecting binding; the three landing-related rows pass only as
 explicitly non-contact checkpoints.
 
-The current coverage audit is 24 of 24 rows fully dimension-bound and 24 of 24
+The current coverage audit is 26 of 26 rows fully dimension-bound and 26 of 26
 rows passing at the row level, with zero actionable dimension gaps.

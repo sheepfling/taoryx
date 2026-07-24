@@ -92,6 +92,16 @@ refresh the page-normalized source build:
 python tools/dev.py manual
 ```
 
+For the complete junior-friendly documentation PDF workflow, diagnose tools
+first and then rebuild all historical and successor PDFs:
+
+```bash
+python tools/dev.py docs-doctor
+python tools/dev.py all-pdfs
+```
+
+Individual PDF targets and outputs are listed in [docs/BUILDING.md](docs/BUILDING.md).
+
 Use the analysis tree for focused studies and generated helpers:
 
 ```bash

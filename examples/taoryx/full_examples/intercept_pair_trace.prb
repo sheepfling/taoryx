@@ -1,0 +1,31 @@
+(intercept-pair-trace)
+*title Named two-vehicle intercept trace
+*sixdof
+*method rk45-var variable-mass
+*atmos standard
+*earth wgs-84
+*file intercept_pair_trace.dat time alt vel range gamgd psigd wt
+
+*trajectory 1 interceptor start on 1
+  *initial ecic x=20925646 y=0 z=0 xdt=0 ydt=300 zdt=0 time=0 mass=1965
+  *print time alt vel range gamgd psigd p q r relrng[2]
+  *segment 1 powered-interceptor
+    *mass xcg=0 ixx=10 iyy=11 izz=12
+    *aero caxial=0.5 cnormal=0.2
+    *prop thrust=25000 mdot=3
+    *when time>5 goto 2
+  *segment 2 intercept-coast
+    *aero constant_beta=200
+    *when relvel[2]>0 stop
+
+*trajectory 2 target start on 10
+  *initial geodetic time=0 wt=13000 alt=0 lat=0 long=0 vel=0 gama=79 psi=90
+  *print time alt vel range gamgd psigd wt
+  *segment 10 target-ascent
+    *aero caxial=0.6 cnormal=0.15
+    *prop thrust=30000 mdot=4
+    *when tseg>8 goto 11
+  *segment 11 target-coast
+    *aero constant_beta=200
+    *when alt<0 stop
+*end
