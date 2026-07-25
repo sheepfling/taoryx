@@ -48,7 +48,7 @@ Rebuild from the external corpus with:
 
 ```text
 python tools/build_daveml_collection.py \
-  --source-root INBOX/taoryx-aerospace-data-corpus-v1.1 \
+  --source-root /tmp/taoryx-aerospace-data-corpus-v1.1/taoryx-aerospace-data-corpus-v1.1 \
   --output build/f16-s119.txcollection
 ```
 
@@ -88,7 +88,7 @@ Build the second source-grounded fixture with:
 ```text
 python tools/build_daveml_collection.py \
   --family-manifest families/reference_hl20_mod_k/family.yaml \
-  --source-root INBOX/taoryx-aerospace-data-corpus-v1.1 \
+  --source-root /tmp/taoryx-aerospace-data-corpus-v1.1/taoryx-aerospace-data-corpus-v1.1 \
   --output build/hl20-mod-k.txcollection
 ```
 

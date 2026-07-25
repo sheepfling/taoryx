@@ -7,7 +7,7 @@ source:
   aerodynamic_source: qualified-models/f16-s119/F16_aero_mod_k_normalized.dml
   aerodynamics_sha256: 272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764
   expected_input_path: qualified-models/f16-s119/taoryx-f16-s119-reference-v0.7.txair
-  source_corpus_archive: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+  source_corpus_archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
   source_corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
   availability: local_corpus_input_verified
   license_and_notices: required_from_source_package

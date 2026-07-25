@@ -8,6 +8,6 @@ aerodynamics:
   relative_to_corpus: qualified-models/hl20-mod-k/source/aerodynamics.dml
   sha256: b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec
 corpus:
-  archive: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+  archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
   sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
 replay_boundary: package_replay_in_taoryx_runtime

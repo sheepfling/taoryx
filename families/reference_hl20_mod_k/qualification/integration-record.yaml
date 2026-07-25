@@ -14,7 +14,7 @@ source:
   expected_input_path: qualified-models/hl20-mod-k/source/aerodynamics.dml
   runtime_package_path: qualified-models/hl20-mod-k/taoryx-hl20-mod-k-unpowered-v0.10.txair
   runtime_package_sha256: 443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63
-  source_corpus_archive: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+  source_corpus_archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
   source_corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
   license_and_notices: required_from_source_repository
 plant:

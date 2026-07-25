@@ -46,7 +46,7 @@ Use `--strict` in CI or before allowing source replay:
   --source-root /path/to/taoryx-source-inputs --strict
 ```
 
-The corpus archive is `INBOX/taoryx-aerospace-data-corpus-v1.1.zip` with archive
+The corpus archive is `resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip` with archive
 SHA-256 `9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31`.
 Its extracted directory is ignored local input data, not a new source license
 or a historical-manual change.
@@ -143,7 +143,7 @@ the external corpus with:
 
 ```text
 python tools/build_daveml_collection.py \
-  --source-root INBOX/taoryx-aerospace-data-corpus-v1.1 \
+  --source-root /tmp/taoryx-aerospace-data-corpus-v1.1/taoryx-aerospace-data-corpus-v1.1 \
   --output build/f16-s119.txcollection
 ```
 
@@ -159,7 +159,7 @@ The same builder now supports the HL-20 fixture:
 ```text
 python tools/build_daveml_collection.py \
   --family-manifest families/reference_hl20_mod_k/family.yaml \
-  --source-root INBOX/taoryx-aerospace-data-corpus-v1.1 \
+  --source-root /tmp/taoryx-aerospace-data-corpus-v1.1/taoryx-aerospace-data-corpus-v1.1 \
   --output build/hl20-mod-k.txcollection
 ```
 

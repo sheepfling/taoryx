@@ -2,9 +2,9 @@ schema_version: 1
 program: taoryx-daveml-reference-integration
 claim_boundary: source-bounded research reference models; not flight qualification
 input_corpus:
-  archive: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+  archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
   archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
-  extracted_root: INBOX/taoryx-aerospace-data-corpus-v1.1
+  extracted_root: /tmp/taoryx-aerospace-data-corpus-v1.1/taoryx-aerospace-data-corpus-v1.1
 families:
   - id: reference_f16_s119
     status: source_parsed_static_checks_passed_package_replay_pending

@@ -8,6 +8,6 @@ aerodynamics:
   relative_to_corpus: qualified-models/f16-s119/F16_aero_mod_k_normalized.dml
   sha256: 272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764
 corpus:
-  archive: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+  archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
   sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
 replay_boundary: package_replay_in_taoryx_runtime

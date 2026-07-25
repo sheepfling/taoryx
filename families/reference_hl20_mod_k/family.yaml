@@ -11,7 +11,7 @@ source:
   package_sha256: 443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63
   aerodynamic_source: qualified-models/hl20-mod-k/source/aerodynamics.dml
   aerodynamics_sha256: b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec
-  corpus_archive: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+  corpus_archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
   corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
   availability: local_corpus_input_verified
   license_and_notices: required_from_source_repository

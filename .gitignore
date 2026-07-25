@@ -119,6 +119,7 @@ ipython_config.py
 
 # pixi
 /INBOX/
+.trashcan/
 /qa/
 /artifacts/
 /output/
