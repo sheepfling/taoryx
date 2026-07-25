@@ -1,0 +1,339 @@
+schema_version: 1
+id: taoryx_reachability_profile_catalog_v1
+status: planning
+claim_boundary: >-
+  Archetype-specific effective reachability for declared Taoryx models,
+  controllers, environments, horizons, terminal sets, and constraints. A
+  successful witness proves declared-model feasibility; failure to find a
+  witness is not a proof of physical impossibility unless a certified method
+  is used.
+common_object:
+  mathematical_form: >-
+    E(vehicle_state, flight_phase, resource_state, target_relative_state,
+    controller_class, time_horizon, success_set, path_constraints)
+  required_study_identity: [vehicle_family, configuration, fidelity, profile, semantics, controller, environment, horizon]
+  required_result_products: [feasible_intervals, nondominated_witnesses, limiting_factor_map, fidelity_layers, replay_manifest]
+  default_semantics: first_pass_bounded_time_bounded_resource
+  default_policy: no_implicit_loiter_or_reattack
+study_semantics:
+  first_pass:
+    meaning: reach_terminal_set_without_orbiting_reattacking_or_crossing_and_returning
+  bounded_time:
+    meaning: reach_terminal_set_before_declared_horizon
+  bounded_resource:
+    meaning: reach_terminal_set_without_exceeding_declared_resource_limits
+  bounded_path:
+    meaning: reach_terminal_set_without_exceeding_path_length_turn_count_or_segment_limits
+  eventual_capture:
+    meaning: any_valid_path_within_overall_simulation_horizon
+  robust_capture:
+    meaning: one_declared_policy_succeeds_across_uncertainty_cases
+coordinate_systems:
+  local_vehicle_frame: [east_m, north_m, up_m]
+  velocity_relative_frame: [range_m, bearing_deg, elevation_deg, closing_speed_m_s, target_aspect_deg]
+  launch_aim_frame: [downrange_m, crossrange_m, altitude_m]
+  high_energy_frame: [downrange_m, crossrange_m, specific_energy_j_per_kg]
+  ballistic_frame: [range_m, azimuth_deg, terminal_angle_deg, terminal_speed_m_s]
+  orbit_frame: [relative_position_m, relative_velocity_m_s, epoch_s, visibility_state]
+limiting_factor_codes:
+  - turn_radius_limited
+  - insufficient_time_to_turn
+  - braking_distance_limited
+  - thrust_limited
+  - battery_limited
+  - propellant_limited
+  - terminal_speed_limited
+  - terminal_angle_limited
+  - crossrange_limited
+  - dynamic_pressure_limited
+  - heating_limited
+  - control_authority_limited
+  - actuator_rate_limited
+  - stall_limited
+  - separation_not_complete
+  - minimum_burn_not_complete
+  - aero_table_boundary
+  - controller_search_unresolved
+profiles:
+  - id: reachability.multirotor.capture_bounded_time.v1
+    archetype: multirotor_or_hover_capable_drone
+    status: profile_defined
+    phases: [launch, transit, hover_or_orbit, terminal_capture, landing_or_abort]
+    state_dimensions: [relative_position, relative_velocity, altitude_difference, vehicle_velocity, yaw, battery_energy, wind, payload]
+    decisions: [acceleration_vector, yaw_rate, altitude_policy, terminal_braking_policy]
+    constraints: [maximum_horizontal_acceleration, maximum_braking_acceleration, maximum_tilt, collective_thrust, climb_rate, descent_rate, motor_lag, battery_power, wind_authority, terminal_stopping_speed]
+    coordinates: [local_vehicle_frame, velocity_relative_frame]
+    products: [position_reachability, low_relative_speed_capture, time_to_reach, battery_reserve, wind_robustness, altitude_constrained_reachability, moving_target_lead_solutions]
+    limiting_factors: [braking_distance_limited, thrust_limited, battery_limited, control_authority_limited, actuator_rate_limited]
+    configurations: [hummingbird, bolt, bolt_m, anvil]
+  - id: reachability.rotorcraft.capture_bounded_time.v1
+    archetype: helicopter_or_single_main_rotor
+    status: profile_defined
+    phases: [vtol, climb, translational_flight, hover_stare, terminal_capture, recovery]
+    state_dimensions: [relative_position, relative_velocity, altitude_difference, vehicle_velocity, yaw, battery_energy, wind, payload, rotor_disk_tilt]
+    decisions: [collective, cyclic, yaw_rate, translational_lift_policy, terminal_braking_policy]
+    constraints: [rotor_thrust, disk_tilt, rotor_response, tail_rotor_authority, climb_rate, descent_rate, wind_authority, terminal_stopping_speed]
+    coordinates: [local_vehicle_frame, velocity_relative_frame]
+    products: [near_field_capture, low_relative_speed_capture, hover_hold, payload_endurance, wind_robustness, moving_target_lead_solutions]
+    limiting_factors: [braking_distance_limited, thrust_limited, battery_limited, control_authority_limited, actuator_rate_limited]
+    configurations: [ghost_x, r44_class]
+  - id: reachability.fixed_wing.first_pass_capture.v1
+    archetype: powered_fixed_wing_cruise_aircraft
+    status: profile_defined
+    phases: [launch_or_airborne, climb, cruise, turn, task, return_or_terminal]
+    state_dimensions: [range, bearing, target_aspect, altitude_difference, vehicle_speed, target_velocity, heading, flight_path_angle, bank, specific_energy, fuel_or_battery]
+    decisions: [left_turn, right_turn, bank_schedule, speed_schedule, altitude_schedule, terminal_heading, terminal_speed]
+    constraints: [turn_radius, heading_rate, stall, load_factor, lift, altitude, terminal_heading, terminal_flight_path_angle, terminal_speed, resource, controller_authority]
+    coordinates: [velocity_relative_frame, launch_aim_frame]
+    products: [feasible_range_intervals, forward_crescent, annular_or_lobed_regions, left_right_solution_sets, terminal_heading_speed, first_pass_route, fuel_reserve]
+    limiting_factors: [turn_radius_limited, insufficient_time_to_turn, stall_limited, terminal_speed_limited, propellant_limited, control_authority_limited]
+    configurations: [b747, skywalker_x8, altius_600, altius_700_isr, altius_700m, barracuda_100, barracuda_250, barracuda_500, fury_fq44, f16_s119, reference_a320, learjet24_local]
+  - id: reachability.jet_vtol.transition_capture.v1
+    archetype: vectored_thrust_or_tailsitter
+    status: profile_defined
+    phases: [vertical_launch, transition, wingborne, task, recovery_transition, vertical_land]
+    state_dimensions: [position, velocity, attitude, thrust_axis, transition_blend, fuel_or_battery, actuator_state]
+    decisions: [throttle, thrust_vector, aero_surface_command, transition_schedule, recovery_trigger]
+    constraints: [low_dynamic_pressure_authority, thrust_vector_limit, transition_continuity, engine_spool, post_stall_aero, reserve, terminal_vertical_speed]
+    coordinates: [velocity_relative_frame, launch_aim_frame]
+    products: [launch_corridor, transition_capture, wingborne_reachability, recovery_reserve, reverse_transition, abort_regions]
+    limiting_factors: [thrust_limited, actuator_rate_limited, battery_limited, propellant_limited, control_authority_limited, dynamic_pressure_limited]
+    configurations: [roadrunner, omen]
+  - id: reachability.tiltrotor.conversion_capture.v1
+    archetype: dual_tiltrotor_or_proprotor
+    status: profile_defined
+    phases: [vtol, nacelle_conversion, wingborne_transit, low_speed_task, egress, conversion, land]
+    state_dimensions: [position, velocity, attitude, nacelle_angle, rotor_thrust, generator_power, battery_energy, fuel_mass]
+    decisions: [collective, differential_thrust, nacelle_schedule, flaperon_command, power_manager_policy]
+    constraints: [hover_power, nacelle_rate, proprotor_authority, generator_load, battery_buffer, fuel_reserve, conversion_continuity]
+    coordinates: [local_vehicle_frame, velocity_relative_frame]
+    products: [conversion_corridor, hover_reserve, wingborne_range, generator_battery_trade, landing_go_around_reserve]
+    limiting_factors: [thrust_limited, battery_limited, propellant_limited, actuator_rate_limited, control_authority_limited]
+    configurations: [thunder, xv15_class, v22_class]
+  - id: reachability.boost_glide.prelaunch_capture.v1
+    archetype: rocket_plus_aerodynamic_payload_or_glider
+    status: profile_defined
+    phases: [attached, boost, coast, separation, glider_acquisition, energy_management_glide, terminal]
+    state_dimensions: [position, velocity, attitude, rates, mass, propellant, specific_energy, separation_state]
+    decisions: [launch_azimuth, launch_elevation, booster_choice, ignition_time, cutoff_time, cutoff_speed, stage_timing, payload_loadout, glide_bank_schedule]
+    constraints: [minimum_burn, safe_separation, boost_turn_authority, dynamic_pressure, heating, aero_table, terminal_speed, terminal_energy, crossrange]
+    coordinates: [launch_aim_frame, high_energy_frame]
+    products: [prelaunch_envelope, direct_lobes, lofted_lobes, boost_glide_lobes, terminal_energy_contours, release_state_acceptability]
+    limiting_factors: [minimum_burn_not_complete, separation_not_complete, propellant_limited, terminal_energy_limited, crossrange_limited, heating_limited]
+    configurations: [kestrel_glider, rocket_plus_glider_generic]
+  - id: reachability.boost_glide.release_state.v1
+    archetype: booster_to_glider_handoff
+    status: profile_defined
+    phases: [boost, cutoff, separation, stabilization, release]
+    state_dimensions: [release_position, release_velocity, release_attitude, release_rates, release_energy, release_mass]
+    decisions: [cutoff_speed, cutoff_time, pitch_program, bank_program, separation_time]
+    constraints: [separation_safety, release_attitude, release_rate, dynamic_pressure, propellant, table_validity]
+    coordinates: [launch_aim_frame, high_energy_frame]
+    products: [release_state_envelope, handoff_acceptability, downstream_glider_initial_conditions]
+    limiting_factors: [minimum_burn_not_complete, separation_not_complete, control_authority_limited, dynamic_pressure_limited]
+    configurations: [kestrel_glider, x15]
+  - id: reachability.glider.post_release_retarget.v1
+    archetype: unpowered_or_powered_glider_after_handoff
+    status: profile_defined
+    phases: [glider_acquisition, energy_management_glide, bank_reversal, terminal]
+    state_dimensions: [position, velocity, attitude, rates, specific_energy, dynamic_pressure, heating_proxy, terminal_energy]
+    decisions: [bank_schedule, angle_of_attack_schedule, waypoint_or_lead_point, bank_reversal_timing]
+    constraints: [bank_limit, dynamic_pressure, Mach, angle_of_attack, normal_acceleration, terminal_speed, terminal_energy, aero_table]
+    coordinates: [launch_aim_frame, high_energy_frame]
+    products: [post_release_retarget, downrange_crossrange, terminal_speed, terminal_energy, bank_reversal_count, energy_corridor]
+    limiting_factors: [terminal_energy_limited, crossrange_limited, dynamic_pressure_limited, heating_limited, aero_table_boundary]
+    configurations: [x15, hl20_mod_k, kestrel_glider]
+  - id: reachability.high_energy_glider.first_pass.v1
+    archetype: hypersonic_or_high_energy_glider
+    status: profile_defined
+    phases: [boost_or_release, high_energy_glide, energy_management, terminal]
+    state_dimensions: [downrange, crossrange, altitude, specific_energy, Mach, dynamic_pressure, angle_of_attack, bank, normal_acceleration]
+    decisions: [bank_schedule, angle_of_attack_schedule, bank_reversal_count, terminal_energy_target]
+    constraints: [dynamic_pressure, heating_proxy, Mach, angle_of_attack, normal_acceleration, bank, control_authority, minimum_terminal_speed, minimum_terminal_energy, aero_table]
+    coordinates: [high_energy_frame, launch_aim_frame]
+    products: [downrange_crossrange, terminal_speed_contours, terminal_energy_contours, heating_margin, bank_reversal_modes, multi_fidelity_contraction]
+    limiting_factors: [heating_limited, dynamic_pressure_limited, terminal_energy_limited, crossrange_limited, control_authority_limited, aero_table_boundary]
+    configurations: [x15, hl20_mod_k, generic_hypersonic_glider]
+  - id: reachability.ballistic.launch_footprint.v1
+    archetype: ballistic_rocket_or_largely_unguided_body
+    status: profile_defined
+    phases: [launch, powered_boost, cutoff, ballistic_coast, terminal]
+    state_dimensions: [position, velocity, mass, launch_attitude, launch_azimuth, launch_elevation, burn_duration, cutoff_speed]
+    decisions: [launch_azimuth, launch_elevation, burn_duration, cutoff_speed, booster_configuration, payload_mass, initial_spin]
+    constraints: [atmosphere, mass, propellant, terminal_angle, terminal_speed, launch_site]
+    coordinates: [ballistic_frame, launch_aim_frame]
+    products: [passive_terminal_footprint, minimum_range, maximum_range, low_arc, high_arc, terminal_speed_regions]
+    limiting_factors: [propellant_limited, terminal_angle_limited, terminal_speed_limited, dynamic_pressure_limited]
+    configurations: [ballistic_rocket, two_stage_ballistic_rocket, ballistic_reentry]
+  - id: reachability.passive_object.terminal_footprint.v1
+    archetype: tumbling_or_passive_object
+    status: profile_defined
+    phases: [release, free_flight, terminal]
+    state_dimensions: [position, velocity, attitude, angular_rate, ballistic_coefficient, uncertainty_state]
+    decisions: []
+    constraints: [atmosphere, geometry, ballistic_coefficient, initial_attitude_distribution, initial_rate_distribution]
+    coordinates: [ballistic_frame, launch_aim_frame]
+    products: [probabilistic_impact_footprint, terminal_speed_distribution, orientation_at_impact, uncertainty_bands]
+    limiting_factors: [aero_table_boundary, dynamic_pressure_limited]
+    configurations: [tumbling_ballistic_body, passive_release_body, suborbital_ballistic_tumble_return]
+  - id: reachability.spacecraft.orbit_visibility.v1
+    archetype: orbital_spacecraft_3dof
+    status: profile_defined
+    phases: [deployment, orbit_raise, coast, observation, downlink, stationkeeping, safe_mode]
+    state_dimensions: [relative_orbital_state, epoch, central_body, visibility, propellant_or_delta_v, eclipse_state]
+    decisions: [burn_time, burn_vector, observation_window, downlink_window, stationkeeping_policy]
+    constraints: [delta_v, propellant, eclipse, line_of_sight, keep_out, epoch_and_frame_contract]
+    coordinates: [orbit_frame]
+    products: [visibility_reachability, retasking_window, delta_v_reserve, ground_track_access, checkpoint_fan]
+    limiting_factors: [propellant_limited, terminal_time_limited, controller_search_unresolved]
+    configurations: [reference_satellite_wheel_primary, reference_satellite_hybrid, spacecraft.6u_observer_rw.standard.v1, spacecraft.6u_observer_rw.resilient.v1, spacecraft.agile_imager_rw.v1, spacecraft.marco_like_hybrid.v1]
+  - id: reachability.spacecraft.attitude_pointing.v1
+    archetype: spacecraft_attitude_control
+    status: profile_defined
+    phases: [detumble, slew, point, observe, desaturate, safe_mode]
+    state_dimensions: [attitude, body_rates, wheel_momentum, thruster_propellant, sensor_state, target_line_of_sight]
+    decisions: [wheel_torque, thruster_pulse, magnetorquer_command, pointing_schedule, unload_trigger]
+    constraints: [torque, wheel_speed, wheel_momentum, thruster_propellant, sensor_visibility, keep_out]
+    coordinates: [orbit_frame]
+    products: [pointing_capture, slew_time, wheel_saturation, desaturation_reachability, safe_mode_basin]
+    limiting_factors: [control_authority_limited, propellant_limited, actuator_rate_limited, controller_search_unresolved]
+    configurations: [reference_satellite_wheel_primary, reference_satellite_hybrid, spacecraft.6u_observer_rw.standard.v1, spacecraft.6u_observer_rw.resilient.v1, spacecraft.agile_imager_rw.v1, spacecraft.marco_like_hybrid.v1]
+  - id: reachability.spacecraft.freeflyer_capture.v1
+    archetype: free_flyer_thruster_primary
+    status: profile_defined
+    phases: [release, translation, stationkeeping, proximity_capture, abort]
+    state_dimensions: [relative_position, relative_velocity, attitude, body_rates, propellant, thruster_state]
+    decisions: [thruster_pulse, attitude_hold, translation_burn, approach_corridor]
+    constraints: [wrench_rank, pulse_quantization, propellant, collision_keep_out, terminal_relative_speed, failed_thruster_reallocation]
+    coordinates: [orbit_frame, local_vehicle_frame]
+    products: [capture_basin, approach_corridor, propellant_reserve, failure_reachability]
+    limiting_factors: [control_authority_limited, propellant_limited, actuator_rate_limited, terminal_speed_limited]
+    configurations: [reference_freeflyer_thruster_primary, spacecraft.spheres_like_rcs.v1]
+  - id: reachability.fleet.multi_agent_capture.v1
+    archetype: population_or_fleet_reachability
+    status: profile_defined
+    phases: [launch, transit, task, regroup, return, terminal]
+    state_dimensions: [agent_state, neighbor_state, communication_state, resource_state, population_status]
+    decisions: [per_agent_control, task_assignment, formation_policy, collision_avoidance, communication_relay]
+    constraints: [collision, separation, communication, resource, formation_geometry, population_terminal_condition]
+    coordinates: [local_vehicle_frame, velocity_relative_frame]
+    products: [individual_capture, fleet_capture, task_coverage, communication_connectivity, failure_reachability]
+    limiting_factors: [control_authority_limited, battery_limited, insufficient_time_to_turn, controller_search_unresolved]
+    configurations: [hummingbird_fleet, bolt_fleet, generic_multirotor_population]
+vehicle_families:
+  - id: powered_fixed_wing
+    status: validated_family
+    configurations: [b747, skywalker_x8]
+    profiles: [reachability.fixed_wing.first_pass_capture.v1]
+  - id: rocket_plane
+    status: validated_family
+    configurations: [x15]
+    profiles: [reachability.fixed_wing.first_pass_capture.v1, reachability.high_energy_glider.first_pass.v1, reachability.boost_glide.release_state.v1]
+  - id: multirotor_direct_wrench
+    status: validated_family
+    configurations: [hummingbird]
+    profiles: [reachability.multirotor.capture_bounded_time.v1, reachability.fleet.multi_agent_capture.v1]
+  - id: source_reference_high_performance_fixed_wing
+    status: source_anchored_reference
+    configurations: [f16_s119]
+    profiles: [reachability.fixed_wing.first_pass_capture.v1]
+  - id: source_reference_lifting_body
+    status: source_anchored_reference
+    configurations: [hl20_mod_k]
+    profiles: [reachability.glider.post_release_retarget.v1, reachability.high_energy_glider.first_pass.v1]
+  - id: source_reference_transport_jet
+    status: blocked_missing_source
+    configurations: [reference_a320]
+    profiles: [reachability.fixed_wing.first_pass_capture.v1]
+  - id: electric_multirotor
+    status: public_surrogate_cataloged
+    configurations: [bolt, bolt_m, anvil]
+    profiles: [reachability.multirotor.capture_bounded_time.v1, reachability.fleet.multi_agent_capture.v1]
+  - id: electric_single_main_rotor
+    status: public_surrogate_cataloged
+    configurations: [ghost_x]
+    profiles: [reachability.rotorcraft.capture_bounded_time.v1]
+  - id: deployable_propeller_fixed_wing
+    status: public_surrogate_cataloged
+    configurations: [altius_600, altius_700_isr, altius_700m]
+    profiles: [reachability.fixed_wing.first_pass_capture.v1]
+  - id: fuel_turbojet_fixed_wing
+    status: public_surrogate_cataloged
+    configurations: [barracuda_100, barracuda_250, barracuda_500]
+    profiles: [reachability.fixed_wing.first_pass_capture.v1]
+  - id: fuel_vectored_jet_vtol
+    status: public_surrogate_cataloged
+    configurations: [roadrunner]
+    profiles: [reachability.jet_vtol.transition_capture.v1]
+  - id: fuel_turbofan_fixed_wing
+    status: public_surrogate_cataloged
+    configurations: [fury_fq44]
+    profiles: [reachability.fixed_wing.first_pass_capture.v1]
+  - id: selectable_energy_tailsitter
+    status: public_surrogate_cataloged
+    configurations: [omen]
+    profiles: [reachability.jet_vtol.transition_capture.v1]
+  - id: series_hybrid_dual_tiltrotor
+    status: concept_surrogate_cataloged
+    configurations: [thunder]
+    profiles: [reachability.tiltrotor.conversion_capture.v1]
+  - id: light_propeller_aircraft
+    status: planned_domain_pilot
+    configurations: [c172p_hybrid]
+    profiles: [reachability.fixed_wing.first_pass_capture.v1]
+  - id: small_business_jet
+    status: planned_domain_pilot
+    configurations: [learjet24_local]
+    profiles: [reachability.fixed_wing.first_pass_capture.v1]
+  - id: generic_rotorcraft
+    status: planned_domain_pilot
+    configurations: [r44_class]
+    profiles: [reachability.rotorcraft.capture_bounded_time.v1]
+  - id: generic_tiltrotor
+    status: planned_domain_pilot
+    configurations: [xv15_class, v22_class]
+    profiles: [reachability.tiltrotor.conversion_capture.v1]
+  - id: rocket_boost_glide
+    status: planned_domain_pilot
+    configurations: [kestrel_glider, rocket_plus_glider_generic]
+    profiles: [reachability.boost_glide.prelaunch_capture.v1, reachability.boost_glide.release_state.v1, reachability.glider.post_release_retarget.v1]
+  - id: ballistic_rocket
+    status: manual_and_segment_baseline
+    configurations: [ballistic_rocket, two_stage_ballistic_rocket, ballistic_reentry]
+    profiles: [reachability.ballistic.launch_footprint.v1]
+  - id: passive_or_tumbling_body
+    status: planned_parametric_family
+    configurations: [tumbling_ballistic_body, passive_release_body, suborbital_ballistic_tumble_return]
+    profiles: [reachability.passive_object.terminal_footprint.v1]
+  - id: spacecraft_wheel_primary
+    status: planned_parametric_family
+    configurations: [reference_satellite_wheel_primary, spacecraft.6u_observer_rw.standard.v1, spacecraft.6u_observer_rw.resilient.v1, spacecraft.agile_imager_rw.v1]
+    profiles: [reachability.spacecraft.orbit_visibility.v1, reachability.spacecraft.attitude_pointing.v1]
+  - id: spacecraft_thruster_primary
+    status: planned_parametric_family
+    configurations: [reference_freeflyer_thruster_primary, spacecraft.spheres_like_rcs.v1]
+    profiles: [reachability.spacecraft.freeflyer_capture.v1, reachability.spacecraft.attitude_pointing.v1]
+  - id: spacecraft_hybrid_wheel_thruster
+    status: planned_parametric_family
+    configurations: [reference_satellite_hybrid, spacecraft.marco_like_hybrid.v1]
+    profiles: [reachability.spacecraft.orbit_visibility.v1, reachability.spacecraft.attitude_pointing.v1]
+  - id: generic_atmospheric_surrogate
+    status: archetype_only
+    configurations: [generic_fixed_wing, generic_multirotor, generic_hypersonic_glider]
+    profiles: [reachability.multirotor.capture_bounded_time.v1, reachability.fixed_wing.first_pass_capture.v1, reachability.high_energy_glider.first_pass.v1]
+promotion_rungs:
+  - cataloged
+  - data_ready
+  - 3dof_ready
+  - pseudo_6dof_ready
+  - mission_ready
+  - profile_qualified
+qualification_requirements:
+  - explicit_state_phase_decision_constraint_terminal_contract
+  - analytical_or_simplified_sanity_cases
+  - replayable_feasible_witnesses
+  - feasible_interval_and_disconnected_region_preservation
+  - adaptive_boundary_convergence
+  - multi_start_or_search_sensitivity
+  - limiting_factor_attribution
+  - controller_effective_vs_open_loop_separation

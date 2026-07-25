@@ -1,0 +1,648 @@
+schema_version: 1
+release: taoryx-alpha-2
+status: active
+purpose: ranked post-release work after the frozen Alpha 2 core contract
+baseline:
+  completion_signal: A2-RELEASE-PASS
+  evidence: artifacts/verification/alpha2/t7_release/evidence-packet.zip
+  exclusions:
+    - historical TAOS 96.0 runtime compatibility
+    - global validity of real-vehicle models
+    - flight qualification or certification
+    - universal autopilot performance
+prioritization:
+  P0: Alpha 2 platform closeout; close generic execution, evaluation, onboarding, and replay seams
+  P1: Alpha 2 proof closeout; prove the four established families and normalized controller tooling
+  P2: Alpha 3 domain pilots; add new vehicle families only after the Alpha 2 closeout gates pass
+  P3: Alpha 3 scale and qualification; fleets, corpora, spacecraft breadth, sensors, and weather
+  P4: deferred external-evidence work; historical compatibility remains blocked until an oracle exists
+release_boundaries:
+  alpha2_closeout:
+    objective: Reusable, diagnosable, replayable platform with four composable proof families.
+    required_items: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4, A2-POST-P0-5, A2-POST-P1-1, A2-POST-P1-2, A2-POST-P1-3]
+    required_maturity: M4
+    exclusions:
+      - new unpinned vehicle-family runtime qualification
+      - spacecraft, rotorcraft, tiltrotor, Cessna, Learjet, and public-surrogate breadth
+      - global physical validity, certification, and historical TAOS compatibility
+  alpha3_breadth:
+    objective: Qualify new family packages through the same contracts without bespoke runtimes.
+    deferred_items: [A2-POST-P2-1, A2-POST-P2-2, A2-POST-P2-3, A2-POST-P2-4, A2-POST-P2-5, A2-POST-P2-6, A2-POST-P3-1, A2-POST-P3-2, A2-POST-P3-2A, A2-POST-P3-3]
+    target_maturity: M4
+  blocked_external:
+    items: [A2-POST-P4-1]
+    reason: No historical executable and complete table-library oracle is currently available.
+  maturity_registry: verification/vehicle_maturity_registry.yaml
+ranked_sequence:
+  - A2-POST-P0-1
+  - A2-POST-P0-2
+  - A2-POST-P0-3
+  - A2-POST-P0-4
+  - A2-POST-P0-5
+  - A2-POST-P1-1
+  - A2-POST-P1-2
+  - A2-POST-P1-3
+  - A2-POST-P2-4
+  - A2-POST-P2-5
+  - A2-POST-P3-2
+  - A2-POST-P2-6
+  - A2-POST-P2-3
+  - A2-POST-P2-1
+  - A2-POST-P2-2
+  - A2-POST-P3-1
+  - A2-POST-P3-2A
+  - A2-POST-P3-3
+  - A2-POST-P4-1
+items:
+  - id: A2-POST-P0-1
+    priority: P0
+    name: common-scenario-and-evaluation-substrate
+    status: partial
+    depends_on: [A2-RELEASE-PASS]
+    rationale: Every future family needs comparable runs, unit-bearing objectives, event markers, and resource metrics before controller results are reviewable.
+    scope:
+      - versioned scenario contract with physical-input hashes
+      - objective evaluator with target, tolerance, slack, normalized error, units, and severity
+      - continuity and declared-discontinuity audit
+      - table margins, saturation, command-derivative, closure, and convergence rollups
+      - distinct requested-control, achieved-actuator, resource, and event-prediction channels
+      - family/scenario/tier filtering and refusal of incomparable overlays
+      - plots generated only from machine-readable run artifacts
+    exit_criteria:
+      - identical telemetry and contract produce identical objective and composite JSON
+      - missing or unitless channels fail closed
+      - requested bank/throttle is never reported as achieved bank/throttle
+      - fuel/propellant remaining and time-to-burnout availability are explicit observables when supported
+      - required gates cannot be hidden by a weighted score
+      - waypoint/objective event markers identify start, capture, mode change, and completion
+      - one new family can consume the evaluator without a bespoke scoring path
+    evidence:
+      - scenario-contract schema and validator
+      - metric dictionary and score definition
+      - positive/negative contract fixtures
+      - regenerated family-filtered evidence packet
+
+  - id: A2-POST-P0-2
+    priority: P0
+    name: interactive-lab-and-control-session
+    status: partial
+    depends_on: [A2-POST-P0-1]
+    rationale: The existing stepping foundation needs a complete generic task/session boundary for scripts, AI, players, and controller experiments.
+    scope:
+      - reset, step, run, pause, resume, interrupt, and terminal state machine
+      - named typed actions and fixed observation schemas
+      - action-to-applied-control provenance through arbitration, limits, and actuators
+      - per-channel absolute and requested-rate control inputs with explicit rate units
+      - requested rate, hard actuator rate limit, realized rate, and achieved state in the audit trail
+      - task metadata for reward, termination, truncation, randomization, and evaluation
+      - deterministic command-stream replay and batch/step parity
+      - optional SQLite/Parquet/JSON views over one normalized artifact
+    exit_criteria:
+      - a generic derivative model runs without a problem file
+      - the same public transition powers batch and interactive execution
+      - a control command never overwrites physical state directly
+      - seeded reset and replay reproduce state, controls, events, and diagnostics
+      - at least one point-mass and one rigid-body family pass the same session contract
+    evidence:
+      - neutral session/task schemas
+      - replay and pause/resume tests
+      - action-to-applied-control audit
+      - normalized session artifact and CLI demonstration
+
+  - id: A2-POST-P0-3
+    priority: P0
+    name: generic-model-onboarding-and-convention-firewall
+    status: partial
+    depends_on: [A2-POST-P0-1]
+    rationale: New vehicles still need a short, diagnosable path through source registration, tables, units, frames, trim, and bounded propagation.
+    scope:
+      - versioned model-integration record and source/hash inventory
+      - canonical SI and frame adapter contract
+      - common table ingestion and margin report
+      - quaternion, alpha/beta, force/moment, mass/CG/inertia checks
+      - source differential, trim/closure, bounded propagation, and convergence sequence
+      - generated family schema, problem files, and evidence from one metadata record
+    exit_criteria:
+      - a new family is rejected with an actionable missing-field diagnostic
+      - no vehicle-specific test framework is needed to run the firewall
+      - all twelve convention stages emit machine-readable results
+      - source, derived, assumed, and unavailable values remain distinct
+      - the firewall can classify a family as green, diagnostic, blocked, or not-run
+    evidence:
+      - integration-record schema
+      - onboarding doctor report
+      - four-family regenerated firewall packet
+      - minimal new-family fixture with one intentional convention failure
+
+  - id: A2-POST-P0-4
+    priority: P0
+    name: checkpoint-restart-and-reproducible-run-store
+    status: planned
+    depends_on: [A2-POST-P0-2, A2-POST-P0-3]
+    rationale: Long missions, tuning, reachability, and human-in-the-loop work need branchable state without losing provenance or event semantics.
+    scope:
+      - checkpoint at accepted integration boundaries
+      - source/model/controller/environment hashes in checkpoint metadata
+      - resume and branch from a checkpoint
+      - state, controls, events, diagnostics, and numerical settings preserved
+      - clean replay and stale-artifact rejection
+    exit_criteria:
+      - uninterrupted and checkpoint/resume histories match within declared tolerances
+      - branching produces distinct but provenance-linked run identities
+      - interrupted runs cannot be reported as completed missions
+
+  - id: A2-POST-P0-5
+    priority: P0
+    name: future-family-interface-stress-test
+    status: planned
+    depends_on: [A2-POST-P0-1, A2-POST-P0-3]
+    rationale: The Alpha 3 intake already spans propeller aircraft, helicopters, tiltrotors, spacecraft, and energy-coupled surrogates. Their requirements must stress the neutral contracts before Alpha 2 freezes them, without requiring those families to be implemented in Alpha 2.
+    scope:
+      - capability declaration for fidelities, controls, observations, resources, modes, finality, and checkpoint support
+      - typed component slots for engines, rotors, surfaces, actuators, payloads, and resource backends
+      - channel frame, semantic level, validity/availability, neutral value, and achieved-state metadata
+      - actuator allocation and requested-versus-achieved control contracts, including absolute and rate commands
+      - typed mode-transition contracts with entry, exit, abort, hysteresis, schedules, handoff, and resource continuity
+      - first-class fuel, battery, propellant, power, mass, CG, inertia, and time-to-event observables
+      - evidence grade and uncertainty metadata for every promoted parameter
+      - contract fixtures derived from C172, R44/UH-1H/UH-60A, XV-15/V-22-class, spacecraft, Learjet, and surrogate intakes
+    exit_criteria:
+      - every future-family contract requirement maps to a typed neutral field or an explicit documented extension point
+      - no future-family fixture requires a bespoke session, scoring, or problem-file runner
+      - missing capability or unsupported fidelity fails during resolution with an actionable diagnostic
+      - component, resource, mode, actuator, frame, and evidence metadata survive into ResolvedCase identity/provenance
+      - Alpha 3 family packages can be added without changing the canonical transition function
+    evidence:
+      - interface stress matrix and gap report
+      - positive and negative contract fixtures for each future-family archetype
+      - schema compatibility report
+      - updated family-package authoring guide
+
+  - id: A2-POST-P1-1
+    priority: P1
+    name: four-family-flagship-mission-qualification
+    status: planned
+    depends_on: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4]
+    rationale: The four existing research families are the best near-term proof that the generic path produces understandable, family-appropriate flights.
+    execution_order: [hummingbird, skywalker_x8, b747, x15]
+    scope:
+      hummingbird: pad_takeoff_hover_box_yaw_disturbance_landing
+      skywalker_x8: powered_trim_altitude_step_rounded_course_return
+      b747: airborne_trim_climb_turn_speed_change_descent_arrival
+      x15: air_release_powered_or_source_bounded_coast_energy_corridor
+    exit_criteria:
+      - each family has a valid start contract and family-specific terminal contract
+      - 3DOF, pseudo-6DOF, and 6DOF claims are separated and only supported tiers are green
+      - objectives include altitude/path/velocity/angle/event/resource metrics with units
+      - no unannotated discontinuity, envelope exit, sustained saturation, or below-ground propagation
+      - every result has raw telemetry, commands, events, score, claim ledger, and plots
+      - the mission does not receive a qualification badge from a weighted score alone
+
+  - id: A2-POST-P1-2
+    priority: P1
+    name: normalized-controller-presets-and-tuning
+    status: partial
+    depends_on: [A2-POST-P0-2, A2-POST-P0-3]
+    rationale: Controllers need family-specific plant scaling, rate/authority profiles, and reproducible tuning rather than copied gains.
+    scope:
+      - plant-truth trim and linearization inputs
+      - mass/inertia/reference-geometry scaling
+      - gentle/standard/aggressive profiles with declared envelope limits
+      - LQR baseline plus explicit alternative solver adapters
+      - automatic search with bounded parameters, seeds, and failure reports
+      - control-direction and saturation verification before tuning
+    exit_criteria:
+      - the same controller interface works across the four families with family metadata
+      - tuning never changes plant truth or silently widens table bounds
+      - gains, scales, objective weights, and solver settings are provenance-linked
+      - each claimed mission reports stability, tracking, saturation, derivative, and table-margin metrics
+
+  - id: A2-POST-P1-3
+    priority: P1
+    name: source-grounded-reference-anchor-integration
+    status: planned
+    depends_on: [A2-POST-P0-1, A2-POST-P0-3]
+    rationale: F-16 S-119 and HL-20 Mod K are the Alpha 2 source-grounded reference-anchor gate. A320 remains a separate intake target because its exact source package is unavailable.
+    scope:
+      - immutable source packages and integration records
+      - deterministic .txcollection builds with source identity and hashes
+      - native DAVE-ML graph replay through the Taoryx runtime boundary
+      - source check-case, trim, and short-hold evidence in a fresh process
+      - canonical unit/frame/envelope diagnostics and direct-control plant artifacts
+      - actuator, controller, mission, and reduction work remains a separate overlay tranche
+    exit_criteria:
+      - F-16 and HL-20 load through the normal catalog path without source edits
+      - source vectors, declared limits, and source regressions pass before controllers are added
+      - each collection reproduces its source documents and runtime evidence from one documented command
+      - reference-anchor and surrogate claims remain separate in the claim ledger
+      - the completion report explicitly marks actuator/controller, flagship-mission, and reduction gates as pending
+
+  - id: A2-POST-P2-1
+    priority: P2
+    target_release: alpha3
+    lane: alpha3-breadth
+    name: guidance-search-and-reachability-workbench
+    status: planned
+    depends_on: [A2-POST-P1-1, A2-POST-P1-2, A2-POST-P0-4]
+    rationale: Reachability is a state-, phase-, resource-, target-, controller-, horizon-, and constraint-dependent object; a single maximum-range envelope would erase inner holes, disconnected regions, and phase transitions.
+    profile_catalog: verification/reachability_profile_catalog.yaml
+    common_object:
+      state: [vehicle_state, flight_phase, resource_state, target_relative_state, controller_class, time_horizon, success_set, path_constraints]
+      result: [feasible_intervals, nondominated_witnesses, limiting_factor_attribution, fidelity_layers, provenance]
+    study_semantics: [first_pass, bounded_time, bounded_resource, bounded_path, eventual_capture, robust_capture]
+    scope:
+      - 3DOF discovery, pseudo-6DOF feasibility refinement, 6DOF validation
+      - checkpoint branching and cached candidate runs
+      - launch/target loci, uncertainty sets, path constraints, and terminal corridors
+      - SciPy and historical-solver adapters with explicit solver identity
+      - feasible range intervals and disconnected-region preservation rather than radial maxima or convex hulls
+      - vehicle-relative coordinate systems and archetype-specific state/phase/decision/constraint profiles
+      - multirotor stopping-distance, wind, low-relative-speed, battery-reserve, and altitude-constrained products
+      - fixed-wing turn-radius, left/right, stall/load-factor, terminal-heading, terminal-speed, fuel, and first-pass products
+      - boost/glide prelaunch, release-state, post-release retarget, separation, minimum-burn, and energy-management products
+      - high-energy glider specific-energy, crossrange, bank-reversal, heating, Mach, dynamic-pressure, and terminal-energy products
+      - ballistic low/high-arc terminal footprints and passive/tumbling probabilistic footprints
+      - phase-aware along-track reachability fans that may expand, split, rotate, or contract at mode transitions
+      - direct, lofted, low/high-arc, boost-heavy, glide-heavy, left/right, and bank-reversal solution families
+      - limiting-factor attribution for every boundary cell and failed query
+      - controller-effective reachability separate from open-loop plant reachability
+      - adaptive boundary refinement, multi-start studies, witness replay, and cross-fidelity boundary contraction
+    archetype_profiles:
+      - reachability.multirotor.capture_bounded_time.v1
+      - reachability.fixed_wing.first_pass_capture.v1
+      - reachability.boost_glide.prelaunch_capture.v1
+      - reachability.boost_glide.release_state.v1
+      - reachability.glider.post_release_retarget.v1
+      - reachability.high_energy_glider.first_pass.v1
+      - reachability.ballistic.launch_footprint.v1
+      - reachability.passive_object.terminal_footprint.v1
+    exit_criteria:
+      - every candidate retains its resolved case, seed, controller, and objective report
+      - boundary extraction converges with resolution and multi-start checks
+      - plant reachability and controller reachability are reported separately
+      - no modern solver result is labeled historical compatibility
+      - every registered vehicle family selects a profile, semantics, coordinates, products, and supported terminal conditions
+      - every result preserves feasible intervals, disconnected regions, and multiple nondominated witnesses where present
+      - first-pass bounded-time bounded-resource is the default tactical product; loiter and reattack require explicit opt-in
+      - failure causes identify the active limiting factor or unresolved controller search
+      - along-track fans branch from exact deterministic checkpoints and retain phase/resource/controller identity
+      - profile qualification requires analytical sanity cases, witness replay, adaptive-boundary convergence, and model-validity enforcement
+
+  - id: A2-POST-P2-2
+    priority: P2
+    name: coherent-parametric-and-ml-corpus
+    status: planned
+    depends_on: [A2-POST-P0-1, A2-POST-P0-3, A2-POST-P1-3]
+    rationale: Breadth should come from coherent realized vehicles and paired fidelities, not unrelated random table cells.
+    scope:
+      - latent design vectors and coherence constraints
+      - 3DOF, pseudo-6DOF, and rigid-body paired experiments
+      - identification fragments, truth/observation editions, and leakage-safe splits
+      - source-grounded, synthetic, and public-surrogate evidence classes
+    exit_criteria:
+      - each realized vehicle has complete provenance and validity bounds
+      - paired runs share a parent identity and declare expected omissions
+      - corpus splits prevent vehicle/controller/source leakage
+
+  - id: A2-POST-P2-3
+    priority: P2
+    lane: domain-pilot
+    name: flight-dynamics-surrogate-library
+    status: planned
+    depends_on: [A2-POST-P0-3, A2-POST-P1-2]
+    rationale: Anduril-inspired public-surrogate vehicles are the near-term atmospheric domain pilot; they must exercise shared equations, controller scaling, and evidence labels without implying exact or classified vehicle data.
+    scope:
+      - shared multirotor, conventional fixed-wing, vectored-thrust, and tiltrotor equations
+      - Bolt, Bolt-M, Ghost-X, Anvil, ALTIUS, Barracuda, Roadrunner, Fury/FQ-44, Omen, and Thunder configurations
+      - named pseudo-6DOF attitude and transition-response profiles
+      - P/D/E/S evidence grades, public-source registers, sensitivity bands, and unknown-value handling
+      - versioned parameter pack and contributor integration notebook with a failure/friction ledger
+      - coherent latent-parameter generation and explicit rejected-sample reasons
+      - launch, transition, recovery, range, endurance, control-lag, and effective-reachability fixtures
+      - common pseudo-6-DOF state contract with inertial position, body velocity, quaternion, body rates, resource state, actuator states, and mode states
+      - selectable battery-electric, fuel-burning, and series-hybrid energy backends
+      - speed-, altitude-, Mach-, SOC-, throttle-, and mode-dependent propulsion schedules
+      - fuel-dependent mass, CG, and inertia scheduling; battery mass/inertia retention unless a pack or payload changes
+      - low-order aerodynamic coefficient, rotorcraft drag, induced-power, and post-stall/transition blending proxies
+      - explicit mission state machines for launch, deployment, transition, task, reserve, abort, recovery, and terminal phases
+      - control allocation, actuator lag, rate limits, saturation, and requested-versus-achieved telemetry
+      - parameter ledger records with unit, source reference, evidence grade, uncertainty band, sensitivity policy, and validity envelope
+      - paired 3-DOF and pseudo-6-DOF runs resolved from the same vehicle/loading configuration
+    implementation_sequence:
+      - shared_resource_and_mass_property_scheduler
+      - battery_and_fuel_backends
+      - mode_state_machine_and_continuous_blends
+      - propulsion_and_aerodynamic_force_maps
+      - control_allocation_and_actuator_lag
+      - 3dof_mission_and_resource_fixtures
+      - pseudo_6dof_attitude_rate_fixtures
+      - reachability_and_coherent_corpus_generation
+    energy_backends:
+      battery_electric:
+        resource_state: battery_energy_j
+        mass_policy: constant_until_payload_or_pack_event
+        required_observables: [battery_energy_j, soc, battery_power_w, available_power_w, reserve_violation]
+      fuel_burning:
+        resource_state: fuel_mass_kg
+        mass_policy: continuous_mass_loss
+        required_observables: [fuel_mass_kg, fuel_flow_kg_s, mass_kg, cg_m, inertia_kg_m2, reserve_violation]
+      series_hybrid:
+        resource_state: [battery_energy_j, fuel_mass_kg]
+        mass_policy: fuel_mass_loss_battery_mass_retained
+        required_observables: [generator_power_w, battery_power_w, bus_power_w, fuel_flow_kg_s, soc, reserve_violation]
+    mode_contract:
+      required_fields: [mode_id, entry_conditions, blend_state, exit_conditions, abort_conditions, resource_policy]
+      continuous_transition_required: [roadrunner, omen, thunder]
+      initial_mode_fixtures: [launch, deployment, vertical, transition, wingborne, task, return, recovery, terminal]
+    vehicle_work_packages:
+      - id: bolt_and_bolt_m
+        family: electric_multirotor
+        first_goal: energy_coupled_hover_transit_terminal_reserve
+      - id: ghost_x
+        family: electric_single_main_rotor
+        first_goal: rotorcraft_forward_flight_and_payload_endurance
+      - id: anvil
+        family: electric_interceptor_multirotor
+        first_goal: sprint_power_limit_and_one_way_terminal_policy
+      - id: altius_family
+        family: selectable_energy_deployable_fixed_wing
+        first_goal: deployment_transient_and_battery_fuel_comparison
+      - id: barracuda_family
+        family: fuel_turbojet_fixed_wing
+        first_goal: thrust_lapse_spool_and_range_reserve
+      - id: roadrunner
+        family: fuel_vectored_jet_vtol
+        first_goal: vertical_launch_transition_recovery_and_reserve
+      - id: fury_fq44
+        family: fuel_turbofan_fixed_wing
+        first_goal: high_subsonic_drag_and_fuel_sensitivity
+      - id: omen
+        family: selectable_energy_tailsitter
+        first_goal: battery_default_and_range_extender_uncertainty_pair
+      - id: thunder
+        family: series_hybrid_dual_tiltrotor
+        first_goal: generator_battery_energy_management_and_nacelle_conversion
+    validation_ladder:
+      - id: data_firewall
+        checks: [units, evidence_grade, source_reference, uncertainty_band, missing_value_policy]
+      - id: resource_balance
+        checks: [nonnegative_resource, reserve_guard, power_or_fuel_balance, payload_monotonicity]
+      - id: plant_equilibrium
+        checks: [hover_or_cruise_trim, stall_consistency, thrust_drag_intersection, load_factor_limit]
+      - id: transition_continuity
+        checks: [force_continuity, moment_continuity, attitude_continuity, mode_event_contract]
+      - id: actuator_and_control
+        checks: [allocation_rank, lag, rate_limit, saturation, requested_achieved_separation]
+      - id: paired_fidelity
+        checks: [same_parent_configuration, 3dof_vs_pseudo_6dof_comparison, declared_omissions]
+      - id: uncertainty_and_reachability
+        checks: [e_grade_plus_or_minus_25_percent, s_grade_full_band, multi_start, boundary_resolution]
+    exit_criteria:
+      - at least eight first-wave configurations run through shared equations without bespoke runners
+      - the full first-wave roster has a resolved data record, even when execution remains blocked or catalog-only
+      - straight-and-level, speed, turn, hover, resource, and transition checks pass within declared tolerances for each promoted family
+      - payload and resource changes produce coherent acceleration, climb, endurance, and terminal behavior
+      - every result distinguishes published, corroborated, estimated, and placeholder values
+      - pseudo-6DOF runs expose lag, rates, limits, saturation, and mode transitions
+      - battery cases retain mass while fuel cases update mass, CG, inertia, and controller scaling
+      - Omen and ALTIUS expose selectable energy backends rather than silently selecting a production configuration
+      - Roadrunner, Omen, and Thunder preserve continuous forces and attitude through transition
+      - hover power, stall speed, cruise equilibrium, thrust/drag maximum speed, payload monotonicity, and transition continuity checks pass
+      - E-grade parameters receive at least +/-25% sensitivity sweeps and S-grade parameters receive full-band sweeps
+      - Thunder remains explicitly concept-level and low-confidence until evidence improves
+
+  - id: A2-POST-P2-4
+    priority: P2
+    lane: domain-pilot
+    name: light-propeller-aircraft-family
+    status: planned
+    depends_on: [A2-POST-P0-3, A2-POST-P1-2]
+    rationale: A Cessna-class aircraft supplies the missing low-mass, propeller, low-speed, configuration, ground-contact, and takeoff/landing coverage with unusually transparent public research models. The attached v0.1 C172P-class hybrid is the current intake candidate, not yet a checked-in TAORYX source package.
+    research_intake: verification/small_aircraft_research_intake_v1.yaml#c172p_hybrid
+    source_roles:
+      operational_baseline: JSBSim C172X or C172R public approximation
+      independent_cross_check: UIUC C172 nonlinear and tabulated coefficient models
+      validation_anchor: NASA Cessna 177B performance and dynamic-response data
+    scope:
+      - C172 geometry, mass, inertia, engine/propeller, controls, gear, and configuration record
+      - longitudinal nonlinear lift/drag/moment curves with flap and power effects
+      - lateral-directional derivatives, damping, propeller torque, and declared slipstream/P-factor approximations
+      - point-mass 3DOF, prescribed-attitude pseudo-6DOF, and rigid-body 6DOF adapters
+      - trim, stall, climb, phugoid, short-period, Dutch-roll, roll, spiral, takeoff, and landing fixtures
+      - achieved actuator state, fuel/resource telemetry, and gear/ground-contact events
+      - source_linear/source_table versus derived and estimated values remain separately queryable
+    exit_criteria:
+      - JSBSim, UIUC, and NASA evidence roles remain distinct and independently hashed
+      - no manufacturer-grade or accident-reconstruction claim is made
+      - trim and mode checks pass at declared low-speed and cruise anchors
+      - stall, flap, power-on/power-off, gear, ground-contact, and propeller-effect transitions are continuous or explicitly event-marked
+      - all supported fidelity tiers share one scenario contract and common evaluation path
+      - the candidate package is re-ingested from hashed source inputs rather than copied as opaque truth
+
+  - id: A2-POST-P2-5
+    priority: P2
+    lane: domain-pilot
+    name: rotorcraft-vtol-transition-family
+    status: planned
+    depends_on: [A2-POST-P0-3, A2-POST-P1-2]
+    rationale: "Helicopters and V-22-like tiltrotors add the most important control-mode transitions: hover, translational flight, rotor/thrust allocation, nacelle or tilt scheduling, and handoff between attitude and airspeed objectives. The current close-out intake defines an R44 source-identified hover anchor, an XV-15 conversion anchor, and a clearly labeled scaled V-22-class surrogate."
+    research_intake: verification/rotorcraft_tiltrotor_research_intake_v1.yaml
+    catalog_variants:
+      - rotorcraft.r44_class.3dof.v1
+      - rotorcraft.r44_class.p6dof_hover_scheduled.v1
+      - tiltrotor.xv15_class.3dof.v1
+      - tiltrotor.xv15_class.p6dof_conversion.v1
+      - tiltrotor.v22_class.3dof_scaled.v1
+      - tiltrotor.v22_class.p6dof_scaled.v1
+      - rotorcraft.uh1h.3dof.v1
+      - rotorcraft.uh1h.p6dof_scheduled.v1
+      - rotorcraft.uh60a.3dof.v1
+      - rotorcraft.uh60a.p6dof_scheduled.v1
+    source_roles:
+      r44_identified_hover: published R44 hover system-identification model
+      r44_public_reference: Robinson R44 Raven II class public aircraft values
+      xv15_primary_anchor: NASA/Bell XV-15 public conversion and controls research
+      v22_public_reference: public NAVAIR dimensions, mass classes, engines, and power
+      v22_model_role: scaled engineering surrogate, not an exact aircraft model
+      uh1h_source_model: NASA TM-73254 and NASA CR-3144 scheduled derivative decks
+      uh60a_source_model: NASA TM-85890 scheduled derivative deck
+      uh60a_higher_fidelity_target: NASA CR-166309 GenHel and NASA TM-88360 validation context
+    scope:
+      - helicopter hover and forward-flight 3DOF reduction
+      - pseudo-6DOF attitude/rate and actuator-response profiles
+      - rigid-body rotorcraft 6DOF with rotor or proprotor allocation
+      - V-22-like nacelle/tilt transition as an evidence-labeled generic configuration, not an exact V-22 replica
+      - hover, climb, conversion, forward-flight, deceleration, and return-to-hover segments
+      - actuator mode ownership, transition continuity, saturation, induced-flow, and failure fixtures
+      - R44 rotorcraft modes: spool, hover, translation, forward flight, climb, descent, approach, landing
+      - XV-15 nacelle corridor points, rotor/wing lift sharing, scheduled control mixer, and abort/reversion
+      - V-22-class scaled mass/power/authority coherence and sensitivity bands
+      - source, identified, derived, estimated, and placeholder parameter classes in every resolved case
+      - UH-1H and UH-60A scheduled matrix interpolation, trim, and control-pulse fixtures
+      - source-point reproduction before nonlinear rotorcraft or engine upgrades
+    exit_criteria:
+      - mode transitions are declared events with preconditions, handoff state, and postconditions
+      - achievable wrench and control authority are tested in hover, conversion, and forward flight
+      - 3DOF, pseudo-6DOF, and rigid-body claims are kept separate
+      - rotor/proprotor speed, tilt, collective, resource, and achieved-state channels are recorded
+      - no exact production helicopter or V-22 performance claim is made from generic parameters
+      - R44 identified hover quantities preserve source units, state normalization, delays, and sign conventions
+      - transition contracts declare guards, active models, continuous schedules, handoff, hysteresis, resources, and abort/reversion
+      - forward and reverse conversion pass without undeclared force, state, resource, or controller discontinuities
+      - batch and stepwise transition results agree within the common session tolerance
+      - UH-1H and UH-60A matrix decks preserve the source state/control normalization and do not double-count angular dynamics
+      - nonlinear UH-1H, GenHel-level UH-60A, and Airloads comparison remain explicit future maturity gates
+
+  - id: A2-POST-P2-6
+    priority: P2
+    lane: domain-pilot
+    name: small-business-jet-family
+    status: planned
+    depends_on: [A2-POST-P0-3, A2-POST-P1-2, A2-POST-P2-4]
+    rationale: A small business-jet family fills the gap between the B747 transport and high-performance fighter while reusing the fixed-wing coefficient, trim, mode, and jet-propulsion contracts proven by the Cessna pilot. The attached Learjet 24-class package is the current local-cruise intake candidate; its bounded proxy remains an explicit estimate.
+    research_intake: verification/small_aircraft_research_intake_v1.yaml#learjet24_local
+    source_roles:
+      primary_research_anchor: Stengel generic business-jet models
+      independent_derivative_fixture: UIUC Learjet 24 model
+      operational_supplement: JSBSim Global 5000 public approximation
+    scope:
+      - Mach/altitude-scheduled low-alpha business-jet derivative model
+      - high-alpha low-subsonic research profile as a separate validity envelope
+      - jet thrust lapse, spool/achieved throttle, mass properties, and actuator limits
+      - trim, short-period, phugoid, Dutch-roll, roll, spiral, climb, turn, and descent fixtures
+      - source-grounded, public approximation, and derived values in separate evidence classes
+      - source_linear and bounded_proxy modes are distinct catalog variants and cannot be silently mixed
+    exit_criteria:
+      - all three source roles remain distinct and no Citation X exact-model claim is implied
+      - local trim and mode behavior agree within declared source/digitization tolerances
+      - low-alpha and high-alpha profiles cannot be silently mixed
+      - achieved throttle, spool, table margins, and controller saturation are auditable
+      - the family enters through the same catalog and convention firewall as C172 and B747
+      - no bounded-proxy result is promoted to source-validation evidence without an independent source anchor
+
+  - id: A2-POST-P3-1
+    priority: P3
+    name: population-fleet-runtime
+    status: planned
+    depends_on: [A2-POST-P0-2, A2-POST-P0-4, A2-POST-P2-2]
+    rationale: Fleet simulation is a scale optimization, not a reason to fork the single-vehicle runtime.
+    scope:
+      - ResolvedPopulationCase and PopulationSession
+      - structure-of-arrays state and cohort schemas
+      - scalar/batched equivalence and deterministic seed partitioning
+      - Hummingbird 3DOF and pseudo-6DOF reductions calibrated to rigid-body truth
+    exit_criteria:
+      - scalar and batched transitions agree within declared tolerances
+      - per-agent events, masks, controls, and terminal status remain auditable
+      - performance claims name hardware, population size, and memory limits
+
+  - id: A2-POST-P3-2
+    priority: P2
+    lane: domain-pilot
+    name: spacecraft-reference-family
+    status: planned
+    depends_on: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3]
+    rationale: Spacecraft is the second near-term domain pilot because it stress-tests epochs, time scales, orbital frames, resources, and attitude effectors before broader parametric qualification.
+    scope:
+      - orbital 3DOF, attitude-response pseudo-6DOF, and rigid-body spacecraft 6DOF
+      - explicit force, epoch, frame, eclipse, actuator, and propellant contracts
+      - deployment-to-observation and detumble/pointing scenarios
+    exit_criteria:
+      - frame/epoch correctness and force-model provenance are independently checked
+      - wheel momentum and thruster attainable-wrench tests pass where applicable
+      - orbital propagation and attitude claims remain distinct
+
+  - id: A2-POST-P3-2A
+    priority: P3
+    name: parametric-spacecraft-family-qualification
+    status: planned
+    depends_on: [A2-POST-P2-2, A2-POST-P3-2]
+    rationale: Spacecraft breadth should come from coherent, evidence-labeled families with qualified wheel and thruster behavior, not from independently sampled subsystem fields or implied replicas of public vehicles.
+    scope:
+      - spacecraft.6u_observer_rw.standard.v1 with detumble, pointing, wheel saturation, and magnetic unloading
+      - spacecraft.6u_observer_rw.resilient.v1 with skewed-wheel and one-wheel-out analysis
+      - spacecraft.agile_imager_rw.v1 with torque-versus-momentum slew studies
+      - spacecraft.spheres_like_rcs.v1 with six-axis pulsed-thruster allocation and proximity-control fixtures
+      - spacecraft.marco_like_hybrid.v1 with finite burns, wheel compensation, and RCS unloading
+      - CPOD-like proximity and one-thruster-out variants as follow-on fixtures
+      - coherent sizing from inertia, slew, acceleration, impulse-bit, propellant, and failure requirements
+      - reaction-wheel and thruster maturity gates, source registers, uncertainty ranges, and evidence labels
+      - allocation matrices, attainable-wrench envelopes, resource models, failure modes, and analytical checks
+    exit_criteria:
+      - every family resolves from a versioned manifest without implementation edits
+      - public facts, component ranges, derived values, geometry estimates, engineering nominals, and sampled values remain distinct
+      - wheel torque, momentum, speed, power, saturation, and unloading behavior are independently reported
+      - thruster force/moment, pulse quantization, latency, propellant use, and failed-actuator reallocation are independently reported
+      - nonnegative allocation and attainable-wrench tests pass for every advertised configuration
+      - flagship missions produce replayable telemetry, terminal status, resource accounting, and qualification evidence
+      - synthetic source anchors are not presented as exact replicas or flight-vehicle specifications
+
+  - id: A2-POST-P3-3
+    priority: P3
+    target_release: alpha3
+    lane: alpha3-breadth
+    name: sensor-weather-and-measurement-layer
+    status: planned
+    depends_on: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P3-1]
+    design_doc: docs/plan/sensor-measurement-orchestration.md
+    rationale: Sensors and weather are shared environment/observation layers, not fields to bolt onto one vehicle. Taoryx owns the causal orchestration boundary between committed physical truth and sensed-data consumers; external sensor libraries own their measurement-error physics.
+    scope:
+      - atomic immutable TruthPoint and TruthSegment commits with shared timestamps, frames, transforms, environment fields, and integration status
+      - causal multi-rate event scheduling with explicit sample time, availability time, latency, validity, and actuator latching
+      - ideal sensor projection followed by sensor errors/electronics/timing; never mutate or relabel generic EOM state increments as corrupted truth
+      - stateful IMU adapter for delta angle and delta velocity, including mounting transform, lever arm, gravity/specific-force convention, chronological call count, and persistent stochastic state
+      - focal-plane, seeker, radar, air-data, and target-observation pipelines with projection, exposure/dwell, blur/jitter, detector effects, quantization, saturation, and post-processing stages
+      - event-aligned propagation or committed dense trajectory output; never expose Runge-Kutta intermediate stages as physical truth
+      - sensor-specific seeded random streams, reproducible replay, packet drops, latency, out-of-order protection, and unavailable/invalid measurements
+      - estimator, tracker, guidance, control, and decision ports that consume sensed or estimated data rather than truth
+      - wind/weather provider boundary and air-relative force semantics
+      - perfect-navigation, sensor-closed-loop, and hardware/SWIL producer bindings behind the same estimator/guidance contracts
+      - truth-isolation enforcement and provenance for every truth, measurement, estimate, command, and EOM interval
+    validation_ladder:
+      - contract tests for atomic truth commits, frame conventions, interval semantics, packet timing, and validity
+      - deterministic zero-error sensor tests against ideal projections
+      - IMU analytical tests for constant pose, constant velocity, constant acceleration, rotation, gravity, mounting, and lever-arm cases
+      - multi-rate causality tests proving Measurement[k] depends on TruthSegment[k-1,k] and Command[k] first affects TruthSegment[k,k+1]
+      - seeded replay and independent-stream tests for bias, random walk, noise, quantization, saturation, and packet loss
+      - truth-leakage tests showing guidance and control fail or remain unchanged when truth ports are unavailable
+      - focal-plane/seeker tests for boresight, projection, exposure, blur, detector noise, centroiding, latency, and target occlusion
+      - closed-loop comparisons across perfect-navigation, synthetic-measurement, and hardware/SWIL modes
+      - sensor realism regression fixtures attached to promoted vehicle and segment validation cases
+    exit_criteria:
+      - the orchestration contract is implemented independently of the EOM and any single sensor-error library
+      - truth and observation channels cannot silently cross the declared boundary
+      - every measurement packet carries sampled time, available time, interval provenance, validity, and sensor identity
+      - IMU sampling is exactly once per scheduled event, chronological, convention-checked, and stateful across calls
+      - multi-rate sensors receive committed event-aligned truth or committed dense trajectory values rather than endpoint-only fakes
+      - seeded measurement replay is deterministic
+      - weather inputs retain source/provenance and interpolation diagnostics
+      - sensor-closed-loop results identify sensor configuration, timing, estimator mode, random seed, and truth-isolation status
+      - promoted segments report both plant-truth and sensed-data quality where the segment claims closed-loop validity
+
+  - id: A2-POST-P4-1
+    priority: P4
+    name: historical-taos-compatibility
+    status: blocked_external
+    depends_on: []
+    rationale: Historical behavior requires an executable, source tree, complete table library, or trusted output corpus that is not currently available.
+    scope:
+      - historical executable/source acquisition
+      - intermediate-state and output-format comparison
+      - separate source-faithful and successor/adjudicated modes
+    exit_criteria:
+      - an external historical oracle is pinned and independently reproducible
+      - compatibility claims are released separately from successor-side claims
+      - no inferred behavior is promoted silently
+non_goals_for_this_backlog:
+  - adding bespoke family runners or problem dialects for each new vehicle
+  - certifying real vehicles from synthetic or public-surrogate data
+  - treating pseudo_6dof as rigid-body evidence
+  - building a remote marketplace or untrusted hot-loader
+  - widening tolerances to force a controller mission to pass
+stop_ship:
+  - new family has no integration record or source/evidence classification
+  - mission score hides a failed required plant or event gate
+  - interactive action bypasses control authority, limits, or actuator dynamics
+  - source-grounded and synthetic claims share one unqualified badge
+  - a modern optimizer result is labeled historical compatibility
+####

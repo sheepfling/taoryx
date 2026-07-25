@@ -1,0 +1,11 @@
+schema_version: 1
+kind: taoryx.reference-observation-binding/v1alpha1
+family: reference_hl20_mod_k
+frames:
+  body: FRD
+  navigation: NED
+observations:
+  state: [position.north, position.east, position.down, velocity.body, attitude.quaternion, body_rates]
+  aerodynamics: [alpha, beta, mach, dynamic_pressure]
+  controls: [upper_left_body_flap, lower_left_body_flap, upper_right_body_flap, lower_right_body_flap, left_wing_flap, right_wing_flap, rudder]
+source_truth_required: true

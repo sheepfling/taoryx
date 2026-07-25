@@ -1,0 +1,80 @@
+schema_version: 1
+profile_id: taos96_evidence_bounded_v1
+title: Evidence-bounded TAOS 96.0 language and specification profile
+status: release_profile
+historical_oracle_available: false
+source_authority: TAOS_manual_1995.pdf
+scope:
+  historical_product_label: TAOS Version 96.0
+  manual_publication: SAND95-1652, December 1995
+  covered_artifacts:
+    - reconstructed manual
+    - documented .tbl and .prb grammar
+    - source-located equations and constants
+    - parser diagnostics and lossless fixtures
+    - independently benchmarked successor-side mathematical kernels
+claims:
+  documentary_fidelity:
+    status: supported_bounded
+    evidence:
+      - docs/manual/RECONSTRUCTION_README.md
+      - metadata/equations_provenance.csv
+      - python3 tools/dev.py manual
+      - python3 tools/dev.py equation-audit
+    boundary: The reconstructed edition represents the printed manual and records substantive editorial decisions.
+  parser_conformance:
+    status: supported_bounded
+    evidence:
+      - tests/parser
+      - tests/fixtures/taos_manual_corpus_v22
+      - tests/fixtures/taos_e2e_v23
+      - verification/alpha1_feature_matrix.yaml
+    boundary: The parser accepts and diagnoses explicitly evidenced language constructs; undocumented or incomplete forms are not treated as supported.
+  semantic_traceability:
+    status: supported_bounded
+    evidence:
+      - verification/claims.md
+      - verification/spec/requirements.yaml
+      - verification/spec/ambiguities.yaml
+      - verification/spec/constants.yaml
+      - verification/spec/frame_matrices.yaml
+    boundary: Documented equations, constants, conventions, defaults, and restrictions are linked to source locations and tests where implemented.
+  numerical_kernel_correctness:
+    status: supported_by_kernel
+    evidence:
+      - tests/unit
+      - tests/e2e
+      - verification/numerical_goal.md
+    boundary: This supports individually verified mathematical kernels and successor runtime cases, not historical TAOS execution equivalence.
+  historical_runtime_equivalence:
+    status: excluded_unverifiable
+    required_oracle:
+      - historical TAOS 96.0 executable
+      - complete historical vehicle-table library
+      - trusted historical output or intermediate-state corpus
+    reason: None of the required historical runtime oracles is available; parser, manual, or modern-kernel evidence cannot substitute for it.
+    release_rule: Never imply this claim from manual fidelity, parser coverage, or passing successor tests.
+successor_extensions:
+  profile: taoryx
+  status: explicitly_outside_historical_profile
+  examples:
+    - pseudo_6dof
+    - rigid_body_6dof
+    - interactive_step_and_control_sessions
+    - composable_segments
+    - modern_controller_and_optimizer_adapters
+release_wording:
+  allowed: Evidence-bounded TAOS 96.0 language and specification profile with a labeled Taoryx successor runtime.
+  forbidden:
+    - TAOS 96.0 runtime-compatible
+    - behaviorally identical to historical TAOS
+    - historical output-equivalent
+    - complete historical vehicle-library compatibility
+required_release_artifacts:
+  - verification/claims.md
+  - verification/alpha1_feature_matrix.yaml
+  - verification/spec/requirements.yaml
+  - verification/spec/ambiguities.yaml
+  - tests/fixtures/taos_manual_corpus_v22
+  - tests/fixtures/taos_e2e_v23
+  - docs/verification/taos96-evidence-bounded-profile.md

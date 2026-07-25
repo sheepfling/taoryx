@@ -1,0 +1,31 @@
+schema: taoryx.model-integration/v1alpha1
+family: reference_a320
+source:
+  kind: daveml
+  availability: blocked_missing_source
+  package: null
+  package_sha256: null
+  source_uri: null
+  license_and_notices: pending
+plant:
+  fidelity: rigid_body_6dof
+  body_frame: pending
+  navigation_frame: pending
+  qualification: not_started
+  source_payload_required_for_execution: true
+layers:
+  mass_properties: {version: not_started, evidence: unknown}
+  aerodynamics: {version: not_started, evidence: unknown}
+  propulsion: {version: not_started, evidence: unknown}
+  actuators: {version: not_started, evidence: unknown}
+  controller: {version: not_started, evidence: unknown}
+  mission: {version: not_started, evidence: unknown}
+claims: []
+nonclaims:
+  - no A320 DAVE-ML runtime or aerodynamic fidelity claim
+  - no substitution of a flight-simulator model or generic airliner data for the requested source plant
+open_questions:
+  - provide an exact A320 DAVE-ML archive or repository revision
+  - provide source license/notices and check-case vectors
+  - provide mass, inertia, geometry, propulsion, control, and envelope provenance
+next_gate: acquire_and_hash_exact_a320_source_package

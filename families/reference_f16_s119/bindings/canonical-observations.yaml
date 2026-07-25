@@ -1,0 +1,11 @@
+schema_version: 1
+kind: taoryx.reference-observation-binding/v1alpha1
+family: reference_f16_s119
+frames:
+  body: FRD
+  navigation: NED
+observations:
+  state: [position.north, position.east, position.down, velocity.body, attitude.quaternion, body_rates]
+  aerodynamics: [alpha, beta, mach, dynamic_pressure]
+  controls: [elevator, aileron, rudder, throttle]
+source_truth_required: true

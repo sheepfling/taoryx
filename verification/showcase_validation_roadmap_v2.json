@@ -1,0 +1,186 @@
+{
+  "schema_version": "taoryx-validation-roadmap-v2",
+  "claim_boundary": "research validation plan; proposed thresholds are internal project gates, not certification standards",
+  "milestones": [
+    {
+      "id": "M0",
+      "name": "Self-contained evidence and provenance",
+      "deliverables": [
+        "bundle_manifest.json with SHA-256 for every file",
+        "source packet or immutable retrievable URI and hash",
+        "raw telemetry and scenario problem for every plotted mission",
+        "software commit, build metadata, dependency lock, reproduce script",
+        "metric dictionary and score formula"
+      ],
+      "exit_criteria": [
+        "100% packaged files referenced and hashed",
+        "100% referenced files present or retrievable by immutable hash",
+        "reproduction run regenerates every reported scalar within declared tolerance",
+        "no absolute local paths",
+        "no stale or unreferenced outputs"
+      ]
+    },
+    {
+      "id": "M1",
+      "name": "Metric semantics and honest scoring",
+      "deliverables": [
+        "formal definitions for route error, cross-track, along-track, closure, continuity, envelope margin and score",
+        "separate pass/fail gates from optional summary score",
+        "commanded path and target-transition event log"
+      ],
+      "exit_criteria": [
+        "score is monotonic with terminal and integrated tracking error",
+        "a case at 75% of an allowed miss limit cannot receive approximately 100/100",
+        "every metric names frame, units, sampling rule and event exclusions",
+        "manifest values exactly match plotted time-series statistics"
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Source-evaluator differential parity",
+      "deliverables": [
+        "B747 comparison at all NASA anchor conditions plus randomized local samples",
+        "X8 comparison throughout declared alpha/beta/rate/control/throttle region",
+        "Hummingbird six-axis wrench comparison against RotorPy",
+        "X-15 coefficient and propulsion comparison against selected source model"
+      ],
+      "exit_criteria": [
+        "exact-code transcodes agree near floating-point precision",
+        "digitized-source differences remain within documented digitization uncertainty",
+        "worst-case state and error are published",
+        "no unexplained sign, frame or normalization mismatch"
+      ]
+    },
+    {
+      "id": "M3",
+      "name": "Golden equilibrium plants",
+      "deliverables": [
+        "one source-anchored trim or hover case per family",
+        "six-axis force and moment decomposition",
+        "table and actuator margins",
+        "direct independent equation-closure history"
+      ],
+      "exit_criteria": [
+        "translational trim acceleration norm <= 0.01 m/s^2 for fixed-wing and <= 0.02 m/s^2 for multirotor",
+        "angular acceleration norm <= 0.001 rad/s^2",
+        "no extrapolation or clamping",
+        "minimum table margin >= 10% of each active axis span",
+        "no actuator saturation",
+        "hold duration: B747 120 s, X8 60 s, Hummingbird 30 s, X-15 60-120 s source segment"
+      ]
+    },
+    {
+      "id": "M4",
+      "name": "Independent convergence and closure",
+      "deliverables": [
+        "RK4 dt, dt/2 and dt/4 runs",
+        "adaptive DOP853 reference",
+        "full-history position, velocity, attitude and body-rate errors",
+        "observed order on smooth intervals"
+      ],
+      "exit_criteria": [
+        "final position difference dt/2 vs dt/4 <= 1 m for B747/X-15 and <= 0.1 m for X8/Hummingbird",
+        "final velocity difference <= 0.01 m/s",
+        "attitude geodesic difference <= 0.001 rad",
+        "closure residual decreases consistently with step size where finite differencing is used",
+        "events are excluded or evaluated one-sided"
+      ]
+    },
+    {
+      "id": "M5",
+      "name": "Inner-loop controller baselines",
+      "deliverables": [
+        "body-rate step and doublet tests",
+        "attitude step tests",
+        "commanded and achieved actuator histories",
+        "linearized model, poles, controllability and margins"
+      ],
+      "exit_criteria": [
+        "all commanded axes stable",
+        "overshoot <= 20% unless source requirement differs",
+        "steady-state error <= 2% of command",
+        "no sustained saturation",
+        "nonlinear small-signal responses agree with linear model within declared tolerance",
+        "gain/phase or disk margins meet predeclared internal requirements"
+      ]
+    },
+    {
+      "id": "M6",
+      "name": "Complete family-appropriate missions",
+      "deliverables": [
+        "B747 trim-climb-turn-descend-capture mission",
+        "X8 powered trim, rectangle and return-to-trim mission",
+        "Hummingbird takeoff-hover-square-yaw-return-land mission",
+        "X-15 source-trim/doublet/energy-management/valid-termination mission"
+      ],
+      "exit_criteria": [
+        "all declared waypoints captured in order",
+        "endpoint position, velocity and attitude inside explicit corridor",
+        "cross-track RMS and maximum below mission-specific limits",
+        "speed/altitude tracking within mission-specific limits",
+        "no undeclared state discontinuity",
+        "no envelope violation or prolonged actuator saturation",
+        "mission-completion event reached rather than merely timing out"
+      ]
+    },
+    {
+      "id": "M7",
+      "name": "3-DOF / reduced / 6-DOF parity",
+      "deliverables": [
+        "same plant, environment, propulsion, mass, controls and initial physical state at all tiers",
+        "constrained 6-DOF reduction test",
+        "initial-derivative and full-trajectory differences"
+      ],
+      "exit_criteria": [
+        "initial Vdot, hdot, gamma-dot and course-dot agree within declared numerical tolerance",
+        "constrained 6-DOF and 3-DOF histories agree to convergence tolerance",
+        "free 6-DOF divergence is explained by measured attitude/rate/actuator effects",
+        "scenario-contract hash differs only by dynamics tier"
+      ]
+    },
+    {
+      "id": "M8",
+      "name": "Robustness and Monte Carlo",
+      "deliverables": [
+        "predeclared distributions for wind, mass, inertia, CG, aero, propulsion, sensors and actuators",
+        "fixed seeds and all failure artifacts",
+        "pass-rate confidence intervals and failure taxonomy"
+      ],
+      "exit_criteria": [
+        "at least 100 physically distinct runs per family for development and 1000 for release evidence",
+        "pass-rate lower confidence bound meets predeclared target",
+        "no duplicated perturbation cases",
+        "all failures classified as envelope, numerical, controller, actuator, sensor or mission"
+      ]
+    },
+    {
+      "id": "M9",
+      "name": "Independent source maneuver validation",
+      "deliverables": [
+        "replay of published trim, doublet, mode or flight-test maneuver",
+        "time-aligned state/control comparison",
+        "uncertainty-aware error report"
+      ],
+      "exit_criteria": [
+        "responses lie within published measurement/model uncertainty where available",
+        "mode frequency and damping agree within source-informed limits",
+        "no tuning against the held-out validation maneuver",
+        "validation data and calibration data are separated"
+      ]
+    },
+    {
+      "id": "M10",
+      "name": "Release flag and claim matrix",
+      "deliverables": [
+        "claim-by-claim evidence matrix",
+        "green/yellow/red status with immutable artifact links",
+        "limitations and invalid-use statement"
+      ],
+      "exit_criteria": [
+        "every green claim has independent source parity, convergence, closure and mission evidence",
+        "no global-envelope or certification claim is made from local surrogate evidence",
+        "all release artifacts are reproducible and self-contained"
+      ]
+    }
+  ]
+}

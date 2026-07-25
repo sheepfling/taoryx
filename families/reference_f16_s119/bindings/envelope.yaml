@@ -1,0 +1,15 @@
+schema_version: 1
+kind: taoryx.reference-envelope/v1alpha1
+family: reference_f16_s119
+fidelity: rigid_body_6dof
+body_frame: FRD
+navigation_frame: NED
+qualified_axes:
+  mach: [0.0, 1.0]
+  alpha_rad: [-0.17453292519943295, 0.7853981633974483]
+  beta: declared_by_source_payload
+interpolation: source_package_declared
+extrapolation: fail_closed
+notes:
+  - Current envelope is the source-package envelope, not a global F-16 claim.
+  - Fuel evolution and actuator dynamics are not part of the accepted plant.

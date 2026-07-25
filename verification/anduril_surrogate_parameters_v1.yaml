@@ -1,0 +1,413 @@
+schema: taoryx.flight-dynamics-surrogate-parameters/v1
+status: intake
+claim_boundary: >-
+  Public-data flight-dynamics engineering proxies for trajectory, control,
+  reachability, and corpus experiments; not exact vehicle reconstructions,
+  classified models, or manufacturer-grade performance claims.
+evidence_grades:
+  P: direct public or government source
+  D: derived from public geometry or performance using standard physics
+  E: engineering estimate constrained by vehicle class and comparable systems
+  S: scenario placeholder requiring sensitivity analysis
+equation_families:
+  multirotor_or_helicopter:
+    fidelity_profiles: [point_mass_3dof, attitude_response_p6dof]
+    controls: [acceleration_vector, yaw_rate]
+  conventional_fixed_wing:
+    fidelity_profiles: [point_mass_3dof, attitude_response_p6dof]
+    controls: [thrust, bank, load_factor]
+  vectored_thrust_hybrid:
+    fidelity_profiles: [point_mass_3dof, transition_response_p6dof]
+    modes: [vertical, transition, wingborne, recovery]
+  tiltrotor:
+    fidelity_profiles: [point_mass_3dof, transition_response_p6dof]
+    state_extensions: [nacelle_angle]
+parameter_rules:
+  - id: hover_power_margin
+    rule: nominal_hover_power <= 0.65 * installed_peak_power
+  - id: payload_monotonicity
+    rule: increasing_payload_must_not_improve_acceleration_climb_range_or_endurance
+  - id: stall_consistency
+    rule: "derived_sea_level_stall_speed_matches_manifest_within_fraction: 0.03"
+  - id: speed_equilibrium
+    rule: maximum_speed_is_thrust_drag_intersection_at_declared_altitude
+  - id: transition_continuity
+    rule: hybrid_force_and_attitude_transition_has_no_discontinuity
+  - id: uncertainty_sweep
+    rule: "E_grade_plus_or_minus_25_percent_and_S_grade_full_band"
+parameter_contract:
+  promoted_parameter_fields_require: [value, unit, evidence_grade, source_ref, uncertainty_policy]
+  evidence_grades: [P, D, E, S]
+  missing_value_policy: explicit_unknown_or_blocked
+  compact_vehicle_fields_are: compatibility_views
+  authoritative_review_surface: parameter_ledger
+  supported_loading_states: [light, nominal, heavy, dash]
+  required_result_identity: [vehicle_id, loading_state, energy_backend, fidelity_profile, mission_id, environment_id]
+state_contract:
+  common_pseudo_6dof_state:
+    - {name: position_n_m, type: vector3, unit: m, purpose: inertial_position}
+    - {name: velocity_b_m_s, type: vector3, unit: m/s, purpose: body_axis_velocity}
+    - {name: quaternion_bn, type: quaternion, unit: dimensionless, purpose: body_to_navigation_attitude}
+    - {name: body_rates_b_rad_s, type: vector3, unit: rad/s, purpose: body_angular_rates}
+    - {name: fuel_remaining_kg, type: scalar, unit: kg, purpose: fuel_resource_or_zero}
+    - {name: battery_energy_j, type: scalar, unit: J, purpose: battery_resource_or_zero}
+    - {name: actuator_states, type: mapping, unit: declared_per_channel, purpose: lagged_commands}
+    - {name: hover_to_wingborne_blend, type: scalar, unit: dimensionless, purpose: continuous_transition}
+    - {name: nacelle_angle_rad, type: scalar, unit: rad, purpose: tiltrotor_conversion_or_zero}
+  reductions:
+    point_mass_3dof: [position_n_m, velocity_b_m_s, fuel_remaining_kg, battery_energy_j]
+    pseudo_6dof: [position_n_m, velocity_b_m_s, quaternion_bn, body_rates_b_rad_s, fuel_remaining_kg, battery_energy_j, actuator_states, hover_to_wingborne_blend, nacelle_angle_rad]
+energy_backends:
+  battery_electric:
+    resource_state: battery_energy_j
+    mass_policy: constant_battery_mass
+    equations:
+      power_w: "sum(shaft_power_w) / (motor_efficiency * esc_efficiency) + avionics_power_w + payload_power_w"
+      energy_rate_w: "-power_w"
+      soc: "battery_energy_j / usable_battery_energy_j"
+      available_power_w: "peak_power_w when soc >= derate_soc else peak_power_w * (0.65 + 0.35 * soc / derate_soc)"
+    required_observables: [battery_energy_j, soc, battery_power_w, available_power_w, reserve_violation]
+  fuel_burning:
+    resource_state: fuel_remaining_kg
+    mass_policy: continuous_fuel_mass_loss
+    equations:
+      jet_fuel_flow_kg_s: "-tsfc_kg_per_n_h * thrust_n / 3600"
+      shaft_fuel_flow_kg_s: "-bsfc_kg_per_kwh * shaft_power_kw / 3600"
+      mass_kg: "empty_mass_kg + payload_mass_kg + fuel_remaining_kg"
+      cg_m: "linear_interpolation(full_fuel_cg_m, empty_fuel_cg_m, fuel_fraction)"
+    required_observables: [fuel_remaining_kg, fuel_flow_kg_s, mass_kg, cg_m, inertia_kg_m2, reserve_violation]
+  series_hybrid:
+    resource_state: [battery_energy_j, fuel_remaining_kg]
+    mass_policy: fuel_mass_loss_battery_mass_retained
+    equations:
+      bus_power_w: "generator_power_w + battery_power_w"
+      battery_energy_rate_w: "-battery_power_w"
+      generator_fuel_flow_kg_s: "-generator_bsfc_kg_per_kwh * generator_power_kw / 3600"
+      generator_load_policy: "efficient_load_band_with_battery_buffering"
+    required_observables: [generator_power_w, battery_power_w, bus_power_w, fuel_flow_kg_s, soc, reserve_violation]
+  selectable:
+    selection_policy: preserve_backend_in_configuration_identity
+    allowed_backends: [battery_electric, fuel_burning]
+flight_mode_contract:
+  required_fields: [mode_id, entry_conditions, blend_state, exit_conditions, abort_conditions, resource_policy]
+  generic_modes: [prep, launch, deployment, vertical, transition, wingborne, climb, transit, task, return, recovery, terminal, abort]
+  continuous_transition_modes: [roadrunner, omen, thunder]
+  event_markers: [mode_entry, mode_exit, mode_abort, reserve_violation, control_authority_loss, resource_depletion]
+propulsion_models:
+  rotor:
+    thrust_fraction: "normalized_rotor_speed^2"
+    power_fraction: "normalized_rotor_speed^3"
+    induced_power: "proportional_to_thrust_to_three_halves"
+  propeller:
+    maximum_thrust: "min(static_thrust, propeller_efficiency(speed) * maximum_power / max(speed, speed_epsilon))"
+  air_breathing_jet:
+    thrust_lapse: "sea_level_thrust * throttle_fraction * density_ratio^0.7 * mach_lapse"
+    spool: "clip((commanded_spool - spool) / spool_time_constant, -deceleration_limit, acceleration_limit)"
+  tiltrotor:
+    bus_power: "generator_power + battery_power"
+    conversion_state: nacelle_angle_rad
+aerodynamic_proxy_contract:
+  longitudinal: [cl0, cl_alpha, cl_q, cl_control, cd0, induced_drag_factor, cd_alpha_squared, cm0, cm_alpha, cm_q, cm_control]
+  lateral_directional: [cy_beta, cl_beta, cn_beta, cl_p, cn_r, cl_aileron, cm_elevator, cn_rudder]
+  transonic_drag_required_for: [roadrunner, barracuda_100, barracuda_250, barracuda_500, fury_fq44]
+  post_stall_blend_required_for: [roadrunner, omen]
+validation_ladder:
+  - id: data_firewall
+    checks: [units, evidence_grade, source_reference, uncertainty_band, explicit_unknowns]
+  - id: resource_balance
+    checks: [nonnegative_resource, reserve_guard, power_or_fuel_balance, payload_monotonicity]
+  - id: plant_equilibrium
+    checks: [hover_or_cruise_trim, stall_consistency, thrust_drag_intersection, load_factor_limit]
+  - id: transition_continuity
+    checks: [force_continuity, moment_continuity, attitude_continuity, mode_event_contract]
+  - id: actuator_and_control
+    checks: [allocation_rank, lag, rate_limit, saturation, requested_achieved_separation]
+  - id: paired_fidelity
+    checks: [same_parent_configuration, 3dof_vs_pseudo_6dof_comparison, declared_omissions]
+  - id: uncertainty_and_reachability
+    checks: [e_grade_plus_or_minus_25_percent, s_grade_full_band, multi_start, boundary_resolution]
+vehicles:
+  bolt:
+    display_name: Bolt public-data flight-dynamics proxy
+    family: multirotor_or_helicopter
+    proxy_version: v1
+    execution_status: adapter_smoke_supported
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {mass: P, endurance: P, range: P, geometry: E, propulsion: D}
+    energy_backend: battery_electric
+    flight_modes: [prep, vtol_launch, transit, hover_or_orbit, reposition, rtb, land]
+    resource_policy: {reserve_fraction_at_commit: 0.20, low_soc_derate: true, mass_changes_with_resource: false}
+    geometry: {rotor_diameter_m: 0.38, rotor_envelope_m: [0.80, 0.90]}
+    mass: {gross_kg: 5.44, gross_band_kg: [5.2, 5.8]}
+    energy: {usable_battery_kwh: [0.50, 0.60], installed_peak_power_kw: [2.5, 3.5]}
+    performance: {hover_power_kw: 0.63, cruise_speed_m_s: [11.0, 14.0], max_speed_m_s: 24.0, endurance_min: 45.0}
+    control: {max_lateral_acceleration_g: [0.6, 0.8], response_time_s: [0.18, 0.30]}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 5.44, unit: kg, evidence_grade: P, source_ref: public_bolt_mass_anchor, uncertainty_policy: published_anchor_with_band}
+      - {path: energy.usable_battery_kwh, value: [0.50, 0.60], unit: kWh, evidence_grade: E, source_ref: comparable_small_electric_vtol, uncertainty_policy: full_band}
+      - {path: performance.hover_power_kw, value: 0.63, unit: kW, evidence_grade: D, source_ref: induced_power_from_public_mass_and_endurance, uncertainty_policy: plus_or_minus_25_percent}
+  bolt_m:
+    display_name: Bolt-M public-data flight-dynamics proxy
+    family: multirotor_or_helicopter
+    proxy_version: v1
+    execution_status: cataloged_energy_mode_ready
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {mass: P, endurance: P, geometry: E, propulsion: D}
+    energy_backend: battery_electric
+    flight_modes: [launch, fast_transit, search_track, terminal_task]
+    resource_policy: {reserve_fraction_at_commit: 0.10, low_soc_derate: true, mass_changes_with_resource: false}
+    geometry: {rotor_envelope_m: [0.85, 1.00]}
+    mass: {gross_kg: 6.35, gross_band_kg: [5.9, 6.8]}
+    energy: {usable_battery_kwh: [0.52, 0.65], installed_peak_power_kw: [3.5, 4.5]}
+    performance: {hover_power_kw: [0.80, 1.00], cruise_speed_m_s: [14.0, 18.0], max_speed_m_s: [28.0, 35.0], endurance_min: [40.0, 50.0]}
+    control: {motor_lag_s: [0.05, 0.12], max_tilt_deg: [45.0, 50.0], max_rate_deg_s: [250.0, 320.0]}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 6.35, unit: kg, evidence_grade: P, source_ref: public_bolt_m_mass_anchor, uncertainty_policy: published_band}
+      - {path: energy.usable_battery_kwh, value: [0.52, 0.65], unit: kWh, evidence_grade: E, source_ref: comparable_small_electric_vtol, uncertainty_policy: full_band}
+      - {path: control.motor_lag_s, value: [0.05, 0.12], unit: s, evidence_grade: E, source_ref: small_motor_response_class, uncertainty_policy: plus_or_minus_25_percent}
+  anvil:
+    display_name: Anvil public-data flight-dynamics proxy
+    family: multirotor_or_helicopter
+    proxy_version: v1
+    execution_status: cataloged_energy_mode_ready
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {configuration: P, mass: S, endurance: S, propulsion: S}
+    energy_backend: battery_electric
+    flight_modes: [alert, box_launch, max_climb, sprint_intercept, identify, terminal_or_abort]
+    resource_policy: {reserve_fraction_at_commit: 0.10, low_soc_derate: true, mass_changes_with_resource: false}
+    geometry: {rotor_envelope_m: [0.90, 1.30]}
+    mass: {gross_kg: 7.5, gross_band_kg: [5.0, 12.0]}
+    energy: {usable_battery_kwh: [0.35, 0.55], installed_peak_power_kw: [12.0, 20.0]}
+    performance: {hover_power_kw: [1.0, 1.6], cruise_speed_m_s: [20.0, 28.0], max_speed_m_s: [35.0, 50.0], endurance_min: [5.0, 10.0]}
+    control: {motor_lag_s: [0.04, 0.09], max_tilt_deg: [65.0, 75.0], max_rate_deg_s: [350.0, 500.0]}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 7.5, unit: kg, evidence_grade: S, source_ref: public_short_mission_configuration_class, uncertainty_policy: full_band}
+      - {path: energy.installed_peak_power_kw, value: [12.0, 20.0], unit: kW, evidence_grade: S, source_ref: high_power_interceptor_proxy, uncertainty_policy: full_band}
+      - {path: performance.endurance_min, value: [5.0, 10.0], unit: min, evidence_grade: S, source_ref: short_high_speed_mission_placeholder, uncertainty_policy: full_band}
+  ghost_x:
+    display_name: Ghost-X public-data flight-dynamics proxy
+    family: multirotor_or_helicopter
+    proxy_version: v1
+    execution_status: adapter_smoke_supported
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {endurance: P, range: P, gross_mass: E, geometry: E, propulsion: D}
+    energy_backend: battery_electric
+    flight_modes: [vtol, climb, efficient_transit, stare_orbit, hover_stare, relocate, rtb]
+    resource_policy: {reserve_fraction_at_commit: 0.20, low_soc_derate: true, mass_changes_with_resource: false}
+    mass: {gross_kg: 25.0, gross_band_kg: [20.0, 36.0]}
+    energy: {usable_battery_kwh: [1.8, 3.0], installed_peak_power_kw: [8.0, 12.0]}
+    loading_states:
+      light: {gross_kg: 16.0, hover_power_kw: 1.00, endurance_min: [75.0, 90.0]}
+      nominal: {gross_kg: 25.0, hover_power_kw: 2.45, endurance_min: [55.0, 70.0]}
+      heavy: {gross_kg: 36.0, hover_power_kw: 3.20, endurance_min: [35.0, 50.0]}
+    geometry: {main_rotor_diameter_m: 2.4}
+    performance: {cruise_speed_m_s: [15.0, 19.0], max_speed_m_s: [25.0, 33.0]}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 25.0, unit: kg, evidence_grade: E, source_ref: public_ghost_configuration_and_payload_anchors, uncertainty_policy: full_loading_band}
+      - {path: energy.usable_battery_kwh, value: [1.8, 3.0], unit: kWh, evidence_grade: E, source_ref: modular_dual_battery_proxy, uncertainty_policy: plus_or_minus_25_percent}
+      - {path: loading_states.heavy.hover_power_kw, value: 3.20, unit: kW, evidence_grade: D, source_ref: rotorcraft_induced_power_scaling, uncertainty_policy: plus_or_minus_25_percent}
+  altius_600:
+    display_name: ALTIUS-600 public-data flight-dynamics proxy
+    family: conventional_fixed_wing
+    proxy_version: v1
+    execution_status: adapter_smoke_supported
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {mass: P, geometry: P, cruise: P, endurance: P, range: P, aero: D}
+    energy_backend: selectable
+    backend_options: [battery_electric, fuel_burning]
+    flight_modes: [eject, deploy, stabilize, prop_start, climb, racetrack_or_orbit, task, recovery_or_termination]
+    resource_policy: {reserve_fraction_at_commit: 0.15, low_soc_derate: true, fuel_changes_mass_properties: true}
+    geometry: {length_m: 1.016, span_m: 2.54, reference_area_m2: [0.45, 0.65]}
+    mass: {gross_kg: 11.3, gross_band_kg: [10.4, 12.25]}
+    performance: {stall_speed_m_s: 16.6, cruise_speed_m_s: 28.3, max_speed_m_s: 46.3, endurance_h: [3.0, 4.0]}
+    aerodynamics: {cd0: [0.025, 0.035], induced_drag_factor: [0.030, 0.045], cl_max: [1.15, 1.30]}
+    energy_options:
+      battery_electric: {usable_battery_kwh: [1.3, 1.7], cruise_shaft_power_kw: [0.35, 0.45]}
+      fuel_burning: {fuel_kg: [0.70, 1.10], bsfc_kg_per_kwh: [0.45, 0.65]}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 11.3, unit: kg, evidence_grade: P, source_ref: public_altius_600_gross_mass_anchor, uncertainty_policy: published_anchor_with_band}
+      - {path: performance.cruise_speed_m_s, value: 28.3, unit: m/s, evidence_grade: P, source_ref: public_altius_600_cruise_anchor, uncertainty_policy: published_anchor}
+      - {path: energy_options.fuel_burning.fuel_kg, value: [0.70, 1.10], unit: kg, evidence_grade: S, source_ref: selectable_propulsion_scenario, uncertainty_policy: full_band}
+  altius_700_isr:
+    display_name: ALTIUS-700 ISR public-data flight-dynamics proxy
+    family: conventional_fixed_wing
+    proxy_version: v1
+    execution_status: cataloged_energy_mode_ready
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {configuration: P, mass: E, payload: P, endurance: P, propulsion: S, aero: E}
+    energy_backend: selectable
+    backend_options: [battery_electric, fuel_burning]
+    flight_modes: [eject, deploy, stabilize, prop_start, climb, racetrack_or_orbit, task, recovery_or_termination]
+    resource_policy: {reserve_fraction_at_commit: 0.15, low_soc_derate: true, fuel_changes_mass_properties: true}
+    geometry: {length_m: 2.2, span_m: 3.0, reference_area_m2: 1.20}
+    mass: {gross_kg: 30.0, gross_band_kg: [26.0, 34.0]}
+    performance: {stall_speed_m_s: 17.9, cruise_speed_m_s: 28.3, max_speed_m_s: 46.0, endurance_h: [4.0, 5.0]}
+    aerodynamics: {cd0: [0.028, 0.040], induced_drag_factor: [0.035, 0.050], cl_max: [1.15, 1.35]}
+    energy_options:
+      battery_electric: {usable_battery_kwh: [4.5, 6.5], cruise_shaft_power_kw: [0.90, 1.30]}
+      fuel_burning: {fuel_kg: [2.5, 4.0], bsfc_kg_per_kwh: [0.45, 0.65]}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 30.0, unit: kg, evidence_grade: E, source_ref: public_altius_700_isr_configuration_anchor, uncertainty_policy: full_band}
+      - {path: performance.endurance_h, value: [4.0, 5.0], unit: h, evidence_grade: P, source_ref: public_altius_700_endurance_anchor, uncertainty_policy: loading_state_bound}
+      - {path: energy_options.battery_electric.usable_battery_kwh, value: [4.5, 6.5], unit: kWh, evidence_grade: S, source_ref: selectable_propulsion_scenario, uncertainty_policy: full_band}
+  altius_700m:
+    display_name: ALTIUS-700M public-data flight-dynamics proxy
+    family: conventional_fixed_wing
+    proxy_version: v1
+    execution_status: cataloged_energy_mode_ready
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {configuration: P, mass: E, payload: P, endurance: P, propulsion: S, aero: E}
+    energy_backend: selectable
+    backend_options: [battery_electric, fuel_burning]
+    flight_modes: [eject, deploy, stabilize, prop_start, climb, cruise, loiter, terminal_task]
+    resource_policy: {reserve_fraction_at_commit: 0.15, low_soc_derate: true, fuel_changes_mass_properties: true}
+    geometry: {length_m: 2.2, span_m: 3.0, reference_area_m2: 1.20}
+    mass: {gross_kg: 40.0, gross_band_kg: [35.0, 45.0]}
+    performance: {stall_speed_m_s: 20.7, cruise_speed_m_s: 28.3, max_speed_m_s: 46.0, payload_kg: 15.0, endurance_h: [1.0, 2.0]}
+    aerodynamics: {cd0: [0.030, 0.043], induced_drag_factor: [0.038, 0.055], cl_max: [1.15, 1.35]}
+    energy_options:
+      battery_electric: {usable_battery_kwh: [3.0, 5.0], cruise_shaft_power_kw: [1.50, 2.30]}
+      fuel_burning: {fuel_kg: [2.0, 4.0], bsfc_kg_per_kwh: [0.45, 0.65]}
+    parameter_ledger:
+      - {path: performance.payload_kg, value: 15.0, unit: kg, evidence_grade: P, source_ref: public_altius_700m_payload_anchor, uncertainty_policy: published_anchor}
+      - {path: mass.gross_kg, value: 40.0, unit: kg, evidence_grade: E, source_ref: heavy_payload_configuration_proxy, uncertainty_policy: full_band}
+      - {path: energy_options.fuel_burning.fuel_kg, value: [2.0, 4.0], unit: kg, evidence_grade: S, source_ref: selectable_propulsion_scenario, uncertainty_policy: full_band}
+  roadrunner:
+    display_name: Roadrunner concept-level flight-dynamics proxy
+    family: vectored_thrust_hybrid
+    proxy_version: v1
+    execution_status: adapter_smoke_supported
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {configuration: P, mass: S, propulsion: S, performance: S}
+    energy_backend: fuel_burning
+    flight_modes: [alert, vertical_launch, transition, intercept_climb, track, task_or_waveoff, return, recovery_transition, vertical_land]
+    resource_policy: {reserve_fraction_at_commit: 0.30, landing_reserve_fraction: 0.08, fuel_changes_mass_properties: true}
+    modes: {transition_start_m_s: 30.0, transition_end_m_s: 50.0}
+    mass: {gross_kg: 43.0, gross_band_kg: [35.0, 55.0]}
+    propulsion: {static_thrust_n: [650.0, 900.0], usable_fuel_kg: [8.0, 14.0]}
+    performance: {stall_speed_m_s: 38.2, cruise_speed_m_s: 160.0, max_speed_m_s: 240.0, endurance_min: [10.0, 18.0]}
+    aerodynamics: {cd0: [0.045, 0.070], induced_drag_factor: [0.16, 0.24], cl_max: [1.0, 1.2]}
+    parameter_ledger:
+      - {path: propulsion.static_thrust_n, value: [650.0, 900.0], unit: N, evidence_grade: S, source_ref: comparable_twin_jet_vtol_proxy, uncertainty_policy: full_band}
+      - {path: propulsion.usable_fuel_kg, value: [8.0, 14.0], unit: kg, evidence_grade: S, source_ref: mixed_mission_fuel_budget_proxy, uncertainty_policy: full_band}
+      - {path: modes.transition_end_m_s, value: 50.0, unit: m/s, evidence_grade: E, source_ref: transition_blend_engineering_nominal, uncertainty_policy: plus_or_minus_25_percent}
+  barracuda_100:
+    display_name: Barracuda-100 public-data flight-dynamics proxy
+    family: conventional_fixed_wing
+    proxy_version: v1
+    execution_status: cataloged_energy_mode_ready
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {configuration: P, range: P, load_factor: P, mass: E, geometry: E, propulsion: E, aero: E}
+    energy_backend: fuel_burning
+    flight_modes: [carrier_or_booster_launch, climb, efficient_cruise, loiter_or_formation, task, terminal]
+    resource_policy: {reserve_fraction_at_commit: 0.10, fuel_changes_mass_properties: true}
+    geometry: {length_m: 1.5, span_m: 1.1, reference_area_m2: 0.22}
+    mass: {gross_kg: 50.0, gross_band_kg: [42.0, 60.0]}
+    propulsion: {installed_thrust_n: [250.0, 350.0], fuel_kg: [10.0, 16.0], tsfc_kg_per_n_h: [0.145, 0.165]}
+    performance: {stall_speed_m_s: 57.5, cruise_speed_m_s: 150.0, max_speed_m_s: 220.0, max_load_factor_g: 5.0}
+    aerodynamics: {cd0: [0.037, 0.057], induced_drag_factor: [0.070, 0.100], cl_max: [1.0, 1.2], mach_drag: required}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 50.0, unit: kg, evidence_grade: E, source_ref: barracuda_100_class_proxy, uncertainty_policy: full_band}
+      - {path: propulsion.tsfc_kg_per_n_h, value: [0.145, 0.165], unit: kg/N/h, evidence_grade: E, source_ref: small_turbojet_comparison_class, uncertainty_policy: full_band}
+      - {path: performance.max_load_factor_g, value: 5.0, unit: g, evidence_grade: P, source_ref: public_barracuda_maneuver_anchor, uncertainty_policy: published_anchor}
+  barracuda_250:
+    display_name: Barracuda-250 public-data flight-dynamics proxy
+    family: conventional_fixed_wing
+    proxy_version: v1
+    execution_status: adapter_smoke_supported
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {range: P, load_factor: P, mass: E, geometry: E, aero: E}
+    energy_backend: fuel_burning
+    flight_modes: [carrier_or_booster_launch, climb, efficient_cruise, loiter_or_formation, task, terminal]
+    resource_policy: {reserve_fraction_at_commit: 0.10, fuel_changes_mass_properties: true}
+    geometry: {length_m: 1.9, span_m: 1.45, reference_area_m2: 0.36}
+    mass: {gross_kg: 90.0, gross_band_kg: [75.0, 110.0]}
+    performance: {stall_speed_m_s: 60.3, cruise_speed_m_s: 185.0, max_speed_m_s: 257.0, max_load_factor_g: 5.0}
+    aerodynamics: {cd0: [0.032, 0.050], induced_drag_factor: [0.070, 0.105], cl_max: [1.0, 1.2], mach_drag: required}
+    propulsion: {installed_thrust_n: [400.0, 550.0], fuel_kg: [22.0, 35.0], tsfc_kg_per_n_h: [0.135, 0.155]}
+    parameter_ledger:
+      - {path: performance.max_load_factor_g, value: 5.0, unit: g, evidence_grade: P, source_ref: public_barracuda_maneuver_anchor, uncertainty_policy: published_anchor}
+      - {path: propulsion.tsfc_kg_per_n_h, value: [0.135, 0.155], unit: kg/N/h, evidence_grade: E, source_ref: small_turbojet_comparison_class, uncertainty_policy: full_band}
+      - {path: aerodynamics.mach_drag, value: required, unit: dimensionless, evidence_grade: S, source_ref: transonic_drag_required_by_model_class, uncertainty_policy: full_band}
+  barracuda_500:
+    display_name: Barracuda-500 public-data flight-dynamics proxy
+    family: conventional_fixed_wing
+    proxy_version: v1
+    execution_status: cataloged_energy_mode_ready
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {configuration: P, range: P, load_factor: P, mass: E, geometry: E, propulsion: E, aero: E}
+    energy_backend: fuel_burning
+    flight_modes: [carrier_or_booster_launch, climb, efficient_cruise, loiter_or_formation, task, terminal]
+    resource_policy: {reserve_fraction_at_commit: 0.10, fuel_changes_mass_properties: true}
+    geometry: {length_m: 3.0, span_m: 2.4, reference_area_m2: 0.88}
+    mass: {gross_kg: 205.0, gross_band_kg: [170.0, 240.0]}
+    propulsion: {installed_thrust_n: [550.0, 850.0], fuel_kg: [60.0, 90.0], tsfc_kg_per_n_h: [0.135, 0.145]}
+    performance: {stall_speed_m_s: 57.0, cruise_speed_m_s: 185.0, max_speed_m_s: 275.0, max_load_factor_g: 5.0}
+    aerodynamics: {cd0: [0.028, 0.046], induced_drag_factor: [0.075, 0.110], cl_max: [1.05, 1.25], mach_drag: required}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 205.0, unit: kg, evidence_grade: E, source_ref: barracuda_500_class_proxy, uncertainty_policy: full_band}
+      - {path: propulsion.fuel_kg, value: [60.0, 90.0], unit: kg, evidence_grade: E, source_ref: long_range_air_breathing_proxy, uncertainty_policy: full_band}
+      - {path: aerodynamics.mach_drag, value: required, unit: dimensionless, evidence_grade: S, source_ref: transonic_drag_required_by_model_class, uncertainty_policy: full_band}
+  fury_fq44:
+    display_name: Fury/FQ-44 generic high-performance proxy
+    family: conventional_fixed_wing
+    proxy_version: v1
+    execution_status: adapter_smoke_supported
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {max_mach: P, geometry: E, mass: S, propulsion: S, performance: S}
+    energy_backend: fuel_burning
+    flight_modes: [runway_takeoff, climb, rendezvous, package_join, cap_or_sensing, sprint_task, egress, rtb]
+    resource_policy: {reserve_fraction_at_commit: 0.20, divert_allowance: true, fuel_changes_mass_properties: true}
+    geometry: {length_m: 6.2, span_m: 5.3, reference_area_m2: 13.5}
+    mass: {gross_kg: 2400.0, gross_band_kg: [1800.0, 3200.0]}
+    performance: {stall_speed_m_s: 47.7, cruise_mach: 0.70, max_mach: 0.95, max_load_factor_g: 8.0}
+    propulsion: {installed_thrust_kn: [10.0, 18.0], fuel_kg: [450.0, 900.0]}
+    aerodynamics: {cd0: [0.025, 0.040], induced_drag_factor: [0.16, 0.23], cl_max: [1.15, 1.40], mach_drag: required}
+    parameter_ledger:
+      - {path: performance.max_mach, value: 0.95, unit: mach, evidence_grade: P, source_ref: public_fury_max_mach_anchor, uncertainty_policy: published_anchor}
+      - {path: mass.gross_kg, value: 2400.0, unit: kg, evidence_grade: S, source_ref: high_performance_autonomous_jet_class, uncertainty_policy: full_band}
+      - {path: propulsion.installed_thrust_kn, value: [10.0, 18.0], unit: kN, evidence_grade: S, source_ref: small_turbofan_comparison_class, uncertainty_policy: full_band}
+  omen:
+    display_name: Omen concept-level flight-dynamics proxy
+    family: vectored_thrust_hybrid
+    proxy_version: v1
+    execution_status: adapter_smoke_supported
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {configuration: P, group_bounds: P, mass: S, propulsion: S, performance: S}
+    energy_backend: selectable
+    backend_options: [battery_electric, fuel_burning]
+    flight_modes: [tailsitter_launch, body_transition, climb, long_transit, isr_relay_or_logistics, return, reverse_transition, land]
+    resource_policy: {reserve_fraction_at_commit: 0.20, low_soc_derate: true, fuel_changes_mass_properties: true}
+    modes: {transition_start_m_s: 22.0, transition_end_m_s: 40.0}
+    geometry: {length_m: 3.5, span_m: 6.3, reference_area_m2: 8.8}
+    mass: {gross_kg: 500.0, gross_band_kg: [350.0, 590.0]}
+    propulsion: {practical_hover_power_kw: [140.0, 175.0], installed_peak_power_kw: [250.0, 350.0], cruise_power_kw: [55.0, 75.0]}
+    performance: {stall_speed_m_s: 23.4, cruise_speed_m_s: [50.0, 65.0], max_speed_m_s: [80.0, 110.0], endurance_min: [40.0, 70.0]}
+    energy_options:
+      battery_electric: {usable_battery_kwh: [45.0, 70.0], practical_cruise_power_kw: [55.0, 75.0]}
+      fuel_burning: {battery_buffer_kwh: [25.0, 40.0], generator_power_kw: [70.0, 100.0], fuel_kg: [70.0, 120.0], bsfc_kg_per_kwh: [0.26, 0.32]}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 500.0, unit: kg, evidence_grade: S, source_ref: group_3_tailsitter_mass_scenario, uncertainty_policy: full_band}
+      - {path: energy_options.battery_electric.usable_battery_kwh, value: [45.0, 70.0], unit: kWh, evidence_grade: S, source_ref: conservative_battery_only_scenario, uncertainty_policy: full_band}
+      - {path: energy_options.fuel_burning.generator_power_kw, value: [70.0, 100.0], unit: kW, evidence_grade: S, source_ref: range_extender_scenario, uncertainty_policy: full_band}
+  thunder:
+    display_name: Thunder concept proxy
+    family: tiltrotor
+    proxy_version: v0
+    execution_status: concept_adapter_smoke_supported
+    runtime_claim: shared_kinematic_adapter_only
+    evidence: {configuration: P, mass: S, geometry: S, propulsion: S, performance: S}
+    claim_boundary: concept_level_only
+    energy_backend: series_hybrid
+    flight_modes: [vtol, nacelle_conversion, wingborne_transit, mission_orbit, low_speed_task, egress, conversion, land]
+    resource_policy: {reserve_fraction_at_commit: 0.20, landing_go_around_battery_reserve: true, fuel_changes_mass_properties: true}
+    geometry: {wing_span_m: [9.0, 11.0], rotor_diameter_m: [3.5, 5.0], reference_area_m2: 24.0}
+    mass: {gross_kg: 4500.0, gross_band_kg: [3500.0, 6500.0]}
+    propulsion: {practical_hover_power_mw: [1.0, 2.7], installed_peak_power_mw: [2.2, 3.8], generator_continuous_power_mw: [1.2, 2.0]}
+    performance: {cruise_speed_m_s: 115.0, max_speed_m_s: [100.0, 135.0], endurance_h: [3.0, 6.0]}
+    energy: {battery_buffer_kwh: [80.0, 220.0], fuel_kg: [700.0, 1400.0], generator_bsfc_kg_per_kwh: [0.24, 0.33], cruise_power_mw: [0.6, 1.1]}
+    control: {nacelle_angle_deg: [0.0, 90.0], nacelle_rate_deg_s: [8.0, 15.0], rotor_lag_s: [0.15, 0.35]}
+    parameter_ledger:
+      - {path: mass.gross_kg, value: 4500.0, unit: kg, evidence_grade: S, source_ref: thunder_concept_mass_nominal, uncertainty_policy: full_band}
+      - {path: propulsion.generator_continuous_power_mw, value: [1.2, 2.0], unit: MW, evidence_grade: S, source_ref: series_hybrid_dual_tiltrotor_scenario, uncertainty_policy: full_band}
+      - {path: energy.generator_bsfc_kg_per_kwh, value: [0.24, 0.33], unit: kg/kWh, evidence_grade: E, source_ref: comparable_heavy_fuel_generator_class, uncertainty_policy: full_band}

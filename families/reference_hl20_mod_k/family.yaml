@@ -1,0 +1,128 @@
+schema_version: 1
+manifest_type: taoryx.reference-family/v1alpha1
+family_id: reference_hl20_mod_k
+version: 1.0.0
+display_name: HL-20 Mod K source-grounded reference family
+role: source-grounded-reference-anchor
+source:
+  kind: daveml
+  package: hl20-mod-k-unpowered-v0.10.txair
+  package_relative_path: qualified-models/hl20-mod-k/taoryx-hl20-mod-k-unpowered-v0.10.txair
+  package_sha256: 443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63
+  aerodynamic_source: qualified-models/hl20-mod-k/source/aerodynamics.dml
+  aerodynamics_sha256: b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec
+  corpus_archive: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+  corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+  availability: local_corpus_input_verified
+  license_and_notices: required_from_source_repository
+plant:
+  fidelity: rigid_body_6dof
+  body_frame: FRD
+  navigation_frame: NED
+  quaternion_order: wxyz
+  package_schema_version: 0.3.0
+  reference_geometry:
+    area_m2: 26.612075808
+    mean_aerodynamic_chord_m: 8.607552
+    span_m: 4.233672
+  validity_envelope:
+    mach_min: 0.3
+    mach_max: 4.0
+    alpha_min_rad: 0.0
+    alpha_max_rad: 0.2617993877991494
+    beta_min_rad: -0.17453292519943295
+    beta_max_rad: 0.17453292519943295
+    altitude_min_m: -1000.0
+    altitude_max_m: 20000.0
+  qualification: source_parsed_static_checks_passed_package_replay_pending
+  source_payload_required_for_execution: true
+fidelity_profiles:
+  - profile_id: hl20.energy_glide_3dof.v1
+    runtime_fidelity: point_mass_3dof
+    equations: [newton_point_mass_translation]
+    status: planned_derived_from_parent
+    parent_profile: hl20.rigid_body_6dof.v1
+    data_contract: [broad_mach_force_sweeps, lift_drag, energy_rate, crossrange_authority]
+    omitted_physics: [physical_attitude_dynamics, aerodynamic_moments, physical_actuator_states]
+  - profile_id: hl20.attitude_response_p6dof.v1
+    runtime_fidelity: pseudo_6dof
+    equations: [newton_point_mass_translation, quaternion_kinematics, scheduled_attitude_response]
+    status: planned_derived_from_parent
+    parent_profile: hl20.rigid_body_6dof.v1
+    data_contract: [attitude_response_sweeps, bank_response, seven_surface_surrogate_response]
+    omitted_physics: [moment_balance_as_response_source, physical_actuator_states]
+  - profile_id: hl20.rigid_body_6dof.v1
+    runtime_fidelity: rigid_body_6dof
+    equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
+    status: source_parsed_static_checks_passed_package_replay_pending
+    data_contract: [exact_daveml_force_moment_graph, fixed_mass_properties, seven_direct_surfaces]
+    omitted_physics: [propulsion, actuator_dynamics, landing_contact]
+parameters:
+  - {id: vehicle.source_package, kind: string, default: hl20-mod-k-unpowered-v0.10.txair}
+  - {id: vehicle.body_frame, kind: string, default: FRD}
+  - {id: vehicle.navigation_frame, kind: string, default: NED}
+  - {id: vehicle.mass_properties.binding, kind: string, default: separate_fixed_binding_v1}
+  - {id: environment.atmosphere, kind: string, default: source_package_declared}
+  - {id: mission.profile, kind: string, default: release_energy_management_arrival}
+variants: {baseline: {}}
+loadouts: {baseline: {}}
+missions: {baseline: {}}
+segment_plans: {baseline: {}}
+segment_graphs:
+  baseline:
+    schema_version: 1
+    segments:
+      - {id: release, kind: air_release, qualification: planned}
+      - {id: stabilization, kind: attitude_stabilization, qualification: planned}
+      - {id: glide_trim, kind: glide_trim_capture, qualification: source_package_regression}
+      - {id: right_bank, kind: crossrange_leg, qualification: planned}
+      - {id: left_bank, kind: crossrange_leg, qualification: planned}
+      - {id: energy_descent, kind: energy_management, qualification: planned}
+      - {id: arrival, kind: terminal_energy_corridor, qualification: planned}
+    terminal: approach_energy_arrival_gate
+controls:
+  - {id: control.surface.upper_left_body_flap, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct upper-left body flap input.}
+  - {id: control.surface.lower_left_body_flap, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct lower-left body flap input.}
+  - {id: control.surface.upper_right_body_flap, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct upper-right body flap input.}
+  - {id: control.surface.lower_right_body_flap, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct lower-right body flap input.}
+  - {id: control.surface.left_wing_flap, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct left wing flap input.}
+  - {id: control.surface.right_wing_flap, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct right wing flap input.}
+  - {id: control.surface.rudder, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct rudder input.}
+observations:
+  - {id: state.position.north, unit: m, source: position.north, description: NED north position.}
+  - {id: state.position.east, unit: m, source: position.east, description: NED east position.}
+  - {id: state.position.down, unit: m, source: position.down, description: NED down position.}
+  - {id: state.velocity.body, unit: m/s, source: velocity.body, description: Body-frame velocity.}
+  - {id: state.attitude.quaternion, unit: dimensionless, source: attitude.quaternion, description: Body-to-navigation attitude.}
+  - {id: state.body_rates, unit: rad/s, source: body_rates, description: Body angular rates.}
+  - {id: aero.angle_of_attack, unit: deg, source: aero.alpha, description: Source aerodynamic angle of attack.}
+  - {id: aero.sideslip, unit: deg, source: aero.beta, description: Source aerodynamic sideslip.}
+  - {id: aero.mach, unit: dimensionless, source: aero.mach, description: Mach number.}
+  - {id: aero.dynamic_pressure, unit: Pa, source: aero.dynamic_pressure, description: Dynamic pressure.}
+  - {id: control.surface.upper_left_body_flap.achieved, unit: deg, source: controls.upper_left_body_flap.achieved, kind: actuator_achieved}
+  - {id: control.surface.lower_left_body_flap.achieved, unit: deg, source: controls.lower_left_body_flap.achieved, kind: actuator_achieved}
+  - {id: control.surface.upper_right_body_flap.achieved, unit: deg, source: controls.upper_right_body_flap.achieved, kind: actuator_achieved}
+  - {id: control.surface.lower_right_body_flap.achieved, unit: deg, source: controls.lower_right_body_flap.achieved, kind: actuator_achieved}
+  - {id: control.surface.left_wing_flap.achieved, unit: deg, source: controls.left_wing_flap.achieved, kind: actuator_achieved}
+  - {id: control.surface.right_wing_flap.achieved, unit: deg, source: controls.right_wing_flap.achieved, kind: actuator_achieved}
+  - {id: control.surface.rudder.achieved, unit: deg, source: controls.rudder.achieved, kind: actuator_achieved}
+layers:
+  mass_properties: {version: separate-fixed-binding-v1, evidence: source_bound_fixed_separate_record}
+  aerodynamics: {version: mod-k-v1, evidence: source_checked_exact_bytes}
+  actuators: {version: pending, evidence: taoryx_engineering_assumption}
+  allocation: {version: pending, evidence: taoryx_reference_design}
+  controllers: {version: pending, evidence: taoryx_reference_design}
+  reductions: {version: pending, evidence: derived_from_parent_plant}
+bindings:
+  - bindings/canonical-controls.yaml
+  - bindings/canonical-observations.yaml
+  - bindings/envelope.yaml
+  - plant/source-lock.yaml
+claims:
+  - byte-pinned nonlinear unpowered lifting-body aerodynamic reference
+  - exact DAVE-ML source independently parsed and statically accepted
+  - provider-neutral direct-surface controls and observations are ready for case resolution
+nonclaims:
+  - landing gear, ground contact, flare, tire friction, touchdown, or rollout behavior
+  - generic hypersonic-glider or operational spacecraft performance
+next_gate: package_replay_in_taoryx_runtime

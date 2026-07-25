@@ -1,0 +1,13 @@
+schema_version: 1
+kind: taoryx.reference-control-binding/v1alpha1
+family: reference_hl20_mod_k
+source_control_mode: seven_direct_algebraic_surface_inputs
+controls:
+  - {id: control.surface.upper_left_body_flap, source_name: upper_left_body_flap, realization: source_direct_input, allocator_ready: true}
+  - {id: control.surface.lower_left_body_flap, source_name: lower_left_body_flap, realization: source_direct_input, allocator_ready: true}
+  - {id: control.surface.upper_right_body_flap, source_name: upper_right_body_flap, realization: source_direct_input, allocator_ready: true}
+  - {id: control.surface.lower_right_body_flap, source_name: lower_right_body_flap, realization: source_direct_input, allocator_ready: true}
+  - {id: control.surface.left_wing_flap, source_name: left_wing_flap, realization: source_direct_input, allocator_ready: true}
+  - {id: control.surface.right_wing_flap, source_name: right_wing_flap, realization: source_direct_input, allocator_ready: true}
+  - {id: control.surface.rudder, source_name: rudder, realization: source_direct_input, allocator_ready: true}
+logical_controls_status: pending_allocator_overlay

@@ -1,0 +1,11 @@
+schema_version: 1
+kind: taoryx.reference-actuator-profile/v1alpha1
+family: reference_hl20_mod_k
+profile_id: hl20.reference_first_order.v1
+evidence: taoryx_engineering_assumption
+status: planned
+channels: [upper_left_body_flap, lower_left_body_flap, upper_right_body_flap, lower_right_body_flap, left_wing_flap, right_wing_flap, rudder]
+qualification_required:
+  - command_to_achieved_trace
+  - rate_and_latency_report
+  - saturation_and_health_report

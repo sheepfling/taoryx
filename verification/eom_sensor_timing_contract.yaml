@@ -1,0 +1,123 @@
+schema_version: 1
+contract_id: eom_sensor_timing_v1
+status: alpha3_architecture_contract
+purpose: Define accepted-state, force-evaluation, sensor-sampling, and integration-stage timing.
+causal_rule: Sensors observe committed physical truth; integrator stages are computational and never sensor-visible.
+time_boundary:
+  start: t_k
+  end: t_k_plus_1
+phases:
+  - id: committed_boundary
+    timestamp: t_k
+    state: committed
+    truth: publishable
+    controls: achieved_actuator_state_at_t_k
+    loads: evaluate_current_truth_with_achieved_actuators
+    sensor_access: allowed
+  - id: sensor_sample
+    timestamp: t_k
+    state: read_only_committed_state
+    truth: same_committed_truth_as_boundary
+    controls: no_future_command
+    sensor_access: allowed
+  - id: controller_decision
+    timestamp: t_k
+    state: same_committed_boundary_observation
+    truth: same_committed_boundary_observation
+    controls: produce_command_for_next_interval
+    sensor_access: not_a_new_truth_boundary
+  - id: actuator_latch
+    timestamp: t_k
+    state: unchanged
+    truth: unchanged
+    controls: latch_command_and_apply_declared_actuator_dynamics
+    sensor_access: not_a_new_truth_boundary
+  - id: integration_stage
+    timestamp: between_t_k_and_t_k_plus_1
+    state: trial_or_solver_stage_state
+    truth: not_publishable
+    controls: latched_interval_command
+    sensor_access: forbidden
+  - id: accepted_boundary
+    timestamp: t_k_plus_1
+    state: atomically_commit_accepted_state
+    truth: derive_and_publish_new_truth_snapshot
+    controls: achieved_actuator_state_at_t_k_plus_1
+    sensor_access: allowed
+commit_rules:
+  state_and_truth_atomic: true
+  rejected_solver_stages_are_discarded: true
+  force_and_moment_evaluations_are_tagged_with_state_and_control_timestamp: true
+  accepted_history_contains_only_committed_boundaries: true
+transition_rules:
+  automatic_for_all_runtime_events: true
+  pre_snapshot: accepted_truth_at_event_time_before_handler
+  post_snapshot: accepted_truth_at_event_time_after_handler
+  snapshots_include:
+    - state_values
+    - named_truth_channels
+    - frame
+    - segment_number
+    - active_status
+    - achieved_controls
+  same_event_timestamp: true
+  immutable_copies: true
+  legacy_event_history_mirrors_pair: true
+  discontinuity_requires_declared_physical_event: true
+sensor_rules:
+  instantaneous_measurement:
+    sample_only_committed_boundary: true
+    use_interpolated_runtime_state: false
+  interval_measurement:
+    input: accepted_truth_segments
+    use_solver_stage_states: false
+    use_posthoc_linear_state_interpolation: false
+    integrate_sensor_specific_quantity_over_accepted_interval: true
+  rate_mismatch:
+    sensor_faster_than_eom: split_or_substep_eom_at_sensor_timestamps
+    sensor_slower_than_eom: accumulate_accepted_segments_until_delivery_boundary
+    nondividing_rate: create_explicit_scheduler_boundary
+  imu:
+    gyro: sample_body_rate_at_committed_boundary_or_integrate_committed_interval
+    accelerometer: sample_specific_force_at_committed_boundary_or_integrate_committed_interval
+    include_lever_arm_and_mount_transform: when_declared_by_sensor
+    expose_gravity_treatment: true
+    first_sample_policy: explicit_initial_history_or_invalid
+forbidden_patterns:
+  - sensor_reads_rk_stage_state
+  - sensor_interpolates_between_published_fixed_steps
+  - controller_uses_post_step_state_for_current_command
+  - rejected_step_emits_measurement
+  - force_snapshot_without_achieved_control_timestamp
+required_artifacts:
+  - committed_truth_point
+  - accepted_truth_segment
+  - force_moment_evaluation_timestamp
+  - achieved_actuator_state
+  - sensor_sample_time
+  - measurement_available_time
+  - event_and_step_boundary_reason
+boundary_scheduler:
+  next_accepted_time: minimum_of_active_model_step_and_all_required_future_boundaries
+  required_future_boundaries:
+    - truth_timestamp
+    - sensor_timestamp
+    - output_timestamp
+    - table_knot
+    - event_timestamp
+    - final_time
+  current_runtime_stream: RuntimeProblem.required_truth_times
+  sensor_scheduler_policy: provide_explicit_boundaries_or_accepted_segment_accumulation
+language_extension:
+  profile: taoryx
+  declaration: '*runtime sensor NAME kind=KIND cadence-s=SECONDS sample=instantaneous|interval delivery-s=SECONDS truth=boundary|accepted-segment rate-policy=split|accumulate'
+  instantaneous:
+    truth_policy: boundary
+    rate_policy: split
+    scheduler_effect: split_or_substep_at_each_sensor_timestamp
+  interval:
+    truth_policy: accepted-segment
+    rate_policy: accumulate
+    scheduler_effect: accumulate_accepted_segments_until_sensor_boundary
+  delivery_latency: measurement_availability_only; never_shift_or_interpolate_truth
+  unsupported_historical_profile: taos96

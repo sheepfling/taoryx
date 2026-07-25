@@ -1,0 +1,43 @@
+schema: taoryx.model-integration/v1alpha1
+family: reference_f16_s119
+source:
+  kind: daveml
+  package: f16-s119-reference-v0.7.txair
+  package_sha256: eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c
+  aerodynamic_source: qualified-models/f16-s119/F16_aero_mod_k_normalized.dml
+  aerodynamics_sha256: 272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764
+  expected_input_path: qualified-models/f16-s119/taoryx-f16-s119-reference-v0.7.txair
+  source_corpus_archive: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+  source_corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+  availability: local_corpus_input_verified
+  license_and_notices: required_from_source_package
+plant:
+  fidelity: rigid_body_6dof
+  body_frame: FRD
+  navigation_frame: NED
+  qualification: source_parsed_static_checks_passed_package_replay_pending
+  source_payload_required_for_execution: true
+library:
+  family_manifest: families/reference_f16_s119/family.yaml
+  standardized_shape: source_grounded_reference_manifest_to_family_package
+  case_resolution: supported
+  native_runtime_replay: pending
+layers:
+  mass_properties: {version: v1, evidence: source_bound_fixed}
+  aerodynamics: {version: v1, evidence: source_checked_semantic_reconstruction}
+  propulsion: {version: v1, evidence: source_checked_steady}
+  actuators: {version: pending, evidence: taoryx_engineering_assumption}
+  controller: {version: pending, evidence: taoryx_reference_design}
+  mission: {version: pending, evidence: taoryx_qualification_scenario}
+  reductions: {version: pending, evidence: derived_from_parent_plant}
+claims:
+  - source-grounded nonlinear powered fixed-wing reference plant
+  - subsonic rigid-body 6DOF regression represented by the verified corpus package and embedded evidence
+  - normalized DAVE-ML source independently parsed, compiled, and passed 17 embedded static checks
+nonclaims:
+  - production F-16 training or operational fidelity
+  - actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone
+open_questions:
+  - replay the packaged source and plant through the Taoryx runtime boundary
+  - bind actuator dynamics and controller overlays as separate records
+next_gate: package_replay_in_taoryx_runtime

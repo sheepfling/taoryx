@@ -1,0 +1,137 @@
+schema_version: 1
+intake_id: helicopter-tiltrotor-closeout-v0.1
+received: 2026-07-24
+purpose: source-bounded rotorcraft and tiltrotor domain-pilot intake for Alpha 2
+attachment:
+  name: TAORYX_HELICOPTER_TILTROTOR_CLOSEOUT_PLAN.md
+  sha256: 905d3ddbfaaf951588b7e97acec13d877b16e954ae89bf57390b5e5c41c3bb7c
+additional_candidate_package:
+  name: helicopter_6dof_baseline.zip
+  sha256: 8aa04e62aec027badc589268171ed4d7d8b32b561d7ff339624c0dba803ef62f
+  archive_members: 51
+  supplied_validation: 13 pytest checks, compileall, wheel/package smoke test
+  supplied_source_manifest: data/source_manifest.json
+  claim_status: candidate intake; not yet ingested into the TAORYX catalog
+claim_boundary:
+  - These are configurable research models, not certified aircraft reconstructions.
+  - Public manufacturer values, identified dynamics, derived values, and Taoryx engineering assumptions remain separate.
+  - The V-22-class variant is a scaled transport surrogate and must not be labeled MV-22 or treated as reproducing its flight-control laws.
+families:
+  r44_class:
+    backlog_id: A2-POST-P2-5
+    catalog_ids:
+      - rotorcraft.r44_class.3dof.v1
+      - rotorcraft.r44_class.p6dof_hover_scheduled.v1
+    anchor_roles:
+      public_aircraft_reference: Robinson R44 Raven II class mass, power, fuel, and performance values
+      identified_dynamics_anchor: published R44 hover system-identification model
+      notional_extension: scheduled forward-flight response outside the identified hover envelope
+    fidelity_path:
+      - point_mass_3dof
+      - prescribed_attitude_pseudo_6dof
+      - rigid_body_6dof_later
+    first_supported_claims:
+      - rotor spool, vertical takeoff, hover, translation, climb, descent, approach, and touchdown
+      - coupled hover pseudo-6DOF response using source-normalized derivatives and delays
+      - four-pilot-control direction and saturation checks
+    explicit_limits:
+      - forward-flight schedule is not source-identified R44 truth
+      - autorotation is excluded until a separate model is sourced
+      - gear, tire, and ground-effect details remain separate readiness gates
+  xv15_class:
+    backlog_id: A2-POST-P2-5
+    catalog_ids:
+      - tiltrotor.xv15_class.3dof.v1
+      - tiltrotor.xv15_class.p6dof_conversion.v1
+    anchor_roles:
+      primary_technical_anchor: NASA/Bell XV-15 public configuration, controls, rotor, conversion, and flight-test material
+      engineering_estimates: initial rotor speed, wing area, conversion rate, and response schedules until source-pinned
+    first_supported_claims:
+      - rotorborne force sharing and hover control
+      - nacelle-scheduled conversion through declared corridor points
+      - helicopter-mode, conversion-mode, and airplane-mode control mixing
+      - forward and reverse conversion with abort/reversion
+    explicit_limits:
+      - no exact XV-15 aerodynamic database claim before source-table ingestion
+      - conversion guards are conservative Taoryx research conditions, not flight-manual limits
+  v22_class_scaled:
+    backlog_id: A2-POST-P2-5
+    catalog_ids:
+      - tiltrotor.v22_class.3dof_scaled.v1
+      - tiltrotor.v22_class.p6dof_scaled.v1
+    anchor_roles:
+      public_aircraft_reference: public NAVAIR dimensions, gross-weight classes, engine count, and power
+      scaled_surrogate: normalized XV-15 architecture with explicitly scaled mass, power, authority, and conversion behavior
+    first_supported_claims:
+      - scaled rotorborne-to-wingborne mode architecture
+      - resource, power, nacelle-rate, and achieved-control telemetry
+      - shared transition framework and generic mission composition
+    explicit_limits:
+      - not an exact V-22/MV-22 model
+      - estimated empty mass, fuel, wing area, rotor data, and control response require sensitivity bands
+  uh1h_scheduled:
+    backlog_id: A2-POST-P2-5
+    catalog_ids:
+      - rotorcraft.uh1h.3dof.v1
+      - rotorcraft.uh1h.p6dof_scheduled.v1
+    anchor_roles:
+      primary_source: NASA TM-73254 UH-1H mathematical force and moment model
+      derivative_fixture: NASA CR-3144 helicopter handling-qualities data
+      future_nonlinear_target: TM-73254 component model transcription
+    current_fidelity: scheduled pseudo-6DOF with 1–130 knot operating points
+    supported_first_pass:
+      - source-point matrix interpolation and trim holds
+      - cyclic, collective, and pedal pulse/step response studies
+      - guidance, sensor corruption, and waypoint control near scheduled trims
+    excluded_until_upgrade:
+      - full nonlinear rotor, inflow, drivetrain, governor, and actuator model
+      - fuel-flow and engine-performance claims
+      - full-envelope retreating-blade, vortex-ring, or dynamic-stall claims
+  uh60a_scheduled:
+    backlog_id: A2-POST-P2-5
+    catalog_ids:
+      - rotorcraft.uh60a.3dof.v1
+      - rotorcraft.uh60a.p6dof_scheduled.v1
+    anchor_roles:
+      primary_source: NASA TM-85890 UH-60 mathematical model
+      higher_fidelity_target: NASA CR-166309 GenHel engineering simulation
+      validation_context: NASA TM-88360 real-time simulation comparison
+      future_flight_data: NASA/TM-2019-220310 UH-60A Airloads counter data
+      future_engine_upgrade: NASA TM-105805 T700 simplified dynamic model
+    current_fidelity: scheduled pseudo-6DOF with 1–140 knot operating points
+    supported_first_pass:
+      - source-point matrix interpolation and trim holds
+      - control pulse/step response and local mode studies
+      - guidance, sensor corruption, and waypoint control near scheduled trims
+    excluded_until_upgrade:
+      - GenHel-equivalent blade flap/lag, hub, inflow, and engine/governor dynamics
+      - direct flight-test or rotor-load validation claims
+      - full-envelope nonlinear helicopter performance
+transition_contract:
+  required_fields:
+    - entry_guards
+    - active_models
+    - continuous_schedules
+    - exit_guards
+    - abort_or_reversion
+    - hysteresis_policy
+    - resource_continuity
+    - state_continuity
+    - controller_handoff
+  required_evidence:
+    - nacelle or rotor-tilt command versus achieved state and rate
+    - rotor_lift_fraction and wing_lift_fraction
+    - control-mixer weights and per-effector saturation
+    - force, attitude, resource, and mode continuity at boundaries
+    - forward and reverse conversion
+    - abort/reversion case
+    - batch versus stepwise equivalence
+exit_criteria:
+  - R44 source hover fixture reproduces the selected identified model with exact units and normalization recorded.
+  - R44 3DOF pad-to-pad mission reaches touchdown with all cyclic, collective, and pedal directions exercised.
+  - XV-15 3DOF and pseudo-6DOF conversion pass declared corridor and lift-sharing gates.
+  - V-22-class scaled runs retain surrogate labels and pass coherence/sensitivity checks.
+  - All three variants enter through the catalog, convention firewall, trim/evaluation harness, and common session path.
+  - No mode transition has an undeclared state, force, resource, or controller discontinuity.
+  - UH-1H and UH-60A source-point schedules reproduce their supplied matrices and trim conditions with source units and normalization retained.
+  - UH-1H nonlinear component transcription and UH-60A GenHel/Airloads validation remain separate future gates.

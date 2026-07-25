@@ -1,0 +1,77 @@
+schema_version: 1
+intake_id: small-aircraft-pseudo6dof-baselines-v0.1
+received: 2026-07-24
+purpose: source-bounded research intake for the Alpha 2 small-aircraft domain pilots
+claim_boundary:
+  - These are public simulation and controls-research baselines, not manufacturer or certification data.
+  - The package is not an independent TAORYX implementation until its source files, tables, signs, units, and tests are ingested.
+  - Derived and estimated values must remain separate from source-transcribed values in resolved cases and evidence packets.
+attachments:
+  - name: README.md
+    sha256: e8c82830c6855e30cf1a9460bd77da4b0dcc93b12db03ebd8fef5bef3d8f2512
+  - name: aircraft_baselines_v0_1.json
+    sha256: a55841198814e8da9b98be925880b1eeded1849971165a0abc0eebd032c0a3a7
+  - name: SOURCES.md
+    sha256: e071675bef143e2e09fad3c3e54767d124eda388aeae19867621ed440b14a275
+models:
+  c172p_hybrid:
+    backlog_id: A2-POST-P2-4
+    family: light-propeller-aircraft
+    proposed_role: canonical light-aircraft pseudo-6DOF pilot
+    fidelity:
+      - point_mass_3dof
+      - prescribed_attitude_pseudo_6dof
+      - rigid_body_6dof
+    evidence_roles:
+      operational_baseline: JSBSim C172X public approximation
+      independent_cross_check: UIUC C172 nonlinear and tabulated models
+      validation_anchor: NASA Cessna 177B same-class performance and dynamics
+    supported_first_pass:
+      - substall trim and cruise
+      - climb and descent
+      - coordinated and uncoordinated control doublets
+      - stall-onset and recovery experiments
+      - flap and ground-effect transitions
+      - fuel/resource telemetry
+    excluded_until_additional_evidence:
+      - spin and deep-stall claims
+      - authoritative propwash, P-factor, or gyroscopic coupling
+      - realistic landing-gear and tire dynamics
+      - manufacturer or POH equivalence
+  learjet24_local:
+    backlog_id: A2-POST-P2-6
+    family: small-business-jet
+    proposed_role: local business-jet pseudo-6DOF and controls pilot
+    fidelity:
+      - point_mass_3dof
+      - prescribed_attitude_pseudo_6dof
+      - rigid_body_6dof
+    evidence_roles:
+      source_local: UIUC/Roskam Learjet 24-class constant derivative model
+      primary_research_anchor: Stengel generic business-jet models, pending ingestion
+      operational_supplement: JSBSim Global 5000 public approximation, pending comparison
+      limits_reference: FAA Learjet type-certificate data, not a complete aerodynamic source
+    modes:
+      source_linear:
+        claim: exact local source-equation reproduction
+        envelope: clean low-alpha cruise only
+      bounded_proxy:
+        claim: continuity aid for routing, guidance, and Monte Carlo development
+        status: estimated; never report as validated stall or global aerodynamics
+    supported_first_pass:
+      - clean cruise trim
+      - local short-period, phugoid, Dutch-roll, roll, and spiral checks
+      - small elevator, aileron, and rudder doublets
+      - altitude and Mach path-following inside the local envelope
+    excluded_until_additional_evidence:
+      - takeoff, landing, flap, speed-brake, or gear claims
+      - stall or buffet claims
+      - certified climb, range, fuel-burn, or engine-performance claims
+      - exact Citation X or exact single-serial Learjet reconstruction
+ingestion_exit_criteria:
+  - Copy or regenerate the candidate tables into the TAORYX catalog with immutable provenance.
+  - Run the convention firewall for units, axes, quaternion identity, alpha/beta, and control signs.
+  - Differentially compare source equations/tables against the TAORYX provider at declared in-envelope points.
+  - Generate plant-truth trims before controller tuning.
+  - Prove 3DOF reduction, prescribed-attitude pseudo-6DOF, and rigid-body 6DOF through one scenario contract.
+  - Keep source, derived, estimated, and placeholder values visible in resolved cases and evidence packets.

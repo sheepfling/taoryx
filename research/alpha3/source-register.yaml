@@ -1,0 +1,209 @@
+schema_version: 1
+registry: taoryx.alpha3-research/v1alpha1
+release_target: alpha3
+purpose: >-
+  Source-controlled index of research, source locks, example configuration, and
+  external payload requirements for Alpha 3 vehicle-family work.
+
+source_control_policy:
+  checked_in:
+    - research notes and integration notebooks
+    - family manifests, source locks, schemas, and acceptance contracts
+    - example case configuration and reproduction commands
+    - provenance, evidence classifications, and resource inventories
+  external_hash_pinned:
+    - raw DAVE-ML and TXAIR payloads when size, licensing, or source policy requires it
+    - external research archives and datasets
+  forbidden:
+    - unlabelled estimates presented as source facts
+    - generated runtime artifacts treated as authoring authority
+    - source payloads copied into Git without license and attribution review
+
+validation_commands:
+  corpus_integrity: python tools/verify_daveml_reference_inputs.py
+  f16_collection: >-
+    python tools/build_daveml_collection.py --family-manifest
+    families/reference_f16_s119/family.yaml --source-root
+    INBOX/taoryx-aerospace-data-corpus-v1.1 --output
+    build/f16-s119.txcollection
+  hl20_collection: >-
+    python tools/build_daveml_collection.py --family-manifest
+    families/reference_hl20_mod_k/family.yaml --source-root
+    INBOX/taoryx-aerospace-data-corpus-v1.1 --output
+    build/hl20-mod-k.txcollection
+  source_roundtrip: >-
+    python tools/roundtrip_daveml_collection.py --collection
+    build/<family>.txcollection --output-dir build/<family>-daveml
+
+resource_groups:
+  - id: daveml_reference_anchors
+    alpha: alpha2-closeout-and-alpha3-methodology
+    status: runtime_pending
+    families: [reference_f16_s119, reference_hl20_mod_k]
+    checked_in:
+      - docs/plan/daveml-reference-intake-notebook.md
+      - docs/plan/daveml-roundtrip.md
+      - docs/plan/f16-hl20-library-integration.md
+      - docs/plan/f16-s119-complete-model.md
+      - docs/plan/hl20-source-model.md
+      - verification/daveml_reference_integration.yaml
+      - verification/reference_family_catalog.yaml
+      - families/reference_f16_s119/family.yaml
+      - families/reference_f16_s119/plant/source-lock.yaml
+      - families/reference_f16_s119/qualification/integration-record.yaml
+      - families/reference_hl20_mod_k/family.yaml
+      - families/reference_hl20_mod_k/plant/source-lock.yaml
+      - families/reference_hl20_mod_k/qualification/integration-record.yaml
+    external_payloads:
+      - id: aerospace_corpus_v1_1
+        path: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+        sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+        members:
+          - qualified-models/f16-s119/taoryx-f16-s119-reference-v0.7.txair
+          - qualified-models/hl20-mod-k/taoryx-hl20-mod-k-unpowered-v0.10.txair
+        policy: external_hash_pinned
+    alpha2_exit:
+      - collections_build_deterministically
+      - package_binding_hashes_verified
+      - source_preserving_l0_l1_roundtrip_verified
+    remaining:
+      - native_daveml_graph_replay
+      - canonical_daveml_regeneration
+      - runtime_l2_l4_equivalence
+
+  - id: spacecraft_research
+    alpha: alpha3
+    status: research_ready
+    families:
+      - synthetic.spacecraft.6u_observer_rw.v1
+      - synthetic.spacecraft.agile_imager_rw.v1
+      - synthetic.spacecraft.spheres_like_rcs.v1
+      - synthetic.spacecraft.6u_hybrid_deepspace.v1
+      - synthetic.spacecraft.cpod_like_proximity.v1
+      - synthetic.spacecraft.6u_hybrid_deepspace.one_thruster_out.v1
+    checked_in:
+      - docs/plan/spacecraft-6dof-data-and-examples.md
+      - docs/plan/spacecraft-parametric-family-expansion.md
+      - docs/plan/spacecraft-parametric-fixtures-engineering-review.md
+      - docs/plan/fleet-space-public-surrogate-expansion.md
+    evidence_boundary:
+      - source_anchored_notional_architecture
+      - formula_derived_sizing
+      - taoryx_engineering_nominal
+    remaining:
+      - spacecraft_family_manifests
+      - orbit_epoch_and_frame_contract
+      - wheel_and_thruster_allocation_checks
+      - deploy_detumble_pointing_flagship_replay
+
+  - id: rotorcraft_tiltrotor
+    alpha: alpha3
+    status: research_ready
+    families:
+      - r44_class
+      - uh1h_scheduled
+      - uh60a_scheduled
+      - xv15_class
+      - v22_class_scaled_surrogate
+    checked_in:
+      - docs/plan/vehicle-family-validation-v1.md
+      - docs/plan/vehicle-family-validation-v1.md
+      - verification/rotorcraft_tiltrotor_research_intake_v1.yaml
+      - verification/rotorcraft_showcases.yaml
+    evidence_boundary:
+      - public_source_anchor
+      - scheduled_model
+      - scaled_engineering_surrogate
+    remaining:
+      - canonical_rotorcraft_family_packages
+      - rotor_and_thrust_allocation_contract
+      - hover_to_forward_flight_transition_replay
+      - forward_reverse_abort_qualification
+
+  - id: public_flight_dynamics_surrogates
+    alpha: alpha3
+    status: research_ready
+    families:
+      - surrogate.expeditionary_tandem_rotor_vtol
+      - surrogate.tube_launched_fixed_wing_aav
+      - surrogate.reusable_twin_jet_vtol
+      - surrogate.high_performance_autonomous_jet
+      - surrogate.modular_air_breathing_cruise_aav
+      - surrogate.group5_hybrid_vtol_rotorcraft
+    checked_in:
+      - docs/plan/anduril-surrogate-engineering-review.md
+      - docs/plan/anduril-surrogate-integration-notebook.md
+      - docs/plan/fleet-space-public-surrogate-expansion.md
+      - docs/plan/flight-dynamics-surrogate-library.md
+      - verification/anduril_surrogate_parameters_v1.yaml
+      - verification/vehicle_maturity_registry.yaml
+    evidence_boundary:
+      - public_descriptor
+      - derived_estimate
+      - generic_archetype_assumption
+      - taoryx_calibration_choice
+      - unknown
+    nonclaims:
+      - exact_proprietary_vehicle_reconstruction
+      - classified_performance
+      - weapon_effects_seekers_signatures_or_targeting_logic
+    remaining:
+      - common_energy_and_mass_scheduler
+      - explicit_mode_state_machine
+      - 3dof_and_pseudo6dof_same_instance_validation
+      - first_three_surrogate_flagship_missions
+
+  - id: small_aircraft_and_jets
+    alpha: alpha3
+    status: research_ready
+    families:
+      - c172_class
+      - learjet_24_class
+      - a320_mixed_source_intake
+      - b747_existing_proof_family
+      - skywalker_x8_existing_proof_family
+      - x15_existing_proof_family
+      - hummingbird_existing_proof_family
+    checked_in:
+      - docs/plan/a320-daveml-integration.md
+      - docs/plan/b747-x8-verification-v1.md
+      - docs/plan/four-family-flagship-flight-showcase-v1.md
+      - docs/plan/vehicle-readiness-guide.md
+      - verification/small_aircraft_research_intake_v1.yaml
+      - verification/vehicle_maturity_registry.yaml
+    source_boundary:
+      - a320_exact_source_package_missing
+      - c172_and_learjet_research_inputs_require_source_review
+      - existing_showcase_families_have_separate_alpha2_evidence
+    remaining:
+      - exact_a320_source_acquisition
+      - family_package_generation
+      - source_or_class_comparison
+      - family_specific_flagship_qualification
+
+  - id: shared_qualification_and_corpus_infrastructure
+    alpha: alpha3
+    status: planned
+    checked_in:
+      - docs/plan/parametric-models-ml-trajectory-corpus.md
+      - docs/plan/trajectory-reachability-workbench.md
+      - docs/plan/sensor-measurement-orchestration.md
+      - docs/plan/model-integration-workflow.md
+      - docs/plan/vehicle-readiness-guide.md
+      - verification/vehicle_maturity_registry.yaml
+    remaining:
+      - qualified_family_evaluator_reuse
+      - leakage_safe_trajectory_corpus_splits
+      - reachability_profile_implementations
+      - sensor_and_truth_isolation_contracts
+
+commit_readiness:
+  required_before_alpha3_bundle:
+    - source-register.yaml is tracked
+    - every checked_in path exists
+    - every external payload has a hash and acquisition instruction
+    - every family has an evidence boundary and next gate
+    - no raw source is committed without license review
+  current_known_gap:
+    - many listed plans, family manifests, and verification ledgers are present in the worktree but not yet committed
+    - the aerospace corpus remains ignored under INBOX and is not self-contained in Git

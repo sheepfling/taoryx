@@ -3,7 +3,8 @@
 **Target release:** `v0.2.0-alpha`  
 **Depends on:** Alpha 1 language, validation, deterministic runtime,
 composition, and run-artifact foundations  
-**Status:** planned
+**Status:** core contract complete — `A2-RELEASE-PASS`; source-anchor closeout
+tranche planned
 
 ## Purpose
 
@@ -152,7 +153,7 @@ ResolvedCase
   = ResolvedEnvironment
 ```
 
-The same Spectre configuration can therefore be a batch trajectory case,
+The same Simple Aero configuration can therefore be a batch trajectory case,
 autopilot verification case, scripted closed-loop run, human-player scenario,
 terminal-accuracy task, energy-management task, or cross-fidelity transfer
 benchmark. Rewards, curricula, and episode rules do not belong in a vehicle
@@ -281,13 +282,59 @@ machine-readable evidence, focused tests, and a clean claim boundary.
 
 | Tranche | Release point | Primary result | Explicitly deferred |
 | --- | --- | --- | --- |
-| A2-T1 | `case-contracts` | Neutral schemas, catalog records, immutable `ResolvedCase`, provenance, and resolver tooling. | Providers, Lab, controllers, and new 6-DOF physics. |
-| A2-T2 | `provider-session` | One reference provider and the Taoryx adapter share validate/compile/reset/step/run/result semantics. | Vehicle-family breadth, learning tasks, and direct effectors. |
-| A2-T3 | `control-authority` | Versioned control schemas and deterministic autopilot/commanded/overlay/direct/mixed arbitration. | Policy transfer and complex missions. |
-| A2-T4 | `spectre-3dof` | Configurable booster/loadout/segment Spectre-style family with generated 3-DOF cases and evidence. | Pseudo-6DOF and rigid-body claims. |
-| A2-T5 | `fidelity-ladder` | One small family runs the same mission at 3DOF, pseudo-6DOF, and rigid-body 6DOF. | Dual-launch handoff and broad vehicle migration. |
-| A2-T6 | `dual-launch-glider` | The same glider family supports air release and attached-booster separation. | Global vehicle validity and historical TAOS claims. |
-| A2-T7 | `alpha-2-release` | Documentation, artifact generation, reproducibility, and public schema freeze. | Features outside the frozen Alpha 2 contract. |
+| A2-T1 | `case-contracts` | **Complete:** neutral schemas, catalog records, immutable `ResolvedCase`, provenance, and resolver tooling. | Providers, Lab, controllers, and new 6-DOF physics. |
+| A2-T2 | `provider-session` | **Complete:** one reference provider and the Taoryx adapter share validate/compile/reset/step/run/result semantics. | Vehicle-family breadth, learning tasks, and direct effectors. |
+| A2-T3 | `control-authority` | **Complete:** versioned control schemas and deterministic autopilot/commanded/overlay/direct/mixed arbitration. | Policy transfer and complex missions. |
+| A2-T4 | `simple_aero_3dof` | **Complete:** configurable booster/loadout/segment Simple Aero-style family with generated 3-DOF cases and evidence. | Pseudo-6DOF and rigid-body claims. |
+| A2-T5 | `fidelity-ladder` | **Complete:** one resolved Simple Aero proof family runs a common mission at 3DOF, pseudo-6DOF, and rigid-body 6DOF with parity, divergence, closure, convergence, and native artifacts. | Dual-launch handoff and broad vehicle migration. |
+| A2-T6 | `dual-launch-glider` | **Complete:** one resolved glider family generates air-release and attached-booster cases with a native continuous separation handoff, shared post-release guidance, authority metadata, trajectories, plot, and hashed evidence. | Global vehicle validity and historical TAOS claims. |
+| A2-T7 | `alpha-2-release` | **Complete:** catalog-derived schema reference, explicit claim matrix, self-contained hashed evidence packet, isolated clean-source replay, and release audit gate. | Features outside the frozen Alpha 2 contract. |
+| A2-T8 | `source-reference-anchors` | **Planned:** F-16 S-119 and HL-20 Mod K collections, native DAVE-ML replay, source check-case/trim evidence, and reproducible direct-control plant artifacts. | Actuator/controller overlays, flagship missions, RL tasks, and derived reductions. |
+
+Alpha 2 core is now closed at the core-contract boundary. The source-grounded
+reference-anchor tranche below is an explicit Alpha 2 closeout target; Lab
+behavior, flagship mission qualification, and deeper vehicle overlays remain
+ranked follow-on work rather than being inferred from provider/session or
+synthetic proof-family evidence. Their dependencies are maintained in the
+[post-release backlog](taoryx-alpha-2-backlog.md) and
+`verification/alpha2_post_release_backlog.yaml`.
+
+### Alpha 2 source-grounded reference-anchor objective
+
+The Alpha 2 closeout also includes a bounded F-16 S-119 and HL-20 Mod K
+reference-anchor tranche. This is the bridge from verified external packages
+to executable Taoryx library inputs; it is not a claim that either aircraft is
+already an M5 pickup-ready mission family.
+
+The Alpha 2 target is:
+
+```text
+immutable source package
+        ↓
+hash-pinned family manifest
+        ↓
+loss-aware .txcollection
+        ↓
+native Taoryx DAVE-ML replay
+        ↓
+source check cases + trim/hold evidence
+        ↓
+direct-control reference-plant artifact
+```
+
+F-16 and HL-20 are Alpha 2 reference anchors when a new contributor can:
+
+- rebuild each collection from the pinned corpus without editing source data;
+- load each family through the normal catalog and case-resolution path;
+- replay the source DAVE-ML graph in a fresh Taoryx process;
+- pass all embedded source check cases and the declared trim/hold regression;
+- receive explicit unit, frame, envelope, source, and nonclaim diagnostics;
+- reproduce the result and its hashes from one documented command.
+
+The following remain separate post-anchor work: actuator dynamics, control
+allocation, SAS/autopilot, flagship missions, sensor profiles, RL tasks, and
+derived 3DOF/pseudo-6DOF reductions. Those layers may use the reference plants,
+but must not be allowed to change or strengthen the source-plant claim.
 
 ### The first tranche: A2-T1 `case-contracts`
 
@@ -300,7 +347,7 @@ It delivers:
 1. Neutral typed declarations for parameters, controls, observations,
    capabilities, events, and provenance.
 2. `CaseIntent` parsing and validation with canonical units and frames.
-3. A small versioned catalog containing one Spectre-style point-mass family,
+3. A small versioned catalog containing one Simple Aero-style point-mass family,
    two loadouts, and two reusable segment plans.
 4. Immutable `ResolvedCase` creation with precedence, compatibility checks,
    derived values, and stable identity hashing.
@@ -356,7 +403,7 @@ complete:
 | Exit record | Machine-readable status, owner, remaining blockers, and next tranche. |
 
 Passing a tranche does not promote deferred capabilities. For example, a
-passing Spectre 3DOF tranche cannot imply pseudo-6DOF or rigid-body validity;
+passing Simple Aero 3DOF tranche cannot imply pseudo-6DOF or rigid-body validity;
 those require their own ladder exit evidence.
 
 ## Definition of done
@@ -376,7 +423,7 @@ Alpha 2 is complete when a user can:
    seed, step it with actions, and produce reward/termination and provenance
    artifacts without a second simulation path.
 7. Reproduce verified artifacts and plots for:
-   - a Spectre-style configurable 3DOF family;
+   - a Simple Aero-style configurable 3DOF family;
    - a family spanning point-mass 3DOF, pseudo-6DOF, and rigid-body 6DOF; and
    - a glider supporting both air release and booster launch.
 
@@ -386,7 +433,7 @@ It must additionally retain provider, adapter, binding, model, solver,
 translation-report, approximation, and native-artifact provenance.
 
 Taoryx itself must satisfy the complete provider/testbed proof: the same
-Spectre case run through the provider facade and stepped through Taoryx Lab
+Simple Aero case run through the provider facade and stepped through Taoryx Lab
 must produce the same physical trajectory when controls, seed, cadence, and
 initial state are held constant.
 
@@ -525,9 +572,9 @@ Booster separation, payload deployment, fuel depletion, or control-surface
 loss are declared events. They update the active model graph, mass properties,
 control activity masks, and artifact event trace deterministically.
 
-## Spectre concepts mapped into TAORYX
+## Simple Aero concepts mapped into TAORYX
 
-| Spectre concept | TAORYX concept |
+| Simple Aero concept | TAORYX concept |
 | --- | --- |
 | Fixed L/D by phase | Segment parameter or explicit `fixed_ld` aerodynamic mode. |
 | Booster choice | Typed booster component slot in a loadout. |
@@ -624,6 +671,20 @@ frame, bounds, normalization, cadence, hold behavior, validity/activity masks,
 authority, failsafe, and provenance. Normalized `[-1, 1]` values are boundary
 representations only; canonical physical channels remain in artifacts.
 
+Controls must distinguish the requested input from the achieved physical
+actuator state. A channel may declare `absolute` input, `rate` input, or both;
+rate input has an explicit rate unit and is integrated by the control arbiter
+over the accepted transition interval. A hard actuator rate limit is separate
+from a requested-rate command. The artifact records command mode, requested
+rate, realized rate, post-limit value, and achieved value.
+
+Observations are typed by role. `state` describes the dynamic state, while
+`actuator_achieved` reports the current realized bank, throttle, surface,
+rotor, or gimbal state. `resource` covers values such as fuel or propellant
+remaining, and `event_prediction` covers available time or state-to-event
+estimates such as time-to-burnout. Requested commands are never substituted
+for these achieved/resource/event observations.
+
 Family packages also declare truth-output schemas, sensor/observation profiles,
 autopilot implementations, actuator presets, randomizable parameters and
 valid distributions, supported task requirements, cross-fidelity comparison
@@ -661,13 +722,13 @@ obligation when its underlying contract is implemented:
 
 ```bash
 taoryx catalog list families
-taoryx family inspect spectre
-taoryx family schema spectre --exposure common
-taoryx preset list --family spectre --kind loadout
+taoryx family inspect simple_aero
+taoryx family schema simple_aero --exposure common
+taoryx preset list --family simple_aero --kind loadout
 
-taoryx case resolve cases/spectre-heavy.yaml --output resolved.json
-taoryx case explain cases/spectre-heavy.yaml --parameter vehicle.mass.total
-taoryx case diff cases/spectre-light.yaml cases/spectre-heavy.yaml
+taoryx case resolve cases/simple_aero-heavy.yaml --output resolved.json
+taoryx case explain cases/simple_aero-heavy.yaml --parameter vehicle.mass.total
+taoryx case diff cases/simple_aero-light.yaml cases/simple_aero-heavy.yaml
 taoryx case validate cases/kestrel-air-release.yaml
 taoryx graph show cases/kestrel-air-release.yaml
 
@@ -675,10 +736,10 @@ taoryx schema export cases/kestrel-air-release.yaml --kind controls
 taoryx schema export cases/kestrel-air-release.yaml --kind observations
 taoryx schema export cases/kestrel-air-release.yaml --normalized
 
-taoryx run cases/spectre-heavy.yaml
+taoryx run cases/simple_aero-heavy.yaml
 taoryx compare fidelities cases/kestrel-course.yaml \
   --levels 3dof,pseudo_6dof,rigid_body_6dof
-taoryx family verify spectre --all
+taoryx family verify simple_aero --all
 taoryx family verify kestrel-glider --cross-fidelity
 ```
 
@@ -689,7 +750,7 @@ from and how it was derived.
 
 ### Shared provider/Lab proof
 
-Use one resolved Spectre case twice:
+Use one resolved Simple Aero case twice:
 
 ```text
 Taoryx Provider: resolve -> compile -> run/step -> trajectory result
@@ -701,7 +762,7 @@ Compare state transitions, applied controls, events, and termination. Any
 difference must be attributable to an explicitly declared observation, action,
 task, or randomization layer—not a second integrator or hidden controller.
 
-### A — Spectre-style configurable 3DOF
+### A — Simple Aero-style configurable 3DOF
 
 Demonstrate multiple boosters, payload/loadout mass, fixed L/D by segment,
 swappable phase plans, launch/aim points, heading offsets, physical and
@@ -749,12 +810,12 @@ replacements for guidance-level control.
 | A2-R4 | Fixed runtime schemas | Parameter, state, control, observation, output, event, and activity-mask schemas remain fixed after reset. |
 | A2-R5 | Reference-provider parity | A non-Taoryx reference provider passes common validation, compilation, batch execution, inspection, normalized results, and any advertised session capabilities. |
 | A2-R6 | Taoryx adapter | Taoryx is reachable only through its registered execution adapter and family bindings, with complete translation reports. |
-| A2-R7 | Provider/Lab parity | The same resolved Spectre case produces equivalent physical transitions through provider batch/step and Taoryx Lab action loops. |
-| A2-R8 | Spectre proof family | Configurable 3DOF boosters, payloads, fixed L/D, launch/aim, cutoffs, segments, and sweeps pass. |
+| A2-R7 | Provider/Lab parity | The same resolved Simple Aero case produces equivalent physical transitions through provider batch/step and Taoryx Lab action loops. |
+| A2-R8 | Simple Aero proof family | Configurable 3DOF boosters, payloads, fixed L/D, launch/aim, cutoffs, segments, and sweeps pass. |
 | A2-R9 | Control authority | Autopilot, commanded, residual/overlay, direct, and mixed modes pass limits, cadence, logging, and replay tests. |
 | A2-R10 | Fidelity ladder | One family runs the same mission at all three fidelities with declared adapters/tolerances. |
 | A2-R11 | Dual-launch glider | Air-release and attached-booster paths pass deterministic handoff and mission evidence. |
-| A2-R12 | Lab testbed | Seeded reset, action/observation profiles, reward, termination/truncation, randomization, and evaluation artifacts pass. |
+| A2-R12 | Lab testbed | **Post-release:** seeded reset, action/observation profiles, reward, termination/truncation, randomization, and evaluation artifacts. |
 | A2-R13 | Tooling/artifacts | Inspect, resolve, explain, diff, schema export, run, compare, verify, plot, reset, rollout, and replay paths emit audit artifacts. |
 | A2-R14 | Release reproducibility | A clean checkout reproduces proof cases, reports, plots, and hashes without stop-ship findings. |
 
@@ -809,7 +870,7 @@ randomization, seed, rollout, replay, and action-to-applied-control contracts
 without placing them in the physics package.
 
 Exit: provider batch/step and Taoryx Lab stepping agree on physical transitions
-for the shared Spectre proof case.
+for the shared Simple Aero proof case.
 
 ### A2-2 — Semantic schema and catalog
 
@@ -830,7 +891,7 @@ Exit: derived mass, CG, inertia, launch heading, and other values are
 inspectable; unknown/unused overrides are errors; identical inputs have stable
 case identity hashes.
 
-### A2-4 — Spectre 3DOF family and Taoryx binding
+### A2-4 — Simple Aero 3DOF family and Taoryx binding
 
 Build the configurable proof family: boosters, payloads, fixed L/D,
 launch/aim, heading offset, target-speed cutoff, swappable segments, physical
@@ -896,7 +957,7 @@ catalog/
   components/{boosters,payloads,engines,effectors}/
   segments/
   controllers/
-  families/{spectre,kestrel-glider}/
+  families/{simple_aero,kestrel-glider}/
     family.yaml
     fidelities/ variants/ loadouts/ segments/
     controllers/ presets/ examples/ verification/
@@ -929,5 +990,111 @@ Alpha 2 does not include a remote model marketplace, untrusted hot-loading,
 automatic 3DOF-to-valid-6DOF conversion, guaranteed policy transfer across
 fidelities, a required RL/game/network framework, unbounded runtime schema
 changes, generic undeclared control mixing, or one universal autopilot.
+
+## Flagship showcase backlog
+
+The [Four-Family Flight Showcase v1](four-family-flagship-flight-showcase-v1.md)
+is the next qualification layer above the Alpha 2 family proofs. It is a
+single versioned release containing one `Flagship Mission Qualification Pack`
+for each archetype:
+
+```text
+Hummingbird: pad -> hover -> 3D waypoint box -> yaw -> disturbance -> land
+Skywalker X8: launch -> bidirectional course -> speed/altitude -> recovery
+B747: airborne trim -> climb/turn/accelerate -> descent -> arrival gate
+X-15: air release -> powered climb -> burnout/coast -> glide -> energy corridor
+```
+
+The public badge is `Flagship Mission Qualified`. It is earned only when the
+same resolved case can be launched or initialized through its documented start
+contract, complete qualified segments, exercise the required controls and
+effectors, capture ordered objectives, reach explicit family-appropriate
+finality, and reproduce all artifacts from one command. The hero flight sits
+on top of source/data, trim/hover, closure, convergence, actuator, controller,
+segment, robustness, and replay evidence; it does not replace them.
+
+The first implementation slice is common tooling: waypoint and terminal-
+corridor evaluators, control-coverage reports, envelope reports, metric
+dictionary, common plots, self-contained manifests, and batch/step equivalence.
+Then implement Hummingbird, X8, B747, and X-15 in that order. Runway-to-runway
+B747 and physical X8 touchdown remain separate follow-on badges until their
+low-speed and ground-contact models qualify.
+
+Supporting artifacts are recorded in `verification/showcase_validation_roadmap_v2.json`
+and `verification/showcase_composites_v1_audit.md`.
+
+## Fleet, space, and public-surrogate backlog
+
+The [Fleet, Space, and Public-Surrogate Expansion Plan](fleet-space-public-surrogate-expansion.md)
+extends Alpha 2 library maturity after the flagship layer:
+
+1. Add a first-class `PopulationSession` with structure-of-arrays state,
+   cohort grouping, sparse events, spatial indexing, scalar/batched
+   equivalence, deterministic replay, and documented wall-clock/memory gates.
+2. Qualify Hummingbird as one family with rotor-resolved rigid-body 6DOF,
+   named attitude-response pseudo-6DOF, and `fleet_3dof` realizations.
+3. Add a `reference_satellite` domain profile with explicit epochs, time
+   scales, inertial frames, central bodies, force models, eclipse, visibility,
+   CCSDS orbit data, and orbital/attitude/rigid-body realizations.
+4. Define public-surrogate evidence before encoding product data. Tag every
+   value as public fact, derived estimate, generic assumption, calibration
+   choice, scenario convenience, or unknown.
+5. Build the first three surrogates initially: tandem-rotor VTOL,
+   tube-launched fixed wing, and reusable twin-jet VTOL. High-performance jet
+   and modular cruise surrogates follow; Thunder remains catalog-only `E0`/`M0`.
+
+These tracks reuse the same provider, Lab, composition, stepping, evaluation,
+provenance, and readiness infrastructure. They do not create independent
+fleet, spacecraft, or surrogate runtimes.
+
+The ranked backlog treats the Cessna-class, rotorcraft/VTOL, spacecraft,
+small-business-jet, and Anduril-inspired public-surrogate families as P2
+domain pilots. They come after the generic P0 seams and current-family P1
+proof, but before broad parametric qualification. This order tests whether the
+common contracts truly generalize across low-speed propeller flight, hover and
+transition, atmospheric jets, public surrogates, and orbital domains without
+turning any domain into a bespoke runtime.
+
+All future library additions must follow the
+[model integration workflow](model-integration-workflow.md). The F-16 S-119
+and HL-20 Mod K packages enter as source-grounded reference anchors with
+immutable plant records; actuator, controller, mission, reduction, and RL
+layers are separate integration work items.
+
+The spacecraft family backlog expands these anchors into standard and resilient
+`spacecraft.6u_observer_rw` variants, `spacecraft.agile_imager_rw.v1`,
+`spacecraft.spheres_like_rcs.v1`, and `spacecraft.marco_like_hybrid.v1`.
+CPOD-like proximity and one-thruster-out variants remain follow-on
+qualification work. Corrected fixture values and lifecycle gates are recorded
+in `spacecraft-parametric-fixtures-engineering-review.md`.
+
+Spacecraft 6DOF is a dedicated qualification track documented in
+[spacecraft-6dof-data-and-examples.md](spacecraft-6dof-data-and-examples.md).
+Alpha 2’s space backlog begins with a reaction-wheel-primary Earth-observation
+vehicle and a thruster-primary free flyer, followed by a hybrid. Required
+evidence includes wheel momentum exchange/unloading, thruster attainable
+wrench and rank checks, pulse/valve behavior, propellant use, failures, frame
+and epoch correctness, and reproducible deployment/pointing or stationkeeping
+missions.
+
+The [Parametric Models and ML Trajectory Corpus Plan](parametric-models-ml-trajectory-corpus.md)
+is a first-class backlog workstream, not an extension-field checklist. It
+adds coherent latent vehicle sampling, identification fragments, multi-layer
+truth, sensorized corpus editions, realized-vehicle leakage-safe splits, and
+P0–P5 corpus maturity gates. Source-grounded F-16 and HL-20 families remain
+immutable external anchors; synthetic archetypes provide controlled breadth.
+
+The [Trajectory Reachability Workbench](trajectory-reachability-workbench.md)
+is a separate application over the provider/session API. It owns launch and
+target loci, candidate fan-out, search, adaptive boundary extraction,
+uncertainty studies, classification, and visualization; Taoryx owns case
+resolution, checkpoint/restore, deterministic stepping, controls, telemetry,
+and validity reporting. Its first target is R3 along-track fan capability,
+with R5 as the qualified workbench gate.
+
+The [sensor and measurement orchestration backlog](sensor-measurement-orchestration.md)
+adds committed truth staging, synthetic measurement production, causal
+multi-rate scheduling, estimator truth isolation, and IMU/focal-plane adapter
+contracts. It is shared by flight, RL, reachability, and ML-corpus studies.
 
 ####

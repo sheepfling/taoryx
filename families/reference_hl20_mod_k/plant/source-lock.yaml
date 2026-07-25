@@ -1,0 +1,13 @@
+schema_version: 1
+kind: taoryx.reference-plant-source-lock/v1alpha1
+family: reference_hl20_mod_k
+package:
+  relative_to_corpus: qualified-models/hl20-mod-k/taoryx-hl20-mod-k-unpowered-v0.10.txair
+  sha256: 443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63
+aerodynamics:
+  relative_to_corpus: qualified-models/hl20-mod-k/source/aerodynamics.dml
+  sha256: b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec
+corpus:
+  archive: INBOX/taoryx-aerospace-data-corpus-v1.1.zip
+  sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+replay_boundary: package_replay_in_taoryx_runtime
