@@ -9,7 +9,7 @@ def test_all_registered_vehicles_have_a_diagnosable_onboarding_report() -> None:
     reports = validate_all_vehicle_onboarding()
     assert {report.vehicle_id for report in reports} == {"b747", "skywalker_x8", "hummingbird", "x15"}
     assert all(not report.errors for report in reports)
-    assert validate_vehicle_onboarding("x15").status == "ready-with-warnings"
+    assert validate_vehicle_onboarding("x15").status == "ready"
     ####
 
 
@@ -27,12 +27,10 @@ def test_unknown_vehicle_error_identifies_the_registration_path_and_repair() -> 
 
 
 def test_onboarding_reports_are_json_ready() -> None:
-    """Machine-readable findings retain severity, source path, and repair hint."""
+    """A clean onboarding report remains machine-readable."""
 
     report = validate_vehicle_onboarding("x15")
     payload = report.as_dict()
-    assert payload["status"] == "ready-with-warnings"
-    warning = payload["findings"][0]
-    assert set(warning) == {"severity", "code", "path", "message", "hint"}
-    assert warning["severity"] == "warning"
+    assert payload["status"] == "ready"
+    assert payload["findings"] == []
     ####

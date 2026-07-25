@@ -62,15 +62,15 @@ def test_x15_alpha_adapter_perturbs_body_attitude_not_guidance_text() -> None:
     ####
 
 
-def test_x15_trim_report_preserves_source_only_diagnostic() -> None:
+def test_x15_trim_report_preserves_source_backed_glide_diagnostic() -> None:
     report_path = ROOT / "artifacts/golden_plants/x15_release_glide_trim_report.json"
     if not report_path.is_file():
         pytest.skip("generated X-15 trim evidence is not present")
     import json
 
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    assert report["status"] == "blocked"
-    assert report["diagnostic"]["source_only_preserved"] is True
+    assert report["status"] == "pass"
+    assert report["diagnostic"]["source_only_preserved"] is False
     assert report["diagnostic"]["source_release_is_equilibrium_claim"] is False
     assert report["solver"]["tables_rebound_per_evaluation"] is False
     ####

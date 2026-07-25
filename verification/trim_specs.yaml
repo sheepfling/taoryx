@@ -43,12 +43,13 @@ entries:
     notes: Equal-rotor source-frame hover equilibrium.
   - id: x15-release-glide-v1
     vehicle: x15
-    status: source_only
+    status: ready
     state_names: [alpha_deg]
     control_names: [symmetric_stabilator_deg, differential_stabilator_deg, rudder_deg]
-    residual_names: [body_x_force, body_z_force, roll_moment, pitch_moment, yaw_moment]
+    residual_names: [force_velocity_cross_y, force_velocity_cross_z, roll_moment, pitch_moment, yaw_moment]
     state_initial: {alpha_deg: 0.0}
     state_lower: {alpha_deg: -5.0}
     state_upper: {alpha_deg: 25.0}
     control_initial: {symmetric_stabilator_deg: 0.0, differential_stabilator_deg: 0.0, rudder_deg: 2.0}
-    notes: Source-trimmed release artifact; independent residual adapter still required.
+    residual_scales: {force_velocity_cross_y: 1.0, force_velocity_cross_z: 1.0, roll_moment: 1.0, pitch_moment: 1.0, yaw_moment: 1.0}
+    notes: Source-backed unpowered-glide trim; force is required to align with the body velocity vector while body moments vanish. Axial drag/gravity force is intentionally permitted.

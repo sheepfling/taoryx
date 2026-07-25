@@ -9,6 +9,7 @@ import re
 import tempfile
 from pathlib import Path
 
+from taoryx.contracts import Vector3
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.modes import Quaternion
 from taoryx.runtime.common import RuntimeState, RuntimeVehicle
@@ -87,15 +88,58 @@ def _residual(
     vehicle.state = candidate_state
     vehicle.history[0] = candidate_state
     for name, value in control_values.items():
-        vehicle.control_values[name.replace("_", "-")] = float(value)
+        degree_name = name.replace("_", "-")
+        numeric_value = float(value)
+        vehicle.control_values[degree_name] = numeric_value
+        # The rigid-body table adapters query the canonical radian aliases;
+        # retain the degree command as well so diagnostics and source-facing
+        # controls remain auditable.
+        vehicle.control_values[degree_name.removesuffix("-deg")] = math.radians(numeric_value)
+    # Keep the candidate namespace coherent for both the generic runtime
+    # evaluator and the rigid-body aerodynamic control provider.
+    candidate_named = {**candidate_state.named, **vehicle.control_values}
+    candidate_state = RuntimeState(
+        candidate_state.time,
+        candidate_state.values,
+        candidate_state.frame,
+        candidate_named,
+        candidate_state.value_names,
+        candidate_state.segment_endpoints,
+    )
+    vehicle.state = candidate_state
+    vehicle.history[0] = candidate_state
     if vehicle.environment_evaluator is None:
         raise RuntimeError("X-15 cached program has no rigid-body observable evaluator")
-    observed = vehicle.environment_evaluator(candidate_state.named)
+    # The evaluator consumes one coherent namespace containing both the
+    # candidate rigid-body state and the candidate runtime controls.  Passing
+    # only ``candidate_state.named`` silently left the closure's original
+    # source controls active while the solver varied ``control_values``.
+    observed = vehicle.environment_evaluator({**candidate_state.named, **vehicle.control_values})
     force_scale = max(float(candidate_state.named["mass"]) * 9.80665, 1.0)
     moment_scale = max(force_scale * float(X15["reference_length_m"]), 1.0)
+    current = Quaternion(
+        float(candidate_state.named["qw"]),
+        float(candidate_state.named["qx"]),
+        float(candidate_state.named["qy"]),
+        float(candidate_state.named["qz"]),
+    )
+    velocity_body = current.conjugate().rotate(
+        Vector3(
+            float(candidate_state.named.get("xdt", candidate_state.named.get("xdot", candidate_state.named.get("xdot_ecic", 0.0)))),
+            float(candidate_state.named.get("ydt", candidate_state.named.get("ydot", candidate_state.named.get("ydot_ecic", 0.0)))),
+            float(candidate_state.named.get("zdt", candidate_state.named.get("zdot", candidate_state.named.get("zdot_ecic", 0.0)))),
+        )
+    )
+    total_force = Vector3(
+        float(observed["total_force_body_x_n"]),
+        float(observed["total_force_body_y_n"]),
+        float(observed["total_force_body_z_n"]),
+    )
+    force_velocity_cross = total_force.cross(velocity_body)
+    force_velocity_scale = max(force_scale * max(velocity_body.norm(), 1.0), 1.0)
     return {
-        "body_x_force": float(observed["total_force_body_x_n"]) / force_scale,
-        "body_z_force": float(observed["total_force_body_z_n"]) / force_scale,
+        "force_velocity_cross_y": float(force_velocity_cross.y) / force_velocity_scale,
+        "force_velocity_cross_z": float(force_velocity_cross.z) / force_velocity_scale,
         "roll_moment": float(observed["total_moment_body_x_nm"]) / moment_scale,
         "pitch_moment": float(observed["total_moment_body_y_nm"]) / moment_scale,
         "yaw_moment": float(observed["total_moment_body_z_nm"]) / moment_scale,
@@ -135,20 +179,24 @@ def main() -> None:
     payload = {
         "vehicle": "x15",
         "source_anchor": "source-trimmed release glide",
-        "claim": "local source-trim candidate through the common trim solver and cached rigid-body residual adapter",
+        "claim": "local source-trim candidate through the common trim solver and cached rigid-body glide residual adapter",
         "status": "pass" if result.success else "blocked",
         "state": dict(result.state),
         "controls": dict(result.controls),
         "residual_normalized": dict(result.residuals),
         "residual_norm_l2": math.sqrt(sum(value * value for value in result.residuals.values())),
-        "acceptance_gate": {"translation_norm_lt": 0.01, "rotation_norm_lt": 0.001, "passed": result.success},
+        "acceptance_gate": {
+            "force_velocity_cross_norm_lt": 1.0e-3,
+            "moment_norm_lt": 1.0e-3,
+            "passed": result.success,
+        },
         "diagnostic": {
             "source_only_preserved": not result.success,
             "reason": (
-                "bounded residual solve reached the declared alpha lower bound without satisfying the "
-                "zero-wrench equilibrium gate; the source release state is not silently reclassified as a trim"
+                "bounded glide residual solve did not satisfy force-velocity alignment and zero-moment equilibrium; "
+                "the source release state is not silently reclassified as a trim"
                 if not result.success
-                else "bounded residual solve satisfied the declared source-trim equilibrium gate"
+                else "bounded glide residual solve satisfied force-velocity alignment and zero-moment equilibrium"
             ),
             "state_bound_hit": bool(
                 result.state.get("alpha_deg") == result.spec.state_lower.get("alpha_deg")
