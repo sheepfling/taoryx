@@ -7,11 +7,23 @@ import json
 import math
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 
-from .contracts import CaseIntent, CaseValue, FamilyCatalog, FamilyPackage, ProvenanceRecord, ResolvedCase, ResolvedValue
+from .contracts import (
+    CaseIntent,
+    CaseValue,
+    DerivedParameter,
+    FamilyCatalog,
+    FamilyPackage,
+    ParameterSchema,
+    ProvenanceRecord,
+    ResolvedCase,
+    ResolvedValue,
+    ResolvedVariant,
+    VariantResolutionReport,
+)
 
 
 class ResolutionError(ValueError):
@@ -119,10 +131,204 @@ def _apply_layer(
     for parameter_id, raw in layer.items():
         if parameter_id not in schemas:
             raise ResolutionError("unknown-override", "parameter is not declared by the family", field=parameter_id)
+        if schemas[parameter_id].role == "derived":
+            raise ResolutionError("derived-override", "derived parameters are computed and cannot be overridden", field=parameter_id)
         supplied = _as_case_value(raw)
         canonical = _convert(supplied.value, supplied.unit, schemas[parameter_id].canonical_unit, parameter_id)
         _check_value(schemas[parameter_id], canonical, parameter_id)
         values[parameter_id] = (canonical, source, supplied.unit, supplied.value)
+    ####
+
+
+def _bound_variant_value(
+    value: float,
+    minimum: float | None,
+    maximum: float | None,
+    *,
+    policy: str,
+    field: str,
+    report: dict[str, Any],
+) -> float:
+    """Apply an explicit reject/project policy to one candidate value."""
+
+    projected = value
+    if minimum is not None and projected < minimum:
+        if policy == "reject":
+            raise ResolutionError("variant-out-of-range", f"value must be >= {minimum}", field=field)
+        projected = minimum
+    if maximum is not None and projected > maximum:
+        if policy == "reject":
+            raise ResolutionError("variant-out-of-range", f"value must be <= {maximum}", field=field)
+        projected = maximum
+    if projected != value:
+        report["projection_distance"] = float(report.get("projection_distance", 0.0)) + abs(projected - value)
+    return projected
+    ####
+
+
+def _apply_variant_modifiers(
+    values: dict[str, tuple[Any, str, str | None, Any]],
+    intent: CaseIntent,
+    family: FamilyPackage,
+    schemas: Mapping[str, ParameterSchema],
+) -> VariantResolutionReport:
+    """Apply bounded semantic modifiers and return their immutable audit report."""
+
+    space = family.variant_space
+    modifiers = {modifier.id: modifier for modifier in space.modifiers}
+    if len(modifiers) != len(space.modifiers):
+        raise ResolutionError("duplicate-variant-modifier", "variant modifier IDs must be unique", field="variant_parameters")
+    unknown = sorted(set(intent.variant_parameters) - set(modifiers))
+    if unknown:
+        raise ResolutionError(
+            "unknown-variant-parameter",
+            f"variant parameter(s) are not declared: {', '.join(unknown)}",
+            field="variant_parameters",
+        )
+
+    original: dict[str, Any] = {
+        key: _as_case_value(value).model_dump(mode="json") for key, value in sorted(intent.variant_parameters.items())
+    }
+    applied: dict[str, Any] = {}
+    invalidations: set[str] = set()
+    diagnostics: list[str] = []
+    report_state: dict[str, Any] = {"projection_distance": 0.0}
+    applied_ids: list[str] = []
+    extended = False
+
+    for modifier_id, raw in sorted(intent.variant_parameters.items()):
+        modifier = modifiers[modifier_id]
+        if modifier.target not in schemas:
+            raise ResolutionError("unknown-variant-target", "modifier target is not declared by the family", field=modifier.target)
+        target_schema = schemas[modifier.target]
+        if target_schema.role == "derived":
+            raise ResolutionError("derived-variant-target", "variant modifiers cannot target derived parameters", field=modifier.target)
+        supplied = _as_case_value(raw)
+        candidate = _convert(supplied.value, supplied.unit, modifier.canonical_unit, modifier_id)
+        if not isinstance(candidate, (int, float)) or isinstance(candidate, bool):
+            raise ResolutionError("variant-type-mismatch", "variant modifier candidates must be numeric", field=modifier_id)
+        candidate_float = float(candidate)
+        bounded = _bound_variant_value(
+            candidate_float,
+            modifier.minimum,
+            modifier.maximum,
+            policy=space.policy,
+            field=modifier_id,
+            report=report_state,
+        )
+        if modifier.qualified_minimum is not None and bounded < modifier.qualified_minimum:
+            extended = True
+            diagnostics.append(f"{modifier_id} below qualified minimum")
+        if modifier.qualified_maximum is not None and bounded > modifier.qualified_maximum:
+            extended = True
+            diagnostics.append(f"{modifier_id} above qualified maximum")
+        if modifier.target not in values:
+            raise ResolutionError("missing-variant-target", "modifier target has no resolved base value", field=modifier.target)
+        current = values[modifier.target][0]
+        if not isinstance(current, (int, float)) or isinstance(current, bool):
+            raise ResolutionError("variant-target-type", "modifier target must resolve to a numeric value", field=modifier.target)
+        if modifier.operation == "set":
+            updated = bounded
+        elif modifier.operation == "add":
+            updated = float(current) + bounded
+        else:
+            updated = float(current) * bounded
+        updated = _bound_variant_value(
+            float(updated),
+            target_schema.minimum,
+            target_schema.maximum,
+            policy=space.policy,
+            field=modifier.target,
+            report=report_state,
+        )
+        if target_schema.qualified_minimum is not None and updated < target_schema.qualified_minimum:
+            extended = True
+            diagnostics.append(f"{modifier.target} below qualified minimum")
+        if target_schema.qualified_maximum is not None and updated > target_schema.qualified_maximum:
+            extended = True
+            diagnostics.append(f"{modifier.target} above qualified maximum")
+        values[modifier.target] = (updated, f"modifier:{modifier_id}", modifier.canonical_unit, supplied.value)
+        applied[modifier_id] = bounded
+        applied_ids.append(modifier_id)
+        if modifier.requires_retrim or target_schema.requires_retrim:
+            invalidations.add(f"retrim:{modifier.target}")
+        if modifier.requires_requalification or target_schema.requires_requalification:
+            invalidations.add(f"requalification:{modifier.target}")
+
+    status: Literal["qualified", "extended", "projected"] = (
+        "projected" if report_state["projection_distance"] > 0.0 else ("extended" if extended else "qualified")
+    )
+    fingerprint_payload = {
+        "family": family.family_id,
+        "family_version": family.version,
+        "fidelity": intent.fidelity,
+        "variant": intent.variant,
+        "loadout": intent.loadout,
+        "candidate_original": original,
+        "candidate_applied": applied,
+    }
+    return VariantResolutionReport(
+        status=status,
+        candidate_original=original,
+        candidate_applied=applied,
+        projection_distance=float(report_state["projection_distance"]),
+        modifiers_applied=tuple(applied_ids),
+        invalidations=tuple(sorted(invalidations)),
+        diagnostics=tuple(diagnostics),
+        fingerprint=_identity_payload(fingerprint_payload),
+    )
+    ####
+
+
+def _derive_variant_parameters(
+    values: dict[str, tuple[Any, str, str | None, Any]],
+    family: FamilyPackage,
+    schemas: Mapping[str, ParameterSchema],
+) -> tuple[dict[str, Any], dict[str, tuple[str, tuple[str, ...]]]]:
+    """Resolve the small declarative derived-parameter graph."""
+
+    pending = list(family.variant_space.derived)
+    derived_values: dict[str, Any] = {}
+    derivations: dict[str, tuple[str, tuple[str, ...]]] = {}
+    while pending:
+        progressed = False
+        remaining: list[DerivedParameter] = []
+        for definition in pending:
+            if definition.id not in schemas:
+                raise ResolutionError("unknown-derived-parameter", "derived parameter is not declared by the family", field=definition.id)
+            if schemas[definition.id].role != "derived":
+                raise ResolutionError("derived-role-mismatch", "derived graph target must have role=derived", field=definition.id)
+            if any(dependency not in values for dependency in definition.dependencies):
+                remaining.append(definition)
+                continue
+            operands = [values[dependency][0] for dependency in definition.dependencies]
+            if not all(isinstance(item, (int, float)) and not isinstance(item, bool) for item in operands):
+                raise ResolutionError("derived-type-mismatch", "derived operands must be numeric", field=definition.id)
+            if definition.operation == "sum":
+                result = sum(float(item) for item in operands) + definition.constant
+            elif definition.operation == "difference":
+                result = float(operands[0]) - sum(float(item) for item in operands[1:])
+            elif definition.operation == "product":
+                result = math.prod(float(item) for item in operands)
+            elif definition.operation == "ratio":
+                result = float(operands[0])
+                for denominator in operands[1:]:
+                    if float(denominator) == 0.0:
+                        raise ResolutionError("derived-zero-division", "derived ratio denominator is zero", field=definition.id)
+                    result /= float(denominator)
+            else:
+                result = float(operands[0]) * definition.constant
+            schema = schemas[definition.id]
+            _check_value(schema, result, definition.id)
+            values[definition.id] = (result, f"derived:{definition.id}", schema.canonical_unit, result)
+            derived_values[definition.id] = result
+            derivations[definition.id] = (f"{definition.operation}({', '.join(definition.dependencies)})", definition.dependencies)
+            progressed = True
+        if not progressed:
+            unresolved = ", ".join(item.id for item in remaining)
+            raise ResolutionError("derived-cycle", f"derived parameters cannot be resolved: {unresolved}")
+        pending = remaining
+    return derived_values, derivations
     ####
 
 
@@ -186,9 +392,12 @@ def resolve_case(intent: CaseIntent, catalog: FamilyCatalog) -> ResolvedCase:
     family = catalog.family(intent.family)
     if intent.fidelity not in family.fidelities:
         raise ResolutionError("unsupported-fidelity", f"family does not advertise {intent.fidelity!r}", field="fidelity")
+    if family.capabilities.fidelities and intent.fidelity not in family.capabilities.fidelities:
+        raise ResolutionError("capability-fidelity", f"family capability contract does not support {intent.fidelity!r}", field="fidelity")
     schemas = family.parameter_map()
     values: dict[str, tuple[Any, str, str | None, Any]] = {}
     provenance: list[ProvenanceRecord] = []
+    derivations: dict[str, tuple[str, tuple[str, ...]]] = {}
 
     for schema in family.parameters:
         if schema.required and schema.default is None:
@@ -203,6 +412,8 @@ def resolve_case(intent: CaseIntent, catalog: FamilyCatalog) -> ResolvedCase:
     _apply_layer(values, _select_named_layer(family, "segment_plans", intent.segment_plan, kind="segment-plan"), f"segment-plan:{intent.segment_plan}", schemas)
     segment_graph = _select_named_layer(family, "segment_graphs", intent.segment_plan, kind="segment-graph") if family.segment_graphs else {}
     _apply_layer(values, intent.overrides, "case.override", schemas)
+    variant_report = _apply_variant_modifiers(values, intent, family, schemas)
+    derived_values, derivations = _derive_variant_parameters(values, family, schemas)
 
     control_ids = set(family.control_map())
     unknown_controls = sorted(set(intent.requested_controls) - control_ids)
@@ -212,12 +423,32 @@ def resolve_case(intent: CaseIntent, catalog: FamilyCatalog) -> ResolvedCase:
             f"requested control(s) are not declared by the family: {', '.join(unknown_controls)}",
             field="requested_controls",
         )
+    unavailable_controls = sorted(
+        control.id for control in family.controls if control.id in intent.requested_controls and control.availability == "unavailable"
+    )
+    if unavailable_controls:
+        raise ResolutionError(
+            "unsupported-control",
+            f"requested control(s) are unavailable for this family: {', '.join(unavailable_controls)}",
+            field="requested_controls",
+        )
     observation_ids = set(family.observation_map())
     unknown_observations = sorted(set(intent.requested_observations) - observation_ids)
     if unknown_observations:
         raise ResolutionError(
             "unknown-observation",
             f"requested observation(s) are not declared by the family: {', '.join(unknown_observations)}",
+            field="requested_observations",
+        )
+    unavailable_observations = sorted(
+        observation.id
+        for observation in family.observations
+        if observation.id in intent.requested_observations and observation.availability == "unavailable"
+    )
+    if unavailable_observations:
+        raise ResolutionError(
+            "unsupported-observation",
+            f"requested observation(s) are unavailable for this family: {', '.join(unavailable_observations)}",
             field="requested_observations",
         )
 
@@ -229,6 +460,7 @@ def resolve_case(intent: CaseIntent, catalog: FamilyCatalog) -> ResolvedCase:
         if schema.id not in values:
             continue
         value, source, input_unit, input_value = values[schema.id]
+        derivation = derivations.get(schema.id)
         final_parameters[schema.id] = ResolvedValue(value=value, unit=schema.canonical_unit, source=source)
         provenance.append(
             ProvenanceRecord(
@@ -238,9 +470,21 @@ def resolve_case(intent: CaseIntent, catalog: FamilyCatalog) -> ResolvedCase:
                 canonical_unit=schema.canonical_unit,
                 input_value=input_value,
                 canonical_value=value,
-                derivation=None,
+                derivation=derivation[0] if derivation is not None else None,
+                dependencies=derivation[1] if derivation is not None else (),
             )
         )
+    variant_report = variant_report.model_copy(update={"derived_values": derived_values})
+    resolved_variant = ResolvedVariant(
+        family=family.family_id,
+        family_version=family.version,
+        fidelity=intent.fidelity,
+        variant=intent.variant,
+        loadout=intent.loadout,
+        parameters=final_parameters,
+        resolution=variant_report,
+        fingerprint=variant_report.fingerprint,
+    )
     payload: dict[str, Any] = {
         "schema_version": 1,
         "case_id": intent.case_id,
@@ -255,9 +499,17 @@ def resolve_case(intent: CaseIntent, catalog: FamilyCatalog) -> ResolvedCase:
         "parameters": {key: value.model_dump(mode="json") for key, value in sorted(final_parameters.items())},
         "controls": [item.model_dump(mode="json") for item in family.controls],
         "observations": [item.model_dump(mode="json") for item in family.observations],
+        "capabilities": family.capabilities.model_dump(mode="json"),
+        "component_slots": [item.model_dump(mode="json") for item in family.component_slots],
+        "resources": [item.model_dump(mode="json") for item in family.resources],
+        "allocations": [item.model_dump(mode="json") for item in family.allocations],
+        "mode_transitions": [item.model_dump(mode="json") for item in family.mode_transitions],
+        "evidence_grade": family.evidence_grade,
+        "uncertainty": family.uncertainty,
         "provenance": [item.model_dump(mode="json") for item in provenance],
         "segment_graph": segment_graph,
         "extensions": intent.extensions,
+        "resolved_variant": resolved_variant.model_dump(mode="json"),
     }
     identity = _identity_payload(payload)
     return ResolvedCase(

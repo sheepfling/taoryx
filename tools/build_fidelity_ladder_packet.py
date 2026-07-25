@@ -14,7 +14,7 @@ import subprocess
 import uuid
 import zipfile
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 import yaml
 
@@ -22,6 +22,8 @@ from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.objectives import ObjectiveSpec, score_objectives
 from taoryx.runtime.runner import run_files
 from taoryx.scenario_contract import ScenarioContract, compare_contracts
+from taoryx.trajectory import EvaluationMetric, EvidenceChannel, objective_report_to_evaluation
+from taoryx.trajectory.evaluation import OutcomeStatus, ValidityStatus
 from taoryx.validation import independent_force_closure, independent_moment_closure
 from taoryx.visualization import render_run_artifact_plots
 
@@ -201,7 +203,7 @@ def _scenario_contract(
         scenario_id=str(case["id"]),
         vehicle=str(case["id"]),
         family=str(case["display_name"]),
-        dynamics_tier=tier,
+        dynamics_tier=cast(Literal["3dof", "pseudo_6dof", "6dof"], tier),
         initial_state_sha256=initial_hash,
         environment_sha256=_payload_sha256({"unit_system": unit_system, "source": _sha256(base_problem)}),
         vehicle_model_sha256=model_hash,
@@ -276,18 +278,62 @@ def _write_bundle_metadata(packet: Path, *, reproduction_command: str | None = N
         encoding="utf-8",
     )
     try:
-        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
+        ).strip()
     except (OSError, subprocess.CalledProcessError):
         commit = "unavailable"
     (packet / "software_commit.txt").write_text(f"git_commit={commit}\n", encoding="utf-8")
     try:
-        diff = subprocess.check_output(["git", "diff", "--binary", "HEAD"], cwd=ROOT, text=True)
-        status = subprocess.check_output(["git", "status", "--short"], cwd=ROOT, text=True)
+        diff = subprocess.check_output(
+            ["git", "diff", "--binary", "HEAD"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
+        )
+        status = subprocess.check_output(
+            ["git", "status", "--short"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
+        )
     except (OSError, subprocess.CalledProcessError):
         diff = "# working tree diff unavailable\n"
         status = "working tree status unavailable\n"
     (packet / "working_tree.patch").write_text(diff, encoding="utf-8")
     (packet / "working_tree.status").write_text(status, encoding="utf-8")
+    untracked_root = packet / "working_tree_untracked"
+    untracked_manifest: list[dict[str, str]] = []
+    try:
+        raw_untracked = subprocess.check_output(
+            ["git", "ls-files", "--others", "--exclude-standard", "-z"],
+            cwd=ROOT,
+            stderr=subprocess.DEVNULL,
+        )
+        untracked_paths = tuple(Path(item) for item in raw_untracked.decode("utf-8").split("\0") if item)
+    except (OSError, subprocess.CalledProcessError, UnicodeError):
+        untracked_paths = ()
+    for relative in untracked_paths:
+        source = ROOT / relative
+        if not source.is_file():
+            continue
+        destination = untracked_root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+        untracked_manifest.append(
+            {
+                "path": relative.as_posix(),
+                "packet_path": destination.relative_to(packet).as_posix(),
+                "sha256": _sha256(source),
+            }
+        )
+    (packet / "working_tree.untracked.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "base_commit": commit,
+                "files": untracked_manifest,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (packet / "dependency.lock").write_text(
         "# Reproducibility profile captured from the packet-producing environment.\n"
         f"python_version=3.12\npyproject_sha256={_sha256(ROOT / 'pyproject.toml')}\n"
@@ -847,17 +893,22 @@ def _long_convergence_report(
     ####
 
 
-def _parity_convergence_report(family_id: str, specification: dict[str, Any]) -> dict[str, Any]:
+def _parity_convergence_report(
+    family_id: str,
+    specification: dict[str, Any],
+    *,
+    report_path: Path | None = None,
+) -> dict[str, Any]:
     """Project the existing catalog-driven parity report into a family packet."""
 
-    report_path = ROOT / "artifacts/verification/fidelity_parity_v1/report.json"
-    if not report_path.exists():
+    source_report = report_path or ROOT / "artifacts/verification/fidelity_parity_v1/report.json"
+    if not source_report.exists():
         return {
             "status": "unavailable",
             "evidence_source": "fidelity-parity-report.json",
             "reason": "parity report is not present; run tools/run_fidelity_parity.py",
         }
-    payload = json.loads(report_path.read_text(encoding="utf-8"))
+    payload = json.loads(source_report.read_text(encoding="utf-8"))
     record = next(
         (item for item in payload.get("families", ()) if _family_key(str(item.get("id"))) == _family_key(family_id)),
         None,
@@ -906,6 +957,245 @@ def _closure_evaluation(family_id: str, summary: dict[str, Any]) -> dict[str, An
         "checks": checks,
         "contract_test": contract["test"],
     }
+    ####
+
+
+def _channel_unit(channel: str) -> str | None:
+    """Infer only units encoded unambiguously in a telemetry channel name."""
+
+    lowered = channel.casefold()
+    for token, unit in (
+        ("rad_s2", "rad/s^2"),
+        ("rad_s", "rad/s"),
+        ("m_s2", "m/s^2"),
+        ("m_s", "m/s"),
+        ("deg_s", "deg/s"),
+        ("deg", "deg"),
+        ("_nm", "N m"),
+        ("_n", "N"),
+        ("_pa", "Pa"),
+        ("_kg", "kg"),
+        ("_m", "m"),
+        ("_s", "s"),
+    ):
+        if lowered.endswith(token) or token in lowered:
+            return unit
+    if lowered.endswith("_active") or lowered.endswith("_saturated"):
+        return "1"
+    return None
+    ####
+
+
+def _telemetry_evidence_channels(summary: dict[str, Any]) -> tuple[tuple[EvidenceChannel, ...], tuple[EvidenceChannel, ...], tuple[EvidenceChannel, ...]]:
+    """Extract final requested, achieved, and resource channels with units."""
+
+    metrics = dict(summary.get("telemetry_metrics", {}))
+    final = dict(metrics.get("final", {}))
+    time_s = metrics.get("duration_s")
+    controls = set(str(name) for name in metrics.get("trajectory_rollup", {}).get("control_channels", ()))
+    requested: list[EvidenceChannel] = []
+    achieved: list[EvidenceChannel] = []
+    for name, value in final.items():
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            continue
+        lowered = name.casefold()
+        source: Literal["requested", "achieved"] | None = None
+        target: list[EvidenceChannel] | None = requested if "command" in lowered or lowered.endswith("_request") else achieved if name in controls or "achieved" in lowered else None
+        if target is requested:
+            source = "requested"
+        elif target is achieved:
+            source = "achieved"
+        if source is None or target is None:
+            continue
+        unit = _channel_unit(name)
+        target.append(
+            EvidenceChannel(
+                id=f"{source}:{name}",
+                value=float(value) if unit is not None else None,
+                unit=unit,
+                source=source,
+                status="available" if unit is not None else "unavailable",
+                time_s=float(time_s) if isinstance(time_s, (int, float)) else None,
+                provenance=f"telemetry.final:{name}",
+            )
+        )
+    resource_names = {
+        "mass_kg",
+        "fuel_remaining_kg",
+        "propellant_remaining_kg",
+        "battery_soc",
+        "time_to_burnout_s",
+        "burnout_time_available_s",
+    }
+    resources: list[EvidenceChannel] = []
+    for name in sorted(resource_names & set(final)):
+        value = final[name]
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            continue
+        unit = "1" if name == "battery_soc" else _channel_unit(name)
+        resources.append(
+            EvidenceChannel(
+                id=f"resource:{name}",
+                value=float(value),
+                unit=unit,
+                source="resource",
+                time_s=float(time_s) if isinstance(time_s, (int, float)) else None,
+                provenance=f"telemetry.final:{name}",
+            )
+        )
+    return tuple(requested), tuple(achieved), tuple(resources)
+    ####
+
+
+def _event_evidence_channels(summary: dict[str, Any]) -> tuple[EvidenceChannel, ...]:
+    """Represent runtime events as explicit boolean evidence channels."""
+
+    channels: list[EvidenceChannel] = []
+    for index, event in enumerate(summary.get("event_timeline", ())):
+        if not isinstance(event, dict):
+            continue
+        name = str(event.get("name") or event.get("id") or event.get("action") or f"event-{index}")
+        raw_time = event.get("time")
+        time_s = float(raw_time) if isinstance(raw_time, (int, float)) else None
+        channels.append(
+            EvidenceChannel(
+                id=f"event:{index}:{name}",
+                value=True,
+                source="event",
+                time_s=time_s,
+                provenance="runtime.event_timeline",
+            )
+        )
+    return tuple(channels)
+    ####
+
+
+def _closure_metrics(summary: dict[str, Any]) -> tuple[EvaluationMetric, ...]:
+    """Convert the independent closure gate into required evidence metrics."""
+
+    evaluation = summary.get("closure_evaluation")
+    if not isinstance(evaluation, dict) or evaluation.get("status") not in {"pass", "fail"}:
+        return (
+            EvaluationMetric(
+                id="closure-availability",
+                actual=None,
+                target=1.0,
+                tolerance=0.5,
+                unit="1",
+                status="blocked",
+                source="independent-closure",
+            ),
+        )
+    metrics: list[EvaluationMetric] = []
+    for name, check in dict(evaluation.get("checks", {})).items():
+        if not isinstance(check, dict):
+            continue
+        raw_actual = check.get("actual")
+        raw_limit = check.get("limit")
+        actual = float(raw_actual) if isinstance(raw_actual, (int, float)) else None
+        limit = float(raw_limit) if isinstance(raw_limit, (int, float)) else None
+        available = actual is not None and limit is not None
+        metrics.append(
+            EvaluationMetric(
+                id=f"closure-{name}",
+                actual=actual,
+                target=0.0,
+                tolerance=limit if limit is not None else 1.0,
+                slack=limit - actual if available and limit is not None and actual is not None else None,
+                normalized_error=actual / limit if available and limit is not None and limit > 0.0 and actual is not None else None,
+                unit="1",
+                status="pass" if check.get("passed") else "fail" if available else "blocked",
+                source="independent-closure",
+            )
+        )
+    return tuple(metrics)
+    ####
+
+
+def _convergence_metrics(report: Any) -> tuple[EvaluationMetric, ...]:
+    """Represent a convergence report as one explicit required gate."""
+
+    status = report.get("status") if isinstance(report, dict) else None
+    if status not in {"pass", "fail"}:
+        return (
+            EvaluationMetric(
+                id="convergence-availability",
+                actual=None,
+                target=1.0,
+                tolerance=0.5,
+                unit="1",
+                status="blocked",
+                source="convergence-report",
+            ),
+        )
+    passed = status == "pass"
+    return (
+        EvaluationMetric(
+            id="convergence-gate",
+            actual=1.0 if passed else 0.0,
+            target=1.0,
+            tolerance=0.5,
+            slack=0.5 if passed else -0.5,
+            normalized_error=0.0 if passed else 2.0,
+            unit="1",
+            status="pass" if passed else "fail",
+            source="convergence-report",
+        ),
+    )
+    ####
+
+
+def _trajectory_evaluation(
+    summary: dict[str, Any],
+    *,
+    scenario_id: str,
+    claim_boundary: str,
+    objective_report: dict[str, Any] | None = None,
+    convergence_report: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build the neutral evaluation envelope from an existing packet summary."""
+
+    results = tuple(item for item in summary.get("results", ()) if isinstance(item, dict))
+    outcome: OutcomeStatus
+    validity: ValidityStatus
+    if not results:
+        outcome = "not_run"
+        validity = "not_run"
+    elif int(summary.get("exit_code", 1)) != 0:
+        outcome = "numerical_failure"
+        validity = "invalid"
+    elif all(bool(item.get("completed")) for item in results):
+        outcome = "completed"
+        validity = "valid"
+    else:
+        outcome = "time_limited"
+        validity = "valid"
+    closure = _closure_metrics(summary)
+    if any(metric.status == "fail" for metric in closure):
+        validity = "invalid"
+    elif any(metric.status == "blocked" for metric in closure) and validity == "valid":
+        validity = "not_run"
+    requested, achieved, resources = _telemetry_evidence_channels(summary)
+    contract = summary.get("scenario_contract")
+    contract_hash = contract.get("contract_sha256") if isinstance(contract, dict) else None
+    report = objective_report or {"status": "not_run", "objectives": ()}
+    evaluation = objective_report_to_evaluation(
+        report,
+        scenario_id=scenario_id,
+        scenario_contract_sha256=str(contract_hash) if contract_hash else None,
+        validity=validity,
+        qualification="extended",
+        feasibility="unknown",
+        outcome=outcome,
+        requested_controls=requested,
+        achieved_controls=achieved,
+        resources=resources,
+        events=_event_evidence_channels(summary),
+        closure=closure,
+        convergence=_convergence_metrics(convergence_report),
+        claim_boundary=claim_boundary,
+    )
+    return evaluation.as_dict()
     ####
 
 
@@ -1225,10 +1515,15 @@ def build(
                 "contract_sha256": contract.digest(),
                 "parity_sha256": contract.digest(include_tier=False),
             }
+            summary["evaluation"] = _trajectory_evaluation(
+                summary,
+                scenario_id=f"{family}:{contract_tier}:ladder",
+                claim_boundary="fidelity-ladder execution evidence; unsupported tiers remain diagnostic",
+            )
             (tier_dir / "summary.json").parent.mkdir(parents=True, exist_ok=True)
             (tier_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
             family_report["tiers"][tier] = summary
-        contracts = {
+        contracts: dict[str, ScenarioContract] = {
             ScenarioContract.model_validate(
                 {
                     key: value
@@ -1327,7 +1622,11 @@ def build(
             convergence_specification = dict(long_case.get("convergence", {}))
             if convergence_specification:
                 if convergence_specification.get("source") == "fidelity_parity":
-                    long_report["convergence"] = _parity_convergence_report(family, convergence_specification)
+                    long_report["convergence"] = _parity_convergence_report(
+                        family,
+                        convergence_specification,
+                        report_path=parity_report,
+                    )
                 else:
                     long_report["convergence"] = _long_convergence_report(
                         long_input,
@@ -1336,6 +1635,13 @@ def build(
                         50_000,
                         convergence_specification,
                     )
+            nominal["evaluation"] = _trajectory_evaluation(
+                nominal,
+                scenario_id=f"{family}:6dof:long-validation",
+                claim_boundary=str(long_case.get("claim_boundary", "sustained research-surrogate semantics; not flight qualification")),
+                objective_report=dict(long_report["objective_evaluation"]),
+                convergence_report=long_report.get("convergence"),
+            )
             follow_on = long_case.get("follow_on_maneuver")
             if follow_on:
                 follow_on_input = ROOT / str(follow_on)
@@ -1354,6 +1660,12 @@ def build(
                 long_report["follow_on"]["objective_evaluation"] = _objective_evaluation(
                     tuple(dict(item) for item in long_case.get("follow_on_objectives", ())),
                     long_report["follow_on"],
+                )
+                long_report["follow_on"]["evaluation"] = _trajectory_evaluation(
+                    long_report["follow_on"],
+                    scenario_id=f"{family}:6dof:follow-on",
+                    claim_boundary=str(long_case.get("claim_boundary", "sustained research-surrogate semantics; not flight qualification")),
+                    objective_report=dict(long_report["follow_on"]["objective_evaluation"]),
                 )
             (long_dir / "summary.json").parent.mkdir(parents=True, exist_ok=True)
             (long_dir / "summary.json").write_text(
@@ -1457,6 +1769,25 @@ def build(
             summary,
         )
         summary["closure_evaluation"] = _closure_evaluation(family, summary)
+        convergence_specification = dict(mission.get("convergence", {}))
+        summary["convergence"] = (
+            _long_convergence_report(
+                problem,
+                tables,
+                mission_dir / "convergence",
+                int(mission["max_steps"]),
+                convergence_specification,
+            )
+            if convergence_specification
+            else {"status": "not_run", "reason": "controller mission has no convergence declaration"}
+        )
+        summary["evaluation"] = _trajectory_evaluation(
+            summary,
+            scenario_id=f"{mission_id}:controller-mission",
+            claim_boundary=controller_mission_claim_boundary,
+            objective_report=dict(summary["objective_evaluation"]),
+            convergence_report=summary["convergence"],
+        )
         (mission_dir / "summary.json").write_text(
             json.dumps(summary, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -1471,6 +1802,8 @@ def build(
                 "claim_boundary": controller_mission_claim_boundary,
                 "objective_evaluation": summary["objective_evaluation"],
                 "closure_evaluation": summary["closure_evaluation"],
+                "convergence": summary["convergence"],
+                "evaluation": summary["evaluation"],
                 "event_continuity_audit": summary.get("event_continuity_audit", {"status": "unavailable"}),
             }
         )

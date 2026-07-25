@@ -1,0 +1,141 @@
+schema_version: 1
+matrix_id: taoryx_alpha2_future_family_interface_stress_v1
+purpose: >-
+  Contract-only probes for Alpha 3 vehicle families. These records do not
+  claim that the corresponding providers or source models are implemented.
+required_fields:
+  - capabilities
+  - component_slots
+  - controls
+  - observations
+  - resources
+  - allocations
+  - mode_transitions
+  - evidence
+probes:
+  - id: c172p-class
+    archetype: light_propeller_aircraft
+    fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof]
+    capabilities:
+      modes: [ground, takeoff, cruise, stall, landing]
+      control_intents: [altitude, airspeed, attitude, effector]
+      observation_kinds: [state, actuator_achieved, resource, diagnostic]
+      terminal_conditions: [touchdown, fuel_depleted, envelope_exit]
+      supports_resources: true
+      supports_allocation: true
+      supports_mode_transitions: true
+      supports_checkpoint: true
+    component_slots: [engine, propeller, flaps, landing_gear, fuel_tanks, actuators]
+    controls: [elevator, aileron, rudder, throttle, flap_position, flap_rate]
+    observations: [airspeed, alpha, beta, flap_achieved, fuel_remaining, touchdown]
+    resources: [fuel_mass, engine_power]
+    allocations: [fixed_wing_surface_mixer]
+    mode_transitions: [ground_to_airborne, cruise_to_landing]
+    evidence:
+      grade: mixed
+      uncertainty: source-linked geometry with public-surrogate dynamics
+  - id: r44-class
+    archetype: single_main_rotor_helicopter
+    fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof]
+    capabilities:
+      modes: [ground_idle, spool, hover, forward_flight, approach, touchdown]
+      control_intents: [position, velocity, attitude, body_rate, effector]
+      observation_kinds: [state, actuator_achieved, resource, diagnostic]
+      terminal_conditions: [touchdown, power_limited, rotor_shutdown]
+      supports_resources: true
+      supports_allocation: true
+      supports_mode_transitions: true
+      supports_checkpoint: true
+    component_slots: [main_rotor, tail_rotor, engine, governor, cyclic, collective, pedal, fuel_tank]
+    controls: [longitudinal_cyclic, lateral_cyclic, collective, pedal, collective_rate]
+    observations: [airspeed, rotor_rpm, collective_achieved, fuel_remaining, flight_mode]
+    resources: [fuel_mass, shaft_power]
+    allocations: [helicopter_cockpit_mixer]
+    mode_transitions: [spool_to_hover, hover_to_forward_flight, forward_flight_to_hover]
+    evidence:
+      grade: identified
+      uncertainty: hover source deck; forward-flight schedule estimated
+  - id: xv15-class
+    archetype: tiltrotor
+    fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof]
+    capabilities:
+      modes: [helicopter, conversion, airplane, abort_reversion]
+      control_intents: [position, flight_path, attitude, body_rate, effector]
+      observation_kinds: [state, actuator_achieved, resource, event_prediction, diagnostic]
+      terminal_conditions: [touchdown, conversion_complete, conversion_abort]
+      supports_resources: true
+      supports_allocation: true
+      supports_mode_transitions: true
+      supports_checkpoint: true
+    component_slots: [left_proprotor, right_proprotor, nacelles, wing, flaperons, rudder, engines, fuel_tanks]
+    controls: [power_lever, nacelle_angle, longitudinal_stick, lateral_stick, pedal, nacelle_rate]
+    observations: [nacelle_angle_achieved, nacelle_rate, rotor_lift_fraction, wing_lift_fraction, fuel_remaining, conversion_mode]
+    resources: [fuel_mass, shaft_power]
+    allocations: [scheduled_tiltrotor_mixer]
+    mode_transitions: [helicopter_to_conversion, conversion_to_airplane, conversion_abort]
+    evidence:
+      grade: mixed
+      uncertainty: public configuration with scheduled engineering response
+  - id: spacecraft-attitude
+    archetype: spacecraft
+    fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof]
+    capabilities:
+      modes: [coast, thrust, reaction_wheel, magnetic_torquer, eclipse]
+      control_intents: [orbit, attitude, body_rate, effector]
+      observation_kinds: [state, actuator_achieved, resource, event_prediction, diagnostic]
+      terminal_conditions: [propellant_depleted, battery_depleted, mission_end]
+      supports_resources: true
+      supports_allocation: true
+      supports_mode_transitions: true
+      supports_checkpoint: true
+    component_slots: [main_engine, rcs, reaction_wheels, magnetic_torquers, battery, propellant_tank]
+    controls: [thrust, wheel_torque, magnetic_dipole, rcs_pulse, rcs_pulse_rate]
+    observations: [epoch, orbital_frame, quaternion, wheel_speed_achieved, battery_energy, propellant_remaining]
+    resources: [propellant_mass, battery_energy, reaction_wheel_momentum]
+    allocations: [attitude_effector_allocator]
+    mode_transitions: [coast_to_thrust, nominal_to_eclipse, wheel_desaturation]
+    evidence:
+      grade: synthetic
+      uncertainty: interface probe only; no spacecraft provider in Alpha 2
+  - id: learjet24-class
+    archetype: small_business_jet
+    fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof]
+    capabilities:
+      modes: [ground, climb, cruise, descent, approach]
+      control_intents: [airspeed, altitude, heading, attitude, effector]
+      observation_kinds: [state, actuator_achieved, resource, diagnostic]
+      terminal_conditions: [touchdown, fuel_depleted, envelope_exit]
+      supports_resources: true
+      supports_allocation: true
+      supports_mode_transitions: true
+      supports_checkpoint: true
+    component_slots: [left_engine, right_engine, elevator, aileron, rudder, flaps, speed_brakes, fuel_tanks]
+    controls: [throttle_left, throttle_right, elevator, aileron, rudder, speed_brake]
+    observations: [mach, alpha, beta, engine_spool_achieved, fuel_remaining, configuration]
+    resources: [fuel_mass, engine_thrust]
+    allocations: [business_jet_surface_mixer]
+    mode_transitions: [climb_to_cruise, cruise_to_approach]
+    evidence:
+      grade: estimated
+      uncertainty: local derivative model; source-linear and bounded-proxy modes
+  - id: public-surrogate-hybrid
+    archetype: energy_coupled_surrogate
+    fidelities: [point_mass_3dof, pseudo_6dof, rigid_body_6dof]
+    capabilities:
+      modes: [electric, fuel_burn, battery_depleted, best_effort]
+      control_intents: [waypoint, speed, attitude, effector]
+      observation_kinds: [state, actuator_achieved, resource, diagnostic]
+      terminal_conditions: [resource_limited, mission_complete, numerical_failure]
+      supports_resources: true
+      supports_allocation: true
+      supports_mode_transitions: true
+      supports_checkpoint: true
+    component_slots: [payload, battery, fuel_tank, generator, motor, control_surfaces]
+    controls: [power_request, throttle, surface_command, surface_rate]
+    observations: [power_achieved, battery_energy, fuel_remaining, payload_mass, qualification_tier]
+    resources: [battery_energy, fuel_mass, thermal_budget]
+    allocations: [hybrid_power_allocator]
+    mode_transitions: [electric_to_fuel, nominal_to_resource_limited]
+    evidence:
+      grade: synthetic
+      uncertainty: contract-only public-surrogate intake

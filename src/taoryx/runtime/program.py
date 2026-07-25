@@ -12,11 +12,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
-from taoryx.contracts import Frame
+from taoryx.contracts import Frame, FrameVector3, Vector3
 from taoryx.language.diagnostics import Diagnostic, Severity
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import ProblemDocument, RuntimeBlock, TableDocument, TitleBlock
+from taoryx.modes import Kinematic6DofState, Quaternion
 
 from .common import RuntimeProblem, RuntimeState, TransitionTruthPair, TransitionTruthSnapshot
 from .lowering import LoweredDocument, lower_problem_document, problem_unit_settings
@@ -354,8 +355,6 @@ class LoadedProgram:
         """
 
         problem = self.case(index)
-        if any(vehicle.kinematic_state is not None for vehicle in problem.vehicles.values()):
-            raise NotImplementedError("checkpoint serialization for kinematic sidecars is not implemented")
         payload = {
             "schema_version": 2,
             "problem_path": self.problem_path,
@@ -393,6 +392,7 @@ class LoadedProgram:
                         "relative_tolerance": vehicle.relative_tolerance,
                         "max_step_size": vehicle.max_step_size,
                         "publish_derived_rates": vehicle.publish_derived_rates,
+                        "kinematic_state": _kinematic_state_payload(vehicle.kinematic_state),
                     }
                     for name, vehicle in problem.vehicles.items()
                 },
@@ -464,12 +464,19 @@ class LoadedProgram:
             vehicle.relative_tolerance = float(vehicle_payload["relative_tolerance"])
             vehicle.max_step_size = float(vehicle_payload["max_step_size"]) if vehicle_payload.get("max_step_size") is not None else None
             vehicle.publish_derived_rates = bool(vehicle_payload["publish_derived_rates"])
+            saved_kinematic = vehicle_payload.get("kinematic_state")
+            if saved_kinematic is not None:
+                if vehicle.kinematic_state is None:
+                    raise ValueError(f"checkpoint contains a kinematic sidecar for non-kinematic vehicle {name!r}")
+                vehicle.kinematic_state = _kinematic_state_from_payload(cast(Mapping[str, object], saved_kinematic))
+            elif vehicle.kinematic_state is not None:
+                raise ValueError(f"checkpoint is missing the kinematic sidecar for vehicle {name!r}")
         return program
     ####
 ####
 
 
-def _state_payload(state: RuntimeState) -> dict[str, object]:
+def _state_payload(state: RuntimeState, *, include_endpoints: bool = True) -> dict[str, object]:
     """Serialize the portable portion of one runtime state."""
 
     return {
@@ -478,8 +485,16 @@ def _state_payload(state: RuntimeState) -> dict[str, object]:
         "frame": getattr(state.frame, "value", str(state.frame)),
         "named": _json_safe(state.named),
         "value_names": list(state.value_names),
+        "segment_endpoints": (
+            {
+                str(segment): _state_payload(boundary, include_endpoints=False)
+                for segment, boundary in state.segment_endpoints.items()
+            }
+            if include_endpoints
+            else {}
+        ),
     }
-####
+    ####
 
 
 def _state_from_payload(payload: Mapping[str, object], frame: Frame | str) -> RuntimeState:
@@ -488,14 +503,63 @@ def _state_from_payload(payload: Mapping[str, object], frame: Frame | str) -> Ru
     values = cast(Sequence[float | int | str], payload["values"])
     named = cast(Mapping[str, object], payload.get("named", {}))
     value_names = cast(Sequence[object], payload.get("value_names", ()))
+    endpoint_payload = cast(Mapping[str, object], payload.get("segment_endpoints", {}))
+    endpoints = {
+        int(segment): _state_from_payload(cast(Mapping[str, object], endpoint), frame)
+        for segment, endpoint in endpoint_payload.items()
+    }
     return RuntimeState(
         float(cast(float | int | str, payload["time"])),
         tuple(float(value) for value in values),
         frame,
         {str(key): float(cast(float | int | str, value)) for key, value in named.items()},
         tuple(str(name) for name in value_names),
+        endpoints,
     )
-####
+    ####
+
+
+def _kinematic_state_payload(state: Kinematic6DofState | None) -> dict[str, object] | None:
+    """Serialize the explicit kinematic 3+3 sidecar without callbacks."""
+
+    if state is None:
+        return None
+    return {
+        "time": state.time,
+        "position": {"vector": [state.position.vector.x, state.position.vector.y, state.position.vector.z], "frame": state.position.frame.value},
+        "velocity": {"vector": [state.velocity.vector.x, state.velocity.vector.y, state.velocity.vector.z], "frame": state.velocity.frame.value},
+        "attitude": {"w": state.attitude.w, "x": state.attitude.x, "y": state.attitude.y, "z": state.attitude.z},
+    }
+    ####
+
+
+def _kinematic_state_from_payload(payload: Mapping[str, object]) -> Kinematic6DofState:
+    """Restore a validated kinematic 3+3 sidecar from a checkpoint."""
+
+    position = cast(Mapping[str, object], payload["position"])
+    velocity = cast(Mapping[str, object], payload["velocity"])
+    attitude = cast(Mapping[str, object], payload["attitude"])
+
+    def frame_vector(value: Mapping[str, object]) -> FrameVector3:
+        components = cast(Sequence[float | int | str], value["vector"])
+        return FrameVector3(
+            Vector3(*(float(component) for component in components)),
+            Frame(str(value["frame"])),
+        )
+    ####
+
+    return Kinematic6DofState(
+        float(cast(float | int | str, payload["time"])),
+        frame_vector(position),
+        frame_vector(velocity),
+        Quaternion(
+            float(cast(float | int | str, attitude["w"])),
+            float(cast(float | int | str, attitude["x"])),
+            float(cast(float | int | str, attitude["y"])),
+            float(cast(float | int | str, attitude["z"])),
+        ).normalized(),
+    )
+    ####
 
 
 def _transition_snapshot_from_payload(payload: Mapping[str, object]) -> TransitionTruthSnapshot:

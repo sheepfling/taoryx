@@ -2,10 +2,10 @@
 
 **Release:** `v0.2.0-alpha`  
 **Plan:** [TAORYX Alpha 2](taoryx-alpha-2.md)  
-**Current exit:** `A2-RELEASE-PASS`
-**Overall release:** core contract complete; remaining Alpha 2 closeout is the
-platform and four-family proof tranche. Source-grounded reference anchors are
-deferred to Alpha 3.
+**Current exit:** `A2-CLOSEOUT-PASS`
+**Overall release:** Alpha 2 platform and four-family proof closeout complete;
+source-grounded reference anchors and new vehicle breadth are deferred to Alpha
+3.
 
 This is the running implementation log for Alpha 2. A tranche is complete only
 when its checked-in tests pass, its evidence directory is generated from the
@@ -212,6 +212,39 @@ dual-launch composition, and release tooling. It does not claim historical
 TAOS 96.0 runtime compatibility, global vehicle validity, flight qualification,
 or a universal autopilot.
 
+## Post-release closeout progress
+
+The Alpha 2 core release signal was `A2-RELEASE-PASS`. The closeout goal is
+recorded in
+[`taoryx-alpha-2-execution-goal.md`](taoryx-alpha-2-execution-goal.md), with
+`A2-CLOSEOUT-PASS` now supported by the required-item and milestone audits.
+
+Completed in the current closeout tranche:
+
+- checkpoint/restart contracts now preserve accepted state, controls, events,
+  diagnostics, hashes, and the kinematic 3+3 sidecar;
+- future-family interface stress probes cover components, resources, modes,
+  allocation, control/observation availability, and evidence grades;
+- bounded variant resolution and reusable multi-start/continuation trim
+  procedures are typed, provenance-linked, and covered by focused tests;
+- provider results carry requested controls, achieved controls, resources, and
+  an optional neutral `TrajectoryEvaluation`;
+- objective reports can be promoted into that evaluation without duplicating
+  score arithmetic, and required closure/convergence metrics cannot be hidden;
+- the Alpha 2 finish line and completion signal are now explicit and checked
+  in the machine-readable backlog;
+- a full four-family packet contains raw telemetry, controls, events, plots,
+  objective/evaluation records, closure, convergence, and claim boundaries;
+- an independent clean-source replay reproduces the primary packet scores and
+  passes M0--M6 in `tools/audit_fidelity_milestones.py`;
+- packet audits pass for all four families and all four controller missions,
+  while retaining the research-surrogate/non-certification claim boundary.
+
+The Alpha 2 closeout is complete. The evidence demonstrates a reusable,
+auditable research-simulation platform; it does not establish global vehicle
+validity, flight qualification, historical TAOS runtime compatibility, or a
+universal controller. Those claims remain explicitly outside this release.
+
 ## A3-T1 deferred — source-grounded reference anchors
 
 The F-16 S-119 and HL-20 Mod K source-anchor tranche is an Alpha 3 breadth
@@ -229,6 +262,6 @@ outside the frozen release contract.
 
 The expanded work is ranked in
 [`taoryx-alpha-2-backlog.md`](taoryx-alpha-2-backlog.md). The immediate P0 path
-is common scenario/evaluation, interactive Lab/session closure, generic vehicle
-onboarding, and checkpoint/replay; flagship missions and additional families
-remain P1 work until those seams are complete.
+is now the Alpha 3 breadth tranche: new vehicle packages, deeper source
+correlation, reachability/search, sensors/weather, and larger evidence
+corpora.

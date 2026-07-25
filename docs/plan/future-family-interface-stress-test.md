@@ -27,6 +27,17 @@ The current neutral contract already provides a good base:
 - resource and event-prediction observation kinds;
 - one batch/step transition boundary.
 
+The typed stress surface is now present in `src/taoryx/trajectory/contracts.py`:
+`CapabilitySchema`, `ComponentSlot`, `ResourceSchema`, `AllocationSchema`, and
+`ModeTransitionSchema` are carried by both `FamilyPackage` and `ResolvedCase`.
+Controls and observations also carry frame, semantic level,
+availability, evidence grade, uncertainty, and achieved-channel metadata.
+Resolution rejects unsupported fidelity, unavailable controls, and unavailable
+observations with stable diagnostic codes. The contract-only probes and
+positive/negative resolution tests live in
+`verification/alpha2_interface_stress_matrix.yaml` and
+`tests/unit/test_alpha2_interface_stress.py`.
+
 The stress test identifies six concepts that should become first-class before
 the Alpha 2 interface is frozen:
 
@@ -75,3 +86,9 @@ shows each probe family mapped to typed contract fields, declared extension
 points, or an explicit unsupported diagnostic. The report should include both
 positive and negative cases and must not claim that a family is implemented just
 because its interface can be described.
+
+The Alpha 2 contract tranche is marked `complete` in
+`verification/alpha2_post_release_backlog.yaml`. The generated compatibility
+report and authoring guide close the interface gate. The matrix remains
+contract coverage evidence, not provider qualification; the provider families
+remain Alpha 3 work.

@@ -21,11 +21,13 @@ def test_alpha2_post_release_backlog_has_unique_ordered_items() -> None:
     assert payload["baseline"]["completion_signal"] == "A2-RELEASE-PASS"
     boundaries = payload["release_boundaries"]
     assert boundaries["alpha2_closeout"]["required_maturity"] == "M4"
+    assert boundaries["alpha2_closeout"]["completion_signal"] == "A2-CLOSEOUT-PASS"
     required = set(boundaries["alpha2_closeout"]["required_items"])
     deferred = set(boundaries["alpha3_breadth"]["deferred_items"])
     assert required.isdisjoint(deferred)
     assert "A2-POST-P0-1" in required
     assert "A2-POST-P0-5" in required
+    assert "A2-POST-P0-6" in required
     assert "A2-POST-P2-5" in deferred
     assert {item["priority"] for item in items} == {"P0", "P1", "P2", "P3", "P4"}
     known = set(ids) | {"A2-RELEASE-PASS"}
@@ -45,6 +47,8 @@ def test_alpha2_post_release_backlog_has_unique_ordered_items() -> None:
     ]
     by_name = {item["name"]: item for item in items}
     assert by_name["reusable-trim-generation-and-operating-point-procedure"]["target_release"] == "alpha2"
+    assert by_name["bounded-vehicle-variant-compiler"]["status"] == "complete"
+    assert by_name["future-family-interface-stress-test"]["status"] == "complete"
     assert by_name["passive-tumbling-deployable-body-geometry-qualification"]["target_release"] == "alpha3"
     assert by_name["source-grounded-reference-anchor-integration"]["target_release"] == "alpha3"
     assert by_name["guidance-search-and-reachability-workbench"]["target_release"] == "alpha3"

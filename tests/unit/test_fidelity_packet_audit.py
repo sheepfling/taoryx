@@ -11,16 +11,38 @@ from tools.audit_fidelity_packet import audit
 
 
 def _packet(tmp_path: Path, *, corrupt: bool = False) -> Path:
+    def evaluation(scenario_id: str) -> dict[str, object]:
+        return {
+            "schema_version": 1,
+            "scenario_id": scenario_id,
+            "validity": "valid",
+            "qualification": "extended",
+            "feasibility": "unknown",
+            "outcome": "completed",
+            "metrics": [],
+            "gates": [{"id": "objective-report", "status": "pass", "message": "pass", "metric_ids": []}],
+            "requested_controls": [],
+            "achieved_controls": [],
+            "resources": [],
+            "events": [],
+            "closure": [],
+            "convergence": [],
+            "claim_boundary": "test evidence",
+        }
+
     source = b"evidence"
     digest = hashlib.sha256(source).hexdigest()
     if corrupt:
         digest = "0" * 64
-    manifest = {"families": [{"id": "demo", "long_validation": {"objective_evaluation": {
-        "status": "pass", "score": 100.0, "objectives": [{
-            "id": "duration", "status": "pass", "severity": "required", "weight": 1.0,
-            "normalized_error": 0.0,
-        }],
-    }}}], "tiers": ["3dof"], "files": {"evidence.txt": digest}}
+    manifest = {"families": [{"id": "demo", "long_validation": {
+        "objective_evaluation": {
+            "status": "pass", "score": 100.0, "objectives": [{
+                "id": "duration", "status": "pass", "severity": "required", "weight": 1.0,
+                "normalized_error": 0.0,
+            }],
+        },
+        "nominal": {"evaluation": evaluation("demo-long")},
+    }}], "controller_missions": [], "tiers": ["3dof"], "files": {"evidence.txt": digest}}
     archive = tmp_path / "packet.zip"
     with zipfile.ZipFile(archive, "w") as handle:
         handle.writestr("evidence.txt", source)
@@ -49,9 +71,28 @@ def test_objective_composite_recomputation_rejects_tampering(tmp_path: Path) -> 
         "normalized_error": 0.25,
     }
     manifest = {
-        "families": [{"id": "demo", "long_validation": {"objective_evaluation": {
-            "status": "pass", "score": 75.0, "objectives": [objective]
-        }}}],
+        "families": [{"id": "demo", "long_validation": {
+            "objective_evaluation": {
+                "status": "pass", "score": 75.0, "objectives": [objective]
+            },
+            "nominal": {"evaluation": {
+                "schema_version": 1,
+                "scenario_id": "demo-long",
+                "validity": "valid",
+                "qualification": "extended",
+                "feasibility": "unknown",
+                "outcome": "completed",
+                "metrics": [],
+                "gates": [{"id": "objective-report", "status": "pass", "message": "pass", "metric_ids": []}],
+                "requested_controls": [],
+                "achieved_controls": [],
+                "resources": [],
+                "events": [],
+                "closure": [],
+                "convergence": [],
+                "claim_boundary": "test evidence",
+            }}
+        }}],
         "tiers": ["3dof"],
         "files": {"evidence.txt": hashlib.sha256(source).hexdigest()},
     }

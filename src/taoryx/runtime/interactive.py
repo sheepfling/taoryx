@@ -7,13 +7,16 @@ contracts; it is not a second numerical kernel.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
+import os
+import tempfile
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from taoryx.control import SegmentController, VehicleObservation
 
@@ -508,4 +511,324 @@ class InteractiveSession:
         else:
             raise RuntimeError("replay requires a newly created or paused session")
         return tuple(self.step(frame.duration, frame.commands) for frame in frames)
+    ####
+
+    def save_checkpoint(self, path: str | Path, *, model_fingerprint: str | None = None) -> Path:
+        """Persist the session boundary and command stream without pickling callbacks.
+
+        The runtime graph is restored into a caller-supplied model on load.  The
+        optional ``model_fingerprint`` lets a caller bind the checkpoint to a
+        resolved case or immutable model manifest; callbacks and controllers are
+        deliberately rebuilt by the caller rather than serialized as Python.
+        """
+
+        payload: dict[str, object] = {
+            "schema_version": 1,
+            "model_fingerprint": model_fingerprint,
+            "problem": _interactive_problem_payload(self.problem),
+            "session": {
+                "status": self.status.value,
+                "last_commands": dict(self._last_commands),
+                "fired_events": [[vehicle, event] for vehicle, event in sorted(self._fired_events)],
+                "command_history": [{"duration": frame.duration, "commands": dict(frame.commands)} for frame in self.command_history],
+                "snapshots": [_interactive_snapshot_payload(snapshot) for snapshot in self.snapshots],
+                "event_history": [event.as_dict() for event in self.event_history],
+                "controls": [_control_payload(control) for control in self.controls],
+                "status_specs": [_status_payload(status) for status in self.status_specs],
+                "output_subscriptions": [_subscription_payload(subscription) for subscription in self.output_subscriptions],
+            },
+        }
+        payload["integrity"] = _checkpoint_fingerprint(payload)
+        destination = Path(path)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        serialized = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=destination.parent, delete=False) as temporary:
+            temporary.write(serialized)
+            temporary_path = Path(temporary.name)
+        os.replace(temporary_path, destination)
+        return destination
+    ####
+
+    @classmethod
+    def load_checkpoint(
+        cls,
+        path: str | Path,
+        problem: RuntimeProblem,
+        *,
+        model_fingerprint: str | None = None,
+        controls: Sequence[ControlSpec] | None = None,
+        control_model: ControlModel | None = None,
+        segment_controllers: Mapping[str, SegmentController] | None = None,
+        status_specs: Sequence[StatusSpec] | None = None,
+        event_specs: Sequence[EventSpec] = (),
+        output_subscriptions: Sequence[OutputSubscription] | None = None,
+    ) -> InteractiveSession:
+        """Restore a session into an explicitly supplied executable model.
+
+        ``problem`` and any controller/event callbacks are the executable
+        factory boundary.  The checkpoint supplies only immutable data, live
+        state, controls, histories, and command semantics.  A supplied model
+        fingerprint must match the saved value when either side provides one.
+        """
+
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        if payload.get("schema_version") != 1:
+            raise ValueError(f"unsupported TAORYX interactive checkpoint schema: {payload.get('schema_version')!r}")
+        saved_integrity = payload.pop("integrity", None)
+        if saved_integrity != _checkpoint_fingerprint(payload):
+            raise ValueError("interactive checkpoint integrity verification failed")
+        saved_model = payload.get("model_fingerprint")
+        if saved_model is not None and model_fingerprint is not None and saved_model != model_fingerprint:
+            raise ValueError("interactive checkpoint model fingerprint mismatch")
+
+        _restore_interactive_problem(problem, cast(Mapping[str, object], payload["problem"]))
+        session_payload = cast(Mapping[str, object], payload["session"])
+        saved_controls = tuple(_control_from_payload(cast(Mapping[str, object], item)) for item in cast(Sequence[object], session_payload.get("controls", ())))
+        saved_statuses = tuple(_status_from_payload(cast(Mapping[str, object], item)) for item in cast(Sequence[object], session_payload.get("status_specs", ())))
+        saved_subscriptions = tuple(_subscription_from_payload(cast(Mapping[str, object], item)) for item in cast(Sequence[object], session_payload.get("output_subscriptions", ())))
+        session = cls(
+            problem,
+            tuple(controls) if controls is not None else saved_controls,
+            control_model=control_model,
+            segment_controllers=segment_controllers or {},
+            status_specs=tuple(status_specs) if status_specs is not None else saved_statuses,
+            event_specs=tuple(event_specs),
+            output_subscriptions=tuple(output_subscriptions) if output_subscriptions is not None else saved_subscriptions,
+        )
+        session.status = InteractiveStatus(str(session_payload.get("status", InteractiveStatus.PAUSED.value)))
+        session._last_commands = {str(name): _as_float(value) for name, value in cast(Mapping[str, object], session_payload.get("last_commands", {})).items()}
+        session._fired_events = {
+            (str(item[0]), str(item[1]))
+            for item in cast(Sequence[object], session_payload.get("fired_events", ()))
+            if isinstance(item, Sequence) and len(item) == 2
+        }
+        session.command_history = [
+            ReplayFrame(_as_float(cast(Mapping[str, object], item)["duration"]), {str(name): _as_float(value) for name, value in cast(Mapping[str, object], cast(Mapping[str, object], item)["commands"]).items()})
+            for item in cast(Sequence[object], session_payload.get("command_history", ()))
+        ]
+        session.snapshots = [_interactive_snapshot_from_payload(cast(Mapping[str, object], item), problem) for item in cast(Sequence[object], session_payload.get("snapshots", ()))]
+        session.event_history = [_runtime_event_from_payload(cast(Mapping[str, object], item)) for item in cast(Sequence[object], session_payload.get("event_history", ()))]
+        return session
+    ####
+
+
+def _interactive_problem_payload(problem: RuntimeProblem) -> dict[str, object]:
+    """Serialize mutable runtime state while leaving executable callbacks out."""
+
+    from .program import _kinematic_state_payload, _state_payload
+
+    return {
+        "print_times": list(problem.print_times),
+        "table_knots": list(problem.table_knots),
+        "required_truth_times": list(problem.required_truth_times),
+        "sensor_clocks": [clock.to_metadata() for clock in problem.sensor_clocks],
+        "final_time": problem.final_time,
+        "metadata": _json_safe(problem.metadata),
+        "event_history": _json_safe(problem.event_history),
+        "transition_history": [item.to_metadata() for item in problem.transition_history],
+        "vehicles": {
+            name: {
+                "state": _state_payload(vehicle.state),
+                "history": [_state_payload(state) for state in vehicle.history],
+                "active": vehicle.active,
+                "activation_pending": vehicle.activation_pending,
+                "segment_number": vehicle.segment_number,
+                "fired_events": sorted(vehicle.fired_events),
+                "control_values": _json_safe(vehicle.control_values),
+                "parameters": _json_safe(vehicle.parameters),
+                "step_size": vehicle.step_size,
+                "integrator": vehicle.integrator,
+                "absolute_tolerance": vehicle.absolute_tolerance,
+                "relative_tolerance": vehicle.relative_tolerance,
+                "max_step_size": vehicle.max_step_size,
+                "publish_derived_rates": vehicle.publish_derived_rates,
+                "kinematic_state": _kinematic_state_payload(vehicle.kinematic_state),
+                "dynamics_mode": vehicle.dynamics_mode.value,
+            }
+            for name, vehicle in problem.vehicles.items()
+        },
+    }
+    ####
+
+
+def _restore_interactive_problem(problem: RuntimeProblem, payload: Mapping[str, object]) -> None:
+    """Restore a checkpoint into a caller-provided executable runtime graph."""
+
+    from .program import _kinematic_state_from_payload, _state_from_payload, _transition_pair_from_payload
+
+    saved_vehicles = cast(Mapping[str, object], payload.get("vehicles", {}))
+    if set(saved_vehicles) != set(problem.vehicles):
+        raise ValueError("interactive checkpoint vehicle graph does not match the supplied problem")
+    problem.print_times = tuple(_as_float(value) for value in cast(Sequence[object], payload.get("print_times", ())))
+    problem.table_knots = tuple(_as_float(value) for value in cast(Sequence[object], payload.get("table_knots", ())))
+    problem.required_truth_times = tuple(_as_float(value) for value in cast(Sequence[object], payload.get("required_truth_times", ())))
+    problem.final_time = float(cast(float | int | str, payload["final_time"])) if payload.get("final_time") is not None else None
+    problem.metadata = cast(dict[str, object], _json_safe(payload.get("metadata", {})))
+    problem.event_history = [cast(dict[str, object], item) for item in cast(Sequence[object], payload.get("event_history", ())) if isinstance(item, Mapping)]
+    problem.transition_history = [
+        _transition_pair_from_payload(cast(Mapping[str, object], item))
+        for item in cast(Sequence[object], payload.get("transition_history", ()))
+    ]
+    for name, raw in saved_vehicles.items():
+        vehicle_payload = cast(Mapping[str, object], raw)
+        vehicle = problem.vehicles[name]
+        vehicle.state = _state_from_payload(cast(Mapping[str, object], vehicle_payload["state"]), vehicle.state.frame)
+        vehicle.history = [
+            _state_from_payload(cast(Mapping[str, object], item), vehicle.state.frame)
+            for item in cast(Sequence[object], vehicle_payload.get("history", ()))
+        ]
+        vehicle.active = bool(vehicle_payload["active"])
+        vehicle.activation_pending = bool(vehicle_payload["activation_pending"])
+        vehicle.segment_number = int(cast(int | str, vehicle_payload["segment_number"]))
+        vehicle.fired_events = {str(value) for value in cast(Sequence[object], vehicle_payload.get("fired_events", ())) }
+        vehicle.control_values = {str(key): _as_float(value) for key, value in cast(Mapping[str, object], vehicle_payload.get("control_values", {})).items()}
+        vehicle.parameters = {str(key): _as_float(value) for key, value in cast(Mapping[str, object], vehicle_payload.get("parameters", {})).items()}
+        vehicle.step_size = float(cast(float | int | str, vehicle_payload["step_size"]))
+        vehicle.integrator = str(vehicle_payload["integrator"])
+        vehicle.absolute_tolerance = float(cast(float | int | str, vehicle_payload["absolute_tolerance"]))
+        vehicle.relative_tolerance = float(cast(float | int | str, vehicle_payload["relative_tolerance"]))
+        vehicle.max_step_size = float(cast(float | int | str, vehicle_payload["max_step_size"])) if vehicle_payload.get("max_step_size") is not None else None
+        vehicle.publish_derived_rates = bool(vehicle_payload["publish_derived_rates"])
+        sidecar = vehicle_payload.get("kinematic_state")
+        if sidecar is not None:
+            if vehicle.kinematic_state is None:
+                raise ValueError(f"interactive checkpoint contains a kinematic sidecar for non-kinematic vehicle {name!r}")
+            vehicle.kinematic_state = _kinematic_state_from_payload(cast(Mapping[str, object], sidecar))
+        elif vehicle.kinematic_state is not None:
+            raise ValueError(f"interactive checkpoint is missing the kinematic sidecar for vehicle {name!r}")
+    ####
+
+
+def _interactive_snapshot_payload(snapshot: InteractiveSnapshot) -> dict[str, object]:
+    """Serialize one interactive snapshot with complete state names and frames."""
+
+    from .program import _state_payload
+
+    return {
+        "time_start": snapshot.time_start,
+        "time_end": snapshot.time_end,
+        "states": {name: _state_payload(state) for name, state in snapshot.states.items()},
+        "commands": [
+            {"name": command.name, "requested": command.requested, "applied": command.applied, "unit": command.unit, "clamped": command.clamped}
+            for command in snapshot.commands
+        ],
+        "events": list(snapshot.events),
+        "diagnostics": list(snapshot.diagnostics),
+        "status": snapshot.status.value,
+        "runtime_events": [event.as_dict() for event in snapshot.runtime_events],
+        "statuses": {vehicle: dict(values) for vehicle, values in snapshot.statuses.items()},
+    }
+    ####
+
+
+def _interactive_snapshot_from_payload(payload: Mapping[str, object], problem: RuntimeProblem) -> InteractiveSnapshot:
+    """Restore one interactive snapshot against the supplied runtime graph."""
+
+    from .program import _state_from_payload
+
+    states = {
+        name: _state_from_payload(cast(Mapping[str, object], raw), problem.vehicles[name].state.frame)
+        for name, raw in cast(Mapping[str, object], payload.get("states", {})).items()
+    }
+    commands = tuple(
+        AppliedCommand(
+            str(item["name"]),
+            float(cast(float | int | str, item["requested"])),
+            float(cast(float | int | str, item["applied"])),
+            str(item["unit"]) if item.get("unit") is not None else None,
+            bool(item.get("clamped", False)),
+        )
+        for item in (cast(Mapping[str, object], value) for value in cast(Sequence[object], payload.get("commands", ())))
+    )
+    return InteractiveSnapshot(
+        float(cast(float | int | str, payload["time_start"])),
+        float(cast(float | int | str, payload["time_end"])),
+        states,
+        commands,
+        tuple(str(value) for value in cast(Sequence[object], payload.get("events", ()))),
+        tuple(str(value) for value in cast(Sequence[object], payload.get("diagnostics", ()))),
+        InteractiveStatus(str(payload.get("status", InteractiveStatus.RUNNING.value))),
+        tuple(_runtime_event_from_payload(cast(Mapping[str, object], value)) for value in cast(Sequence[object], payload.get("runtime_events", ()))),
+        {str(vehicle): {str(key): _as_float(value) for key, value in cast(Mapping[str, object], values).items()} for vehicle, values in cast(Mapping[str, object], payload.get("statuses", {})).items()},
+    )
+    ####
+
+
+def _control_payload(control: ControlSpec) -> dict[str, object]:
+    return {"name": control.name, "unit": control.unit, "default": control.default, "lower": control.lower, "upper": control.upper, "slew_rate": control.slew_rate, "modes": list(control.modes)}
+    ####
+
+
+def _control_from_payload(payload: Mapping[str, object]) -> ControlSpec:
+    return ControlSpec(
+        str(payload["name"]),
+        str(payload["unit"]) if payload.get("unit") is not None else None,
+        float(cast(float | int | str, payload["default"])),
+        float(cast(float | int | str, payload["lower"])),
+        float(cast(float | int | str, payload["upper"])),
+        float(cast(float | int | str, payload["slew_rate"])) if payload.get("slew_rate") is not None else None,
+        tuple(str(value) for value in cast(Sequence[object], payload.get("modes", ()))),
+    )
+    ####
+
+
+def _status_payload(status: StatusSpec) -> dict[str, object]:
+    return {"name": status.name, "source": status.source, "unit": status.unit, "modes": list(status.modes)}
+    ####
+
+
+def _status_from_payload(payload: Mapping[str, object]) -> StatusSpec:
+    return StatusSpec(str(payload["name"]), str(payload["source"]) if payload.get("source") is not None else None, str(payload["unit"]) if payload.get("unit") is not None else None, tuple(str(value) for value in cast(Sequence[object], payload.get("modes", ()))) )
+    ####
+
+
+def _subscription_payload(subscription: OutputSubscription) -> dict[str, object]:
+    return {"channels": list(subscription.channels), "sample_interval": subscription.sample_interval, "include_events": subscription.include_events}
+    ####
+
+
+def _subscription_from_payload(payload: Mapping[str, object]) -> OutputSubscription:
+    return OutputSubscription(tuple(str(value) for value in cast(Sequence[object], payload.get("channels", ()))), float(cast(float | int | str, payload["sample_interval"])) if payload.get("sample_interval") is not None else None, bool(payload.get("include_events", True)))
+    ####
+
+
+def _runtime_event_from_payload(payload: Mapping[str, object]) -> RuntimeEvent:
+    return RuntimeEvent(
+        str(payload["name"]),
+        str(payload["vehicle"]),
+        float(cast(float | int | str, payload["time"])),
+        EventAction(str(payload["action"])),
+        str(payload["signal"]) if payload.get("signal") is not None else None,
+        str(payload["source"]) if payload.get("source") is not None else None,
+        int(cast(int | str, payload["segment_from"])) if payload.get("segment_from") is not None else None,
+        int(cast(int | str, payload["segment_to"])) if payload.get("segment_to") is not None else None,
+    )
+    ####
+
+
+def _json_safe(value: object) -> object:
+    """Keep checkpoint metadata JSON-compatible without serializing callbacks."""
+
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, Mapping):
+        return {str(key): _json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [_json_safe(item) for item in value]
+    return str(value)
+    ####
+
+
+def _checkpoint_fingerprint(payload: Mapping[str, object]) -> str:
+    """Hash a checkpoint payload excluding its integrity field."""
+
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+    ####
+
+
+def _as_float(value: object) -> float:
+    """Convert a JSON scalar to a finite runtime float."""
+
+    return float(cast(float | int | str, value))
     ####

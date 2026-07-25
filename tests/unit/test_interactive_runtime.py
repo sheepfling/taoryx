@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from taoryx.contracts import Frame, FrameVector3, Vector3
@@ -184,4 +186,43 @@ def test_batch_and_interactive_replay_share_the_same_state_contract() -> None:
 
     assert batch_result.states["player"][-1].values == pytest.approx(interactive.problem.vehicles["player"].state.values)
     assert batch_result.states["player"][-1].time == pytest.approx(interactive.time)
+
+
+def test_interactive_checkpoint_restores_command_history_and_continues(tmp_path) -> None:
+    first = InteractiveSession(_problem(), _controls())
+    first.step(0.1, {"throttle": 0.3})
+    first.pause()
+    checkpoint = first.save_checkpoint(tmp_path / "interactive.checkpoint.json", model_fingerprint="demo-model-v1")
+
+    restored = InteractiveSession.load_checkpoint(
+        checkpoint,
+        _problem(),
+        model_fingerprint="demo-model-v1",
+        controls=_controls(),
+    )
+    assert restored.status is InteractiveStatus.PAUSED
+    assert restored.time == pytest.approx(0.1)
+    assert restored.command_history == first.command_history
+    assert restored.problem.vehicles["player"].state.values == pytest.approx(first.problem.vehicles["player"].state.values)
+
+    first.resume()
+    restored.resume()
+    expected = first.step(0.1, {"throttle": 0.8})
+    actual = restored.step(0.1, {"throttle": 0.8})
+    assert actual.as_dict() == expected.as_dict()
+    assert restored.command_history == first.command_history
+
+
+def test_interactive_checkpoint_rejects_tampering_and_wrong_model(tmp_path) -> None:
+    session = InteractiveSession(_problem(), _controls())
+    checkpoint = session.save_checkpoint(tmp_path / "interactive-integrity.json", model_fingerprint="model-a")
+
+    with pytest.raises(ValueError, match="model fingerprint"):
+        InteractiveSession.load_checkpoint(checkpoint, _problem(), model_fingerprint="model-b", controls=_controls())
+
+    payload = json.loads(checkpoint.read_text(encoding="utf-8"))
+    payload["session"]["status"] = "interrupted"
+    checkpoint.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="integrity"):
+        InteractiveSession.load_checkpoint(checkpoint, _problem(), model_fingerprint="model-a", controls=_controls())
 ####

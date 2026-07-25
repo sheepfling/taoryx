@@ -21,13 +21,15 @@ provider output, not the configuration authority for new family combinations.
 
 | Layer | Alpha 2 contract | Release behavior |
 | --- | --- | --- |
-| Family | `FamilyPackage` | Versioned family identity, fidelity set, parameters, controls, observations, presets, and segment graphs. |
+| Family | `FamilyPackage` | Versioned family identity, fidelity set, parameters, controls, observations, capabilities, component slots, resources, allocations, transitions, presets, and segment graphs. |
 | Case input | `CaseIntent` | Human-authored family/fidelity/preset selection plus typed overrides and extensions. |
 | Resolved case | `ResolvedCase` | Frozen canonical values, fixed schemas, segment graph, provenance, and identity SHA-256. |
 | Provider | `CompiledCase` | Explicit translation from the neutral case into a provider/runtime binding. |
 | Session | `reset`, `step`, `run_to_completion` | Batch execution is repeated canonical stepping; applied controls and diagnostics are retained. |
 | Control | `ControlSchema` and `ControlFrame` | Autopilot, commanded, overlay, direct, and mixed authority are explicit and bounded. |
-| Observation | `ObservationSchema` | Stable semantic IDs, units, sources, and descriptions are fixed after resolution. |
+| Observation | `ObservationSchema` | Stable semantic IDs, units, frames, availability, evidence grade, sources, and descriptions are fixed after resolution. |
+| Capability | `CapabilitySchema` | Supported fidelities, control intents, modes, terminal conditions, resources, allocation, transitions, and checkpoint support. |
+| Components | `ComponentSlot`, `AllocationSchema`, `ModeTransitionSchema` | Typed composition points and hybrid-mode handoffs remain provider-neutral. |
 
 ## Fidelity profiles
 
@@ -40,6 +42,30 @@ provider output, not the configuration authority for new family combinations.
 Fidelity is independent from control authority. A high-level commanded or
 autopilot interface may be used at any advertised fidelity; direct effectors
 are only valid when the family declares them.
+
+## Evaluation envelope
+
+Provider results may carry a `TrajectoryEvaluation`. It is the neutral
+evidence boundary for a run, not another physics implementation. The envelope
+keeps four claims separate:
+
+| Field | Meaning |
+| --- | --- |
+| `validity` | Whether the resolved model and run satisfy internal integrity rules. |
+| `qualification` | Whether the run remains inside the source-supported or explicitly extended range. |
+| `feasibility` | Whether the requested mission is expected to be achievable before execution. |
+| `outcome` | What actually happened: completion, degradation, resource or envelope limitation, abort, or numerical failure. |
+
+Objective arithmetic remains owned by `taoryx.objectives.score_objectives`.
+`objective_report_to_evaluation` promotes that result into the typed envelope
+without recomputing it. Requested controls, achieved actuator states,
+resources, events, closure, and convergence are separate channels. A required
+closure or convergence metric therefore cannot be hidden by a passing weighted
+objective score.
+
+Every numeric evidence channel declares a unit; unavailable channels are
+represented explicitly rather than as zero. This is the contract used by
+family-specific plots and evidence packets.
 
 ## Claim boundary
 

@@ -19,6 +19,7 @@ prioritization:
 release_boundaries:
   alpha2_closeout:
     objective: Reusable, diagnosable, replayable platform with four composable proof families.
+    completion_signal: A2-CLOSEOUT-PASS
     required_items: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4, A2-POST-P0-5, A2-POST-P0-6, A2-POST-P1-1, A2-POST-P1-2, A2-POST-P1-4]
     required_maturity: M4
     exclusions:
@@ -60,7 +61,7 @@ items:
   - id: A2-POST-P0-1
     priority: P0
     name: common-scenario-and-evaluation-substrate
-    status: partial
+    status: complete
     depends_on: [A2-RELEASE-PASS]
     rationale: Every future family needs comparable runs, unit-bearing objectives, event markers, and resource metrics before controller results are reviewable.
     scope:
@@ -82,13 +83,14 @@ items:
     evidence:
       - scenario-contract schema and validator
       - metric dictionary and score definition
+      - provider-neutral TrajectoryEvaluation envelope and objective-report adapter
       - positive/negative contract fixtures
       - regenerated family-filtered evidence packet
 
   - id: A2-POST-P0-2
     priority: P0
     name: interactive-lab-and-control-session
-    status: partial
+    status: complete
     depends_on: [A2-POST-P0-1]
     rationale: The existing stepping foundation needs a complete generic task/session boundary for scripts, AI, players, and controller experiments.
     scope:
@@ -115,7 +117,7 @@ items:
   - id: A2-POST-P0-3
     priority: P0
     name: generic-model-onboarding-and-convention-firewall
-    status: partial
+    status: complete
     depends_on: [A2-POST-P0-1]
     rationale: New vehicles still need a short, diagnosable path through source registration, tables, units, frames, trim, and bounded propagation.
     scope:
@@ -140,7 +142,7 @@ items:
   - id: A2-POST-P0-4
     priority: P0
     name: checkpoint-restart-and-reproducible-run-store
-    status: planned
+    status: complete
     depends_on: [A2-POST-P0-2, A2-POST-P0-3]
     rationale: Long missions, tuning, reachability, and human-in-the-loop work need branchable state without losing provenance or event semantics.
     scope:
@@ -153,11 +155,16 @@ items:
       - uninterrupted and checkpoint/resume histories match within declared tolerances
       - branching produces distinct but provenance-linked run identities
       - interrupted runs cannot be reported as completed missions
+    completed_evidence:
+      - source-program point-mass and rigid-body checkpoint tests in tests/unit/test_runtime_branching.py
+      - kinematic 3+3 sidecar save/load test in tests/unit/test_runtime_branching.py
+      - interactive command-history checkpoint/restart and integrity tests in tests/unit/test_interactive_runtime.py
+      - docs/plan/checkpoint-restart.md
 
   - id: A2-POST-P0-5
     priority: P0
     name: future-family-interface-stress-test
-    status: planned
+    status: complete
     depends_on: [A2-POST-P0-1, A2-POST-P0-3]
     rationale: The Alpha 3 intake already spans propeller aircraft, helicopters, tiltrotors, spacecraft, and energy-coupled surrogates. Their requirements must stress the neutral contracts before Alpha 2 freezes them, without requiring those families to be implemented in Alpha 2.
     scope:
@@ -180,13 +187,20 @@ items:
       - positive and negative contract fixtures for each future-family archetype
       - schema compatibility report
       - updated family-package authoring guide
+    completed_evidence:
+      - verification/alpha2_interface_stress_matrix.yaml
+      - verification/generated/alpha2_interface_compatibility_report.json
+      - tests/unit/test_alpha2_interface_stress.py
+      - tools/generate_alpha2_interface_report.py
+      - docs/plan/vehicle-family-authoring-guide.md
+      - docs/plan/future-family-interface-stress-test.md
 
   - id: A2-POST-P0-6
     priority: P0
     target_release: alpha2
     lane: alpha2-platform-closeout
     name: bounded-vehicle-variant-compiler
-    status: planned
+    status: complete
     depends_on: [A2-POST-P0-1, A2-POST-P0-3, A2-POST-P0-5]
     rationale: Family composition is already present, but parameterized variants need explicit validity, qualification, derivation, and provenance boundaries before new vehicle breadth or search can scale.
     scope:
@@ -212,6 +226,12 @@ items:
       - every derived value records dependencies and provenance
       - Simple Aero, fixed-wing, and rotorcraft-style fixtures consume the same variant contract without bespoke resolution code
       - resolved variants bind consistently to 3DOF, pseudo-6DOF, and rigid-body 6DOF profiles where supported
+    completed_evidence:
+      - src/taoryx/trajectory/contracts.py
+      - src/taoryx/trajectory/resolution.py
+      - tests/unit/test_alpha2_case_contracts.py
+      - synthetic fixed-wing and rotorcraft contract fixtures in test_alpha2_case_contracts.py
+      - verification/alpha2_family_catalog.yaml
     evidence:
       - variant schema and modifier registry
       - positive, projected, and rejected candidate fixtures
@@ -221,7 +241,7 @@ items:
   - id: A2-POST-P1-1
     priority: P1
     name: four-family-flagship-mission-qualification
-    status: planned
+    status: complete
     depends_on: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4]
     rationale: The four existing research families are the best near-term proof that the generic path produces understandable, family-appropriate flights.
     execution_order: [hummingbird, skywalker_x8, b747, x15]
@@ -237,11 +257,16 @@ items:
       - no unannotated discontinuity, envelope exit, sustained saturation, or below-ground propagation
       - every result has raw telemetry, commands, events, score, claim ledger, and plots
       - the mission does not receive a qualification badge from a weighted score alone
+    completed_evidence:
+      - clean-process packet generated by tools/build_fidelity_ladder_packet.py and checked by tools/audit_fidelity_packet.py
+      - tools/build_fidelity_ladder_packet.py
+      - tools/audit_fidelity_packet.py
+      - tools/audit_fidelity_milestones.py
 
   - id: A2-POST-P1-2
     priority: P1
     name: normalized-controller-presets-and-tuning
-    status: partial
+    status: complete
     depends_on: [A2-POST-P0-2, A2-POST-P0-3]
     rationale: Controllers need family-specific plant scaling, rate/authority profiles, and reproducible tuning rather than copied gains.
     scope:
@@ -256,13 +281,20 @@ items:
       - tuning never changes plant truth or silently widens table bounds
       - gains, scales, objective weights, and solver settings are provenance-linked
       - each claimed mission reports stability, tracking, saturation, derivative, and table-margin metrics
+    completed_evidence:
+      - verification/lqr_scaling_profiles.yaml
+      - verification/control_direction_contracts.yaml
+      - verification/controller_designs.yaml
+      - tests/unit/test_trim.py
+      - tests/unit/test_trim_catalog.py
+      - controller-mission evidence emitted by tools/build_fidelity_ladder_packet.py
 
   - id: A2-POST-P1-4
     priority: P1
     target_release: alpha2
     lane: alpha2-proof-closeout
     name: reusable-trim-generation-and-operating-point-procedure
-    status: partial
+    status: complete
     depends_on: [A2-POST-P0-2, A2-POST-P0-3, A2-POST-P1-2]
     rationale: The established vehicles cannot scale through controllers and segment validation if each trim point is hand-derived. Alpha 2 needs a reusable, auditable operating-point procedure; new family catalogs can remain Alpha 3.
     scope:
@@ -289,6 +321,13 @@ items:
       - failed trims are classified as infeasible, out-of-envelope, numerically unresolved, or adapter-invalid
       - local linearization and normalized controller tuning can be reproduced from the trim artifact in a fresh process
       - no new Alpha 3 vehicle family is required to close this Alpha 2 item
+    completed_evidence:
+      - src/taoryx/trim.py
+      - src/taoryx/trim_catalog.py
+      - verification/trim_specs.yaml
+      - tests/unit/test_trim.py
+      - tests/unit/test_trim_catalog.py
+      - four-family trim and controller evidence emitted by tools/build_fidelity_ladder_packet.py
 
   - id: A2-POST-P1-5
     priority: P2

@@ -41,14 +41,23 @@ The release gate must retain tests for:
 - rigid-body attitude, inertia, controller, and actuator restoration;
 - interactive session command-history restoration.
 
-Current implementation covers point-mass source reconstruction, runtime
-configuration, integrity verification, atomic writes, cloning, and restart
-tests in `tests/unit/test_runtime_branching.py`. Kinematic/rigid-body sidecars
-and interactive-session checkpoints remain explicit completion work.
+Current implementation covers point-mass and rigid-body source reconstruction,
+runtime configuration, integrity verification, atomic writes, cloning, and
+restart tests in `tests/unit/test_runtime_branching.py`. Kinematic 3+3 attitude
+sidecars are serialized as explicit position/velocity/quaternion data and are
+restored with their parent runtime vehicle. Interactive sessions expose the
+same boundary through `InteractiveSession.save_checkpoint()` and
+`InteractiveSession.load_checkpoint()`: the caller supplies the executable
+problem and callback/controller factory, while the checkpoint restores the
+runtime graph, sidecar state, controls, snapshots, events, and command history.
+Python callbacks are never pickled. A model fingerprint may be supplied to bind
+the checkpoint to a resolved case.
 
 ## Completion gate
 
 This goal is complete only when a checkpoint/resume run produces the same
 accepted state, event sequence, control history, and terminal artifact as an
 uninterrupted run within the documented numerical tolerance for every supported
-dynamics mode.
+dynamics mode. The source-program and interactive checkpoint tests are the
+executable evidence for that claim; event/controller callback rebinding is
+explicit at the load boundary rather than inferred from serialized Python.

@@ -18,10 +18,17 @@ from pydantic import BaseModel, ConfigDict, Field
 CapabilityStatus = Literal["native", "emulated", "approximated", "unsupported"]
 FidelityProfile = Literal["point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"]
 ParameterKind = Literal["number", "integer", "boolean", "string"]
+ParameterRole = Literal["independent", "derived", "developer"]
+ModifierOperation = Literal["set", "add", "scale"]
+VariantPolicy = Literal["reject", "project"]
+VariantStatus = Literal["qualified", "extended", "projected"]
 AuthorityMode = Literal["autopilot", "commanded", "overlay", "direct", "mixed"]
 HoldBehavior = Literal["hold", "default", "failsafe"]
 ControlInputMode = Literal["absolute", "rate"]
 ObservationKind = Literal["state", "actuator_achieved", "resource", "event_prediction", "diagnostic"]
+SemanticLevel = Literal["guidance", "attitude_rate", "body_motion", "effector", "state", "resource", "event", "diagnostic"]
+ChannelAvailability = Literal["always", "conditional", "unavailable"]
+EvidenceGrade = Literal["source", "identified", "derived", "estimated", "synthetic", "mixed", "unavailable", "unknown"]
 
 
 class CaseValue(BaseModel):
@@ -46,7 +53,78 @@ class ParameterSchema(BaseModel):
     required: bool = False
     minimum: float | None = None
     maximum: float | None = None
+    role: ParameterRole = "independent"
+    qualified_minimum: float | None = None
+    qualified_maximum: float | None = None
+    search_transform: Literal["linear", "log", "fraction", "categorical"] = "linear"
+    coupling_group: str | None = None
+    requires_retrim: bool = False
+    requires_requalification: bool = False
+    provenance: str = ""
     description: str = ""
+####
+
+
+class VariantModifier(BaseModel):
+    """A bounded semantic change applied to a resolved family parameter."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    target: str = Field(min_length=1)
+    operation: ModifierOperation
+    canonical_unit: str | None = None
+    minimum: float | None = None
+    maximum: float | None = None
+    qualified_minimum: float | None = None
+    qualified_maximum: float | None = None
+    coupling_group: str | None = None
+    requires_retrim: bool = False
+    requires_requalification: bool = False
+    provenance: str = ""
+    description: str = ""
+####
+
+
+class DerivedParameter(BaseModel):
+    """A small declarative derivation over already-resolved parameters."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    operation: Literal["sum", "difference", "product", "ratio", "scale"]
+    dependencies: tuple[str, ...] = Field(min_length=1)
+    canonical_unit: str | None = None
+    constant: float = 0.0
+    provenance: str = ""
+####
+
+
+class VariantSpace(BaseModel):
+    """Bounded candidate and derivation metadata for one family."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    policy: VariantPolicy = "reject"
+    modifiers: tuple[VariantModifier, ...] = ()
+    derived: tuple[DerivedParameter, ...] = ()
+####
+
+
+class VariantResolutionReport(BaseModel):
+    """Machine-readable validity and qualification result for one candidate."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    status: VariantStatus
+    candidate_original: dict[str, Any] = Field(default_factory=dict)
+    candidate_applied: dict[str, Any] = Field(default_factory=dict)
+    projection_distance: float = 0.0
+    modifiers_applied: tuple[str, ...] = ()
+    derived_values: dict[str, Any] = Field(default_factory=dict)
+    invalidations: tuple[str, ...] = ()
+    diagnostics: tuple[str, ...] = ()
+    fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
 ####
 
 
@@ -71,6 +149,13 @@ class ControlSchema(BaseModel):
     overlay_minimum: float | None = None
     overlay_maximum: float | None = None
     rate_limit_per_s: float | None = Field(default=None, gt=0.0)
+    frame: str | None = None
+    semantic_level: SemanticLevel = "effector"
+    availability: ChannelAvailability = "always"
+    achieved_observation_id: str | None = None
+    allocation_id: str | None = None
+    evidence_grade: EvidenceGrade = "unknown"
+    uncertainty: str | None = None
     description: str = ""
 ####
 
@@ -106,7 +191,100 @@ class ObservationSchema(BaseModel):
     unit: str | None = None
     source: str | None = None
     kind: ObservationKind = "state"
+    frame: str | None = None
+    semantic_level: SemanticLevel = "state"
+    availability: ChannelAvailability = "always"
+    neutral_value: Any = None
+    evidence_grade: EvidenceGrade = "unknown"
+    uncertainty: str | None = None
     description: str = ""
+####
+
+
+class CapabilitySchema(BaseModel):
+    """Family-level capabilities negotiated before a provider is loaded."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    fidelities: tuple[FidelityProfile, ...] = ()
+    control_intents: tuple[str, ...] = ()
+    observation_kinds: tuple[ObservationKind, ...] = ()
+    modes: tuple[str, ...] = ()
+    terminal_conditions: tuple[str, ...] = ()
+    supports_resources: bool = False
+    supports_allocation: bool = False
+    supports_mode_transitions: bool = False
+    supports_checkpoint: bool = True
+    provenance: str = ""
+    description: str = ""
+####
+
+
+class ComponentSlot(BaseModel):
+    """Typed composition point for a family component or loadout."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    component_kind: str = Field(min_length=1)
+    required: bool = False
+    compatible_fidelities: tuple[FidelityProfile, ...] = ()
+    selected_component: str | None = None
+    provenance: str = ""
+####
+
+
+class ResourceSchema(BaseModel):
+    """First-class consumable or capacity resource declaration."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    resource_kind: str = Field(min_length=1)
+    canonical_unit: str | None = None
+    default: float | None = None
+    minimum: float | None = None
+    reserve: float | None = None
+    consumption_channels: tuple[str, ...] = ()
+    observation_id: str | None = None
+    evidence_grade: EvidenceGrade = "estimated"
+    uncertainty: str | None = None
+    provenance: str = ""
+####
+
+
+class AllocationSchema(BaseModel):
+    """Requested-to-effector allocation contract."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    requested_channels: tuple[str, ...] = ()
+    allocated_channels: tuple[str, ...] = ()
+    achieved_observations: tuple[str, ...] = ()
+    supports_rate_commands: bool = False
+    frame: str | None = None
+    provenance: str = ""
+####
+
+
+class ModeTransitionSchema(BaseModel):
+    """Typed hybrid-mode transition with explicit safety and handoff data."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    from_mode: str = Field(min_length=1)
+    to_mode: str = Field(min_length=1)
+    entry_guards: tuple[str, ...] = ()
+    exit_guards: tuple[str, ...] = ()
+    abort_to: str | None = None
+    hysteresis_s: float = Field(default=0.0, ge=0.0)
+    schedules: dict[str, Any] = Field(default_factory=dict)
+    controller_handoff: dict[str, Any] = Field(default_factory=dict)
+    resource_continuity: bool = True
+    state_continuity: bool = True
+    provenance: str = ""
 ####
 
 
@@ -121,12 +299,20 @@ class FamilyPackage(BaseModel):
     fidelities: tuple[FidelityProfile, ...]
     parameters: tuple[ParameterSchema, ...]
     variants: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    variant_space: VariantSpace = Field(default_factory=VariantSpace)
     loadouts: dict[str, dict[str, Any]] = Field(default_factory=dict)
     missions: dict[str, dict[str, Any]] = Field(default_factory=dict)
     segment_plans: dict[str, dict[str, Any]] = Field(default_factory=dict)
     segment_graphs: dict[str, dict[str, Any]] = Field(default_factory=dict)
     controls: tuple[ControlSchema, ...] = ()
     observations: tuple[ObservationSchema, ...] = ()
+    capabilities: CapabilitySchema = Field(default_factory=CapabilitySchema)
+    component_slots: tuple[ComponentSlot, ...] = ()
+    resources: tuple[ResourceSchema, ...] = ()
+    allocations: tuple[AllocationSchema, ...] = ()
+    mode_transitions: tuple[ModeTransitionSchema, ...] = ()
+    evidence_grade: EvidenceGrade = "unknown"
+    uncertainty: str | None = None
     provenance: str = ""
 
     def parameter_map(self) -> dict[str, ParameterSchema]:
@@ -193,6 +379,7 @@ class CaseIntent(BaseModel):
     mission: str = "baseline"
     segment_plan: str = "baseline"
     controller: str = "none"
+    variant_parameters: dict[str, CaseValue] = Field(default_factory=dict)
     overrides: dict[str, CaseValue] = Field(default_factory=dict)
     requested_controls: tuple[str, ...] = ()
     requested_observations: tuple[str, ...] = ()
@@ -227,6 +414,22 @@ class ResolvedValue(BaseModel):
 ####
 
 
+class ResolvedVariant(BaseModel):
+    """Immutable vehicle binding produced before provider compilation."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    family: str = Field(min_length=1)
+    family_version: str = Field(min_length=1)
+    fidelity: FidelityProfile
+    variant: str = Field(min_length=1)
+    loadout: str = Field(min_length=1)
+    parameters: dict[str, ResolvedValue]
+    resolution: VariantResolutionReport
+    fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+####
+
+
 class ResolvedCase(BaseModel):
     """Immutable, canonical case representation shared by providers."""
 
@@ -245,10 +448,25 @@ class ResolvedCase(BaseModel):
     parameters: dict[str, ResolvedValue]
     controls: tuple[ControlSchema, ...]
     observations: tuple[ObservationSchema, ...]
+    capabilities: CapabilitySchema = Field(default_factory=CapabilitySchema)
+    component_slots: tuple[ComponentSlot, ...] = ()
+    resources: tuple[ResourceSchema, ...] = ()
+    allocations: tuple[AllocationSchema, ...] = ()
+    mode_transitions: tuple[ModeTransitionSchema, ...] = ()
+    evidence_grade: EvidenceGrade = "unknown"
+    uncertainty: str | None = None
     provenance: tuple[ProvenanceRecord, ...]
     segment_graph: dict[str, Any] = Field(default_factory=dict)
     extensions: dict[str, Any] = Field(default_factory=dict)
+    resolved_variant: ResolvedVariant | None = None
     identity_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @property
+    def variant_resolution(self) -> VariantResolutionReport | None:
+        """Backward-compatible access to the nested resolution report."""
+
+        return None if self.resolved_variant is None else self.resolved_variant.resolution
+        ####
 
     def canonical_payload(self) -> dict[str, Any]:
         """Return the identity payload without the self-referential digest."""
@@ -288,21 +506,38 @@ class ResolvedCase(BaseModel):
 
 __all__ = [
     "AuthorityMode",
+    "AllocationSchema",
+    "CapabilitySchema",
+    "ChannelAvailability",
     "CapabilityStatus",
     "CaseIntent",
     "CaseValue",
     "ControlSchema",
     "ControlInputMode",
     "ControlFrame",
+    "EvidenceGrade",
+    "ComponentSlot",
+    "DerivedParameter",
     "FamilyCatalog",
     "FamilyPackage",
     "FidelityProfile",
     "HoldBehavior",
+    "ModifierOperation",
+    "ModeTransitionSchema",
     "ObservationSchema",
     "ObservationKind",
     "ParameterSchema",
+    "ParameterRole",
     "ProvenanceRecord",
     "ResolvedCase",
+    "ResolvedVariant",
     "ResolvedValue",
+    "ResourceSchema",
+    "SemanticLevel",
+    "VariantModifier",
+    "VariantPolicy",
+    "VariantResolutionReport",
+    "VariantSpace",
+    "VariantStatus",
 ]
 ####

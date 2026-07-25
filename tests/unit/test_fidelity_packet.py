@@ -55,6 +55,64 @@ def test_telemetry_rollup_includes_margin_saturation_and_control_rate_metrics() 
     ####
 
 
+def test_packet_promotes_summary_into_neutral_evaluation_envelope() -> None:
+    """Mission evidence carries claims, controls, resources, events, and gates."""
+
+    summary = {
+        "exit_code": 0,
+        "results": [{"completed": True}],
+        "scenario_contract": {"contract_sha256": "a" * 64},
+        "telemetry_metrics": {
+            "duration_s": 12.0,
+            "final": {
+                "bank_command_deg": 10.0,
+                "bank_achieved_deg": 8.0,
+                "elevator-deg": 1.0,
+                "mass_kg": 3.0,
+                "battery_soc": 0.8,
+            },
+            "trajectory_rollup": {"control_channels": ["elevator-deg"]},
+        },
+        "event_timeline": [{"name": "waypoint-capture", "time": 5.0}],
+        "closure_evaluation": {
+            "status": "pass",
+            "checks": {"translation_p99": {"actual": 1.0e-8, "limit": 1.0e-4, "passed": True}},
+        },
+    }
+    evaluation = packet._trajectory_evaluation(
+        summary,
+        scenario_id="demo:controller",
+        claim_boundary="bounded evidence",
+        objective_report={"status": "pass", "objectives": []},
+        convergence_report={"status": "pass"},
+    )
+
+    assert evaluation["validity"] == "valid"
+    assert evaluation["outcome"] == "completed"
+    assert evaluation["scenario_contract_sha256"] == "a" * 64
+    assert {item["source"] for item in evaluation["requested_controls"]} == {"requested"}
+    assert {item["source"] for item in evaluation["achieved_controls"]} == {"achieved"}
+    assert {item["source"] for item in evaluation["resources"]} == {"resource"}
+    assert evaluation["events"][0]["id"] == "event:0:waypoint-capture"
+    assert evaluation["closure"][0]["status"] == "pass"
+    assert evaluation["convergence"][0]["status"] == "pass"
+
+
+def test_packet_evaluation_blocks_missing_closure_evidence() -> None:
+    """A completed run without independent closure remains unqualified evidence."""
+
+    evaluation = packet._trajectory_evaluation(
+        {"exit_code": 0, "results": [{"completed": True}]},
+        scenario_id="demo:missing-closure",
+        claim_boundary="diagnostic evidence",
+        objective_report={"status": "pass", "objectives": []},
+    )
+    assert evaluation["validity"] == "not_run"
+    assert evaluation["closure"][0]["status"] == "blocked"
+    assert evaluation["convergence"][0]["status"] == "blocked"
+    assert evaluation["gates"][0]["status"] == "pass"
+
+
 def test_packet_contains_all_families_and_hashes_inputs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The packet remains auditable even when runtime execution is mocked."""
 

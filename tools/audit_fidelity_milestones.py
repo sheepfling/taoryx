@@ -9,6 +9,8 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
+from taoryx.trajectory.evaluation import TrajectoryEvaluation
+
 FAMILIES = {"b747", "skywalker_x8", "hummingbird", "x15"}
 PASS = "pass"
 DIAGNOSTIC = "diagnostic"
@@ -31,6 +33,56 @@ def _status(
     }
 
 
+def _neutral_evaluation(item: dict[str, Any], path: str) -> TrajectoryEvaluation | None:
+    """Return a valid neutral evaluation, or ``None`` for an incomplete packet."""
+
+    value: object = item
+    for component in path.split("."):
+        if not isinstance(value, dict):
+            return None
+        value = value.get(component)
+    if not isinstance(value, dict):
+        return None
+    try:
+        return TrajectoryEvaluation.model_validate(value)
+    except (TypeError, ValueError):
+        return None
+    ####
+
+
+def _snapshot_metadata_ok(handle: zipfile.ZipFile) -> bool:
+    """Check that a packet can describe its complete dirty-worktree snapshot."""
+
+    required = {
+        "software_commit.txt",
+        "working_tree.patch",
+        "working_tree.status",
+        "working_tree.untracked.json",
+        "dependency.lock",
+        "reproduce.sh",
+    }
+    names = set(handle.namelist())
+    if not required <= names:
+        return False
+    try:
+        manifest = json.loads(handle.read("working_tree.untracked.json"))
+    except (KeyError, json.JSONDecodeError):
+        return False
+    if not isinstance(manifest, dict) or manifest.get("schema_version") != 1:
+        return False
+    for item in manifest.get("files", ()):
+        if not isinstance(item, dict):
+            return False
+        packet_path = item.get("packet_path")
+        expected = item.get("sha256")
+        if not isinstance(packet_path, str) or not isinstance(expected, str) or packet_path not in names:
+            return False
+        if _digest(handle.read(packet_path)) != expected:
+            return False
+    return True
+    ####
+
+
 def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
     """Return milestone status and raise only for malformed packet structure."""
 
@@ -51,8 +103,13 @@ def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
         )
         m1 = _status(
             "M1-objective-scorer",
-            all(item.get("long_validation", {}).get("objective_evaluation", {}).get("objectives") for item in families.values()),
-            reason="every family packages raw objective records",
+            all(
+                item.get("long_validation", {}).get("objective_evaluation", {}).get("objectives")
+                and (evaluation := _neutral_evaluation(item, "long_validation.nominal.evaluation")) is not None
+                and evaluation.required_gates_pass
+                for item in families.values()
+            ),
+            reason="every family packages raw objective records and a passing neutral evaluation",
         )
         m2 = _status(
             "M2-event-continuity",
@@ -78,8 +135,18 @@ def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
         source_report = manifest.get("source_differential_report")
         m4 = _status(
             "M4-plant-evidence",
-            bool(source_report) and not closure_failures,
-            reason=("independent source report and closure pass" if not closure_failures else f"closure failed: {closure_failures}"),
+            bool(source_report)
+            and not closure_failures
+            and all(
+                (evaluation := _neutral_evaluation(item, "long_validation.nominal.evaluation")) is not None
+                and evaluation.required_gates_pass
+                for item in families.values()
+            ),
+            reason=(
+                "independent source report, closure, and neutral evaluation pass"
+                if not closure_failures
+                else f"closure failed: {closure_failures}"
+            ),
         )
 
         mission_failures = [
@@ -91,8 +158,17 @@ def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
         ]
         m5 = _status(
             "M5-long-missions",
-            not mission_failures,
-            reason="all required objectives, runtime, and closure gates pass" if not mission_failures else f"family gates failed: {mission_failures}",
+            not mission_failures
+            and all(
+                (evaluation := _neutral_evaluation(item, "long_validation.nominal.evaluation")) is not None
+                and evaluation.required_gates_pass
+                for item in families.values()
+            ),
+            reason=(
+                "all required objectives, runtime, closure, convergence, and neutral evaluation gates pass"
+                if not mission_failures
+                else f"family gates failed: {mission_failures}"
+            ),
         )
 
         controller_missions = tuple(dict(item) for item in manifest.get("controller_missions", ()))
@@ -103,6 +179,8 @@ def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
             if item.get("objective_evaluation", {}).get("status") != PASS
             or item.get("closure_evaluation", {}).get("status") != PASS
             or item.get("event_continuity_audit", {}).get("status") != PASS
+            or (evaluation := _neutral_evaluation(item, "evaluation")) is None
+            or not evaluation.required_gates_pass
         ]
         missing_controller_families = FAMILIES - controller_families
         m5b = _status(
@@ -110,7 +188,7 @@ def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
             controller_families == FAMILIES and not controller_failures,
             diagnostic=not controller_missions,
             reason=(
-                "all declared controller missions have passing objectives, closure, and continuity"
+                "all declared controller missions have passing objectives, closure, continuity, convergence, and neutral evaluation"
                 if controller_families == FAMILIES and not controller_failures
                 else f"controller mission gates failed or missing families: {sorted(missing_controller_families | set(controller_failures))}"
             ),
@@ -120,7 +198,7 @@ def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
             name for name in handle.namelist() if name.startswith(("/", "\\")) or "/Users/" in name or "/private/" in name
         ]
         m6_status = DIAGNOSTIC
-        m6_reason = "archive is hash-audited; clean-checkout reproduction must still be demonstrated"
+        m6_reason = "archive is hash-audited; clean-process reproduction must still be demonstrated"
         reproduction: dict[str, Any] | None = None
         if reproduced_from is not None:
             with zipfile.ZipFile(reproduced_from) as reproduced_handle:
@@ -130,6 +208,7 @@ def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
                     for name in reproduced_handle.namelist()
                     if name.startswith(("/", "\\")) or "/Users/" in name or "/private/" in name
                 ]
+                reproduced_snapshot_ok = _snapshot_metadata_ok(reproduced_handle)
             primary_scores = {
                 str(item["id"]): item.get("long_validation", {}).get("objective_evaluation", {}).get("score")
                 for item in families.values()
@@ -149,6 +228,8 @@ def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
             reproduction_passed = (
                 not absolute_entries
                 and not reproduced_absolute
+                and _snapshot_metadata_ok(handle)
+                and reproduced_snapshot_ok
                 and set(reproduced_scores) == set(primary_scores)
                 and all(abs(float(reproduced_scores[key]) - float(primary_scores[key])) <= 1.0e-12 for key in primary_scores)
                 and set(reproduced_controller_scores) == set(primary_controller_scores)
@@ -160,7 +241,7 @@ def audit(archive: Path, reproduced_from: Path | None = None) -> dict[str, Any]:
                 and bool(reproduced_manifest.get("parity_report"))
             )
             m6_status = PASS if reproduction_passed else BLOCKED
-            m6_reason = "clean snapshot reproduced packet scores, tiers, and parity evidence" if reproduction_passed else "clean snapshot differs from the primary packet"
+            m6_reason = "clean snapshot reproduced packet scores, tiers, and parity evidence" if reproduction_passed else "clean snapshot differs from the primary packet or lacks a complete source snapshot"
             reproduction = {
                 "archive": str(reproduced_from),
                 "archive_sha256": _digest(reproduced_from.read_bytes()),

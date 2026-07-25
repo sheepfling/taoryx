@@ -13,6 +13,41 @@ SPEC.loader.exec_module(MODULE)
 
 
 def _packet(tmp_path: Path, *, x15_closure: str = "pass") -> Path:
+    def evaluation(scenario_id: str) -> dict[str, object]:
+        return {
+            "schema_version": 1,
+            "scenario_id": scenario_id,
+            "validity": "valid",
+            "qualification": "extended",
+            "feasibility": "unknown",
+            "outcome": "completed",
+            "metrics": [],
+            "gates": [{"id": "objective-report", "status": "pass", "message": "pass", "metric_ids": []}],
+            "requested_controls": [],
+            "achieved_controls": [],
+            "resources": [],
+            "events": [],
+            "closure": [{
+                "id": "closure-translation",
+                "actual": 0.0,
+                "target": 0.0,
+                "tolerance": 1.0,
+                "unit": "1",
+                "status": "pass",
+                "source": "test",
+            }],
+            "convergence": [{
+                "id": "convergence-gate",
+                "actual": 1.0,
+                "target": 1.0,
+                "tolerance": 0.5,
+                "unit": "1",
+                "status": "pass",
+                "source": "test",
+            }],
+            "claim_boundary": "test evidence",
+        }
+
     families = []
     for family in sorted(MODULE.FAMILIES):
         families.append(
@@ -21,6 +56,7 @@ def _packet(tmp_path: Path, *, x15_closure: str = "pass") -> Path:
                 "scenario_identity": {"id": family},
                 "long_validation": {
                     "catalog": {"id": family},
+                    "nominal": {"evaluation": evaluation(f"{family}-long")},
                     "objective_evaluation": {"objectives": [{"id": "duration"}], "status": "pass", "score": 100.0},
                     "follow_on": {
                         "event_continuity_audit": {"status": "pass"},
@@ -43,6 +79,7 @@ def _packet(tmp_path: Path, *, x15_closure: str = "pass") -> Path:
                 "objective_evaluation": {"status": "pass", "score": 100.0},
                 "closure_evaluation": {"status": "pass"},
                 "event_continuity_audit": {"status": "pass"},
+                "evaluation": evaluation(f"{mission_id}-mission"),
             }
             for family, mission_id in (
                 ("b747", "b747-integrated-route-transition"),
@@ -56,6 +93,15 @@ def _packet(tmp_path: Path, *, x15_closure: str = "pass") -> Path:
     archive = tmp_path / "packet.zip"
     with zipfile.ZipFile(archive, "w") as handle:
         handle.writestr("manifest.json", json.dumps(manifest))
+        handle.writestr("software_commit.txt", "git_commit=test\n")
+        handle.writestr("working_tree.patch", "")
+        handle.writestr("working_tree.status", "")
+        handle.writestr("dependency.lock", "python_version=3.12\n")
+        handle.writestr("reproduce.sh", "#!/bin/sh\n")
+        handle.writestr(
+            "working_tree.untracked.json",
+            json.dumps({"schema_version": 1, "base_commit": "test", "files": []}),
+        )
     return archive
 
 

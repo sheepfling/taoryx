@@ -12,6 +12,11 @@ missions:
     tables:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
     max_steps: 2000
+    convergence:
+      window_s: 5.0
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s]
+      tolerances: {altitude_m: 0.5, speed_m_s: 0.05}
     objectives:
       - {id: duration, kind: controller_mission, channel: duration_s, target: 20.0, tolerance: 0.01, quality_limit: 0.10, unit: s, source: summary}
       - {id: route-capture, kind: route_transition, channel: range_to_target_m, target: 500.0, tolerance: 1.0, quality_limit: 100.0, unit: m, comparison: maximum, source: final}
@@ -33,6 +38,11 @@ missions:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
     max_steps: 10000
+    convergence:
+      window_s: 10.0
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s]
+      tolerances: {altitude_m: 1.0, speed_m_s: 0.1}
     objectives:
       - {id: duration, kind: controller_mission, channel: duration_s, target: 120.0, tolerance: 0.01, quality_limit: 0.10, unit: s, source: summary}
       - {id: final-corner-capture, kind: waypoint, channel: range_to_target_m, target: 300.0, tolerance: 1.0, quality_limit: 50.0, unit: m, comparison: maximum, source: final}
@@ -56,6 +66,11 @@ missions:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
     max_steps: 50000
+    convergence:
+      window_s: 5.0
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s]
+      tolerances: {altitude_m: 0.2, speed_m_s: 0.05}
     objectives:
       - {id: duration, kind: controller_mission, channel: duration_s, target: 40.0, tolerance: 0.01, quality_limit: 0.10, unit: s, source: summary}
       - {id: return-capture, kind: waypoint, channel: range_to_target_m, target: 0.20, tolerance: 0.01, quality_limit: 0.10, unit: m, comparison: maximum, source: final}
@@ -76,6 +91,11 @@ missions:
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl
     max_steps: 3000
+    convergence:
+      window_s: 10.0
+      factors: [1.0, 0.5, 0.25]
+      channels: [altitude_m, speed_m_s]
+      tolerances: {altitude_m: 10.0, speed_m_s: 1.0}
     objectives:
       - {id: duration, kind: controller_transition, channel: duration_s, target: 35.0, tolerance: 0.01, quality_limit: 0.10, unit: s, source: summary}
       - {id: propnav-transition, kind: guidance, channel: pro_nav_active, target: 1.0, tolerance: 0.01, quality_limit: 1.0, unit: "1", comparison: minimum, source: max_abs}

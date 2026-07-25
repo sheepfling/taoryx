@@ -17,6 +17,12 @@ execution, spacecraft, sensors, and weather. These are not additional Alpha 2
 release gates. They are ranked post-release work and must not be allowed to
 silently widen the Alpha 2 claim.
 
+The executable closeout goal is recorded in
+[`taoryx-alpha-2-execution-goal.md`](taoryx-alpha-2-execution-goal.md). It is
+deliberately narrower than the full vehicle-breadth roadmap: Alpha 2 closes a
+reusable platform and evidence path for the four established proof families;
+new vehicle runtime qualification remains Alpha 3 work.
+
 ## Release boundary
 
 The post-release backlog is now split into two release lanes. Alpha 2 closes

@@ -4,6 +4,10 @@ entries:
   - id: b747-condition3-trim-v1
     vehicle: b747
     status: ready
+    fidelity: rigid_body_6dof
+    operating_point: {altitude_m: 100.0, true_airspeed_m_s: 153.0, configuration: clean}
+    provenance: {source: NASA-CR-2144-condition-3, geometry: verification/vehicle_models.yaml}
+    solver: {multi_start: 3, seed: 74703, perturbation_fraction: 0.05, max_nfev: 100, residual_tolerance: 1.0e-11}
     state_names: [alpha_offset_deg]
     control_names: [thrust_n, elevator_deg]
     residual_names: [body_x_force, body_z_force, pitch_moment]
@@ -18,6 +22,10 @@ entries:
   - id: x8-powered-trim-v1
     vehicle: skywalker_x8
     status: ready
+    fidelity: rigid_body_6dof
+    operating_point: {altitude_m: 178.0, true_airspeed_m_s: 17.9, alpha_deg: 7.9, beta_deg: 1.2, throttle: 0.44}
+    provenance: {source: public-skywalker-x8-flight-identification, geometry: verification/vehicle_models.yaml}
+    solver: {multi_start: 3, seed: 8008, perturbation_fraction: 0.05, max_nfev: 500, residual_tolerance: 1.0e-9}
     state_names: [alpha_deg]
     control_names: [throttle, collective_elevon_deg, differential_elevon_deg]
     residual_names: [body_x_force, body_z_force, roll_moment, pitch_moment, yaw_moment]
@@ -32,6 +40,10 @@ entries:
   - id: hummingbird-hover-v1
     vehicle: hummingbird
     status: ready
+    fidelity: rigid_body_6dof
+    operating_point: {altitude_m: 2.0, airspeed_m_s: 0.0, wind_m_s: 0.0}
+    provenance: {source: RotorPy-Hummingbird-public-parameters, geometry: verification/vehicle_models.yaml}
+    solver: {multi_start: 2, seed: 4242, perturbation_fraction: 0.02, max_nfev: 100, residual_tolerance: 1.0e-11}
     state_names: []
     control_names: [equal_rotor_speed_rad_s]
     residual_names: [body_x_force, body_z_force, yaw_moment]
@@ -44,6 +56,10 @@ entries:
   - id: x15-release-glide-v1
     vehicle: x15
     status: ready
+    fidelity: rigid_body_6dof
+    operating_point: {altitude_m: 21000.0, true_airspeed_m_s: 1300.0, powered: false, condition: release-glide}
+    provenance: {source: x15-coherent-6dof-public-research-v1, geometry: verification/vehicle_models.yaml}
+    solver: {multi_start: 3, seed: 1515, perturbation_fraction: 0.05, max_nfev: 500, residual_tolerance: 1.0e-9}
     state_names: [alpha_deg]
     control_names: [symmetric_stabilator_deg, differential_stabilator_deg, rudder_deg]
     residual_names: [force_velocity_cross_y, force_velocity_cross_z, roll_moment, pitch_moment, yaw_moment]

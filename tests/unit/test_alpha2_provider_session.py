@@ -46,6 +46,8 @@ def test_reference_and_taoryx_step_transitions_have_common_physical_state() -> N
     assert native_step.time_end_s == pytest.approx(reference_step.time_end_s)
     assert native_step.state.values == pytest.approx(reference_step.state.values)
     assert native_step.applied_controls == reference_step.applied_controls
+    assert native_step.requested_controls["command.throttle"] == pytest.approx(0.5)
+    assert native_step.achieved_controls == native_step.applied_controls
 
 
 def test_batch_execution_is_repeated_public_step_transition() -> None:
@@ -53,6 +55,8 @@ def test_batch_execution_is_repeated_public_step_transition() -> None:
     for provider in (ReferencePointMassProvider(), TaoryxPointMassAdapter()):
         compiled = provider.compile(CASE)
         batch = provider.new_session(compiled).run_to_completion(controls)
+        assert len(batch.requested_controls) == len(batch.applied_controls)
+        assert len(batch.resource_observations) == len(batch.applied_controls)
         stepped_session = provider.new_session(compiled)
         stepped = [stepped_session.reset()]
         for frame in controls:

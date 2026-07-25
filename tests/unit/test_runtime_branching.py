@@ -7,9 +7,11 @@ from pathlib import Path
 
 import pytest
 
+from taoryx.contracts import Frame, FrameVector3, Vector3
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import ingest_file
 from taoryx.language.models import ProblemDocument
+from taoryx.modes import DynamicsMode, Kinematic6DofState, Quaternion
 from taoryx.runtime.common import RuntimeProblem, RuntimeState, RuntimeVehicle
 from taoryx.runtime.engine import compute_trajectories
 from taoryx.runtime.interactive import ControlSpec, InteractiveSession
@@ -259,6 +261,61 @@ def test_checkpoint_rejects_source_tampering(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="source integrity"):
         LoadedProgram.load_checkpoint(checkpoint)
+####
+
+
+def test_kinematic_checkpoint_restores_attitude_sidecar_and_segment_endpoints(tmp_path: Path) -> None:
+    source = tmp_path / "kinematic-checkpoint.prb"
+    source.write_text(
+        "(kinematic-checkpoint)\n"
+        "*mode kinematic-6dof\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecfc x=0 y=0 z=0 xdt=10 ydt=0 zdt=0 mass=1 time=0\n"
+        "  *segment 1 flight\n"
+        "    *integ dt=0.5\n"
+        "    *when time>1 stop\n"
+        "*end\n",
+        encoding="utf-8",
+    )
+    program = LoadedProgram.load(source, profile=GrammarProfile.TAORYX)
+    vehicle = program.case().vehicles["1"]
+    assert vehicle.dynamics_mode is DynamicsMode.KINEMATIC_6DOF
+    vehicle.kinematic_state = Kinematic6DofState(
+        0.0,
+        FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECFC),
+        FrameVector3(Vector3(10.0, 0.0, 0.0), Frame.ECFC),
+        Quaternion(0.5, 0.5, 0.5, 0.5).normalized(),
+    )
+    compute_trajectories(program.case(), max_steps=2)
+    checkpoint = program.save_checkpoint(tmp_path / "kinematic.json")
+
+    resumed = LoadedProgram.load_checkpoint(checkpoint)
+    restored = resumed.case().vehicles["1"]
+    assert restored.kinematic_state is not None
+    assert restored.kinematic_state.time == pytest.approx(vehicle.kinematic_state.time)
+    assert restored.kinematic_state.position.vector == vehicle.kinematic_state.position.vector
+    assert restored.kinematic_state.velocity.vector == vehicle.kinematic_state.velocity.vector
+    assert restored.kinematic_state.attitude == vehicle.kinematic_state.attitude
+    assert restored.state.segment_endpoints == vehicle.state.segment_endpoints
+####
+
+
+def test_rigid_body_checkpoint_restores_state_and_runtime_settings(tmp_path: Path) -> None:
+    source = Path("tests/fixtures/alpha2_case_contracts/t5-rigid-probe.prb")
+    program = LoadedProgram.load(source, profile=GrammarProfile.TAORYX)
+    compute_trajectories(program.case(), max_steps=2)
+    before = program.case().vehicles["1"]
+    checkpoint = program.save_checkpoint(tmp_path / "rigid.json")
+
+    resumed = LoadedProgram.load_checkpoint(checkpoint)
+    after = resumed.case().vehicles["1"]
+    assert after.dynamics_mode is DynamicsMode.RIGID_BODY_6DOF
+    assert after.state.time == pytest.approx(before.state.time)
+    assert after.state.values == pytest.approx(before.state.values)
+    assert after.integrator == before.integrator
+    assert after.step_size == pytest.approx(before.step_size)
 ####
 
 

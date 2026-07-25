@@ -9,6 +9,8 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
+from taoryx.trajectory.evaluation import TrajectoryEvaluation
+
 
 def _digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -49,6 +51,25 @@ def _audit_objective_composite(report: object, family_id: str) -> dict[str, obje
     if report.get("status") != expected_status:
         raise ValueError(f"{family_id} objective status is not reproducible")
     return {"score": expected_score, "status": expected_status, "objective_count": len(records)}
+
+
+def _audit_neutral_evaluation(report: object, label: str) -> dict[str, object]:
+    """Validate the provider-neutral evaluation envelope without rerunning a case."""
+
+    if not isinstance(report, dict):
+        raise ValueError(f"{label} neutral evaluation is missing")
+    try:
+        evaluation = TrajectoryEvaluation.model_validate(report)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{label} neutral evaluation is invalid: {error}") from error
+    return {
+        "scenario_id": evaluation.scenario_id,
+        "validity": evaluation.validity,
+        "qualification": evaluation.qualification,
+        "feasibility": evaluation.feasibility,
+        "outcome": evaluation.outcome,
+        "required_gates_pass": evaluation.required_gates_pass,
+    }
 
 
 def audit(archive: Path) -> dict[str, Any]:
@@ -94,6 +115,20 @@ def audit(archive: Path) -> dict[str, Any]:
                     family.get("long_validation", {}).get("objective_evaluation"), str(family["id"])
                 )
                 for family in families
+            }
+            result["neutral_evaluations"] = {
+                str(family["id"]): _audit_neutral_evaluation(
+                    family.get("long_validation", {}).get("nominal", {}).get("evaluation"),
+                    f"{family['id']} long-validation",
+                )
+                for family in families
+            }
+            result["controller_neutral_evaluations"] = {
+                str(item["id"]): _audit_neutral_evaluation(
+                    item.get("evaluation"),
+                    f"controller mission {item['id']}",
+                )
+                for item in manifest.get("controller_missions", ())
             }
             result["hashes_checked"] = len(declared)
         else:

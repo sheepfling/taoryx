@@ -1,0 +1,337 @@
+{
+  "claim_boundary": "contract coverage only; no provider qualification",
+  "findings": [
+    {
+      "archetype": "light_propeller_aircraft",
+      "capabilities": {
+        "control_intents": [
+          "altitude",
+          "airspeed",
+          "attitude",
+          "effector"
+        ],
+        "modes": [
+          "ground",
+          "takeoff",
+          "cruise",
+          "stall",
+          "landing"
+        ],
+        "observation_kinds": [
+          "state",
+          "actuator_achieved",
+          "resource",
+          "diagnostic"
+        ],
+        "supports_allocation": true,
+        "supports_checkpoint": true,
+        "supports_mode_transitions": true,
+        "supports_resources": true,
+        "terminal_conditions": [
+          "touchdown",
+          "fuel_depleted",
+          "envelope_exit"
+        ]
+      },
+      "contract_counts": {
+        "allocations": 1,
+        "component_slots": 6,
+        "controls": 6,
+        "mode_transitions": 2,
+        "observations": 6,
+        "resources": 2
+      },
+      "diagnostics": [],
+      "evidence": {
+        "grade": "mixed",
+        "uncertainty": "source-linked geometry with public-surrogate dynamics"
+      },
+      "fidelities": [
+        "point_mass_3dof",
+        "pseudo_6dof",
+        "rigid_body_6dof"
+      ],
+      "id": "c172p-class",
+      "provider_status": "interface_only",
+      "status": "pass"
+    },
+    {
+      "archetype": "single_main_rotor_helicopter",
+      "capabilities": {
+        "control_intents": [
+          "position",
+          "velocity",
+          "attitude",
+          "body_rate",
+          "effector"
+        ],
+        "modes": [
+          "ground_idle",
+          "spool",
+          "hover",
+          "forward_flight",
+          "approach",
+          "touchdown"
+        ],
+        "observation_kinds": [
+          "state",
+          "actuator_achieved",
+          "resource",
+          "diagnostic"
+        ],
+        "supports_allocation": true,
+        "supports_checkpoint": true,
+        "supports_mode_transitions": true,
+        "supports_resources": true,
+        "terminal_conditions": [
+          "touchdown",
+          "power_limited",
+          "rotor_shutdown"
+        ]
+      },
+      "contract_counts": {
+        "allocations": 1,
+        "component_slots": 8,
+        "controls": 5,
+        "mode_transitions": 3,
+        "observations": 5,
+        "resources": 2
+      },
+      "diagnostics": [],
+      "evidence": {
+        "grade": "identified",
+        "uncertainty": "hover source deck; forward-flight schedule estimated"
+      },
+      "fidelities": [
+        "point_mass_3dof",
+        "pseudo_6dof",
+        "rigid_body_6dof"
+      ],
+      "id": "r44-class",
+      "provider_status": "interface_only",
+      "status": "pass"
+    },
+    {
+      "archetype": "tiltrotor",
+      "capabilities": {
+        "control_intents": [
+          "position",
+          "flight_path",
+          "attitude",
+          "body_rate",
+          "effector"
+        ],
+        "modes": [
+          "helicopter",
+          "conversion",
+          "airplane",
+          "abort_reversion"
+        ],
+        "observation_kinds": [
+          "state",
+          "actuator_achieved",
+          "resource",
+          "event_prediction",
+          "diagnostic"
+        ],
+        "supports_allocation": true,
+        "supports_checkpoint": true,
+        "supports_mode_transitions": true,
+        "supports_resources": true,
+        "terminal_conditions": [
+          "touchdown",
+          "conversion_complete",
+          "conversion_abort"
+        ]
+      },
+      "contract_counts": {
+        "allocations": 1,
+        "component_slots": 8,
+        "controls": 6,
+        "mode_transitions": 3,
+        "observations": 6,
+        "resources": 2
+      },
+      "diagnostics": [],
+      "evidence": {
+        "grade": "mixed",
+        "uncertainty": "public configuration with scheduled engineering response"
+      },
+      "fidelities": [
+        "point_mass_3dof",
+        "pseudo_6dof",
+        "rigid_body_6dof"
+      ],
+      "id": "xv15-class",
+      "provider_status": "interface_only",
+      "status": "pass"
+    },
+    {
+      "archetype": "spacecraft",
+      "capabilities": {
+        "control_intents": [
+          "orbit",
+          "attitude",
+          "body_rate",
+          "effector"
+        ],
+        "modes": [
+          "coast",
+          "thrust",
+          "reaction_wheel",
+          "magnetic_torquer",
+          "eclipse"
+        ],
+        "observation_kinds": [
+          "state",
+          "actuator_achieved",
+          "resource",
+          "event_prediction",
+          "diagnostic"
+        ],
+        "supports_allocation": true,
+        "supports_checkpoint": true,
+        "supports_mode_transitions": true,
+        "supports_resources": true,
+        "terminal_conditions": [
+          "propellant_depleted",
+          "battery_depleted",
+          "mission_end"
+        ]
+      },
+      "contract_counts": {
+        "allocations": 1,
+        "component_slots": 6,
+        "controls": 5,
+        "mode_transitions": 3,
+        "observations": 6,
+        "resources": 3
+      },
+      "diagnostics": [],
+      "evidence": {
+        "grade": "synthetic",
+        "uncertainty": "interface probe only; no spacecraft provider in Alpha 2"
+      },
+      "fidelities": [
+        "point_mass_3dof",
+        "pseudo_6dof",
+        "rigid_body_6dof"
+      ],
+      "id": "spacecraft-attitude",
+      "provider_status": "interface_only",
+      "status": "pass"
+    },
+    {
+      "archetype": "small_business_jet",
+      "capabilities": {
+        "control_intents": [
+          "airspeed",
+          "altitude",
+          "heading",
+          "attitude",
+          "effector"
+        ],
+        "modes": [
+          "ground",
+          "climb",
+          "cruise",
+          "descent",
+          "approach"
+        ],
+        "observation_kinds": [
+          "state",
+          "actuator_achieved",
+          "resource",
+          "diagnostic"
+        ],
+        "supports_allocation": true,
+        "supports_checkpoint": true,
+        "supports_mode_transitions": true,
+        "supports_resources": true,
+        "terminal_conditions": [
+          "touchdown",
+          "fuel_depleted",
+          "envelope_exit"
+        ]
+      },
+      "contract_counts": {
+        "allocations": 1,
+        "component_slots": 8,
+        "controls": 6,
+        "mode_transitions": 2,
+        "observations": 6,
+        "resources": 2
+      },
+      "diagnostics": [],
+      "evidence": {
+        "grade": "estimated",
+        "uncertainty": "local derivative model; source-linear and bounded-proxy modes"
+      },
+      "fidelities": [
+        "point_mass_3dof",
+        "pseudo_6dof",
+        "rigid_body_6dof"
+      ],
+      "id": "learjet24-class",
+      "provider_status": "interface_only",
+      "status": "pass"
+    },
+    {
+      "archetype": "energy_coupled_surrogate",
+      "capabilities": {
+        "control_intents": [
+          "waypoint",
+          "speed",
+          "attitude",
+          "effector"
+        ],
+        "modes": [
+          "electric",
+          "fuel_burn",
+          "battery_depleted",
+          "best_effort"
+        ],
+        "observation_kinds": [
+          "state",
+          "actuator_achieved",
+          "resource",
+          "diagnostic"
+        ],
+        "supports_allocation": true,
+        "supports_checkpoint": true,
+        "supports_mode_transitions": true,
+        "supports_resources": true,
+        "terminal_conditions": [
+          "resource_limited",
+          "mission_complete",
+          "numerical_failure"
+        ]
+      },
+      "contract_counts": {
+        "allocations": 1,
+        "component_slots": 6,
+        "controls": 4,
+        "mode_transitions": 2,
+        "observations": 5,
+        "resources": 3
+      },
+      "diagnostics": [],
+      "evidence": {
+        "grade": "synthetic",
+        "uncertainty": "contract-only public-surrogate intake"
+      },
+      "fidelities": [
+        "point_mass_3dof",
+        "pseudo_6dof",
+        "rigid_body_6dof"
+      ],
+      "id": "public-surrogate-hybrid",
+      "provider_status": "interface_only",
+      "status": "pass"
+    }
+  ],
+  "matrix_id": "taoryx_alpha2_future_family_interface_stress_v1",
+  "probe_count": 6,
+  "schema_version": 1,
+  "status": "pass"
+}

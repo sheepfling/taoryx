@@ -113,6 +113,8 @@ class _TaoryxSession:
         self._session: InteractiveSession
         self._history: list[SessionState]
         self._controls: list[Mapping[str, float]]
+        self._requested_controls: list[Mapping[str, float]]
+        self._resources: list[Mapping[str, float]]
         self._diagnostics: list[str]
         self._arbitrator = ControlArbitrator(compiled.case.controls)
         self._build()
@@ -129,6 +131,8 @@ class _TaoryxSession:
         )
         self._history = [self._state_from_runtime()]
         self._controls = []
+        self._requested_controls = []
+        self._resources = []
         self._diagnostics = []
         ####
 
@@ -161,6 +165,9 @@ class _TaoryxSession:
         state = self._state_from_runtime()
         self._history.append(state)
         self._controls.append(dict(arbitration.values))
+        requested = {**frame.values, **frame.rates}
+        self._requested_controls.append(requested)
+        self._resources.append({})
         diagnostics = arbitration.diagnostics + snapshot.diagnostics
         self._diagnostics.extend(diagnostics)
         return StepResult(
@@ -171,6 +178,8 @@ class _TaoryxSession:
             snapshot.events,
             diagnostics,
             tuple(decision.to_dict() for decision in arbitration.decisions),
+            requested_controls=requested,
+            achieved_controls=dict(arbitration.values),
         )
         ####
 
@@ -193,6 +202,8 @@ class _TaoryxSession:
             tuple(self._history),
             tuple(self._controls),
             diagnostics=tuple(self._diagnostics),
+            requested_controls=tuple(self._requested_controls),
+            resource_observations=tuple(self._resources),
         )
         ####
 

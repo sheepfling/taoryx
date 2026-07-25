@@ -34,6 +34,19 @@ families:
       baseline: {}
       light:
         vehicle.mass.initial: {value: 850.0, unit: kg}
+    variant_space:
+      policy: reject
+      modifiers:
+        - id: propulsion.thrust_scale
+          target: vehicle.booster.thrust
+          operation: scale
+          canonical_unit: dimensionless
+          minimum: 0.5
+          maximum: 1.5
+          qualified_minimum: 0.8
+          qualified_maximum: 1.2
+          requires_retrim: true
+          provenance: synthetic Alpha 2 scaling fixture; not source vehicle data
     loadouts:
       baseline: {}
       high_thrust:

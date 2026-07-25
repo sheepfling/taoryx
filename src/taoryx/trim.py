@@ -8,14 +8,19 @@ meaning of ``alpha`` versus ``collective`` or any vehicle-specific frame.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
-from dataclasses import dataclass, field
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass, field, replace
+from typing import Any, Literal
 
 import numpy as np
 from scipy.optimize import least_squares
 
 TrimEvaluator = Callable[[Mapping[str, float], Mapping[str, float]], Mapping[str, float]]
 DynamicsEvaluator = Callable[[Mapping[str, float], Mapping[str, float]], Mapping[str, float]]
+ProcedureEvaluator = Callable[
+    [Mapping[str, float], Mapping[str, float], Mapping[str, float | str]],
+    Mapping[str, float],
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,6 +130,23 @@ class TrimResult:
         )
         ####
 
+    def as_dict(self) -> dict[str, Any]:
+        """Return a JSON-compatible, source-independent trim record."""
+
+        return {
+            "state": dict(self.state),
+            "controls": dict(self.controls),
+            "residuals": dict(self.residuals),
+            "scaled_residual_norm": self.scaled_residual_norm,
+            "max_residual": self.max_residual,
+            "success": self.success,
+            "status": self.status,
+            "message": self.message,
+            "iterations": self.iterations,
+            "cost": self.cost,
+        }
+        ####
+
 
 def solve_trim(
     spec: TrimSpec,
@@ -190,6 +212,359 @@ def solve_trim(
         message=str(result.message),
         iterations=int(result.nfev),
         cost=float(result.cost),
+    )
+    ####
+
+
+TrimProcedureStatus = Literal[
+    "accepted",
+    "infeasible",
+    "out_of_envelope",
+    "numerically_unresolved",
+    "adapter_invalid",
+]
+TrimGateComparison = Literal["minimum", "maximum", "equal"]
+
+
+@dataclass(frozen=True, slots=True)
+class TrimGate:
+    """One optional post-solve gate evaluated against adapter diagnostics."""
+
+    id: str
+    metric: str
+    comparison: TrimGateComparison
+    limit: float
+    unit: str
+
+    def __post_init__(self) -> None:
+        if not self.id.strip() or not self.metric.strip() or not self.unit.strip():
+            raise ValueError("trim gates require non-empty id, metric, and unit")
+        if not np.isfinite(float(self.limit)):
+            raise ValueError("trim gate limit must be finite")
+        ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class TrimProcedure:
+    """Reusable, provenance-bearing policy for one operating-point solve.
+
+    The plant adapter remains outside this object.  A procedure only owns the
+    variable contract, operating-point metadata, deterministic search policy,
+    and optional gates.  This keeps source equations and frame conversions in
+    the family adapter while making trim generation uniform across families.
+    """
+
+    id: str
+    vehicle: str
+    fidelity: str
+    spec: TrimSpec
+    operating_point: Mapping[str, float | str] = field(default_factory=dict)
+    provenance: Mapping[str, str] = field(default_factory=dict)
+    multi_start: int = 1
+    seed: int = 0
+    perturbation_fraction: float = 0.10
+    max_nfev: int = 2000
+    residual_tolerance: float = 1.0e-8
+    acceptance_tolerance: float | None = None
+    continuation_axis: str | None = None
+    continuation_values: tuple[float, ...] = ()
+    gates: tuple[TrimGate, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.id.strip() or not self.vehicle.strip() or not self.fidelity.strip():
+            raise ValueError("trim procedure identity fields must not be empty")
+        if self.multi_start < 1:
+            raise ValueError("trim procedure multi_start must be at least one")
+        if not 0.0 <= self.perturbation_fraction <= 1.0:
+            raise ValueError("trim procedure perturbation_fraction must be in [0, 1]")
+        if self.max_nfev < 1:
+            raise ValueError("trim procedure max_nfev must be positive")
+        if self.residual_tolerance <= 0.0 or not np.isfinite(self.residual_tolerance):
+            raise ValueError("trim procedure residual_tolerance must be positive and finite")
+        if self.acceptance_tolerance is not None and (
+            self.acceptance_tolerance <= 0.0 or not np.isfinite(self.acceptance_tolerance)
+        ):
+            raise ValueError("trim procedure acceptance_tolerance must be positive and finite")
+        if self.continuation_values and self.continuation_axis is None:
+            raise ValueError("continuation_values require continuation_axis")
+        ####
+    ####
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the immutable procedure contract as JSON-compatible data."""
+
+        return {
+            "id": self.id,
+            "vehicle": self.vehicle,
+            "fidelity": self.fidelity,
+            "operating_point": dict(self.operating_point),
+            "provenance": dict(self.provenance),
+            "solver": {
+                "multi_start": self.multi_start,
+                "seed": self.seed,
+                "perturbation_fraction": self.perturbation_fraction,
+                "max_nfev": self.max_nfev,
+                "residual_tolerance": self.residual_tolerance,
+                "acceptance_tolerance": self.acceptance_tolerance,
+                "continuation_axis": self.continuation_axis,
+                "continuation_values": list(self.continuation_values),
+            },
+            "variables": {
+                "state_names": list(self.spec.state_names),
+                "control_names": list(self.spec.control_names),
+                "residual_names": list(self.spec.residual_names),
+                "state_initial": dict(self.spec.state_initial),
+                "control_initial": dict(self.spec.control_initial),
+                "state_lower": dict(self.spec.state_lower or {}),
+                "state_upper": dict(self.spec.state_upper or {}),
+                "control_lower": dict(self.spec.control_lower or {}),
+                "control_upper": dict(self.spec.control_upper or {}),
+                "residual_scales": dict(self.spec.residual_scales or {}),
+                "x_scale": dict(self.spec.x_scale or {}),
+            },
+            "gates": [
+                {
+                    "id": gate.id,
+                    "metric": gate.metric,
+                    "comparison": gate.comparison,
+                    "limit": gate.limit,
+                    "unit": gate.unit,
+                }
+                for gate in self.gates
+            ],
+        }
+        ####
+
+
+@dataclass(frozen=True, slots=True)
+class TrimGateResult:
+    """Evaluation of one procedure gate."""
+
+    id: str
+    status: Literal["pass", "fail", "blocked"]
+    metric: str
+    actual: float | None
+    limit: float
+    unit: str
+    message: str | None = None
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return a JSON-compatible gate result."""
+
+        return {
+            "id": self.id,
+            "status": self.status,
+            "metric": self.metric,
+            "actual": self.actual,
+            "limit": self.limit,
+            "unit": self.unit,
+            "message": self.message,
+        }
+        ####
+
+
+@dataclass(frozen=True, slots=True)
+class TrimProcedureResult:
+    """Auditable result of a deterministic, possibly multi-start procedure."""
+
+    procedure: TrimProcedure
+    status: TrimProcedureStatus
+    best: TrimResult | None
+    attempts: tuple[TrimResult, ...]
+    start_vectors: tuple[tuple[float, ...], ...]
+    gate_results: tuple[TrimGateResult, ...] = ()
+    failure_reason: str | None = None
+    continuation: tuple[TrimProcedureResult, ...] = ()
+
+    @property
+    def converged(self) -> bool:
+        """Return whether the procedure produced an accepted trim."""
+
+        return self.status == "accepted" and self.best is not None
+        ####
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return a versionable procedure artifact."""
+
+        return {
+            "schema_version": 1,
+            "procedure": self.procedure.as_dict(),
+            "status": self.status,
+            "failure_reason": self.failure_reason,
+            "best": self.best.as_dict() if self.best is not None else None,
+            "attempts": [attempt.as_dict() for attempt in self.attempts],
+            "start_vectors": [list(vector) for vector in self.start_vectors],
+            "gate_results": [result.as_dict() for result in self.gate_results],
+            "continuation": [item.as_dict() for item in self.continuation],
+        }
+        ####
+
+
+def _procedure_start_specs(procedure: TrimProcedure) -> tuple[TrimSpec, ...]:
+    """Generate deterministic bounded initial guesses for a procedure."""
+
+    base = procedure.spec
+    initial = base.initial_vector()
+    lower, upper = base.bounds()
+    starts = [initial]
+    if procedure.multi_start == 1:
+        return (base,)
+    rng = np.random.default_rng(procedure.seed)
+    for _ in range(procedure.multi_start - 1):
+        candidate = initial.copy()
+        for index, value in enumerate(candidate):
+            lo = lower[index]
+            hi = upper[index]
+            if np.isfinite(lo) and np.isfinite(hi):
+                span = hi - lo
+                candidate[index] = value + rng.uniform(-1.0, 1.0) * procedure.perturbation_fraction * span
+            else:
+                scale = max(1.0, abs(value))
+                candidate[index] = value + rng.normal(0.0, procedure.perturbation_fraction * scale)
+        starts.append(np.clip(candidate, lower, upper))
+    specs: list[TrimSpec] = []
+    for vector in starts:
+        split = len(base.state_names)
+        state = dict(zip(base.state_names, vector[:split], strict=True))
+        controls = dict(zip(base.control_names, vector[split:], strict=True))
+        specs.append(replace(base, state_initial=state, control_initial=controls))
+    return tuple(specs)
+    ####
+
+
+def _evaluate_trim_gates(
+    gates: Sequence[TrimGate], metrics: Mapping[str, float] | None
+) -> tuple[TrimGateResult, ...]:
+    """Evaluate declared gates without inventing unavailable metrics."""
+
+    values = metrics or {}
+    results: list[TrimGateResult] = []
+    for gate in gates:
+        if gate.metric not in values:
+            results.append(TrimGateResult(gate.id, "blocked", gate.metric, None, gate.limit, gate.unit, "metric unavailable"))
+            continue
+        actual = float(values[gate.metric])
+        if not np.isfinite(actual):
+            results.append(TrimGateResult(gate.id, "blocked", gate.metric, actual, gate.limit, gate.unit, "metric is non-finite"))
+            continue
+        passed = {
+            "minimum": actual >= gate.limit,
+            "maximum": actual <= gate.limit,
+            "equal": np.isclose(actual, gate.limit),
+        }[gate.comparison]
+        results.append(TrimGateResult(gate.id, "pass" if passed else "fail", gate.metric, actual, gate.limit, gate.unit))
+    return tuple(results)
+    ####
+
+
+def solve_trim_procedure(
+    procedure: TrimProcedure,
+    evaluator: ProcedureEvaluator,
+    *,
+    metrics: Mapping[str, float] | None = None,
+) -> TrimProcedureResult:
+    """Solve one operating point using deterministic multi-start and gates."""
+
+    attempts: list[TrimResult] = []
+    starts: list[tuple[float, ...]] = []
+    try:
+        for spec in _procedure_start_specs(procedure):
+            starts.append(tuple(float(value) for value in spec.initial_vector()))
+
+            def residual_adapter(
+                state: Mapping[str, float],
+                controls: Mapping[str, float],
+                op: Mapping[str, float | str] = procedure.operating_point,
+            ) -> Mapping[str, float]:
+                return evaluator(state, controls, op)
+
+            attempts.append(
+                solve_trim(
+                    spec,
+                    residual_adapter,
+                    max_nfev=procedure.max_nfev,
+                    residual_tolerance=procedure.residual_tolerance,
+                    acceptance_tolerance=procedure.acceptance_tolerance,
+                )
+            )
+    except (KeyError, TypeError, ValueError, OverflowError) as error:
+        return TrimProcedureResult(
+            procedure,
+            "adapter_invalid",
+            None,
+            tuple(attempts),
+            tuple(starts),
+            failure_reason=str(error),
+        )
+    successful = tuple(attempt for attempt in attempts if attempt.success)
+    best = min(successful, key=lambda attempt: attempt.scaled_residual_norm) if successful else None
+    gate_results = _evaluate_trim_gates(procedure.gates, metrics if best is not None else None)
+    if best is None:
+        status: TrimProcedureStatus = "infeasible" if attempts else "numerically_unresolved"
+        reason = "no bounded start converged" if attempts else "no solver attempt completed"
+    elif any(item.status == "blocked" for item in gate_results):
+        status = "out_of_envelope"
+        reason = "one or more declared trim gates were unavailable"
+    elif any(item.status == "fail" for item in gate_results):
+        status = "out_of_envelope"
+        reason = "one or more declared trim gates failed"
+    else:
+        status = "accepted"
+        reason = None
+    return TrimProcedureResult(procedure, status, best, tuple(attempts), tuple(starts), gate_results, reason)
+    ####
+
+
+def solve_trim_continuation(
+    procedure: TrimProcedure,
+    evaluator: ProcedureEvaluator,
+    *,
+    metrics_by_point: Mapping[float, Mapping[str, float]] | None = None,
+) -> TrimProcedureResult:
+    """Solve declared operating points by warm-starting each next point.
+
+    Continuation is deliberately explicit: no operating-point values are
+    invented and a failed point is retained as the terminal diagnostic.
+    """
+
+    if procedure.continuation_axis is None or not procedure.continuation_values:
+        return solve_trim_procedure(procedure, evaluator, metrics=(metrics_by_point or {}).get(0.0))
+    current = procedure
+    results: list[TrimProcedureResult] = []
+    for value in procedure.continuation_values:
+        operating_point = dict(current.operating_point)
+        operating_point[procedure.continuation_axis] = float(value)
+        current = replace(current, operating_point=operating_point, multi_start=1)
+        result = solve_trim_procedure(
+            current,
+            evaluator,
+            metrics=(metrics_by_point or {}).get(float(value)),
+        )
+        results.append(result)
+        if not result.converged or result.best is None:
+            return TrimProcedureResult(
+                procedure,
+                result.status,
+                result.best,
+                result.attempts,
+                result.start_vectors,
+                result.gate_results,
+                f"continuation stopped at {procedure.continuation_axis}={value}: {result.failure_reason}",
+                tuple(results),
+            )
+        current = replace(
+            current,
+            spec=replace(current.spec, state_initial=result.best.state, control_initial=result.best.controls),
+        )
+    return TrimProcedureResult(
+        procedure,
+        "accepted",
+        results[-1].best if results else None,
+        tuple(attempt for result in results for attempt in result.attempts),
+        tuple(vector for result in results for vector in result.start_vectors),
+        results[-1].gate_results if results else (),
+        continuation=tuple(results),
     )
     ####
 

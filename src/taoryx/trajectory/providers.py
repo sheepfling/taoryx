@@ -10,6 +10,7 @@ from typing import Protocol
 
 from .authority import ControlArbitrator
 from .contracts import ControlFrame, FidelityProfile, ResolvedCase
+from .evaluation import TrajectoryEvaluation
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,6 +103,9 @@ class StepResult:
     events: tuple[str, ...] = ()
     diagnostics: tuple[str, ...] = ()
     control_decisions: tuple[Mapping[str, object], ...] = ()
+    requested_controls: Mapping[str, float] = field(default_factory=dict)
+    achieved_controls: Mapping[str, float] = field(default_factory=dict)
+    resource_observations: Mapping[str, float] = field(default_factory=dict)
 ####
 
 
@@ -116,6 +120,9 @@ class TrajectoryResult:
     applied_controls: tuple[Mapping[str, float], ...]
     events: tuple[str, ...] = ()
     diagnostics: tuple[str, ...] = ()
+    requested_controls: tuple[Mapping[str, float], ...] = ()
+    resource_observations: tuple[Mapping[str, float], ...] = ()
+    evaluation: TrajectoryEvaluation | None = None
 
     def to_dict(self) -> dict[str, object]:
         """Return a stable machine-readable result envelope."""
@@ -128,6 +135,9 @@ class TrajectoryResult:
             "applied_controls": [dict(frame) for frame in self.applied_controls],
             "events": list(self.events),
             "diagnostics": list(self.diagnostics),
+            "requested_controls": [dict(frame) for frame in self.requested_controls],
+            "resource_observations": [dict(frame) for frame in self.resource_observations],
+            "evaluation": self.evaluation.as_dict() if self.evaluation is not None else None,
         }
         ####
 
@@ -293,6 +303,8 @@ class _ReferenceSession:
         self._arbitrator.reset()
         self._history: list[SessionState] = [self._state()]
         self._controls: list[Mapping[str, float]] = []
+        self._requested_controls: list[Mapping[str, float]] = []
+        self._resources: list[Mapping[str, float]] = []
         self._diagnostics: list[str] = []
         ####
 
@@ -333,6 +345,9 @@ class _ReferenceSession:
         state = self._state()
         self._history.append(state)
         self._controls.append(dict(applied))
+        requested = {**frame.values, **frame.rates}
+        self._requested_controls.append(requested)
+        self._resources.append({})
         self._diagnostics.extend(arbitration.diagnostics)
         return StepResult(
             start,
@@ -341,6 +356,8 @@ class _ReferenceSession:
             dict(applied),
             diagnostics=arbitration.diagnostics,
             control_decisions=tuple(decision.to_dict() for decision in arbitration.decisions),
+            requested_controls=requested,
+            achieved_controls=dict(applied),
         )
         ####
 
@@ -364,6 +381,8 @@ class _ReferenceSession:
             tuple(self._history),
             tuple(self._controls),
             diagnostics=tuple(self._diagnostics),
+            requested_controls=tuple(self._requested_controls),
+            resource_observations=tuple(self._resources),
         )
         ####
 
