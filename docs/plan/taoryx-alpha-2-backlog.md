@@ -25,25 +25,25 @@ new vehicle breadth and deeper source correlation.
 
 ### Alpha 2 finish line
 
-Alpha 2 closes only after P0-1 through P0-5, P1-1, P1-2, the reusable trim
-procedure P1-4, the passive-body geometry tranche P1-5, and the bounded
-source-anchor tranche P1-3 are complete:
+Alpha 2 closes only after P0-1 through P0-6, P1-1, P1-2, and the reusable trim
+procedure P1-4 are complete:
 
 - one common evaluator and evidence packet route;
 - deterministic interactive stepping, replay, and checkpoint/restart;
 - generic vehicle onboarding and convention firewall;
 - future-family interface stress test covering components, resources, modes,
   allocation, channel semantics, and evidence metadata;
+- bounded vehicle-variant resolution with coupled derived values, qualified
+  ranges, semantic modifiers, projection/rejection reports, and fingerprints;
 - reproducible B747, X8, Hummingbird, and X-15 flagship missions;
 - normalized plant-truth controller presets and tuning;
 - reusable trim generation and operating-point procedure for the four
   established families, including the source-backed X-15 glide trim;
-- four parameterized passive/tumbling deployable-body geometries: sphere,
-  cylinder, cone, and triaxial ellipsoid;
 - M4 Composable maturity for the four established proof families.
-- F-16 S-119 and HL-20 Mod K source-grounded reference anchors that replay
-  their pinned DAVE-ML plants and source regressions through the normal
-  Taoryx path.
+
+F-16/HL-20 source anchors and passive/tumbling deployable bodies are Alpha 3
+tranches. They may have intake records and reusable contracts in Alpha 2, but
+their runtime qualification must not block the Alpha 2 release signal.
 
 The finish line does not require implementing every vehicle now in intake. It
 permits their source records and maturity entries to exist while keeping their
@@ -52,9 +52,10 @@ runtime claims in Alpha 3.
 ### Alpha 3 boundary
 
 Alpha 3 begins with the C172, R44, UH-1H, UH-60A, XV-15, V-22-class, Learjet,
-spacecraft, and public-surrogate pilots. It then adds source correlation,
-hybrid transitions, search/reachability, trajectory corpora, fleet scale,
-sensors/weather, and stronger reference anchors. See
+spacecraft, and public-surrogate pilots using the Alpha 2.1 resolved-variant
+contract. It then adds source correlation, hybrid transitions,
+search/reachability, trajectory corpora, fleet scale, sensors/weather, and
+stronger reference anchors. See
 [`taoryx-alpha-3.md`](taoryx-alpha-3.md) and the machine-readable
 [`vehicle_maturity_registry.yaml`](../../verification/vehicle_maturity_registry.yaml).
 
@@ -108,11 +109,42 @@ Work is ordered by how much it reduces future rework:
 
 P0 is complete only when a new family can enter through metadata plus a normal
 provider binding, run through the same session/evaluation path, and produce a
-replayable evidence packet.
+replayable evidence packet. P0-6 additionally ensures that a candidate variant
+cannot bypass model-integrity or qualification rules through generic overrides.
+
+5. **Bounded vehicle-variant compiler**
+
+Add the smallest reusable variant layer needed by the existing four families:
+
+- `VariantSpace`, parameter roles, semantic modifiers, and derived-parameter
+  dependencies;
+- hard-valid, qualified, and extrapolated ranges with evidence/provenance;
+- deterministic reject/project policy with original and projected candidates;
+- immutable `ResolvedVariant` binding and stable fingerprint;
+- resource, mass-property, and propulsion coupling checks; and
+- retrim/requalification invalidation flags consumed by the existing trim and
+  controller workflows.
+
+Do not expose arbitrary table-cell edits, unrestricted inertia entries,
+topology changes, or geometry generation in this tranche. New variants remain
+catalog/configuration data and are lowered through the existing problem-file
+generator.
+
+P0-6 exit criteria:
+
+- randomized candidates cannot produce negative mass, invalid inertia, or
+  inconsistent propellant/resource state;
+- the same candidate resolves identically in a clean process;
+- out-of-qualified but hard-valid candidates are labeled `extended`;
+- invalid candidates are rejected or explicitly projected, never repaired
+  silently;
+- every derived value has dependency and provenance records; and
+- one Simple Aero, one fixed-wing, and one rotorcraft-style fixture consume the
+  same variant contract without bespoke resolution code.
 
 ### P1 — Prove the current library
 
-5. **Four-family flagship missions**
+6. **Four-family flagship missions**
 
 Run these in order because their mechanics and debugging cost increase:
 
@@ -128,14 +160,14 @@ segments to expose mechanics, objective/event markers, command and actuator
 telemetry, envelope margins, and a claim ledger. A finite trajectory or loose
 terminal radius is not sufficient.
 
-6. **Normalized controller presets and tuning**
+7. **Normalized controller presets and tuning**
 
 Use plant-truth trim and linearization, mass/inertia/reference-geometry
 scaling, control-direction probes, and explicit gentle/standard/aggressive
 profiles. LQR is the first baseline, not a permanent architectural lock-in;
 SciPy or historical solver adapters remain selectable and provenance-linked.
 
-7. **Reusable trim generation and operating-point procedure**
+8. **Reusable trim generation and operating-point procedure**
 
 Trim generation is an Alpha 2 dependency because controller and segment
 validation cannot scale if every operating point is hand-tuned. The procedure
@@ -148,9 +180,14 @@ force must align with velocity and body moments must vanish; requiring zero
 total force would be physically incorrect. New vehicle families remain Alpha
 3 consumers of this interface.
 
+P1 is complete only when each claimed family mission is reproducible from a
+resolved case and its lower-level plant, convention, and controller evidence.
+
+### Alpha 3 deferred — passive-body and reference-anchor breadth
+
 8. **Passive/tumbling deployable-body geometry qualification**
 
-This is a deliberately bounded Alpha 2 promotion. Qualify sphere, cylinder,
+This is a deliberately bounded Alpha 3 promotion. Qualify sphere, cylinder,
 cone, and triaxial-ellipsoid passive bodies through one deploy/release,
 full-angle drag-area, tumbling, atmosphere, impact-event, and terminal-footprint
 contract. The result is a physical terminal-footprint and uncertainty claim,
@@ -162,7 +199,7 @@ remain Alpha 3.
 9. **F-16 and HL-20 DAVE-ML reference anchors**
 
 Integrate their immutable source plants through the same catalog and firewall.
-The Alpha 2 slice is deliberately narrower than full pickup readiness: it
+The Alpha 3 slice is deliberately narrower than full pickup readiness: it
 requires pinned collections, native DAVE-ML replay, source check-case and
 trim/hold evidence, direct-control plant artifacts, and reproducible hashes.
 Add actuator, allocation, controller, mission, and reduction layers separately
@@ -170,9 +207,6 @@ after this anchor gate. Keep source-grounded reference claims distinct from
 public-data and synthetic surrogate claims. A320 remains an intake record and
 is not an Alpha 2 completion dependency because its exact source package is
 still unavailable.
-
-P1 is complete only when each claimed family mission is reproducible from a
-resolved case and its lower-level plant, convention, and controller evidence.
 
 ### P2 — Alpha 3 domain pilots, search, and coherent breadth
 

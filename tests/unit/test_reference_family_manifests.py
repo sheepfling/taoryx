@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
@@ -9,7 +10,12 @@ from taoryx.trajectory import CaseIntent, as_family_catalog, inspect_reference_p
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG_PATH = ROOT / "verification" / "reference_family_catalog.yaml"
-CORPUS_ROOT = ROOT / "INBOX/taoryx-aerospace-data-corpus-v1.1"
+CORPUS_ROOT = Path(
+    os.environ.get(
+        "TAORYX_DAVEML_CORPUS_ROOT",
+        ROOT / "resources/aerospace/daveml/taoryx-corpus-v1.1/extracted/taoryx-aerospace-data-corpus-v1.1",
+    )
+)
 
 
 def test_reference_family_manifests_project_into_common_catalog() -> None:

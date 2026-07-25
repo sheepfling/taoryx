@@ -1,6 +1,6 @@
 # Taoryx DAVE-ML reference corpus v1.1
 
-This is the minimal offline input required to rebuild the Alpha 2 F-16 S-119
+This is the minimal offline input required to rebuild the Alpha 3 F-16 S-119
 and HL-20 Mod K source-grounded reference collections. The archive is kept as
 one immutable payload so the exact Taoryx-normalized F-16 inputs and compiled
 `.txair` package remain reproducible.

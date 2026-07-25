@@ -19,7 +19,7 @@ prioritization:
 release_boundaries:
   alpha2_closeout:
     objective: Reusable, diagnosable, replayable platform with four composable proof families.
-    required_items: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4, A2-POST-P0-5, A2-POST-P1-1, A2-POST-P1-2, A2-POST-P1-4, A2-POST-P1-5, A2-POST-P1-3]
+    required_items: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4, A2-POST-P0-5, A2-POST-P0-6, A2-POST-P1-1, A2-POST-P1-2, A2-POST-P1-4]
     required_maturity: M4
     exclusions:
       - new unpinned vehicle-family runtime qualification
@@ -27,7 +27,7 @@ release_boundaries:
       - global physical validity, certification, and historical TAOS compatibility
   alpha3_breadth:
     objective: Qualify new family packages through the same contracts without bespoke runtimes.
-    deferred_items: [A2-POST-P2-1, A2-POST-P2-2, A2-POST-P2-3, A2-POST-P2-4, A2-POST-P2-5, A2-POST-P2-6, A2-POST-P3-1, A2-POST-P3-2, A2-POST-P3-2A, A2-POST-P3-3]
+    deferred_items: [A2-POST-P1-3, A2-POST-P1-5, A2-POST-P2-1, A2-POST-P2-2, A2-POST-P2-3, A2-POST-P2-4, A2-POST-P2-5, A2-POST-P2-6, A2-POST-P3-1, A2-POST-P3-2, A2-POST-P3-2A, A2-POST-P3-3]
     target_maturity: M4
   blocked_external:
     items: [A2-POST-P4-1]
@@ -39,6 +39,7 @@ ranked_sequence:
   - A2-POST-P0-3
   - A2-POST-P0-4
   - A2-POST-P0-5
+  - A2-POST-P0-6
   - A2-POST-P1-1
   - A2-POST-P1-2
   - A2-POST-P1-4
@@ -180,6 +181,43 @@ items:
       - schema compatibility report
       - updated family-package authoring guide
 
+  - id: A2-POST-P0-6
+    priority: P0
+    target_release: alpha2
+    lane: alpha2-platform-closeout
+    name: bounded-vehicle-variant-compiler
+    status: planned
+    depends_on: [A2-POST-P0-1, A2-POST-P0-3, A2-POST-P0-5]
+    rationale: Family composition is already present, but parameterized variants need explicit validity, qualification, derivation, and provenance boundaries before new vehicle breadth or search can scale.
+    scope:
+      - independent, derived, and developer-only parameter roles
+      - semantic modifiers for payload, propellant/loadout, thrust/power, CG, inertia, drag, and actuator response
+      - hard-valid, qualified, and extrapolated parameter ranges
+      - derived-parameter graph for mass, burnout, resources, impulse, CG, and inertia
+      - deterministic reject/project policies with original and projected candidate records
+      - immutable ResolvedVariant binding with stable fingerprint and source hashes
+      - resource and mass-property consistency checks before compilation
+      - retrim and requalification invalidation flags consumed by the common trim/controller workflows
+      - generated problem-file lowering without treating .prb as variant source truth
+    exclusions:
+      - arbitrary aerodynamic table-cell mutation
+      - unrestricted inertia tensor search
+      - topology or geometry generation
+      - large-scale optimizer, corpus, or multi-backend execution
+    exit_criteria:
+      - randomized candidates cannot produce negative mass, invalid inertia, or inconsistent resource state
+      - identical candidates resolve to identical canonical values, reports, and fingerprints
+      - out-of-qualified but hard-valid candidates are labeled extended
+      - invalid candidates are rejected or explicitly projected, never repaired silently
+      - every derived value records dependencies and provenance
+      - Simple Aero, fixed-wing, and rotorcraft-style fixtures consume the same variant contract without bespoke resolution code
+      - resolved variants bind consistently to 3DOF, pseudo-6DOF, and rigid-body 6DOF profiles where supported
+    evidence:
+      - variant schema and modifier registry
+      - positive, projected, and rejected candidate fixtures
+      - derived-value and resource-balance report
+      - clean-process fingerprint/replay report
+
   - id: A2-POST-P1-1
     priority: P1
     name: four-family-flagship-mission-qualification
@@ -253,13 +291,13 @@ items:
       - no new Alpha 3 vehicle family is required to close this Alpha 2 item
 
   - id: A2-POST-P1-5
-    priority: P1
-    target_release: alpha2
-    lane: alpha2-proof-closeout
+    priority: P2
+    target_release: alpha3
+    lane: alpha3-breadth
     name: passive-tumbling-deployable-body-geometry-qualification
     status: partial
     depends_on: [A2-POST-P0-1, A2-POST-P0-3, A2-POST-P1-1]
-    rationale: Passive and tumbling deployable bodies are common, bounded-physics objects that can be qualified without opening the broader Alpha 3 family program. Existing full-angle drag-area models and four-shape analysis fixtures provide a natural Alpha 2 implementation slice.
+    rationale: Passive and tumbling deployable bodies are a bounded Alpha 3 physics tranche. Existing full-angle drag-area models and four-shape analysis fixtures provide a natural first implementation slice after the Alpha 2 platform closeout.
     geometries: [sphere, cylinder, cone, triaxial_ellipsoid]
     scope:
       - geometry-parameterized projected-area and drag-area models over full attitude angle
@@ -283,15 +321,17 @@ items:
       - each geometry has a generated table, deploy example, terminal report, and focused test
       - terminal footprints report distributions and uncertainty bands rather than a controller envelope claim
       - trajectories remain bounded by declared atmosphere, table, and integration validity limits
-      - the existing suborbital ballistic tumble-return example passes as a promoted Alpha 2 proof case
+      - the existing suborbital ballistic tumble-return example passes as a promoted Alpha 3 proof case
       - no powered guidance, seeker, or Alpha 3 family qualification is implied
 
   - id: A2-POST-P1-3
-    priority: P1
+    priority: P2
+    target_release: alpha3
+    lane: alpha3-breadth
     name: source-grounded-reference-anchor-integration
     status: planned
     depends_on: [A2-POST-P0-1, A2-POST-P0-3]
-    rationale: F-16 S-119 and HL-20 Mod K are the Alpha 2 source-grounded reference-anchor gate. A320 remains a separate intake target because its exact source package is unavailable.
+    rationale: F-16 S-119 and HL-20 Mod K are Alpha 3 source-grounded reference anchors. The corpus is now a resource-managed input, but replay remains a separate breadth gate. A320 remains a separate intake target because its exact source package is unavailable.
     scope:
       - immutable source packages and integration records
       - deterministic .txcollection builds with source identity and hashes

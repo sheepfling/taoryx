@@ -3,8 +3,9 @@
 **Release:** `v0.2.0-alpha`  
 **Plan:** [TAORYX Alpha 2](taoryx-alpha-2.md)  
 **Current exit:** `A2-RELEASE-PASS`
-**Overall release:** core contract complete; source-grounded reference-anchor
-closeout remains planned
+**Overall release:** core contract complete; remaining Alpha 2 closeout is the
+platform and four-family proof tranche. Source-grounded reference anchors are
+deferred to Alpha 3.
 
 This is the running implementation log for Alpha 2. A tranche is complete only
 when its checked-in tests pass, its evidence directory is generated from the
@@ -211,15 +212,14 @@ dual-launch composition, and release tooling. It does not claim historical
 TAOS 96.0 runtime compatibility, global vehicle validity, flight qualification,
 or a universal autopilot.
 
-## A2-T8 planned — source-grounded reference anchors
+## A3-T1 deferred — source-grounded reference anchors
 
-The F-16 S-119 and HL-20 Mod K source-anchor tranche is now an explicit Alpha
-2 closeout target rather than an Alpha 3 breadth dependency. It is complete
-only when both pinned collections replay their source DAVE-ML graphs through a
-fresh Taoryx process, pass source check cases and trim/hold regressions, and
-produce reproducible direct-control plant artifacts. This tranche does not
-include actuator/controller overlays, flagship missions, RL tasks, or derived
-3DOF/pseudo-6DOF reductions.
+The F-16 S-119 and HL-20 Mod K source-anchor tranche is an Alpha 3 breadth
+dependency. It is complete only when both pinned collections replay their
+source DAVE-ML graphs through a fresh Taoryx process, pass source check cases
+and trim/hold regressions, and produce reproducible direct-control plant
+artifacts. This tranche does not include actuator/controller overlays,
+flagship missions, RL tasks, or derived 3DOF/pseudo-6DOF reductions.
 
 ## Deferred after Alpha 2
 

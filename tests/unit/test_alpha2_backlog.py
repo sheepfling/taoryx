@@ -30,7 +30,7 @@ def test_alpha2_post_release_backlog_has_unique_ordered_items() -> None:
     assert {item["priority"] for item in items} == {"P0", "P1", "P2", "P3", "P4"}
     known = set(ids) | {"A2-RELEASE-PASS"}
     assert all(dependency in known for item in items for dependency in item.get("depends_on", []))
-    assert payload["ranked_sequence"] == ids[:10] + [
+    assert payload["ranked_sequence"] == ids[:11] + [
         "A2-POST-P2-4",
         "A2-POST-P2-5",
         "A2-POST-P3-2",
@@ -45,7 +45,8 @@ def test_alpha2_post_release_backlog_has_unique_ordered_items() -> None:
     ]
     by_name = {item["name"]: item for item in items}
     assert by_name["reusable-trim-generation-and-operating-point-procedure"]["target_release"] == "alpha2"
-    assert by_name["passive-tumbling-deployable-body-geometry-qualification"]["target_release"] == "alpha2"
+    assert by_name["passive-tumbling-deployable-body-geometry-qualification"]["target_release"] == "alpha3"
+    assert by_name["source-grounded-reference-anchor-integration"]["target_release"] == "alpha3"
     assert by_name["guidance-search-and-reachability-workbench"]["target_release"] == "alpha3"
     assert by_name["sensor-weather-and-measurement-layer"]["target_release"] == "alpha3"
     assert by_name["light-propeller-aircraft-family"]["priority"] == "P2"

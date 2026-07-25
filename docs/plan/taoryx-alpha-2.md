@@ -3,8 +3,8 @@
 **Target release:** `v0.2.0-alpha`  
 **Depends on:** Alpha 1 language, validation, deterministic runtime,
 composition, and run-artifact foundations  
-**Status:** core contract complete — `A2-RELEASE-PASS`; source-anchor closeout
-tranche planned
+**Status:** core contract complete — `A2-RELEASE-PASS`; bounded-variant
+closeout tranche planned
 
 ## Purpose
 
@@ -273,6 +273,56 @@ records, generated cases, and reusable segments. A legacy `.prb` remains a
 valid source frontend; it is not the canonical configuration model for new
 family combinations.
 
+## Bounded vehicle variants: Alpha 2.1 closeout
+
+The Alpha 2 composition contracts already resolve a family, fidelity, loadout,
+mission, segments, controller, and overrides into an immutable `ResolvedCase`.
+The remaining platform gap is an explicit, safe vehicle-variant compiler. This
+is a focused closeout tranche, not a second physics runtime or a new problem-
+file dialect.
+
+```text
+FamilyPackage + VariantSpace + semantic modifiers + candidate values
+    -> VariantResolver
+    -> ResolvedVariant + ResolutionReport
+    -> ResolvedCase
+    -> CompiledCase -> run() or step()
+```
+
+`ResolvedVariant` is an immutable vehicle binding inside the `ResolvedCase`.
+It contains primitive and derived canonical values, selected components,
+resource policies, validity/qualification status, capability envelope,
+modifier history, source hashes, and a stable fingerprint.
+
+The resolver must keep these decisions separate:
+
+| Decision | Meaning |
+| --- | --- |
+| Internal validity | The model is physically and structurally consistent. |
+| Qualification | The candidate remains within documented supported ranges. |
+| Mission feasibility | The selected mission appears achievable for this candidate. |
+| Execution outcome | What actually happened during the run. |
+
+`best_effort` applies only to mission execution. It never permits negative
+resources, invalid inertia, silent table extrapolation, or force after
+propellant depletion.
+
+Alpha 2.1 extends parameter metadata with independent, derived, and
+developer-only roles; hard-valid, qualified, and extrapolated ranges; units,
+transforms, coupling groups, provenance, evidence grade, and retrim/requalify
+invalidation flags. Reject/project policies must record the original
+candidate, projected candidate, constraints, and projection distance.
+
+The initial scope is operational variation for the four established proof
+families: payload, propellant/loadout, bounded thrust or power derating, CG
+movement, actuator response, and controller/segment parameters. Arbitrary
+table-cell mutation, unrestricted inertia entries, aerodynamic topology
+changes, and geometry generation remain outside Alpha 2.
+
+Variants are authored in catalog/configuration data and lowered through the
+existing problem-file generator. A `.prb` file may remain an input or
+generated artifact, but it is never the source of variant truth.
+
 ## Execution shape and milestone exits
 
 Alpha 2 is intentionally not one all-or-nothing implementation effort. Work
@@ -289,19 +339,20 @@ machine-readable evidence, focused tests, and a clean claim boundary.
 | A2-T5 | `fidelity-ladder` | **Complete:** one resolved Simple Aero proof family runs a common mission at 3DOF, pseudo-6DOF, and rigid-body 6DOF with parity, divergence, closure, convergence, and native artifacts. | Dual-launch handoff and broad vehicle migration. |
 | A2-T6 | `dual-launch-glider` | **Complete:** one resolved glider family generates air-release and attached-booster cases with a native continuous separation handoff, shared post-release guidance, authority metadata, trajectories, plot, and hashed evidence. | Global vehicle validity and historical TAOS claims. |
 | A2-T7 | `alpha-2-release` | **Complete:** catalog-derived schema reference, explicit claim matrix, self-contained hashed evidence packet, isolated clean-source replay, and release audit gate. | Features outside the frozen Alpha 2 contract. |
-| A2-T8 | `source-reference-anchors` | **Planned:** F-16 S-119 and HL-20 Mod K collections, native DAVE-ML replay, source check-case/trim evidence, and reproducible direct-control plant artifacts. | Actuator/controller overlays, flagship missions, RL tasks, and derived reductions. |
+| A2-T7.1 | `bounded-variants` | **Planned Alpha 2.1 closeout:** bounded semantic modifiers, coupled derivations, qualification tiers, reject/project reports, resource checks, and immutable variant fingerprints. | Raw table morphing, topology changes, geometry generation, and large-scale search. |
+| A2-T8 | `source-reference-anchors` | **Moved to Alpha 3:** F-16 S-119 and HL-20 Mod K collections, native DAVE-ML replay, source check-case/trim evidence, and reproducible direct-control plant artifacts. | All source-anchor runtime qualification and overlays. |
 
-Alpha 2 core is now closed at the core-contract boundary. The source-grounded
-reference-anchor tranche below is an explicit Alpha 2 closeout target; Lab
-behavior, flagship mission qualification, and deeper vehicle overlays remain
-ranked follow-on work rather than being inferred from provider/session or
-synthetic proof-family evidence. Their dependencies are maintained in the
-[post-release backlog](taoryx-alpha-2-backlog.md) and
+Alpha 2 core is now closed at the core-contract boundary. The remaining
+closeout is limited to the reusable platform seams and the four established
+proof families. Source-grounded reference anchors, passive-body qualification,
+Lab expansion, flagship mission qualification beyond the established family
+slice, and deeper vehicle overlays are Alpha 3 work. Their dependencies are
+maintained in the [post-release backlog](taoryx-alpha-2-backlog.md) and
 `verification/alpha2_post_release_backlog.yaml`.
 
-### Alpha 2 source-grounded reference-anchor objective
+### Alpha 3 source-grounded reference-anchor objective
 
-The Alpha 2 closeout also includes a bounded F-16 S-119 and HL-20 Mod K
+The Alpha 3 breadth plan includes a bounded F-16 S-119 and HL-20 Mod K
 reference-anchor tranche. This is the bridge from verified external packages
 to executable Taoryx library inputs; it is not a claim that either aircraft is
 already an M5 pickup-ready mission family.
@@ -322,7 +373,7 @@ source check cases + trim/hold evidence
 direct-control reference-plant artifact
 ```
 
-F-16 and HL-20 are Alpha 2 reference anchors when a new contributor can:
+F-16 and HL-20 are Alpha 3 reference anchors when a new contributor can:
 
 - rebuild each collection from the pinned corpus without editing source data;
 - load each family through the normal catalog and case-resolution path;
@@ -413,7 +464,8 @@ Alpha 2 is complete when a user can:
 1. Select a versioned vehicle family, fidelity profile, compatible variant and
    loadout, mission and launch form, reusable phase plan, and controller preset.
 2. Resolve that selection into an immutable, unit-checked model graph with
-   complete parameter provenance and fixed observation/control schemas.
+   complete parameter provenance, bounded-variant status, and fixed
+   observation/control schemas.
 3. Run the resolved case deterministically to completion or one step at a time.
 4. Operate it through autopilot, high-level commands, bounded external overlays,
    or direct effectors under explicit per-channel authority.
@@ -426,6 +478,9 @@ Alpha 2 is complete when a user can:
    - a Simple Aero-style configurable 3DOF family;
    - a family spanning point-mass 3DOF, pseudo-6DOF, and rigid-body 6DOF; and
    - a glider supporting both air release and booster launch.
+8. Resolve operational variants through hard-valid and qualified bounds,
+   coupled derived values, explicit reject/project policy, and stable
+   fingerprints without mutating family definitions.
 
 Each result must retain source hashes, selected versions, resolved values,
 control authority, event history, numerical settings, and claim boundary.
@@ -460,6 +515,14 @@ A Vehicle Family Package is the versioned unit of composition. It contains:
 
 It is a composition boundary, not a subclass for every booster, payload,
 mission, and fidelity combination.
+
+Family packages also publish a `VariantSpace`. Independent parameters are
+user- or optimizer-selectable; derived parameters are computed from declared
+dependencies; deep parameters require a developer/calibration path. Semantic
+modifiers such as payload, propellant load, thrust derating, drag increment,
+CG shift, and actuator response replace arbitrary recursive overrides. Each
+modifier declares hard/qualified bounds, affected fidelity bindings, resource
+couplings, and retrim/requalification requirements.
 
 ### CaseIntent
 
@@ -725,6 +788,9 @@ taoryx catalog list families
 taoryx family inspect simple_aero
 taoryx family schema simple_aero --exposure common
 taoryx preset list --family simple_aero --kind loadout
+taoryx variant inspect simple_aero
+taoryx variant resolve cases/simple_aero-heavy.yaml --candidate candidate.json
+taoryx variant explain cases/simple_aero-heavy.yaml --parameter vehicle.mass.wet
 
 taoryx case resolve cases/simple_aero-heavy.yaml --output resolved.json
 taoryx case explain cases/simple_aero-heavy.yaml --parameter vehicle.mass.total
@@ -745,6 +811,10 @@ taoryx family verify kestrel-glider --cross-fidelity
 
 `case explain` is a priority feature: it must show exactly where a value came
 from and how it was derived.
+
+`variant explain` must additionally show parameter role, hard and qualified
+ranges, modifier coupling, projection/rejection decisions, and whether the
+resolved candidate invalidates trim or qualification evidence.
 
 ## Alpha 2 proof families
 
@@ -807,6 +877,7 @@ replacements for guidance-level control.
 | A2-R1 | Host and adapter SDK | Provider discovery, selection, lifecycle, and adapter/binding interfaces work through the common host. |
 | A2-R2 | Catalog foundation | Versioned families/components/segments/controllers are discoverable with stable semantic IDs. |
 | A2-R3 | Resolver/provenance | Units, compatibility, precedence, derived values, and provenance resolve immutably. |
+| A2-R3V | Bounded variants | Independent/derived roles, hard/qualified bounds, semantic modifiers, deterministic reject/project, and variant fingerprints pass without silent repair. |
 | A2-R4 | Fixed runtime schemas | Parameter, state, control, observation, output, event, and activity-mask schemas remain fixed after reset. |
 | A2-R5 | Reference-provider parity | A non-Taoryx reference provider passes common validation, compilation, batch execution, inspection, normalized results, and any advertised session capabilities. |
 | A2-R6 | Taoryx adapter | Taoryx is reachable only through its registered execution adapter and family bindings, with complete translation reports. |

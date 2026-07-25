@@ -30,6 +30,15 @@ Alpha 2 builds the catalog, immutable `ResolvedCase`, fidelity adapters, and
 explicit control-authority layer on top of Alpha 1; it is the path away from
 bespoke vehicle/mission runners.
 
+Alpha 2.1 closes the bounded vehicle-variant seam: semantic modifiers,
+derived-parameter provenance, hard versus qualified bounds, deterministic
+reject/project policy, resource consistency, and immutable resolved-variant
+fingerprints. Alpha 3 consumes that seam for new family qualification and
+hybrid transitions; Alpha 4 scales it into backend-neutral parameterization,
+optimization, corpus generation, and multi-backend conformance. See
+[`taoryx-alpha-3.md`](taoryx-alpha-3.md) and
+[`taoryx-alpha-4.md`](taoryx-alpha-4.md).
+
 ## Completion target for the next major milestone
 
 Deliver a first integrated vertical slice:
