@@ -26,7 +26,8 @@ new vehicle breadth and deeper source correlation.
 ### Alpha 2 finish line
 
 Alpha 2 closes only after P0-1 through P0-5, P1-1, P1-2, the reusable trim
-procedure P1-4, and the bounded source-anchor tranche P1-3 are complete:
+procedure P1-4, the passive-body geometry tranche P1-5, and the bounded
+source-anchor tranche P1-3 are complete:
 
 - one common evaluator and evidence packet route;
 - deterministic interactive stepping, replay, and checkpoint/restart;
@@ -37,6 +38,8 @@ procedure P1-4, and the bounded source-anchor tranche P1-3 are complete:
 - normalized plant-truth controller presets and tuning;
 - reusable trim generation and operating-point procedure for the four
   established families, including the source-backed X-15 glide trim;
+- four parameterized passive/tumbling deployable-body geometries: sphere,
+  cylinder, cone, and triaxial ellipsoid;
 - M4 Composable maturity for the four established proof families.
 - F-16 S-119 and HL-20 Mod K source-grounded reference anchors that replay
   their pinned DAVE-ML plants and source regressions through the normal
@@ -145,7 +148,18 @@ force must align with velocity and body moments must vanish; requiring zero
 total force would be physically incorrect. New vehicle families remain Alpha
 3 consumers of this interface.
 
-8. **F-16 and HL-20 DAVE-ML reference anchors**
+8. **Passive/tumbling deployable-body geometry qualification**
+
+This is a deliberately bounded Alpha 2 promotion. Qualify sphere, cylinder,
+cone, and triaxial-ellipsoid passive bodies through one deploy/release,
+full-angle drag-area, tumbling, atmosphere, impact-event, and terminal-footprint
+contract. The result is a physical terminal-footprint and uncertainty claim,
+not a controller-effective reachability claim. Existing analysis fixtures and
+the suborbital ballistic tumble-return example provide the initial proof cases.
+New ballistic families, boost-glide families, and broader reachability products
+remain Alpha 3.
+
+9. **F-16 and HL-20 DAVE-ML reference anchors**
 
 Integrate their immutable source plants through the same catalog and firewall.
 The Alpha 2 slice is deliberately narrower than full pickup readiness: it

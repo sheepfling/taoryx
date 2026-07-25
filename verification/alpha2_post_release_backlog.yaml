@@ -19,7 +19,7 @@ prioritization:
 release_boundaries:
   alpha2_closeout:
     objective: Reusable, diagnosable, replayable platform with four composable proof families.
-    required_items: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4, A2-POST-P0-5, A2-POST-P1-1, A2-POST-P1-2, A2-POST-P1-4, A2-POST-P1-3]
+    required_items: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4, A2-POST-P0-5, A2-POST-P1-1, A2-POST-P1-2, A2-POST-P1-4, A2-POST-P1-5, A2-POST-P1-3]
     required_maturity: M4
     exclusions:
       - new unpinned vehicle-family runtime qualification
@@ -42,6 +42,7 @@ ranked_sequence:
   - A2-POST-P1-1
   - A2-POST-P1-2
   - A2-POST-P1-4
+  - A2-POST-P1-5
   - A2-POST-P1-3
   - A2-POST-P2-4
   - A2-POST-P2-5
@@ -250,6 +251,40 @@ items:
       - failed trims are classified as infeasible, out-of-envelope, numerically unresolved, or adapter-invalid
       - local linearization and normalized controller tuning can be reproduced from the trim artifact in a fresh process
       - no new Alpha 3 vehicle family is required to close this Alpha 2 item
+
+  - id: A2-POST-P1-5
+    priority: P1
+    target_release: alpha2
+    lane: alpha2-proof-closeout
+    name: passive-tumbling-deployable-body-geometry-qualification
+    status: partial
+    depends_on: [A2-POST-P0-1, A2-POST-P0-3, A2-POST-P1-1]
+    rationale: Passive and tumbling deployable bodies are common, bounded-physics objects that can be qualified without opening the broader Alpha 3 family program. Existing full-angle drag-area models and four-shape analysis fixtures provide a natural Alpha 2 implementation slice.
+    geometries: [sphere, cylinder, cone, triaxial_ellipsoid]
+    scope:
+      - geometry-parameterized projected-area and drag-area models over full attitude angle
+      - passive ballistic and tumbling propagation with explicit initial attitude/rate uncertainty
+      - deterministic single-witness trajectories plus Monte Carlo terminal-footprint distributions
+      - deploy/release initial-condition contract, mass/inertia/reference-area metadata, and frame conventions
+      - geometry-specific tables and reusable passive-coast/deploy segments through the composition layer
+      - terminal altitude/impact, terminal speed, attitude, angular-rate, and footprint products
+      - uncertainty sweeps for mass, drag coefficient, atmospheric profile, release velocity, attitude, and angular rate
+      - explicit distinction between physical terminal footprints and controller-effective reachability
+    validation_ladder:
+      - analytical projected-area anchors for all four geometries
+      - periodic/full-angle interpolation and front/rear cone/cylinder asymmetry checks
+      - zero-spin and high-spin limiting cases
+      - deterministic replay with fixed seeds and independent uncertainty streams
+      - single-body versus batch Monte Carlo equivalence
+      - table-margin, atmosphere, impact-event, and no-control-leakage checks
+      - reusable segment entry/exit validation from representative deploy states
+    exit_criteria:
+      - all four geometries resolve from one parameterized passive-body contract
+      - each geometry has a generated table, deploy example, terminal report, and focused test
+      - terminal footprints report distributions and uncertainty bands rather than a controller envelope claim
+      - trajectories remain bounded by declared atmosphere, table, and integration validity limits
+      - the existing suborbital ballistic tumble-return example passes as a promoted Alpha 2 proof case
+      - no powered guidance, seeker, or Alpha 3 family qualification is implied
 
   - id: A2-POST-P1-3
     priority: P1
