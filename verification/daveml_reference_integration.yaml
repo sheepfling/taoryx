@@ -7,7 +7,7 @@ input_corpus:
   extracted_root: /tmp/taoryx-aerospace-data-corpus-v1.1/taoryx-aerospace-data-corpus-v1.1
 families:
   - id: reference_f16_s119
-    status: source_parsed_static_checks_passed_package_replay_pending
+    status: runtime_replay_qualification_passed
     integration_record: families/reference_f16_s119/qualification/integration-record.yaml
     source_kind: daveml
     parent_fidelity: rigid_body_6dof
@@ -20,10 +20,10 @@ families:
         kind: source_file
         relative_path: qualified-models/f16-s119/F16_aero_mod_k_normalized.dml
         sha256: 272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764
-    next_gate: package_replay_in_taoryx_runtime
+    next_gate: qualify_separate_overlays_and_reductions
     reductions: [attitude_response_p6dof, point_mass_3dof]
   - id: reference_hl20_mod_k
-    status: source_parsed_static_checks_passed_package_replay_pending
+    status: runtime_replay_qualification_passed
     integration_record: families/reference_hl20_mod_k/qualification/integration-record.yaml
     source_kind: daveml
     parent_fidelity: rigid_body_6dof
@@ -36,7 +36,7 @@ families:
         kind: source_file
         relative_path: qualified-models/hl20-mod-k/source/aerodynamics.dml
         sha256: b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec
-    next_gate: package_replay_in_taoryx_runtime
+    next_gate: qualify_separate_overlays_and_reductions
     reductions: [attitude_response_p6dof, point_mass_3dof]
   - id: reference_a320
     status: blocked_missing_source

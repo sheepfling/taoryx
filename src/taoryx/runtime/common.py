@@ -88,6 +88,7 @@ Derivative = Callable[[RuntimeState], Sequence[float]]
 PointMassDerivative = Callable[[PointMassState], PointMassRates]
 BodyRateProvider = Callable[[RuntimeState], Vector3]
 StallDetector = Callable[[RuntimeState], bool]
+SpawnProvider = Callable[[RuntimeState], Sequence["SpawnRequest"]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -188,9 +189,16 @@ class RuntimeVehicle:
     body_rate_provider: BodyRateProvider | None = None
     stall_detector: StallDetector | None = None
     vehicle_kind: VehicleKind = VehicleKind.GENERIC
+    model_id: str | None = None
+    parent_model_id: str | None = None
+    spawn_provider: SpawnProvider | None = None
     fired_events: set[str] = field(default_factory=set)
 
     def __post_init__(self) -> None:
+        if self.model_id is None:
+            self.model_id = self.name
+        if not self.model_id:
+            raise ValueError("vehicle model_id must not be empty")
         if self.step_size <= 0.0:
             raise ValueError("vehicle step_size must be positive")
         if self.active:
@@ -205,6 +213,32 @@ class RuntimeVehicle:
         if not self.history:
             self.history.append(self.state)
         ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class SpawnRequest:
+    """Deferred request to add an arbitrary vehicle at an accepted boundary."""
+
+    event_id: str
+    child: RuntimeVehicle
+    parent_model_id: str | None = None
+    source: str | None = None
+    metadata: Mapping[str, object] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not self.event_id:
+            raise ValueError("spawn request event_id must not be empty")
+        if self.parent_model_id is not None and not self.parent_model_id:
+            raise ValueError("spawn request parent_model_id must not be empty")
+        if not self.child.name or not self.child.model_id:
+            raise ValueError("spawn request child must have stable name and model_id")
+####
+
+
+class DeploymentValidationError(ValueError):
+    """Raised when an accepted-boundary deployment cannot be committed."""
+
     ####
 
 
@@ -224,6 +258,47 @@ class RuntimeProblem:
 
     def active_vehicles(self) -> tuple[RuntimeVehicle, ...]:
         return tuple(vehicle for vehicle in self.vehicles.values() if vehicle.active)
+    ####
+
+    def add_spawned_vehicles(self, requests: Sequence[SpawnRequest], *, parent: RuntimeVehicle, accepted_time: float) -> None:
+        """Validate and register children as one all-or-nothing collection update."""
+
+        existing_names = set(self.vehicles)
+        existing_model_ids = {item.model_id for item in self.vehicles.values()}
+        pending_names: set[str] = set()
+        pending_model_ids: set[str | None] = set()
+        for request in requests:
+            child = request.child
+            parent_model_id = request.parent_model_id or parent.model_id
+            if parent_model_id != parent.model_id:
+                raise DeploymentValidationError(
+                    f"spawn request {request.event_id!r} names parent {parent_model_id!r}, "
+                    f"expected {parent.model_id!r}"
+                )
+            if child.name in existing_names or child.name in pending_names or child.model_id in existing_model_ids or child.model_id in pending_model_ids:
+                raise DeploymentValidationError(f"spawned model {child.name!r} or model_id {child.model_id!r} already exists")
+            if abs(child.state.time - accepted_time) > 1.0e-9:
+                raise DeploymentValidationError(
+                    f"spawned model {child.name!r} starts at {child.state.time:g}, expected accepted time {accepted_time:g}"
+                )
+            if not child.history or abs(child.history[-1].time - accepted_time) > 1.0e-9:
+                raise DeploymentValidationError(f"spawned model {child.name!r} history is not initialized at the accepted time")
+            if child.dependencies:
+                raise DeploymentValidationError(f"spawned model {child.name!r} cannot defer activation through dependencies")
+            pending_names.add(child.name)
+            pending_model_ids.add(child.model_id)
+        for request in requests:
+            child = request.child
+            child.parent_model_id = parent.model_id
+            child.active = True
+            child.activation_pending = False
+            self.vehicles[child.name] = child
+    ####
+
+    def add_spawned_vehicle(self, request: SpawnRequest, *, parent: RuntimeVehicle, accepted_time: float) -> None:
+        """Validate and register one child through the collection transaction."""
+
+        self.add_spawned_vehicles((request,), parent=parent, accepted_time=accepted_time)
     ####
 
     def observe(self, vehicle: str | None = None, *, status_names: Sequence[str] = (), include_deep: bool = False) -> object:

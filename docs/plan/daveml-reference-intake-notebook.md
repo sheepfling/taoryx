@@ -12,8 +12,8 @@ checks.
 
 | Family | Expected input | Recorded digest | Checkout state | Next gate |
 | --- | --- | --- | --- | --- |
-| `reference_f16_s119` | Package plus normalized aero source under `qualified-models/f16-s119/` | `eeaeaf17…`; aero `272c647b…` | Local corpus inputs present and hash-verified | Package/plant replay in Taoryx runtime |
-| `reference_hl20_mod_k` | Package plus exact source under `qualified-models/hl20-mod-k/` | Package `443e2ed9…`; source `b2ec6260…` | Local corpus inputs present and hash-verified | Package/plant replay in Taoryx runtime |
+| `reference_f16_s119` | Package plus normalized aero source under `qualified-models/f16-s119/` | `eeaeaf17…`; aero `272c647b…` | Package/plant replay passed through Taoryx load contract | Separate overlay and reduction qualification |
+| `reference_hl20_mod_k` | Package plus exact source under `qualified-models/hl20-mod-k/` | Package `443e2ed9…`; source `b2ec6260…` | Package/plant replay passed through Taoryx load contract | Separate overlay and reduction qualification |
 
 The machine-readable declarations live in:
 
@@ -83,9 +83,11 @@ temporary extraction. The parser and compiler passed for both source files:
 | HL-20 Mod K exact aero | 361 | 8 | 241 | 169 | 24/24 | Parsed, compiled, and accepted |
 
 This was run with the corpus wheel and `defusedxml` in `/tmp`; neither was
-installed into the repository environment. The remaining gap is package/plant
+installed into the repository environment. The remaining gap was package/plant
 replay through the current repository’s runtime boundary, not source-byte
-availability or DAVE-ML static acceptance.
+availability or DAVE-ML static acceptance. That first replay tranche is now
+implemented by `taoryx.trajectory.replay_reference_package` and
+`tools/replay_daveml_reference.py`.
 
 ## Standardized library shape
 
@@ -130,8 +132,8 @@ hash listed by `manifest.json`. The current corpus reports:
 
 | Family | Package binding | Native stepping |
 | --- | --- | --- |
-| F-16 S-119 | Verified; 7 embedded artifacts | Pending DAVE-ML runtime adapter |
-| HL-20 Mod K | Verified; 16 embedded artifacts | Pending DAVE-ML runtime adapter |
+| F-16 S-119 | Verified; 7 embedded artifacts | Load contract and trim-hold evidence replay passed |
+| HL-20 Mod K | Verified; 16 embedded artifacts | Load contract and glide-hold evidence replay passed |
 
 This distinction is deliberate: a package can be structurally and
 provenance-correct before Taoryx can evaluate its force/moment graph.
@@ -180,6 +182,17 @@ The collection is deliberately a derived artifact. The repository retains the
 builder and the source/hash contracts, while the source payload remains in the
 external `INBOX` corpus until its distribution policy is settled.
 
+Run the package/runtime replay with:
+
+```text
+python tools/replay_daveml_reference.py path/to/f16.txair path/to/hl20.txair
+```
+
+The replay verifies the package ledger and source identity, checks the pinned
+force/moment evidence where present, exercises the Taoryx rigid-body load
+contract, and requires the package trim/glide hold evidence to pass. It does
+not claim that Taoryx now contains a general-purpose DAVE-ML compiler.
+
 ## Family-specific notes
 
 ### F-16 S-119
@@ -210,10 +223,10 @@ This ledger separates observed integration pain from untested behavior.
 | resolved integrity gate | Qualified packages were present only inside the corpus archive | Package presence alone was insufficient | Outer corpus ledger, ZIP CRC, package manifests, and embedded member ledgers all pass |
 | resolved parser gate | The repository environment did not include the corpus wheel’s `defusedxml` dependency | The first isolated CLI attempt stopped before parsing | Installed the single dependency into `/tmp`; direct F-16/HL-20 parse, compile, and static checks pass |
 | important distinction | The corpus also contains A320 OpenAP and JSBSim data | This does not create an A320 DAVE-ML source model | Keep A320 as a separate OpenAP/JSBSim integration path |
-| observed gap | No DAVE-ML parser/adapter was found in `src/taoryx` | Payload verification is possible; compilation/replay is not yet wired | Add the parser/adapter as the next implementation gate |
+| resolved runtime boundary | No Taoryx package replay adapter was present | Payload verification stopped before the rigid-body load contract | `taoryx.trajectory.replay_reference_package` now verifies and replays both reference packages |
 | design constraint | Controller and actuator data are not source-plant evidence | Prevents accidental overclaiming | Keep them as versioned overlays with separate evidence classes |
-| not yet tested | Canonical Taoryx unit/frame conversion against source vectors | No conclusion yet | Run after the repository adapter exists |
-| not yet tested | Package/plant trim, dynamic, event, and reduction replay in this repository | No conclusion yet | Gate behind the runtime adapter |
+| not yet tested | Canonical DAVE-ML regeneration and semantic round trip | No conclusion yet | Keep in the separate round-trip tranche |
+| not yet tested | Controller, event, and reduction overlays in this repository | No conclusion yet | Qualify as separate layers from the replayed parent plant |
 
 New contributors should append rows here when a command, adapter, or regression
 reveals a new failure mode. Do not replace a blocker with a guessed value.

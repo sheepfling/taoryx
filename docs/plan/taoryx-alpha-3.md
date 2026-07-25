@@ -149,7 +149,31 @@ contract](../architecture/eom-timing-contract.md). IMU, estimator, and
 multi-rate sensor development cannot begin by interpolating published vehicle
 states or exposing RK solver stages as truth.
 
-### A3-W5 — Compatibility claim maintenance
+### A3-W5 — Aero-ballistic deployment and spawned bodies
+
+Promote stage separation from a parent mass adjustment into a first-class
+accepted-boundary event. The canonical contract and release gate are defined
+in [`alpha3-aero-ballistic-deployment.md`](alpha3-aero-ballistic-deployment.md).
+The workstream covers:
+
+- shared stage mass, propulsion-authority, separation, and detached-body
+  definitions;
+- parent pre/post event states and optional body-frame/inertial impulse;
+- cylindrical spent rocket stages and spheroidal spent tanks as ballistic
+  child bodies;
+- point-mass 3DOF, pseudo-6DOF tumbling, and separately gated rigid-body 6DOF;
+- deterministic child initialization, mass accounting, event identity, and
+  parent/child artifact visualization; and
+- source-language lowering only after the shared semantic contract is stable.
+
+A3-W5 is not complete when a separation merely changes parent mass. It is
+complete when a declared passive aero-ballistic child can be initialized,
+propagated, terminated, and visualized with the same event and provenance
+identity as its parent. Active arbitrary-child deployment, including child
+propulsion, guidance, and vehicle-specific configuration builders, is deferred
+to Alpha 4.
+
+### A3-W6 — Compatibility claim maintenance
 
 Maintain the evidence-bounded TAOS 96.0 language/specification profile and its
 machine-readable claim ledger. Historical runtime equivalence remains an
@@ -187,6 +211,9 @@ post-stall, ground-effect, engine, rotor, or thermal behavior remain outside
 the release definition. Large-scale multi-backend parameter search, ML corpus
 generation, topology/geometry generation, advanced smooth aerodynamic morphing,
 and fleet-scale optimization are Alpha 4 work rather than Alpha 3 exit gates.
+The generalized deployment API for arbitrary active children, including
+first-class child propulsion, guidance, and non-ballistic vehicle schemas, is
+also Alpha 4 work rather than an Alpha 3 exit gate.
 
 The Alpha 4 scale and backend plan is maintained in
 [`taoryx-alpha-4.md`](taoryx-alpha-4.md).

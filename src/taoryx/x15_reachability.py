@@ -9,20 +9,25 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from .contracts import Vector3
 from .reachability_envelope import (
     LaunchCommand,
     ReachabilityEnvelope,
     ReachabilityFidelity,
     RocketGlideVehicle,
+    RocketStageSpec,
+    StagedRocketSpec,
+    StageSeparationSpec,
     TerminalCriteria,
     generate_launch_grid,
     run_reachability_envelope,
     simulate_rocket_glide,
 )
 from .reachability_visualization import ReachabilityPlotReport, render_reachability_plot_bundle
+from .vehicle import DetachedBodyDefinition, PropellantType, PropulsionCapabilities
 from .vehicle_registry import vehicle_definition
 
-X15EnvelopeTier = Literal["point_mass_3dof", "pseudo_6dof"]
+X15EnvelopeTier = Literal["point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"]
 
 _ROOT = Path(__file__).resolve().parents[2]
 _SOURCE_STAGED_MISSION = _ROOT / "examples/showcases/x15_rocket_to_hawaii/mission.prb"
@@ -58,7 +63,7 @@ class X15IntegrationPreflight:
 
 @dataclass(frozen=True, slots=True)
 class X15ReachabilityBundle:
-    """The two comparable X-15-scaled envelope tiers and their plot report."""
+    """The comparable X-15-scaled envelope tiers and their plot report."""
 
     envelopes: tuple[ReachabilityEnvelope, ...]
     plot_report: ReachabilityPlotReport
@@ -173,23 +178,41 @@ def x15_surrogate_vehicle() -> RocketGlideVehicle:
     release_mass_kg = 14_641.0545
     launch_mass_kg = 30_000.0
     booster_burn_time_s = 20.0
-    return RocketGlideVehicle(
-        vehicle_id="x15-generic-reachability-surrogate-v1",
+    core_stage = RocketStageSpec(
+        identifier="x15-glide-body",
         dry_mass_kg=release_mass_kg,
-        propellant_mass_kg=0.0,
-        thrust_n=0.0,
-        burn_time_s=0.0,
+    )
+    booster_stage = RocketStageSpec(
+        identifier="x15-booster",
+        dry_mass_kg=launch_mass_kg - release_mass_kg - 2_000.0,
+        propellant_mass_kg=2_000.0,
+        thrust_n=40_000.0,
+        burn_time_s=booster_burn_time_s,
+        mass_flow_kg_s=100.0,
+        declared_propellant_mass_kg=9_000.0,
+        capabilities=PropulsionCapabilities.defaults_for(PropellantType.LIQUID),
+    )
+    detached_booster = DetachedBodyDefinition.cylinder(
+        "x15-spent-booster",
+        mass_kg=booster_stage.dry_mass_kg,
+        radius_m=1.25,
+        length_m=8.0,
+        inertia_kg_m2=Vector3(50_000.0, 50_000.0, 5_000.0),
+    )
+    staged_spec = StagedRocketSpec(
+        core_stage=core_stage,
+        attached_stages=(booster_stage,),
+        separation_events=(StageSeparationSpec("x15-booster", 50.0, detached_body=detached_booster),),
+    )
+    return RocketGlideVehicle.from_staged_spec(
+        staged_spec,
+        vehicle_id="x15-generic-reachability-surrogate-v1",
         reference_area_m2=float(definition["reference_area_m2"]),
         drag_coefficient=0.045,
         lift_to_drag=3.0,
         initial_speed_m_s=1_555.6349186151906,
         initial_altitude_m=0.0,
         max_attitude_rate_rad_s=math.radians(3_600.0),
-        booster_dry_mass_kg=launch_mass_kg - release_mass_kg - 2_000.0,
-        booster_propellant_mass_kg=2_000.0,
-        booster_thrust_n=40_000.0,
-        booster_burn_time_s=booster_burn_time_s,
-        booster_release_time_s=50.0,
     )
     ####
 
@@ -215,6 +238,11 @@ def _x15_provenance() -> dict[str, object]:
         "source_staged_mission": "examples/showcases/x15_rocket_to_hawaii/mission.prb",
         "source_reduced_mission": "examples/showcases/x15_rocket_to_hawaii/mission_3dof.prb",
         "claim_boundary": "X-15-scaled staged reachability surrogate; not a native X-15 rigid-body batch provider",
+        "fidelity_boundary": {
+            "point_mass_3dof": "reduced parent and reduced child",
+            "pseudo_6dof": "reduced parent and pseudo-6DOF child",
+            "rigid_body_6dof": "reduced parent and native rigid-body child",
+        },
         "source_launch_mass_kg": 30_000.0,
         "source_booster_thrust_n": 40_000.0,
         "source_booster_mdot_kg_s": 100.0,
@@ -224,6 +252,12 @@ def _x15_provenance() -> dict[str, object]:
         "assumed_booster_propellant_consumed_kg": 2_000.0,
         "assumed_booster_dry_mass_discarded_kg": 13_358.9455,
         "source_declared_minus_consumed_propellant_kg": 7_000.0,
+        "stage_contract": {
+            "core_stage": "x15-glide-body",
+            "attached_stage": "x15-booster",
+            "separation_time_s": 50.0,
+            "ejected_mass_kg": 13_358.9455,
+        },
         "assumed_drag_coefficient": 0.045,
         "assumed_lift_to_drag": 3.0,
         "default_terminal_speed_window_m_s": [720.0, 950.0],
@@ -241,6 +275,7 @@ def run_x15_reachability_tiers(
     horizon_s: float = 120.0,
     workers: int = 1,
     criteria: TerminalCriteria | None = None,
+    spawn_children: bool = True,
 ) -> tuple[ReachabilityEnvelope, ...]:
     """Run point-mass and pseudo-6DOF X-15-scaled tiers over one search grid."""
 
@@ -252,6 +287,7 @@ def run_x15_reachability_tiers(
     tiers: tuple[ReachabilityFidelity, ...] = (
         ReachabilityFidelity.POINT_MASS_3DOF,
         ReachabilityFidelity.PSEUDO_6DOF,
+        ReachabilityFidelity.RIGID_BODY_6DOF,
     )
     return tuple(
         run_reachability_envelope(
@@ -264,6 +300,7 @@ def run_x15_reachability_tiers(
             workers=workers,
             study_id="x15_scaled_reachability_v1",
             provenance=provenance,
+            spawn_children=spawn_children,
         )
         for fidelity in tiers
     )
@@ -279,6 +316,7 @@ def write_x15_reachability_bundle(
     workers: int = 1,
     dpi: int = 140,
     criteria: TerminalCriteria | None = None,
+    spawn_children: bool = True,
 ) -> X15ReachabilityBundle:
     """Write comparable X-15 tier artifacts and their standard plot bundle."""
 
@@ -290,6 +328,7 @@ def write_x15_reachability_bundle(
         horizon_s=horizon_s,
         workers=workers,
         criteria=criteria,
+        spawn_children=spawn_children,
     )
     artifact_paths: list[Path] = []
     for envelope in envelopes:

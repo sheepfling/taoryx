@@ -87,8 +87,8 @@ models:
       mass_properties: source_bound_fixed
       actuators: taoryx_engineering_assumption
       controller: taoryx_reference_design
-    status: source_parsed_static_checks_passed_package_replay_pending
-    current_boundary: payload_verified_source_and_embedded_evidence
+    status: runtime_replay_qualification_passed
+    current_boundary: payload_verified_source_and_taoryx_runtime_load_replay
     family_manifest: families/reference_f16_s119/family.yaml
     standardized_shape: source_grounded_reference_manifest_to_family_package
     next_layers: [actuators, sas, controllers, route_mission, reductions, rl_authority]
@@ -112,8 +112,8 @@ models:
       mass_properties: source_bound_fixed_separate_record
       actuators: taoryx_engineering_assumption
       controller: taoryx_reference_design
-    status: source_parsed_static_checks_passed_package_replay_pending
-    current_boundary: payload_verified_source_and_embedded_evidence
+    status: runtime_replay_qualification_passed
+    current_boundary: payload_verified_source_and_taoryx_runtime_load_replay
     family_manifest: families/reference_hl20_mod_k/family.yaml
     standardized_shape: source_grounded_reference_manifest_to_family_package
     next_layers: [actuators, allocation, energy_guidance, arrival_mission, reductions, rl_authority]

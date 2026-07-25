@@ -14,12 +14,14 @@ from taoryx.rigid_body import RIGID_BODY_STATE_NAMES
 from taoryx.simulation.contracts import DerivativeModel, SimulationState
 
 from .common import (
+    DeploymentValidationError,
     Derivative,
     DerivativePipeline,
     RuntimeProblem,
     RuntimeState,
     RuntimeVehicle,
     SearchRestart,
+    SpawnRequest,
     TransitionTruthPair,
     TransitionTruthSnapshot,
 )
@@ -315,7 +317,7 @@ def _apply_event_crossings(
     active: Sequence[RuntimeVehicle],
     crossings_by_vehicle: Mapping[str, Sequence[EventCrossing]],
 ) -> bool:
-    """Apply event handlers in vehicle and source order; return when all stop."""
+    """Apply event handlers and atomically commit any accepted child spawns."""
 
     for vehicle in active:
         for crossing in crossings_by_vehicle.get(vehicle.name, ()):
@@ -324,13 +326,40 @@ def _apply_event_crossings(
             segment_from = vehicle.segment_number
             before_state = vehicle.state
             pre_truth = _transition_truth_snapshot(vehicle, before_state)
-            handler = vehicle.event_handlers.get(crossing.name)
-            if handler is not None:
-                vehicle.state = handler(vehicle.state)
-                vehicle.state = _refresh_runtime_state(vehicle, vehicle.state)
-                vehicle.history[-1] = vehicle.state
-            vehicle.fired_events.add(crossing.name)
             condition = next((item for item in vehicle.events if item.name == crossing.name), None)
+            handler = vehicle.event_handlers.get(crossing.name)
+            candidate_state = before_state
+            if handler is not None:
+                candidate_state = _refresh_runtime_state(vehicle, handler(before_state))
+            requests: tuple[SpawnRequest, ...] = ()
+            try:
+                if crossing.action == "spawn":
+                    if vehicle.spawn_provider is None:
+                        raise DeploymentValidationError(f"spawn event {crossing.name!r} has no spawn provider")
+                    try:
+                        requests = tuple(vehicle.spawn_provider(candidate_state))
+                    except (TypeError, ValueError) as error:
+                        raise DeploymentValidationError(f"spawn provider returned an invalid request set: {error}") from error
+                    problem.add_spawned_vehicles(requests, parent=vehicle, accepted_time=crossing.time)
+            except DeploymentValidationError as error:
+                problem.event_history.append(
+                    {
+                        "event_id": crossing.name,
+                        "name": crossing.name,
+                        "vehicle": vehicle.name,
+                        "model_id": vehicle.model_id,
+                        "time": crossing.time,
+                        "action": crossing.action,
+                        "status": "deployment_failed",
+                        "deployment_failure": str(error),
+                        "source": condition.source if condition is not None else None,
+                        "pre_truth": pre_truth.to_metadata(),
+                    }
+                )
+                raise
+            vehicle.state = candidate_state
+            vehicle.history[-1] = candidate_state
+            vehicle.fired_events.add(crossing.name)
             if crossing.action == "stop":
                 vehicle.active = False
                 vehicle.activation_pending = False
@@ -353,9 +382,16 @@ def _apply_event_crossings(
             problem.event_history.append(
                 {
                     "name": crossing.name,
+                    "event_id": requests[0].event_id if len(requests) == 1 else crossing.name,
                     "vehicle": vehicle.name,
+                    "model_id": vehicle.model_id,
                     "time": crossing.time,
                     "action": crossing.action,
+                    "status": "committed",
+                    "child_model_ids": [request.child.model_id for request in requests],
+                    "child_names": [request.child.name for request in requests],
+                    "child_initial_states": [_runtime_state_metadata(request.child.state) for request in requests],
+                    "spawn_metadata": [dict(request.metadata) for request in requests],
                     "signal": condition.signal if condition is not None and condition.signal is not None else crossing.name,
                     "residual": crossing.residual,
                     "segment_from": segment_from,
@@ -374,6 +410,18 @@ def _apply_event_crossings(
             if not vehicle.active:
                 break
     return not any(vehicle.active for vehicle in active)
+
+
+def _runtime_state_metadata(state: RuntimeState) -> dict[str, object]:
+    """Serialize a spawn boundary state without retaining mutable runtime objects."""
+
+    return {
+        "time": state.time,
+        "values": list(state.values),
+        "frame": getattr(state.frame, "value", str(state.frame)),
+        "named": dict(state.named),
+        "value_names": list(state.value_names),
+    }
 
 
 def _physical_state_changed(before: RuntimeState, after: RuntimeState, *, tolerance: float = 1e-12) -> bool:

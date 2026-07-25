@@ -126,6 +126,8 @@ declared model/status values second, and deep diagnostics only on request.
   renderer-independent table inspection and plotting boundary.
 - [`docs/architecture/interactive-engine.md`](interactive-engine.md) defines
   deterministic external stepping, command routing, replay, and artifacts.
+- [`docs/architecture/deployment-and-spawning.md`](deployment-and-spawning.md)
+  defines generic vehicle spawning and its aero-ballistic specializations.
 - [`docs/extensions/README.md`](../extensions/README.md) defines the claim
   boundary and documentation contract for TAORYX-only capabilities.
 - [`examples/showcases/README.md`](../../examples/showcases/README.md) lists

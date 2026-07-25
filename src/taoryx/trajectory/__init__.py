@@ -19,6 +19,7 @@ from .collections import (
     read_collection_archive,
     write_deterministic_collection,
 )
+from .daveml_replay import DAVEMLReplayReport, replay_reference_package
 from .contracts import (
     AuthorityMode,
     CapabilityStatus,
@@ -115,6 +116,8 @@ __all__ = [
     "ReferencePackageInspection",
     "inspect_reference_package",
     "write_deterministic_collection",
+    "DAVEMLReplayReport",
+    "replay_reference_package",
     "diff_resolved_cases",
     "FidelityProblem",
     "load_case_intent",

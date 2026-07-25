@@ -1,12 +1,14 @@
 """Typed orchestration contracts for the cataloged TAOS runtime algorithms."""
 
 from .common import (
+    DeploymentValidationError,
     DerivativePipeline,
     EventCondition,
     RuntimeProblem,
     RuntimeState,
     RuntimeVehicle,
     SearchRestart,
+    SpawnRequest,
     StepBoundary,
 )
 from .engine import ExecutionResult, run_taos
@@ -82,12 +84,14 @@ from .sensor_clock import SensorClockSpec
 
 __all__ = [
     "DerivativePipeline",
+    "DeploymentValidationError",
     "ExecutionResult",
     "EventCondition",
     "RuntimeProblem",
     "RuntimeState",
     "RuntimeVehicle",
     "SearchRestart",
+    "SpawnRequest",
     "StepBoundary",
     "run_taos",
     "EnvironmentProvider",

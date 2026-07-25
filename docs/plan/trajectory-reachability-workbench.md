@@ -210,6 +210,13 @@ vehicle and loadout
 
 Changing any of those may change the answer.
 
+Reachability and deployment are orthogonal capabilities. Reachability can run
+for an air-breathing aircraft, drone, glider, or spacecraft with no staging,
+ejection, or spawned-body model. Deployment is an optional accepted-boundary
+event service that can be composed with reachability when parent/child outcomes
+are part of the study. The X-15 example exercises that composition; it does not
+define the reachability contract.
+
 When a study uses sensed-data control, it consumes the [sensor and measurement
 orchestration contract](sensor-measurement-orchestration.md) rather than
 perturbing truth directly. The study records sensor timing, estimator mode,

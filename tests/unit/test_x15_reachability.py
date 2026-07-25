@@ -69,7 +69,24 @@ def test_x15_surrogate_exposes_boost_coast_release_and_glide() -> None:
     assert coast_state.mass_kg == 28_000.0
     release_state = next(state for state in result.states if state.phase == "glide")
     assert release_state.mass_kg == vehicle.release_mass_kg
+    assert vehicle.booster_detached_body is not None
+    assert vehicle.booster_detached_body.shape.value == "cylinder"
     ####
+
+
+def test_x15_surrogate_can_propagate_the_declared_spent_booster() -> None:
+    result = simulate_rocket_glide(
+        x15_surrogate_vehicle(),
+        LaunchCommand(0.0, math.radians(45.0)),
+        fidelity=ReachabilityFidelity.POINT_MASS_3DOF,
+        step_size_s=5.0,
+        horizon_s=60.0,
+        spawn_children=True,
+    )
+
+    assert len(result.spawned_bodies) == 1
+    assert result.spawned_bodies[0].body_id == "x15-spent-booster"
+    assert result.deployment_events[0]["accepted_time_s"] == 50.0
 
 
 def test_x15_tiers_share_search_and_record_claim_boundary() -> None:
@@ -78,6 +95,7 @@ def test_x15_tiers_share_search_and_record_claim_boundary() -> None:
     assert tuple(envelope.fidelity for envelope in envelopes) == (
         ReachabilityFidelity.POINT_MASS_3DOF,
         ReachabilityFidelity.PSEUDO_6DOF,
+        ReachabilityFidelity.RIGID_BODY_6DOF,
     )
     assert all(len(envelope.samples) == 6 for envelope in envelopes)
     assert envelopes[0].search_space == envelopes[1].search_space
@@ -106,19 +124,26 @@ def test_x15_bundle_writes_comparable_artifacts_and_plots(tmp_path: Path) -> Non
     }
     assert (tmp_path / "point_mass_3dof.json").exists()
     assert (tmp_path / "pseudo_6dof.json").exists()
+    assert (tmp_path / "rigid_body_6dof.json").exists()
     assert all(path.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n" for path in bundle.plot_report.plot_paths)
     ####
 
 
 def test_x15_native_replay_runs_one_safe_boundary_checkpoint(tmp_path: Path) -> None:
     envelope_dir = tmp_path / "envelope"
-    write_x15_reachability_bundle(
+    bundle = write_x15_reachability_bundle(
         envelope_dir,
         commands=x15_reachability_commands()[:6],
         horizon_s=120.0,
         step_size_s=1.0,
         dpi=90,
     )
+
+    plot_names = {path.name for path in bundle.plot_report.plot_paths}
+    assert {"trajectory_parent.png", "trajectory_children.png", "event_timeline.png", "projected_area.png", "fidelity_comparison.png"} <= plot_names
+    telemetry_names = {path.name for path in bundle.plot_report.artifact_paths}
+    assert "telemetry_parent.csv" in telemetry_names
+    assert "telemetry_x15-spent-booster.csv" in telemetry_names
 
     replay = write_x15_native_boundary_replay(
         envelope_dir / "pseudo_6dof.json",

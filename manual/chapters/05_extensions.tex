@@ -1,0 +1,163 @@
+\chapter{Successor Extensions and Compiled Workflows}\label{chap:extensions}
+
+This chapter catalogs successor-side capabilities that are compiled from
+shared vehicle contracts into deterministic runtime studies and artifacts. It
+is intentionally separate from the reconstructed 1995 TAOS syntax. A feature
+listed here is a TAORYX extension unless its source, implementation, and
+verification boundary are explicitly identified as historical.
+
+\section{Compiled Capability Catalog}\label{sec:compiled-capability-catalog}
+
+The catalog below is the index for major compiled capabilities. Operational
+details belong in the corresponding Markdown architecture and plan pages; this
+chapter records the physical meaning, compiled surface, and evidence required
+before a result is promoted.
+
+\begin{longtable}{p{0.20\linewidth}p{0.25\linewidth}p{0.42\linewidth}}
+\toprule
+\textbf{Capability} & \textbf{Compiled surface} & \textbf{Evidence and boundary}\\
+\midrule
+\endhead
+Reachability envelope &
+  Search commands, terminal criteria, fidelity tier, and deterministic batch
+  propagation. &
+  JSON result contains the complete search space, successful and unsuccessful
+  samples, timeout classifications, terminal margins, and replay metadata.\\
+Deployment and ejection &
+  Optional stage mass, separation event, impulse frame, residual policy,
+  detached-body definition, and accepted-boundary child spawn. &
+  Parent pre/post state, child initial state, event identity, mass accounting,
+  impulse, and momentum residual are recorded when this capability is
+  composed with a study. Invalid requests are explicit deployment failures.\\
+Ballistic body families &
+  Sphere, cylinder, spheroid, and cone geometry with projected area, inertia,
+  center of pressure, and tumbling policy. &
+  Geometry and coefficient assumptions are serialized. Surrogate aerodynamics
+  are not treated as validated test or CFD data.\\
+Fidelity ladder &
+  Point-mass 3-DOF, pseudo-6-DOF, and native rigid-body 6-DOF child tiers. &
+  Tier comparisons retain the same search coordinates and identify which
+  parent and child models actually ran.\\
+Runtime model collection &
+  Stable model IDs, parent IDs, deferred spawn requests, and atomic insertion
+  into the active model collection. &
+  Accepted event boundaries are the only deployment points; rejected solver
+  trials do not create models or mutate the collection.\\
+Successor language and lowering &
+  Explicit dynamics modes, runtime declarations, deployment requests, and
+  source-located extension diagnostics. &
+  Historical and successor grammar profiles remain distinct; unsupported
+  features fail closed instead of becoming implicit physics.\\
+Native aero and table models &
+  Force and moment coefficient tables, direct dimensional wrench tables,
+  atmosphere providers, and Earth-rotation frame adapters. &
+  Table domains, source quality, margins, and frame conventions are retained
+  with the run artifact.\\
+Guidance, control, and thermal gates &
+  Attitude moments, actuator saturation, LQR design, terminal guidance,
+  heating limits, and objective scoring. &
+  Controller results are downstream of plant validation; gates and quality
+  scores remain separate claims.\\
+Vehicle onboarding and validation &
+  Registry contracts, source anchors, trim points, parity cases, and fidelity
+  ladder promotion. &
+  A new vehicle must pass source, geometry, dynamics, and artifact gates before
+  it is treated as an integrated example.\\
+Result and visualization compilation &
+  JSON, CSV telemetry, Matplotlib trajectories, coverage, capability,
+  event-timeline, projected-area, and fidelity-comparison artifacts. &
+  A manifest joins source configuration, resolved parameters, search space,
+  event IDs, telemetry, plots, and terminal classifications.\\
+\bottomrule
+\end{longtable}
+
+\section{Reachability Envelopes}\label{sec:compiled-reachability}
+
+A reachability envelope is a standalone, finite, explicitly parameterized search
+rather than a claim that every point in continuous control space has been tested.
+It does not require staging, deployment, ejection, or spawned bodies. An
+air-breathing aircraft, drone, glider, or spacecraft can produce a reachability
+envelope with no deployment feature configured. Each
+candidate retains its decision vector, search coordinates, terminal state,
+success status, failure reasons, path metrics, and witness trajectory when
+requested. The result format also distinguishes impact, timeout, invalid
+integration, and constraint failure.
+
+Terminal acceptance may include impact radius and impact-speed limits. A
+candidate that reaches the horizon before ground contact is a timeout, not an
+impact. Timeout candidates can be extracted and rerun with a longer horizon
+without reconstructing the original search manually.
+
+The canonical X-15 exercise composes the two features: Reachability supplies
+the search and terminal evaluation, while Deployment supplies the booster
+release and spawned-body histories. It runs one shared launch grid through
+three declared tiers: point-mass 3-DOF, pseudo-6-DOF, and a
+reduced-parent/native-rigid-child 6-DOF deployment tier. The X-15 result is an
+X-15-scaled surrogate integration case, not evidence of a native historically
+validated X-15 batch model.
+
+\section{Deployment and Ejection}\label{sec:compiled-deployment}
+
+Deployment and ejection are a separate accepted-boundary capability. They can
+be used by the general runtime without a reachability study, and can be
+optionally composed with Reachability when parent/child outcomes belong in the
+same envelope. Deployment is an accepted-boundary event. The parent is propagated to the event
+time, its pre-event state is retained, mass and declared impulse discontinuities
+are applied, and a child is initialized from the same accepted timestamp. The
+parent and child then continue as independent models with shared provenance.
+The generic child is a full runtime vehicle: it may be propulsive, guided,
+instrumented, aerodynamic, ballistic, or a spacecraft. A
+\texttt{DetachedBodyDefinition} is only the optional specification for an
+aero-ballistic child, not a requirement for deployment.
+For Alpha 3, the supported and documented authoring path is the passive
+aero-ballistic specialization; higher-level configuration of arbitrary active
+children is deferred to Alpha 4.
+
+The shared contract distinguishes liquid, solid, hybrid, and unknown
+propulsion behavior. Throttle and cutoff requests are rejected when the
+declared hardware cannot realize them. Separation mechanism, impulse frame,
+ejection energy, detached mass, inertia, center of mass, center of pressure,
+and body shape are explicit rather than inferred from a vehicle-specific
+adapter.
+
+A body-frame impulse is transformed through the parent attitude. The retained
+and detached bodies receive equal-and-opposite translational impulses under
+the declared partition. The event artifact records the parent pre/post
+velocity, child initial velocity, and momentum residual so that an apparently
+successful trajectory cannot hide an invented momentum jump.
+
+\section{Tumbling and Rigid-Body Promotion}\label{sec:compiled-tumbling}
+
+The pseudo-6-DOF tier is appropriate for fast screening and for exposing
+orientation-dependent projected-area effects. The native rigid-body child tier
+uses quaternion attitude, body rates, diagonal principal inertia, aerodynamic
+force, center-of-pressure moments, and explicit unresolved-rate damping. The
+damping is a stability-bounded ballistic surrogate; it is not a replacement
+for a measured six-degree-of-freedom coefficient database.
+
+The mathematical basis for the projected-area and rotational closures is in
+\cref{sec:ballistic-tumbling}. The implementation research and generated
+coefficient studies are maintained under \texttt{analysis/tumbling}; the
+runtime contract is documented under \texttt{docs/architecture} and the Alpha
+3 deployment plan.
+
+\section{Artifacts and Promotion Gates}\label{sec:compiled-artifacts}
+
+Every promoted envelope must emit a machine-readable manifest and the
+corresponding evidence set:
+
+\begin{itemize}
+  \item parent and child trajectories with deployment markers;
+  \item accepted-event timeline with mass, impulse, mechanism, and identity;
+  \item successful and unsuccessful capability footprint;
+  \item search-space coverage and uncovered candidate bins;
+  \item projected-area and aerodynamic-load histories;
+  \item fidelity comparison for matched candidates; and
+  \item parent and per-child telemetry tables with terminal classification.
+\end{itemize}
+
+Promotion requires deterministic event-boundary behavior, valid quaternion
+norm, bounded timestep refinement, mass and momentum closure, explicit timeout
+handling, and a claim boundary that identifies surrogate assumptions. A green
+plot is not sufficient evidence when the search space, parameterization, or
+failed candidates are absent.

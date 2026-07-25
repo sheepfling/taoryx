@@ -12,6 +12,7 @@ schema
 study
 search_space
 success_spec
+deployment
 execution
 summary
 samples
@@ -63,13 +64,28 @@ physical impossibility.
 
 The optional `trajectory` table has a `fields` array and row-major `rows`
 array. This is intentionally easy to load into a plotting dataframe. It
-contains time, position, velocity, speed, mass, phase, and, for pseudo-6DOF,
-attitude and attitude-rate channels.
+contains time, position, velocity, speed, mass, and phase. Pseudo-6DOF records
+attitude and attitude-rate channels; rigid-body 6-DOF records the attitude
+quaternion, body rates, inertia, forces, moments, projected area, and
+termination diagnostics.
 
 `summary` provides counts by classification and failure reason, explicit lists
 of successful and unsuccessful query IDs, and both feasible-only and all-
 evaluated terminal bounds. This supports plotting the envelope while retaining
 the evidence needed to explain holes and failures.
+
+Deployment is optional in this artifact. A standalone reachability study may
+have no spawned models at all; when deployment is composed into a study, child
+histories and deployment markers are recorded only for the models that were
+actually created. Aero-ballistic child fields are therefore specialization
+data, not required reachability fields.
+
+`deployment` is the top-level deployment summary. It records whether the
+study was configured for deployment, whether deployment was enabled for the
+run, the specialization kind, child model definitions, accepted event count,
+spawned-child count, and child terminal classifications. This keeps the
+deployment contract inspectable without requiring a consumer to scan every
+candidate first.
 
 Horizon termination is also tracked independently of feasibility through
 `timed_out` on each sample and `summary.timed_out_query_ids`. Those candidates
@@ -100,8 +116,8 @@ remain available from a compact summary artifact.
 
 ## X-15 Demonstration
 
-The X-15 exercise runs the same reduced-order search grid at both
-`point_mass_3dof` and `pseudo_6dof` fidelity:
+The X-15 exercise runs the same reduced-order search grid at
+`point_mass_3dof`, `pseudo_6dof`, and `rigid_body_6dof` fidelity:
 
 ```bash
 taoryx reachability x15 --output-dir artifacts/x15-reachability
@@ -112,7 +128,10 @@ The command writes one result artifact per tier, a comparable plot bundle, and
 registry; thrust, burn time, drag, and lift-to-drag are declared surrogate
 assumptions. Each artifact records the source X-15 cases and tables plus the
 claim boundary that this is an X-15-scaled reachability surrogate, not a
-native X-15 rigid-body batch provider.
+native X-15 rigid-body batch provider. The rigid-body tier explicitly means a
+reduced-order X-15 parent with a native rigid-body spawned spent-booster child;
+it is an integration and ballistic-surrogate demonstration, not a historically
+validated native X-15 aerodynamic deck.
 
 The integration decisions and friction log are maintained in
 `docs/plan/x15-reachability-integration-notebook.md`. The X-15 surrogate

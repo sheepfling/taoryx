@@ -10,4 +10,4 @@ aerodynamics:
 corpus:
   archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
   sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
-replay_boundary: package_replay_in_taoryx_runtime
+replay_boundary: taoryx_rigid_body_load_contract_and_hold_evidence

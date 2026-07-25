@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import csv
+import hashlib
 import json
 import math
 from collections.abc import Mapping, Sequence
@@ -21,6 +23,7 @@ class ReachabilityPlotReport:
     plot_paths: tuple[Path, ...]
     manifest_path: Path
     omitted: tuple[dict[str, str], ...] = ()
+    artifact_paths: tuple[Path, ...] = ()
     ####
 
 
@@ -89,6 +92,46 @@ def plot_flown_trajectories(
                 axes[0].scatter(columns["x_m"][-1], columns["y_m"][-1], color=status_color, marker="x", s=28)
                 axes[1].scatter(columns["x_m"][-1], columns["z_m"][-1], color=status_color, marker="x", s=28)
             seen_statuses.add(status)
+            child_payloads = sample.get("spawned_bodies", [])
+            if isinstance(child_payloads, list):
+                for child in child_payloads:
+                    if not isinstance(child, Mapping):
+                        continue
+                    child_trajectory = child.get("trajectory")
+                    if not isinstance(child_trajectory, Mapping):
+                        continue
+                    child_fields = child_trajectory.get("fields")
+                    child_rows = child_trajectory.get("rows")
+                    if not isinstance(child_fields, list) or not isinstance(child_rows, list):
+                        continue
+                    for first, second in zip(child_rows[:-1], child_rows[1:], strict=True):
+                        left = _row_columns(child_fields, first)
+                        right = _row_columns(child_fields, second)
+                        if not {"x_m", "y_m", "z_m"}.issubset(left) or not {"x_m", "y_m", "z_m"}.issubset(right):
+                            continue
+                        axes[0].plot(
+                            [left["x_m"], right["x_m"]],
+                            [left["y_m"], right["y_m"]],
+                            color="#475569",
+                            linewidth=1.0,
+                            linestyle="--",
+                            alpha=0.65,
+                        )
+                        axes[1].plot(
+                            [left["x_m"], right["x_m"]],
+                            [left["z_m"], right["z_m"]],
+                            color="#475569",
+                            linewidth=1.0,
+                            linestyle="--",
+                            alpha=0.65,
+                        )
+                    if child_rows:
+                        first = _row_columns(child_fields, child_rows[0])
+                        last = _row_columns(child_fields, child_rows[-1])
+                        if {"x_m", "y_m", "z_m"}.issubset(first) and {"x_m", "y_m", "z_m"}.issubset(last):
+                            axes[0].scatter(first["x_m"], first["y_m"], color="#475569", marker="o", s=12, alpha=0.7)
+                            axes[0].scatter(last["x_m"], last["y_m"], color="#475569", marker="x", s=24)
+                            axes[1].scatter(last["x_m"], last["z_m"], color="#475569", marker="x", s=24)
         axes[0].set_title("Flown trajectories: top-down", loc="left")
         axes[0].set_xlabel("downrange x (m)")
         axes[0].set_ylabel("crossrange y (m)")
@@ -104,6 +147,8 @@ def plot_flown_trajectories(
         for phase in ("boost", "glide"):
             if phase in seen_phases:
                 handles.append(Line2D([0], [0], color=phase_colors[phase], linewidth=2.2, label=phase))
+        if any(sample.get("spawned_bodies") for sample in samples):
+            handles.append(Line2D([0], [0], color="#475569", linewidth=1.2, linestyle="--", label="spawned body"))
         for status in ("feasible", "infeasible", "invalid"):
             if status in seen_statuses:
                 handles.append(Line2D([0], [0], color=_status_color(status), linewidth=2.0, label=status))
@@ -112,6 +157,165 @@ def plot_flown_trajectories(
         return _save_figure(figure, path, dpi)
     finally:
         plt.close(figure)
+    ####
+
+
+def plot_deployment_timeline(
+    source: ReachabilityEnvelope | Payload,
+    path: str | Path,
+    *,
+    dpi: int = 140,
+) -> Path:
+    """Plot accepted deployment times and parent/child identities."""
+
+    plt = _get_matplotlib()
+    events = [event for sample in _samples(_payload(source)) for event in sample.get("deployment_events", []) if isinstance(event, Mapping)]
+    figure, axis = plt.subplots(figsize=(10.0, max(2.8, 0.55 * len(events) + 1.5)), layout="constrained")
+    try:
+        if not events:
+            axis.text(0.5, 0.5, "No deployment events recorded", ha="center", va="center", transform=axis.transAxes)
+            axis.set_axis_off()
+        else:
+            for index, event in enumerate(events):
+                time = float(event.get("accepted_time_s", event.get("time_s", 0.0)))
+                label = f"{event.get('parent_model_id', 'parent')} -> {event.get('child_model_id', 'child')}"
+                axis.scatter(time, index, color="#0f766e", s=42, zorder=2)
+                axis.text(time, index + 0.12, label, fontsize=8, va="bottom")
+            axis.set_xlabel("accepted event time (s)")
+            axis.set_yticks([])
+            axis.set_title("Deployment event timeline", loc="left")
+            axis.grid(True, axis="x", color="#cbd5e1", linewidth=0.7)
+        return _save_figure(figure, path, dpi)
+    finally:
+        plt.close(figure)
+    ####
+
+
+def plot_projected_area(
+    source: ReachabilityEnvelope | Payload,
+    path: str | Path,
+    *,
+    dpi: int = 140,
+) -> Path:
+    """Plot projected drag area and drag load for every spawned body."""
+
+    plt = _get_matplotlib()
+    children = [
+        child
+        for sample in _samples(_payload(source))
+        for child in sample.get("spawned_bodies", [])
+        if isinstance(child, Mapping)
+    ]
+    figure, axes = plt.subplots(2, 1, figsize=(10.0, 6.5), sharex=True, layout="constrained")
+    try:
+        legend_labels: set[str] = set()
+        for child in children:
+            telemetry = child.get("telemetry", [])
+            if not isinstance(telemetry, list):
+                continue
+            rows = [row for row in telemetry if isinstance(row, Mapping)]
+            if not rows:
+                continue
+            label = f"{child.get('body_id', 'child')} ({child.get('shape', 'unknown')})"
+            plotted_label = label if label not in legend_labels else "_nolegend_"
+            legend_labels.add(label)
+            times = [float(row["time_s"]) for row in rows]
+            axes[0].plot(times, [float(row["projected_area_m2"]) for row in rows], linewidth=1.4, label=plotted_label)
+            axes[1].plot(times, [float(row["drag_force_n"]) for row in rows], linewidth=1.4, label=plotted_label)
+        axes[0].set_ylabel("projected area (m2)")
+        axes[1].set_ylabel("drag force (N)")
+        axes[1].set_xlabel("time (s)")
+        axes[0].set_title("Detached-body aerodynamic history", loc="left")
+        for axis in axes:
+            axis.grid(True, color="#cbd5e1", linewidth=0.7)
+            if legend_labels:
+                axis.legend(loc="best", fontsize=8)
+        return _save_figure(figure, path, dpi)
+    finally:
+        plt.close(figure)
+    ####
+
+
+def _parent_only_payload(payload: Payload) -> dict[str, Any]:
+    """Build a plotting payload with child traces removed."""
+
+    result = dict(payload)
+    result["samples"] = [
+        {**sample, "spawned_bodies": []}
+        for sample in _samples(payload)
+    ]
+    return result
+
+
+def _children_only_payload(payload: Payload) -> dict[str, Any]:
+    """Build a plotting payload containing only spawned-body traces."""
+
+    result = dict(payload)
+    result["samples"] = [
+        {
+            **sample,
+            "trajectory": {"fields": [], "rows": []},
+            "spawned_bodies": sample.get("spawned_bodies", []),
+        }
+        for sample in _samples(payload)
+    ]
+    return result
+
+
+def plot_parent_trajectory(source: ReachabilityEnvelope | Payload, path: str | Path, *, dpi: int = 140) -> Path:
+    """Write the canonical parent-only trajectory view."""
+
+    return plot_flown_trajectories(_parent_only_payload(_payload(source)), path, dpi=dpi)
+    ####
+
+
+def plot_children_trajectories(source: ReachabilityEnvelope | Payload, path: str | Path, *, dpi: int = 140) -> Path:
+    """Write the canonical spawned-child trajectory view."""
+
+    return plot_flown_trajectories(_children_only_payload(_payload(source)), path, dpi=dpi)
+    ####
+
+
+def _write_telemetry_csv(path: Path, rows: Sequence[Mapping[str, Any]]) -> Path:
+    """Write stable flattened telemetry rows while retaining vector fields as JSON."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    keys = sorted({str(key) for row in rows for key in row})
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=("query_id", *keys), extrasaction="ignore")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({
+                "query_id": row.get("query_id", ""),
+                **{
+                    key: json.dumps(row[key], sort_keys=True) if isinstance(row.get(key), (list, dict)) else row.get(key, "")
+                    for key in keys
+                },
+            })
+    return path
+    ####
+
+
+def _deployment_telemetry_artifacts(payload: Payload, destination: Path) -> tuple[Path, ...]:
+    """Write aggregate parent and one CSV per spawned-body identity."""
+
+    parent_rows: list[dict[str, Any]] = []
+    child_rows: dict[str, list[dict[str, Any]]] = {}
+    for sample in _samples(payload):
+        query_id = str(sample.get("query_id", ""))
+        for row in sample.get("telemetry", []):
+            if isinstance(row, Mapping):
+                parent_rows.append({"query_id": query_id, **dict(row)})
+        for child in sample.get("spawned_bodies", []):
+            if not isinstance(child, Mapping):
+                continue
+            child_id = str(child.get("body_id", "child"))
+            for row in child.get("telemetry", []):
+                if isinstance(row, Mapping):
+                    child_rows.setdefault(child_id, []).append({"query_id": query_id, **dict(row)})
+    paths = [_write_telemetry_csv(destination / "telemetry_parent.csv", parent_rows)]
+    paths.extend(_write_telemetry_csv(destination / f"telemetry_{child_id}.csv", rows) for child_id, rows in sorted(child_rows.items()))
+    return tuple(paths)
     ####
 
 
@@ -309,13 +513,31 @@ def render_reachability_plot_bundle(
     payload = _payload(source)
     paths: list[Path] = []
     omitted: list[dict[str, str]] = []
+    all_sources = (source, *comparison_sources)
     if _has_trajectories(payload):
         paths.append(plot_flown_trajectories(payload, destination / "flown-trajectories.png", dpi=dpi))
     else:
         omitted.append({"plot": "flown-trajectories", "reason": "trajectory tables are not present"})
     paths.append(plot_search_coverage(payload, destination / "search-coverage.png", dpi=dpi))
     paths.append(plot_terminal_capability(payload, destination / "terminal-capability.png", dpi=dpi))
-    all_sources = (source, *comparison_sources)
+    if _has_deployment_events(payload):
+        paths.append(plot_deployment_timeline(payload, destination / "deployment-timeline.png", dpi=dpi))
+        paths.append(plot_projected_area(payload, destination / "projected-area.png", dpi=dpi))
+        paths.extend(
+            (
+                plot_parent_trajectory(payload, destination / "trajectory_parent.png", dpi=dpi),
+                plot_children_trajectories(payload, destination / "trajectory_children.png", dpi=dpi),
+                plot_deployment_timeline(payload, destination / "event_timeline.png", dpi=dpi),
+                plot_terminal_capability(payload, destination / "capability_footprint.png", dpi=dpi),
+                plot_search_coverage(payload, destination / "exploration_coverage.png", dpi=dpi),
+                plot_projected_area(payload, destination / "projected_area.png", dpi=dpi),
+            )
+        )
+        if len(all_sources) >= 2:
+            paths.append(plot_fidelity_progression(all_sources, destination / "fidelity_comparison.png", dpi=dpi))
+        artifact_paths = _deployment_telemetry_artifacts(payload, destination)
+    else:
+        artifact_paths = ()
     if len(all_sources) >= 2:
         paths.append(plot_fidelity_progression(all_sources, destination / "fidelity-progression.png", dpi=dpi))
     manifest = {
@@ -324,11 +546,16 @@ def render_reachability_plot_bundle(
         "fidelity": payload.get("fidelity", payload.get("study", {}).get("fidelity")),
         "dpi": dpi,
         "plots": [path.name for path in paths],
+        "artifacts": [path.name for path in artifact_paths],
+        "deployment_event_count": sum(len(sample.get("deployment_events", [])) for sample in _samples(payload)),
+        "source_configuration_hash": _configuration_hash(payload),
+        "search_space": payload.get("search_space", {}),
+        "execution": payload.get("execution", {}),
         "omitted": omitted,
     }
     manifest_path = destination / "plot-manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return ReachabilityPlotReport(tuple(paths), manifest_path, tuple(omitted))
+    return ReachabilityPlotReport(tuple(paths), manifest_path, tuple(omitted), artifact_paths)
     ####
 
 
@@ -356,6 +583,27 @@ def _axis_map(payload: Payload) -> dict[str, Mapping[str, Any]]:
 
 def _has_trajectories(payload: Payload) -> bool:
     return any(isinstance(sample.get("trajectory"), Mapping) for sample in _samples(payload))
+    ####
+
+
+def _has_deployment_events(payload: Payload) -> bool:
+    """Return whether at least one candidate recorded a committed deployment."""
+
+    return any(bool(sample.get("deployment_events")) for sample in _samples(payload))
+    ####
+
+
+def _configuration_hash(payload: Payload) -> str:
+    """Hash resolved study, vehicle, search, and execution configuration."""
+
+    selected = {
+        "study": payload.get("study", {}),
+        "search_space": payload.get("search_space", {}),
+        "execution": payload.get("execution", {}),
+        "provenance": payload.get("provenance", {}),
+    }
+    encoded = json.dumps(selected, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
     ####
 
 
@@ -420,6 +668,10 @@ __all__ = [
     "load_reachability_artifact",
     "plot_fidelity_progression",
     "plot_flown_trajectories",
+    "plot_deployment_timeline",
+    "plot_children_trajectories",
+    "plot_projected_area",
+    "plot_parent_trajectory",
     "plot_search_coverage",
     "plot_terminal_capability",
     "render_reachability_plot_bundle",

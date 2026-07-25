@@ -109,6 +109,27 @@ source anchors are compared before the batch run, discontinuous events are
 tested independently of the production search grid, and the known source
 closure decision is emitted as data rather than hidden in a constructor.
 
+The shared vehicle model in `src/taoryx/vehicle.py` now expresses that same
+boundary directly through `StageMassDefinition`, `StagedVehicleDefinition`,
+and `StageSeparationEvent`; the reachability names are compatibility aliases.
+A vehicle is
+constructed from a retained core stage, attached stages, and explicit ejection
+events. Modeled propellant flow must close over burn time, while an optional
+source-declared propellant value is retained for discrepancy reporting.
+Propulsion capabilities also distinguish liquid, solid, hybrid, and unknown
+systems and reject throttle or cutoff commands that the declared hardware
+cannot realize. The reduced solver currently accepts one attached stage, but
+the configuration boundary no longer requires callers to coordinate unrelated
+booster mass, propellant, thrust, and release-time fields by hand.
+
+Separation events can additionally declare a passive, spring, pneumatic,
+pyrotechnic, or explosive mechanism, a body-frame impulse applied to the
+retained stack, and optional separation energy. The impulse produces a
+retained-stack delta-v when a retained mass is supplied; energy is retained as
+evidence until an explicit impulse-partition model exists. This prevents a
+source document's separation energy from being silently treated as vehicle
+translation.
+
 The default 45-command demonstration uses a 720--950 m/s terminal-speed
 window. At the current reduced-order settings it produces 27 feasible
 point-mass candidates and 33 feasible pseudo-6-DOF candidates. This is a

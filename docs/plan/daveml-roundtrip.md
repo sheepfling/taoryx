@@ -27,7 +27,7 @@ fresh import and equivalence report
 | M2 multi-document binder | F-16 and HL-20 initial slices complete | `tools/build_daveml_collection.py` |
 | M3 source-preserving exporter | Complete for embedded source bytes | `tools/roundtrip_daveml_collection.py` reports L0/L1 |
 | M3 canonical DAVE-ML exporter | Pending | Requires canonical-to-DAVE-ML writer |
-| M4 round-trip verifier | Source-layer gate complete; semantic levels pending | Fresh source reload is explicit; L2/L4 remain pending |
+| M4 round-trip verifier | Source-layer and package-runtime boundary gates complete | Fresh source reload and Taoryx load-contract replay are explicit; canonical regeneration remains pending |
 | M5 four-model qualification | Pending | F-16 and HL-20 collection fixtures are now available; rocket and A320 later |
 | M6 offline CI integration | Pending | Requires stable M3–M5 reports |
 
@@ -105,5 +105,5 @@ source DAVE-ML.
 2. Implement canonical DAVE-ML regeneration with generated IDs and provenance.
 3. Re-import generated documents and compare structure, check cases, knots,
    boundaries, and seeded interior samples.
-4. Add the Taoryx runtime replay adapter only after static round-trip evidence
-   is stable.
+4. Add canonical DAVE-ML regeneration and semantic round-trip comparison;
+   package-runtime replay is covered by `tools/replay_daveml_reference.py`.
