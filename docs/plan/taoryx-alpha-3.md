@@ -5,6 +5,10 @@
 **Boundary:** Add and qualify new vehicle archetypes without weakening the
 common runtime, family-package, control, or evidence contracts.
 
+The [Family Showcase Composite Master Plan](taoryx-family-showcase-composite-master-plan.md)
+is the governing execution plan for Alpha 3 flagship packs, standard evidence
+boards, family-local event markers, and cross-fidelity qualification.
+
 Alpha 2 must complete the [future-family interface stress test](future-family-interface-stress-test.md)
 before this breadth work begins. That is a contract-closure gate, not a
 requirement to implement the future families early.

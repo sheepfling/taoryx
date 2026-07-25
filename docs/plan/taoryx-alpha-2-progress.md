@@ -219,6 +219,12 @@ recorded in
 [`taoryx-alpha-2-execution-goal.md`](taoryx-alpha-2-execution-goal.md), with
 `A2-CLOSEOUT-PASS` now supported by the required-item and milestone audits.
 
+The post-closeout showcase extension is tracked in the
+[Family Showcase Composite Master Plan](taoryx-family-showcase-composite-master-plan.md).
+It adds the common contract and telemetry-native evidence-board foundation to
+Alpha 2 without reopening the Alpha 2 physics claim. Four-anchor flagship
+rebuilds and new family packs are Alpha 3 work.
+
 Completed in the current closeout tranche:
 
 - checkpoint/restart contracts now preserve accepted state, controls, events,

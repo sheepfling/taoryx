@@ -1,0 +1,78 @@
+schema: taoryx.showcase/v1alpha1
+catalog_id: org.taoryx.showcase.catalog.v1
+status: foundation
+alpha2_extension:
+  milestones:
+    - id: A2-S1
+      name: showcase_contracts
+      status: complete
+    - id: A2-S2
+      name: standard_evidence_board
+      status: complete
+    - id: A2-S3
+      name: plot_semantics_and_artifact_audit
+      status: in_progress
+alpha3_milestones:
+  - id: A3-M1
+    name: four_anchor_flagships
+    status: planned
+  - id: A3-M2
+    name: fixed_wing_breadth
+    status: planned
+  - id: A3-M3
+    name: high_energy_and_ballistic
+    status: planned
+  - id: A3-M4
+    name: vertical_lift_and_transition
+    status: planned
+  - id: A3-M5
+    name: autonomous_and_public_surrogates
+    status: planned
+  - id: A3-M6
+    name: space_actuator_families
+    status: planned
+  - id: A3-M7
+    name: cross_fidelity_and_robustness
+    status: planned
+  - id: A3-M8
+    name: pickup_ready_catalog
+    status: planned
+families:
+  - id: powered_fixed_wing
+    archetypes: [heavy_transport, light_ga, fighter, cruise_vehicle, isr_drone]
+    current_bindings: [b747, skywalker_x8]
+  - id: rocket_booster
+    archetypes: [staged_rocket, rocket_aircraft]
+    current_bindings: [x15]
+  - id: glide_vehicle
+    archetypes: [lifting_body, hypersonic_glider]
+    current_bindings: [x15]
+  - id: multirotor
+    archetypes: [quadcopter, fleet_drone]
+    current_bindings: [hummingbird]
+  - id: rotorcraft
+    archetypes: [helicopter]
+    current_bindings: []
+  - id: transition_vtol
+    archetypes: [tiltrotor, tailsitter, vectored_thrust]
+    current_bindings: []
+  - id: orbital_point_mass
+    archetypes: [orbit_propagation]
+    current_bindings: []
+  - id: rigid_spacecraft
+    archetypes: [reaction_wheel, magnetorquer, rcs_free_flyer, hybrid]
+    current_bindings: []
+  - id: ballistic_body
+    archetypes: [ballistic_projectile, tumbling_body]
+    current_bindings: []
+fidelity_profiles:
+  - point_mass_3dof
+  - named_pseudo_6dof
+  - rigid_body_6dof
+release_badges:
+  - nominal_showcase_complete
+  - flagship_mission_qualified
+  - fixed_matrix_qualified
+  - release_robustness_qualified
+  - multi_fidelity_qualified
+  - pickup_ready

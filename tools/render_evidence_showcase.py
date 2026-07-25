@@ -515,6 +515,156 @@ def _render_mission_grid(family: str, mission_dir: Path, output: Path, plt: Any)
 ####
 
 
+def _first_series(rows: list[dict[str, float]], names: tuple[str, ...]) -> tuple[str, list[float], list[float]] | None:
+    """Return the first available finite telemetry series from ``names``."""
+
+    return _series_from_rows(rows, names)
+    ####
+
+
+def _draw_event_lines(axis: Any, markers: list[tuple[float, str]], *, labels: bool = False) -> None:
+    """Draw family-local objective and transition markers on a telemetry axis."""
+
+    for time_s, label in markers:
+        axis.axvline(time_s, color="#dc2626", linestyle="--", linewidth=0.8, alpha=0.48)
+        if labels:
+            axis.text(time_s, 0.98, _compact_marker_label(label), color="#b91c1c", fontsize=7,
+                      ha="left", va="top", rotation=90, transform=axis.get_xaxis_transform(), clip_on=True)
+    ####
+
+
+def _draw_telemetry_panel(axis: Any, rows: list[dict[str, float]], markers: list[tuple[float, str]], title: str, candidates: tuple[str, ...], ylabel: str, *, marker_labels: bool = False) -> None:
+    """Draw a unit-labelled telemetry panel without manufacturing missing values."""
+
+    selected = _first_series(rows, candidates)
+    if selected is None:
+        axis.text(0.5, 0.5, "unavailable", ha="center", va="center", transform=axis.transAxes)
+    else:
+        name, times, values = selected
+        axis.plot(times, values, color="#2563eb", linewidth=1.6, label=name)
+        axis.legend(fontsize="x-small", loc="best")
+    axis.set_title(title, loc="left", fontweight="bold")
+    axis.set_xlabel("time (s)")
+    axis.set_ylabel(ylabel)
+    axis.grid(True, color="#cbd5e1", linewidth=0.65)
+    _draw_event_lines(axis, markers, labels=marker_labels)
+    ####
+
+
+def _draw_multiseries_panel(axis: Any, rows: list[dict[str, float]], markers: list[tuple[float, str]], title: str, candidates: tuple[tuple[str, tuple[str, ...], str], ...], ylabel: str) -> None:
+    """Draw several semantic channels while preserving unavailable channels."""
+
+    plotted = False
+    for label, names, color in candidates:
+        selected = _first_series(rows, names)
+        if selected is None:
+            continue
+        _, times, values = selected
+        axis.plot(times, values, color=color, linewidth=1.5, label=label)
+        plotted = True
+    if not plotted:
+        axis.text(0.5, 0.5, "unavailable", ha="center", va="center", transform=axis.transAxes)
+    else:
+        axis.legend(fontsize="x-small", loc="best")
+    axis.set_title(title, loc="left", fontweight="bold")
+    axis.set_xlabel("time (s)")
+    axis.set_ylabel(ylabel)
+    axis.grid(True, color="#cbd5e1", linewidth=0.65)
+    _draw_event_lines(axis, markers)
+    ####
+
+
+def _draw_trajectory_panel(axis: Any, rows: list[dict[str, float]], markers: list[tuple[float, str]], *, three_dimensional: bool = False) -> None:
+    """Draw the complete route, including explicit start and terminal markers."""
+
+    north = _first_series(rows, ("north_m", "position_north_m", "x_m"))
+    east = _first_series(rows, ("east_m", "position_east_m", "y_m"))
+    altitude = _first_series(rows, ("altitude_m", "alt"))
+    if north is None or east is None:
+        text = getattr(axis, "text2D", axis.text)
+        text(0.5, 0.5, "trajectory coordinates unavailable", ha="center", va="center", transform=axis.transAxes)
+        axis.set_title("Complete mission geometry", loc="left", fontweight="bold")
+        return
+    north_values, east_values = north[2], east[2]
+    if three_dimensional and altitude is not None:
+        axis.plot(north_values, east_values, altitude[2], color="#2563eb", linewidth=1.8)
+        axis.scatter([north_values[0]], [east_values[0]], [altitude[2][0]], color="#16a34a", label="start")
+        axis.scatter([north_values[-1]], [east_values[-1]], [altitude[2][-1]], color="#dc2626", label="terminal")
+        axis.set_zlabel("altitude (m)")
+    else:
+        axis.plot(north_values, east_values, color="#2563eb", linewidth=1.8, label="actual path")
+        axis.scatter([north_values[0]], [east_values[0]], color="#16a34a", label="start")
+        axis.scatter([north_values[-1]], [east_values[-1]], color="#dc2626", label="terminal")
+        axis.set_ylabel("east (m)")
+    axis.set_xlabel("north (m)")
+    axis.set_title("Complete mission geometry", loc="left", fontweight="bold")
+    axis.grid(True, color="#cbd5e1", linewidth=0.65)
+    axis.legend(fontsize="x-small", loc="best")
+    if not three_dimensional:
+        for time_s, label in markers:
+            index = min(range(len(rows)), key=lambda item: abs(rows[item].get("time_s", 0.0) - time_s))
+            axis.annotate(_compact_marker_label(label), (north_values[index], east_values[index]), fontsize=7, color="#b91c1c")
+    ####
+
+
+def _render_flagship_board(family: str, mission_dir: Path, output: Path, plt: Any) -> None:
+    """Render the telemetry-native flagship board for one family.
+
+    Unlike the older image mosaic, this board draws semantic panels from the
+    same telemetry rows and places event markers only on this family's axes.
+    """
+
+    telemetry = _telemetry_rows(mission_dir)
+    payload = json.loads((mission_dir / "summary.json").read_text(encoding="utf-8"))
+    markers = _objective_markers(payload, telemetry)
+    figure = plt.figure(figsize=(21, 15), layout="constrained")
+    _draw_trajectory_panel(figure.add_subplot(3, 4, 1, projection="3d"), telemetry, markers, three_dimensional=True)
+    _draw_trajectory_panel(figure.add_subplot(3, 4, 2), telemetry, markers)
+    _draw_telemetry_panel(figure.add_subplot(3, 4, 3), telemetry, markers, "Altitude", ("altitude_m", "alt"), "m")
+    _draw_telemetry_panel(figure.add_subplot(3, 4, 4), telemetry, markers, "True airspeed", ("speed_m_s", "vel"), "m/s")
+    _draw_multiseries_panel(figure.add_subplot(3, 4, 5), telemetry, markers, "AoA / bank / sideslip", (
+        ("AoA", ("aero_alpha_deg",), "#2563eb"),
+        ("Bank", ("route_bank_achieved_deg", "bank_achieved_deg", "local_roll_deg"), "#dc2626"),
+        ("Sideslip", ("aero_sideslip_deg",), "#d97706"),
+    ), "deg")
+    _draw_multiseries_panel(figure.add_subplot(3, 4, 6), telemetry, markers, "FPA / heading", (
+        ("FPA", ("flight_path_angle_deg", "aero_query_flight_path_angle_deg"), "#2563eb"),
+        ("Heading", ("local_heading_deg",), "#7c3aed"),
+    ), "deg")
+    _draw_multiseries_panel(figure.add_subplot(3, 4, 7), telemetry, markers, "Body / response rates", (
+        ("p", ("body_rate_p_rad_s", "p_rad_s", "p"), "#2563eb"),
+        ("q", ("body_rate_q_rad_s", "q_rad_s", "q"), "#dc2626"),
+        ("r", ("body_rate_r_rad_s", "r_rad_s", "r"), "#d97706"),
+    ), "rad/s")
+    _draw_multiseries_panel(figure.add_subplot(3, 4, 8), telemetry, markers, "Commands / achieved controls", (
+        ("bank command", ("route_bank_command_deg", "bank_command_deg"), "#2563eb"),
+        ("bank achieved", ("route_bank_achieved_deg", "bank_achieved_deg", "local_roll_deg"), "#dc2626"),
+        ("throttle", ("throttle_command", "command_throttle", "throttle"), "#16a34a"),
+    ), "declared units")
+    _draw_telemetry_panel(figure.add_subplot(3, 4, 9), telemetry, markers, "Route / objective error", ("route_target_error_m", "route_cross_track_error_m"), "m", marker_labels=True)
+    _draw_multiseries_panel(figure.add_subplot(3, 4, 10), telemetry, markers, "Envelope / aerodynamic state", (
+        ("Mach", ("aero_mach", "mach"), "#2563eb"),
+        ("dynamic pressure", ("aero_dynamic_pressure_pa", "dynprs"), "#dc2626"),
+        ("load factor", ("load_factor_g", "normal_load_factor_g"), "#d97706"),
+    ), "declared units")
+    _draw_multiseries_panel(figure.add_subplot(3, 4, 11), telemetry, markers, "Resources", (
+        ("fuel", ("fuel_remaining_kg", "fuel_kg", "fuel_remaining"), "#16a34a"),
+        ("propellant", ("propellant_remaining_kg", "propellant_kg"), "#2563eb"),
+        ("battery", ("battery_energy_j", "battery_remaining"), "#d97706"),
+    ), "declared units")
+    _draw_multiseries_panel(figure.add_subplot(3, 4, 12), telemetry, markers, "Closure / residuals", (
+        ("translation", ("translation_equation_residual_normalized", "force_closure_normalized"), "#2563eb"),
+        ("rotation", ("rotation_equation_residual_normalized", "moment_closure_normalized"), "#dc2626"),
+    ), "normalized")
+    score = payload.get("objective_evaluation", {}).get("score")
+    status = str(payload.get("objective_evaluation", {}).get("status", "unknown")).upper()
+    figure.suptitle(f"{FAMILY_LABELS[family]} — flagship qualification board", fontsize=20, fontweight="bold")
+    figure.text(0.01, 0.005, f"Status: {status}    Score: {score if score is not None else 'unavailable'}    Dashed red markers are family-local objectives/transitions. Missing channels remain unavailable. Source-bounded research-surrogate evidence; not certification.", fontsize=9, color="#7f1d1d")
+    figure.savefig(output, dpi=180, bbox_inches="tight")
+    plt.close(figure)
+    ####
+
+
 def _render_mission_overview(records: dict[str, tuple[Path, dict[str, Any]]], output: Path, plt: Any) -> None:
     figure, axes = plt.subplots(4, 4, figsize=(20, 18), layout="constrained")
     for row, family in enumerate(FAMILY_ORDER):
@@ -563,7 +713,7 @@ def _render_manifest(records: dict[str, tuple[Path, dict[str, Any]]], packet: Pa
         "source_packet": packet_reference,
         "source_packet_manifest_sha256": _sha256(packet / "manifest.json"),
         "claim_boundary": "source-bounded research-surrogate evidence; not flight qualification or historical TAOS compatibility",
-        "composites": ["plant-validation-scoreboard.png", "controller-mission-scoreboard.png", "objective-score-timeline.png", "controller-missions-overview.png"] + [f"{family}-controller-evidence.png" for family in FAMILY_ORDER],
+        "composites": ["plant-validation-scoreboard.png", "controller-mission-scoreboard.png", "objective-score-timeline.png", "controller-missions-overview.png"] + [f"{family}-controller-evidence.png" for family in FAMILY_ORDER] + [f"{family}-flagship-board.png" for family in FAMILY_ORDER],
         "missions": entries,
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -612,6 +762,7 @@ def generate(packet: Path, output: Path) -> Path:
     _render_mission_overview(records, output / "controller-missions-overview.png", plt)
     for family in FAMILY_ORDER:
         _render_mission_grid(family, records[family][0], output / f"{family}-controller-evidence.png", plt)
+        _render_flagship_board(family, records[family][0], output / f"{family}-flagship-board.png", plt)
     _render_manifest(records, packet, output)
     return _zip_output(output)
 ####
