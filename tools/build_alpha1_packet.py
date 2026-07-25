@@ -37,7 +37,7 @@ STATIC_FILES = (
     "artifacts/golden_plants/x8_powered_trim_report.json",
     "artifacts/golden_plants/hummingbird_hover_trim_report.json",
     "artifacts/golden_plants/x15_release_glide_trim_report.json",
-    "artifacts/source_differential_v1/tests_e2e_test_golden_source_differential.py_test_source_differential_report_writes_review_artifact/source-differential/golden_static_grid_report.json",
+    "artifacts/tests_e2e_test_golden_source_differential.py_test_source_differential_report_writes_review_artifact/source-differential/golden_static_grid_report.json",
     "examples/chapter04/ballistic-reentry.prb",
     "examples/chapter04/ballistic-rocket.prb",
     "examples/chapter04/air-launched-intercept.prb",
@@ -67,10 +67,22 @@ TABLE_FILES = (
 )
 
 ARTIFACT_DIRECTORIES = (
-    "artifacts/tests_e2e_test_vehicle_family_validation.py_test_b747_long_6dof_trim_hold_writes_contract_and_convergence_artifacts/vehicle-family-validation/b747-trim-hold-contract",
-    "artifacts/tests_e2e_test_x8_family_validation.py_test_x8_long_powered_candidate_writes_family_artifacts/vehicle-family-validation/x8-powered-validation-6dof",
-    "artifacts/tests_e2e_test_hummingbird_family_validation.py_test_hummingbird_return_home_landing_writes_phase_artifacts/vehicle-family-validation/hummingbird-return-home-land",
-    "artifacts/tests_e2e_test_glider_family_validation.py_test_glider_6dof_writes_family_artifacts/vehicle-family-validation/glider-unpowered-6dof",
+    (
+        "artifacts/tests_e2e_test_vehicle_family_validation.py_test_b747_long_6dof_trim_hold_writes_contract_and_convergence_artifacts/vehicle-family-validation/b747-trim-hold-contract",
+        "evidence/family/b747",
+    ),
+    (
+        "artifacts/tests_e2e_test_x8_family_validation.py_test_x8_long_powered_candidate_writes_family_artifacts/vehicle-family-validation/x8-powered-validation-6dof",
+        "evidence/family/x8",
+    ),
+    (
+        "artifacts/tests_e2e_test_hummingbird_family_validation.py_test_hummingbird_return_home_landing_writes_phase_artifacts/vehicle-family-validation/hummingbird-return-home-land",
+        "evidence/family/hummingbird",
+    ),
+    (
+        "artifacts/tests_e2e_test_glider_family_validation.py_test_glider_6dof_writes_family_artifacts/vehicle-family-validation/glider-unpowered-6dof",
+        "evidence/family/x15",
+    ),
 )
 
 
@@ -133,15 +145,17 @@ def main() -> None:
     args = _parse_args()
     output = args.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="taoryx-alpha1-packet-") as directory:
+    # Keep the deeply nested packet staging path beside the ZIP on Windows;
+    # the system temp prefix can otherwise exceed MAX_PATH before archiving.
+    with tempfile.TemporaryDirectory(prefix="a1-", dir=ROOT.parent) as directory:
         stage = Path(directory) / PACKET_NAME
         stage.mkdir()
         records: list[dict[str, Any]] = []
         for relative in (*STATIC_FILES, *TABLE_FILES):
             source = ROOT / relative
             _copy_file(source, stage / relative, records)
-        for relative in ARTIFACT_DIRECTORIES:
-            _copy_tree(ROOT / relative, stage / relative, records)
+        for source_relative, packet_relative in ARTIFACT_DIRECTORIES:
+            _copy_tree(ROOT / source_relative, stage / packet_relative, records)
         manifest = {
             "schema_version": 1,
             "release": "taoryx-alpha-1",

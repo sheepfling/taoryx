@@ -27,7 +27,7 @@ def build_contract(catalog_path: Path = CATALOG) -> dict[str, Any]:
 
     payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
     problem_catalog = yaml.safe_load(PROBLEM_CATALOG.read_text(encoding="utf-8"))
-    generated_outputs = {str(scenario["output"]) for scenario in problem_catalog["scenarios"]}
+    generated_outputs = {Path(str(scenario["output"])).as_posix() for scenario in problem_catalog["scenarios"]}
     required = tuple(payload["required_fields"])
     families: list[dict[str, Any]] = []
     for family in payload["families"]:
@@ -38,9 +38,9 @@ def build_contract(catalog_path: Path = CATALOG) -> dict[str, Any]:
             raise ValueError(f"{family['id']} has unsupported reduction kind: {family['reduction_kind']}")
         problems = {name: str(ROOT / family[name]) for name in ("point_mass_problem", "bridge_source_problem", "constrained_rigid_problem")}
         unregistered = [
-            str(Path(value).relative_to(ROOT))
+                Path(value).relative_to(ROOT).as_posix()
             for value in problems.values()
-            if str(Path(value).relative_to(ROOT)) not in generated_outputs
+            if Path(value).relative_to(ROOT).as_posix() not in generated_outputs
         ]
         if unregistered:
             raise ValueError(

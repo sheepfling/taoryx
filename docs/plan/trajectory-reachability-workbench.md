@@ -1,6 +1,6 @@
 # Taoryx Effective Kinematic Reachability Envelope Tool Plan
 
-**Status:** Alpha 3 breadth candidate / planning draft  
+**Status:** Alpha 3 breadth candidate / execution milestone defined
 **Product type:** Application and analysis tool built on trajectory-provider interfaces  
 **Initial provider:** Taoryx  
 **Long-term provider scope:** Any provider that can initialize, run, and report compatible trajectory cases  
@@ -28,6 +28,130 @@ A user should be able to ask questions such as:
 - How much does the feasible region contract under wind, model uncertainty, target maneuver, actuator limits, or control failures?
 
 The visible result may look like a fan, footprint, funnel, tube, or set of range-speed curves. Internally, all of those are slices or projections of the same reachability study.
+
+### 1.1 Reachability Tool Completion Goal
+
+> **Complete the Alpha 3 Reachability Tool as a reproducible end-to-end
+> research workflow: a user can connect a declared vehicle model, define its
+> search space and terminal goals, execute a deterministic reachability batch,
+> retain and classify every candidate, refine timeout cases, and generate
+> inspectable Matplotlib visualizations from the resulting artifacts. Prove the
+> workflow with the generic rocket/glide baseline and the staged X-15 example
+> across reduced-order fidelity tiers, using selected native X-15 replay only
+> to exercise the high-fidelity handoff and validity checks.**
+
+This is a process-completion goal, not a claim that the reduced-order X-15 is a
+validated performance model or that a finite search certifies physical
+infeasibility. The proof must establish that a new vehicle can be integrated,
+run, explained, visualized, and escalated without changing the result contract.
+
+#### Completion Gates
+
+| Gate | Required evidence |
+| --- | --- |
+| **G1. Vehicle integration** | Generic rocket/glide and staged X-15 providers declare state, phases, parameters, fidelity, validity assumptions, and source provenance. |
+| **G2. Search and outcome completeness** | A resolved study records the declared axes, every realized candidate, terminal margins, failure reasons, invalid/model-blocked outcomes, and explicit horizon timeouts. |
+| **G3. Goal evaluation** | Impact radius, impact speed, terminal speed, ground-contact, and horizon goals are represented in the versioned success specification and reflected in classifications. |
+| **G4. Refinement and escalation** | Timeout-only reruns preserve parent query IDs; selected pseudo-6DOF checkpoints can be preflighted and replayed natively, with out-of-domain cases retained as blocked records. |
+| **G5. Visualization** | One command renders flown trajectories, declared-versus-realized search coverage, terminal capability, and cross-fidelity progression from artifact data without rerunning simulations. |
+| **G6. Reproducible proof** | Example commands, manifests, plot manifests, focused tests, and integration notes demonstrate serial/parallel agreement and state the claim boundary for each fidelity. |
+
+#### Proof Vehicle Set
+
+| Proof lane | Executable configuration | What it proves | Completion boundary |
+| --- | --- | --- | --- |
+| **Baseline** | Generic single-stage rocket plus glide vehicle, 3DOF and pseudo-6DOF | Known-footprint behavior, impact radius/speed goals, complete outcome accounting, timeout refinement, and comparable fidelity artifacts. | Reduced-order process proof; not a vehicle-validation claim. |
+| **Staged example** | X-15-scaled booster, coast, release, and unpowered glide, 3DOF and pseudo-6DOF | Multi-phase state/resource handling, limited-energy capability, trajectory visualization, and capability contraction or movement across tiers. | X-15-scaled surrogate; source-backed assumptions and nonclaims are recorded. |
+| **Handoff probe** | Selected X-15 pseudo-6DOF checkpoints through native rigid-body replay | State/frame conversion, aerodynamic-table domain preflight, native telemetry capture, and explicit blocked outcomes. | Selective replay evidence only; not a native batch envelope. |
+
+The broader reachability profile catalog is an onboarding roster, not an Alpha 3
+completion dependency. Additional Taoryx examples become proof vehicles when
+they have a provider adapter and can pass the same gates; they do not replace
+the generic baseline or X-15 multi-phase proof.
+
+#### Minimum Executable Proof Sequence
+
+The completion report should be reproducible from these commands, with the
+resolved criteria and search grid recorded in each artifact:
+
+```bash
+taoryx reachability run --fidelity point_mass_3dof \
+  --include-trajectories \
+  --output artifacts/reachability/generic/point_mass_3dof.json
+
+taoryx reachability run --fidelity pseudo_6dof \
+  --include-trajectories \
+  --output artifacts/reachability/generic/pseudo_6dof.json
+
+taoryx reachability plot \
+  artifacts/reachability/generic/point_mass_3dof.json \
+  --compare artifacts/reachability/generic/pseudo_6dof.json \
+  --output-dir artifacts/reachability/generic/plots
+
+taoryx reachability x15 \
+  --output-dir artifacts/reachability/x15
+
+taoryx reachability x15-native-replay \
+  artifacts/reachability/x15/pseudo_6dof.json \
+  --output-dir artifacts/reachability/x15/native-replay
+```
+
+The exact grid, horizon, step size, criteria, worker count, and source
+revisions remain part of the emitted manifests; the commands above define the
+proof shape, not an unrecorded set of defaults.
+
+### 1.2 Alpha 3 Completion Milestone: Vehicle Onboarding Proof
+
+Alpha 3 is a process-validation milestone below the full R5 qualified
+workbench. Its purpose is to prove what is required to connect a vehicle to
+the reachability tool, preserve the evidence boundary, and iterate from cheap
+models to selective native replay.
+
+The milestone is complete when the X-15 and generic rocket/glide examples can
+be run through the following reproducible ladder:
+
+```text
+generic 3DOF baseline
+        -> generic pseudo-6DOF control refinement
+        -> X-15 staged 3DOF envelope
+        -> X-15 staged pseudo-6DOF envelope
+        -> selective native X-15 6DOF replay
+```
+
+The native replay is evidence for selected checkpoints, not a claim that the
+native rigid-body provider is already a batch envelope provider.
+
+#### Alpha 3 Requirements
+
+| ID | Requirement | Completion evidence |
+| --- | --- | --- |
+| A3-RQ-01 | A vehicle provider declares identity, state, parameters, phases, fidelity, and source provenance. | Self-describing result artifact and provider integration notes. |
+| A3-RQ-02 | A study declares terminal speed, impact event, target position, impact radius, and impact-speed goals where applicable. | Versioned `success_spec`, terminal margins, and goal-specific failure reasons. |
+| A3-RQ-03 | Every candidate is retained with feasible, infeasible, invalid, and model-blocked evidence distinguished. | Complete `samples` table and summary counts. |
+| A3-RQ-04 | Horizon termination is explicit and independently queryable. | Per-sample `timed_out`, timeout query IDs, and timeout-focused rerun artifact. |
+| A3-RQ-05 | A timeout rerun can extend the horizon without repeating completed candidates. | Parent-study provenance and a longer-horizon subset result. |
+| A3-RQ-06 | 3DOF and pseudo-6DOF use the same search contract and produce comparable artifacts. | Shared search-space identity, cross-fidelity plots, and tier comparison report. |
+| A3-RQ-07 | Native 6DOF escalation performs domain preflight before execution. | Mach, altitude, angle, sideslip, mass, control, and other table-domain margins. |
+| A3-RQ-08 | Native handoff failures are explicit and never silently clamped into a table. | `native_domain_blocked` records with reasons and bridge provenance. |
+| A3-RQ-09 | The example suite includes at least one known synthetic problem independent of X-15. | Known-footprint test with impact radius and impact-speed goals. |
+| A3-RQ-10 | Runs are deterministic and operationally reproducible. | Serial/parallel agreement, focused tests, manifests, and one-command examples. |
+| A3-RQ-11 | Integration friction is recorded as engineering evidence. | Vehicle onboarding notebook covering assumptions, failed attempts, and nonclaims. |
+| A3-RQ-12 | Every proof vehicle produces a standard Matplotlib plot bundle from its result artifact. | Flown trajectories, search coverage, terminal capability, and fidelity comparison plots plus a plot manifest. |
+| A3-RQ-13 | The proof result is usable without reading implementation details. | One-command run and plot instructions, artifact schema, example output tree, and claim boundary in the accompanying report. |
+
+#### Alpha 3 Definition Of Done
+
+Alpha 3 is complete when a new vehicle can be connected by declaring its
+reduced-order model, search variables, terminal goals, validity domain, and
+provenance; run a complete candidate batch; inspect successful, unsuccessful,
+timed-out, and blocked candidates; rerun unresolved timeout candidates; render
+the standard plots from the saved artifact; and escalate selected in-domain
+checkpoints to a higher-fidelity provider without modifying the envelope result
+contract.
+
+Alpha 3 does not require formal reachable-set certification, uncertainty
+quantification, adaptive boundary extraction, or a full native 6DOF batch
+search. Those remain R4/R5 workbench objectives.
 
 ---
 
@@ -787,6 +911,53 @@ actuator-and-moment-limited 6DOF envelope
 
 A conservative composite envelope may be produced only under an explicit rule.
 
+### 12.5 Native handoff and table-domain preflight
+
+The higher-fidelity handoff should be an explicit provider operation, not an
+implicit upgrade inside the reduced-order solver:
+
+```text
+reduced checkpoint
+      ↓
+state/frame conversion
+      ↓
+native validity preflight
+      ↓
+native replay or explicit blocked result
+```
+
+Before native execution, check every declared validity axis, including:
+
+```text
+Mach or speed
+altitude
+angle of attack
+sideslip
+mass and propellant state
+control and actuator authority
+thermal and dynamic-pressure limits
+```
+
+The preflight must return domain margins and a named status such as
+`ready`, `blocked`, or `invalid`. It must not silently clamp an out-of-domain
+state into an aerodynamic or propulsion table. A conservative initialization
+policy may be offered for reference replay, but it must preserve both the
+original reduced state and the native replay state so that the result cannot be
+misread as exact same-state validation.
+
+### 12.6 Horizon and timeout refinement
+
+Horizon termination is a study outcome, not an omitted candidate. Each sample
+must retain a timeout flag and the result must expose the timeout query IDs.
+The workbench should support a follow-up study that:
+
+- selects only the prior timeout candidates;
+- extends the horizon or changes the termination policy;
+- preserves the original study and candidate IDs in provenance;
+- reports which candidates resolved, timed out again, or reached another
+  terminal failure;
+- never silently merges the follow-up result into the original envelope.
+
 ---
 
 ## 13. Formal reachability research track
@@ -957,6 +1128,35 @@ The first release should generate:
 8. **Cross-fidelity comparison**
    - Overlay of 3DOF, pseudo-6DOF, and 6DOF boundaries.
    - Boundary displacement and reason codes.
+
+### 16.1 Alpha 3 Required Plot Bundle
+
+The Alpha 3 completion bundle is intentionally smaller than the full R5
+visualization catalog. It must be generated from the saved envelope artifact,
+not by rerunning the vehicle, and must contain:
+
+```text
+flown-trajectories.png
+search-coverage.png
+terminal-capability.png
+fidelity-progression.png    # when two or more tiers are supplied
+plot-manifest.json
+```
+
+The four views answer distinct completion questions:
+
+| View | Completion question |
+| --- | --- |
+| Flown trajectories | What did the vehicle actually fly, including boost/glide phase changes and feasible versus failed candidates? |
+| Search coverage | Did the run realize the declared search space, or are apparent gaps just missing candidates? |
+| Terminal capability | Where did candidates terminate, and how do feasible, infeasible, invalid, and unresolved outcomes separate? |
+| Fidelity progression | How did terminal points, feasible count, and maximum capability move between 3DOF and pseudo-6DOF? |
+
+Plot manifests must identify the source artifact, fidelity, plot names, DPI,
+and any intentionally omitted view, such as flown trajectories when compact
+artifacts do not contain trajectory tables. A plot is not evidence of a
+successful run unless its source artifact and classification legend are
+available alongside it.
 
 ---
 
@@ -1259,6 +1459,8 @@ Purpose:
 
 - Validate the envelope machinery against a known reachable region.
 - Exercise inner, boundary, exterior, and unresolved classifications.
+- Exercise explicit impact radius and impact-speed goals independently of a
+  vehicle-specific table or source mission.
 
 ### Example B: Moving-objective range-speed-aspect envelope
 
@@ -1308,6 +1510,10 @@ Purpose:
 - Validate selected cases with 6DOF.
 - Explain contraction caused by turn response, actuator limits, moments, and control saturation.
 
+The Alpha 3 realization of this example is the staged X-15 demonstration. It
+must include booster burn, coast, release mass drop, unpowered glide, timeout
+refinement, native table-domain preflight, and explicit native-blocked results.
+
 ### Example E: Robust or probabilistic envelope
 
 ```text
@@ -1333,7 +1539,13 @@ Purpose:
 | **R5 — Qualified Workbench** | Independent witness replay, convergence evidence, inner/uncertain/certified classifications, one-command artifacts, provider-neutral contracts. |
 | **R6 — Online Envelope Service** | Precomputed or learned envelope surrogate with query latency targets, calibration, versioning, and runtime invalidation rules. |
 
-The initial release target should be **R3**. The first defensible “good to go” research release should be **R5**.
+The long-term initial workbench target remains **R3**, and the first
+defensible “good to go” research release remains **R5**. The Alpha 3
+completion goal in section 1.1 is a narrower vertical slice: executable
+single-study semantics, timeout and outcome handling, reduced-order
+multi-fidelity evidence, selected native handoff checks, and artifact-backed
+Matplotlib plots. It is not a claim that Alpha 3 has reached R3 along-track
+branching or R5 qualification.
 
 ---
 
