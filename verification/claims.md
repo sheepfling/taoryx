@@ -19,14 +19,26 @@ claims:
     scope: individually benchmarked mathematical kernels
     excludes: historical iteration sequence or vehicle-table completeness
   - id: H
-    name: historical_compatibility
-    scope: TAOS 96.0 behavior
+    name: historical_runtime_equivalence
+    scope: TAOS 96.0 executable behavior and complete historical table library
     evidence_required: historical executable, source, or trusted output corpus
-    status: not_established
+    status: excluded_unverifiable_without_oracle
 
-The numerical-verification work in this repository is scoped to TAOS 1995.
-TAOS 96.0 compatibility remains a separate claim and must not be implied by
-manual fidelity or by passing unit tests alone.
+  - id: T96
+    name: taos96_language_and_specification_profile
+    scope: evidence-bounded manual, grammar, semantic, and numerical-kernel fidelity
+    evidence_required: reconstructed manual, verified corpus, source-linked registries, and independent kernel tests
+    status: supported_bounded
+    profile: verification/taos96_compatibility_profile.yaml
+
+The numerical-verification work in this repository is scoped to the 1995
+manual and its evidence-bounded TAOS 96.0 language/specification profile.
+Historical runtime equivalence remains explicitly excluded because the
+historical executable and complete table library are unavailable. It must not
+be implied by manual fidelity, parser coverage, or passing successor tests.
+
+The release profile and approved wording are documented in
+[`docs/verification/taos96-evidence-bounded-profile.md`](../docs/verification/taos96-evidence-bounded-profile.md).
 ```
 
 The status of a claim is determined per release and per scope. A passing unit

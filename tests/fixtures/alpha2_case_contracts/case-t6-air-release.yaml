@@ -1,0 +1,13 @@
+schema_version: 1
+case_id: dual-launch-glider-air-release-v1
+family: dual_launch_glider
+fidelity: point_mass_3dof
+variant: baseline
+loadout: baseline
+mission: waypoint_release
+segment_plan: dual_launch
+controller: waypoint-autopilot
+extensions:
+  launch_mode: air_release
+  handoff_policy: continuous
+  source_validity: synthetic_successor_fixture

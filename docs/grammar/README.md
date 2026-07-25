@@ -13,7 +13,7 @@ For the fastest route into the validator and parser corpus:
 python tools/dev.py grammar
 taoryx-validate examples/chapter04/ballistic-reentry.prb
 python tools/dev.py test-grammar
-python tools/dev.py test-spectre
+python tools/dev.py test-simple_aero
 ```
 
 ## Sources of truth
@@ -106,7 +106,7 @@ grammar automatically.
 - `python tools/dev.py grammar` runs the parser, fixture, and manual-corpus
   checks together.
 - `python tools/dev.py test-grammar` runs the grammar view from pytest.
-- `python tools/dev.py test-spectre` runs the Spectre corpus that exercises
+- `python tools/dev.py test-simple_aero` runs the Simple Aero corpus that exercises
   problem, segment, and trajectory coverage.
 - `tests/fixtures/grammar_baseline/` contains the smallest independent syntax
   fixtures for positive and negative grammar checks.

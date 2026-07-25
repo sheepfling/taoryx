@@ -1,0 +1,4 @@
+(sensor-timing-extension)
+*runtime sensor imu kind=imu cadence-s=0.01 sample=instantaneous delivery-s=0 truth=boundary rate-policy=split frame=body
+*runtime sensor camera kind=camera cadence-s=0.1 phase-s=0.05 sample=interval delivery-s=0.05 truth=accepted-segment rate-policy=accumulate source=synthetic
+*end

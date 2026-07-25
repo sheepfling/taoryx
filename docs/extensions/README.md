@@ -17,6 +17,8 @@ TAOS behavior.
   every `.prb`/`.tbl` fixture.
 - [Taoryx language extension reference](taoryx-language-reference.md): focused
   syntax, aliases, AST mappings, validation, and end-to-end artifact commands.
+- [Transition truth](transition-truth.md): language boundary, immutable
+  pre/post event snapshots, continuity rules, and artifact inspection.
 - [Showcase catalog](showcase-catalog.md): polished, reproducible examples
   and their expected plots.
 - [LQR](lqr.md): declarative linear-quadratic regulator configuration and

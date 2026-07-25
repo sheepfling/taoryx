@@ -3,6 +3,18 @@
 This is the shortest route from a new task to a traceable TAORYX change. Read
 this page first, then follow the detailed architecture page for the workflow.
 
+Before adding a new source-grounded plant, DAVE-ML model, OpenAP model,
+NASA/NESC scenario, JSBSim aircraft, orbital source, or public-data surrogate,
+follow the [model integration workflow](plan/model-integration-workflow.md).
+Start with the integration record and source hashes; keep the immutable plant
+separate from Taoryx actuator, controller, mission, and RL overlays. This is
+the contributor-facing Tier 0–4 process for new model work.
+
+For sensors, estimators, seekers, or RL observations, also follow the
+[sensor and measurement orchestration backlog](plan/sensor-measurement-orchestration.md).
+It defines the committed-truth boundary, measurement timing, multi-rate event
+ordering, and truth-isolated decision ports.
+
 ## First orientation
 
 ```text
@@ -122,31 +134,31 @@ change belongs to the documented source language. Use the external
 segmentation catalog when the task needs reusable orchestration metadata,
 controller bindings, goals, events, or transition policies.
 
-### Spectre-style specialized segments
+### Simple Aero-style specialized segments
 
-For the synthetic Spectre corpus, start with
-[`docs/architecture/spectre-segments.md`](architecture/spectre-segments.md) and
-[`verification/spectre_segment_catalog.yaml`](../verification/spectre_segment_catalog.yaml).
+For the synthetic Simple Aero corpus, start with
+[`docs/architecture/simple_aero-segments.md`](architecture/simple_aero-segments.md) and
+[`verification/simple_aero_segment_catalog.yaml`](../verification/simple_aero_segment_catalog.yaml).
 The reusable templates are `powered_ascent`, `ballistic_coast`,
 `bank_maneuver`, `alpha_profile`, `skip_maneuver`, `terminal_pronav`, and
 `moving_target_intercept`. They apply to point-mass 3-DOF, kinematic
 pseudo-6-DOF, and—after additional plant gates—rigid-body 6-DOF.
 
-The Spectre fixture status is deliberately separate from vehicle promotion:
+The Simple Aero fixture status is deliberately separate from vehicle promotion:
 `fixture-ready` means the synthetic source translation and provenance are
 available. It does not prove a vehicle's thrust, aero tables, bank sign, alpha
 response, target closure, or terminal behavior. Reuse the phase contract and
 retune the vehicle-specific controls, tables, limits, and time-to-go values;
-never copy those values blindly from the Spectre surrogate.
+never copy those values blindly from the Simple Aero surrogate.
 
-Before composing a Spectre phase into a vehicle route, run the isolated fixture
+Before composing a Simple Aero phase into a vehicle route, run the isolated fixture
 ladder:
 
 ```bash
-python tools/dev.py test-spectre-segments
+python tools/dev.py test-simple_aero-segments
 ```
 
-This Spectre-specific runtime view proves grammar, completion, telemetry,
+This Simple Aero-specific runtime view proves grammar, completion, telemetry,
 finite samples, time ordering, and isolated segment span. It does not promote
 the phase: vehicle-quality gates remain deferred until a vehicle adapter
 supplies bounded aero/plant, control, convergence, and terminal evidence.
@@ -155,7 +167,7 @@ For the shortest path to a runnable reduced-order case, use the parameter
 builder instead of hand-writing four native segments:
 
 ```python
-from taoryx.spectre_builder import build_fixed_ld_3dof
+from taoryx.simple_aero_builder import build_fixed_ld_3dof
 
 build = build_fixed_ld_3dof(
     vehicle_id="generic-3dof",
@@ -167,14 +179,14 @@ build = build_fixed_ld_3dof(
     initial_heading_offset_deg=8.0,
     lift_to_drag=4.0,
 )
-build.write("build/spectre-demo.prb", "build/spectre-demo.manifest.json")
+build.write("build/simple_aero-demo.prb", "build/simple_aero-demo.manifest.json")
 ```
 
 Validate the generated extension with `taoryx`, then run it through the same
 profile explicitly:
 
 ```bash
-taoryx-validate --profile taoryx build/spectre-demo.prb
+taoryx-validate --profile taoryx build/simple_aero-demo.prb
 ```
 
 The generated manifest shows the computed phase durations, initial heading,

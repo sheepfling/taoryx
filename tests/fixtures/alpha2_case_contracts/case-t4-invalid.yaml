@@ -1,0 +1,11 @@
+schema_version: 1
+case_id: simple_aero-t4-invalid-v1
+family: simple_aero
+fidelity: point_mass_3dof
+variant: baseline
+loadout: baseline
+mission: baseline
+segment_plan: boost_coast
+controller: none
+overrides:
+  mission.pitch_over_angle: {value: 95.0, unit: deg}

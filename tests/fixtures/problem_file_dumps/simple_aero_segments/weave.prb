@@ -1,0 +1,22 @@
+(simple_aero-weave)
+
+# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/weave.yaml
+# Simple Aero family: weave
+# Start controls: weave_end_range_to_go_km
+# Stop controls: min_time_to_go_s
+
+*title Simple Aero translation weave
+
+*atmos standard
+*earth wgs-84 omega=0
+
+*trajectory 1 vehicle start on 1
+  *initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0
+  *file weave.dat time alt vel gamgd alpha bankgd thrust
+  *segment 1 weave
+    *integ dtprnt=0.1 dt=0.1
+    *aero ca=0.0 cn=0.0
+    *fly bankgd=0.0
+    *when time=60.0 stop
+
+*end

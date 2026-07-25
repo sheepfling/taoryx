@@ -1,0 +1,20 @@
+schema_version: 1
+case_id: simple_aero-light-short-v1
+family: simple_aero
+fidelity: point_mass_3dof
+variant: light
+loadout: high_thrust
+mission: short_range
+segment_plan: boost_coast
+controller: none
+overrides:
+  mission.initial_speed:
+    value: 180.0
+    unit: km/h
+requested_controls:
+  - command.bank
+  - command.throttle
+requested_observations:
+  - state.position.downrange
+  - state.position.altitude
+  - state.velocity

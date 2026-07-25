@@ -25,8 +25,8 @@ new vehicle breadth and deeper source correlation.
 
 ### Alpha 2 finish line
 
-Alpha 2 closes only after P0-1 through P0-5, P1-1, P1-2, and the bounded
-source-anchor tranche P1-3 are complete:
+Alpha 2 closes only after P0-1 through P0-5, P1-1, P1-2, the reusable trim
+procedure P1-4, and the bounded source-anchor tranche P1-3 are complete:
 
 - one common evaluator and evidence packet route;
 - deterministic interactive stepping, replay, and checkpoint/restart;
@@ -35,6 +35,8 @@ source-anchor tranche P1-3 are complete:
   allocation, channel semantics, and evidence metadata;
 - reproducible B747, X8, Hummingbird, and X-15 flagship missions;
 - normalized plant-truth controller presets and tuning;
+- reusable trim generation and operating-point procedure for the four
+  established families, including the source-backed X-15 glide trim;
 - M4 Composable maturity for the four established proof families.
 - F-16 S-119 and HL-20 Mod K source-grounded reference anchors that replay
   their pinned DAVE-ML plants and source regressions through the normal
@@ -130,7 +132,20 @@ scaling, control-direction probes, and explicit gentle/standard/aggressive
 profiles. LQR is the first baseline, not a permanent architectural lock-in;
 SciPy or historical solver adapters remain selectable and provenance-linked.
 
-7. **F-16 and HL-20 DAVE-ML reference anchors**
+7. **Reusable trim generation and operating-point procedure**
+
+Trim generation is an Alpha 2 dependency because controller and segment
+validation cannot scale if every operating point is hand-tuned. The procedure
+must declare variables, bounds, residual semantics, scales, solver settings,
+and source provenance; support deterministic bounded solves, multi-start, and
+continuation; classify infeasible or out-of-envelope cases; and emit a
+versioned trim artifact consumed by linearization, LQR design, and segment
+entry validation. The first reference case is the X-15 unpowered glide, where
+force must align with velocity and body moments must vanish; requiring zero
+total force would be physically incorrect. New vehicle families remain Alpha
+3 consumers of this interface.
+
+8. **F-16 and HL-20 DAVE-ML reference anchors**
 
 Integrate their immutable source plants through the same catalog and firewall.
 The Alpha 2 slice is deliberately narrower than full pickup readiness: it

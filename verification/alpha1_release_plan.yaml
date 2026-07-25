@@ -107,11 +107,11 @@ release_profile:
     - python tools/dev.py generate-problems
     - python tools/dev.py check
     - python -m pytest
-    - python tools/dev.py test-spectre
-    - python -m pytest -m 'slow or artifact or spectre'
+    - python tools/dev.py test-simple_aero
+    - python -m pytest -m 'slow or artifact or simple_aero'
     - python tools/dev.py handoff
   default_pytest_excludes:
     - slow
     - artifact
-    - spectre
+    - simple_aero
 ####

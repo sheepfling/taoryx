@@ -13,6 +13,8 @@ from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.outputs import RunArtifact
 from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
 from taoryx.table_explorer import InterpolationExplanation, TableInspection, explain_interpolation, inspect_table_file
+from taoryx.trajectory import FamilyCatalog, ResolvedCase, diff_resolved_cases, load_case_intent, load_family_catalog, resolve_case
+from taoryx.trajectory.resolution import ResolutionError
 from taoryx.visualization import render_run_artifact_html, render_run_artifact_plots
 
 from .optimization_runtime import available_optimizers
@@ -75,6 +77,44 @@ def main(argv: list[str] | None = None) -> int:
     integrators = subparsers.add_parser("integrators", help="inspect available integration backends")
     integrators_subparsers = integrators.add_subparsers(dest="integrator_command", required=True)
     integrators_subparsers.add_parser("list", help="list installed integration backends")
+    catalog = subparsers.add_parser("catalog", help="inspect Alpha 2 vehicle-family catalogs")
+    catalog_subparsers = catalog.add_subparsers(dest="catalog_command", required=True)
+    catalog_list = catalog_subparsers.add_parser("list", help="list catalog entries")
+    catalog_list.add_argument("kind", choices=("families",))
+    catalog_list.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
+    family = subparsers.add_parser("family", help="inspect one Alpha 2 vehicle family")
+    family_subparsers = family.add_subparsers(dest="family_command", required=True)
+    family_inspect = family_subparsers.add_parser("inspect", help="show family metadata")
+    family_inspect.add_argument("family_id")
+    family_inspect.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
+    family_schema = family_subparsers.add_parser("schema", help="export family schemas")
+    family_schema.add_argument("family_id")
+    family_schema.add_argument("--exposure", choices=("common",), default="common")
+    family_schema.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
+    case = subparsers.add_parser("case", help="resolve and inspect Alpha 2 case intents")
+    case_subparsers = case.add_subparsers(dest="case_command", required=True)
+    case_validate = case_subparsers.add_parser("validate", help="validate a case intent")
+    case_validate.add_argument("path", type=Path)
+    case_validate.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
+    case_resolve = case_subparsers.add_parser("resolve", help="resolve a case intent")
+    case_resolve.add_argument("path", type=Path)
+    case_resolve.add_argument("--output", type=Path, required=True)
+    case_resolve.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
+    case_explain = case_subparsers.add_parser("explain", help="explain resolved parameter provenance")
+    case_explain.add_argument("path", type=Path)
+    case_explain.add_argument("--parameter")
+    case_explain.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
+    case_diff = case_subparsers.add_parser("diff", help="diff two case intents")
+    case_diff.add_argument("left", type=Path)
+    case_diff.add_argument("right", type=Path)
+    case_diff.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
+    schema = subparsers.add_parser("schema", help="export Alpha 2 case schemas")
+    schema_subparsers = schema.add_subparsers(dest="schema_command", required=True)
+    schema_export = schema_subparsers.add_parser("export", help="export parameters, controls, or observations")
+    schema_export.add_argument("path", type=Path)
+    schema_export.add_argument("--kind", choices=("parameters", "controls", "observations"), required=True)
+    schema_export.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
+    schema_export.add_argument("--output", type=Path)
     arguments = parser.parse_args(argv)
     if arguments.command == "scenario":
         return _compile_scenario(arguments)
@@ -90,6 +130,14 @@ def main(argv: list[str] | None = None) -> int:
         for integrator_name, description in available_integrator_descriptions():
             print(f"{integrator_name.value}\t{description}")
         return 0
+    if arguments.command == "catalog":
+        return _catalog_command(arguments)
+    if arguments.command == "family":
+        return _family_command(arguments)
+    if arguments.command == "case":
+        return _case_command(arguments)
+    if arguments.command == "schema":
+        return _schema_command(arguments)
     if arguments.max_steps <= 0:
         parser.error("--max-steps must be positive")
     report = run_files(
@@ -148,6 +196,126 @@ def _compile_scenario(arguments: argparse.Namespace) -> int:
         print(f"compiled scenario {scenario.identity}")
         print(f"cache: {arguments.output}")
     return 0
+
+
+def _trajectory_catalog(path: Path) -> FamilyCatalog:
+    """Load the configured Alpha 2 family catalog for CLI commands."""
+
+    return load_family_catalog(path)
+    ####
+
+
+def _print_json(payload: object, output: Path | None = None) -> None:
+    """Print or write one deterministic JSON payload."""
+
+    text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if output is None:
+        print(text, end="")
+        return
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(text, encoding="utf-8")
+    print(f"wrote {output}")
+    ####
+
+
+def _catalog_command(arguments: argparse.Namespace) -> int:
+    """Handle Alpha 2 catalog inspection."""
+
+    try:
+        catalog = _trajectory_catalog(arguments.catalog)
+        if arguments.catalog_command == "list" and arguments.kind == "families":
+            _print_json(
+                [
+                    {
+                        "family_id": family.family_id,
+                        "version": family.version,
+                        "display_name": family.display_name,
+                        "fidelities": list(family.fidelities),
+                    }
+                    for family in catalog.families
+                ]
+            )
+        return 0
+    except (OSError, KeyError, ResolutionError, TypeError, ValueError) as error:
+        print(f"error: catalog-failed: {error}")
+        return 2
+    ####
+
+
+def _family_command(arguments: argparse.Namespace) -> int:
+    """Handle Alpha 2 family inspection and schema export."""
+
+    try:
+        family = _trajectory_catalog(arguments.catalog).family(arguments.family_id)
+        if arguments.family_command == "inspect":
+            _print_json(family.model_dump(mode="json"))
+        else:
+            _print_json(
+                {
+                    "family_id": family.family_id,
+                    "version": family.version,
+                    "parameters": [item.model_dump(mode="json") for item in family.parameters],
+                    "controls": [item.model_dump(mode="json") for item in family.controls],
+                    "observations": [item.model_dump(mode="json") for item in family.observations],
+                }
+            )
+        return 0
+    except (OSError, KeyError, ResolutionError, TypeError, ValueError) as error:
+        print(f"error: family-failed: {error}")
+        return 2
+    ####
+
+
+def _resolve_cli_case(path: Path, catalog_path: Path) -> ResolvedCase:
+    """Load and resolve one case intent for CLI operations."""
+
+    return resolve_case(load_case_intent(path), _trajectory_catalog(catalog_path))
+    ####
+
+
+def _case_command(arguments: argparse.Namespace) -> int:
+    """Handle Alpha 2 case validation, resolution, explanation, and diff."""
+
+    try:
+        if arguments.case_command == "validate":
+            resolved = _resolve_cli_case(arguments.path, arguments.catalog)
+            print(f"valid: {resolved.case_id} ({resolved.identity_sha256})")
+        elif arguments.case_command == "resolve":
+            resolved = _resolve_cli_case(arguments.path, arguments.catalog)
+            resolved.write_json(str(arguments.output))
+            print(f"resolved: {resolved.case_id} ({resolved.identity_sha256})")
+        elif arguments.case_command == "explain":
+            resolved = _resolve_cli_case(arguments.path, arguments.catalog)
+            _print_json(resolved.explain(arguments.parameter))
+        else:
+            left = _resolve_cli_case(arguments.left, arguments.catalog)
+            right = _resolve_cli_case(arguments.right, arguments.catalog)
+            _print_json(diff_resolved_cases(left, right))
+        return 0
+    except (OSError, KeyError, ResolutionError, TypeError, ValueError) as error:
+        print(f"error: case-failed: {error}")
+        return 2
+    ####
+
+
+def _schema_command(arguments: argparse.Namespace) -> int:
+    """Handle Alpha 2 schema export."""
+
+    try:
+        resolved = _resolve_cli_case(arguments.path, arguments.catalog)
+        payload: object
+        if arguments.kind == "parameters":
+            payload = {key: value.model_dump(mode="json") for key, value in resolved.parameters.items()}
+        elif arguments.kind == "controls":
+            payload = [item.model_dump(mode="json") for item in resolved.controls]
+        else:
+            payload = [item.model_dump(mode="json") for item in resolved.observations]
+        _print_json(payload, arguments.output)
+        return 0
+    except (OSError, KeyError, ResolutionError, TypeError, ValueError) as error:
+        print(f"error: schema-failed: {error}")
+        return 2
+    ####
 
 
 def _render_artifact(arguments: argparse.Namespace) -> int:

@@ -57,8 +57,15 @@ python3 examples/composition/mode_validation.py
 
 The first writes command history, status/event metadata, CSV, JSON, and HTML.
 The second records a deterministic stage transition and terminal stop event in
-JSON, SQLite, and HTML. Both examples use synthetic runtime models and are
-not historical TAOS output claims.
+JSON, SQLite, and HTML. Its console output also shows each typed pre/post truth
+pair, including the event time, segment handoff, physical discontinuity flag,
+and state values. Both examples use synthetic runtime models and are not
+historical TAOS output claims.
+
+For the source-language version of the same contract, inspect and run
+`examples/taoryx/syntax_fragments/12_transition_truth.prb` with the `taoryx`
+profile. The source uses ordinary `*when`, `goto`, `*increment`, and `stop`
+syntax; the runtime supplies the transition truth audit automatically.
 
 The round-trip example reloads JSON and writes the same run through all output
 sinks. The mode example accepts a control only for its declared dynamics mode

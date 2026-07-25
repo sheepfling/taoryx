@@ -9,6 +9,12 @@ the executable implementation.
 coordinate frames, and constants. They are not a replacement for the canonical
 manual metadata; they link to it.
 
+The release compatibility boundary is defined by
+[`taos96_compatibility_profile.yaml`](taos96_compatibility_profile.yaml) and
+[`docs/verification/taos96-evidence-bounded-profile.md`](../docs/verification/taos96-evidence-bounded-profile.md):
+Taoryx claims evidence-bounded TAOS 96.0 language/specification fidelity, not
+historical executable equivalence.
+
 `numerical_goal.md` states the operational goal for the derivation and
 verification work: source-linked, unit-checked, ambiguity-preserving numerical
 behavior with explicit diagnostics.
@@ -91,6 +97,55 @@ versioned Vehicle Family Package, immutable `ResolvedCase`, fidelity adapters,
 loadouts, reusable mission segments, and explicit autopilot/AI/player control
 authority on top of Alpha 1.
 
+Alpha 2 T7 is the release boundary for that frozen contract. Build the
+self-contained packet and its isolated replay with:
+
+```bash
+python tools/dev.py alpha2-release
+python tools/dev.py audit-alpha2
+```
+
+The packet is written to
+`artifacts/verification/alpha2/t7_release/evidence-packet.zip` and includes the
+catalog-derived `schema-reference.json`/PDF, claim matrix, T1–T6 evidence,
+source snapshot, native artifacts, and reproducibility report. Its release
+claim excludes historical TAOS 96.0 runtime compatibility, global vehicle
+validity, flight qualification, and universal autopilot performance.
+
+The expanded work is ranked separately in
+[`docs/plan/taoryx-alpha-2-backlog.md`](../docs/plan/taoryx-alpha-2-backlog.md)
+and `alpha2_post_release_backlog.yaml`. P0 closes the common scenario,
+interactive-session, onboarding, and checkpoint seams; P1 qualifies the four
+existing families and integrates F-16/HL-20 reference anchors; P2 now brings
+the Cessna-class, rotorcraft/VTOL, spacecraft, small-business-jet, and
+Anduril-inspired public-surrogate domain pilots into the shared contracts
+before search and corpus breadth; P3 adds fleet scale, parametric spacecraft
+qualification, sensors, and weather; P4 remains blocked on a historical
+oracle.
+
+The current small-aircraft research intake is recorded in
+[`small_aircraft_research_intake_v1.yaml`](small_aircraft_research_intake_v1.yaml).
+It contains the hashed C172P-class and Learjet 24-class candidate inputs,
+source roles, supported first-pass claims, and explicit exclusions. These
+remain backlog intake records until their tables and providers are ingested
+through the normal catalog and convention-firewall workflow.
+
+The rotorcraft/tiltrotor close-out intake is recorded in
+[`rotorcraft_tiltrotor_research_intake_v1.yaml`](rotorcraft_tiltrotor_research_intake_v1.yaml).
+It separates the R44 identified-hover anchor, XV-15 conversion research, and
+scaled V-22-class surrogate, and makes mode-transition continuity and
+abort/reversion evidence explicit.
+
+The Alpha 2/Alpha 3 release boundary is documented in
+[`docs/plan/taoryx-alpha-3.md`](../docs/plan/taoryx-alpha-3.md), and current
+family maturity is tracked in
+[`vehicle_maturity_registry.yaml`](vehicle_maturity_registry.yaml). Intake
+records are not maturity promotions: a family advances only through the
+common catalog, convention firewall, trim, evidence, and mission gates.
+
+The required pre-freeze interface review is
+[`future-family-interface-stress-test.md`](../docs/plan/future-family-interface-stress-test.md).
+
 The companion [Vehicle Readiness Guide](../docs/plan/vehicle-readiness-guide.md)
 defines the M0–M6 maturity ladder, per-dimension qualification scorecard,
 graded composition statuses, typed start contracts, classified finality,
@@ -98,6 +153,37 @@ trajectory evaluation, evidence classes, and readiness badges. M5
 `Qualified / Pickup-Ready` is a bounded qualification claim, not a claim that
 one runnable example proves the entire family or its real-world predictive
 accuracy.
+
+The [Four-Family Flight Showcase v1 plan](../docs/plan/four-family-flagship-flight-showcase-v1.md)
+defines the flagship qualification layer for the B747, Skywalker X8,
+Hummingbird, and X-15. Its independent audit is
+[`showcase_composites_v1_audit.md`](showcase_composites_v1_audit.md), and its
+machine-readable validation roadmap is
+[`showcase_validation_roadmap_v2.json`](showcase_validation_roadmap_v2.json).
+The canonical bundle-index workbook is
+[`bundle_index.xlsx`](../tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/bundle_index.xlsx).
+
+The [model integration workflow](../docs/plan/model-integration-workflow.md)
+is the contributor-facing procedure for adding source-grounded plants and
+surrogates. The F-16 and HL-20 reference-anchor notes are documented in
+[`f16-hl20-library-integration.md`](../docs/plan/f16-hl20-library-integration.md),
+[`f16-s119-complete-model.md`](../docs/plan/f16-s119-complete-model.md), and
+[`hl20-source-model.md`](../docs/plan/hl20-source-model.md).
+The machine-readable reference-anchor registry is
+[`reference_model_registry.yaml`](reference_model_registry.yaml); it records
+package/source hashes, current qualification boundaries, evidence by layer,
+and the next overlay work.
+
+The [Parametric Models and ML Trajectory Corpus Plan](../docs/plan/parametric-models-ml-trajectory-corpus.md)
+defines the P0–P5 corpus maturity ladder, coherent design sampling,
+identification fragments, truth/observation editions, coverage reporting, and
+realized-vehicle leakage-safe splits.
+
+The [Fleet, Space, and Public-Surrogate Expansion Plan](../docs/plan/fleet-space-public-surrogate-expansion.md)
+extends the library-maturity backlog with batched Hummingbird reductions,
+the `reference_satellite` family, and evidence-bounded public autonomous-
+aircraft surrogates. It is explicitly not a proprietary-platform replication
+plan.
 
 `acceptance/robustness_matrix_v1.yaml` is the executable claim boundary for
 the paired slower-vehicle examples. Run it with `python tools/dev.py

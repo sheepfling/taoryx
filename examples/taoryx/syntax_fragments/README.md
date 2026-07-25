@@ -20,6 +20,8 @@ successor `aero_force`, `aero_moment`, and `inertia` table families.
 | `08_batch_cases.prb` | cases, symbolic optimization, and summaries |
 | `09_environment.prb` | RCC atmosphere and file-backed wind |
 | `10_parser_quirks.prb` | spacing, case, names, and non-1 start segments |
+| `11_sensor_timing.prb` | accepted-truth sensor clocks, cadence, phase, latency, and sample policy |
+| `12_transition_truth.prb` | automatic pre/post truth capture around `goto`, `increment`, and `stop` |
 
 These are Taoryx grammar/AST fixtures. They do not claim complete TAOS 96 runtime
 compatibility.

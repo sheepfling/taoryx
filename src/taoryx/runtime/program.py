@@ -18,7 +18,7 @@ from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
 from taoryx.language.models import ProblemDocument, RuntimeBlock, TableDocument, TitleBlock
 
-from .common import RuntimeProblem, RuntimeState
+from .common import RuntimeProblem, RuntimeState, TransitionTruthPair, TransitionTruthSnapshot
 from .lowering import LoweredDocument, lower_problem_document, problem_unit_settings
 from .table_binding import bind_runtime_tables
 
@@ -140,6 +140,8 @@ class LoadedProgram:
             "controls": self.inspect_controls(),
             "parameters": self.inspect_parameters(),
             "lqr": self.inspect_lqr(),
+            "sensors": self.inspect_sensors(),
+            "transition_history": [item.to_metadata() for item in self.case().transition_history],
             "vehicles": [
                 {
                     "name": name,
@@ -216,6 +218,12 @@ class LoadedProgram:
         ]
     ####
 
+    def inspect_sensors(self) -> list[dict[str, object]]:
+        """List declared sensor clocks and their truth-boundary policies."""
+
+        return [clock.to_metadata() for clock in self.case().sensor_clocks]
+    ####
+
     def inspect_case(self, index: int = 0) -> dict[str, object]:
         """Return live emulator state, controls, parameters, and histories."""
 
@@ -226,6 +234,7 @@ class LoadedProgram:
             "case_index": index,
             "parameters": parameters,
             "event_history": list(problem.event_history),
+            "transition_history": [item.to_metadata() for item in problem.transition_history],
             "vehicles": {
                 name: {
                     "time": vehicle.state.time,
@@ -362,9 +371,12 @@ class LoadedProgram:
             "problem": {
                 "print_times": list(problem.print_times),
                 "table_knots": list(problem.table_knots),
+                "required_truth_times": list(problem.required_truth_times),
+                "sensor_clocks": [clock.to_metadata() for clock in problem.sensor_clocks],
                 "final_time": problem.final_time,
                 "metadata": _json_safe({key: value for key, value in problem.metadata.items() if key != "tables"}),
                 "event_history": _json_safe(problem.event_history),
+                "transition_history": [item.to_metadata() for item in problem.transition_history],
                 "vehicles": {
                     name: {
                         "state": _state_payload(vehicle.state),
@@ -427,9 +439,15 @@ class LoadedProgram:
         saved = payload["problem"]
         case.print_times = tuple(float(value) for value in saved.get("print_times", ()))
         case.table_knots = tuple(float(value) for value in saved.get("table_knots", ()))
+        case.required_truth_times = tuple(float(value) for value in saved.get("required_truth_times", ()))
         case.final_time = float(saved["final_time"]) if saved.get("final_time") is not None else None
         case.metadata.update(saved.get("metadata", {}))
         case.event_history[:] = list(saved.get("event_history", ()))
+        case.transition_history[:] = [
+            _transition_pair_from_payload(item)
+            for item in saved.get("transition_history", ())
+            if isinstance(item, Mapping)
+        ]
         for name, vehicle_payload in saved["vehicles"].items():
             vehicle = case.vehicles[name]
             vehicle.state = _state_from_payload(vehicle_payload["state"], vehicle.state.frame)
@@ -478,6 +496,48 @@ def _state_from_payload(payload: Mapping[str, object], frame: Frame | str) -> Ru
         tuple(str(name) for name in value_names),
     )
 ####
+
+
+def _transition_snapshot_from_payload(payload: Mapping[str, object]) -> TransitionTruthSnapshot:
+    """Restore one serialized transition truth snapshot."""
+
+    values = cast(Sequence[float | int | str], payload.get("values", ()))
+    named_payload = cast(Mapping[str, object], payload.get("named", {}))
+    controls_payload = cast(Mapping[str, object], payload.get("achieved_controls", {}))
+    state = RuntimeState(
+        float(cast(float | int | str, payload.get("time", 0.0))),
+        tuple(float(value) for value in values),
+        str(payload.get("frame", Frame.ECFC.value)),
+        {str(key): float(cast(float | int | str, value)) for key, value in named_payload.items() if isinstance(value, (int, float))},
+        tuple(str(name) for name in cast(Sequence[object], payload.get("value_names", ()))),
+    )
+    controls = tuple(sorted((str(key), float(cast(float | int | str, value))) for key, value in controls_payload.items()))
+    return TransitionTruthSnapshot(
+        state,
+        int(cast(int | str, payload.get("segment", 1))),
+        bool(payload.get("active", True)),
+        controls,
+    )
+    ####
+
+
+def _transition_pair_from_payload(payload: Mapping[str, object]) -> TransitionTruthPair:
+    """Restore one serialized transition truth pair."""
+
+    return TransitionTruthPair(
+        event_name=str(payload.get("name", "")),
+        event_time=float(cast(float | int | str, payload.get("time", 0.0))),
+        action=str(payload.get("action", "")),
+        signal=str(payload.get("signal", "")),
+        segment_from=int(cast(int | str, payload.get("segment_from", 1))),
+        segment_to=int(cast(int | str, payload.get("segment_to", 1))),
+        pre=_transition_snapshot_from_payload(cast(Mapping[str, object], payload.get("pre_truth", {}))),
+        post=_transition_snapshot_from_payload(cast(Mapping[str, object], payload.get("post_truth", {}))),
+        residual=float(cast(float | int | str, payload.get("residual", 0.0))),
+        source=str(payload["source"]) if payload.get("source") is not None else None,
+        state_discontinuity=bool(payload.get("state_discontinuity", False)),
+    )
+    ####
 
 
 def _json_safe(value: object) -> object:

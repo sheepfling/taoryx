@@ -48,7 +48,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = ["--strict-markers", "-m", "not slow and not artifact and not spectre"]
+addopts = ["--strict-markers", "-m", "not slow and not artifact and not simple_aero"]
 markers = [
   "grammar: parser, lexer, EBNF, corpus, and language-validation view",
   "equations: equation catalog, implementation, provenance, and verification view",
@@ -58,7 +58,7 @@ markers = [
   "dof6: 6-DOF robustness-matrix view",
   "slow: long-running tests that are excluded from the fast development loop",
   "artifact: tests that intentionally write human-readable artifacts under artifacts/",
-  "spectre: end-to-end or fixture tests for the Spectre problem/segment trajectory corpus",
+  "simple_aero: end-to-end or fixture tests for the SimpleAero problem/segment trajectory corpus",
   "runtime: requires a historical or separately verified TAOS executable",
   "historical: exploratory or historically sourced runtime cases",
   "stress: intentionally large or long-running runtime cases",

@@ -12,6 +12,8 @@ from taoryx.modes import DynamicsMode, Kinematic6DofState
 from taoryx.outputs import VehicleKind
 from taoryx.state import PointMassRates, PointMassState
 
+from .sensor_clock import SensorClockSpec
+
 
 @dataclass(frozen=True, slots=True)
 class RuntimeState:
@@ -88,6 +90,68 @@ BodyRateProvider = Callable[[RuntimeState], Vector3]
 StallDetector = Callable[[RuntimeState], bool]
 
 
+@dataclass(frozen=True, slots=True)
+class TransitionTruthSnapshot:
+    """Immutable truth and achieved-control state at a segment transition."""
+
+    state: RuntimeState
+    segment_number: int
+    active: bool
+    achieved_controls: tuple[tuple[str, float], ...] = ()
+
+    def to_metadata(self) -> dict[str, object]:
+        """Return a JSON-safe representation for reports and checkpoints."""
+
+        return {
+            "time": self.state.time,
+            "values": list(self.state.values),
+            "frame": getattr(self.state.frame, "value", str(self.state.frame)),
+            "named": dict(self.state.named),
+            "value_names": list(self.state.value_names),
+            "segment": self.segment_number,
+            "active": self.active,
+            "achieved_controls": dict(self.achieved_controls),
+        }
+    ####
+####
+
+
+@dataclass(frozen=True, slots=True)
+class TransitionTruthPair:
+    """The committed pre/post truth pair for one event or segment transition."""
+
+    event_name: str
+    event_time: float
+    action: str
+    signal: str
+    segment_from: int
+    segment_to: int
+    pre: TransitionTruthSnapshot
+    post: TransitionTruthSnapshot
+    residual: float
+    source: str | None = None
+    state_discontinuity: bool = False
+
+    def to_metadata(self) -> dict[str, object]:
+        """Return a report-friendly representation with both truth snapshots."""
+
+        return {
+            "name": self.event_name,
+            "time": self.event_time,
+            "action": self.action,
+            "signal": self.signal,
+            "segment_from": self.segment_from,
+            "segment_to": self.segment_to,
+            "residual": self.residual,
+            "source": self.source,
+            "state_discontinuity": self.state_discontinuity,
+            "pre_truth": self.pre.to_metadata(),
+            "post_truth": self.post.to_metadata(),
+        }
+    ####
+####
+
+
 @dataclass(slots=True)
 class RuntimeVehicle:
     """Mutable integration record for one vehicle trajectory."""
@@ -154,6 +218,9 @@ class RuntimeProblem:
     final_time: float | None = None
     metadata: dict[str, object] = field(default_factory=dict)
     event_history: list[dict[str, object]] = field(default_factory=list)
+    required_truth_times: tuple[float, ...] = ()
+    sensor_clocks: tuple[SensorClockSpec, ...] = ()
+    transition_history: list[TransitionTruthPair] = field(default_factory=list)
 
     def active_vehicles(self) -> tuple[RuntimeVehicle, ...]:
         return tuple(vehicle for vehicle in self.vehicles.values() if vehicle.active)
@@ -211,6 +278,9 @@ class RuntimeProblem:
             self.final_time,
             deepcopy(self.metadata),
             deepcopy(self.event_history),
+            self.required_truth_times,
+            self.sensor_clocks,
+            deepcopy(self.transition_history),
         )
         cloned.metadata["cloned_at_time"] = float(time)
         return cloned

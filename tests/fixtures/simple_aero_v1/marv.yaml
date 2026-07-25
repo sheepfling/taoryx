@@ -1,0 +1,17 @@
+# Simple Aero simple_aero example: MARV
+name: marv
+segment_family: marv
+integration_timestep: 0.1
+trajectory:
+  launch_point:
+    latitude_deg: 35.8766
+    longitude_deg: 14.4425
+  aimpoint:
+    latitude_deg: 36.000975
+    longitude_deg: -5.60999
+  initial_altitude_m: 0.0
+  initial_speed_mps: 10.0
+solution:
+  type: MARV
+  maneuver_begin_time_to_go_s: 60.0
+  min_time_to_go_s: 30.0

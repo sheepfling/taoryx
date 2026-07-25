@@ -1,0 +1,39 @@
+schema_version: 1
+case_id: simple_aero-t5-fidelity-ladder-v1
+family: simple_aero_ladder
+fidelity: point_mass_3dof
+variant: baseline
+loadout: baseline
+mission: ladder
+segment_plan: ladder
+controller: none
+overrides:
+  vehicle.id: {value: t5-ladder-vehicle}
+  vehicle.mass.initial: {value: 1000.0, unit: kg}
+  vehicle.booster.thrust: {value: 0.0, unit: N}
+  vehicle.booster.mass_flow: {value: 0.0, unit: kg/s}
+  vehicle.aero.drag_coefficient: {value: 0.02}
+  vehicle.aero.lift_to_drag: {value: 4.0}
+  mission.initial_altitude: {value: 1000.0, unit: m}
+  mission.initial_speed: {value: 60.0, unit: m/s}
+  mission.burnout_speed: {value: 120.0, unit: m/s}
+  mission.apogee_altitude: {value: 1200.0, unit: m}
+  mission.pitch_over_angle: {value: 0.0, unit: deg}
+  mission.target_range: {value: 1000.0, unit: m}
+  mission.target_bearing: {value: 90.0, unit: deg}
+  mission.target_altitude: {value: 1000.0, unit: m}
+  mission.target_speed: {value: 60.0, unit: m/s}
+  mission.target_heading: {value: 90.0, unit: deg}
+  mission.boost_duration: {value: 0.5, unit: s}
+  mission.coast_duration: {value: 0.5, unit: s}
+  mission.bank_duration: {value: 0.5, unit: s}
+  mission.terminal_duration: {value: 0.5, unit: s}
+  mission.terminal_capture_range: {value: 25.0, unit: m}
+  runtime.time_step: {value: 0.05, unit: s}
+  runtime.output_interval: {value: 0.1, unit: s}
+extensions:
+  cutoff_mode: physical
+  fidelity_ladder:
+    expected_pseudo_translation_parity: exact
+    rigid_body_role: free_body_evidence
+    source_validity: synthetic_only

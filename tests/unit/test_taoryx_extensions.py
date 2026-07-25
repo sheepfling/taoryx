@@ -15,7 +15,7 @@ def _errors(path: Path, *, profile: GrammarProfile = GrammarProfile.TAORYX) -> l
 
 def test_taoryx_focused_problem_corpus_is_grammar_complete() -> None:
     fixtures = sorted(CORPUS.glob("*.prb"))
-    assert len(fixtures) == 9
+    assert len(fixtures) == 11
     assert all(_errors(path) == [] for path in fixtures)
 
 

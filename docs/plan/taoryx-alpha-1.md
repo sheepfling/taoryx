@@ -407,7 +407,7 @@ Alpha 1 must not be declared complete if any of the following is true:
 ## Required release commands
 
 The development loop remains fast by default. The Alpha 1 release profile must
-run the normal gates plus the explicitly selected long/artifact/Spectre views:
+run the normal gates plus the explicitly selected long/artifact/Simple Aero views:
 
 ```bash
 python tools/dev.py manual
@@ -415,14 +415,14 @@ python tools/dev.py equation-audit
 python tools/dev.py generate-problems
 python tools/dev.py check
 python -m pytest
-python tools/dev.py test-spectre
-python -m pytest -m "slow or artifact or spectre"
+python tools/dev.py test-simple_aero
+python -m pytest -m "slow or artifact or simple_aero"
 python tools/dev.py alpha1-packet
 python tools/dev.py handoff
 ```
 
 The default pytest configuration continues to exclude `slow`, `artifact`, and
-`spectre` tests for day-to-day development. Alpha release evidence must record
+`simple_aero` tests for day-to-day development. Alpha release evidence must record
 which optional views were run, their seeds/configuration, and their output
 hashes.
 

@@ -1,6 +1,6 @@
-"""Reusable specialized segment contracts for Spectre-like trajectories.
+"""Reusable specialized segment contracts for SimpleAero-like trajectories.
 
-The Spectre fixtures are synthetic translations, not a recovered Spectre
+The SimpleAero fixtures are synthetic translations, not a recovered SimpleAero
 runtime.  This module captures the reusable phase intent separately from the
 fixture syntax so the same segment contract can be applied to a rocket,
 air-breathing vehicle, glider, or pseudo-6-DOF bridge.
@@ -36,7 +36,7 @@ class SpecializedSegmentContract:
     ####
 
 
-SPECTRE_SEGMENT_CONTRACTS: tuple[SpecializedSegmentContract, ...] = (
+SIMPLE_AERO_SEGMENT_CONTRACTS: tuple[SpecializedSegmentContract, ...] = (
     SpecializedSegmentContract(
         name="powered_ascent",
         composition_template="powered_ascent",
@@ -113,7 +113,7 @@ SPECTRE_SEGMENT_CONTRACTS: tuple[SpecializedSegmentContract, ...] = (
 )
 
 
-SPECTRE_FAMILY_SEGMENTS: dict[str, tuple[SpecializedSegmentType, ...]] = {
+SIMPLE_AERO_FAMILY_SEGMENTS: dict[str, tuple[SpecializedSegmentType, ...]] = {
     "ballistic": ("powered_ascent", "ballistic_coast"),
     "cbcr": ("powered_ascent", "ballistic_coast", "bank_maneuver", "terminal_pronav"),
     "crossrange": ("powered_ascent", "ballistic_coast", "bank_maneuver", "terminal_pronav"),
@@ -130,29 +130,29 @@ SPECTRE_FAMILY_SEGMENTS: dict[str, tuple[SpecializedSegmentType, ...]] = {
 def specialized_segment_contract(name: SpecializedSegmentType) -> SpecializedSegmentContract:
     """Return one reusable contract by stable segment name."""
 
-    for contract in SPECTRE_SEGMENT_CONTRACTS:
+    for contract in SIMPLE_AERO_SEGMENT_CONTRACTS:
         if contract.name == name:
             return contract
     raise KeyError(f"unknown specialized segment contract {name!r}")
     ####
 
 
-def spectre_family_segments(family: str) -> tuple[SpecializedSegmentContract, ...]:
-    """Return the reusable contract sequence for one Spectre family."""
+def simple_aero_family_segments(family: str) -> tuple[SpecializedSegmentContract, ...]:
+    """Return the reusable contract sequence for one SimpleAero family."""
 
     try:
-        names = SPECTRE_FAMILY_SEGMENTS[family.casefold()]
+        names = SIMPLE_AERO_FAMILY_SEGMENTS[family.casefold()]
     except KeyError as error:
-        raise KeyError(f"unknown Spectre family {family!r}") from error
+        raise KeyError(f"unknown SimpleAero family {family!r}") from error
     return tuple(specialized_segment_contract(name) for name in names)
     ####
 
 
 __all__ = [
-    "SPECTRE_FAMILY_SEGMENTS",
-    "SPECTRE_SEGMENT_CONTRACTS",
+    "SIMPLE_AERO_FAMILY_SEGMENTS",
+    "SIMPLE_AERO_SEGMENT_CONTRACTS",
     "SpecializedSegmentContract",
     "SpecializedSegmentType",
     "specialized_segment_contract",
-    "spectre_family_segments",
+    "simple_aero_family_segments",
 ]

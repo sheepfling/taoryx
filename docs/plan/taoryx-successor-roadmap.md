@@ -446,5 +446,10 @@ Completed foundations:
 - normalized output and visualization boundaries;
 - equation, manual, grammar, and test verification routes.
 
-The next active tranche is the unified source-to-runtime pipeline and the first
-traceable 3+3 vertical slice.
+Alpha 2 core is complete at `A2-RELEASE-PASS`, including the provider-neutral
+catalog/resolution contracts, deterministic session path, control authority,
+fidelity composition, dual-launch proof, and self-contained release packet.
+The next active work is the ranked P0 post-release backlog in
+[`taoryx-alpha-2-backlog.md`](taoryx-alpha-2-backlog.md): common scenario
+evaluation, interactive Lab/session closure, generic vehicle onboarding, and
+checkpoint/replay before more family or domain expansion.

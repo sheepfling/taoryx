@@ -19,7 +19,7 @@ Use `pytest --markers` to inspect the registered marker descriptions directly.
 | `algorithms` | Algorithm catalog, runtime bindings, and algorithm-verification view |
 | `slow` | Long-running tests, including stress and historical runtime cases |
 | `artifact` | Tests that intentionally write human-readable output under `artifacts/` |
-| `spectre` | Spectre problem, segment, and trajectory corpus tests |
+| `simple_aero` | Simple Aero problem, segment, and trajectory corpus tests |
 | `segment` | Isolated segment contracts, maneuver objectives, and promotion gates |
 | `plot` | Plotting and visualization-only checks; normally unit-level and fast |
 | `b747` | Boeing 747 family plant, trajectory, controller, and artifact tests |
@@ -30,9 +30,9 @@ Use `pytest --markers` to inspect the registered marker descriptions directly.
 The portable development runner provides the usual selections:
 
 ```bash
-python tools/dev.py test             # fast tests: excludes slow/artifact/spectre
+python tools/dev.py test             # fast tests: excludes slow/artifact/simple_aero
 python tools/dev.py test-all         # every test category
-python tools/dev.py test-spectre     # only Spectre tests
+python tools/dev.py test-simple_aero     # only Simple Aero tests
 python tools/dev.py test-artifacts   # only artifact-producing tests
 python tools/dev.py test-slow        # only slow tests
 python tools/dev.py test-grammar     # grammar/parser view
@@ -53,9 +53,9 @@ The equivalent direct pytest expressions are:
 
 ```bash
 # This is also the configured default for bare `python -m pytest`.
-python -m pytest -m "not slow and not artifact and not spectre"
+python -m pytest -m "not slow and not artifact and not simple_aero"
 python -m pytest -m ""
-python -m pytest -m spectre
+python -m pytest -m simple_aero
 python -m pytest -m artifact
 python -m pytest -m slow
 python -m pytest -m grammar
@@ -87,7 +87,7 @@ family when the change is limited to one dynamics tier or one segment:
 The `segment`, `dof3`, and `dof6` markers are additive views. `slow` is a cost
 label, not a reason to select every slow test. `-o addopts=''` is required for
 an explicit opt-in slice because the repository default excludes `slow`,
-`artifact`, and `spectre`. The terms “view” and “shard” remain distinct: views
+`artifact`, and `simple_aero`. The terms “view” and “shard” remain distinct: views
 overlap, while a future CI shard must be a disjoint partition.
 
 Vehicle-family markers are selective views, not disjoint CI shards. They are
@@ -104,7 +104,7 @@ different output root can be selected with `--artifact-dir`, for example:
 python -m pytest -m artifact --artifact-dir /tmp/taoryx-artifacts
 ```
 
-Markers are intentionally additive. A test can be both `slow` and `spectre`,
+Markers are intentionally additive. A test can be both `slow` and `simple_aero`,
 or both `slow` and `artifact`, when both properties apply. The terms “view”
 and “shard” are kept distinct: these views overlap; a future CI shard must be
 a disjoint partition of the collected tests.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import re
 from pathlib import Path
 from typing import Any
@@ -135,6 +136,11 @@ _AERO_COEFFICIENT_SETS = (
 )
 _FORMAT_RE = re.compile(r"^[ef]\.\d+$", re.IGNORECASE)
 _RUNTIME_ATTRIBUTE_RE = re.compile(r"(?P<name>[A-Za-z_][A-Za-z0-9_.-]*)=(?P<value>\"[^\"]*\"|'[^']*'|[^\s]+)")
+_SENSOR_KINDS = {"imu", "accelerometer", "gyroscope", "magnetometer", "gps", "camera", "radar", "custom"}
+_SENSOR_ATTRIBUTES = {"kind", "cadence-s", "phase-s", "sample", "delivery-s", "truth", "rate-policy", "frame", "mount", "source", "enabled", "units"}
+_SENSOR_SAMPLE_MODES = {"instantaneous", "interval"}
+_SENSOR_TRUTH_POLICIES = {"boundary", "accepted-segment"}
+_SENSOR_RATE_POLICIES = {"split", "accumulate"}
 _ATMOS_STANDARD_MODELS = {"none", "standard", "rcc", *{str(number) for number in range(21)}}
 _EARTH_MODELS = {"spherical", "wgs-72", "wgs-84", "tsap-72", "tsap-84", "wgs-84-full", "gem-t1-full"}
 _EARTH_PARAMETER_NAMES = {"reqtr", "rpolr", "ecc", "flat", "omega", "g", "gm", "j2", "j3", "j4", "c20", "c22", "c30", "c31", "c32", "c33", "c40", "c41", "c42", "c43", "c44", "s22", "s31", "s32", "s33", "s41", "s42", "s43", "s44"}
@@ -2141,6 +2147,72 @@ def _validate_problem_global_blocks(problem: Problem, diagnostics: list[Diagnost
 ####
 
 
+def _validate_runtime_sensor(
+    name: str | None,
+    attributes: dict[str, str],
+    path: str,
+    line: int,
+    diagnostics: list[Diagnostic],
+) -> None:
+    """Validate the provider-neutral sensor clock contract."""
+
+    location = _location(path, line)
+    if name is None:
+        return
+    for required in ("kind", "cadence-s", "sample", "truth", "rate-policy"):
+        if required not in attributes:
+            diagnostics.append(
+                Diagnostic(
+                    severity=Severity.ERROR,
+                    code="missing-sensor-attribute",
+                    message=f"Runtime sensor {name!r} requires {required}=.",
+                    location=location,
+                )
+            )
+    unknown = sorted(set(attributes) - _SENSOR_ATTRIBUTES - {attribute for attribute in attributes if attribute.startswith("provider-")})
+    for attribute in unknown:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="unsupported-sensor-attribute",
+                message=f"Runtime sensor attribute {attribute!r} is not in the common sensor contract; use provider-* for provider-specific metadata.",
+                location=location,
+            )
+        )
+    kind = attributes.get("kind", "").casefold()
+    if kind and kind not in _SENSOR_KINDS:
+        diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-sensor-kind", message=f"Unknown runtime sensor kind {kind!r}.", location=location))
+    sample = attributes.get("sample", "").casefold()
+    if sample and sample not in _SENSOR_SAMPLE_MODES:
+        diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-sensor-sample-mode", message="Sensor sample must be instantaneous or interval.", location=location))
+    truth = attributes.get("truth", "").casefold()
+    if truth and truth not in _SENSOR_TRUTH_POLICIES:
+        diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-sensor-truth-policy", message="Sensor truth must be boundary or accepted-segment.", location=location))
+    rate_policy = attributes.get("rate-policy", "").casefold()
+    if rate_policy and rate_policy not in _SENSOR_RATE_POLICIES:
+        diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-sensor-rate-policy", message="Sensor rate-policy must be split or accumulate.", location=location))
+    for attribute, minimum, strict in (("cadence-s", 0.0, True), ("phase-s", 0.0, False), ("delivery-s", 0.0, False)):
+        value = attributes.get(attribute)
+        if value is None:
+            continue
+        try:
+            parsed = float(value)
+        except ValueError:
+            parsed = math.nan
+        if not math.isfinite(parsed) or (parsed <= minimum if strict else parsed < minimum):
+            relation = "positive" if strict else "non-negative"
+            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-sensor-timing", message=f"Sensor {attribute} must be finite and {relation}.", location=location))
+    if sample == "instantaneous" and truth and truth != "boundary":
+        diagnostics.append(Diagnostic(severity=Severity.ERROR, code="inconsistent-sensor-timing-policy", message="Instantaneous sensors must sample committed truth boundaries.", location=location))
+    if sample == "interval" and truth and truth != "accepted-segment":
+        diagnostics.append(Diagnostic(severity=Severity.ERROR, code="inconsistent-sensor-timing-policy", message="Interval sensors must consume accepted truth segments.", location=location))
+    if sample == "instantaneous" and rate_policy and rate_policy != "split":
+        diagnostics.append(Diagnostic(severity=Severity.ERROR, code="inconsistent-sensor-rate-policy", message="Instantaneous sensors require rate-policy=split.", location=location))
+    if sample == "interval" and rate_policy and rate_policy != "accumulate":
+        diagnostics.append(Diagnostic(severity=Severity.ERROR, code="inconsistent-sensor-rate-policy", message="Interval sensors require rate-policy=accumulate.", location=location))
+    ####
+
+
 def _make_block(
     keyword: str,
     header: str,
@@ -2245,14 +2317,14 @@ def _make_block(
     if keyword == "runtime":
         fields = _free_fields(header)
         declaration = fields[0].casefold() if fields else None
-        if declaration not in {"parameter", "control", "status", "event", "output", "lqr"}:
-            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-runtime-declaration", message="Expected '*runtime parameter|control|status|event|output|lqr ...'.", location=_location(path, line)))
+        if declaration not in {"parameter", "control", "status", "event", "output", "lqr", "sensor"}:
+            diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-runtime-declaration", message="Expected '*runtime parameter|control|status|event|output|lqr|sensor ...'.", location=_location(path, line)))
         else:
             extra["declaration"] = declaration
             extra["name"] = fields[1] if len(fields) > 1 and "=" not in fields[1] else None
             attributes = {match.group("name").casefold(): match.group("value").strip("\"'") for match in _RUNTIME_ATTRIBUTE_RE.finditer(header)}
             extra["attributes"] = attributes
-            if declaration in {"parameter", "control", "status", "event", "lqr"} and extra["name"] is None:
+            if declaration in {"parameter", "control", "status", "event", "lqr", "sensor"} and extra["name"] is None:
                 diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-runtime-name", message=f"Runtime {declaration} declarations require a name.", location=_location(path, line)))
             if declaration == "lqr":
                 if not attributes.get("states"):
@@ -2261,6 +2333,8 @@ def _make_block(
                     diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-lqr-controls", message="Runtime lqr declarations require controls=.", location=_location(path, line)))
                 if attributes.get("method", "continuous").casefold() != "continuous":
                     diagnostics.append(Diagnostic(severity=Severity.ERROR, code="unsupported-lqr-method", message="TAORYX currently supports only method=continuous for runtime lqr.", location=_location(path, line)))
+            if declaration == "sensor":
+                _validate_runtime_sensor(extra["name"], attributes, path, line, diagnostics)
     elif keyword in {"atmos", "earth"}:
         extra["model"] = words[0] if words else None
         if keyword == "atmos":

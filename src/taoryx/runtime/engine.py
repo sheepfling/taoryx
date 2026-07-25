@@ -13,7 +13,16 @@ from taoryx.modes import DynamicsMode, Quaternion
 from taoryx.rigid_body import RIGID_BODY_STATE_NAMES
 from taoryx.simulation.contracts import DerivativeModel, SimulationState
 
-from .common import Derivative, DerivativePipeline, RuntimeProblem, RuntimeState, RuntimeVehicle, SearchRestart
+from .common import (
+    Derivative,
+    DerivativePipeline,
+    RuntimeProblem,
+    RuntimeState,
+    RuntimeVehicle,
+    SearchRestart,
+    TransitionTruthPair,
+    TransitionTruthSnapshot,
+)
 from .events import EventCrossing, refine_segment_final_condition
 from .expressions import evaluate_definition_program
 
@@ -29,12 +38,23 @@ class ExecutionResult:
 
 
 def get_next_time_step(problem: RuntimeProblem, candidate_step: float, *, now: float | None = None) -> float:
-    """Shorten a candidate step at print, table, and final-time boundaries."""
+    """Shorten a candidate step at every required accepted-truth boundary.
+
+    ``required_truth_times`` is the provider-neutral seam for future sensor
+    schedulers.  It keeps IMU and other truth timestamps in the same minimum
+    boundary calculation as model cadence, output times, table knots, and the
+    final time.
+    """
 
     if candidate_step <= 0.0:
         raise ValueError("candidate step must be positive")
     current = max((vehicle.state.time for vehicle in problem.active_vehicles()), default=0.0) if now is None else now
-    boundaries = [boundary for boundary in problem.print_times + problem.table_knots if boundary > current]
+    boundaries = [
+        boundary
+        for boundary in problem.print_times + problem.table_knots + problem.required_truth_times
+        if boundary > current
+    ]
+    boundaries.extend(clock.next_truth_time(current) for clock in problem.sensor_clocks)
     if problem.final_time is not None and problem.final_time > current:
         boundaries.append(problem.final_time)
     return min([candidate_step, *(boundary - current for boundary in boundaries)])
@@ -303,6 +323,7 @@ def _apply_event_crossings(
                 continue
             segment_from = vehicle.segment_number
             before_state = vehicle.state
+            pre_truth = _transition_truth_snapshot(vehicle, before_state)
             handler = vehicle.event_handlers.get(crossing.name)
             if handler is not None:
                 vehicle.state = handler(vehicle.state)
@@ -310,6 +331,25 @@ def _apply_event_crossings(
                 vehicle.history[-1] = vehicle.state
             vehicle.fired_events.add(crossing.name)
             condition = next((item for item in vehicle.events if item.name == crossing.name), None)
+            if crossing.action == "stop":
+                vehicle.active = False
+                vehicle.activation_pending = False
+            state_discontinuity = _physical_state_changed(before_state, vehicle.state)
+            post_truth = _transition_truth_snapshot(vehicle, vehicle.state)
+            transition = TransitionTruthPair(
+                event_name=crossing.name,
+                event_time=crossing.time,
+                action=crossing.action,
+                signal=condition.signal if condition is not None and condition.signal is not None else crossing.name,
+                segment_from=segment_from,
+                segment_to=vehicle.segment_number,
+                pre=pre_truth,
+                post=post_truth,
+                residual=crossing.residual,
+                source=condition.source if condition is not None else None,
+                state_discontinuity=state_discontinuity,
+            )
+            problem.transition_history.append(transition)
             problem.event_history.append(
                 {
                     "name": crossing.name,
@@ -325,12 +365,13 @@ def _apply_event_crossings(
                     "post_values": list(vehicle.state.values),
                     "value_names": list(vehicle.state.value_names),
                     "frame": str(vehicle.state.frame),
-                    "state_discontinuity": _physical_state_changed(before_state, vehicle.state),
+                    "state_discontinuity": state_discontinuity,
+                    "transition_index": len(problem.transition_history) - 1,
+                    "pre_truth": pre_truth.to_metadata(),
+                    "post_truth": post_truth.to_metadata(),
                 }
             )
-            if crossing.action == "stop":
-                vehicle.active = False
-                vehicle.activation_pending = False
+            if not vehicle.active:
                 break
     return not any(vehicle.active for vehicle in active)
 
@@ -349,6 +390,23 @@ def _physical_state_changed(before: RuntimeState, after: RuntimeState, *, tolera
         if isinstance(left, (int, float)) and isinstance(right, (int, float)) and abs(float(left) - float(right)) > tolerance:
             return True
     return False
+    ####
+####
+
+
+def _transition_truth_snapshot(vehicle: RuntimeVehicle, state: RuntimeState) -> TransitionTruthSnapshot:
+    """Copy committed truth and achieved controls without retaining live mappings."""
+
+    stable_state = RuntimeState(
+        state.time,
+        tuple(state.values),
+        state.frame,
+        dict(state.named),
+        tuple(state.value_names),
+        state.segment_endpoints,
+    )
+    controls = tuple(sorted((str(name), float(value)) for name, value in vehicle.control_values.items()))
+    return TransitionTruthSnapshot(stable_state, vehicle.segment_number, vehicle.active, controls)
     ####
 ####
 

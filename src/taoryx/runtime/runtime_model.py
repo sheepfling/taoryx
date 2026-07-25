@@ -5,9 +5,18 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from .common import RuntimeProblem, RuntimeVehicle
+from .sensor_clock import SensorClockSpec
 
 
-def build_runtime_problem(vehicles: Iterable[RuntimeVehicle], *, print_times: Iterable[float] = (), table_knots: Iterable[float] = (), final_time: float | None = None) -> RuntimeProblem:
+def build_runtime_problem(
+    vehicles: Iterable[RuntimeVehicle],
+    *,
+    print_times: Iterable[float] = (),
+    table_knots: Iterable[float] = (),
+    required_truth_times: Iterable[float] = (),
+    sensor_clocks: Iterable[SensorClockSpec] = (),
+    final_time: float | None = None,
+) -> RuntimeProblem:
     """Build and validate a name-indexed graph of direct/dependent vehicles."""
 
     records = tuple(vehicles)
@@ -20,7 +29,14 @@ def build_runtime_problem(vehicles: Iterable[RuntimeVehicle], *, print_times: It
         if unknown:
             raise ValueError(f"unknown vehicle dependency: {sorted(unknown)!r}")
     _assert_acyclic(graph)
-    return RuntimeProblem(graph, tuple(sorted(print_times)), tuple(sorted(table_knots)), final_time)
+    return RuntimeProblem(
+        graph,
+        tuple(sorted(print_times)),
+        tuple(sorted(table_knots)),
+        final_time,
+        required_truth_times=tuple(sorted(required_truth_times)),
+        sensor_clocks=tuple(sensor_clocks),
+    )
 ####
 
 

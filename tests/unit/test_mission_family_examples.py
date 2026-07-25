@@ -27,7 +27,7 @@ from taoryx.runtime.runner import run_files
 
 ROOT = Path(__file__).resolve().parents[1].parent / "examples" / "mission_families"
 
-pytestmark = pytest.mark.spectre
+pytestmark = pytest.mark.simple_aero
 
 
 def test_hypersonic_glide_guidance_runs_with_two_vehicle_target(tmp_path: Path) -> None:

@@ -1,0 +1,14 @@
+(transition-truth-extension)
+*mode point-mass
+*atmos none
+*earth spherical gm=0 omega=0
+*trajectory 1 transition_demo start on 1
+  *initial geodetic alt=0 long=0 lat=0 vel=10 gama=0 psi=90 time=0 wt=10
+  *segment 1 powered
+    *integ dt=0.1 dtprnt=0.1
+    *prop thrust=10 mdot=0
+    *when time>0.2 goto 2
+  *segment 2 separated
+    *increment q_rail=-0.20
+    *when time>0.4 stop
+*end

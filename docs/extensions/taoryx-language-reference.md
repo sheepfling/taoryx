@@ -29,10 +29,51 @@ feature is implemented by every runtime adapter.
 | `*atmos`, `*wind` (problem) | `AtmosBlock`, `WindBlock` | adapter, table-data, or file dependent |
 | `aero_force`, `aero_moment`, `inertia` (tables) | typed table document | successor table families |
 | `*runtime ...` (problem) | `RuntimeBlock` | lowers to shared runtime contract where supported |
+| `*runtime sensor ...` (problem) | `RuntimeBlock` + `SensorClockSpec` | registers an accepted-truth clock; measurement providers remain explicit |
 
 The explicit aliases are intentionally normalized in the AST: `*3dof` maps to
 `point-mass`, while `*6dof` and `*sixdof` map to `rigid-body-6dof`. Original
 source spelling remains available through the lossless source records.
+
+### Sensor timing contract
+
+Sensor clocks are successor syntax. The runtime scheduler takes the minimum of
+the vehicle/model cadence, output and event boundaries, explicit truth
+timestamps, and the next sensor clock boundary. Solver stages are never
+sensor-visible. Instantaneous sensors require a committed boundary; interval
+sensors consume the accepted segment. No post-hoc state interpolation is used
+to manufacture a measurement. A loaded program exposes normalized clock
+declarations as `sensor_clocks` metadata and requires a separate provider to
+produce physical measurements, noise, or estimator delivery.
+
+### Segment-transition truth contract
+
+TAORYX does not add a new transition keyword for truth capture. Existing
+`*when ... goto`, `*when ... stop`, `*reset`, and `*increment` constructs retain
+their documented source meaning. When one of those events is applied by the
+runtime, the implementation automatically records a `TransitionTruthPair`:
+
+| Snapshot | Captured when | Required contents |
+| --- | --- | --- |
+| `pre_truth` | At the accepted event boundary, before the event handler | State, time, frame, named channels, source segment, active status, achieved controls |
+| `post_truth` | At the same event time, after reset/increment/segment action | The same fields, including the destination segment and resulting achieved controls |
+
+The pair is available through `RuntimeProblem.transition_history`, loaded
+program inspection, checkpoints, and run-artifact event records. The legacy
+`event_history` remains compatible and mirrors each pair under `pre_truth` and
+`post_truth`, with `transition_index` linking to the typed record.
+
+The two snapshots are immutable copies. Solver stages and rejected trial steps
+are never transition truth. A continuous `goto` normally has identical
+physical values on both sides and reports `state_discontinuity=false`. A reset,
+increment, impulse, staging, or other physical jump must be explicit and is
+reported with `state_discontinuity=true`. Sensors and controllers must use the
+committed boundary truth; they must not sample between the pair or interpolate
+across it.
+
+This is an implementation contract rather than an opt-in language feature:
+source syntax declares the transition, while the runtime always supplies the
+audit record.
 
 ## Representative forms
 
@@ -42,6 +83,8 @@ source spelling remains available through the lossless source records.
 *method rk4-fixed variable-mass
 *atmos rcc ktf-annual
 *wind geodetic file=wind.dat units=ft/sec
+*runtime sensor imu kind=imu cadence-s=0.01 sample=instantaneous delivery-s=0 truth=boundary rate-policy=split
+*runtime sensor camera kind=camera cadence-s=0.1 sample=interval delivery-s=0.05 truth=accepted-segment rate-policy=accumulate
 
 *trajectory 1 vehicle start on 1
   *initial ecic x=20925646 y=0 z=0 xdt=0 ydt=300 zdt=0 time=0 mass=100
@@ -111,8 +154,10 @@ writing artifacts; parser errors and runtime exceptions are reported separately.
 
 ## Claim boundary
 
-`taos96` remains the default profile and is the historical compatibility claim.
-`taoryx` is the successor profile. The local runtime can execute the supported
-subset, but this repository does not contain the historical TAOS executable and
-complete table library, so these extensions must not be described as TAOS 96.0
-behavioral compatibility.
+`taos96` remains the default historical-language profile. It is an
+evidence-bounded language and specification profile, not a claim of behavioral
+equivalence with the unavailable historical executable. `taoryx` is the
+successor profile. The local runtime can execute the supported subset, while
+successor extensions must remain explicitly labeled as Taoryx behavior.
+See [`taos96-evidence-bounded-profile.md`](../verification/taos96-evidence-bounded-profile.md)
+for the release boundary and approved wording.

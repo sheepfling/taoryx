@@ -77,7 +77,7 @@ def typecheck() -> None:
 
 
 def test() -> None:
-    run([project_python(), "-m", "pytest", "-m", "not slow and not artifact and not spectre"])
+    run([project_python(), "-m", "pytest", "-m", "not slow and not artifact and not simple_aero"])
     ####
 
 
@@ -114,9 +114,9 @@ def test_x15_catalog() -> None:
     ####
 
 
-def test_spectre_segments() -> None:
-    """Run the isolated Spectre segment fixture-quality ladder."""
-    test_slice(("tests/e2e/test_spectre_segment_validation.py",), "spectre and segment")
+def test_simple_aero_segments() -> None:
+    """Run the isolated SimpleAero segment fixture-quality ladder."""
+    test_slice(("tests/e2e/test_simple_aero_segment_validation.py",), "simple_aero and segment")
     ####
 
 
@@ -138,7 +138,7 @@ def test_views() -> None:
     print("Cost/output categories:")
     print("  slow         long-running or historical/stress tests")
     print("  artifact     human-readable outputs written below artifacts/")
-    print("  spectre      Spectre problem/segment/trajectory corpus")
+    print("  simple_aero      SimpleAero problem/segment/trajectory corpus")
     print("  dof-matrix   3-DOF-first/6-DOF-second robustness evidence summary")
     print("  robustness-matrix   bounded paired vehicle verification with convergence and failure reports")
     print("  verification-artifacts   render the full Matplotlib verification and CA-HI bundle")
@@ -151,6 +151,9 @@ def test_views() -> None:
     print("  generate-problems render metadata-driven native .prb products")
     print("  alpha1-composition-case prove metadata-driven new-case composition")
     print("  alpha1-packet   build the self-contained Alpha 1 evidence packet")
+    print("  alpha2-tranches build A2-T1 through A2-T6 evidence")
+    print("  alpha2-release  build the self-contained Alpha 2 T7 release packet")
+    print("  audit-alpha2    audit the A2-T1 through A2-T7 machine-readable exit signals")
     print("  check-problems verify generated .prb products are current")
     print("  check-vehicles verify vehicle-family contracts and table bindings")
     print("  onboard-vehicles diagnose the complete new-vehicle metadata path")
@@ -164,7 +167,7 @@ def test_views() -> None:
     print("  language-reference build the manual-parallel TAORYX language reference PDF")
     print("  docs-doctor diagnose tools needed for every documentation PDF")
     print("  all-pdfs rebuild the historical and successor documentation PDFs")
-    print("Commands: test-grammar, test-equations, test-algorithms, test-slow, test-artifacts, test-spectre")
+    print("Commands: test-grammar, test-equations, test-algorithms, test-slow, test-artifacts, test-simple_aero")
     print("Vehicle families: test-b747, test-x8, test-hummingbird, test-x15")
     ####
 
@@ -330,6 +333,24 @@ def alpha1_packet() -> None:
     ####
 
 
+def alpha2_tranches() -> None:
+    """Build the completed Alpha 2 tranche evidence directories."""
+    run(tool_script("run_alpha2_tranches.py"))
+    ####
+
+
+def audit_alpha2() -> None:
+    """Audit the completed Alpha 2 tranche evidence directories."""
+    run(tool_script("audit_alpha2_release.py"))
+    ####
+
+
+def alpha2_release() -> None:
+    """Build and audit the self-contained Alpha 2 T7 release packet."""
+    run(tool_script("build_alpha2_release.py"))
+    ####
+
+
 def maneuver_matrix() -> None:
     """Run bound native vehicle maneuvers and write classified evidence."""
     run([project_python(), str(TOOLS / "run_maneuver_matrix.py"), "--plots"])
@@ -439,7 +460,7 @@ def manual_corpus() -> None:
 
 def e2e() -> None:
     """Validate the bounded application-level corpus without a TAOS executable."""
-    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime and not slow and not artifact and not spectre"])
+    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime and not slow and not artifact and not simple_aero"])
     run([project_python(), "-m", "tools.build_e2e_documented_coverage"])
     ####
 
@@ -614,8 +635,8 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-segments": lambda: test_category("segment"),
     "test-plots": lambda: test_category("plot"),
     "test-slow": lambda: test_category("slow"),
-    "test-spectre": lambda: test_category("spectre"),
-    "test-spectre-segments": test_spectre_segments,
+    "test-simple_aero": lambda: test_category("simple_aero"),
+    "test-simple_aero-segments": test_simple_aero_segments,
     "test-b747": lambda: test_vehicle_family("b747"),
     "test-x8": lambda: test_vehicle_family("x8"),
     "test-hummingbird": lambda: test_vehicle_family("hummingbird"),
@@ -636,6 +657,9 @@ TASKS: dict[str, Callable[[], None]] = {
     "alpha1-composition-case": alpha1_composition_case,
     "alpha1-packet": alpha1_packet,
     "audit-alpha1": audit_alpha1,
+    "alpha2-tranches": alpha2_tranches,
+    "alpha2-release": alpha2_release,
+    "audit-alpha2": audit_alpha2,
     "maneuver-matrix": maneuver_matrix,
     "slower-tables": import_slower_tables,
     "generate-problems": generate_problem_files,

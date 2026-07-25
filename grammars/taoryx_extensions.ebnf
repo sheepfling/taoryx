@@ -1,6 +1,17 @@
 (* taoryx-specific extensions; these are not claims about the 1995 manual. *)
 mode-block = "*mode" , ( "point-mass" | "kinematic-6dof" | "rigid-body-6dof" ) ;
 dof-directive = "*3dof" | "*6dof" ;
-runtime-block = "*runtime" , ( "parameter" | "control" | "status" | "event" | "output" | "lqr" ) , identifier , attribute* ;
+runtime-block = "*runtime" , runtime-declaration ;
+runtime-declaration = "sensor" , identifier , sensor-attribute*
+                    | ( "parameter" | "control" | "status" | "event" | "output" | "lqr" ) , identifier , attribute* ;
+sensor-attribute = "kind" , "=" , identifier
+                 | "cadence-s" , "=" , number
+                 | "phase-s" , "=" , number
+                 | "sample" , "=" , ( "instantaneous" | "interval" )
+                 | "delivery-s" , "=" , number
+                 | "truth" , "=" , ( "boundary" | "accepted-segment" )
+                 | "rate-policy" , "=" , ( "split" | "accumulate" )
+                 | provider-attribute ;
+provider-attribute = identifier , "=" , token ;
 attribute = identifier , "=" , token ;
 moment-table-type = "cmx" | "cmy" | "cmz" ;

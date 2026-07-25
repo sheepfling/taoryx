@@ -78,6 +78,7 @@ from .rigid_body import (
     rigid_body_vehicle,
     runtime_state,
 )
+from .sensor_clock import SensorClockSpec
 
 __all__ = [
     "DerivativePipeline",
@@ -116,6 +117,7 @@ __all__ = [
     "RuntimeObservation",
     "StandardRuntimeOutput",
     "observe_vehicle",
+    "SensorClockSpec",
     "RacetrackCommand",
     "RacetrackController",
     "RacetrackPhase",

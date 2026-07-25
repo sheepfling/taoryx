@@ -91,6 +91,7 @@ from taoryx.output_catalog import output_channel_spec
 from taoryx.rigid_body import RIGID_BODY_STATE_NAMES, RigidBody6DofModel, RigidBody6DofState, RigidBodyForceMoment
 from taoryx.rigid_body_frames import EarthRotationAdapter
 from taoryx.rotorcraft import QuadRotorAllocation
+from taoryx.runtime.sensor_clock import SensorClockSpec, SensorRatePolicy, SensorSampleMode, SensorTruthPolicy
 from taoryx.searches import golden_section_minimize, parabolic_minimize, parabolic_root, secant_bracketed_root
 from taoryx.tables import (
     ExtrapolationMode,
@@ -1286,10 +1287,14 @@ def _lower_case(
             vehicle.state.segment_endpoints,
         )
         vehicle.history[0] = vehicle.state
-    runtime = RuntimeProblem({vehicle.name: vehicle for vehicle in vehicles})
+    runtime = RuntimeProblem(
+        {vehicle.name: vehicle for vehicle in vehicles},
+        sensor_clocks=_runtime_sensor_clocks(problem),
+    )
     runtime.metadata["dynamics_mode"] = _dynamics_mode(problem).value
     runtime.metadata["parameters"] = dict(parameters)
     runtime.metadata["tables"] = tables
+    _register_sensor_clock_metadata(runtime)
     runtime.metadata["coupled_trajectories"] = any(
         isinstance(block, RadarBlock)
         for block in problem.blocks
@@ -2135,7 +2140,7 @@ def _lower_rigid_body_case(
         for event in events
         if (target := event_targets[event.name]) is not None
     }
-    runtime = RuntimeProblem({vehicle.name: vehicle})
+    runtime = RuntimeProblem({vehicle.name: vehicle}, sensor_clocks=_runtime_sensor_clocks(problem))
     runtime.metadata["dynamics_mode"] = DynamicsMode.RIGID_BODY_6DOF.value
     runtime.metadata["parameters"] = dict(parameters)
     runtime.metadata["vehicle"] = dict(vehicle_attributes)
@@ -2146,6 +2151,7 @@ def _lower_rigid_body_case(
     runtime.metadata["lqr"] = _runtime_lqr_attributes(problem, "attitude")
     runtime.metadata["telemetry"] = dict(_runtime_attributes(problem, "telemetry"))
     runtime.metadata["controls"] = dict(control_values)
+    _register_sensor_clock_metadata(runtime)
     runtime.metadata["native_pipeline"] = {
         "integration_frame": "ecic",
         "environment_frame": "ecfc",
@@ -3771,7 +3777,43 @@ def _runtime_lqr_attributes(problem: Problem, name: str) -> dict[str, str]:
         if isinstance(block, RuntimeBlock) and block.declaration == "lqr" and block.name is not None and block.name.casefold() == name.casefold():
             return dict(block.attributes)
     return {}
-####
+    ####
+
+
+def _runtime_sensor_clocks(problem: Problem) -> tuple[SensorClockSpec, ...]:
+    """Lower declarative sensor clocks without inventing measurements."""
+
+    clocks: list[SensorClockSpec] = []
+    for block in problem.blocks:
+        if not isinstance(block, RuntimeBlock) or block.declaration != "sensor" or block.name is None:
+            continue
+        attributes = block.attributes
+        clocks.append(
+            SensorClockSpec(
+                name=block.name,
+                kind=attributes["kind"],
+                cadence_s=float(attributes["cadence-s"]),
+                phase_s=float(attributes.get("phase-s", "0")),
+                sample_mode=cast(SensorSampleMode, attributes.get("sample", "instantaneous")),
+                delivery_s=float(attributes.get("delivery-s", "0")),
+                truth_policy=cast(SensorTruthPolicy, attributes.get("truth", "boundary")),
+                rate_policy=cast(SensorRatePolicy, attributes.get("rate-policy", "split")),
+            )
+        )
+    return tuple(clocks)
+    ####
+
+
+def _register_sensor_clock_metadata(runtime: RuntimeProblem) -> None:
+    """Expose sensor clocks for inspection and make the execution boundary explicit."""
+
+    runtime.metadata["sensor_clocks"] = [clock.to_metadata() for clock in runtime.sensor_clocks]
+    runtime.metadata["sensor_execution"] = (
+        "clock-only; measurement providers consume committed boundaries or accepted segments"
+        if runtime.sensor_clocks
+        else "none"
+    )
+    ####
 
 
 def _runtime_inertia_provider(
@@ -7519,6 +7561,10 @@ def _restrict_optimization_problem(
         table_knots=problem.table_knots,
         final_time=problem.final_time,
         metadata=dict(problem.metadata),
+        event_history=list(problem.event_history),
+        required_truth_times=problem.required_truth_times,
+        sensor_clocks=problem.sensor_clocks,
+        transition_history=list(problem.transition_history),
     )
 ####
 

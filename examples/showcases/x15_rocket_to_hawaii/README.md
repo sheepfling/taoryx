@@ -37,7 +37,7 @@ gate. At the selected step the same continuous, unpowered, event-terminated
 trajectory passes the translation-closure gate; this is a convergence choice,
 not a relaxation of the physics or an unreported state reset.
 
-The focused Spectre-derived X-15 additions are `x15_phugoid_3dof.prb` and
+The focused Simple Aero-derived X-15 additions are `x15_phugoid_3dof.prb` and
 `x15_weave_6dof.prb`. The first is a bounded source-deck alpha/energy profile;
 the second performs two native positive/negative bank reversals before a
 neutral glide. They are promotion fixtures, not natural-mode, crossrange-

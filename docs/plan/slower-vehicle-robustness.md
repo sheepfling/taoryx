@@ -159,8 +159,8 @@ behavior, and racetrack/actuator saturation respectively.
 The paired tests belong to the overlapping `dof3` and `dof6` views. B747 and
 X8 baseline pairs are ordinary table/runtime tests when short; Hummingbird
 racetrack and all plot-producing comparisons are marked `slow` and/or
-`artifact`. They are not `spectre` tests unless they are deliberately added to
-the Spectre problem/segment corpus.
+`artifact`. They are not `simple_aero` tests unless they are deliberately added to
+the Simple Aero problem/segment corpus.
 
 ## Acceptance gates
 

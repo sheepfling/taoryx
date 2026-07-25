@@ -1,0 +1,13 @@
+schema_version: 1
+case_id: simple_aero-heavy-baseline-v1
+family: simple_aero
+fidelity: point_mass_3dof
+variant: baseline
+loadout: baseline
+mission: baseline
+segment_plan: baseline
+controller: none
+overrides:
+  mission.initial_speed:
+    value: 60.0
+    unit: m/s

@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 MISSION = ROOT / "examples/showcases/x15_rocket_to_hawaii/mission.prb"
 X15_TABLE = ROOT / "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl"
 
-pytestmark = [pytest.mark.slow, pytest.mark.artifact, pytest.mark.spectre]
+pytestmark = [pytest.mark.slow, pytest.mark.artifact, pytest.mark.simple_aero]
 
 
 def test_sideslip_command_projection_preserves_pitch_plane() -> None:

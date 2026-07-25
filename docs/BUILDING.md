@@ -120,14 +120,14 @@ python3 tools/dev.py check
 The older, source-heavy validation workflow remains available as
 `python tools/dev.py check`.
 
-For selective pytest runs, including the `slow`, `artifact`, and `spectre`
+For selective pytest runs, including the `slow`, `artifact`, and `simple_aero`
 markers, see [BUILDING_TESTS.md](BUILDING_TESTS.md).
 
 For the most common project entry points:
 
 ```bash
 python tools/dev.py grammar          # parser, lexer, corpus, EBNF, and manual-fixture validation
-python tools/dev.py test-spectre     # Spectre problem / segment / trajectory corpus
+python tools/dev.py test-simple_aero     # Simple Aero problem / segment / trajectory corpus
 python tools/dev.py test-equations   # equation catalog and provenance checks
 python tools/dev.py test-algorithms  # algorithm catalog and runtime binding checks
 taoryx-validate examples/chapter04/ballistic-reentry.prb

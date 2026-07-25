@@ -18,6 +18,10 @@ tracked in
 The progressive point-mass, kinematic bridge, and rigid-body fidelity ladder is
 described in
 [`dynamics-fidelity-ladder.md`](dynamics-fidelity-ladder.md).
+The accepted-state, force-evaluation, and sensor timing boundary is defined in
+[`eom-timing-contract.md`](eom-timing-contract.md).
+The language/implementation contract for pre/post truth around events is
+defined in [`../extensions/transition-truth.md`](../extensions/transition-truth.md).
 
 ## System layers
 

@@ -19,7 +19,7 @@ prioritization:
 release_boundaries:
   alpha2_closeout:
     objective: Reusable, diagnosable, replayable platform with four composable proof families.
-    required_items: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4, A2-POST-P0-5, A2-POST-P1-1, A2-POST-P1-2, A2-POST-P1-3]
+    required_items: [A2-POST-P0-1, A2-POST-P0-2, A2-POST-P0-3, A2-POST-P0-4, A2-POST-P0-5, A2-POST-P1-1, A2-POST-P1-2, A2-POST-P1-4, A2-POST-P1-3]
     required_maturity: M4
     exclusions:
       - new unpinned vehicle-family runtime qualification
@@ -41,6 +41,7 @@ ranked_sequence:
   - A2-POST-P0-5
   - A2-POST-P1-1
   - A2-POST-P1-2
+  - A2-POST-P1-4
   - A2-POST-P1-3
   - A2-POST-P2-4
   - A2-POST-P2-5
@@ -216,6 +217,39 @@ items:
       - tuning never changes plant truth or silently widens table bounds
       - gains, scales, objective weights, and solver settings are provenance-linked
       - each claimed mission reports stability, tracking, saturation, derivative, and table-margin metrics
+
+  - id: A2-POST-P1-4
+    priority: P1
+    target_release: alpha2
+    lane: alpha2-proof-closeout
+    name: reusable-trim-generation-and-operating-point-procedure
+    status: partial
+    depends_on: [A2-POST-P0-2, A2-POST-P0-3, A2-POST-P1-2]
+    rationale: The established vehicles cannot scale through controllers and segment validation if each trim point is hand-derived. Alpha 2 needs a reusable, auditable operating-point procedure; new family catalogs can remain Alpha 3.
+    scope:
+      - declarative TrimProcedure contracts for operating condition, fidelity, variables, bounds, controls, residuals, scales, and provenance
+      - family-specific residual adapters for hover, powered fixed-wing, airborne transport, and unpowered X-15 glide conditions
+      - bounded least-squares solve with multi-start, deterministic seeds, continuation across airspeed/altitude/mass, and failure classification
+      - physically correct equilibrium definitions, including force-velocity alignment for unpowered glide rather than zero total force
+      - actuator, table, aerodynamic-envelope, mass/CG/inertia, and numerical-margin checks at every accepted trim
+      - versioned trim artifacts consumed by local linearization, LQR design, controller presets, and segment-entry validation
+      - trim-versus-controller separation so LQR tuning cannot compensate for a nonexistent or invalid plant operating point
+      - source-backed X-15 release-glide adapter as the reference implementation
+    validation_ladder:
+      - analytical hover and steady-flight residual fixtures
+      - bounded solver convergence and deterministic replay tests
+      - multi-start agreement or explicit unresolved classification
+      - continuation smoothness across neighboring operating points
+      - trim residual, actuator margin, table margin, and fidelity-consistency gates
+      - X-15 source-backed glide report with force-velocity alignment and zero body moments
+      - controller linearization and LQR generation consume the committed trim artifact rather than duplicate tuning values
+    exit_criteria:
+      - all four established vehicle families resolve through the same TrimProcedure interface
+      - X-15 onboarding reports ready with a passing source-backed glide trim artifact
+      - every accepted trim records state, controls, residuals, bounds, solver settings, source hashes, and validity margins
+      - failed trims are classified as infeasible, out-of-envelope, numerically unresolved, or adapter-invalid
+      - local linearization and normalized controller tuning can be reproduced from the trim artifact in a fresh process
+      - no new Alpha 3 vehicle family is required to close this Alpha 2 item
 
   - id: A2-POST-P1-3
     priority: P1

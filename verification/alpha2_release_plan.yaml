@@ -1,7 +1,8 @@
 schema_version: 1
 release: taoryx-alpha-2
 target_version: v0.2.0-alpha
-status: planned
+status: complete
+post_release_backlog: verification/alpha2_post_release_backlog.yaml
 depends_on:
   - taoryx-alpha-1
 historical_reference:
@@ -47,6 +48,28 @@ authority_modes:
   - direct
   - mixed
 proof_families:
+  - id: four_family_flagship_showcase_v1
+    required: true
+    badge: Flagship_Mission_Qualified
+    scenario_packs:
+      - id: hummingbird_pad_box_yaw_land_6dof
+        terminal: landed_and_disarmed
+      - id: x8_launch_figure8_recovery_6dof
+        terminal: recovery_gate
+      - id: b747_trim_route_arrival_6dof
+        terminal: stabilized_arrival_gate
+      - id: x15_airlaunch_energy_target_6dof
+        terminal: recovery_energy_or_aim_corridor
+    common_requirements:
+      - documented_start_contract
+      - qualified_segment_sequence
+      - ordered_waypoint_or_objective_capture
+      - control_coverage_report
+      - envelope_report
+      - convergence_report
+      - classified_terminal_event
+      - batch_step_replay
+      - one_command_reproduction
   - id: reference_provider_boundary
     required: true
     provider_kind: non_taoryx
@@ -61,7 +84,7 @@ proof_families:
       - batch_execution
       - normalized_results
       - native_artifacts
-  - id: spectre_configurable_3dof
+  - id: simple_aero_configurable_3dof
     required: true
     fidelity: point_mass_3dof
     required_capabilities:
@@ -120,7 +143,7 @@ gates:
     name: provider-lab-parity
     required: true
   - id: A2-R8
-    name: spectre-proof-family
+    name: simple_aero-proof-family
     required: true
   - id: A2-R9
     name: control-authority
@@ -133,17 +156,22 @@ gates:
     required: true
   - id: A2-R12
     name: lab-testbed
-    required: true
+    required: false
+    post_release: true
   - id: A2-R13
     name: tooling-and-artifacts
     required: true
   - id: A2-R14
     name: release-reproducibility
     required: true
+  - id: A2-R15
+    name: flagship-mission-qualification
+    required: false
+    post_release: true
 tranches:
   - id: A2-T1
     release_point: case-contracts
-    status: planned
+    status: pass
     gates:
       - A2-R0
       - A2-R2
@@ -151,7 +179,7 @@ tranches:
       - A2-R4
     scope:
       - neutral typed schemas
-      - Spectre point-mass family catalog seed
+      - Simple Aero point-mass family catalog seed
       - CaseIntent and immutable ResolvedCase
       - canonical units and frames
       - precedence and derived-value provenance
@@ -164,12 +192,13 @@ tranches:
       - pseudo_6dof
       - rigid_body_6dof
     required_artifacts:
-      - resolved_case.json
-      - provenance.json
+      - cases/*/resolved-case.json
+      - cases/*/provenance.json
       - controls.schema.json
       - observations.schema.json
       - diagnostics.json
       - case-manifest.json
+    evidence_root: artifacts/verification/alpha2/t1_case_contracts
     exit_criteria:
       - identical input produces identical canonical JSON and case identity hash
       - every resolved value has source, override, default, or derivation provenance
@@ -184,7 +213,7 @@ tranches:
     completion_signal: A2-T1-PASS
   - id: A2-T2
     release_point: provider-session
-    status: planned
+    status: pass
     gates:
       - A2-R1
       - A2-R5
@@ -206,6 +235,8 @@ tranches:
       - batch-result.json
       - stepped-result.json
       - parity-report.json
+      - manifest.json
+    evidence_root: artifacts/verification/alpha2/t2_provider_session
     exit_criteria:
       - reference provider passes common lifecycle without provider-specific host branches
       - required unsupported capabilities are reported, not emulated silently
@@ -214,7 +245,7 @@ tranches:
     completion_signal: A2-T2-PASS
   - id: A2-T3
     release_point: control-authority
-    status: planned
+    status: pass
     gates:
       - A2-R4
       - A2-R9
@@ -232,6 +263,8 @@ tranches:
       - authority-config.json
       - control-arbitration.csv
       - control-replay-report.json
+      - manifest.json
+    evidence_root: artifacts/verification/alpha2/t3_control_authority
     exit_criteria:
       - every accepted command records source, arbitration stages, limits, and applied value
       - external control cannot bypass bounds, rates, or actuator dynamics
@@ -239,8 +272,8 @@ tranches:
       - unsupported control levels fail at resolution or compilation
     completion_signal: A2-T3-PASS
   - id: A2-T4
-    release_point: spectre-3dof
-    status: planned
+    release_point: simple_aero_3dof
+    status: pass
     gates:
       - A2-R8
     scope:
@@ -257,9 +290,10 @@ tranches:
       - resolved-case.json
       - segment-graph.json
       - events.csv
-      - trajectory.parquet
+      - trajectory.csv
       - mission-metrics.json
       - plot-manifest.json
+    evidence_root: artifacts/verification/alpha2/t4_simple_aero_3dof
     exit_criteria:
       - loadout and segment changes require data changes, not source edits
       - physical and commanded cutoff are distinct annotated events
@@ -269,7 +303,7 @@ tranches:
     completion_signal: A2-T4-PASS
   - id: A2-T5
     release_point: fidelity-ladder
-    status: planned
+    status: pass
     gates:
       - A2-R10
     scope:
@@ -282,6 +316,7 @@ tranches:
       - dual-launch handoff
       - broad source-validity claims
       - automatic policy transfer
+      - historical TAOS compatibility
     required_artifacts:
       - fidelity-contract.json
       - initial-state-adapter.json
@@ -294,10 +329,11 @@ tranches:
       - constrained reduction parity passes declared tolerances
       - free rigid-body behavior reports moments, rates, actuators, and envelope margins
       - pseudo_6dof is never labeled as rigid-body evidence
+    evidence_root: artifacts/verification/alpha2/t5_fidelity_ladder
     completion_signal: A2-T5-PASS
   - id: A2-T6
     release_point: dual-launch-glider
-    status: planned
+    status: pass
     gates:
       - A2-R11
     scope:
@@ -313,6 +349,8 @@ tranches:
       - booster-launch-case.json
       - separation-event.json
       - shared-comparison.json
+      - dual-launch-glider.png
+      - manifest.json
     exit_criteria:
       - both launch forms use the same family and mission contracts
       - handoff is continuous or explicitly impulsive and event-annotated
@@ -321,17 +359,17 @@ tranches:
     completion_signal: A2-T6-PASS
   - id: A2-T7
     release_point: alpha-2-release
-    status: planned
+    status: pass
     gates:
-      - A2-R12
       - A2-R13
       - A2-R14
     scope:
-      - Lab task/testbed contracts
       - schema/catalog documentation
       - plots and evidence packet generation
       - clean-checkout reproducibility
     deferred:
+      - Lab task/testbed contracts
+      - flagship mission qualification
       - remote model marketplace
       - untrusted hot-loading
       - universal autopilot
@@ -339,11 +377,14 @@ tranches:
       - alpha2-status.json
       - evidence-packet.zip
       - bundle-manifest.json
+      - schema-reference.json
       - schema-reference.pdf
+      - claim-matrix.json
       - reproducibility-report.json
+      - manifest.json
     exit_criteria:
       - all prior tranche completion signals are present
-      - clean checkout reproduces proof cases and hashes
+      - isolated clean-source replay reproduces proof cases and hashes
       - provider/Lab action-to-applied-control provenance is complete
       - plots regenerate from machine-readable artifacts
       - no stop-ship condition is present
@@ -356,6 +397,10 @@ stop_ship:
   - required_translation_report_missing_or_incomplete
   - unsupported_required_concept_silently_dropped
   - interactive_capability_assumed_without_negotiation
+  - flagship_flight_substitutes_for_plant_or_controller_qualification
+  - timeout_reported_as_flagship_success
+  - family_inappropriate_terminal_claim
+  - control_coverage_inferred_from_plot_motion_only
   - provider_and_lab_use_separate_transition_implementations
   - reward_or_episode_rules_embedded_in_vehicle_physics
   - action_to_applied_control_provenance_missing
@@ -377,10 +422,11 @@ implementation_order:
   - A2-1b canonical-session-and-taoryx-lab-facade
   - A2-2 semantic-schema-and-catalog
   - A2-3 resolver-and-provenance
-  - A2-4 spectre-3dof-family-and-taoryx-binding
+  - A2-4 simple_aero_3dof-family-and-taoryx-binding
   - A2-5 common-control-stack
   - A2-6 pseudo-6dof-profile
   - A2-7 rigid-body-6dof-profile
   - A2-8 dual-launch-glider
   - A2-9 documentation-and-hardening
+  - A2-10 four-family-flagship-showcase
 ####

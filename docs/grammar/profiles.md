@@ -57,7 +57,16 @@ Runtime declarations are successor-only and can be repeated at problem scope:
 *runtime status altitude source=alt unit=m
 *runtime event ground condition=alt<0 action=stop
 *runtime output channels=alt,vel interval=0.5 events=true
+*runtime sensor imu kind=imu cadence-s=0.01 sample=instantaneous delivery-s=0 truth=boundary rate-policy=split
+*runtime sensor camera kind=camera cadence-s=0.1 sample=interval delivery-s=0.05 truth=accepted-segment rate-policy=accumulate
 ```
+
+Sensor declarations are Taoryx-only clock contracts. They force accepted truth
+boundaries at the declared cadence; they do not interpolate a sensor reading
+between solver stages or provide a measurement/noise model by themselves.
+`sample=instantaneous` reads the committed boundary state. `sample=interval`
+consumes the accepted segment. Delivery latency changes when a measurement is
+available to an estimator, not which truth state was sampled.
 
 They lower into the shared `ScenarioRuntimeContract` and are available to
 interactive stepping and artifact metadata. An API-supplied runtime contract

@@ -26,6 +26,8 @@ def test_runtime_graph_rejects_cycles_and_steps_at_boundaries() -> None:
     first = RuntimeVehicle("a", RuntimeState(0.0, (0.0,)), lambda state: (1.0,), step_size=2.0)
     problem = build_runtime_problem((first,), print_times=(0.5,), final_time=1.0)
     assert get_next_time_step(problem, 2.0) == 0.5
+    truth_timed = build_runtime_problem((first,), required_truth_times=(0.25, 0.75), final_time=1.0)
+    assert get_next_time_step(truth_timed, 2.0) == 0.25
     result = compute_trajectories(problem)
     assert result.completed
     assert problem.vehicles["a"].state.time == pytest.approx(1.0)
@@ -215,9 +217,47 @@ def test_batch_signal_and_stop_events_are_recorded_once_with_provenance() -> Non
     assert problem.event_history[0]["signal"] == "midpoint-reached"
     assert problem.event_history[0]["source"] == "test.prb:4"
     assert problem.event_history[1]["time"] == pytest.approx(0.25)
+    assert len(problem.transition_history) == 2
+    midpoint = problem.transition_history[0]
+    assert midpoint.pre.state.time == pytest.approx(0.15)
+    assert midpoint.post.state.time == pytest.approx(0.15)
+    assert midpoint.pre.segment_number == midpoint.post.segment_number == 1
+    assert midpoint.pre.active is True
+    assert midpoint.post.active is True
+    assert midpoint.state_discontinuity is False
+    terminal = problem.transition_history[1]
+    assert terminal.pre.state.values == pytest.approx((0.25,))
+    assert terminal.post.state.values == pytest.approx((0.25,))
+    assert terminal.post.active is False
+    assert terminal.state_discontinuity is False
+    assert problem.event_history[0]["pre_truth"]["time"] == pytest.approx(0.15)
+    assert problem.event_history[1]["post_truth"]["active"] is False
     artifact = build_run_artifact("test.prb", problem, result, events=problem.event_history)
     assert artifact.events[0]["signal"] == "midpoint-reached"
-####
+    ####
+
+
+def test_transition_truth_pair_captures_declared_state_reset_and_controls() -> None:
+    vehicle = RuntimeVehicle(
+        "reset-vehicle",
+        RuntimeState(0.0, (0.0,), value_names=("x",)),
+        lambda state: (1.0,),
+        step_size=0.5,
+        control_values={"throttle": 0.4},
+        events=(EventCondition("release", lambda state: state.values[0] - 0.5, "signal"),),
+        event_handlers={"release": lambda state: apply_state_discontinuity(state, (2.0,))},
+    )
+    problem = RuntimeProblem({vehicle.name: vehicle}, final_time=1.0)
+
+    assert compute_trajectories(problem).completed
+    pair = problem.transition_history[0]
+    assert pair.pre.state.values == pytest.approx((0.5,))
+    assert pair.post.state.values == pytest.approx((2.5,))
+    assert pair.pre.achieved_controls == (("throttle", 0.4),)
+    assert pair.post.achieved_controls == (("throttle", 0.4),)
+    assert pair.state_discontinuity is True
+    assert pair.to_metadata()["pre_truth"]["values"] == pytest.approx([0.5])
+    ####
 
 
 def test_stopped_dependent_vehicle_is_not_reactivated() -> None:

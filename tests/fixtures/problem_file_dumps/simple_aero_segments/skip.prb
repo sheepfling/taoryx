@@ -1,0 +1,22 @@
+(simple_aero-skip)
+
+# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/skip.yaml
+# Simple Aero family: skip
+# Start controls: maneuver_begin_time_to_go_s
+# Stop controls: maneuver logic and trajectory termination
+
+*title Simple Aero translation skip
+
+*atmos standard
+*earth wgs-84 omega=0
+
+*trajectory 1 vehicle start on 1
+  *initial geodetic alt=0.0 long=14.4425 lat=35.8766 vel=10.0 gama=0.0 psi=90.0 time=0.0 mass=100.0
+  *file skip.dat time alt vel gamgd alpha bankgd thrust
+  *segment 1 skip
+    *integ dtprnt=0.1 dt=0.1
+    *aero ca=0.0 cn=0.0
+    *fly bankgd=0.0
+    *when tseg=400.0 stop
+
+*end

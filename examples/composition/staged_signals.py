@@ -20,7 +20,7 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, default=Path("build/composition/staged"))
     arguments = parser.parse_args()
 
-    def transition(state: RuntimeState) -> RuntimeState:
+    def apply_stage_transition(state: RuntimeState) -> RuntimeState:
         vehicle.segment_number = 2
         return RuntimeState(state.time, state.values, state.frame, dict(state.named, stage=2.0), state.value_names, state.segment_endpoints)
 
@@ -33,7 +33,7 @@ def main() -> int:
             EventCondition("stage-separation", lambda state: state.values[0] - 0.5, "transition", signal="stage-2", source="staged_signals.py:31"),
             EventCondition("terminal", lambda state: state.values[0] - 1.0, "stop", signal="terminal", source="staged_signals.py:32"),
         ),
-        event_handlers={"stage-separation": transition},
+        event_handlers={"stage-separation": apply_stage_transition},
     )
     problem = RuntimeProblem({vehicle.name: vehicle}, final_time=2.0)
     result = compute_trajectories(problem)
@@ -43,6 +43,13 @@ def main() -> int:
     artifact.write_sqlite(arguments.output_dir / "staged.sqlite", run_id="stage-1")
     render_run_artifact_html(artifact, arguments.output_dir / "staged.html", vehicle_id="stage-vehicle")
     print(f"events={len(problem.event_history)}")
+    for transition in problem.transition_history:
+        print(
+            f"transition={transition.event_name} time={transition.event_time:.3f} "
+            f"segment={transition.segment_from}->{transition.segment_to} "
+            f"discontinuity={transition.state_discontinuity} "
+            f"pre={transition.pre.state.values} post={transition.post.state.values}"
+        )
     print(f"artifacts={arguments.output_dir}")
     return 0
 

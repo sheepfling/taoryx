@@ -62,7 +62,7 @@ Every case must emit a machine-readable summary containing:
 - energy and heat-rate history where applicable.
 
 Human-readable plots are artifact tests. Long-running, artifact-producing, and
-Spectre cases retain the existing `slow`, `artifact`, and `spectre` markers.
+Simple Aero cases retain the existing `slow`, `artifact`, and `simple_aero` markers.
 Views such as `grammar`, `equations`, `algorithms`, `dof3`, and `dof6` may
 overlap; they are not mutually exclusive shards.
 

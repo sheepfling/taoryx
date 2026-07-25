@@ -15,7 +15,7 @@ evidence-bounded toolchain that can:
 - parse and validate `.tbl` and `.prb` files with source-located diagnostics;
 - map equations and algorithms to executable Python bindings;
 - provide runtime, inspection, and analysis entry points for real workflows;
-- keep regression coverage around the parser, runtime, Spectre corpus, and
+- keep regression coverage around the parser, runtime, Simple Aero corpus, and
   numeric helpers; and
 - preserve the boundary between what is documented, what is executable, and
   what still needs historical confirmation.
@@ -26,7 +26,7 @@ evidence-bounded toolchain that can:
 - `metadata/` - equation, figure, source-page, fixture, and catalog registries
 - `grammars/` - documentary EBNF for TAOS table and problem files
 - `src/taoryx/` - the installable Python package
-- `tests/` - parser, runtime, equation, algorithm, Spectre, and artifact tests
+- `tests/` - parser, runtime, equation, algorithm, Simple Aero, and artifact tests
 - `tools/` - build, audit, validation, and reporting commands
 - `analysis/` - focused numerical studies and generated analysis helpers
 - `docs/` - user-facing guidance for the manual, grammar, equations, runtime, and verification layers
@@ -78,11 +78,11 @@ taoryx table inspect examples/chapter03/stmi-full.tbl
 taoryx table inspect examples/chapter03/stmi-full.tbl --html build/table-explorer.html
 ```
 
-Run the Spectre corpus tests when you want the problem/segment/trajectory
+Run the Simple Aero corpus tests when you want the problem/segment/trajectory
 fixtures:
 
 ```bash
-python tools/dev.py test-spectre
+python tools/dev.py test-simple_aero
 ```
 
 Rebuild the reconstructed manual when you need the published PDF or want to
@@ -119,7 +119,7 @@ python tools/aero_drag_analysis.py --all --output-dir build/aero-drag
 - [Equation implementation bindings](docs/equations/implementation-bindings.md)
 - [Runtime architecture](docs/architecture/README.md)
 - [Table explorer / table plotter boundary](docs/architecture/table-explorer.md)
-- [Spectre corpus description](docs/grammar/e2e-suite-v23.md)
+- [Simple Aero corpus description](docs/grammar/e2e-suite-v23.md)
 - [Tumbling analysis workspace](analysis/tumbling/README.md)
 
 ## Scope
