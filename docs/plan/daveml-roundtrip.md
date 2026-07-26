@@ -122,6 +122,11 @@ ledger and manifest first, then replays the declared embedded `.txair` artifact
 with collection and family provenance in the report. This is still distinct
 from canonical DAVE-ML regeneration and semantic equivalence.
 
+Canonical package and catalog cycles now re-import each generated document via
+`tools/reimport_daveml_ir.py` in a separate Python process. Reports mark this
+as `fresh_process_reimport: verified`; structural and numeric comparisons are
+made against that fresh-process result.
+
 ## Ingestion And Round-Trip Plan
 
 The machine-readable promotion authority is
