@@ -601,6 +601,9 @@ items are complete and reproducible:
 - The semantic IR now exposes a deterministic unit/dimension index for source
   variable definitions while preserving original unit attributes and unknown
   units as `dimension: unknown` for explicit review.
+- Vector-valued initial values are now preserved as typed IR metadata. Runtime
+  graph evaluation remains scalar-only and therefore does not claim vector
+  execution until vector operators and checkData semantics are implemented.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,

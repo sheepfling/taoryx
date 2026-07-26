@@ -174,6 +174,7 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
     }
     result: dict[str, list[dict[str, object]]] = {name: [] for name in groups}
     result["units"] = []
+    result["vectors"] = []
 
     def visit(node: dict[str, object]) -> None:
         tag = str(node.get("tag", ""))
@@ -204,6 +205,18 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
                     "dimension": _dimension_for_unit(unit_name),
                 }
             )
+        initial = attributes.get("initialValue")
+        if initial and identifier:
+            values = _parse_numbers(initial)
+            if len(values) > 1:
+                result["vectors"].append(
+                    {
+                        "source_path": node.get("source_path"),
+                        "identifier": identifier,
+                        "values": list(values),
+                        "unit": unit_name,
+                    }
+                )
         for child in children:
             visit(child)
 
@@ -230,6 +243,12 @@ def _dimension_for_unit(unit: str) -> str:
         "s": "time",
     }
     return dimensions.get(unit.strip(), "unknown")
+
+
+def _parse_numbers(value: str) -> tuple[float, ...]:
+    """Parse scalar tokens for vector metadata without evaluating a graph."""
+
+    return tuple(float(token) for token in re.findall(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?", value))
 
 
 def _element(node: dict[str, object]) -> Any:

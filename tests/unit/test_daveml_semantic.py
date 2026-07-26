@@ -46,6 +46,21 @@ def test_numeric_comparison_reports_changed_seed_value() -> None:
     ####
 
 
+def test_semantic_ir_preserves_vector_initial_values_as_typed_metadata() -> None:
+    ir = build_daveml_ir(
+        b'<DAVEfunc><variableDef varID="v" units="nd" initialValue="1 2 3"/></DAVEfunc>',
+        document_id="vector",
+    )
+    assert ir.semantic["vectors"] == [
+        {
+            "source_path": "/0/0",
+            "identifier": "v",
+            "values": [1.0, 2.0, 3.0],
+            "unit": "nd",
+        }
+    ]
+
+
 @pytest.mark.parametrize(
     "package_member",
     (
