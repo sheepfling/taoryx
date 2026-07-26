@@ -80,6 +80,30 @@ class DAVEMLGraph:
         return self.variable_units.get(canonical_id)
         ####
 
+    def dimension_for(self, identifier: str) -> str | None:
+        """Return the deterministic dimension signature for a source unit."""
+
+        unit = self.unit_for(identifier)
+        if unit is None:
+            return None
+        dimensions = {
+            "nd": "1",
+            "deg": "angle",
+            "rad": "angle",
+            "deg_rad": "angle",
+            "rad_s": "angle/time",
+            "f_s": "length/time",
+            "f": "length",
+            "fracMAC": "1",
+            "slug": "mass",
+            "slug_ft2": "mass*length^2",
+            "lb": "force",
+            "lbf": "force",
+            "s": "time",
+        }
+        return dimensions.get(unit.strip(), "unknown")
+        ####
+
     def evaluate_vectors(
         self,
         inputs: Mapping[str, Sequence[float]],
