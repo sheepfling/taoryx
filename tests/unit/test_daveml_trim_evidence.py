@@ -16,3 +16,13 @@ def test_f16_daveml_trim_evidence_is_source_backed_and_bounded() -> None:
     assert report["trim"]["max_residual"] < 1.0e-9
     assert -24.0 <= report["trim"]["controls"]["elevator_deg"] <= 24.0
     assert report["local_residual_jacobian"]["b"][0][0] < 0.0
+
+
+def test_hl20_daveml_trim_evidence_is_source_backed_and_bounded() -> None:
+    report = json.loads((ROOT / "verification/daveml_hl20_trim_evidence.json").read_text(encoding="utf-8"))
+    assert report["status"] == "verified"
+    assert report["family_id"] == "reference_hl20_mod_k"
+    assert report["operating_point"] == {"mach": 1.0, "true_airspeed_f_s": 100.0}
+    assert len(report["source"]["document_sha256"]) == 64
+    assert report["trim"]["max_residual"] < 1.0e-9
+    assert 0.0 <= report["trim"]["state"]["alpha_deg"] <= 15.0

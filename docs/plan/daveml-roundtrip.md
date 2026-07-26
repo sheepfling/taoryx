@@ -517,6 +517,11 @@ items are complete and reproducible:
   source-backed F-16 pitch-channel elevator trim and a local residual Jacobian
   with package/document hashes; it is intentionally not yet a full dynamics
   linearization or six-degree-of-freedom equilibrium.
+- The same evidence task now emits
+  `verification/daveml_hl20_trim_evidence.json`, certifying the HL-20
+  source-backed pitch-channel angle-of-attack trim at a declared Mach/airspeed
+  point. The artifact retains the same non-claim boundary until the full
+  vehicle load, gravity, and atmosphere adapters are integrated.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.
