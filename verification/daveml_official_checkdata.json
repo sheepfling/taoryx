@@ -1393,7 +1393,12 @@
       "document": "atmos_76.dml",
       "failed": 0,
       "passed": 126,
-      "unsupported": 0
+      "unsupported": 0,
+      "vector_check_count": 0,
+      "vector_checks": [],
+      "vector_failed": 0,
+      "vector_passed": 0,
+      "vector_unsupported": 0
     },
     {
       "check_count": 102,
@@ -2524,7 +2529,12 @@
       "document": "F16_aero.dml",
       "failed": 0,
       "passed": 102,
-      "unsupported": 0
+      "unsupported": 0,
+      "vector_check_count": 0,
+      "vector_checks": [],
+      "vector_failed": 0,
+      "vector_passed": 0,
+      "vector_unsupported": 0
     },
     {
       "check_count": 240,
@@ -5173,7 +5183,12 @@
       "document": "HL20_aero.dml",
       "failed": 0,
       "passed": 240,
-      "unsupported": 0
+      "unsupported": 0,
+      "vector_check_count": 0,
+      "vector_checks": [],
+      "vector_failed": 0,
+      "vector_passed": 0,
+      "vector_unsupported": 0
     },
     {
       "check_count": 0,
@@ -5181,7 +5196,12 @@
       "document": "simple_aero.dml",
       "failed": 0,
       "passed": 0,
-      "unsupported": 0
+      "unsupported": 0,
+      "vector_check_count": 0,
+      "vector_checks": [],
+      "vector_failed": 0,
+      "vector_passed": 0,
+      "vector_unsupported": 0
     },
     {
       "check_count": 0,
@@ -5189,7 +5209,12 @@
       "document": "threeD_ungridded.dml",
       "failed": 0,
       "passed": 0,
-      "unsupported": 0
+      "unsupported": 0,
+      "vector_check_count": 0,
+      "vector_checks": [],
+      "vector_failed": 0,
+      "vector_passed": 0,
+      "vector_unsupported": 0
     },
     {
       "check_count": 0,
@@ -5197,7 +5222,12 @@
       "document": "twoD_table.dml",
       "failed": 0,
       "passed": 0,
-      "unsupported": 0
+      "unsupported": 0,
+      "vector_check_count": 0,
+      "vector_checks": [],
+      "vector_failed": 0,
+      "vector_passed": 0,
+      "vector_unsupported": 0
     },
     {
       "check_count": 4,
@@ -5250,7 +5280,12 @@
       "document": "twoD_ungridded.dml",
       "failed": 0,
       "passed": 0,
-      "unsupported": 4
+      "unsupported": 4,
+      "vector_check_count": 0,
+      "vector_checks": [],
+      "vector_failed": 0,
+      "vector_passed": 0,
+      "vector_unsupported": 0
     }
   ],
   "limitations": [
