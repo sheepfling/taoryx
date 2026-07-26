@@ -36,6 +36,7 @@ layers:
   controller: {version: pending, evidence: taoryx_reference_design}
   mission: {version: pending, evidence: taoryx_qualification_scenario}
   reductions: {version: pending, evidence: derived_from_parent_plant}
+  linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
 claims:
   - byte-pinned nonlinear unpowered lifting-body aerodynamic reference
   - broad-Mach force/moment graph represented by the verified corpus source and package evidence

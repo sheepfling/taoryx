@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from taoryx.trajectory import load_daveml_family_graph, load_daveml_family_import, load_reference_family_manifest
 

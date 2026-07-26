@@ -6,7 +6,8 @@
     "verification/daveml_f16_scenario_evidence.json": "628ad40114b1c25b4082d6ab9733971c69fde03a182b0dcf437e21ebdce7188a",
     "verification/daveml_f16_trim_evidence.json": "bd131b577c08ec4c3e7640af5ddefce1f7b24908ad1704eeb7f13029a73b8322",
     "verification/daveml_f16_tuning_evidence.json": "ae3f51a44d5ea26264f10122f3bda5a0d1cc8d64d029af89c512673a153dfc00",
-    "verification/daveml_family_readiness.json": "8edc40cbd00fc3d984e881d1764fe0d1eeff2aa632a8f55f4159a7fa5f7eb74b",
+    "verification/daveml_family_readiness.json": "7bc617cf19c0974bd8a1c36a94587ecdd27f293d946b69800fa1011c2a1d668d",
+    "verification/daveml_hl20_linearization_evidence.json": "858de314a1c49635547e1343f1769ba8310c4bb01a23d38557fd777e4ead8a02",
     "verification/daveml_hl20_load_evidence.json": "9651fb6c4266daa356ff7abeef0eef767a302c9a6c43efa0467605596438d0d4",
     "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f"
   },
@@ -23,7 +24,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "sion\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 14\n        }\n      ],\n      \"graph_failures\": [],\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"pending_derived_layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      },\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"layers\": {\n        \"linearization\": \"pending_source_trim_jacobian\",\n        \"objectives\": \"pending\",\n        \"scenarios\": \"glide_trim_only\",\n        \"tuning\": \"pending\"\n      }\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "/twostage_prop.normalized.dml\",\n          \"role\": \"propulsion\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 14\n        }\n      ],\n      \"graph_failures\": [],\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"pending_derived_layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      },\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"layers\": {\n        \"objectives\": \"pending\",\n        \"scenarios\": \"glide_trim_only\",\n        \"tuning\": \"pending\"\n      }\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [
@@ -60,6 +61,15 @@
       "returncode": 0,
       "stderr_tail": "",
       "stdout_tail": " \"reference_hl20_mod_k\",\n  \"geometry\": {\n    \"mean_aerodynamic_chord_m\": 8.607552,\n    \"reference_area_m2\": 26.612075808\n  },\n  \"loads\": {\n    \"body_force_x_n\": -1829.8490628412635,\n    \"body_force_y_n\": 0.0,\n    \"body_force_z_n\": -2653.82203243612,\n    \"body_moment_x_nm\": 0.0,\n    \"body_moment_y_nm\": 969.1523325335203,\n    \"body_moment_z_nm\": 0.0,\n    \"drag_n\": 1829.8490628412635,\n    \"lift_n\": 2653.82203243612,\n    \"pitch_moment_nm\": 969.1523325335203\n  },\n  \"operating_point\": {\n    \"alpha_deg\": 5.0,\n    \"geometric_altitude_m\": 0.0,\n    \"mach\": 1.0,\n    \"true_airspeed_m_s\": 30.48\n  },\n  \"provenance\": {\n    \"aerodynamics_document_sha256\": \"b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec\",\n    \"aerodynamics_package_sha256\": \"443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63\",\n    \"atmosphere_sha256\": \"b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca\"\n  },\n  \"schema_version\": \"taoryx.daveml-hl20-load-evidence/v1\",\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_hl20_linearization.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "  [\n      -0.004982539442238323\n    ]\n  ],\n  \"b_matrix\": [\n    []\n  ],\n  \"claim_boundary\": \"source-bounded HL-20 pitch residual Jacobian; not full 6-DOF dynamics or controller qualification\",\n  \"control_names\": [],\n  \"family_id\": \"reference_hl20_mod_k\",\n  \"perturbations\": {\n    \"control_step\": 1e-05,\n    \"method\": \"central_finite_difference\",\n    \"state_step\": 1e-05\n  },\n  \"provenance\": {\n    \"document_sha256\": \"b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec\",\n    \"package_sha256\": \"443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63\"\n  },\n  \"residual_names\": [\n    \"pitch_cm\"\n  ],\n  \"schema_version\": \"taoryx.daveml-hl20-linearization-evidence/v1\",\n  \"state_names\": [\n    \"alpha_deg\"\n  ],\n  \"status\": \"verified\",\n  \"trim\": {\n    \"controls\": {},\n    \"iterations\": 5,\n    \"max_residual\": 1.1578411840407199e-14,\n    \"residuals\": {\n      \"pitch_cm\": 1.1578411840407199e-14\n    },\n    \"state\": {\n      \"alpha_deg\": 6.457652069267908\n    },\n    \"success\": true\n  }\n}\n"
     },
     {
       "command": [

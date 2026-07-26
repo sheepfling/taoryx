@@ -115,7 +115,7 @@ layers:
   controllers: {version: pending, evidence: taoryx_reference_design}
   reductions: {version: pending, evidence: derived_from_parent_plant}
   trim: {version: source-channel-trim-v1, evidence: source_channel_trim_verified}
-  linearization: {version: pending, evidence: pending_source_trim_jacobian}
+  linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
   tuning: {version: pending, evidence: pending}
   objectives: {version: pending, evidence: pending}
   scenarios: {version: glide-trim-only-v1, evidence: glide_trim_only}

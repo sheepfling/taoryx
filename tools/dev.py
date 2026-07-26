@@ -651,6 +651,13 @@ def daveml_hl20_load() -> None:
     ####
 
 
+def daveml_hl20_linearization() -> None:
+    """Generate reproducible HL-20 DAVE-ML linearization evidence."""
+
+    run(tool_script("validate_daveml_hl20_linearization.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -764,6 +771,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-release": daveml_release,
     "daveml-equilibrium-trim": daveml_equilibrium_trim,
     "daveml-hl20-load": daveml_hl20_load,
+    "daveml-hl20-linearization": daveml_hl20_linearization,
     "handoff": handoff,
     "check": check,
     "all": check,

@@ -579,6 +579,10 @@ items are complete and reproducible:
   and participates in the fresh-process release gate. The report verifies the
   declared sign/frame mapping while leaving mass, dynamics, and controller
   promotion pending.
+- `tools/validate_daveml_hl20_linearization.py` now emits a source-linked
+  residual Jacobian around the certified HL-20 alpha trim. The artifact is
+  promoted only as a pitch-channel linearization; full 6-DOF dynamics and
+  controller qualification remain explicitly pending.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,
