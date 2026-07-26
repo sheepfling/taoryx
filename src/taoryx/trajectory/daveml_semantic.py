@@ -185,7 +185,7 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
             for attribute in ("varID", "gtID", "utID", "bpID", "name"):
                 value = attributes.get(attribute)
                 if value:
-                    identifiers.setdefault((attribute, str(value)), []).append(str(node.get("source_path", "")))
+                    identifiers.setdefault((attribute, str(value).strip()), []).append(str(node.get("source_path", "")))
         children = node.get("children", [])
         if isinstance(children, list):
             for child in children:
@@ -228,12 +228,12 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
             attributes = child.get("attributes", {})
             if not tag.endswith("Ref") or not isinstance(attributes, dict):
                 continue
-            if tag == "documentRef" or attributes.get("refID"):
+            if tag in {"documentRef", "modificationRef"} or attributes.get("refID"):
                 resolved.append(
                     {
                         "source_path": child.get("source_path"),
                         "tag": tag,
-                        "identifier": attributes.get("refID"),
+                        "identifier": str(attributes.get("refID", "")).strip() or None,
                         "status": "external_provenance",
                     }
                 )
@@ -242,7 +242,7 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
             if key_attribute is None:
                 resolved.append({"source_path": child.get("source_path"), "tag": tag, "status": "unresolved"})
                 continue
-            key = (key_attribute, str(attributes[key_attribute]))
+            key = (key_attribute, str(attributes[key_attribute]).strip())
             targets = identifiers.get(key, [])
             legacy_key = None
             if not targets and key_attribute == "gtID":

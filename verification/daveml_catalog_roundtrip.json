@@ -5262,9 +5262,8 @@
       "numeric_diff_count": 0,
       "opaque_paths": [],
       "reference_summary": {
-        "external_provenance": 97,
-        "resolved": 915,
-        "unresolved": 1
+        "external_provenance": 98,
+        "resolved": 915
       },
       "source": "normalized/daveml-example-hl20-aero/source.dml",
       "source_sha256": "8639b55c2525fdb6c0177b8e359de5d6eb984a3b4b35b4d1e5898d54ddc1f44e",
@@ -5340,9 +5339,8 @@
       "numeric_diff_count": 0,
       "opaque_paths": [],
       "reference_summary": {
-        "external_provenance": 2,
-        "resolved": 5,
-        "unresolved": 1
+        "external_provenance": 3,
+        "resolved": 5
       },
       "source": "normalized/daveml-example-twod-table/source.dml",
       "source_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
@@ -5415,7 +5413,7 @@
       "reference_summary": {
         "external_provenance": 1,
         "resolved": 3,
-        "unresolved": 1
+        "type_mismatch": 1
       },
       "source": "normalized/daveml-example-twod-ungridded/source.dml",
       "source_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
