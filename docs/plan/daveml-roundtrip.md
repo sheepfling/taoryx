@@ -575,6 +575,10 @@ items are complete and reproducible:
   `CL/CD/CM` to body-load mapping, including explicit drag/lift signs and
   atmosphere-derived dynamic pressure. It deliberately does not add mass,
   propulsion, or gravity assumptions that the HL-20 package does not provide.
+- `tools/validate_daveml_hl20_load.py` now emits a hash-linked HL-20 load sample
+  and participates in the fresh-process release gate. The report verifies the
+  declared sign/frame mapping while leaving mass, dynamics, and controller
+  promotion pending.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,

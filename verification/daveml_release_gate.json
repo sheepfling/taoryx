@@ -7,6 +7,7 @@
     "verification/daveml_f16_trim_evidence.json": "bd131b577c08ec4c3e7640af5ddefce1f7b24908ad1704eeb7f13029a73b8322",
     "verification/daveml_f16_tuning_evidence.json": "ae3f51a44d5ea26264f10122f3bda5a0d1cc8d64d029af89c512673a153dfc00",
     "verification/daveml_family_readiness.json": "8edc40cbd00fc3d984e881d1764fe0d1eeff2aa632a8f55f4159a7fa5f7eb74b",
+    "verification/daveml_hl20_load_evidence.json": "9651fb6c4266daa356ff7abeef0eef767a302c9a6c43efa0467605596438d0d4",
     "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f"
   },
   "claim_boundary": "bounded source integration release gate; not flight qualification",
@@ -50,6 +51,15 @@
       "returncode": 0,
       "stderr_tail": "",
       "stdout_tail": "3caa862c4dae1c\",\n    \"atmosphere_sha256\": \"b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca\",\n    \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n    \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"propulsion_document_sha256\": \"1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4\",\n    \"propulsion_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"residuals\": {\n    \"force_x_n\": 3.3242031349800527e-09,\n    \"force_z_n\": 2.0372681319713593e-10,\n    \"moment_y_nm\": 1.0738347056774311e-10\n  },\n  \"scaled_residual_norm\": 3.3321708099642557e-13,\n  \"schema_version\": \"taoryx.daveml-equilibrium-trim/v1\",\n  \"solver\": {\n    \"iterations\": 11,\n    \"message\": \"`gtol` termination condition is satisfied.\",\n    \"status\": 1,\n    \"success\": true\n  },\n  \"state\": {\n    \"alpha_deg\": 2.147760465658469\n  },\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_hl20_load.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": " \"reference_hl20_mod_k\",\n  \"geometry\": {\n    \"mean_aerodynamic_chord_m\": 8.607552,\n    \"reference_area_m2\": 26.612075808\n  },\n  \"loads\": {\n    \"body_force_x_n\": -1829.8490628412635,\n    \"body_force_y_n\": 0.0,\n    \"body_force_z_n\": -2653.82203243612,\n    \"body_moment_x_nm\": 0.0,\n    \"body_moment_y_nm\": 969.1523325335203,\n    \"body_moment_z_nm\": 0.0,\n    \"drag_n\": 1829.8490628412635,\n    \"lift_n\": 2653.82203243612,\n    \"pitch_moment_nm\": 969.1523325335203\n  },\n  \"operating_point\": {\n    \"alpha_deg\": 5.0,\n    \"geometric_altitude_m\": 0.0,\n    \"mach\": 1.0,\n    \"true_airspeed_m_s\": 30.48\n  },\n  \"provenance\": {\n    \"aerodynamics_document_sha256\": \"b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec\",\n    \"aerodynamics_package_sha256\": \"443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63\",\n    \"atmosphere_sha256\": \"b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca\"\n  },\n  \"schema_version\": \"taoryx.daveml-hl20-load-evidence/v1\",\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [
