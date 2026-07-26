@@ -111,7 +111,7 @@ layers:
   environment: {version: US1976-upper-continuation-v1, evidence: package_declared}
   controllers: {version: pending, evidence: taoryx_reference_design}
   reductions: {version: pending, evidence: derived_from_parent_plant}
-  trim: {version: scenario-regression-v1, evidence: scenario_regression_only}
+  trim: {version: not-applicable-open-loop-v1, evidence: not_applicable_no_declared_controls}
   linearization: {version: not-applicable, evidence: not_applicable_current_rocket_contract}
   tuning: {version: not-applicable, evidence: not_applicable_current_open_loop_contract}
   objectives: {version: trajectory-checkpoint-objectives-v1, evidence: trajectory_checkpoint_objectives_verified}

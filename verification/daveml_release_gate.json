@@ -8,7 +8,7 @@
     "verification/daveml_f16_scenario_evidence.json": "628ad40114b1c25b4082d6ab9733971c69fde03a182b0dcf437e21ebdce7188a",
     "verification/daveml_f16_trim_evidence.json": "bd131b577c08ec4c3e7640af5ddefce1f7b24908ad1704eeb7f13029a73b8322",
     "verification/daveml_f16_tuning_evidence.json": "ae3f51a44d5ea26264f10122f3bda5a0d1cc8d64d029af89c512673a153dfc00",
-    "verification/daveml_family_readiness.json": "a74085e8aceebd6d87db02843cf3524bb8d5aa2d87da46747270609ac4c29831",
+    "verification/daveml_family_readiness.json": "0bd5dab1968fb7e46360eecd7028db49deddb43d7bd6951eb611c31eb11f4a40",
     "verification/daveml_hl20_linearization_evidence.json": "858de314a1c49635547e1343f1769ba8310c4bb01a23d38557fd777e4ead8a02",
     "verification/daveml_hl20_load_evidence.json": "9651fb6c4266daa356ff7abeef0eef767a302c9a6c43efa0467605596438d0d4",
     "verification/daveml_hl20_scenario_evidence.json": "f8f60cb946e24d7180ef25fabcf3ec4503b11e4bf5581496ec021c180cc022be",
@@ -31,7 +31,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "ment_sha256\": \"9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4\",\n          \"function_count\": 0,\n          \"package_member\": \"source/nesc/twostage_prop.normalized.dml\",\n          \"role\": \"propulsion\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 14\n        }\n      ],\n      \"graph_failures\": [],\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"pending_derived_layers\": {\n        \"objectives\": \"trajectory_checkpoint_objectives_verified\",\n        \"trim\": \"scenario_regression_only\"\n      },\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_objectives_verified\",\n        \"trim\": \"scenario_regression_only\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "aded_hash_verified\",\n          \"variable_count\": 23\n        },\n        {\n          \"document_sha256\": \"9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4\",\n          \"function_count\": 0,\n          \"package_member\": \"source/nesc/twostage_prop.normalized.dml\",\n          \"role\": \"propulsion\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 14\n        }\n      ],\n      \"graph_failures\": [],\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"pending_derived_layers\": {\n        \"objectives\": \"trajectory_checkpoint_objectives_verified\"\n      },\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_objectives_verified\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [

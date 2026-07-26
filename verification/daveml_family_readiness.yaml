@@ -41,7 +41,7 @@ families:
     propulsion_binding: source_checked_schedule
     inertia_binding: source_checked_schedule
     atmosphere_binding: package_declared
-    trim: scenario_regression_only
+    trim: not_applicable_no_declared_controls
     linearization: not_applicable_current_rocket_contract
     tuning: not_applicable_current_open_loop_contract
     objectives: trajectory_checkpoint_objectives_verified

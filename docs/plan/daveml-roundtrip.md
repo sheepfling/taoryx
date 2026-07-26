@@ -602,6 +602,10 @@ items are complete and reproducible:
 - HL20 tuning is now explicitly `not_applicable_no_declared_controls`: the
   authoritative unpowered aerodynamic package declares no control channels,
   so no controller or tuning artifact is fabricated from an uncontrolled plant.
+- NESC trim is now explicitly `not_applicable_no_declared_controls`: the
+  authoritative two-stage package has no controls and qualifies a trajectory
+  replay rather than an equilibrium operating point. Its checkpoint objectives
+  remain independently qualified from the retained acceptance benchmark.
 - The semantic IR now exposes a deterministic unit/dimension index for source
   variable definitions while preserving original unit attributes and unknown
   units as `dimension: unknown` for explicit review.
