@@ -13,6 +13,7 @@ from taoryx.trajectory import (
     compare_daveml_ir,
     compare_daveml_numeric,
     evaluate_daveml_checkdata,
+    evaluate_daveml_vector_checkdata,
     export_daveml_ir,
     read_collection_archive,
 )
@@ -51,6 +52,7 @@ def main() -> int:
         diffs = compare_daveml_ir(ir, fresh)
         numeric_diffs = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
+        vector_check_results = evaluate_daveml_vector_checkdata(payload)
         stem = Path(source_member).stem
         (output / "canonical" / f"{stem}.ir.json").write_bytes(ir.canonical_json())
         (output / "exported" / f"{stem}.dml").write_bytes(exported)
@@ -67,7 +69,7 @@ def main() -> int:
                 "opaque_paths": list(ir.opaque_paths),
                 "structural_diff_count": len(diffs),
                 "numeric_diff_count": len(numeric_diffs),
-                "checkdata": _checkdata_summary(check_results),
+                "checkdata": _checkdata_summary(check_results, vector_check_results),
             }
         )
     report = {
@@ -112,11 +114,12 @@ def _sha256(payload: bytes) -> str:
     ####
 
 
-def _checkdata_summary(results: object) -> dict[str, object]:
+def _checkdata_summary(results: object, vector_results: object = ()) -> dict[str, object]:
     """Summarize evaluator-backed checkData evidence without hiding quarantine."""
 
     values = list(results) if isinstance(results, tuple) else []
-    statuses = [str(getattr(result, "status", "unknown")) for result in values]
+    vector_values = list(vector_results) if isinstance(vector_results, tuple) else []
+    statuses = [str(getattr(result, "status", "unknown")) for result in values + vector_values]
     status = (
         "not_present"
         if not statuses
@@ -133,6 +136,11 @@ def _checkdata_summary(results: object) -> dict[str, object]:
         "unsupported": statuses.count("unsupported"),
         "status": status,
         "results": [result.to_dict() for result in values],
+        "vector_count": len(vector_values),
+        "vector_passed": sum(getattr(result, "status", "") == "passed" for result in vector_values),
+        "vector_failed": sum(getattr(result, "status", "") == "failed" for result in vector_values),
+        "vector_unsupported": sum(getattr(result, "status", "") == "unsupported" for result in vector_values),
+        "vector_results": [result.to_dict() for result in vector_values],
     }
     ####
 
@@ -173,6 +181,7 @@ def _run_package(package: Path, output: Path) -> int:
         structural_diffs = compare_daveml_ir(ir, fresh)
         numeric_diffs = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
+        vector_check_results = evaluate_daveml_vector_checkdata(payload)
         stem = Path(source_member).stem
         (output / "canonical" / f"{stem}.ir.json").write_bytes(ir.canonical_json())
         (output / "exported" / f"{stem}.dml").write_bytes(exported)
@@ -186,7 +195,7 @@ def _run_package(package: Path, output: Path) -> int:
             "opaque_paths": list(ir.opaque_paths),
             "structural_diff_count": len(structural_diffs),
             "numeric_diff_count": len(numeric_diffs),
-            "checkdata": _checkdata_summary(check_results),
+            "checkdata": _checkdata_summary(check_results, vector_check_results),
         })
     manifest = _json_member(files, "manifest.json")
     report = {
@@ -231,6 +240,7 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
         structural = compare_daveml_ir(ir, fresh)
         numeric = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
+        vector_check_results = evaluate_daveml_vector_checkdata(payload)
         (target.parent / f"{target.name}.ir.json").write_bytes(ir.canonical_json())
         (target.parent / f"{target.name}.dml").write_bytes(exported)
         source_reports.append(
@@ -241,7 +251,7 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
                 "opaque_paths": list(ir.opaque_paths),
                 "structural_diff_count": len(structural),
                 "numeric_diff_count": len(numeric),
-                "checkdata": _checkdata_summary(check_results),
+                "checkdata": _checkdata_summary(check_results, vector_check_results),
             }
         )
     package_reports: list[dict[str, object]] = []

@@ -3,11 +3,11 @@
   "evidence_hashes": {
     "docs/plan/daveml-roundtrip.md": "70896fc7cc0dd34f01ead8d5c68fd49c799ad87395e1be6a816a6d111780c8ce",
     "verification/daveml_catalog_import.json": "58ed91d00341140c6e7dbce53ef4e4ee741f9373becf0be1825ae50056d046ff",
-    "verification/daveml_catalog_roundtrip.json": "c137a5daed03cc19fb96442c68a2f7afe3bfc8370c5a4cb510056f409151b599",
+    "verification/daveml_catalog_roundtrip.json": "de53259a16cc278ec40b25f2fe739c059615c34678d28c2d898f66378c9b75db",
     "verification/daveml_family_readiness.json": "c4a91f3786fdb3f30f73102529b0dabecab68ef9b3bf1beb31b921cf18186584",
     "verification/daveml_official_checkdata.json": "7cc0cc1850f8b14d1eace3970bdd4a0a9deb273c50fe3bceccdd509eadf8dced",
     "verification/daveml_official_conformance.json": "deaa6f110a305d0ad555434f4e4c04aa2773d73847324b3e605f816c150de169",
-    "verification/daveml_release_gate.json": "8f4b850b2e60d8e21f677197891fd25fb9e2f051f2d4d271360fd998056c17d6"
+    "verification/daveml_release_gate.json": "04e6909d826fd70e069c319e184cd2aa4301c23641df37948cc0e5c621a7c4d4"
   },
   "readiness_family_count": 3,
   "release_artifact_count": 16,
