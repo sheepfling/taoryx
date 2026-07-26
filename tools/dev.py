@@ -679,6 +679,13 @@ def daveml_nesc_replay() -> None:
     ####
 
 
+def daveml_completion_audit() -> None:
+    """Emit the requirement-level DaveML completion audit."""
+
+    run(tool_script("audit_daveml_completion.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -796,6 +803,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-hl20-scenario": daveml_hl20_scenario,
     "daveml-collection-roundtrip": daveml_collection_roundtrip,
     "daveml-nesc-replay": daveml_nesc_replay,
+    "daveml-completion-audit": daveml_completion_audit,
     "handoff": handoff,
     "check": check,
     "all": check,
