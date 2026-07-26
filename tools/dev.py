@@ -595,6 +595,13 @@ def daveml_readiness() -> None:
     ####
 
 
+def daveml_trim() -> None:
+    """Generate reproducible source-backed DaveML trim evidence."""
+
+    run(tool_script("validate_daveml_trim.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -700,6 +707,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "all-pdfs": all_pdfs,
     "equation-audit": equation_audit,
     "daveml-readiness": daveml_readiness,
+    "daveml-trim": daveml_trim,
     "handoff": handoff,
     "check": check,
     "all": check,
