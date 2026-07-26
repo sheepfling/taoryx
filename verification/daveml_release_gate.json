@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
-    "verification/daveml_catalog_roundtrip.json": "95d66231594bb734bb42ff2ffadf3f8e6ce89c8ce76fee29c804e9bc2c31102f",
+    "verification/daveml_catalog_roundtrip.json": "c202f22f46d96a90d36fe91bcac93b7420c8e639df4349074cd31dfb0d2da372",
     "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",
     "verification/daveml_f16_equilibrium_trim_evidence.json": "400da9183034b3f5fd83c4ebcc63ceede5ae7de1729483e8352d99fca803dbf8",
     "verification/daveml_f16_linearization_evidence.json": "e6ddb6b95b2b4fbf4b7d3374124a638d99796053b547de4925a6a5c4db8e2262",
@@ -127,7 +127,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "stage-package-twostage-inertia/source.dml\",\n      \"source_sha256\": \"277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b\",\n      \"structural_diff_count\": 0\n    },\n    {\n      \"checkdata\": {\n        \"count\": 0,\n        \"failed\": 0,\n        \"passed\": 0,\n        \"results\": [],\n        \"status\": \"not_present\",\n        \"unsupported\": 0,\n        \"vector_count\": 0,\n        \"vector_failed\": 0,\n        \"vector_passed\": 0,\n        \"vector_results\": [],\n        \"vector_unsupported\": 0\n      },\n      \"checkdata_failed\": 0,\n      \"checkdata_status\": \"not_present\",\n      \"exported_sha256\": \"9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0\",\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"reference_summary\": {},\n      \"source\": \"normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml\",\n      \"source_sha256\": \"297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee\",\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b\",\n      \"structural_diff_count\": 0\n    },\n    {\n      \"checkdata\": {\n        \"count\": 0,\n        \"failed\": 0,\n        \"passed\": 0,\n        \"results\": [],\n        \"status\": \"not_present\",\n        \"unsupported\": 0,\n        \"vector_count\": 0,\n        \"vector_failed\": 0,\n        \"vector_passed\": 0,\n        \"vector_results\": [],\n        \"vector_unsupported\": 0\n      },\n      \"checkdata_failed\": 0,\n      \"checkdata_status\": \"not_present\",\n      \"exported_sha256\": \"9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0\",\n      \"ir_sha256\": \"a5ce825c91e48fbcde812f97780c46691689454471116b1f3a9df7f5824d9451\",\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"reference_summary\": {},\n      \"source\": \"normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml\",\n      \"source_sha256\": \"297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee\",\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [

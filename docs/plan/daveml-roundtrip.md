@@ -111,6 +111,11 @@ source DAVE-ML.
 5. Add evaluator-backed numeric replay comparison for seeded values, boundaries,
    and source check cases; the current verifier covers literal preservation.
 
+The round-trip command now emits `canonical/export-manifest.json` for package
+and catalog cycles. It records source, IR, exported-byte, document, and opaque
+node provenance hashes so regenerated DAVE-ML can be promoted without relying
+on the human-readable report alone.
+
 The collection-level runtime handoff is now covered by
 `tools/replay_daveml_collection.py`. It verifies the `.txcollection` checksum
 ledger and manifest first, then replays the declared embedded `.txair` artifact
