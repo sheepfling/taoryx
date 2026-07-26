@@ -173,6 +173,8 @@ def test_f16_aero_and_propulsion_bindings_compose_without_losing_provenance() ->
         {"elevator_deg": 0.0, "power_pct": 0.0},
     )
     assert values["pitch_cm"] == pytest.approx(-0.0074)
+    assert aero.graph.graph.dimension_for("vt") == "length/time"
+    assert aero.graph.graph.dimension_for("cm") == "1"
     assert values["thrust_lbf"] == pytest.approx(1060.0)
     assert aero.graph.document_sha256 != propulsion.graph.document_sha256
 

@@ -205,10 +205,26 @@ class DAVEMLFunctionChannel:
         return self.graph.unit_for(source_id)
         ####
 
+    def input_dimension(self, channel: str) -> str | None:
+        """Return the typed dimension for one public input channel."""
+
+        try:
+            source_id = self.input_channels[channel]
+        except KeyError as error:
+            raise KeyError(f"unknown DAVE-ML function channel {channel!r}") from error
+        return self.graph.graph.dimension_for(source_id)
+        ####
+
     def output_unit(self) -> str | None:
         """Return the declared source unit for the output channel."""
 
         return self.graph.unit_for(self.output_channel)
+        ####
+
+    def output_dimension(self) -> str | None:
+        """Return the typed dimension for the public output channel."""
+
+        return self.graph.graph.dimension_for(self.output_channel)
         ####
     ####
 
