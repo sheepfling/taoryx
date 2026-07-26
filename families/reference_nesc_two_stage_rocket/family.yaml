@@ -1,0 +1,122 @@
+schema_version: 1
+manifest_type: taoryx.reference-family/v1alpha1
+family_id: reference_nesc_two_stage_rocket
+version: 1.0.0
+display_name: NASA/NESC Scenario 17 two-stage rocket reference family
+role: source-grounded-reference-anchor
+source:
+  kind: daveml
+  package: nesc-two-stage-rocket-v0.9.txair
+  package_relative_path: qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair
+  package_sha256: 204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e
+  aerodynamic_source: source/nesc/twostage_aero.normalized.dml
+  aerodynamics_sha256: d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6
+  corpus_archive: INBOX/taoryx-daveml-nesc-model-catalog-v1.0/raw/nesc/official/All_models.zip
+  corpus_archive_sha256: 2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9
+  availability: local_catalog_input_verified
+  license_and_notices: NASA Open Source Agreement Version 1.3; retain package notices
+daveml_import: plant/daveml-import.json
+plant:
+  fidelity: rigid_body_6dof
+  body_frame: FRD
+  navigation_frame: NED
+  quaternion_order: wxyz
+  package_schema_version: 0.3.0
+  reference_geometry:
+    area_m2: 7.0
+    mean_aerodynamic_chord_m: 3.0
+    span_m: 3.0
+  validity_envelope:
+    mach_min: 0.0
+    mach_max: 40.0
+    alpha_min_rad: -0.3490658503988659
+    alpha_max_rad: 0.3490658503988659
+    beta_min_rad: -0.3490658503988659
+    beta_max_rad: 0.3490658503988659
+    altitude_min_m: 0.0
+    altitude_max_m: 500000.0
+  qualification: runtime_replay_qualification_passed
+  source_payload_required_for_execution: true
+fidelity_profiles:
+  - profile_id: nesc_rocket.performance_3dof.v1
+    runtime_fidelity: point_mass_3dof
+    equations: [newton_point_mass_translation, variable_mass_translation]
+    status: planned_derived_from_parent
+    parent_profile: nesc_rocket.variable_mass_6dof.v1
+    data_contract: [aerodynamic_force_tables, propulsion_stage_schedule, mass_schedule, staging_events]
+    omitted_physics: [attitude_dynamics, aerodynamic_moments, body_rates]
+  - profile_id: nesc_rocket.attitude_response_p6dof.v1
+    runtime_fidelity: pseudo_6dof
+    equations: [newton_point_mass_translation, quaternion_kinematics, scheduled_attitude_response]
+    status: planned_derived_from_parent
+    parent_profile: nesc_rocket.variable_mass_6dof.v1
+    data_contract: [aerodynamic_force_tables, propulsion_stage_schedule, mass_schedule, staging_events]
+    omitted_physics: [full_moment_balance, actuator_dynamics]
+  - profile_id: nesc_rocket.variable_mass_6dof.v1
+    runtime_fidelity: rigid_body_6dof
+    equations: [variable_mass_translation, quaternion_kinematics, scheduled_inertia, staging_events]
+    status: runtime_replay_qualification_passed
+    data_contract: [aerodynamic_force_moment_tables, propulsion_stage_schedule, mass_properties_schedule, scenario17_trajectory]
+    omitted_physics: [independent_full_participating_simulation_equivalence]
+parameters:
+  - {id: vehicle.source_package, kind: string, default: nesc-two-stage-rocket-v0.9.txair}
+  - {id: vehicle.body_frame, kind: string, default: FRD}
+  - {id: vehicle.navigation_frame, kind: string, default: NED}
+  - {id: vehicle.mass_properties.binding, kind: string, default: scheduled_propellant_and_staging_v1}
+  - {id: environment.atmosphere, kind: string, default: US1976_with_documented_upper_continuation}
+  - {id: mission.profile, kind: string, default: nesc_atmos_17_scenario}
+variants: {baseline: {}}
+loadouts: {baseline: {}}
+missions:
+  baseline: {scenario_id: Atmos_17, endpoint_s: 200.0}
+segment_plans: {baseline: {}}
+segment_graphs:
+  baseline:
+    schema_version: 1
+    segments:
+      - {id: stage1_burn, kind: powered_ascent, qualification: source_package_regression}
+      - {id: stack_coast, kind: coast_with_spent_stage_attached, qualification: source_package_regression}
+      - {id: stage2_ignition_and_staging, kind: staging_event, qualification: source_package_regression}
+      - {id: stage2_burn, kind: powered_ascent, qualification: source_package_regression}
+      - {id: orbit_coast, kind: coast, qualification: source_package_regression}
+      - {id: terminal, kind: terminal_arrival_gate, qualification: planned}
+    terminal: scenario17_endpoint
+controls: []
+observations:
+  - {id: state.position.north, unit: m, source: position.north, description: NED north position.}
+  - {id: state.position.east, unit: m, source: position.east, description: NED east position.}
+  - {id: state.position.down, unit: m, source: position.down, description: NED down position.}
+  - {id: state.velocity.body, unit: m/s, source: velocity.body, description: Body-frame velocity.}
+  - {id: state.attitude.quaternion, unit: dimensionless, source: attitude.quaternion, description: Body-to-navigation attitude.}
+  - {id: state.body_rates, unit: rad/s, source: body_rates, description: Body angular rates.}
+  - {id: mass.total, unit: kg, source: mass.total, kind: resource, description: Scheduled total mass.}
+  - {id: mass.propellant, unit: kg, source: mass.propellant, kind: resource, description: Consumed-propellant-derived resource.}
+  - {id: event.stage, unit: dimensionless, source: staging.stage, kind: diagnostic, description: Active staging phase.}
+  - {id: aero.mach, unit: dimensionless, source: aero.mach, description: Mach number.}
+  - {id: aero.angle_of_attack, unit: deg, source: aero.alpha, description: Aerodynamic angle of attack.}
+layers:
+  mass_properties: {version: scheduled-propellant-and-staging-v1, evidence: source_checked_schedule}
+  aerodynamics: {version: normalized-daveml-v1, evidence: source_checked_static}
+  propulsion: {version: two-stage-constant-thrust-v1, evidence: source_checked_schedule}
+  staging: {version: instantaneous-dry-mass-transition-v1, evidence: source_checked_acceptance}
+  environment: {version: US1976-upper-continuation-v1, evidence: package_declared}
+  controllers: {version: pending, evidence: taoryx_reference_design}
+  reductions: {version: pending, evidence: derived_from_parent_plant}
+  trim: {version: scenario-regression-v1, evidence: scenario_regression_only}
+  linearization: {version: not-applicable, evidence: not_applicable_current_rocket_contract}
+  tuning: {version: not-applicable, evidence: not_applicable_current_open_loop_contract}
+  objectives: {version: trajectory-checkpoint-v1, evidence: trajectory_checkpoint_only}
+  scenarios: {version: scenario17-runtime-v1, evidence: scenario17_runtime_replay}
+bindings:
+  - bindings/canonical-observations.yaml
+  - bindings/envelope.yaml
+  - plant/source-lock.yaml
+claims:
+  - source-grounded NASA/NESC two-stage variable-mass launch vehicle reference plant
+  - separate DAVE-ML aerodynamics, propulsion, and mass-property components are imported with provenance
+  - stage timing, mass transitions, and trajectory checkpoint evidence are retained
+nonclaims:
+  - independent full participating-simulation trajectory equivalence
+  - perigee performance beyond the package's retained acceptance boundary
+  - actuator, guidance, or launch-pad contact behavior not present in the package
+next_gate: qualify_reduced_order_rocket_and_full_trajectory_comparison

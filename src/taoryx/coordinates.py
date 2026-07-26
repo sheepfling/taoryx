@@ -134,10 +134,12 @@ def geodetic_unit_vectors(longitude: Longitude, latitude: Latitude) -> Basis3:
     sine_latitude = math.sin(latitude.radians)
     cosine_longitude = math.cos(longitude.radians)
     sine_longitude = math.sin(longitude.radians)
+    first = Vector3(-sine_latitude * cosine_longitude, -sine_latitude * sine_longitude, cosine_latitude)
+    second = Vector3(-sine_longitude, cosine_longitude, 0.0)
     return Basis3(
-        Vector3(-sine_latitude * cosine_longitude, -sine_latitude * sine_longitude, cosine_latitude),
-        Vector3(-sine_longitude, cosine_longitude, 0.0),
-        Vector3(-cosine_latitude * cosine_longitude, -cosine_latitude * sine_longitude, -sine_latitude),
+        first,
+        second,
+        first.cross(second),
         parent_frame=Frame.ECFC,
         child_frame=Frame.GEODETIC_HORIZON,
     )

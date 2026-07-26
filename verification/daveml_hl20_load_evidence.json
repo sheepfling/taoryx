@@ -1,0 +1,32 @@
+{
+  "claim_boundary": "source-bounded HL-20 wind-axis load sample; no mass or dynamics claim",
+  "family_id": "reference_hl20_mod_k",
+  "geometry": {
+    "mean_aerodynamic_chord_m": 8.607552,
+    "reference_area_m2": 26.612075808
+  },
+  "loads": {
+    "body_force_x_n": -1829.8490628412635,
+    "body_force_y_n": 0.0,
+    "body_force_z_n": -2653.82203243612,
+    "body_moment_x_nm": 0.0,
+    "body_moment_y_nm": 969.1523325335203,
+    "body_moment_z_nm": 0.0,
+    "drag_n": 1829.8490628412635,
+    "lift_n": 2653.82203243612,
+    "pitch_moment_nm": 969.1523325335203
+  },
+  "operating_point": {
+    "alpha_deg": 5.0,
+    "geometric_altitude_m": 0.0,
+    "mach": 1.0,
+    "true_airspeed_m_s": 30.48
+  },
+  "provenance": {
+    "aerodynamics_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "aerodynamics_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+    "atmosphere_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca"
+  },
+  "schema_version": "taoryx.daveml-hl20-load-evidence/v1",
+  "status": "verified"
+}

@@ -3,3 +3,4 @@ schema_version: 1
 families:
   - ../families/reference_f16_s119/family.yaml
   - ../families/reference_hl20_mod_k/family.yaml
+  - ../families/reference_nesc_two_stage_rocket/family.yaml

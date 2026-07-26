@@ -239,7 +239,7 @@ def _relativeize(value: Any) -> Any:
             return value
         if path.is_absolute():
             try:
-                return str(path.relative_to(ROOT))
+                return path.relative_to(ROOT).as_posix()
             except ValueError:
                 return path.name
     return value
@@ -278,19 +278,13 @@ def _write_bundle_metadata(packet: Path, *, reproduction_command: str | None = N
         encoding="utf-8",
     )
     try:
-        commit = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
-        ).strip()
+        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, encoding="utf-8").strip()
     except (OSError, subprocess.CalledProcessError):
         commit = "unavailable"
     (packet / "software_commit.txt").write_text(f"git_commit={commit}\n", encoding="utf-8")
     try:
-        diff = subprocess.check_output(
-            ["git", "diff", "--binary", "HEAD"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
-        )
-        status = subprocess.check_output(
-            ["git", "status", "--short"], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
-        )
+        diff = subprocess.check_output(["git", "diff", "--binary", "HEAD"], cwd=ROOT, text=True, encoding="utf-8")
+        status = subprocess.check_output(["git", "status", "--short"], cwd=ROOT, text=True, encoding="utf-8")
     except (OSError, subprocess.CalledProcessError):
         diff = "# working tree diff unavailable\n"
         status = "working tree status unavailable\n"
@@ -1339,7 +1333,7 @@ def _run_case(
         "exit_code": report.exit_code,
         "diagnostics": [{"code": item.code, "message": item.message} for item in report.diagnostics],
         "results": results,
-        "plots": [str(path.relative_to(output.parent)) for path in plot_paths],
+        "plots": [path.relative_to(output.parent).as_posix() for path in plot_paths],
         "initial_condition_audit": _initial_condition_audit(report),
         "event_timeline": event_timeline,
         "event_continuity_audit": _event_continuity_audit(event_timeline),
@@ -1389,13 +1383,13 @@ def build(
     manifest: dict[str, Any] = {
         "schema_version": 1,
         "run_id": run_id,
-        "source_config": str(CONFIG.relative_to(ROOT)),
-        "long_validation_config": str(LONG_CONFIG.relative_to(ROOT)),
-        "controller_mission_config": str(CONTROLLER_MISSION_CONFIG.relative_to(ROOT)),
+        "source_config": CONFIG.relative_to(ROOT).as_posix(),
+        "long_validation_config": LONG_CONFIG.relative_to(ROOT).as_posix(),
+        "controller_mission_config": CONTROLLER_MISSION_CONFIG.relative_to(ROOT).as_posix(),
         "claim_boundary": "source-bounded research-surrogate evidence; not flight qualification",
         "tiers": ["point-mass-3dof", "kinematic-3-plus-3-dof", "rigid-body-6dof"],
         "families": [],
-        "claim_inputs": [str(path.relative_to(ROOT)) for path in CLAIM_INPUTS],
+        "claim_inputs": [path.relative_to(ROOT).as_posix() for path in CLAIM_INPUTS],
         "closure_contract": CLOSURE_CONTRACT,
         "metric_dictionary": "evidence/metric_dictionary.json",
         "score_definition": "evidence/score_definition.json",
@@ -1604,7 +1598,7 @@ def build(
             nominal["closure_evaluation"] = _closure_evaluation(family, nominal)
             long_report: dict[str, Any] = {
                 "catalog": {
-                    "path": str(LONG_CONFIG.relative_to(ROOT)),
+                    "path": LONG_CONFIG.relative_to(ROOT).as_posix(),
                     "id": long_case["id"],
                     "semantic_family": long_case["semantic_family"],
                     "duration_s": long_case["duration_s"],
@@ -1731,7 +1725,7 @@ def build(
                 "id": controller_id,
                 "status": "executed",
                 "problem": str(controller["problem"]),
-                "summary": str((controller_dir / "summary.json").relative_to(packet)),
+                "summary": (controller_dir / "summary.json").relative_to(packet).as_posix(),
                 "expected": dict(controller.get("expectations", {})),
                 "expectation_evaluation": _expectation_evaluation(
                     dict(controller.get("expectations", {})),
@@ -1798,7 +1792,7 @@ def build(
                 "family": family,
                 "display_name": str(mission["display_name"]),
                 "status": "executed",
-                "summary": str((mission_dir / "summary.json").relative_to(packet)),
+                "summary": (mission_dir / "summary.json").relative_to(packet).as_posix(),
                 "claim_boundary": controller_mission_claim_boundary,
                 "objective_evaluation": summary["objective_evaluation"],
                 "closure_evaluation": summary["closure_evaluation"],
@@ -1813,7 +1807,7 @@ def build(
     manifest_path = packet / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     manifest["files"] = {
-        str(path.relative_to(packet)): _sha256(path)
+        path.relative_to(packet).as_posix(): _sha256(path)
         for path in _files(packet)
         if path not in {manifest_path, packet / "SHA256SUMS"}
     }
@@ -1821,7 +1815,7 @@ def build(
     hashes_path = packet / "SHA256SUMS"
     hashes_path.write_text(
         "".join(
-            f"{_sha256(path)}  {path.relative_to(packet)}\n"
+            f"{_sha256(path)}  {path.relative_to(packet).as_posix()}\n"
             for path in _files(packet)
             if path != hashes_path
         ),
@@ -1830,7 +1824,7 @@ def build(
     archive = output / f"fidelity-ladder-evidence-{run_id}.zip"
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as handle:
         for path in _files(packet):
-            handle.write(path, path.relative_to(packet))
+            handle.write(path, path.relative_to(packet).as_posix())
     return archive
     ####
 
@@ -1842,7 +1836,7 @@ def _write_case_manifests(packet: Path) -> None:
         case_dir = summary_path.parent
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
         files = {
-            str(path.relative_to(case_dir)): _sha256(path)
+            path.relative_to(case_dir).as_posix(): _sha256(path)
             for path in _files(case_dir)
             if path.name != "case_manifest.json"
         }

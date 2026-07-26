@@ -5,20 +5,82 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import math
 from html import escape
 from pathlib import Path
 
 from taoryx.integration import available_integrator_descriptions, available_integrators
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.outputs import RunArtifact
+from taoryx.reachability_catalog import ReachabilityCatalog, load_reachability_catalog
+from taoryx.reachability_envelope import (
+    ReachabilityFidelity,
+    RocketGlideVehicle,
+    TerminalCriteria,
+    generate_launch_grid,
+    rerun_timed_out_artifact,
+    run_reachability_envelope,
+)
+from taoryx.reachability_visualization import load_reachability_artifact, render_reachability_plot_bundle
 from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
 from taoryx.table_explorer import InterpolationExplanation, TableInspection, explain_interpolation, inspect_table_file
-from taoryx.trajectory import FamilyCatalog, ResolvedCase, diff_resolved_cases, load_case_intent, load_family_catalog, resolve_case
+from taoryx.trajectory import (
+    FamilyCatalog,
+    ResolvedCase,
+    diff_resolved_cases,
+    load_case_intent,
+    load_daveml_family_graph,
+    load_daveml_family_import,
+    load_family_catalog,
+    resolve_case,
+)
 from taoryx.trajectory.resolution import ResolutionError
 from taoryx.visualization import render_run_artifact_html, render_run_artifact_plots
+from taoryx.x15_native_replay import write_x15_native_boundary_replay
+from taoryx.x15_reachability import write_x15_reachability_bundle
 
 from .optimization_runtime import available_optimizers
 from .runner import run_files
+
+
+def _add_reachability_criteria_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--min-speed-m-s", type=float)
+    parser.add_argument("--max-speed-m-s", type=float)
+    parser.add_argument("--require-ground-contact", action="store_true")
+    parser.add_argument("--target-x-m", type=float)
+    parser.add_argument("--target-y-m", type=float)
+    parser.add_argument("--target-z-m", type=float)
+    parser.add_argument("--max-impact-radius-m", type=float)
+    parser.add_argument("--min-impact-speed-m-s", type=float)
+    parser.add_argument("--max-impact-speed-m-s", type=float)
+
+
+def _criteria_from_arguments(arguments: argparse.Namespace) -> TerminalCriteria | None:
+    names = (
+        "min_speed_m_s",
+        "max_speed_m_s",
+        "target_x_m",
+        "target_y_m",
+        "target_z_m",
+        "max_impact_radius_m",
+        "min_impact_speed_m_s",
+        "max_impact_speed_m_s",
+    )
+    if not arguments.require_ground_contact and not any(getattr(arguments, name) is not None for name in names):
+        return None
+    return TerminalCriteria(
+        min_speed_m_s=0.0 if arguments.min_speed_m_s is None else arguments.min_speed_m_s,
+        max_speed_m_s=math.inf if arguments.max_speed_m_s is None else arguments.max_speed_m_s,
+        require_ground_contact=arguments.require_ground_contact,
+        target_position_m=(
+            0.0 if arguments.target_x_m is None else arguments.target_x_m,
+            0.0 if arguments.target_y_m is None else arguments.target_y_m,
+            0.0 if arguments.target_z_m is None else arguments.target_z_m,
+        ),
+        max_impact_radius_m=arguments.max_impact_radius_m,
+        min_impact_speed_m_s=arguments.min_impact_speed_m_s,
+        max_impact_speed_m_s=arguments.max_impact_speed_m_s,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -77,6 +139,51 @@ def main(argv: list[str] | None = None) -> int:
     integrators = subparsers.add_parser("integrators", help="inspect available integration backends")
     integrators_subparsers = integrators.add_subparsers(dest="integrator_command", required=True)
     integrators_subparsers.add_parser("list", help="list installed integration backends")
+    reachability = subparsers.add_parser("reachability", help="inspect Alpha 3 reachability catalogs")
+    reachability_subparsers = reachability.add_subparsers(dest="reachability_command", required=True)
+    reachability_list = reachability_subparsers.add_parser("list", help="list reachability catalog entries")
+    reachability_list.add_argument("kind", choices=("profiles", "families", "semantics"))
+    reachability_list.add_argument("--catalog", type=Path, default=Path("verification/reachability_profile_catalog.yaml"))
+    reachability_inspect = reachability_subparsers.add_parser("inspect", help="inspect one reachability catalog entry")
+    reachability_inspect.add_argument("kind", choices=("profile", "family", "semantic"))
+    reachability_inspect.add_argument("identifier")
+    reachability_inspect.add_argument("--catalog", type=Path, default=Path("verification/reachability_profile_catalog.yaml"))
+    reachability_run = reachability_subparsers.add_parser("run", help="run the reduced-order rocket/glide envelope fixture")
+    reachability_run.add_argument("--fidelity", choices=tuple(item.value for item in ReachabilityFidelity), default=ReachabilityFidelity.POINT_MASS_3DOF.value)
+    reachability_run.add_argument("--workers", type=int, default=1)
+    reachability_run.add_argument("--azimuth-deg", type=float, action="append", default=[])
+    reachability_run.add_argument("--elevation-deg", type=float, action="append", default=[])
+    reachability_run.add_argument("--bank-deg", type=float, action="append", default=[])
+    reachability_run.add_argument("--step-size-s", type=float, default=0.25)
+    reachability_run.add_argument("--horizon-s", type=float, default=120.0)
+    reachability_run.add_argument("--output", type=Path)
+    reachability_run.add_argument("--include-trajectories", action="store_true")
+    reachability_run.add_argument("--omit-trajectories", action="store_true")
+    _add_reachability_criteria_arguments(reachability_run)
+    reachability_timeout = reachability_subparsers.add_parser("rerun-timeouts", help="rerun only candidates that reached the prior horizon")
+    reachability_timeout.add_argument("envelope", type=Path)
+    reachability_timeout.add_argument("--horizon-s", type=float, required=True)
+    reachability_timeout.add_argument("--step-size-s", type=float)
+    reachability_timeout.add_argument("--workers", type=int)
+    reachability_timeout.add_argument("--output", type=Path, required=True)
+    reachability_plot = reachability_subparsers.add_parser("plot", help="render Matplotlib plots from an envelope artifact")
+    reachability_plot.add_argument("path", type=Path)
+    reachability_plot.add_argument("--output-dir", type=Path, required=True)
+    reachability_plot.add_argument("--compare", type=Path, action="append", default=[])
+    reachability_plot.add_argument("--dpi", type=int, default=140)
+    reachability_x15 = reachability_subparsers.add_parser("x15", help="run the X-15-scaled reachability tier demonstration")
+    reachability_x15.add_argument("--output-dir", type=Path, required=True)
+    reachability_x15.add_argument("--workers", type=int, default=1)
+    reachability_x15.add_argument("--step-size-s", type=float, default=0.5)
+    reachability_x15.add_argument("--horizon-s", type=float, default=120.0)
+    reachability_x15.add_argument("--dpi", type=int, default=140)
+    _add_reachability_criteria_arguments(reachability_x15)
+    reachability_x15_native = reachability_subparsers.add_parser("x15-native-replay", help="replay selected X-15 envelope points through native rigid-body cases")
+    reachability_x15_native.add_argument("envelope", type=Path)
+    reachability_x15_native.add_argument("--output-dir", type=Path, required=True)
+    reachability_x15_native.add_argument("--max-points", type=int, default=4)
+    reachability_x15_native.add_argument("--duration-s", type=float, default=0.01)
+    reachability_x15_native.add_argument("--max-steps", type=int, default=50)
     catalog = subparsers.add_parser("catalog", help="inspect Alpha 2 vehicle-family catalogs")
     catalog_subparsers = catalog.add_subparsers(dest="catalog_command", required=True)
     catalog_list = catalog_subparsers.add_parser("list", help="list catalog entries")
@@ -115,6 +222,15 @@ def main(argv: list[str] | None = None) -> int:
     schema_export.add_argument("--kind", choices=("parameters", "controls", "observations"), required=True)
     schema_export.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
     schema_export.add_argument("--output", type=Path)
+    daveml = subparsers.add_parser("daveml", help="run promoted DAVE-ML family smoke paths")
+    daveml_subparsers = daveml.add_subparsers(dest="daveml_command", required=True)
+    daveml_smoke = daveml_subparsers.add_parser("smoke", help="verify a DAVE-ML family smoke evidence chain")
+    daveml_smoke.add_argument(
+        "--family",
+        choices=("reference_f16_s119", "reference_hl20_mod_k", "reference_nesc_two_stage_rocket"),
+        required=True,
+    )
+    daveml_smoke.add_argument("--output", type=Path)
     arguments = parser.parse_args(argv)
     if arguments.command == "scenario":
         return _compile_scenario(arguments)
@@ -130,6 +246,8 @@ def main(argv: list[str] | None = None) -> int:
         for integrator_name, description in available_integrator_descriptions():
             print(f"{integrator_name.value}\t{description}")
         return 0
+    if arguments.command == "reachability":
+        return _reachability_command(arguments)
     if arguments.command == "catalog":
         return _catalog_command(arguments)
     if arguments.command == "family":
@@ -138,6 +256,8 @@ def main(argv: list[str] | None = None) -> int:
         return _case_command(arguments)
     if arguments.command == "schema":
         return _schema_command(arguments)
+    if arguments.command == "daveml":
+        return _daveml_command(arguments)
     if arguments.max_steps <= 0:
         parser.error("--max-steps must be positive")
     report = run_files(
@@ -167,6 +287,49 @@ def main(argv: list[str] | None = None) -> int:
         for output in report.outputs:
             print(f"output: {output}")
     return report.exit_code
+
+
+def _daveml_command(arguments: argparse.Namespace) -> int:
+    """Run fail-closed DAVE-ML family smoke verification."""
+
+    sidecars = {
+        "reference_f16_s119": Path("families/reference_f16_s119/plant/daveml-import.json"),
+        "reference_hl20_mod_k": Path("families/reference_hl20_mod_k/plant/daveml-import.json"),
+        "reference_nesc_two_stage_rocket": Path("families/reference_nesc_two_stage_rocket/plant/daveml-import.json"),
+    }
+    evidence = {
+        "reference_f16_s119": Path("verification/daveml_f16_scenario_evidence.json"),
+        "reference_hl20_mod_k": Path("verification/daveml_hl20_trim_evidence.json"),
+        "reference_nesc_two_stage_rocket": Path("verification/daveml_nesc_replay_evidence.json"),
+    }
+    sidecar = sidecars[arguments.family]
+    evidence_path = evidence[arguments.family]
+    try:
+        record = load_daveml_family_import(sidecar)
+        roles = tuple(document.role for document in record.package.source_documents)
+        for role in roles:
+            load_daveml_family_graph(sidecar, role=role)
+        report = json.loads(evidence_path.read_text(encoding="utf-8"))
+        if report.get("family_id") != arguments.family:
+            raise ValueError("evidence family does not match requested family")
+        if report.get("status") not in {"pass", "verified"}:
+            raise ValueError(f"evidence status is not promotable: {report.get('status')!r}")
+        result = {
+            "schema_version": "taoryx.daveml-cli-smoke/v1",
+            "status": "verified",
+            "family_id": arguments.family,
+            "model_id": record.model_id,
+            "roles_hash_verified": list(roles),
+            "evidence": report,
+        }
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        print(f"error: daveml-smoke-failed: {error}")
+        return 2
+    if arguments.output:
+        arguments.output.parent.mkdir(parents=True, exist_ok=True)
+        arguments.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
 
 
 def _compile_scenario(arguments: argparse.Namespace) -> int:
@@ -205,6 +368,13 @@ def _trajectory_catalog(path: Path) -> FamilyCatalog:
     ####
 
 
+def _reachability_catalog(path: Path) -> ReachabilityCatalog:
+    """Load the configured Alpha 3 reachability catalog for CLI commands."""
+
+    return load_reachability_catalog(path)
+    ####
+
+
 def _print_json(payload: object, output: Path | None = None) -> None:
     """Print or write one deterministic JSON payload."""
 
@@ -238,6 +408,123 @@ def _catalog_command(arguments: argparse.Namespace) -> int:
         return 0
     except (OSError, KeyError, ResolutionError, TypeError, ValueError) as error:
         print(f"error: catalog-failed: {error}")
+        return 2
+    ####
+
+
+def _reachability_command(arguments: argparse.Namespace) -> int:
+    """Handle Alpha 3 reachability catalog inspection."""
+
+    try:
+        if arguments.reachability_command == "x15":
+            bundle = write_x15_reachability_bundle(
+                arguments.output_dir,
+                workers=arguments.workers,
+                step_size_s=arguments.step_size_s,
+                horizon_s=arguments.horizon_s,
+                criteria=_criteria_from_arguments(arguments),
+                dpi=arguments.dpi,
+            )
+            print(f"wrote X-15 reachability bundle: {bundle.manifest_path.parent}")
+            return 0
+        if arguments.reachability_command == "x15-native-replay":
+            bundle = write_x15_native_boundary_replay(
+                arguments.envelope,
+                arguments.output_dir,
+                max_points=arguments.max_points,
+                duration_s=arguments.duration_s,
+                max_steps=arguments.max_steps,
+            )
+            print(f"wrote X-15 native replay bundle: {bundle.manifest_path.parent}")
+            return 0
+        if arguments.reachability_command == "run":
+            azimuths = arguments.azimuth_deg or (-30.0, 0.0, 30.0)
+            elevations = arguments.elevation_deg or (35.0, 50.0, 65.0)
+            banks = arguments.bank_deg or (-30.0, 0.0, 30.0)
+            commands = generate_launch_grid(
+                tuple(math.radians(value) for value in azimuths),
+                tuple(math.radians(value) for value in elevations),
+                tuple(math.radians(value) for value in banks),
+            )
+            result = run_reachability_envelope(
+                RocketGlideVehicle(),
+                commands,
+                fidelity=ReachabilityFidelity(arguments.fidelity),
+                step_size_s=arguments.step_size_s,
+                horizon_s=arguments.horizon_s,
+                workers=arguments.workers,
+                criteria=_criteria_from_arguments(arguments),
+            )
+            _print_json(
+                result.as_dict(include_trajectories=arguments.include_trajectories or not arguments.omit_trajectories),
+                arguments.output,
+            )
+            return 0
+        if arguments.reachability_command == "rerun-timeouts":
+            payload = load_reachability_artifact(arguments.envelope)
+            result = rerun_timed_out_artifact(
+                payload,
+                horizon_s=arguments.horizon_s,
+                step_size_s=arguments.step_size_s,
+                workers=arguments.workers,
+            )
+            result.write_json(arguments.output)
+            print(f"wrote timeout rerun: {arguments.output}")
+            return 0
+        if arguments.reachability_command == "plot":
+            sources = tuple(load_reachability_artifact(path) for path in arguments.compare)
+            report = render_reachability_plot_bundle(
+                load_reachability_artifact(arguments.path),
+                arguments.output_dir,
+                comparison_sources=sources,
+                dpi=arguments.dpi,
+            )
+            print(f"rendered {len(report.plot_paths)} reachability plot(s): {arguments.output_dir}")
+            return 0
+        catalog = _reachability_catalog(arguments.catalog)
+        if arguments.reachability_command == "list":
+            if arguments.kind == "profiles":
+                _print_json(
+                    [
+                        {
+                            "profile_id": profile.id,
+                            "archetype": profile.archetype,
+                            "status": profile.status,
+                            "configurations": list(profile.configurations),
+                            "coordinates": list(profile.coordinates),
+                            "products": list(profile.products),
+                        }
+                        for profile in catalog.profiles
+                    ]
+                )
+            elif arguments.kind == "families":
+                _print_json(
+                    [
+                        {
+                            "family_id": family.id,
+                            "status": family.status,
+                            "configurations": list(family.configurations),
+                            "profiles": list(family.profiles),
+                        }
+                        for family in catalog.vehicle_families
+                    ]
+                )
+            else:
+                _print_json(
+                    {
+                        name: {"meaning": semantic.meaning}
+                        for name, semantic in sorted(catalog.study_semantics.items())
+                    }
+                )
+        elif arguments.kind == "profile":
+            _print_json(catalog.profile(arguments.identifier).model_dump(mode="json"))
+        elif arguments.kind == "family":
+            _print_json(catalog.family(arguments.identifier).model_dump(mode="json"))
+        else:
+            _print_json(catalog.semantic(arguments.identifier).model_dump(mode="json"))
+        return 0
+    except (OSError, KeyError, TypeError, ValueError) as error:
+        print(f"error: reachability-failed: {error}")
         return 2
     ####
 

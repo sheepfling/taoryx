@@ -87,8 +87,8 @@ models:
       mass_properties: source_bound_fixed
       actuators: taoryx_engineering_assumption
       controller: taoryx_reference_design
-    status: source_parsed_static_checks_passed_package_replay_pending
-    current_boundary: payload_verified_source_and_embedded_evidence
+    status: runtime_replay_qualification_passed
+    current_boundary: payload_verified_source_and_taoryx_runtime_load_replay
     family_manifest: families/reference_f16_s119/family.yaml
     standardized_shape: source_grounded_reference_manifest_to_family_package
     next_layers: [actuators, sas, controllers, route_mission, reductions, rl_authority]
@@ -112,12 +112,32 @@ models:
       mass_properties: source_bound_fixed_separate_record
       actuators: taoryx_engineering_assumption
       controller: taoryx_reference_design
-    status: source_parsed_static_checks_passed_package_replay_pending
-    current_boundary: payload_verified_source_and_embedded_evidence
+    status: runtime_replay_qualification_passed
+    current_boundary: payload_verified_source_and_taoryx_runtime_load_replay
     family_manifest: families/reference_hl20_mod_k/family.yaml
     standardized_shape: source_grounded_reference_manifest_to_family_package
     next_layers: [actuators, allocation, energy_guidance, arrival_mission, reductions, rl_authority]
     integration_record: families/reference_hl20_mod_k/qualification/integration-record.yaml
+  - id: reference_nesc_two_stage_rocket
+    source_kind: daveml
+    role: source-grounded-reference-anchor
+    package: nesc-two-stage-rocket-v0.9.txair
+    package_sha256: 204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e
+    fidelity: rigid_body_6dof
+    frames: {body: FRD, navigation: NED}
+    envelope: {mach: [0.0, 40.0], alpha_rad: [-0.3490658503988659, 0.3490658503988659]}
+    evidence:
+      aerodynamics: source_checked_static
+      propulsion: source_checked_schedule
+      mass_properties: source_checked_schedule
+      staging: source_checked_acceptance
+      reductions: taoryx_engineering_assumption
+    status: runtime_replay_qualification_passed
+    current_boundary: payload_verified_source_and_scenario17_load_replay
+    family_manifest: families/reference_nesc_two_stage_rocket/family.yaml
+    standardized_shape: source_grounded_reference_manifest_to_family_package
+    next_layers: [full_trajectory_comparison, reductions, guidance_and_control]
+    integration_record: families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml
   - id: reference_a320
     source_kind: daveml
     role: source-grounded-reference-anchor-planned

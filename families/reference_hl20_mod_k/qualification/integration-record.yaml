@@ -21,21 +21,23 @@ plant:
   fidelity: rigid_body_6dof
   body_frame: FRD
   navigation_frame: NED
-  qualification: source_parsed_static_checks_passed_package_replay_pending
+  qualification: runtime_replay_qualification_passed
   source_payload_required_for_execution: true
 library:
   family_manifest: families/reference_hl20_mod_k/family.yaml
   standardized_shape: source_grounded_reference_manifest_to_family_package
   case_resolution: supported
-  native_runtime_replay: pending
+  native_runtime_replay: verified_load_contract_and_hold_evidence
 layers:
   mass_properties: {version: separate-fixed-binding-v1, evidence: source_bound_fixed_separate_record}
   aerodynamics: {version: mod-k-v1, evidence: source_checked_exact_bytes}
   actuators: {version: pending, evidence: taoryx_engineering_assumption}
   allocation: {version: pending, evidence: taoryx_reference_design}
   controller: {version: pending, evidence: taoryx_reference_design}
-  mission: {version: pending, evidence: taoryx_qualification_scenario}
+  mission: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
   reductions: {version: pending, evidence: derived_from_parent_plant}
+  linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
+  tuning: {version: not-applicable-no-declared-controls-v1, evidence: not_applicable_no_declared_controls}
 claims:
   - byte-pinned nonlinear unpowered lifting-body aerodynamic reference
   - broad-Mach force/moment graph represented by the verified corpus source and package evidence
@@ -44,6 +46,6 @@ nonclaims:
   - landing gear, ground contact, flare, tire friction, or touchdown behavior
   - generic hypersonic-glider or operational spacecraft performance
 open_questions:
-  - replay the packaged source and plant through the Taoryx runtime boundary
   - bind seven-surface actuator and logical-allocation overlays separately
-next_gate: package_replay_in_taoryx_runtime
+  - qualify reductions generated from this parent plant
+next_gate: qualify_separate_overlays_and_reductions

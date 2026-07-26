@@ -580,6 +580,105 @@ def equation_audit() -> None:
 ####
 
 
+def daveml_readiness() -> None:
+    """Validate promoted DAVE-ML family source and graph gates."""
+
+    run(
+        tool_script(
+            "validate_daveml_family_readiness.py",
+            "--readiness",
+            "verification/daveml_family_readiness.yaml",
+            "--output",
+            "verification/daveml_family_readiness.json",
+        )
+    )
+    ####
+
+
+def daveml_trim() -> None:
+    """Generate reproducible source-backed DaveML trim evidence."""
+
+    run(tool_script("validate_daveml_trim.py"))
+    ####
+
+
+def daveml_atmosphere() -> None:
+    """Generate reproducible DAVE-ML atmosphere evidence."""
+
+    run(tool_script("validate_daveml_atmosphere.py"))
+    ####
+
+
+def daveml_linearization() -> None:
+    """Generate reproducible DAVE-ML dynamics linearization evidence."""
+
+    run(tool_script("validate_daveml_linearization.py"))
+    ####
+
+
+def daveml_tuning() -> None:
+    """Generate reproducible DAVE-ML tuning evidence."""
+
+    run(tool_script("validate_daveml_tuning.py"))
+    ####
+
+
+def daveml_scenario() -> None:
+    """Generate reproducible DAVE-ML smoke scenario evidence."""
+
+    run(tool_script("validate_daveml_scenario.py"))
+    ####
+
+
+def daveml_release() -> None:
+    """Run the fresh-process DAVE-ML promotion gate."""
+
+    run(tool_script("validate_daveml_release.py"))
+    ####
+
+
+def daveml_equilibrium_trim() -> None:
+    """Generate reproducible F-16 DAVE-ML equilibrium trim evidence."""
+
+    run(tool_script("validate_daveml_equilibrium_trim.py"))
+    ####
+
+
+def daveml_hl20_load() -> None:
+    """Generate reproducible HL-20 DAVE-ML load evidence."""
+
+    run(tool_script("validate_daveml_hl20_load.py"))
+    ####
+
+
+def daveml_hl20_linearization() -> None:
+    """Generate reproducible HL-20 DAVE-ML linearization evidence."""
+
+    run(tool_script("validate_daveml_hl20_linearization.py"))
+    ####
+
+
+def daveml_hl20_scenario() -> None:
+    """Generate reproducible HL-20 DAVE-ML scenario evidence."""
+
+    run(tool_script("validate_daveml_hl20_scenario.py"))
+    ####
+
+
+def daveml_collection_roundtrip() -> None:
+    """Run the fresh-process DAVE-ML collection round trip."""
+
+    run(tool_script("validate_daveml_collection_roundtrip.py"))
+    ####
+
+
+def daveml_nesc_replay() -> None:
+    """Run the fresh-process NESC DAVE-ML package replay."""
+
+    run(tool_script("validate_daveml_nesc_replay.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -684,6 +783,19 @@ TASKS: dict[str, Callable[[], None]] = {
     "taoryx-extension-pdf": taoryx_extension_pdf,
     "all-pdfs": all_pdfs,
     "equation-audit": equation_audit,
+    "daveml-readiness": daveml_readiness,
+    "daveml-trim": daveml_trim,
+    "daveml-atmosphere": daveml_atmosphere,
+    "daveml-linearization": daveml_linearization,
+    "daveml-tuning": daveml_tuning,
+    "daveml-scenario": daveml_scenario,
+    "daveml-release": daveml_release,
+    "daveml-equilibrium-trim": daveml_equilibrium_trim,
+    "daveml-hl20-load": daveml_hl20_load,
+    "daveml-hl20-linearization": daveml_hl20_linearization,
+    "daveml-hl20-scenario": daveml_hl20_scenario,
+    "daveml-collection-roundtrip": daveml_collection_roundtrip,
+    "daveml-nesc-replay": daveml_nesc_replay,
     "handoff": handoff,
     "check": check,
     "all": check,

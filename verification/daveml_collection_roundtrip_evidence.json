@@ -1,0 +1,27 @@
+{
+  "canonical_documents": [
+    {
+      "canonical_export_sha256": "e1d92eda2e1276823be8c5987a777078c38de6f9ac1e661035a739ea03ecf7df",
+      "checkdata_count": 102,
+      "checkdata_failed": 0,
+      "checkdata_unsupported": 0,
+      "document_id": "f16.aerodynamics",
+      "numeric_diff_count": 0,
+      "structural_diff_count": 0
+    }
+  ],
+  "claim_boundary": "fresh-process collection L0-L3 canonical round trip; L4 runtime replay remains separate",
+  "collection_id": "daveml-f16-canonical-smoke",
+  "levels": {
+    "L0": "verified",
+    "L1": "verified_source_identity",
+    "L2": "verified_canonical_structure",
+    "L3": "verified_canonical_numeric_and_checkdata",
+    "L4": "pending_runtime_replay"
+  },
+  "schema_version": "taoryx.daveml-collection-roundtrip-evidence/v1",
+  "source_sha256": "6da3fad6192ebf2bd16170c379890df5db03e67a00e9bbdd1b58646803491e73",
+  "status": "verified",
+  "stderr_tail": "",
+  "subprocess_returncode": 0
+}

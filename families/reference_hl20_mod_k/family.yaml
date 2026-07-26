@@ -15,6 +15,7 @@ source:
   corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
   availability: local_corpus_input_verified
   license_and_notices: required_from_source_repository
+daveml_import: plant/daveml-import.json
 plant:
   fidelity: rigid_body_6dof
   body_frame: FRD
@@ -34,7 +35,7 @@ plant:
     beta_max_rad: 0.17453292519943295
     altitude_min_m: -1000.0
     altitude_max_m: 20000.0
-  qualification: source_parsed_static_checks_passed_package_replay_pending
+  qualification: runtime_replay_qualification_passed
   source_payload_required_for_execution: true
 fidelity_profiles:
   - profile_id: hl20.energy_glide_3dof.v1
@@ -54,7 +55,7 @@ fidelity_profiles:
   - profile_id: hl20.rigid_body_6dof.v1
     runtime_fidelity: rigid_body_6dof
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
-    status: source_parsed_static_checks_passed_package_replay_pending
+    status: runtime_replay_qualification_passed
     data_contract: [exact_daveml_force_moment_graph, fixed_mass_properties, seven_direct_surfaces]
     omitted_physics: [propulsion, actuator_dynamics, landing_contact]
 parameters:
@@ -113,6 +114,11 @@ layers:
   allocation: {version: pending, evidence: taoryx_reference_design}
   controllers: {version: pending, evidence: taoryx_reference_design}
   reductions: {version: pending, evidence: derived_from_parent_plant}
+  trim: {version: source-channel-trim-v1, evidence: source_channel_trim_verified}
+  linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
+  tuning: {version: not-applicable-no-declared-controls-v1, evidence: not_applicable_no_declared_controls}
+  objectives: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
+  scenarios: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
 bindings:
   - bindings/canonical-controls.yaml
   - bindings/canonical-observations.yaml
@@ -125,4 +131,4 @@ claims:
 nonclaims:
   - landing gear, ground contact, flare, tire friction, touchdown, or rollout behavior
   - generic hypersonic-glider or operational spacecraft performance
-next_gate: package_replay_in_taoryx_runtime
+next_gate: qualify_separate_overlays_and_reductions

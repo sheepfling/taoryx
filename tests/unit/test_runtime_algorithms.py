@@ -5,7 +5,14 @@ import pytest
 from taoryx.contracts import Frame, FrameVector3, Quantity, Unit, Vector3
 from taoryx.language.expressions import parse_expression
 from taoryx.outputs import build_run_artifact
-from taoryx.runtime.common import EventCondition, RuntimeProblem, RuntimeState, RuntimeVehicle
+from taoryx.runtime.common import (
+    DeploymentValidationError,
+    EventCondition,
+    RuntimeProblem,
+    RuntimeState,
+    RuntimeVehicle,
+    SpawnRequest,
+)
 from taoryx.runtime.engine import compute_trajectories, get_next_time_step
 from taoryx.runtime.environment_runtime import evaluate_wind
 from taoryx.runtime.events import apply_state_discontinuity, refine_segment_final_condition
@@ -20,6 +27,103 @@ from taoryx.runtime.runtime_model import build_runtime_problem
 from taoryx.runtime.surveys import generate_survey_cases
 from taoryx.runtime.units import from_internal, resolve_units_and_formats, selected_setting, to_internal, unit_scale
 from taoryx.state import PointMassRates, PointMassState
+
+
+def test_spawn_event_commits_child_at_accepted_boundary_and_steps_active_collection() -> None:
+    def spawn_child(state: RuntimeState) -> tuple[SpawnRequest, ...]:
+        child = RuntimeVehicle(
+            "spent-stage",
+            RuntimeState(state.time, state.values, state.frame),
+            lambda _: (2.0,),
+            step_size=0.1,
+            events=(EventCondition("child-terminal", lambda current: current.values[0] - 1.1),),
+        )
+        return (SpawnRequest("parent-stage-separation", child, metadata={"shape": "cylinder"}),)
+
+    parent = RuntimeVehicle(
+        "parent",
+        RuntimeState(0.0, (0.0,), value_names=("x",)),
+        lambda _: (1.0,),
+        step_size=1.0,
+        events=(EventCondition("separate", lambda state: state.values[0] - 0.5, action="spawn"),),
+        spawn_provider=spawn_child,
+    )
+    problem = RuntimeProblem({parent.name: parent}, final_time=0.8)
+
+    result = compute_trajectories(problem)
+
+    assert result.completed
+    assert [state.time for state in problem.vehicles["spent-stage"].history] == pytest.approx([0.5, 0.6, 0.7, 0.8])
+    event = problem.event_history[0]
+    assert event["event_id"] == "parent-stage-separation"
+    assert event["model_id"] == "parent"
+    assert event["child_model_ids"] == ["spent-stage"]
+    assert event["child_initial_states"][0]["time"] == pytest.approx(0.5)
+    assert event["status"] == "committed"
+    assert problem.vehicles["spent-stage"].parent_model_id == "parent"
+    assert problem.vehicles["spent-stage"].active is False
+    assert problem.event_history[-1]["name"] == "child-terminal"
+
+
+def test_spawn_event_accepts_an_arbitrary_propulsive_child() -> None:
+    def spawn_payload(state: RuntimeState) -> tuple[SpawnRequest, ...]:
+        payload = RuntimeVehicle(
+            "payload-vehicle",
+            RuntimeState(state.time, (0.0,), state.frame),
+            lambda _: (3.0,),
+            step_size=0.1,
+        )
+        return (
+            SpawnRequest(
+                "payload-deployment",
+                payload,
+                metadata={"vehicle_class": "propulsive_vehicle", "aero_ballistic": False},
+            ),
+        )
+
+    parent = RuntimeVehicle(
+        "carrier",
+        RuntimeState(0.0, (0.0,)),
+        lambda _: (1.0,),
+        step_size=1.0,
+        events=(EventCondition("deploy", lambda state: state.values[0] - 0.5, action="spawn"),),
+        spawn_provider=spawn_payload,
+    )
+    problem = RuntimeProblem({parent.name: parent}, final_time=0.8)
+
+    result = compute_trajectories(problem)
+
+    assert result.completed
+    assert problem.vehicles["payload-vehicle"].state.values[0] == pytest.approx(0.9)
+    assert problem.event_history[0]["spawn_metadata"][0]["vehicle_class"] == "propulsive_vehicle"
+    assert problem.event_history[0]["spawn_metadata"][0]["aero_ballistic"] is False
+
+
+def test_spawn_batch_validation_is_atomic_and_records_failure() -> None:
+    def invalid_spawn(state: RuntimeState) -> tuple[SpawnRequest, ...]:
+        first = RuntimeVehicle("child", RuntimeState(state.time, state.values), lambda _: (0.0,))
+        duplicate = RuntimeVehicle("child", RuntimeState(state.time, state.values), lambda _: (0.0,))
+        return (
+            SpawnRequest("invalid-separation", first),
+            SpawnRequest("invalid-separation", duplicate),
+        )
+
+    parent = RuntimeVehicle(
+        "parent",
+        RuntimeState(0.0, (0.0,)),
+        lambda _: (1.0,),
+        step_size=1.0,
+        events=(EventCondition("separate", lambda state: state.values[0] - 0.5, action="spawn"),),
+        spawn_provider=invalid_spawn,
+    )
+    problem = RuntimeProblem({parent.name: parent}, final_time=1.0)
+
+    with pytest.raises(DeploymentValidationError, match="already exists"):
+        compute_trajectories(problem)
+
+    assert tuple(problem.vehicles) == ("parent",)
+    assert problem.event_history[-1]["status"] == "deployment_failed"
+    assert problem.event_history[-1]["event_id"] == "separate"
 
 
 def test_runtime_graph_rejects_cycles_and_steps_at_boundaries() -> None:

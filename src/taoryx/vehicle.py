@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Protocol
 
 from .contracts import Frame, Vector3
@@ -42,6 +43,449 @@ class MassProperties:
         return cls(state.mass, dry_mass_kg, state.propellant_mass, center_of_mass_m or Vector3(0.0, 0.0, 0.0), inertia_kg_m2)
         ####
     ####
+
+
+class PropellantType(StrEnum):
+    """Propellant behavior family used to derive conservative authority defaults."""
+
+    LIQUID = "liquid"
+    SOLID = "solid"
+    HYBRID = "hybrid"
+    UNKNOWN = "unknown"
+
+
+class SeparationMechanism(StrEnum):
+    """Physical mechanism used to separate or eject an attached stage."""
+
+    PASSIVE = "passive"
+    SPRING = "spring"
+    PNEUMATIC = "pneumatic"
+    PYROTECHNIC = "pyrotechnic"
+    EXPLOSIVE = "explosive"
+    UNKNOWN = "unknown"
+
+
+class ImpulseFrame(StrEnum):
+    """Frame in which a declared retained-stack separation impulse is resolved."""
+
+    BODY = "body"
+    INERTIAL = "inertial"
+
+
+class DetachedBodyShape(StrEnum):
+    """Geometry families supported by detached-body aerodynamic reductions."""
+
+    SPHERE = "sphere"
+    SPHEROID = "spheroid"
+    CYLINDER = "cylinder"
+    CONE = "cone"
+    TRIAXIAL_ELLIPSOID = "triaxial_ellipsoid"
+
+
+class TumblingPolicy(StrEnum):
+    """Attitude treatment for a detached ballistic body."""
+
+    FIXED_ATTITUDE = "fixed_attitude"
+    PRESCRIBED_SPIN = "prescribed_spin"
+    PASSIVE_TUMBLE = "passive_tumble"
+    STOCHASTIC_TUMBLE = "stochastic_tumble"
+
+
+@dataclass(frozen=True, slots=True)
+class PropulsionCapabilities:
+    """Physical authority limits for throttle and commanded cutoff."""
+
+    propellant_type: PropellantType
+    can_throttle: bool
+    can_cutoff: bool
+    minimum_throttle_fraction: float = 0.0
+    maximum_throttle_fraction: float = 1.0
+    cutoff_delay_s: float = 0.0
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.minimum_throttle_fraction <= self.maximum_throttle_fraction <= 1.0:
+            raise ValueError("throttle authority must be ordered within [0, 1]")
+        if not math.isfinite(self.cutoff_delay_s) or self.cutoff_delay_s < 0.0:
+            raise ValueError("cutoff delay must be finite and non-negative")
+        if not self.can_throttle and (
+            self.minimum_throttle_fraction != 1.0 or self.maximum_throttle_fraction != 1.0
+        ):
+            raise ValueError("a non-throttleable propulsion system must have a fixed full-thrust command")
+
+    @classmethod
+    def defaults_for(cls, propellant_type: PropellantType) -> PropulsionCapabilities:
+        """Return conservative defaults, which callers may override explicitly."""
+
+        if propellant_type is PropellantType.LIQUID:
+            return cls(propellant_type, can_throttle=True, can_cutoff=True)
+        return cls(propellant_type, can_throttle=False, can_cutoff=False, minimum_throttle_fraction=1.0)
+
+    def validate_throttle(self, fraction: float) -> None:
+        """Reject a throttle request that the propulsion hardware cannot realize."""
+
+        if not math.isfinite(fraction) or not 0.0 <= fraction <= 1.0:
+            raise ValueError("throttle fraction must be finite and within [0, 1]")
+        if not self.can_throttle and fraction != 1.0:
+            raise ValueError(f"{self.propellant_type.value} propulsion cannot throttle")
+        if not self.minimum_throttle_fraction <= fraction <= self.maximum_throttle_fraction:
+            raise ValueError(
+                f"throttle fraction {fraction:g} is outside [{self.minimum_throttle_fraction:g}, "
+                f"{self.maximum_throttle_fraction:g}]"
+            )
+
+    def validate_cutoff(self, requested: bool) -> None:
+        """Reject a commanded cutoff when the propulsion cannot stop thrust."""
+
+        if requested and not self.can_cutoff:
+            raise ValueError(f"{self.propellant_type.value} propulsion cannot be commanded off")
+
+
+@dataclass(frozen=True, slots=True)
+class DetachedBodyDefinition:
+    """Mass, shape, and attitude contract for a spawned ballistic body."""
+
+    body_id: str
+    mass_kg: float
+    shape: DetachedBodyShape
+    dimensions_m: tuple[float, ...]
+    reference_area_m2: float
+    tumbling_policy: TumblingPolicy = TumblingPolicy.FIXED_ATTITUDE
+    inertia_kg_m2: Vector3 | None = None
+    initial_angular_rate_body_rad_s: Vector3 = Vector3(0.0, 0.0, 0.0)
+    center_of_mass_m: Vector3 = Vector3(0.0, 0.0, 0.0)
+    center_of_pressure_m: Vector3 = Vector3(0.0, 0.0, 0.0)
+
+    def __post_init__(self) -> None:
+        if not self.body_id or not math.isfinite(self.mass_kg) or self.mass_kg <= 0.0:
+            raise ValueError("detached body requires a positive finite mass and identifier")
+        if not math.isfinite(self.reference_area_m2) or self.reference_area_m2 <= 0.0:
+            raise ValueError("detached body reference area must be positive and finite")
+        if not self.dimensions_m or not all(math.isfinite(value) and value > 0.0 for value in self.dimensions_m):
+            raise ValueError("detached body dimensions must be positive and finite")
+        expected_dimensions = {
+            DetachedBodyShape.SPHERE: 1,
+            DetachedBodyShape.SPHEROID: 2,
+            DetachedBodyShape.CYLINDER: 2,
+            DetachedBodyShape.CONE: 2,
+            DetachedBodyShape.TRIAXIAL_ELLIPSOID: 3,
+        }[self.shape]
+        if len(self.dimensions_m) != expected_dimensions:
+            raise ValueError(f"{self.shape.value} requires {expected_dimensions} dimensions")
+        if self.inertia_kg_m2 is not None and min(self.inertia_kg_m2.x, self.inertia_kg_m2.y, self.inertia_kg_m2.z) <= 0.0:
+            raise ValueError("detached body inertia must be positive")
+        if self.tumbling_policy is not TumblingPolicy.FIXED_ATTITUDE and self.inertia_kg_m2 is None:
+            raise ValueError("tumbling detached bodies require inertia")
+        for name, vector in (("center_of_mass_m", self.center_of_mass_m), ("center_of_pressure_m", self.center_of_pressure_m)):
+            if not all(math.isfinite(value) for value in (vector.x, vector.y, vector.z)):
+                raise ValueError(f"detached body {name} must be finite")
+
+    @classmethod
+    def cylinder(
+        cls,
+        body_id: str,
+        *,
+        mass_kg: float,
+        radius_m: float,
+        length_m: float,
+        tumbling_policy: TumblingPolicy = TumblingPolicy.PASSIVE_TUMBLE,
+        inertia_kg_m2: Vector3 | None = None,
+        initial_angular_rate_body_rad_s: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_mass_m: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_pressure_m: Vector3 | None = None,
+    ) -> DetachedBodyDefinition:
+        """Build a cylindrical spent-stage body using its frontal reference area."""
+
+        return cls(
+            body_id,
+            mass_kg,
+            DetachedBodyShape.CYLINDER,
+            (radius_m, length_m),
+            math.pi * radius_m**2,
+            tumbling_policy,
+            inertia_kg_m2,
+            initial_angular_rate_body_rad_s,
+            center_of_mass_m,
+            center_of_pressure_m if center_of_pressure_m is not None else Vector3(0.25 * length_m, 0.0, 0.0),
+        )
+
+    @classmethod
+    def sphere(
+        cls,
+        body_id: str,
+        *,
+        mass_kg: float,
+        radius_m: float,
+        tumbling_policy: TumblingPolicy = TumblingPolicy.FIXED_ATTITUDE,
+        inertia_kg_m2: Vector3 | None = None,
+        initial_angular_rate_body_rad_s: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_mass_m: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_pressure_m: Vector3 = Vector3(0.0, 0.0, 0.0),
+    ) -> DetachedBodyDefinition:
+        """Build an orientation-independent spherical ballistic body."""
+
+        return cls(
+            body_id,
+            mass_kg,
+            DetachedBodyShape.SPHERE,
+            (radius_m,),
+            math.pi * radius_m**2,
+            tumbling_policy,
+            inertia_kg_m2,
+            initial_angular_rate_body_rad_s,
+            center_of_mass_m,
+            center_of_pressure_m,
+        )
+
+    @classmethod
+    def cone(
+        cls,
+        body_id: str,
+        *,
+        mass_kg: float,
+        base_radius_m: float,
+        height_m: float,
+        tumbling_policy: TumblingPolicy = TumblingPolicy.PASSIVE_TUMBLE,
+        inertia_kg_m2: Vector3 | None = None,
+        initial_angular_rate_body_rad_s: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_mass_m: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_pressure_m: Vector3 | None = None,
+    ) -> DetachedBodyDefinition:
+        """Build a pointed conical aero-ballistic body."""
+
+        return cls(
+            body_id,
+            mass_kg,
+            DetachedBodyShape.CONE,
+            (base_radius_m, height_m),
+            math.pi * base_radius_m**2,
+            tumbling_policy,
+            inertia_kg_m2,
+            initial_angular_rate_body_rad_s,
+            center_of_mass_m,
+            center_of_pressure_m if center_of_pressure_m is not None else Vector3(0.25 * height_m, 0.0, 0.0),
+        )
+
+    @classmethod
+    def spheroid(
+        cls,
+        body_id: str,
+        *,
+        mass_kg: float,
+        axial_semi_axis_m: float,
+        transverse_semi_axis_m: float,
+        tumbling_policy: TumblingPolicy = TumblingPolicy.PASSIVE_TUMBLE,
+        inertia_kg_m2: Vector3 | None = None,
+        initial_angular_rate_body_rad_s: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_mass_m: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_pressure_m: Vector3 | None = None,
+    ) -> DetachedBodyDefinition:
+        """Build an elliptic tank body using its broadside reference area."""
+
+        return cls(
+            body_id,
+            mass_kg,
+            DetachedBodyShape.SPHEROID,
+            (axial_semi_axis_m, transverse_semi_axis_m),
+            math.pi * transverse_semi_axis_m**2,
+            tumbling_policy,
+            inertia_kg_m2,
+            initial_angular_rate_body_rad_s,
+            center_of_mass_m,
+            center_of_pressure_m if center_of_pressure_m is not None else Vector3(0.25 * axial_semi_axis_m, 0.0, 0.0),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class StageMassDefinition:
+    """Shared stage inventory, propulsion, and source-closure definition."""
+
+    identifier: str
+    dry_mass_kg: float
+    propellant_mass_kg: float = 0.0
+    thrust_n: float = 0.0
+    burn_time_s: float = 0.0
+    mass_flow_kg_s: float | None = None
+    declared_propellant_mass_kg: float | None = None
+    capabilities: PropulsionCapabilities | None = None
+
+    def __post_init__(self) -> None:
+        if not self.identifier:
+            raise ValueError("stage identifier must not be empty")
+        for name, value in (
+            ("dry_mass_kg", self.dry_mass_kg),
+            ("propellant_mass_kg", self.propellant_mass_kg),
+            ("thrust_n", self.thrust_n),
+            ("burn_time_s", self.burn_time_s),
+        ):
+            if not math.isfinite(value):
+                raise ValueError(f"stage {name} must be finite")
+        if self.mass_flow_kg_s is not None and not math.isfinite(self.mass_flow_kg_s):
+            raise ValueError("stage mass flow must be finite")
+        if self.dry_mass_kg <= 0.0 or self.propellant_mass_kg < 0.0:
+            raise ValueError("stage dry mass must be positive and propellant mass non-negative")
+        if self.propellant_mass_kg == 0.0:
+            if self.thrust_n != 0.0 or self.burn_time_s != 0.0 or self.mass_flow_kg_s not in (None, 0.0):
+                raise ValueError("a propellant-less stage must have zero thrust, burn time, and mass flow")
+        else:
+            if self.thrust_n <= 0.0 or self.burn_time_s <= 0.0:
+                raise ValueError("a propellant-bearing stage requires thrust and burn time")
+            flow = self.resolved_mass_flow_kg_s
+            if flow <= 0.0 or not math.isclose(flow * self.burn_time_s, self.propellant_mass_kg, rel_tol=1.0e-8, abs_tol=1.0e-8):
+                raise ValueError("stage mass flow must close propellant mass over burn time")
+        if self.declared_propellant_mass_kg is not None and (
+            not math.isfinite(self.declared_propellant_mass_kg) or self.declared_propellant_mass_kg < 0.0
+        ):
+            raise ValueError("declared propellant mass must be finite and non-negative")
+        if self.capabilities is None:
+            object.__setattr__(self, "capabilities", PropulsionCapabilities.defaults_for(PropellantType.UNKNOWN))
+
+    @property
+    def resolved_mass_flow_kg_s(self) -> float:
+        """Return the flow implied by the actual modeled propellant mass."""
+
+        if self.propellant_mass_kg == 0.0:
+            return 0.0
+        return self.propellant_mass_kg / self.burn_time_s if self.mass_flow_kg_s is None else self.mass_flow_kg_s
+
+    @property
+    def declared_propellant_discrepancy_kg(self) -> float:
+        """Return source-declared minus modeled propellant, when declared."""
+
+        if self.declared_propellant_mass_kg is None:
+            return 0.0
+        return self.declared_propellant_mass_kg - self.propellant_mass_kg
+
+    def validate_throttle(self, fraction: float) -> None:
+        """Validate a throttle request against this stage's hardware contract."""
+
+        assert self.capabilities is not None
+        self.capabilities.validate_throttle(fraction)
+
+    def validate_cutoff(self, requested: bool = True) -> None:
+        """Validate a commanded cutoff against this stage's hardware contract."""
+
+        assert self.capabilities is not None
+        self.capabilities.validate_cutoff(requested)
+
+
+@dataclass(frozen=True, slots=True)
+class StageSeparationEvent:
+    """Explicit stage ejection event and its residual-propellant policy."""
+
+    stage_id: str
+    time_s: float
+    eject_residual_propellant: bool = True
+    mechanism: SeparationMechanism = SeparationMechanism.PASSIVE
+    impulse_body_n_s: Vector3 = Vector3(0.0, 0.0, 0.0)
+    separation_energy_j: float | None = None
+    detached_body: DetachedBodyDefinition | None = None
+    impulse_frame: ImpulseFrame = ImpulseFrame.BODY
+
+    def __post_init__(self) -> None:
+        if not self.stage_id or not math.isfinite(self.time_s) or self.time_s < 0.0:
+            raise ValueError("stage separation requires an identifier and finite non-negative time")
+        if self.mechanism is SeparationMechanism.PASSIVE and self.impulse_body_n_s.norm() > 0.0:
+            raise ValueError("a passive separation cannot specify a kick impulse")
+        if self.separation_energy_j is not None and (
+            not math.isfinite(self.separation_energy_j) or self.separation_energy_j < 0.0
+        ):
+            raise ValueError("separation energy must be finite and non-negative")
+
+    @property
+    def impulse_magnitude_n_s(self) -> float:
+        """Return the retained-stack impulse magnitude."""
+
+        return self.impulse_body_n_s.norm()
+
+    @property
+    def impulse_direction_body(self) -> Vector3 | None:
+        """Return the unit body direction, or ``None`` for no modeled kick."""
+
+        if self.impulse_frame is not ImpulseFrame.BODY:
+            return None
+        magnitude = self.impulse_magnitude_n_s
+        return None if magnitude == 0.0 else self.impulse_body_n_s.scaled(1.0 / magnitude)
+
+    @property
+    def impulse_direction(self) -> Vector3 | None:
+        """Return the unit direction in the declared impulse frame."""
+
+        magnitude = self.impulse_magnitude_n_s
+        return None if magnitude == 0.0 else self.impulse_body_n_s.scaled(1.0 / magnitude)
+
+    def retained_delta_v_m_s(self, retained_mass_kg: float) -> Vector3:
+        """Convert the specified retained-stack impulse to an instantaneous delta-v."""
+
+        if not math.isfinite(retained_mass_kg) or retained_mass_kg <= 0.0:
+            raise ValueError("retained mass must be finite and positive")
+        return self.impulse_body_n_s.scaled(1.0 / retained_mass_kg)
+
+    def detached_delta_v_m_s(self) -> Vector3:
+        """Return the equal-and-opposite child delta-v in the declared frame."""
+
+        if self.detached_body is None:
+            raise ValueError("detached delta-v requires a detached body definition")
+        return self.impulse_body_n_s.scaled(-1.0 / self.detached_body.mass_kg)
+
+
+@dataclass(frozen=True, slots=True)
+class StagedVehicleDefinition:
+    """Validated core-plus-attached-stage vehicle definition."""
+
+    core_stage: StageMassDefinition
+    attached_stages: tuple[StageMassDefinition, ...] = ()
+    separation_events: tuple[StageSeparationEvent, ...] = ()
+
+    def __post_init__(self) -> None:
+        stages = (self.core_stage, *self.attached_stages)
+        identifiers = tuple(stage.identifier for stage in stages)
+        if len(set(identifiers)) != len(identifiers):
+            raise ValueError("stage identifiers must be unique")
+        attached_ids = {stage.identifier for stage in self.attached_stages}
+        event_ids = {event.stage_id for event in self.separation_events}
+        if event_ids != attached_ids or len(self.separation_events) != len(event_ids):
+            raise ValueError("each attached stage requires exactly one separation event")
+        for event in self.separation_events:
+            stage = next(stage for stage in self.attached_stages if stage.identifier == event.stage_id)
+            if event.time_s < stage.burn_time_s:
+                raise ValueError("stage separation cannot precede attached-stage burnout")
+            if event.detached_body is not None:
+                residual = max(0.0, stage.propellant_mass_kg - stage.resolved_mass_flow_kg_s * min(event.time_s, stage.burn_time_s))
+                ejected_mass = stage.dry_mass_kg + (residual if event.eject_residual_propellant else 0.0)
+                if not math.isclose(event.detached_body.mass_kg, ejected_mass, rel_tol=1.0e-8, abs_tol=1.0e-8):
+                    raise ValueError(
+                        f"detached body {event.detached_body.body_id!r} mass does not match ejected stage "
+                        f"{stage.identifier!r} mass"
+                    )
+
+    def stage(self, identifier: str) -> StageMassDefinition:
+        """Return one stage by stable identifier."""
+
+        for stage in (self.core_stage, *self.attached_stages):
+            if stage.identifier == identifier:
+                return stage
+        raise KeyError(f"unknown stage {identifier!r}")
+
+    @property
+    def initial_mass_kg(self) -> float:
+        return sum(stage.dry_mass_kg + stage.propellant_mass_kg for stage in (self.core_stage, *self.attached_stages))
+
+    @property
+    def retained_mass_kg(self) -> float:
+        return self.core_stage.dry_mass_kg + self.core_stage.propellant_mass_kg
+
+    @property
+    def ejected_mass_kg(self) -> float:
+        total = 0.0
+        for stage in self.attached_stages:
+            event = next(event for event in self.separation_events if event.stage_id == stage.identifier)
+            residual = max(0.0, stage.propellant_mass_kg - stage.resolved_mass_flow_kg_s * min(event.time_s, stage.burn_time_s))
+            total += stage.dry_mass_kg + (residual if event.eject_residual_propellant else 0.0)
+        return total
+
+    @property
+    def declared_propellant_discrepancy_kg(self) -> float:
+        return sum(stage.declared_propellant_discrepancy_kg for stage in self.attached_stages)
 
 
 @dataclass(frozen=True, slots=True)

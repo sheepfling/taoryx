@@ -1,0 +1,121 @@
+{
+  "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+  "claims": [
+    "qualified NESC Scenario 17 package is bound to the Taoryx rigid-body load contract",
+    "DAVE-ML aerodynamics, propulsion, and scheduled inertia members are imported as separate components",
+    "staging and variable-mass evidence remains visible through the package acceptance schedule"
+  ],
+  "family_id": "reference_nesc_two_stage_rocket",
+  "kind": "taoryx.daveml-family-import/v1alpha1",
+  "model_id": "nasa-nesc-two-stage-rocket-scenario17",
+  "nonclaims": [
+    "independent full participating-simulation trajectory equivalence",
+    "perigee performance beyond the package's retained acceptance boundary"
+  ],
+  "package": {
+    "display_name": "NASA/NESC Scenario 17 Two-Stage Rocket",
+    "fidelity": "6dof",
+    "frames": {
+      "body": "FRD",
+      "navigation": "NED",
+      "quaternion_order": "wxyz"
+    },
+    "model_id": "nasa-nesc-two-stage-rocket-scenario17",
+    "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
+    "reference_geometry": {
+      "area_m2": 7.0,
+      "mean_aerodynamic_chord_m": 3.0,
+      "span_m": 3.0
+    },
+    "runtime_members": [
+      "runtime/binding.json",
+      "runtime/table-inventory.json"
+    ],
+    "schema_version": "0.3.0",
+    "sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+    "source_documents": [
+      {
+        "canonical_export_sha256": "1c7a3735946918d7acb31918d7e28f27f49d2c753f81ae224fbe2030d35849c4",
+        "canonical_ir_sha256": "e63210e7224ee2e1bb24db614ed6b537f51559b3d76c57a18bca0bd7882133e5",
+        "catalog_document_id": "nesc-all-models-two-stage-package-twostage-aero",
+        "catalog_normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-aero",
+        "catalog_sha256": "49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27",
+        "checkdata_count": 0,
+        "checkdata_failed": 0,
+        "checkdata_passed": 0,
+        "checkdata_unsupported": 0,
+        "document_id": "nasa-nesc-two-stage-rocket-scenario17.aerodynamics",
+        "numeric_diff_count": 0,
+        "package_member": "source/nesc/twostage_aero.normalized.dml",
+        "package_sha256": "d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6",
+        "role": "aerodynamics",
+        "structural_diff_count": 0
+      },
+      {
+        "canonical_export_sha256": "30623e9068588735ac8009fdf0c8cc250cc38d3312a6b2c63a2e8310b53a1d8f",
+        "canonical_ir_sha256": "a1e2c241c6961fbabab599beac6610c4f53a8ae0a4384b0328af4c3ef9e932de",
+        "catalog_document_id": "nesc-all-models-two-stage-package-twostage-prop",
+        "catalog_normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-prop",
+        "catalog_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
+        "checkdata_count": 0,
+        "checkdata_failed": 0,
+        "checkdata_passed": 0,
+        "checkdata_unsupported": 0,
+        "document_id": "nasa-nesc-two-stage-rocket-scenario17.propulsion",
+        "numeric_diff_count": 0,
+        "package_member": "source/nesc/twostage_prop.normalized.dml",
+        "package_sha256": "9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4",
+        "role": "propulsion",
+        "structural_diff_count": 0
+      },
+      {
+        "canonical_export_sha256": "b6727f9bcc0753bc0721f2daa0a1ae7a528c1cec41b966bb3351af96bd8ba5a3",
+        "canonical_ir_sha256": "111bf19a1c26f9457bfc6abfe6323ce1011efef641c7cfac453a4cebee4a03c6",
+        "catalog_document_id": "nesc-all-models-two-stage-package-twostage-inertia",
+        "catalog_normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-inertia",
+        "catalog_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
+        "checkdata_count": 0,
+        "checkdata_failed": 0,
+        "checkdata_passed": 0,
+        "checkdata_unsupported": 0,
+        "document_id": "nasa-nesc-two-stage-rocket-scenario17.mass_properties",
+        "numeric_diff_count": 0,
+        "package_member": "source/nesc/twostage_inertia.normalized.dml",
+        "package_sha256": "388d2192c337c380dd4ebe6d7678815b3b384733113803509eb1298d1a3192cd",
+        "role": "mass_properties",
+        "structural_diff_count": 0
+      }
+    ],
+    "validity_envelope": {
+      "alpha_max_rad": 0.3490658503988659,
+      "alpha_min_rad": -0.3490658503988659,
+      "altitude_max_m": 500000.0,
+      "altitude_min_m": 0.0,
+      "beta_max_rad": 0.3490658503988659,
+      "beta_min_rad": -0.3490658503988659,
+      "mach_max": 40.0,
+      "mach_min": 0.0
+    }
+  },
+  "replay": {
+    "force_moment_residual": 0.0,
+    "hold_evidence": "validation/acceptance.json#passed",
+    "runtime_load_contract": "taoryx_rigid_body_6dof",
+    "source_evaluation": "verified_pinned_package_acceptance",
+    "status": "runtime_replay_qualification_passed"
+  },
+  "roundtrip": {
+    "checkdata_count": 0,
+    "checkdata_failed": 0,
+    "checkdata_passed": 0,
+    "checkdata_status": "not_present",
+    "checkdata_unsupported": 0,
+    "document_count": 3,
+    "numeric_diff_count": 0,
+    "status": "verified",
+    "structural_diff_count": 0
+  },
+  "schema_version": 1,
+  "source_authority": "daveml"
+}

@@ -1,0 +1,48 @@
+{
+  "claim_boundary": "source-bounded atmosphere channel adapter; no extrapolation",
+  "model_id": "daveml-atmosphere-1976",
+  "samples": [
+    {
+      "density_kg_m3": 1.225,
+      "density_ratio": 1.0,
+      "geometric_altitude_m": 0.0,
+      "pressure_pa": 101325.1616593663,
+      "pressure_psf": 2116.22,
+      "pressure_ratio": 1.0,
+      "speed_of_sound_fps": 1116.3975415003385,
+      "speed_of_sound_m_s": 340.2779706493032,
+      "temperature_c": 15.0,
+      "temperature_k": 288.15
+    },
+    {
+      "density_kg_m3": 0.904854482,
+      "density_ratio": 0.7386567199999999,
+      "geometric_altitude_m": 3048.0,
+      "pressure_pa": 69704.35096190107,
+      "pressure_psf": 1455.8056377791997,
+      "pressure_ratio": 0.68792736,
+      "speed_of_sound_fps": 1077.3535385155928,
+      "speed_of_sound_m_s": 328.3773585395527,
+      "temperature_c": -4.802616,
+      "temperature_k": 268.347384
+    },
+    {
+      "density_kg_m3": 0.18796204000000002,
+      "density_ratio": 0.1534384,
+      "geometric_altitude_m": 15240.0,
+      "pressure_pa": 11689.23541960647,
+      "pressure_psf": 244.13475759199997,
+      "pressure_ratio": 0.1153636,
+      "speed_of_sound_fps": 968.0301995227217,
+      "speed_of_sound_m_s": 295.05560481452557,
+      "temperature_c": -56.5,
+      "temperature_k": 216.64999999999998
+    }
+  ],
+  "schema_version": "taoryx.daveml-atmosphere-evidence/v1",
+  "source": {
+    "path": "resources\\aerospace\\daveml\\official-conformance-v1\\atmos_76.dml",
+    "sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca"
+  },
+  "status": "verified"
+}

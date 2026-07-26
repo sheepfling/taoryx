@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import hashlib
+import io
+import json
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -10,6 +13,7 @@ from taoryx.trajectory import (
     SourceDocument,
     export_source_preserving_collection,
     read_collection_archive,
+    replay_reference_collection,
     write_deterministic_collection,
 )
 
@@ -114,5 +118,59 @@ def test_source_preserving_export_reports_verified_hash_reload(tmp_path: Path) -
     report = export_source_preserving_collection(collection, tmp_path / "exported")
     assert report["status"] == "verified_source_preserving"
     assert report["levels"]["L0"] == "verified"
+    assert report["levels"]["L2"] == "verified_canonical_structure"
+    assert report["levels"]["L3"] == "verified_canonical_numeric_and_checkdata"
     assert (tmp_path / "exported/aerodynamics.dml").read_bytes() == source
     ####
+
+
+def test_collection_replay_resolves_and_replays_declared_runtime_artifact(tmp_path: Path) -> None:
+    """A collection replay verifies the outer archive before the runtime seam."""
+
+    corpus = Path(__file__).parents[2] / "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip"
+    package_member = "taoryx-aerospace-data-corpus-v1.1/qualified-models/f16-s119/taoryx-f16-s119-reference-v0.7.txair"
+    with zipfile.ZipFile(corpus) as archive:
+        runtime = archive.read(package_member)
+    with zipfile.ZipFile(io.BytesIO(runtime)) as package:
+        source_name = next(name for name in package.namelist() if name.endswith("aerodynamics.dml"))
+        source = package.read(source_name)
+    source_hash = hashlib.sha256(source).hexdigest()
+    manifest = CollectionManifest(
+        collection_type="taoryx.txcollection/v1alpha1",
+        collection_id="f16-s119-fixture",
+        collection_version="1.0.0",
+        family_id="reference_f16_s119",
+        canonical_authority="taoryx_canonical",
+        source_documents=(SourceDocument(
+            document_id="f16-s119.aerodynamics",
+            role="aerodynamics",
+            source_path=source_name,
+            package_member=source_name,
+            sha256=source_hash,
+            byte_identical_to_upstream=True,
+        ),),
+        component_bindings=(),
+        contribution_authority=(),
+        transforms=(),
+        stateful_components=(),
+        runtime_artifact="runtime/aircraft.txair",
+        validation_artifact="validation/source-check-cases.json",
+        source_payload_external=False,
+    )
+    collection = tmp_path / "f16.txcollection"
+    write_deterministic_collection(
+        {
+            "manifest.json": manifest.canonical_json(),
+            "source/" + Path(source_name).name: source,
+            "runtime/aircraft.txair": runtime,
+        },
+        collection,
+    )
+
+    report = replay_reference_collection(collection)
+
+    assert report.status == "runtime_replay_qualification_passed"
+    assert report.collection_id == "f16-s119-fixture"
+    assert report.family_id == "reference_f16_s119"
+    assert report.runtime_member == "runtime/aircraft.txair"
+    assert json.dumps(report.to_dict())

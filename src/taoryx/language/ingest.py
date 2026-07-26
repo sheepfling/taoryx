@@ -54,6 +54,21 @@ def _attach_diagnostic_recovery(
     ####
 
 
+def _source_bytes_for_text(text: str, source_path: str) -> bytes:
+    """Retain on-disk newline bytes when the path is the supplied text's source."""
+
+    candidate = Path(source_path)
+    if not candidate.is_file():
+        return text.encode("utf-8")
+    raw = candidate.read_bytes()
+    try:
+        raw_text = raw.decode("utf-8", errors="surrogateescape")
+    except UnicodeDecodeError:
+        return text.encode("utf-8")
+    normalize = lambda value: value.replace("\r\n", "\n").replace("\r", "\n")
+    return raw if normalize(raw_text) == normalize(text) else text.encode("utf-8")
+
+
 def _validate_table_profile(document: TableDocument, profile: GrammarProfile) -> list[Diagnostic]:
     if profile is GrammarProfile.TAORYX:
         return []
@@ -103,7 +118,7 @@ def ingest_text(
     available_table_variables: Mapping[str, Collection[str]] | None = None,
     profile: GrammarProfile | str = GrammarProfile.TAOS96,
 ) -> IngestedDocument:
-    source = parse_lossless_bytes(text.encode("utf-8"), source_path=source_path)
+    source = parse_lossless_bytes(_source_bytes_for_text(text, source_path), source_path=source_path)
     lexical = lex_text(text, source_path=source_path)
     if kind is FileKind.PROBLEM:
         document = parse_problem_text(text, source_path, profile=profile)

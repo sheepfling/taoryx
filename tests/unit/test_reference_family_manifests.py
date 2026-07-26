@@ -23,10 +23,15 @@ def test_reference_family_manifests_project_into_common_catalog() -> None:
 
     manifests = load_reference_family_catalog(CATALOG_PATH)
     catalog = as_family_catalog(manifests)
-    assert {manifest.family_id for manifest in manifests} == {"reference_f16_s119", "reference_hl20_mod_k"}
+    assert {manifest.family_id for manifest in manifests} == {
+        "reference_f16_s119",
+        "reference_hl20_mod_k",
+        "reference_nesc_two_stage_rocket",
+    }
     assert {family.family_id for family in catalog.families} == {
         "reference_f16_s119",
         "reference_hl20_mod_k",
+        "reference_nesc_two_stage_rocket",
     }
     assert all(
         set(family.fidelities) == {"point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"}
@@ -42,13 +47,14 @@ def test_reference_family_source_locks_match_existing_intake_records() -> None:
     records = {
         "reference_f16_s119": ROOT / "families/reference_f16_s119/qualification/integration-record.yaml",
         "reference_hl20_mod_k": ROOT / "families/reference_hl20_mod_k/qualification/integration-record.yaml",
+        "reference_nesc_two_stage_rocket": ROOT / "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
     }
     for family_id, path in records.items():
         record = yaml.safe_load(path.read_text(encoding="utf-8"))
         manifest = manifests[family_id]
         assert record["source"]["package_sha256"] == manifest.source.package_sha256
         assert record["source"].get("aerodynamics_sha256", record["source"].get("sha256")) == manifest.source.aerodynamics_sha256
-        assert record["source"]["source_corpus_archive_sha256"] == manifest.source.corpus_archive_sha256
+        assert record["source"].get("source_corpus_archive_sha256") == manifest.source.corpus_archive_sha256
         assert record["plant"]["body_frame"] == manifest.plant.body_frame
         assert record["plant"]["navigation_frame"] == manifest.plant.navigation_frame
     ####
@@ -68,6 +74,10 @@ def test_reference_family_plant_metadata_matches_verified_package_manifests() ->
     assert hl20.reference_geometry.mean_aerodynamic_chord_m == 8.607552
     assert hl20.validity_envelope.mach_max == 4.0
     assert hl20.validity_envelope.altitude_min_m == -1000.0
+    rocket = manifests["reference_nesc_two_stage_rocket"].plant
+    assert rocket.package_schema_version == "0.3.0"
+    assert rocket.reference_geometry.area_m2 == 7.0
+    assert rocket.validity_envelope.mach_max == 40.0
     ####
 
 
@@ -76,7 +86,10 @@ def test_local_reference_packages_match_standardized_family_manifests() -> None:
     """When the local corpus is present, bind both packages before replay."""
 
     for manifest in load_reference_family_catalog(CATALOG_PATH):
-        report = inspect_reference_package(manifest, CORPUS_ROOT / manifest.source.package_relative_path)
+        package = CORPUS_ROOT / manifest.source.package_relative_path
+        if not package.is_file():
+            continue
+        report = inspect_reference_package(manifest, package)
         assert report.status == "verified_package_binding"
         assert report.package_fidelity == "6dof"
         assert report.artifact_count > 0
@@ -108,7 +121,7 @@ def test_reference_family_case_resolution_preserves_source_provenance() -> None:
 def test_reference_sidecar_bindings_are_declared_and_family_specific() -> None:
     """The directory layout keeps plant, controls, observations, and overlays separate."""
 
-    for family_id in ("reference_f16_s119", "reference_hl20_mod_k"):
+    for family_id in ("reference_f16_s119", "reference_hl20_mod_k", "reference_nesc_two_stage_rocket"):
         family_root = ROOT / "families" / family_id
         manifest = yaml.safe_load((family_root / "family.yaml").read_text(encoding="utf-8"))
         for relative_path in manifest["bindings"]:
@@ -116,6 +129,8 @@ def test_reference_sidecar_bindings_are_declared_and_family_specific() -> None:
             payload = yaml.safe_load(sidecar.read_text(encoding="utf-8"))
             assert payload["family"] == family_id
             assert payload["schema_version"] == 1
-        assert (family_root / "actuators/ideal-direct.yaml").is_file()
-        assert (family_root / "actuators/reference-first-order-v1.yaml").is_file()
+        assert (family_root / "plant/daveml-import.json").is_file()
+        if family_id != "reference_nesc_two_stage_rocket":
+            assert (family_root / "actuators/ideal-direct.yaml").is_file()
+            assert (family_root / "actuators/reference-first-order-v1.yaml").is_file()
     ####

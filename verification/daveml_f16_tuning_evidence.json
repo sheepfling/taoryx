@@ -1,0 +1,144 @@
+{
+  "bounded_probe": {
+    "controls": {
+      "aileron_deg": -0.06426682119635538,
+      "elevator_deg": -1.5238659275233886e-17,
+      "rudder_deg": -0.12597529794890622
+    },
+    "saturated": [],
+    "unsaturated": {
+      "aileron_deg": -0.06426682119635538,
+      "elevator_deg": -1.5238659275233886e-17,
+      "rudder_deg": -0.12597529794890622
+    }
+  },
+  "claim_boundary": "source-channel reduced-order LQR screen; not flight qualification",
+  "closed_loop_eigenvalues": [
+    [
+      -0.724119740352753,
+      0.7238858437293523
+    ],
+    [
+      -0.724119740352753,
+      -0.7238858437293523
+    ],
+    [
+      -0.07020702474369188,
+      0.0
+    ],
+    [
+      -1.1497082405688217,
+      1.1494171350201847
+    ],
+    [
+      -1.1497082405688217,
+      -1.1494171350201847
+    ]
+  ],
+  "condition_number": 1.0,
+  "control_names": [
+    "elevator_deg",
+    "aileron_deg",
+    "rudder_deg"
+  ],
+  "controllable": true,
+  "design_id": "f16-s119-source-channel-lqr",
+  "excluded_states": {
+    "u_m_s": "source-channel A/B controllability rank is 5 of 6"
+  },
+  "family_id": "reference_f16_s119",
+  "gain": [
+    [
+      1.5238659275233885e-16,
+      -1.4142135623730958,
+      2.2627910636469943e-17,
+      -184.88204312906137,
+      -4.6533816751424986e-14
+    ],
+    [
+      0.6426682119635537,
+      -4.809142866216765e-17,
+      -1.2597529794890625,
+      -8.2991964351647e-15,
+      -130.8125081204614
+    ],
+    [
+      1.259752979489062,
+      -7.939232430613413e-17,
+      0.6426682119635515,
+      -1.6389679681027098e-14,
+      -264.54023940595283
+    ]
+  ],
+  "hurwitz": true,
+  "maximum_real_pole": -0.07020702474369188,
+  "provenance": {
+    "aerodynamics_document_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+    "aerodynamics_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
+    "mass_properties_document_sha256": "f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28",
+    "mass_properties_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
+  },
+  "q_matrix": [
+    [
+      2.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      2.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      2.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      2.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      2.0
+    ]
+  ],
+  "r_matrix": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "schema_version": "taoryx.daveml-tuning-evidence/v1",
+  "state_names": [
+    "v_m_s",
+    "w_m_s",
+    "p_rad_s",
+    "q_rad_s",
+    "r_rad_s"
+  ],
+  "status": "verified"
+}

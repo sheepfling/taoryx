@@ -1,0 +1,77 @@
+% Successor-side research note based on analysis/tumbling/study.md.
+\subsection{Ballistic Tumbling and Detached-Body Dynamics}\label{sec:ballistic-tumbling}
+
+This subsection records the successor-side mathematics used for detached
+aero-ballistic bodies. It is an engineering model and research note, not a
+claim about an undocumented historical TAOS equation. The working source is
+the project note \texttt{analysis/tumbling/study.md}; calibrated coefficient
+data must replace the illustrative closures before a vehicle-specific claim is
+made.
+
+For a body moving through air, dynamic pressure and drag area provide a useful
+separation between the environment and the aerodynamic closure:
+\[
+  q_\infty=\frac{1}{2}\rho\lVert\vec V_{w}\rVert^2,
+  \qquad
+  D=q_\infty C_D S_{\rm ref}=q_\infty K_D,
+  \qquad
+  K_D=C_D S_{\rm ref}.
+\]
+The drag-area form is important when comparing sources that use different
+reference areas. Projected area is a first-order geometry model; the actual
+coefficient may also depend on Mach number, Reynolds number, base pressure,
+surface condition, and the orientation of the relative wind.
+
+Let $\hat x_b$ be the longitudinal body axis and let $\alpha$ be the angle
+between $\hat x_b$ and the relative-wind direction. A useful cylinder
+projected-area closure is
+\[
+  S_{\rm proj}(\alpha)
+  =\pi r^2\lvert\cos\alpha\rvert
+   +2rL\lvert\sin\alpha\rvert,
+\]
+where $r$ is radius and $L$ is length. A spheroid uses its axial and
+transverse semi-axes in the corresponding orientation-dependent ellipse
+closure. Cones require separate nose-first, broadside, and base-first anchors;
+interpolation between those anchors must not be presented as measured data.
+
+For a freely tumbling rigid body, the body-rate equation is
+\[
+  \mathbf I\dot{\boldsymbol\omega}
+  +\boldsymbol\omega\times
+    (\mathbf I\boldsymbol\omega)
+  =\mathbf M_{\rm aero}+\mathbf M_{\rm sep}+\mathbf M_{\rm control}.
+\]
+If the aerodynamic force is applied at a center-of-pressure offset, its
+moment contribution is
+\[
+  \mathbf M_{\rm aero}
+  =(\mathbf r_{\rm cp}-\mathbf r_{\rm cg})
+    \times\mathbf F_{\rm aero}
+  +\mathbf M_{\rm damping}.
+\]
+The Alpha 3 ballistic surrogate makes the unresolved rate damping explicit.
+That damping stabilizes coarse envelope integrations; it is not a substitute
+for a measured or computed aerodynamic moment database.
+
+Quaternion attitude propagation uses the body rate without Euler-angle
+singularities:
+\[
+  \dot q=\frac{1}{2}q\otimes
+  \begin{bmatrix}0\\\boldsymbol\omega\end{bmatrix},
+  \qquad \lVert q\rVert=1.
+\]
+The implementation renormalizes the integrated quaternion and records the
+attitude, body rates, projected area, force, moment, and termination state in
+the child telemetry.
+
+For isotropic tumbling studies, an orientation-average coefficient is defined
+over the unit sphere by
+\[
+  \overline{K_D}
+  =\frac{1}{4\pi}\int_{S^2}K_D(\hat V_w)\,d\Omega.
+\]
+This average is useful for comparison and screening, but it must not replace
+the time history when attitude, impact timing, or event coupling matters.
+The computational fidelity ladder therefore remains explicit: point-mass
+3-DOF, pseudo-6-DOF attitude/tumble surrogates, and native rigid-body 6-DOF.

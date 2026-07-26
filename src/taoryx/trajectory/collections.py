@@ -11,6 +11,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .daveml_evaluator import evaluate_daveml_checkdata
+from .daveml_semantic import build_daveml_ir, compare_daveml_ir, compare_daveml_numeric, export_daveml_ir
+
 
 class SourceDocument(BaseModel):
     """One immutable source document in a multi-document collection."""
@@ -247,6 +250,33 @@ def export_source_preserving_collection(
         for item in documents
     )
     l1 = l0 and bool(contents.manifest.source_map())
+    canonical_documents: list[dict[str, object]] = []
+    for item in documents:
+        member = str(item["collection_member"])
+        if not member.casefold().endswith((".dml", ".xml")):
+            continue
+        payload = contents.files[member]
+        ir = build_daveml_ir(payload, document_id=str(item["document_id"]))
+        exported = export_daveml_ir(ir)
+        fresh = build_daveml_ir(exported, document_id=str(item["document_id"]))
+        structural = compare_daveml_ir(ir, fresh)
+        numeric = compare_daveml_numeric(ir, fresh)
+        checks = evaluate_daveml_checkdata(payload)
+        canonical_documents.append(
+            {
+                "document_id": item["document_id"],
+                "structural_diff_count": len(structural),
+                "numeric_diff_count": len(numeric),
+                "checkdata_count": len(checks),
+                "checkdata_failed": sum(result.status == "failed" for result in checks),
+                "checkdata_unsupported": sum(result.status == "unsupported" for result in checks),
+                "canonical_export_sha256": hashlib.sha256(exported).hexdigest(),
+            }
+        )
+    l2 = bool(canonical_documents) and all(item["structural_diff_count"] == 0 for item in canonical_documents)
+    l3 = l2 and all(
+        item["numeric_diff_count"] == 0 and item["checkdata_failed"] == 0 for item in canonical_documents
+    )
     report: dict[str, object] = {
         "status": "verified_source_preserving" if l0 else "failed",
         "collection": contents.manifest.collection_id,
@@ -255,15 +285,15 @@ def export_source_preserving_collection(
         "levels": {
             "L0": "verified" if l0 else "failed",
             "L1": "verified_source_identity" if l1 else "failed",
-            "L2": "pending_canonical_serializer",
-            "L3": "pending_canonical_serializer",
+            "L2": "verified_canonical_structure" if l2 else "failed",
+            "L3": "verified_canonical_numeric_and_checkdata" if l3 else "failed",
             "L4": "pending_runtime_replay",
         },
         "source_documents": documents,
+        "canonical_documents": canonical_documents,
         "limitations": [
-            "No canonical DAVE-ML regeneration was performed.",
-            "No DAVE-ML semantic parser was required for this source-preserving check.",
-            "No Taoryx runtime replay was performed by the container verifier.",
+            "Canonical semantic regeneration and fresh structural/numeric import are verified for embedded DAVE-ML documents.",
+            "L4 runtime replay remains a separate collection/package evidence gate.",
         ],
     }
     (destination / "roundtrip-report.json").write_text(

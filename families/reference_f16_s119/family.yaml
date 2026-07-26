@@ -15,6 +15,7 @@ source:
   corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
   availability: local_corpus_input_verified
   license_and_notices: required_from_source_package
+daveml_import: plant/daveml-import.json
 plant:
   fidelity: rigid_body_6dof
   body_frame: FRD
@@ -34,7 +35,7 @@ plant:
     beta_max_rad: 0.5235987755982988
     altitude_min_m: 0.0
     altitude_max_m: 15240.0
-  qualification: source_parsed_static_checks_passed_package_replay_pending
+  qualification: runtime_replay_qualification_passed
   source_payload_required_for_execution: true
 fidelity_profiles:
   - profile_id: f16.performance_3dof.v1
@@ -54,7 +55,7 @@ fidelity_profiles:
   - profile_id: f16.rigid_body_6dof.v1
     runtime_fidelity: rigid_body_6dof
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
-    status: source_parsed_static_checks_passed_package_replay_pending
+    status: runtime_replay_qualification_passed
     data_contract: [source_force_moment_graph, fixed_mass_properties, steady_propulsion, direct_controls]
     omitted_physics: [fuel_mass_evolution, actuator_dynamics, runway_contact]
 parameters:
@@ -106,6 +107,11 @@ layers:
   actuators: {version: pending, evidence: taoryx_engineering_assumption}
   controllers: {version: pending, evidence: taoryx_reference_design}
   reductions: {version: pending, evidence: derived_from_parent_plant}
+  trim: {version: source-equilibrium-trim-v1, evidence: source_equilibrium_trim_verified}
+  linearization: {version: source-channel-dynamics-v1, evidence: source_channel_dynamics_verified}
+  tuning: {version: source-channel-reduced-lqr-v1, evidence: source_channel_reduced_lqr_verified}
+  objectives: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
+  scenarios: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
 bindings:
   - bindings/canonical-controls.yaml
   - bindings/canonical-observations.yaml
@@ -118,4 +124,4 @@ claims:
 nonclaims:
   - production F-16 training or operational fidelity
   - actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone
-next_gate: package_replay_in_taoryx_runtime
+next_gate: qualify_separate_overlays_and_reductions

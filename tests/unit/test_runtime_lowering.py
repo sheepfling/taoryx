@@ -765,7 +765,8 @@ def test_non_strict_when_conditions_trigger_at_boundary(
     velocity: float,
     expected_time: float,
 ) -> None:
-    problem = tmp_path / f"non-strict-{operator}.prb"
+    safe_operator = operator.replace("<", "lt").replace(">", "gt").replace("=", "eq")
+    problem = tmp_path / f"non-strict-{safe_operator}.prb"
     problem.write_text(
         "(non-strict-event)\n"
         "*atmos none\n"

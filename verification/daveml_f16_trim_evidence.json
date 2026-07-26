@@ -1,0 +1,52 @@
+{
+  "claim_boundary": "source-bounded pitch-channel trim; not full 6-DOF equilibrium",
+  "family_id": "reference_f16_s119",
+  "local_residual_jacobian": {
+    "a": [
+      []
+    ],
+    "b": [
+      [
+        -0.009633333332773053
+      ]
+    ],
+    "control_names": [
+      "elevator_deg"
+    ],
+    "control_step": 1e-05,
+    "method": "central_finite_difference",
+    "residual_names": [
+      "pitch_cm"
+    ],
+    "state_names": []
+  },
+  "model_role": "aerodynamics",
+  "schema_version": "taoryx.daveml-trim-evidence/v1",
+  "source": {
+    "document_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+    "package_member": "models/aerodynamics.dml",
+    "package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
+  },
+  "status": "verified",
+  "trim": {
+    "bounds": {
+      "elevator_deg": [
+        -24.0,
+        24.0
+      ]
+    },
+    "controls": {
+      "elevator_deg": -0.7681660899264867
+    },
+    "iterations": 4,
+    "max_residual": 3.7485010755122783e-13,
+    "residuals": {
+      "pitch_cm": -3.7485010755122783e-13
+    },
+    "scaled_residual_norm": 3.7485010755122783e-13,
+    "solver_message": "`gtol` termination condition is satisfied.",
+    "solver_status": 1,
+    "state": {},
+    "success": true
+  }
+}

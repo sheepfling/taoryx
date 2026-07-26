@@ -1,0 +1,13 @@
+{
+  "schema_version": "taoryx.daveml-official-conformance/v1",
+  "source": "https://www.daveml.org/examples/index.html",
+  "fixtures": [
+    {"id": "simple_lift_curve", "file": "simple_aero.dml", "sha256": "7A2148EE89EF4CEACB7663A9BC477E020C1AA58BCFC361F938D60D5D3F18A5D5"},
+    {"id": "two_dimensional_gridded", "file": "twoD_table.dml", "sha256": "988923D3273751872838FC637F1EB835E0061D92E5224EBBC1E205B1F9318D92"},
+    {"id": "two_dimensional_ungridded", "file": "twoD_ungridded.dml", "sha256": "2C6C66492F30560A631C7905E07CC806931C3EAE1D8A630F0E5168951AC3A46D"},
+    {"id": "three_dimensional_ungridded", "file": "threeD_ungridded.dml", "sha256": "1779544DEF313776A7FE380DB05EF097ECD53AD6264AAB1E8765F86D21342F79"},
+    {"id": "us_standard_atmosphere_1976", "file": "atmos_76.dml", "sha256": "B0803B550447F2FA10C81BF7E703449A1944FB633955990A1D01C2DEA71C29CA"},
+    {"id": "f16_nonlinear_subsonic", "file": "F16_aero.dml", "sha256": "6DA3FAD6192EBF2BD16170C379890DF5DB03E67A00E9BBDD1B58646803491E73"},
+    {"id": "hl20_lifting_body", "file": "HL20_aero.dml", "sha256": "8639B55C2525FDB6C0177B8E359DE5D6EB984A3B4B35B4D1E5898D54DDC1F44E"}
+  ]
+}
