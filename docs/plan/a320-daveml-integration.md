@@ -79,11 +79,12 @@ The executable surrogate binding now exists at
 immutable corpus hash, uses OpenAP for translational performance, uses the
 normalized JSBSim channels only for side force and roll/pitch/yaw moments, and
 rescales the JSBSim inertia schedule explicitly against OpenAP mass. The
-The five-document authored DAVE-ML collection and fresh-process structural,
-numeric, and checkData round trip are now verified under
+five-document authored DAVE-ML collection and fresh-process structural,
+numeric, checkData, and bounded runtime round trips are now verified under
 `families/a320_openap_jsbsim_pseudo6dof/daveml/` and its validation report.
-The binding remains `implementation_in_progress` until trim, pulse/turn
-bounds, and runtime-level composite round-trip evidence have their own gate.
+The bounded reduced-order runtime evidence is recorded in
+`families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json`;
+full rigid-body 6-DOF validation remains outside this surrogate claim.
 
 ## Parallel transport reference
 

@@ -2,8 +2,10 @@
   "artifacts": {
     "build/daveml-release-catalog/canonical/export-manifest.json": "94ffb7f59a74350f76d2b7d58057cb7da6d58840518abc709d392f3700035b0a",
     "families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json": "6115f667a61649e865dc5c13334cf6a2e0cc616824c8fa9f268398b2d90968bd",
+    "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json": "bbf04df9c151bf9d8991469f32b3e63d2899a244f579172d6fecf13caf36d52f",
+    "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json": "3255c0007a9d4af208e97c3f1f82bbaa16d3bbd6544f5e835fbf452a4088e271",
     "verification/daveml_a320_openap_integration.json": "8b4c458881d566fb9bcee28312fd554b4507fb33de0a6a199a989829c9e95bec",
-    "verification/daveml_a320_pseudo6dof_integration.json": "9a3e408529fff5c924714f0ec582abb4563d4e28271329f51d62c86f624a552d",
+    "verification/daveml_a320_pseudo6dof_integration.json": "ae98e862f60cd317487b96528744947e0049362a190eba2f7d733f85521181ff",
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
     "verification/daveml_catalog_roundtrip.json": "582bbabb4eee6e4c98be0ec528ddc5b8da16c361f260dfe7bc9d91f2ae2de1d2",
     "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",
@@ -260,6 +262,15 @@
     {
       "command": [
         "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_a320_pseudo6dof_runtime.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "181082e-29,\n        \"elevator_rad\": 0.01999999999996443,\n        \"flight_path_angle_rad\": 9.293022439594822e-25,\n        \"rudder_rad\": -3.885551116729471e-27,\n        \"throttle_ratio\": 0.5156870883463449\n      },\n      \"iterations\": 6,\n      \"max_residual\": 7.077238101116379e-15,\n      \"message\": \"`gtol` termination condition is satisfied.\",\n      \"pass\": true,\n      \"state\": {\n        \"alpha_rad\": 0.0025000000000132473\n      },\n      \"success\": true\n    },\n    \"cruise\": {\n      \"controls\": {\n        \"aileron_rad\": -2.631345584668991e-28,\n        \"elevator_rad\": 0.019999999999995393,\n        \"flight_path_angle_rad\": -1.283415175352058e-23,\n        \"rudder_rad\": 1.0525382338683311e-26,\n        \"throttle_ratio\": 0.7174806937690654\n      },\n      \"iterations\": 6,\n      \"max_residual\": 9.144161122742744e-16,\n      \"message\": \"`gtol` termination condition is satisfied.\",\n      \"pass\": true,\n      \"state\": {\n        \"alpha_rad\": 0.00250000000000171\n      },\n      \"success\": true\n    }\n  }\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
         "-m",
         "taoryx.runtime.cli",
         "daveml",
@@ -271,7 +282,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "im-1.3.1-a320\",\n          \"propulsion.fuel_flow\": \"openap-2.6.0\",\n          \"propulsion.thrust\": \"openap-2.6.0\",\n          \"stability_augmentation\": \"taoryx-controller\"\n        },\n        \"corpus_sha256\": \"9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31\",\n        \"disabled_contributions\": [\n          \"jsbsim.aerodynamic_drag\",\n          \"jsbsim.propulsion_thrust\",\n          \"jsbsim.fuel_flow\"\n        ],\n        \"inertia_policy\": \"linear_mass_rescale_from_jsbsim_empty_mass\",\n        \"manufacturer_validated\": false,\n        \"model_id\": \"a320-openap-jsbsim-pseudo6dof\",\n        \"openap_package_sha256\": \"f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87\",\n        \"qualification_class\": \"surrogate_composite\",\n        \"source_exact\": false\n      }\n    },\n    \"schema_version\": \"taoryx.a320-pseudo6dof-daveml-roundtrip/v1\",\n    \"status\": \"verified\",\n    \"structural_diff\": []\n  },\n  \"schema_version\": \"taoryx.daveml-cli-composite-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "6729471e-27,\n          \"throttle_ratio\": 0.5156870883463449\n        },\n        \"iterations\": 6,\n        \"max_residual\": 7.077238101116379e-15,\n        \"message\": \"`gtol` termination condition is satisfied.\",\n        \"pass\": true,\n        \"state\": {\n          \"alpha_rad\": 0.0025000000000132473\n        },\n        \"success\": true\n      },\n      \"cruise\": {\n        \"controls\": {\n          \"aileron_rad\": -2.631345584668991e-28,\n          \"elevator_rad\": 0.019999999999995393,\n          \"flight_path_angle_rad\": -1.283415175352058e-23,\n          \"rudder_rad\": 1.0525382338683311e-26,\n          \"throttle_ratio\": 0.7174806937690654\n        },\n        \"iterations\": 6,\n        \"max_residual\": 9.144161122742744e-16,\n        \"message\": \"`gtol` termination condition is satisfied.\",\n        \"pass\": true,\n        \"state\": {\n          \"alpha_rad\": 0.00250000000000171\n        },\n        \"success\": true\n      }\n    }\n  },\n  \"schema_version\": \"taoryx.daveml-cli-composite-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
     }
   ],
   "schema_version": "taoryx.daveml-release-gate/v1",

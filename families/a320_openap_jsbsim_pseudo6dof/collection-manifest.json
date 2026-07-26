@@ -116,6 +116,7 @@
   ],
   "runtime_artifact": "src/taoryx/trajectory/a320_pseudo6dof.py",
   "validation_artifact": "validation/roundtrip-report.json",
+  "runtime_qualification_artifact": "validation/runtime-qualification.json",
   "source_payload_external": false,
   "roundtrip_status": "verified"
 }

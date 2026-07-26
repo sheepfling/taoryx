@@ -14,7 +14,7 @@ source:
 plant:
   fidelity: pseudo_6dof
   frames: {body: FRD, navigation: NED, quaternion_order: wxyz}
-  qualification: implementation_in_progress
+  qualification: bounded_runtime_verified
 layers:
   aerodynamics: {performance_authority: openap-2.6.0, rotational_authority: jsbsim-1.3.1-a320}
   propulsion: {authority: openap-2.6.0, duplicate_jsbsim_contribution: disabled}
@@ -22,10 +22,10 @@ layers:
 runtime_binding:
   implementation: taoryx.trajectory.a320_pseudo6dof.A320Pseudo6DOFModel
   status: executable_surrogate_binding
-  verified: [source_hashes, authority_map, side_force, roll_moment, pitch_moment, yaw_moment, mass_rescaled_inertia, canonical_daveml_export, fresh_process_roundtrip]
-  remaining: [trim_close, coordinated_turn, control_pulse_bounds, runtime_roundtrip]
-  actuators: {authority: taoryx-policy, evidence: pending}
-  stability_augmentation: {authority: taoryx-controller, evidence: pending}
+  verified: [source_hashes, authority_map, side_force, roll_moment, pitch_moment, yaw_moment, mass_rescaled_inertia, canonical_daveml_export, fresh_process_roundtrip, trim_close, coordinated_turn, control_pulse_bounds, runtime_roundtrip]
+  remaining: [full_rigidbody_6dof_validation]
+  actuators: {authority: taoryx-policy, evidence: validation/runtime-qualification.json}
+  stability_augmentation: {authority: taoryx-controller, evidence: validation/runtime-qualification.json}
 claims:
   - executable research surrogate combining OpenAP performance with JSBSim rotational structure
   - canonical regenerated DAVE-ML export can represent this composite collection
@@ -33,4 +33,4 @@ nonclaims:
   - upstream Airbus or manufacturer-authoritative DAVE-ML equivalence
   - source-exact JSBSim A320 aerodynamic or propulsion reproduction after disabled contributions
   - certification, training, or flight-test validation
-next_gate: verify_component_replay_and_roundtrip
+next_gate: acquire_or_bind_full_rigidbody_6dof_source

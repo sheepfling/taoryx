@@ -361,9 +361,12 @@ def _a320_pseudo_smoke(arguments: argparse.Namespace) -> int:
         roundtrip = json.loads(
             Path("families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json").read_text(encoding="utf-8")
         )
+        runtime_qualification = json.loads(
+            Path("families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json").read_text(encoding="utf-8")
+        )
         result = {
             "schema_version": "taoryx.daveml-cli-composite-smoke/v1",
-            "status": "verified" if roundtrip.get("status") == "verified" else "failed",
+            "status": "verified" if roundtrip.get("status") == "verified" and runtime_qualification.get("status") == "verified" else "failed",
             "family_id": arguments.family,
             "model_id": "a320-openap-jsbsim-pseudo6dof",
             "qualification_class": "surrogate_composite",
@@ -372,6 +375,7 @@ def _a320_pseudo_smoke(arguments: argparse.Namespace) -> int:
             "result": performance.as_dict(),
             "rotational_derivatives": model.rotational_derivatives(point),
             "roundtrip": roundtrip,
+            "runtime_qualification": runtime_qualification,
         }
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         print(f"error: daveml-composite-smoke-failed: {error}")
