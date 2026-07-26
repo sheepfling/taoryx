@@ -391,6 +391,73 @@ class DAVEMLFixedWingLoadBinding:
     ####
 
 
+@dataclass(frozen=True, slots=True)
+class DAVEMLLiftingBodyLoadBinding:
+    """Convert wind-axis lifting-body coefficients into explicit body loads."""
+
+    aerodynamics: DAVEMLTrimBinding
+    reference_area_m2: float
+    mean_aerodynamic_chord_m: float
+    dynamic_pressure_pa: float
+
+    def __post_init__(self) -> None:
+        values = (self.reference_area_m2, self.mean_aerodynamic_chord_m, self.dynamic_pressure_pa)
+        if not all(float(value) > 0.0 for value in values):
+            raise ValueError("DAVE-ML lifting-body load geometry and pressure must be positive")
+        missing = {"cl", "cd", "cm"} - set(self.aerodynamics.residual_outputs)
+        if missing:
+            raise ValueError("DAVE-ML lifting-body channels are missing: " + ", ".join(sorted(missing)))
+        ####
+
+    def evaluate(
+        self,
+        state: Mapping[str, float],
+        controls: Mapping[str, float],
+        environment: Mapping[str, float] | None = None,
+    ) -> dict[str, float]:
+        """Return wind-axis loads mapped to body X/Z and pitch moment."""
+
+        coefficients = self.aerodynamics.evaluate(state, controls, environment)
+        scale = self.dynamic_pressure_pa * self.reference_area_m2
+        pitch = scale * self.mean_aerodynamic_chord_m * coefficients["cm"]
+        return {
+            "lift_n": scale * coefficients["cl"],
+            "drag_n": scale * coefficients["cd"],
+            "pitch_moment_nm": pitch,
+            "body_force_x_n": -scale * coefficients["cd"],
+            "body_force_y_n": 0.0,
+            "body_force_z_n": -scale * coefficients["cl"],
+            "body_moment_x_nm": 0.0,
+            "body_moment_y_nm": pitch,
+            "body_moment_z_nm": 0.0,
+        }
+        ####
+
+    def evaluate_with_atmosphere(
+        self,
+        state: Mapping[str, float],
+        controls: Mapping[str, float],
+        atmosphere: DAVEMLAtmosphereBinding,
+        *,
+        geometric_altitude_m: float,
+        true_airspeed_m_s: float,
+        environment: Mapping[str, float] | None = None,
+    ) -> dict[str, float]:
+        """Evaluate lifting-body loads with atmosphere-derived dynamic pressure."""
+
+        if not math.isfinite(true_airspeed_m_s) or true_airspeed_m_s <= 0.0:
+            raise ValueError("true airspeed must be finite and positive")
+        density = atmosphere.evaluate(geometric_altitude_m)["density_kg_m3"]
+        return DAVEMLLiftingBodyLoadBinding(
+            self.aerodynamics,
+            self.reference_area_m2,
+            self.mean_aerodynamic_chord_m,
+            0.5 * density * true_airspeed_m_s**2,
+        ).evaluate(state, controls, environment)
+        ####
+    ####
+
+
 def load_daveml_family_import(path: str | Path) -> DAVEMLFamilyImport:
     """Load and validate one family import sidecar."""
 
@@ -707,6 +774,7 @@ __all__ = [
     "DAVEMLFamilyGraphBinding",
     "DAVEMLCompositeTrimBinding",
     "DAVEMLFixedWingLoadBinding",
+    "DAVEMLLiftingBodyLoadBinding",
     "DAVEMLFunctionChannel",
     "DAVEMLImportDocument",
     "DAVEMLImportPackage",

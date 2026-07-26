@@ -12,6 +12,7 @@ from taoryx.trajectory import (
     DAVEMLFixedWingLoadBinding,
     DAVEMLFunctionChannel,
     DAVEMLInertiaBinding,
+    DAVEMLLiftingBodyLoadBinding,
     DAVEMLTrimBinding,
     load_daveml_atmosphere,
     load_daveml_family_graph,
@@ -302,6 +303,23 @@ def test_fixed_wing_dynamics_binding_returns_true_newton_euler_derivatives() -> 
     )
     assert derivatives["u_m_s"] == pytest.approx(1000.0 * 27.870912 * -0.0142 / 1000.0)
     assert derivatives["q_rad_s"] == pytest.approx(1000.0 * 27.870912 * 3.450336 * -0.0074 / 200.0)
+
+
+def test_hl20_lifting_body_binding_maps_wind_axis_coefficients_to_body_loads() -> None:
+    aero = load_daveml_trim_binding(
+        ROOT / "families/reference_hl20_mod_k/plant/daveml-import.json",
+        role="aerodynamics",
+        state_inputs={"alpha_deg": "ALP_UNLIM"},
+        control_inputs={},
+        residual_outputs={"cl": "CL", "cd": "CD", "cm": "CM"},
+        fixed_inputs={"BETA": 0.0, "XMACH": 1.0, "PB": 0.0, "QB": 0.0, "RB": 0.0, "VRW": 100.0, "H_rwy": 0.0, "DBFUL": 0.0, "DBFUR": 0.0, "DBFLL": 0.0, "DBFLR": 0.0, "DWFL": 0.0, "DWFR": 0.0, "DRUD": 0.0, "DLG": 0.0},
+    )
+    binding = DAVEMLLiftingBodyLoadBinding(aero, 26.612075808, 8.607552, 1000.0)
+    loads = binding.evaluate({"alpha_deg": 5.0}, {})
+    assert loads["lift_n"] > 0.0
+    assert loads["drag_n"] > 0.0
+    assert loads["body_force_x_n"] == pytest.approx(-loads["drag_n"])
+    assert loads["body_force_z_n"] == pytest.approx(-loads["lift_n"])
 
 
 @pytest.mark.skipif(not CATALOG_ROOT.is_dir(), reason="local DAVE-ML catalog is external to the repository")

@@ -571,6 +571,10 @@ items are complete and reproducible:
   `source_channel_reduced_lqr_verified`, and
   `source_channel_smoke_verified`); the registry continues to leave full
   equilibrium trim pending and leaves HL-20/NESC derived layers unchanged.
+- `DAVEMLLiftingBodyLoadBinding` now provides the separate HL-20 wind-axis
+  `CL/CD/CM` to body-load mapping, including explicit drag/lift signs and
+  atmosphere-derived dynamic pressure. It deliberately does not add mass,
+  propulsion, or gravity assumptions that the HL-20 package does not provide.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,
