@@ -52,6 +52,7 @@
             "expected": 59.0,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -63,6 +64,7 @@
             "expected": 2116.22,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -74,6 +76,7 @@
             "expected": 1.0,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -85,6 +88,7 @@
             "expected": 41.2,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0006560000000001516,
             "status": "passed"
           },
@@ -96,6 +100,7 @@
             "expected": 1761.12,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 8.047442264011583e-05,
             "status": "passed"
           },
@@ -107,6 +112,7 @@
             "expected": 0.8616,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0001626740947074568,
             "status": "passed"
           },
@@ -118,6 +124,7 @@
             "expected": 23.36,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0002015753424657326,
             "status": "passed"
           },
@@ -129,6 +136,7 @@
             "expected": 1455.84,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.3603020112221226e-05,
             "status": "passed"
           },
@@ -140,6 +148,7 @@
             "expected": 0.73866,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 4.44047328953769e-06,
             "status": "passed"
           },
@@ -151,6 +160,7 @@
             "expected": 5.55,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0005953153153145104,
             "status": "passed"
           },
@@ -162,6 +172,7 @@
             "expected": 1194.336,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0005900993850976389,
             "status": "passed"
           },
@@ -173,6 +184,7 @@
             "expected": 0.6292,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0005505403687221375,
             "status": "passed"
           },
@@ -184,6 +196,7 @@
             "expected": -12.3,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0036970406504063056,
             "status": "passed"
           },
@@ -195,6 +208,7 @@
             "expected": 972.576,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.001010425321620042,
             "status": "passed"
           },
@@ -206,6 +220,7 @@
             "expected": 0.5328,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.000859309309309181,
             "status": "passed"
           },
@@ -217,6 +232,7 @@
             "expected": -30.2,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.005034966887416924,
             "status": "passed"
           },
@@ -228,6 +244,7 @@
             "expected": 785.376,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0015808946746523858,
             "status": "passed"
           },
@@ -239,6 +256,7 @@
             "expected": 0.4481,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0013309529122963555,
             "status": "passed"
           },
@@ -250,6 +268,7 @@
             "expected": -48.0,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0035263666666664286,
             "status": "passed"
           },
@@ -261,6 +280,7 @@
             "expected": 628.416,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0024223679167938955,
             "status": "passed"
           },
@@ -272,6 +292,7 @@
             "expected": 0.3741,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0019712376369953972,
             "status": "passed"
           },
@@ -283,6 +304,7 @@
             "expected": -65.8,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0029552097264438854,
             "status": "passed"
           },
@@ -294,6 +316,7 @@
             "expected": 497.952,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.003338986996336869,
             "status": "passed"
           },
@@ -305,6 +328,7 @@
             "expected": 0.3099,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0025221039044852965,
             "status": "passed"
           },
@@ -316,6 +340,7 @@
             "expected": -69.7,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -327,6 +352,7 @@
             "expected": 391.68,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.005521327871732068,
             "status": "passed"
           },
@@ -338,6 +364,7 @@
             "expected": 0.2462,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0054186839967505585,
             "status": "passed"
           },
@@ -349,6 +376,7 @@
             "expected": -69.7,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -360,6 +388,7 @@
             "expected": 308.016,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.007218102402472525,
             "status": "passed"
           },
@@ -371,6 +400,7 @@
             "expected": 0.1936,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00718016528925628,
             "status": "passed"
           },
@@ -382,6 +412,7 @@
             "expected": -69.7,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -393,6 +424,7 @@
             "expected": 242.208,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.007954970901043619,
             "status": "passed"
           },
@@ -404,6 +436,7 @@
             "expected": 0.1522,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00813666228646518,
             "status": "passed"
           },
@@ -415,6 +448,7 @@
             "expected": -69.7,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -426,6 +460,7 @@
             "expected": 192.24,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.471674157312544e-05,
             "status": "passed"
           },
@@ -437,6 +472,7 @@
             "expected": 0.12082,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.078960437012684e-05,
             "status": "passed"
           },
@@ -448,6 +484,7 @@
             "expected": -69.7,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -459,6 +496,7 @@
             "expected": 146.0890153,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0030854804743564303,
             "status": "passed"
           },
@@ -470,6 +508,7 @@
             "expected": 0.091816,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.003082251351462948,
             "status": "passed"
           },
@@ -481,6 +520,7 @@
             "expected": -68.9188,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 8.70591501656738e-06,
             "status": "passed"
           },
@@ -492,6 +532,7 @@
             "expected": 106.7865774,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0025101894693829144,
             "status": "passed"
           },
@@ -503,6 +544,7 @@
             "expected": 0.066981,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00265083453932917,
             "status": "passed"
           },
@@ -514,6 +556,7 @@
             "expected": -65.3422,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.3773622541900671e-05,
             "status": "passed"
           },
@@ -525,6 +568,7 @@
             "expected": 78.22818852,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0030839148447068844,
             "status": "passed"
           },
@@ -536,6 +580,7 @@
             "expected": 0.048623,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.003270057273031715,
             "status": "passed"
           },
@@ -547,6 +592,7 @@
             "expected": -61.7692,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.9194910108167967e-11,
             "status": "passed"
           },
@@ -558,6 +604,7 @@
             "expected": 57.47865142,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0030190345433195897,
             "status": "passed"
           },
@@ -569,6 +616,7 @@
             "expected": 0.035405,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.003234006391326052,
             "status": "passed"
           },
@@ -580,6 +628,7 @@
             "expected": -58.198,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.0127241950536328e-11,
             "status": "passed"
           },
@@ -591,6 +640,7 @@
             "expected": 42.35825952,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0029476417867273434,
             "status": "passed"
           },
@@ -602,6 +652,7 @@
             "expected": 0.025859,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00317104286107397,
             "status": "passed"
           },
@@ -613,6 +664,7 @@
             "expected": -54.6286,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.6474865621627466e-05,
             "status": "passed"
           },
@@ -624,6 +676,7 @@
             "expected": 31.30524246,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0029067801362977516,
             "status": "passed"
           },
@@ -635,6 +688,7 @@
             "expected": 0.018943,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.003088211903965608,
             "status": "passed"
           },
@@ -646,6 +700,7 @@
             "expected": -51.0628,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.762537780218817e-05,
             "status": "passed"
           },
@@ -657,6 +712,7 @@
             "expected": 23.20223608,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002827435147113519,
             "status": "passed"
           },
@@ -668,6 +724,7 @@
             "expected": 0.013918,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.003017674854984287,
             "status": "passed"
           },
@@ -679,6 +736,7 @@
             "expected": -49.4572,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.74721170045802e-11,
             "status": "passed"
           },
@@ -690,6 +748,7 @@
             "expected": 20.29560791,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002650539748584729,
             "status": "passed"
           },
@@ -701,6 +760,7 @@
             "expected": 0.012126,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0028533730743059513,
             "status": "passed"
           },
@@ -712,6 +772,7 @@
             "expected": -46.912,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00664563442499388,
             "status": "passed"
           },
@@ -723,6 +784,7 @@
             "expected": 17.50240913,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002788189535335439,
             "status": "passed"
           },
@@ -734,6 +796,7 @@
             "expected": 0.010393,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002401616397916784,
             "status": "passed"
           },
@@ -745,6 +808,7 @@
             "expected": -41.9242,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.3785814753870364e-10,
             "status": "passed"
           },
@@ -756,6 +820,7 @@
             "expected": 15.11637108,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002721507314310404,
             "status": "passed"
           },
@@ -767,6 +832,7 @@
             "expected": 0.0088688,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0031796857802632874,
             "status": "passed"
           },
@@ -778,6 +844,7 @@
             "expected": -36.9364,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 4.87319405597677e-05,
             "status": "passed"
           },
@@ -789,6 +856,7 @@
             "expected": 13.07866284,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002669816318230742,
             "status": "passed"
           },
@@ -800,6 +868,7 @@
             "expected": 0.0075829,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0030990776494483167,
             "status": "passed"
           },
@@ -811,6 +880,7 @@
             "expected": -31.9522,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0040785932352542,
             "status": "passed"
           },
@@ -822,6 +892,7 @@
             "expected": 11.33553243,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002609912483144651,
             "status": "passed"
           },
@@ -833,6 +904,7 @@
             "expected": 0.0064956,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.003026663439887157,
             "status": "passed"
           },
@@ -844,6 +916,7 @@
             "expected": -26.968,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.007235242900307331,
             "status": "passed"
           },
@@ -855,6 +928,7 @@
             "expected": 9.84148111,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002541661278151836,
             "status": "passed"
           },
@@ -866,6 +940,7 @@
             "expected": 0.0055745,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002952730204506464,
             "status": "passed"
           },
@@ -877,6 +952,7 @@
             "expected": -21.9874,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.637484458385289e-05,
             "status": "passed"
           },
@@ -888,6 +964,7 @@
             "expected": 8.558416924,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0024924572289439944,
             "status": "passed"
           },
@@ -899,6 +976,7 @@
             "expected": 0.0047926,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0028961303402857547,
             "status": "passed"
           },
@@ -910,6 +988,7 @@
             "expected": -17.0068,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 4.23388172070745e-05,
             "status": "passed"
           },
@@ -921,6 +1000,7 @@
             "expected": 7.454808194,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002435630460362669,
             "status": "passed"
           },
@@ -932,6 +1012,7 @@
             "expected": 0.0041277,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002810280350219382,
             "status": "passed"
           },
@@ -943,6 +1024,7 @@
             "expected": -12.028,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.9864928853463676e-05,
             "status": "passed"
           },
@@ -954,6 +1036,7 @@
             "expected": 6.503990548,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002355695784874101,
             "status": "passed"
           },
@@ -965,6 +1048,7 @@
             "expected": 0.0035611,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0027407245716459844,
             "status": "passed"
           },
@@ -976,6 +1060,7 @@
             "expected": -7.0492,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00010213032875879558,
             "status": "passed"
           },
@@ -987,6 +1072,7 @@
             "expected": 5.68310881,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0022863509617369097,
             "status": "passed"
           },
@@ -998,6 +1084,7 @@
             "expected": 0.0030774,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0027035791368927053,
             "status": "passed"
           },
@@ -1009,6 +1096,7 @@
             "expected": -2.074,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0003471212879188765,
             "status": "passed"
           },
@@ -1020,6 +1108,7 @@
             "expected": 4.973328622,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002255221329219295,
             "status": "passed"
           },
@@ -1031,6 +1120,7 @@
             "expected": 0.0026638,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002642839050640011,
             "status": "passed"
           },
@@ -1042,6 +1132,7 @@
             "expected": 2.8994,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00012413823332382002,
             "status": "passed"
           },
@@ -1053,6 +1144,7 @@
             "expected": 4.358566712,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00224315592695597,
             "status": "passed"
           },
@@ -1064,6 +1156,7 @@
             "expected": 0.0023095,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0025806472318158124,
             "status": "passed"
           },
@@ -1075,6 +1168,7 @@
             "expected": 7.8728,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 4.5735446453753444e-05,
             "status": "passed"
           },
@@ -1086,6 +1180,7 @@
             "expected": 3.825490894,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002179566893284993,
             "status": "passed"
           },
@@ -1097,6 +1192,7 @@
             "expected": 0.0020055,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0025230634188618895,
             "status": "passed"
           },
@@ -1108,6 +1204,7 @@
             "expected": 12.8444,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 8.408788614597826e-05,
             "status": "passed"
           },
@@ -1119,6 +1216,7 @@
             "expected": 3.362461958,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00039020549758564095,
             "status": "passed"
           },
@@ -1130,6 +1228,7 @@
             "expected": 0.0017441,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0024883910380494876,
             "status": "passed"
           },
@@ -1141,6 +1240,7 @@
             "expected": 22.7804,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0030590224951404506,
             "status": "passed"
           },
@@ -1152,6 +1252,7 @@
             "expected": 2.60824115,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0033497547482587457,
             "status": "passed"
           },
@@ -1163,6 +1264,7 @@
             "expected": 0.0013251,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.003988918412230079,
             "status": "passed"
           },
@@ -1174,6 +1276,7 @@
             "expected": 27.5,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1185,6 +1288,7 @@
             "expected": 1.886715941,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.007711287643167021,
             "status": "passed"
           },
@@ -1196,6 +1300,7 @@
             "expected": 0.0009492,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0077802343029719345,
             "status": "passed"
           },
@@ -1207,6 +1312,7 @@
             "expected": 17.1338,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0009980258102890204,
             "status": "passed"
           },
@@ -1218,6 +1324,7 @@
             "expected": 1.075801599,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0018589184129203162,
             "status": "passed"
           },
@@ -1229,6 +1336,7 @@
             "expected": 0.00055299,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0015461394785086895,
             "status": "passed"
           },
@@ -1240,6 +1348,7 @@
             "expected": -2.6626,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.082174872524052e-08,
             "status": "passed"
           },
@@ -1251,6 +1360,7 @@
             "expected": 0.640981876,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.002030438300175198,
             "status": "passed"
           },
@@ -1262,6 +1372,7 @@
             "expected": 0.00034377,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.001672628596515343,
             "status": "passed"
           },
@@ -1273,6 +1384,7 @@
             "expected": -27.3928,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.10755600673609e-09,
             "status": "passed"
           },
@@ -1284,6 +1396,7 @@
             "expected": 0.325114879,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.00224565554315624,
             "status": "passed"
           },
@@ -1295,6 +1408,7 @@
             "expected": 0.00018434,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0018986670059751459,
             "status": "passed"
           },
@@ -1306,6 +1420,7 @@
             "expected": -52.0852,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.8662079953494293e-10,
             "status": "passed"
           },
@@ -1317,6 +1432,7 @@
             "expected": 0.158629735,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0025147085171337872,
             "status": "passed"
           },
@@ -1328,6 +1444,7 @@
             "expected": 9.549e-05,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0010367583286549553,
             "status": "passed"
           },
@@ -1339,6 +1456,7 @@
             "expected": -75.757,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.1879926780494775e-05,
             "status": "passed"
           },
@@ -1350,6 +1468,7 @@
             "expected": 0.074099443,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0029130407784483015,
             "status": "passed"
           },
@@ -1361,6 +1480,7 @@
             "expected": 4.7307e-05,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0025471912282299886,
             "status": "passed"
           },
@@ -1372,6 +1492,7 @@
             "expected": -93.6994,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0038420732782574996,
             "status": "passed"
           },
@@ -1383,6 +1504,7 @@
             "expected": 0.033269095,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0031486413835420416,
             "status": "passed"
           },
@@ -1394,6 +1516,7 @@
             "expected": 2.2259e-05,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0027853884627188448,
             "status": "passed"
           },
@@ -1405,6 +1528,7 @@
             "expected": -110.8948,
             "output_id": "AmbientTemperature",
             "reason": null,
+            "reason_code": null,
             "relative_error": 8.116171871132387e-06,
             "status": "passed"
           },
@@ -1416,6 +1540,7 @@
             "expected": 0.014379292,
             "output_id": "AmbientPressure",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.011427834235327429,
             "status": "passed"
           },
@@ -1427,6 +1552,7 @@
             "expected": 1.0105e-05,
             "output_id": "RatioOfDensityToSeaLevel",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.003057894036784793,
             "status": "passed"
           }
@@ -1465,6 +1591,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1476,6 +1603,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1487,6 +1615,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1498,6 +1627,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1509,6 +1639,7 @@
             "expected": -0.0466,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9780660531790678e-16,
             "status": "passed"
           },
@@ -1520,6 +1651,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1531,6 +1663,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1542,6 +1675,7 @@
             "expected": -0.0468,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1553,6 +1687,7 @@
             "expected": -0.41530612733219,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.808064929688683e-12,
             "status": "passed"
           },
@@ -1564,6 +1699,7 @@
             "expected": -0.005616,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.5444475391531402e-16,
             "status": "passed"
           },
@@ -1575,6 +1711,7 @@
             "expected": -0.04653061273322,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.37724179870073e-12,
             "status": "passed"
           },
@@ -1586,6 +1723,7 @@
             "expected": 0.01065792,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.6276379218241526e-16,
             "status": "passed"
           },
@@ -1597,6 +1735,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1608,6 +1747,7 @@
             "expected": 0.0468,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1619,6 +1759,7 @@
             "expected": -0.41530612733219,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.808064929688683e-12,
             "status": "passed"
           },
@@ -1630,6 +1771,7 @@
             "expected": 0.005616,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.5444475391531402e-16,
             "status": "passed"
           },
@@ -1641,6 +1783,7 @@
             "expected": -0.04653061273322,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.37724179870073e-12,
             "status": "passed"
           },
@@ -1652,6 +1795,7 @@
             "expected": -0.01065792,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.6276379218241526e-16,
             "status": "passed"
           },
@@ -1663,6 +1807,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1674,6 +1819,7 @@
             "expected": 0.01881,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1685,6 +1831,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1696,6 +1843,7 @@
             "expected": -0.07182,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1707,6 +1855,7 @@
             "expected": -0.0466,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9780660531790678e-16,
             "status": "passed"
           },
@@ -1718,6 +1867,7 @@
             "expected": -0.002761764,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1729,6 +1879,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1740,6 +1891,7 @@
             "expected": -0.01881,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1751,6 +1903,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1762,6 +1915,7 @@
             "expected": 0.07182,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1773,6 +1927,7 @@
             "expected": -0.0466,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9780660531790678e-16,
             "status": "passed"
           },
@@ -1784,6 +1939,7 @@
             "expected": 0.002761764,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1795,6 +1951,7 @@
             "expected": 0.02077570666667,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.603155612135585e-13,
             "status": "passed"
           },
@@ -1806,6 +1963,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1817,6 +1975,7 @@
             "expected": -0.99656506666667,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.4535541044498188e-15,
             "status": "passed"
           },
@@ -1828,6 +1987,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1839,6 +1999,7 @@
             "expected": -0.2019104,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.3746481417316253e-16,
             "status": "passed"
           },
@@ -1850,6 +2011,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1861,6 +2023,7 @@
             "expected": -0.02877570666667,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.1574586551277574e-13,
             "status": "passed"
           },
@@ -1872,6 +2035,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1883,6 +2047,7 @@
             "expected": 0.16456506666667,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.0407883140190732e-14,
             "status": "passed"
           },
@@ -1894,6 +2059,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1905,6 +2071,7 @@
             "expected": 0.1087104,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.276583271500653e-16,
             "status": "passed"
           },
@@ -1916,6 +2083,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1927,6 +2095,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1938,6 +2107,7 @@
             "expected": 0.139868,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1949,6 +2119,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1960,6 +2131,7 @@
             "expected": 0.016498,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -1971,6 +2143,7 @@
             "expected": -0.0466,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9780660531790678e-16,
             "status": "passed"
           },
@@ -1982,6 +2155,7 @@
             "expected": -0.06163368586667,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.4152334406861655e-14,
             "status": "passed"
           },
@@ -1993,6 +2167,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2004,6 +2179,7 @@
             "expected": -0.139868,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2015,6 +2191,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2026,6 +2203,7 @@
             "expected": -0.016498,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2037,6 +2215,7 @@
             "expected": -0.0466,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9780660531790678e-16,
             "status": "passed"
           },
@@ -2048,6 +2227,7 @@
             "expected": 0.06163368586667,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.4152334406861655e-14,
             "status": "passed"
           },
@@ -2059,6 +2239,7 @@
             "expected": -0.02860333333333,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.1656468433146994e-13,
             "status": "passed"
           },
@@ -2070,6 +2251,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2081,6 +2263,7 @@
             "expected": -0.514192,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2092,6 +2275,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2103,6 +2287,7 @@
             "expected": -0.1834792,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2114,6 +2299,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2125,6 +2311,7 @@
             "expected": -0.02422,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.4324719041922437e-16,
             "status": "passed"
           },
@@ -2136,6 +2323,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2147,6 +2335,7 @@
             "expected": -0.317808,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2158,6 +2347,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2169,6 +2359,7 @@
             "expected": 0.08481253333333,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.9270953749079544e-14,
             "status": "passed"
           },
@@ -2180,6 +2371,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2191,6 +2383,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2202,6 +2395,7 @@
             "expected": 0.025305,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.3710519470277077e-16,
             "status": "passed"
           },
@@ -2213,6 +2407,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2224,6 +2419,7 @@
             "expected": -0.06266,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.2147762221216818e-16,
             "status": "passed"
           },
@@ -2235,6 +2431,7 @@
             "expected": -0.0466,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9780660531790678e-16,
             "status": "passed"
           },
@@ -2246,6 +2443,7 @@
             "expected": -0.011799842,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2257,6 +2455,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2268,6 +2467,7 @@
             "expected": -0.025305,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.3710519470277077e-16,
             "status": "passed"
           },
@@ -2279,6 +2479,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2290,6 +2491,7 @@
             "expected": 0.06266,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.2147762221216818e-16,
             "status": "passed"
           },
@@ -2301,6 +2503,7 @@
             "expected": -0.0466,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9780660531790678e-16,
             "status": "passed"
           },
@@ -2312,6 +2515,7 @@
             "expected": 0.011799842,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2323,6 +2527,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2334,6 +2539,7 @@
             "expected": 0.034486,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.0120900956641037e-16,
             "status": "passed"
           },
@@ -2345,6 +2551,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2356,6 +2563,7 @@
             "expected": 0.005614,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2367,6 +2575,7 @@
             "expected": -0.0466,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9780660531790678e-16,
             "status": "passed"
           },
@@ -2378,6 +2587,7 @@
             "expected": -0.01934627173333,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.72160771842016e-13,
             "status": "passed"
           },
@@ -2389,6 +2599,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2400,6 +2611,7 @@
             "expected": -0.034486,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.0120900956641037e-16,
             "status": "passed"
           },
@@ -2411,6 +2623,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2422,6 +2635,7 @@
             "expected": -0.005614,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2433,6 +2647,7 @@
             "expected": -0.0466,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9780660531790678e-16,
             "status": "passed"
           },
@@ -2444,6 +2659,7 @@
             "expected": 0.01934627173333,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.72160771842016e-13,
             "status": "passed"
           },
@@ -2455,6 +2671,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2466,6 +2683,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2477,6 +2695,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2488,6 +2707,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2499,6 +2719,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2510,6 +2731,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2521,6 +2743,7 @@
             "expected": 0.04794994533333,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.931666255021229e-14,
             "status": "passed"
           },
@@ -2532,6 +2755,7 @@
             "expected": 0.02735386,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.073429420131e-16,
             "status": "passed"
           },
@@ -2543,6 +2767,7 @@
             "expected": -0.72934852554344,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.1302423559024265e-11,
             "status": "passed"
           },
@@ -2554,6 +2779,7 @@
             "expected": -0.026917840128,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.288902428818829e-16,
             "status": "passed"
           },
@@ -2565,6 +2791,7 @@
             "expected": -0.10638585796503,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.7566344789832926e-11,
             "status": "passed"
           },
@@ -2576,6 +2803,7 @@
             "expected": 0.01118365476765,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.9797091081448663e-13,
             "status": "passed"
           }
@@ -2615,6 +2843,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2626,6 +2855,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2637,6 +2867,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2648,6 +2879,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2659,6 +2891,7 @@
             "expected": 0.450007736683,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.668553794643656e-08,
             "status": "passed"
           },
@@ -2670,6 +2903,7 @@
             "expected": 0.136936217546,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.0737734863744845e-07,
             "status": "passed"
           },
@@ -2681,6 +2915,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2692,6 +2927,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2703,6 +2939,7 @@
             "expected": -0.011184306815,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.469515481443547e-07,
             "status": "passed"
           },
@@ -2714,6 +2951,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2725,6 +2963,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2736,6 +2975,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2747,6 +2987,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2758,6 +2999,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2769,6 +3011,7 @@
             "expected": 0.450007736683,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.668553794643656e-08,
             "status": "passed"
           },
@@ -2780,6 +3023,7 @@
             "expected": 0.136936217546,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.0737734863744845e-07,
             "status": "passed"
           },
@@ -2791,6 +3035,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2802,6 +3047,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2813,6 +3059,7 @@
             "expected": -0.011184306815,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.469515481443547e-07,
             "status": "passed"
           },
@@ -2824,6 +3071,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2835,6 +3083,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2846,6 +3095,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2857,6 +3107,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2868,6 +3119,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2879,6 +3131,7 @@
             "expected": 0.327563971281,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 8.667893202841429e-08,
             "status": "passed"
           },
@@ -2890,6 +3143,7 @@
             "expected": 0.200815469027,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 8.674193129516227e-08,
             "status": "passed"
           },
@@ -2901,6 +3155,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2912,6 +3167,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2923,6 +3179,7 @@
             "expected": -0.028242193162,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 7.175335019880242e-09,
             "status": "passed"
           },
@@ -2934,6 +3191,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2945,6 +3203,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2956,6 +3215,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2967,6 +3227,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2978,6 +3239,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -2989,6 +3251,7 @@
             "expected": 0.368505477905,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.994256707987578e-08,
             "status": "passed"
           },
@@ -3000,6 +3263,7 @@
             "expected": 0.111297950149,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5023106777907173e-08,
             "status": "passed"
           },
@@ -3011,6 +3275,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3022,6 +3287,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3033,6 +3299,7 @@
             "expected": -0.006371179596,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.5755042356336233e-07,
             "status": "passed"
           },
@@ -3044,6 +3311,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3055,6 +3323,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3066,6 +3335,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3077,6 +3347,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3088,6 +3359,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3099,6 +3371,7 @@
             "expected": 0.368505477905,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.994256707987578e-08,
             "status": "passed"
           },
@@ -3110,6 +3383,7 @@
             "expected": 0.111297950149,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5023106777907173e-08,
             "status": "passed"
           },
@@ -3121,6 +3395,7 @@
             "expected": -0.042259058986,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.827171308028361e-08,
             "status": "passed"
           },
@@ -3132,6 +3407,7 @@
             "expected": -0.028061014832,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.823105309062802e-08,
             "status": "passed"
           },
@@ -3143,6 +3419,7 @@
             "expected": -0.006371179596,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.5755042356336233e-07,
             "status": "passed"
           },
@@ -3154,6 +3431,7 @@
             "expected": 0.011899560867,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 4.523864532332865e-09,
             "status": "passed"
           },
@@ -3165,6 +3443,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3176,6 +3455,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3187,6 +3467,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3198,6 +3479,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3209,6 +3491,7 @@
             "expected": 0.368505477905,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.994256707987578e-08,
             "status": "passed"
           },
@@ -3220,6 +3503,7 @@
             "expected": 0.111297950149,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5023106777907173e-08,
             "status": "passed"
           },
@@ -3231,6 +3515,7 @@
             "expected": 0.042259058986,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.827171308028361e-08,
             "status": "passed"
           },
@@ -3242,6 +3527,7 @@
             "expected": 0.028061014832,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.823105309062802e-08,
             "status": "passed"
           },
@@ -3253,6 +3539,7 @@
             "expected": -0.006371179596,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.5755042356336233e-07,
             "status": "passed"
           },
@@ -3264,6 +3551,7 @@
             "expected": -0.011899560867,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 4.523864532332865e-09,
             "status": "passed"
           },
@@ -3275,6 +3563,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3286,6 +3575,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3297,6 +3587,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3308,6 +3599,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3319,6 +3611,7 @@
             "expected": 0.368505477905,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.994256707987578e-08,
             "status": "passed"
           },
@@ -3330,6 +3623,7 @@
             "expected": 0.111297950149,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5023106777907173e-08,
             "status": "passed"
           },
@@ -3341,6 +3635,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3352,6 +3647,7 @@
             "expected": -0.007327404339,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.4217577351796676e-08,
             "status": "passed"
           },
@@ -3363,6 +3659,7 @@
             "expected": -0.006371179596,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.5755042356336233e-07,
             "status": "passed"
           },
@@ -3374,6 +3671,7 @@
             "expected": 0.00358135486,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.764106965215575e-08,
             "status": "passed"
           },
@@ -3385,6 +3683,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3396,6 +3695,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3407,6 +3707,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3418,6 +3719,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3429,6 +3731,7 @@
             "expected": 0.368505477905,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.994256707987578e-08,
             "status": "passed"
           },
@@ -3440,6 +3743,7 @@
             "expected": 0.111297950149,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5023106777907173e-08,
             "status": "passed"
           },
@@ -3451,6 +3755,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3462,6 +3767,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3473,6 +3779,7 @@
             "expected": -0.010959836654,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.0891921775494197e-07,
             "status": "passed"
           },
@@ -3484,6 +3791,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3495,6 +3803,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3506,6 +3815,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3517,6 +3827,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3528,6 +3839,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3539,6 +3851,7 @@
             "expected": 0.368505477905,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.994256707987578e-08,
             "status": "passed"
           },
@@ -3550,6 +3863,7 @@
             "expected": 0.111297950149,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5023106777907173e-08,
             "status": "passed"
           },
@@ -3561,6 +3875,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3572,6 +3887,7 @@
             "expected": 0.010551556014,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 8.857076533924153e-09,
             "status": "passed"
           },
@@ -3583,6 +3899,7 @@
             "expected": -0.006371179596,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.5755042356336233e-07,
             "status": "passed"
           },
@@ -3594,6 +3911,7 @@
             "expected": -0.012994545512,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.8416219549212015e-08,
             "status": "passed"
           },
@@ -3605,6 +3923,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3616,6 +3935,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3627,6 +3947,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3638,6 +3959,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3649,6 +3971,7 @@
             "expected": 0.331961810589,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.373557703318914e-08,
             "status": "passed"
           },
@@ -3660,6 +3983,7 @@
             "expected": 0.10983286798,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 9.93238736770827e-09,
             "status": "passed"
           },
@@ -3671,6 +3995,7 @@
             "expected": 0.007759563625,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.8070740306128896e-07,
             "status": "passed"
           },
@@ -3682,6 +4007,7 @@
             "expected": -0.003393595107,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.948872512068514e-07,
             "status": "passed"
           },
@@ -3693,6 +4019,7 @@
             "expected": 0.006881327368,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.1473001850320716e-07,
             "status": "passed"
           },
@@ -3704,6 +4031,7 @@
             "expected": -0.002109055407,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.572961479822373e-09,
             "status": "passed"
           },
@@ -3715,6 +4043,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3726,6 +4055,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3737,6 +4067,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3748,6 +4079,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3759,6 +4091,7 @@
             "expected": 0.295418143272,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.1317126993439987e-07,
             "status": "passed"
           },
@@ -3770,6 +4103,7 @@
             "expected": 0.108367785811,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.5836761805360867e-08,
             "status": "passed"
           },
@@ -3781,6 +4115,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3792,6 +4127,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3803,6 +4139,7 @@
             "expected": 0.020133834332,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.3363676946310547e-07,
             "status": "passed"
           },
@@ -3814,6 +4151,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3825,6 +4163,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3836,6 +4175,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3847,6 +4187,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3858,6 +4199,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3869,6 +4211,7 @@
             "expected": 0.331961810589,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.373557703318914e-08,
             "status": "passed"
           },
@@ -3880,6 +4223,7 @@
             "expected": 0.10983286798,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 9.93238736770827e-09,
             "status": "passed"
           },
@@ -3891,6 +4235,7 @@
             "expected": -0.007759563625,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.8070740306128896e-07,
             "status": "passed"
           },
@@ -3902,6 +4247,7 @@
             "expected": 0.003393595107,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.948872512068514e-07,
             "status": "passed"
           },
@@ -3913,6 +4259,7 @@
             "expected": 0.006881327368,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.1473001850320716e-07,
             "status": "passed"
           },
@@ -3924,6 +4271,7 @@
             "expected": 0.002109055407,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.572961479822373e-09,
             "status": "passed"
           },
@@ -3935,6 +4283,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3946,6 +4295,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3957,6 +4307,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3968,6 +4319,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -3979,6 +4331,7 @@
             "expected": 0.40392947197,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.614798262733569e-09,
             "status": "passed"
           },
@@ -3990,6 +4343,7 @@
             "expected": 0.121194645762,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.190731873255053e-09,
             "status": "passed"
           },
@@ -4001,6 +4355,7 @@
             "expected": 0.007811152376,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.940823564813514e-08,
             "status": "passed"
           },
@@ -4012,6 +4367,7 @@
             "expected": 0.011529285461,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.46772644780225e-08,
             "status": "passed"
           },
@@ -4023,6 +4379,7 @@
             "expected": -0.013721060939,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.123355137699957e-07,
             "status": "passed"
           },
@@ -4034,6 +4391,7 @@
             "expected": -0.002983793616,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 7.418397827019386e-08,
             "status": "passed"
           },
@@ -4045,6 +4403,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4056,6 +4415,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4067,6 +4427,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4078,6 +4439,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4089,6 +4451,7 @@
             "expected": 0.439353466034,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.727937818979972e-08,
             "status": "passed"
           },
@@ -4100,6 +4463,7 @@
             "expected": 0.131091341376,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.752568765938535e-08,
             "status": "passed"
           },
@@ -4111,6 +4475,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4122,6 +4487,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4133,6 +4499,7 @@
             "expected": -0.021070942283,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.837970679751356e-08,
             "status": "passed"
           },
@@ -4144,6 +4511,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4155,6 +4523,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4166,6 +4535,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4177,6 +4547,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4188,6 +4559,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4199,6 +4571,7 @@
             "expected": 0.40392947197,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.614798262733569e-09,
             "status": "passed"
           },
@@ -4210,6 +4583,7 @@
             "expected": 0.121194645762,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.190731873255053e-09,
             "status": "passed"
           },
@@ -4221,6 +4595,7 @@
             "expected": -0.007811152376,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.940823564813514e-08,
             "status": "passed"
           },
@@ -4232,6 +4607,7 @@
             "expected": -0.011529285461,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.46772644780225e-08,
             "status": "passed"
           },
@@ -4243,6 +4619,7 @@
             "expected": -0.013721060939,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.123355137699957e-07,
             "status": "passed"
           },
@@ -4254,6 +4631,7 @@
             "expected": 0.002983793616,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 7.418397827019386e-08,
             "status": "passed"
           },
@@ -4265,6 +4643,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4276,6 +4655,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4287,6 +4667,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4298,6 +4679,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4309,6 +4691,7 @@
             "expected": 0.344522893429,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.865618916584715e-08,
             "status": "passed"
           },
@@ -4320,6 +4703,7 @@
             "expected": 0.136000260711,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.962104002507064e-09,
             "status": "passed"
           },
@@ -4331,6 +4715,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4342,6 +4727,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4353,6 +4739,7 @@
             "expected": 0.009560574777,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.0131189977662118e-07,
             "status": "passed"
           },
@@ -4364,6 +4751,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4375,6 +4763,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4386,6 +4775,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4397,6 +4787,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4408,6 +4799,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4419,6 +4811,7 @@
             "expected": 0.342922061682,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.793060132527451e-08,
             "status": "passed"
           },
@@ -4430,6 +4823,7 @@
             "expected": 0.108217321336,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.389498379341764e-08,
             "status": "passed"
           },
@@ -4441,6 +4835,7 @@
             "expected": -0.011804478243,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.8574579559221433e-08,
             "status": "passed"
           },
@@ -4452,6 +4847,7 @@
             "expected": -0.008789033629,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.670475560455413e-08,
             "status": "passed"
           },
@@ -4463,6 +4859,7 @@
             "expected": 0.004267802462,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.3605859432316276e-07,
             "status": "passed"
           },
@@ -4474,6 +4871,7 @@
             "expected": 0.010292638093,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.0399180364968616e-07,
             "status": "passed"
           },
@@ -4485,6 +4883,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4496,6 +4895,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4507,6 +4907,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4518,6 +4919,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4529,6 +4931,7 @@
             "expected": 0.317338645458,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 4.720345348459377e-08,
             "status": "passed"
           },
@@ -4540,6 +4943,7 @@
             "expected": 0.105136692524,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 9.446833223327409e-08,
             "status": "passed"
           },
@@ -4551,6 +4955,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4562,6 +4967,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4573,6 +4979,7 @@
             "expected": 0.01490678452,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.2170425109450986e-08,
             "status": "passed"
           },
@@ -4584,6 +4991,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4595,6 +5003,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4606,6 +5015,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4617,6 +5027,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4628,6 +5039,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4639,6 +5051,7 @@
             "expected": 0.342922061682,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.793060132527451e-08,
             "status": "passed"
           },
@@ -4650,6 +5063,7 @@
             "expected": 0.108217321336,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.389498379341764e-08,
             "status": "passed"
           },
@@ -4661,6 +5075,7 @@
             "expected": 0.011804478243,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.8574579559221433e-08,
             "status": "passed"
           },
@@ -4672,6 +5087,7 @@
             "expected": 0.008789033629,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.670475560455413e-08,
             "status": "passed"
           },
@@ -4683,6 +5099,7 @@
             "expected": 0.004267802462,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.3605859432316276e-07,
             "status": "passed"
           },
@@ -4694,6 +5111,7 @@
             "expected": -0.010292638093,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.0399180364968616e-07,
             "status": "passed"
           },
@@ -4705,6 +5123,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4716,6 +5135,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4727,6 +5147,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4738,6 +5159,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4749,6 +5171,7 @@
             "expected": 0.35628426075,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.5022736677578557e-08,
             "status": "passed"
           },
@@ -4760,6 +5183,7 @@
             "expected": 0.103924736381,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.133905909871065e-08,
             "status": "passed"
           },
@@ -4771,6 +5195,7 @@
             "expected": -0.046877939254,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.089085065244317e-09,
             "status": "passed"
           },
@@ -4782,6 +5207,7 @@
             "expected": -0.003217480611,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.626723980631255e-08,
             "status": "passed"
           },
@@ -4793,6 +5219,7 @@
             "expected": -0.005869387183,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5714466375400253e-07,
             "status": "passed"
           },
@@ -4804,6 +5231,7 @@
             "expected": 0.02719957754,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.419931544696758e-08,
             "status": "passed"
           },
@@ -4815,6 +5243,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4826,6 +5255,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4837,6 +5267,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4848,6 +5279,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4859,6 +5291,7 @@
             "expected": 0.35628426075,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.5022736677578557e-08,
             "status": "passed"
           },
@@ -4870,6 +5303,7 @@
             "expected": 0.103924736381,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.133905909871065e-08,
             "status": "passed"
           },
@@ -4881,6 +5315,7 @@
             "expected": 0.046877939254,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.089085065244317e-09,
             "status": "passed"
           },
@@ -4892,6 +5327,7 @@
             "expected": 0.003217480611,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.626723980631255e-08,
             "status": "passed"
           },
@@ -4903,6 +5339,7 @@
             "expected": -0.005869387183,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5714466375400253e-07,
             "status": "passed"
           },
@@ -4914,6 +5351,7 @@
             "expected": -0.02719957754,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.419931544696758e-08,
             "status": "passed"
           },
@@ -4925,6 +5363,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4936,6 +5375,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4947,6 +5387,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4958,6 +5399,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -4969,6 +5411,7 @@
             "expected": 0.375169605017,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.5702628459266355e-08,
             "status": "passed"
           },
@@ -4980,6 +5423,7 @@
             "expected": 0.115039661527,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.725583802946334e-09,
             "status": "passed"
           },
@@ -4991,6 +5435,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5002,6 +5447,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5013,6 +5459,7 @@
             "expected": -0.006561815739,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.675371533903874e-07,
             "status": "passed"
           },
@@ -5024,6 +5471,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5035,6 +5483,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5046,6 +5495,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5057,6 +5507,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5068,6 +5519,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5079,6 +5531,7 @@
             "expected": 0.380470842123,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5600624454757073e-09,
             "status": "passed"
           },
@@ -5090,6 +5543,7 @@
             "expected": 0.11669716984,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.5593548667736615e-08,
             "status": "passed"
           },
@@ -5101,6 +5555,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5112,6 +5567,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5123,6 +5579,7 @@
             "expected": -0.006508949678,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.290246625186069e-07,
             "status": "passed"
           },
@@ -5134,6 +5591,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5145,6 +5603,7 @@
             "expected": 28.24,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5156,6 +5615,7 @@
             "expected": 13.89,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5167,6 +5627,7 @@
             "expected": 286.45,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5178,6 +5639,7 @@
             "expected": 0.54,
             "output_id": "vrsPositionOfMrc_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5189,6 +5651,7 @@
             "expected": 0.387369841337,
             "output_id": "totalCoefficientOfLift",
             "reason": null,
+            "reason_code": null,
             "relative_error": 4.18303685483566e-08,
             "status": "passed"
           },
@@ -5200,6 +5663,7 @@
             "expected": 0.117652975023,
             "output_id": "totalCoefficientOfDrag",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.9580422688961614e-08,
             "status": "passed"
           },
@@ -5211,6 +5675,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5222,6 +5687,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5233,6 +5699,7 @@
             "expected": -0.006862957031,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.2466434939217628e-07,
             "status": "passed"
           },
@@ -5244,6 +5711,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           }
@@ -5360,6 +5828,7 @@
             "expected": 0.0233,
             "output_id": "CLBASIC",
             "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
+            "reason_code": "legacy_table_reference_type_mismatch",
             "relative_error": null,
             "status": "unsupported"
           },
@@ -5371,6 +5840,7 @@
             "expected": 0.26,
             "output_id": "CLBASIC",
             "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
+            "reason_code": "legacy_table_reference_type_mismatch",
             "relative_error": null,
             "status": "unsupported"
           },
@@ -5382,6 +5852,7 @@
             "expected": 0.3822,
             "output_id": "CLBASIC",
             "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
+            "reason_code": "legacy_table_reference_type_mismatch",
             "relative_error": null,
             "status": "unsupported"
           },
@@ -5393,6 +5864,7 @@
             "expected": 1.0072,
             "output_id": "CLBASIC",
             "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
+            "reason_code": "legacy_table_reference_type_mismatch",
             "relative_error": null,
             "status": "unsupported"
           }
@@ -5529,6 +6001,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5540,6 +6013,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5551,6 +6025,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5562,6 +6037,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5573,6 +6049,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5584,6 +6061,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5595,6 +6073,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5606,6 +6085,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5617,6 +6097,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5628,6 +6109,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5639,6 +6121,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5650,6 +6133,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5661,6 +6145,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5672,6 +6157,7 @@
             "expected": -0.0468,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5683,6 +6169,7 @@
             "expected": -0.41530612733219,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.808064929688683e-12,
             "status": "passed"
           },
@@ -5694,6 +6181,7 @@
             "expected": -0.005616,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.5444475391531402e-16,
             "status": "passed"
           },
@@ -5705,6 +6193,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5716,6 +6205,7 @@
             "expected": 0.008892,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.950881102088177e-16,
             "status": "passed"
           },
@@ -5727,6 +6217,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5738,6 +6229,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5749,6 +6241,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5760,6 +6253,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5771,6 +6265,7 @@
             "expected": 0.0468,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5782,6 +6277,7 @@
             "expected": -0.41530612733219,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.808064929688683e-12,
             "status": "passed"
           },
@@ -5793,6 +6289,7 @@
             "expected": 0.005616,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.5444475391531402e-16,
             "status": "passed"
           },
@@ -5804,6 +6301,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5815,6 +6313,7 @@
             "expected": -0.008892,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.950881102088177e-16,
             "status": "passed"
           },
@@ -5826,6 +6325,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5837,6 +6337,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5848,6 +6349,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5859,6 +6361,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5870,6 +6373,7 @@
             "expected": 0.01881,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5881,6 +6385,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5892,6 +6397,7 @@
             "expected": -0.07182,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5903,6 +6409,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5914,6 +6421,7 @@
             "expected": -0.002052,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5925,6 +6433,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5936,6 +6445,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5947,6 +6457,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5958,6 +6469,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5969,6 +6481,7 @@
             "expected": -0.01881,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5980,6 +6493,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -5991,6 +6505,7 @@
             "expected": 0.07182,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6002,6 +6517,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6013,6 +6529,7 @@
             "expected": 0.002052,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6024,6 +6541,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6035,6 +6553,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6046,6 +6565,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6057,6 +6577,7 @@
             "expected": 0.02077570666667,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.603155612135585e-13,
             "status": "passed"
           },
@@ -6068,6 +6589,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6079,6 +6601,7 @@
             "expected": -0.99656506666667,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.4535541044498188e-15,
             "status": "passed"
           },
@@ -6090,6 +6613,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6101,6 +6625,7 @@
             "expected": -0.10225389333333,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.257254042169392e-14,
             "status": "passed"
           },
@@ -6112,6 +6637,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6123,6 +6649,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6134,6 +6661,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6145,6 +6673,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6156,6 +6685,7 @@
             "expected": -0.02877570666667,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.1574586551277574e-13,
             "status": "passed"
           },
@@ -6167,6 +6697,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6178,6 +6709,7 @@
             "expected": 0.16456506666667,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.0407883140190732e-14,
             "status": "passed"
           },
@@ -6189,6 +6721,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6200,6 +6733,7 @@
             "expected": 0.09225389333333,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 3.5952859724667536e-14,
             "status": "passed"
           },
@@ -6211,6 +6745,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6222,6 +6757,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6233,6 +6769,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6244,6 +6781,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6255,6 +6793,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6266,6 +6805,7 @@
             "expected": 0.139868,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6277,6 +6817,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6288,6 +6829,7 @@
             "expected": 0.016498,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6299,6 +6841,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6310,6 +6853,7 @@
             "expected": -0.056356,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.231260895717799e-16,
             "status": "passed"
           },
@@ -6321,6 +6865,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6332,6 +6877,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6343,6 +6889,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6354,6 +6901,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6365,6 +6913,7 @@
             "expected": -0.139868,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6376,6 +6925,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6387,6 +6937,7 @@
             "expected": -0.016498,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6398,6 +6949,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6409,6 +6961,7 @@
             "expected": 0.056356,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.231260895717799e-16,
             "status": "passed"
           },
@@ -6420,6 +6973,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6431,6 +6985,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6442,6 +6997,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6453,6 +7009,7 @@
             "expected": -0.02860333333333,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.1656468433146994e-13,
             "status": "passed"
           },
@@ -6464,6 +7021,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6475,6 +7033,7 @@
             "expected": -0.514192,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6486,6 +7045,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6497,6 +7057,7 @@
             "expected": -0.13206,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6508,6 +7069,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6519,6 +7081,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6530,6 +7093,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6541,6 +7105,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6552,6 +7117,7 @@
             "expected": -0.02422,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.4324719041922437e-16,
             "status": "passed"
           },
@@ -6563,6 +7129,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6574,6 +7141,7 @@
             "expected": -0.317808,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6585,6 +7153,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6596,6 +7165,7 @@
             "expected": 0.11659333333333,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.8566548177788026e-14,
             "status": "passed"
           },
@@ -6607,6 +7177,7 @@
             "expected": 0.0,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6618,6 +7189,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6629,6 +7201,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6640,6 +7213,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6651,6 +7225,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6662,6 +7237,7 @@
             "expected": 0.025305,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.3710519470277077e-16,
             "status": "passed"
           },
@@ -6673,6 +7249,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6684,6 +7261,7 @@
             "expected": -0.06266,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.2147762221216818e-16,
             "status": "passed"
           },
@@ -6695,6 +7273,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6706,6 +7285,7 @@
             "expected": -0.010845,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6717,6 +7297,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6728,6 +7309,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6739,6 +7321,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6750,6 +7333,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6761,6 +7345,7 @@
             "expected": -0.025305,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.3710519470277077e-16,
             "status": "passed"
           },
@@ -6772,6 +7357,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6783,6 +7369,7 @@
             "expected": 0.06266,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.2147762221216818e-16,
             "status": "passed"
           },
@@ -6794,6 +7381,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6805,6 +7393,7 @@
             "expected": 0.010845,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6816,6 +7405,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6827,6 +7417,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6838,6 +7429,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6849,6 +7441,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6860,6 +7453,7 @@
             "expected": 0.034486,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.0120900956641037e-16,
             "status": "passed"
           },
@@ -6871,6 +7465,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6882,6 +7477,7 @@
             "expected": 0.005614,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6893,6 +7489,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6904,6 +7501,7 @@
             "expected": -0.018045,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6915,6 +7513,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6926,6 +7525,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6937,6 +7537,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6948,6 +7549,7 @@
             "expected": -0.004,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6959,6 +7561,7 @@
             "expected": -0.034486,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 2.0120900956641037e-16,
             "status": "passed"
           },
@@ -6970,6 +7573,7 @@
             "expected": -0.416,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6981,6 +7585,7 @@
             "expected": -0.005614,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -6992,6 +7597,7 @@
             "expected": -0.005,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7003,6 +7609,7 @@
             "expected": 0.018045,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7014,6 +7621,7 @@
             "expected": 11.32,
             "output_id": "referenceWingChord",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7025,6 +7633,7 @@
             "expected": 30.0,
             "output_id": "referenceWingSpan",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7036,6 +7645,7 @@
             "expected": 300.0,
             "output_id": "referenceWingArea",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7047,6 +7657,7 @@
             "expected": 0.04794994533333,
             "output_id": "aeroBodyForceCoefficient_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.931666255021229e-14,
             "status": "passed"
           },
@@ -7058,6 +7669,7 @@
             "expected": 0.02735386,
             "output_id": "aeroBodyForceCoefficient_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.073429420131e-16,
             "status": "passed"
           },
@@ -7069,6 +7681,7 @@
             "expected": -0.72934852554344,
             "output_id": "aeroBodyForceCoefficient_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.1302423559024265e-11,
             "status": "passed"
           },
@@ -7080,6 +7693,7 @@
             "expected": -0.026917840128,
             "output_id": "aeroBodyMomentCoefficient_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 1.288902428818829e-16,
             "status": "passed"
           },
@@ -7091,6 +7705,7 @@
             "expected": 0.05917625733333,
             "output_id": "aeroBodyMomentCoefficient_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 5.6166616980346426e-14,
             "status": "passed"
           },
@@ -7102,6 +7717,7 @@
             "expected": 0.013526640528,
             "output_id": "aeroBodyMomentCoefficient_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           }
@@ -7213,6 +7829,7 @@
             "expected": 1060.0,
             "output_id": "thrustBodyForce_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7224,6 +7841,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7235,6 +7853,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7246,6 +7865,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7257,6 +7877,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7268,6 +7889,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7279,6 +7901,7 @@
             "expected": 12680.0,
             "output_id": "thrustBodyForce_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7290,6 +7913,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7301,6 +7925,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7312,6 +7937,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7323,6 +7949,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7334,6 +7961,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7345,6 +7973,7 @@
             "expected": 20000.0,
             "output_id": "thrustBodyForce_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7356,6 +7985,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7367,6 +7997,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7378,6 +8009,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7389,6 +8021,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7400,6 +8033,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7411,6 +8045,7 @@
             "expected": 28885.0,
             "output_id": "thrustBodyForce_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7422,6 +8057,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7433,6 +8069,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7444,6 +8081,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7455,6 +8093,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7466,6 +8105,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7477,6 +8117,7 @@
             "expected": 700.0,
             "output_id": "thrustBodyForce_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7488,6 +8129,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7499,6 +8141,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7510,6 +8153,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7521,6 +8165,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7532,6 +8177,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7543,6 +8189,7 @@
             "expected": 2310.0,
             "output_id": "thrustBodyForce_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7554,6 +8201,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7565,6 +8213,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7576,6 +8225,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7587,6 +8237,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7598,6 +8249,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7609,6 +8261,7 @@
             "expected": 5057.0,
             "output_id": "thrustBodyForce_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7620,6 +8273,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7631,6 +8285,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7642,6 +8297,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7653,6 +8309,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7664,6 +8321,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7675,6 +8333,7 @@
             "expected": 5319.3491,
             "output_id": "thrustBodyForce_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 8.141503625301216e-08,
             "status": "passed"
           },
@@ -7686,6 +8345,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7697,6 +8357,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7708,6 +8369,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7719,6 +8381,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7730,6 +8393,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7741,6 +8405,7 @@
             "expected": 9298.8926,
             "output_id": "thrustBodyForce_X",
             "reason": null,
+            "reason_code": null,
             "relative_error": 6.118631810403475e-08,
             "status": "passed"
           },
@@ -7752,6 +8417,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Y",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7763,6 +8429,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyForce_Z",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7774,6 +8441,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Roll",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7785,6 +8453,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Pitch",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           },
@@ -7796,6 +8465,7 @@
             "expected": 0.0,
             "output_id": "thrustBodyMoment_Yaw",
             "reason": null,
+            "reason_code": null,
             "relative_error": 0.0,
             "status": "passed"
           }
