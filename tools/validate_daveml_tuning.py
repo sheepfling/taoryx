@@ -20,10 +20,9 @@ def main() -> int:
     source = json.loads((ROOT / "verification/daveml_f16_linearization_evidence.json").read_text(encoding="utf-8"))
     full_states = tuple(source["state_names"])
     controls = tuple(source["control_names"])
-    reduced_indices = (1, 2, 3, 4, 5)
-    states = tuple(full_states[index] for index in reduced_indices)
-    a_matrix = np.asarray(source["a_matrix"], dtype=float)[np.ix_(reduced_indices, reduced_indices)]
-    b_matrix = np.asarray(source["b_matrix"], dtype=float)[list(reduced_indices), :]
+    states = full_states
+    a_matrix = np.asarray(source["a_matrix"], dtype=float)
+    b_matrix = np.asarray(source["b_matrix"], dtype=float)
     trim_spec = TrimSpec(
         state_names=states,
         control_names=controls,
@@ -50,7 +49,7 @@ def main() -> int:
         allocator="f16-s119-source-channel-surface-allocator",
         states=states,
         controls=controls,
-        notes="Longitudinal speed is excluded because the source-channel A/B pair is rank 5.",
+        notes="Source propulsion throttle sensitivity is included as the fourth control channel.",
     )
     q = tuple(tuple(2.0 if row == column else 0.0 for column in range(len(states))) for row in range(len(states)))
     r = tuple(tuple(1.0 if row == column else 0.0 for column in range(len(controls))) for row in range(len(controls)))
@@ -61,18 +60,18 @@ def main() -> int:
         b_matrix.tolist(),
         q,
         r,
-        lower={name: -24.0 for name in controls},
-        upper={name: 24.0 for name in controls},
+        lower={name: (0.0 if name == "power_pct" else -24.0) for name in controls},
+        upper={name: (100.0 if name == "power_pct" else 24.0) for name in controls},
     )
-    command = controller.command({name: float(trim.state[name]) + (0.1 if name == states[0] else 0.0) for name in states})
+    command = controller.command({name: float(trim.state[name]) - (0.1 if name == states[0] else 0.0) for name in states})
     result = controller.result
     report = {
         "schema_version": "taoryx.daveml-tuning-evidence/v1",
         "status": "verified",
-        "claim_boundary": "source-channel reduced-order LQR screen; not flight qualification",
+        "claim_boundary": "source-channel full-state LQR screen with propulsion sensitivity; not flight qualification",
         "family_id": "reference_f16_s119",
         "design_id": design.id,
-        "excluded_states": {"u_m_s": "source-channel A/B controllability rank is 5 of 6"},
+        "excluded_states": {},
         "state_names": list(states),
         "control_names": list(controls),
         "q_matrix": [list(row) for row in q],
@@ -98,4 +97,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

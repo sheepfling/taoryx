@@ -6,7 +6,7 @@
     "gate_score": 100.0,
     "objectives": [
       {
-        "actual": -0.07020702474369188,
+        "actual": -0.070207024743692,
         "error": 0.0,
         "id": "closed-loop-hurwitz",
         "kind": "stability",
@@ -63,7 +63,7 @@
     "quality_score": null,
     "required_objectives": 3,
     "required_passed": 3,
-    "scenario_contract_sha256": "69bed1d6ec6b7bda9edb7fde3e4b5a61a2a4ed8b1a4584d1d2c71c66515014d7",
+    "scenario_contract_sha256": "a7d409aece892ddb5396382a2af0f7435acd3916d824cacca7347807709446e4",
     "score": 100.0,
     "score_kind": "gate_compliance_legacy",
     "status": "pass",
@@ -74,14 +74,14 @@
     "worst_required_normalized_error": 0.0
   },
   "scenario_contract": {
-    "command_history_sha256": "79ada57d492475ea6b6ffc37ddd94e9cd7e139d1d7fce3cbbd5e11435bc9e8fa",
-    "contract_sha256": "69bed1d6ec6b7bda9edb7fde3e4b5a61a2a4ed8b1a4584d1d2c71c66515014d7",
+    "command_history_sha256": "87f11f32d8ea48a574827300c21f41e6a3bf0b574c816056f104faf8924520c3",
+    "contract_sha256": "a7d409aece892ddb5396382a2af0f7435acd3916d824cacca7347807709446e4",
     "duration_s": 1.0,
     "dynamics_tier": "6dof",
     "environment_sha256": "e961613243cc286ed63aa05895c2791fbd29b68eb7647512c9eaa716b2f19675",
     "event_schedule_sha256": "d2c3731c29e0c7de63b6ea09989970f476787261c935c5bd3eb5cf0bf73d3fd1",
     "family": "reference_f16_s119",
-    "initial_state_sha256": "0150f388deabfe43d7fb83211c57fe8081cd159029aeb7c0ce62fec295dcd528",
+    "initial_state_sha256": "25041034b031b21c0f72e8b7d7104b890eb8972b9844d6f500099ee8be3e9e3b",
     "integrator": "source-channel-smoke",
     "mass_model_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
     "output_rate_hz": 10.0,
@@ -99,6 +99,8 @@
     "aerodynamics_document_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
     "aerodynamics_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
     "mass_properties_document_sha256": "f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28",
-    "mass_properties_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
+    "mass_properties_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
+    "propulsion_document_sha256": "1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4",
+    "propulsion_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
   }
 }
