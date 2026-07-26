@@ -8,6 +8,7 @@
   "package_count": 3,
   "packages": [
     {
+      "checkdata_failed": 0,
       "checkdata_status": "verified",
       "document_count": 3,
       "numeric_diff_count": 0,
@@ -16,6 +17,7 @@
       "structural_diff_count": 0
     },
     {
+      "checkdata_failed": 0,
       "checkdata_status": "verified",
       "document_count": 1,
       "numeric_diff_count": 0,
@@ -24,6 +26,7 @@
       "structural_diff_count": 0
     },
     {
+      "checkdata_failed": 0,
       "checkdata_status": "not_present",
       "document_count": 3,
       "numeric_diff_count": 0,
@@ -1436,6 +1439,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "verified",
       "exported_sha256": "d36d93e3e368fa54dc84c9a1d4ba06da6f3af74a237c0e2bb773379e253dbe38",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -2580,6 +2585,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "verified",
       "exported_sha256": "e1d92eda2e1276823be8c5987a777078c38de6f9ac1e661035a739ea03ecf7df",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -5242,6 +5249,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "verified",
       "exported_sha256": "1216498bf6fb0d07565fd06ef47c14bec5a1e40a0fca90bb54371a789d7a5629",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -5263,6 +5272,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "4472b61e4632026eac491d19a2b53c00f8d3d5fa410a9c7d9e1f80b50af6af7a",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -5284,6 +5295,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "fff9a3e94fe1735b7158c2966790ba78c7a517c2f953a5f5efbfa301238374fd",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -5305,6 +5318,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "6a06c84b1cb41dec4aa63e0d0018328d29943055279c186a47fd6fb6cda09769",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -5371,6 +5386,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "verified_with_quarantine",
       "exported_sha256": "18ef85500d2a4cd0d5081438f19cfb97234037956497ad6820352d532f9372db",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -5392,6 +5409,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "cefecdb68f5523188774fba9fe2cb8928341284a5cff898b8d7a9bb361fb630a",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -5413,6 +5432,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "1d8ba27861bfaa103541533e1dc754f8be1a6e590850b5ba3a1d765cdc5af5e6",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -5434,6 +5455,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "a94bc41fb4e3821e20400f8d20ba25c7eff8d910cb826b9f40dd3dc40f584b36",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -5455,6 +5478,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "966435d28404ff28db742412792b196cd64d53b393a2e7330a574f5b352f2bc0",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7061,6 +7086,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "verified",
       "exported_sha256": "7bec4bc4bf0b076169a6dae6e804175c0b3db37c1404fb75d30b31ca7e0454b7",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7082,6 +7109,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "cd2a3e190a3b776208f7faf055982af4737b8e14fac17043ae89a0febd98b1ed",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7103,6 +7132,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "169d243b3854c12de940b84fab00fb2b9588fc7eea77b0f5782dc3613dea54d2",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7124,6 +7155,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "18fa56e25478e421083fa41f3b4cd2bd32d3b509620735899e567f246e32b8ff",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7740,6 +7773,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "verified",
       "exported_sha256": "be5efa20eeea87a7ee0072297a4c91bcc92bc7fff4122530e862f45ef9465a13",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7761,6 +7796,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "8b02a4b82d749e6da3cb638b954dfe1c31865ac98f3fa2817e1d74570d50cccd",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7782,6 +7819,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "c589db5e0a43cc79b33be635e0a13f44d57cdbff9970c4476d2c22c659731ed4",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7803,6 +7842,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "de0b8decfab36b72236af4ca39e10ab93fe3937f99e293a75bd5287fb6595e10",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7824,6 +7865,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "2f6a8073b8783c7477f0e19228b91aafc84d80333b519667060129b733ea0ddc",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7845,6 +7888,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "63df22094c9b7e66e4fdad5e7e22bb65cc0dfcbe9ad9a7e38549bcfa61bc130f",
       "numeric_diff_count": 0,
       "opaque_paths": [],
@@ -7866,6 +7911,8 @@
         "vector_results": [],
         "vector_unsupported": 0
       },
+      "checkdata_failed": 0,
+      "checkdata_status": "not_present",
       "exported_sha256": "9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0",
       "numeric_diff_count": 0,
       "opaque_paths": [],

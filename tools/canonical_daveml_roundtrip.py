@@ -88,7 +88,7 @@ def main() -> int:
     }
     (output / "roundtrip-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
-    return 0 if not all_diffs and not all_numeric_diffs else 1
+    return 0 if not all_diffs and not all_numeric_diffs and _documents_checkdata_status(documents) != "failed" else 1
     ####
 
 
@@ -216,7 +216,7 @@ def _run_package(package: Path, output: Path) -> int:
     }
     output.joinpath("roundtrip-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
-    return 0 if not structural and not numeric else 1
+    return 0 if not structural and not numeric and report["checkdata_status"] != "failed" else 1
     ####
 
 
@@ -241,6 +241,7 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
         numeric = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
         vector_check_results = evaluate_daveml_vector_checkdata(payload)
+        checkdata = _checkdata_summary(check_results, vector_check_results)
         (target.parent / f"{target.name}.ir.json").write_bytes(ir.canonical_json())
         (target.parent / f"{target.name}.dml").write_bytes(exported)
         source_reports.append(
@@ -251,7 +252,9 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
                 "opaque_paths": list(ir.opaque_paths),
                 "structural_diff_count": len(structural),
                 "numeric_diff_count": len(numeric),
-                "checkdata": _checkdata_summary(check_results, vector_check_results),
+                "checkdata": checkdata,
+                "checkdata_status": checkdata["status"],
+                "checkdata_failed": checkdata["failed"],
             }
         )
     package_reports: list[dict[str, object]] = []
@@ -265,6 +268,12 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
                 "package": str(package.relative_to(catalog_root)),
                 "status": report.get("status"),
                 "checkdata_status": report.get("checkdata_status", "not_present"),
+                "checkdata_failed": sum(
+                    int(item.get("failed", 0))
+                    for item in report.get("documents", [])
+                    if isinstance(item, dict)
+                    and isinstance(item.get("checkdata"), dict)
+                ),
                 "document_count": len(report.get("documents", [])),
                 "structural_diff_count": len(report.get("structural_diff", [])),
                 "numeric_diff_count": len(report.get("numeric_diff", [])),
@@ -274,7 +283,13 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
             raise ValueError(f"canonical package round trip failed: {package}")
     report = {
         "status": "verified"
-        if all(item["structural_diff_count"] == 0 and item["numeric_diff_count"] == 0 for item in source_reports + package_reports)
+        if all(
+            item["structural_diff_count"] == 0
+            and item["numeric_diff_count"] == 0
+            and item.get("checkdata_status", "not_present") != "failed"
+            and item.get("checkdata_failed", 0) == 0
+            for item in source_reports + package_reports
+        )
         else "failed",
         "schema_version": "taoryx.daveml-roundtrip/v1",
         "catalog_root": str(catalog_root),
