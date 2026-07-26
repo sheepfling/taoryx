@@ -604,6 +604,9 @@ items are complete and reproducible:
 - Vector-valued initial values are now preserved as typed IR metadata. Runtime
   graph evaluation remains scalar-only and therefore does not claim vector
   execution until vector operators and checkData semantics are implemented.
+- The typed graph now evaluates vector constants and explicit vector inputs;
+  vector functions and vector checkData remain fail-closed until their source
+  semantics are implemented.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,

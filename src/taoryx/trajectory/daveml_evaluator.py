@@ -79,6 +79,35 @@ class DAVEMLGraph:
         canonical_id = self.variable_names.get(identifier, identifier)
         return self.variable_units.get(canonical_id)
         ####
+
+    def evaluate_vectors(
+        self,
+        inputs: Mapping[str, Sequence[float]],
+        outputs: Sequence[str],
+    ) -> dict[str, tuple[float, ...]]:
+        """Evaluate vector constants and explicit vector inputs fail-closed."""
+
+        mapped_inputs: dict[str, tuple[float, ...]] = {}
+        for identifier, values in inputs.items():
+            vector = tuple(float(value) for value in values)
+            if not vector or not all(math.isfinite(value) for value in vector):
+                raise ValueError(f"DAVE-ML vector input {identifier!r} must be finite and non-empty")
+            mapped_inputs[self.variable_names.get(identifier, identifier)] = vector
+        result: dict[str, tuple[float, ...]] = {}
+        for output in outputs:
+            identifier = self.variable_names.get(output, output)
+            if identifier in mapped_inputs:
+                result[output] = mapped_inputs[identifier]
+                continue
+            variable = self.variables.get(identifier)
+            initial = variable.attrib.get("initialValue") if variable is not None else None
+            values = _numbers(initial) if initial is not None else []
+            if len(values) > 1 and identifier not in self.functions:
+                result[output] = tuple(values)
+                continue
+            raise ValueError(f"DAVE-ML vector output {identifier!r} has no supported vector source")
+        return result
+        ####
     ####
 
 

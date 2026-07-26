@@ -80,6 +80,15 @@ def test_typed_graph_can_be_reused_for_named_outputs() -> None:
     assert values == {"y": 15.0}
 
 
+def test_typed_graph_evaluates_vector_constant_and_input() -> None:
+    payload = b'<DAVEfunc><variableDef varID="v" initialValue="1 2 3"/><variableDef varID="w"/></DAVEfunc>'
+    graph = load_daveml_graph(payload, document_id="vector")
+    assert graph.evaluate_vectors({}, ("v",))["v"] == (1.0, 2.0, 3.0)
+    assert graph.evaluate_vectors({"w": (4.0, 5.0)}, ("w",))["w"] == (4.0, 5.0)
+    with pytest.raises(ValueError, match="no supported vector source"):
+        graph.evaluate_vectors({}, ("w",))
+
+
 def test_regular_gridded_table_checkdata_is_evaluated() -> None:
     payload = b"""
     <DAVEfunc>
