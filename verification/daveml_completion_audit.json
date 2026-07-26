@@ -7,7 +7,7 @@
     "verification/daveml_family_readiness.json": "c1a458183e2df62d652723fabeb08bbfd0b1d89cedbb27253a29bd7e948fe626",
     "verification/daveml_official_checkdata.json": "7cc0cc1850f8b14d1eace3970bdd4a0a9deb273c50fe3bceccdd509eadf8dced",
     "verification/daveml_official_conformance.json": "deaa6f110a305d0ad555434f4e4c04aa2773d73847324b3e605f816c150de169",
-    "verification/daveml_release_gate.json": "9959850a7a4b085efc9e5f103f74f052c4e2e1f04cdf6dd5dbb76488942f8fac"
+    "verification/daveml_release_gate.json": "cd4da2ed41b1cb2ac4624b81784a74ed682b12e97346e0a277a25d3c7fdcde9f"
   },
   "readiness_family_count": 3,
   "release_artifact_count": 17,
