@@ -503,6 +503,10 @@ items are complete and reproducible:
   solver. A source-backed F-16 pitch-coefficient probe solves elevator trim at
   fixed air data with a residual below `1e-9`; this is a certified channel
   probe, not yet a complete force/thrust operating-point qualification.
+- `DAVEMLCompositeTrimBinding` now combines independently hash-verified
+  component bindings. A focused F-16 probe evaluates aerodynamic pitch
+  coefficient and propulsion thrust together without collapsing their source
+  provenance; force-balance residual composition remains the next gate.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

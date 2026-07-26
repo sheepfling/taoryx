@@ -39,6 +39,7 @@ from .contracts import (
 )
 from .daveml_evaluator import DAVEMLCheckResult, DAVEMLGraph, evaluate_daveml_checkdata, load_daveml_graph
 from .daveml_import import (
+    DAVEMLCompositeTrimBinding,
     DAVEMLFamilyGraphBinding,
     DAVEMLFamilyImport,
     DAVEMLFunctionChannel,
@@ -143,6 +144,7 @@ __all__ = [
     "DAVEMLReplayReport",
     "DAVEMLFamilyImport",
     "DAVEMLFamilyGraphBinding",
+    "DAVEMLCompositeTrimBinding",
     "DAVEMLFunctionChannel",
     "DAVEMLTrimBinding",
     "DAVEMLImportDocument",

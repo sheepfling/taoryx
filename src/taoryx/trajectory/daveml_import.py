@@ -246,6 +246,45 @@ class DAVEMLTrimBinding:
     ####
 
 
+@dataclass(frozen=True, slots=True)
+class DAVEMLCompositeTrimBinding:
+    """Compose independent DAVE-ML component bindings for one trim query."""
+
+    bindings: tuple[DAVEMLTrimBinding, ...]
+
+    def __post_init__(self) -> None:
+        if not self.bindings:
+            raise ValueError("DAVE-ML composite trim binding requires at least one component")
+        residuals = [name for binding in self.bindings for name in binding.residual_outputs]
+        if len(residuals) != len(set(residuals)):
+            raise ValueError("DAVE-ML composite trim residual names must be unique")
+        ####
+
+    def evaluate(
+        self,
+        state: Mapping[str, float],
+        controls: Mapping[str, float],
+        environment: Mapping[str, float] | None = None,
+    ) -> dict[str, float]:
+        """Evaluate every component and merge its named residual channels."""
+
+        values: dict[str, float] = {}
+        for binding in self.bindings:
+            values.update(binding.evaluate(state, controls, environment))
+        return values
+        ####
+
+    def as_evaluator(
+        self,
+        environment: Mapping[str, float] | None = None,
+    ) -> Callable[[Mapping[str, float], Mapping[str, float]], Mapping[str, float]]:
+        """Return the callable shape accepted by :func:`taoryx.trim.solve_trim`."""
+
+        return lambda state, controls: self.evaluate(state, controls, environment)
+        ####
+    ####
+
+
 def load_daveml_family_import(path: str | Path) -> DAVEMLFamilyImport:
     """Load and validate one family import sidecar."""
 
@@ -560,6 +599,7 @@ def _resolve_package_path(sidecar: Path, package_label: str) -> Path:
 __all__ = [
     "DAVEMLFamilyImport",
     "DAVEMLFamilyGraphBinding",
+    "DAVEMLCompositeTrimBinding",
     "DAVEMLFunctionChannel",
     "DAVEMLImportDocument",
     "DAVEMLImportPackage",

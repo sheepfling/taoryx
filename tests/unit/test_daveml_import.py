@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from taoryx.trajectory import (
+    DAVEMLCompositeTrimBinding,
     DAVEMLFunctionChannel,
     DAVEMLTrimBinding,
     load_daveml_family_graph,
@@ -133,6 +134,42 @@ def test_f16_source_pitch_trim_solves_through_daveml_binding() -> None:
     assert result.success
     assert result.controls["elevator_deg"] == pytest.approx(-0.7681660899, abs=1.0e-8)
     assert abs(result.residuals["pitch_cm"]) < 1.0e-9
+
+
+def test_f16_aero_and_propulsion_bindings_compose_without_losing_provenance() -> None:
+    aero = load_daveml_trim_binding(
+        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+        role="aerodynamics",
+        state_inputs={},
+        control_inputs={"elevator_deg": "el"},
+        residual_outputs={"pitch_cm": "cm"},
+        fixed_inputs={
+            "vt": 500.0,
+            "alpha": 2.0,
+            "beta": 0.0,
+            "p": 0.0,
+            "q": 0.0,
+            "r": 0.0,
+            "ail": 0.0,
+            "rdr": 0.0,
+            "xcg": 0.35,
+        },
+    )
+    propulsion = load_daveml_trim_binding(
+        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+        role="propulsion",
+        state_inputs={"altitude_ft": "altitudeMSL", "mach": "mach"},
+        control_inputs={"power_pct": "powerLeverAngle"},
+        residual_outputs={"thrust_lbf": "thrustBodyForce_X"},
+    )
+    composite = DAVEMLCompositeTrimBinding((aero, propulsion))
+    values = composite.evaluate(
+        {"altitude_ft": 0.0, "mach": 0.0},
+        {"elevator_deg": 0.0, "power_pct": 0.0},
+    )
+    assert values["pitch_cm"] == pytest.approx(-0.0074)
+    assert values["thrust_lbf"] == pytest.approx(1060.0)
+    assert aero.graph.document_sha256 != propulsion.graph.document_sha256
 
 
 @pytest.mark.skipif(not CATALOG_ROOT.is_dir(), reason="local DAVE-ML catalog is external to the repository")
