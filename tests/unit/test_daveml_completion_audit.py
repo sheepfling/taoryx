@@ -12,3 +12,4 @@ def test_completion_audit_preserves_known_gaps() -> None:
     statuses = {item["id"]: item["status"] for item in report["requirements"]}
     assert statuses["fresh_process_release_gate"] == "verified"
     assert statuses["official_2d_ungridded_interpolation"] == "known_gap_quarantined"
+    assert statuses["a320_exact_source_package"] == "blocked_missing_source"
