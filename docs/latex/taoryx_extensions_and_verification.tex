@@ -946,6 +946,293 @@ table. Uncertainty values must be traceable to source scatter, digitization,
 validation data, or an explicitly recorded engineering assumption. A stable
 gain with an estimated aerodynamic model is still an estimated-model result.
 
+\subsection{Composition-level objective-to-control resolution}
+\label{subsec:composition-control-resolution}
+
+The controller architecture described in this section is a successor-side
+composition contract. It is not a new historical TAOS language construct. A
+composition resolves an objective, vehicle family, fidelity, operating point,
+guidance law, controller realization, and actuator topology into one
+reproducible control path. The source problem remains the plant and trajectory
+input; the composition layer explains how mission intent is converted into
+bounded physical commands.
+
+The central distinction is between a reusable interface and a reusable
+algorithm. TAORYX provides common contracts for observations, references,
+demands, commands, allocation, telemetry, and independent objective
+evaluation. The guidance law and actuator realization may still be family
+specific. LQR is a reusable regulator option, not a universal controller for
+every vehicle.
+
+\claimbox{\textbf{Composition claim boundary.} A successful objective
+transition is not evidence that a controller physically achieved the
+objective. Guidance references, controller demands, achieved actuator states,
+integrated truth state, and independent objective evaluation are separate
+artifacts.}
+
+At the highest level, the resolution is
+
+\[
+\begin{split}
+  \text{ObjectiveSpec} &+ \text{VehicleFamily} + \text{Fidelity}
+    + \text{Trim} + \text{ControllerRealization} \\
+  &\longrightarrow \text{GuidanceReference}
+  \longrightarrow \text{GeneralizedControlRequest}
+  \longrightarrow \text{ControlCommand} \\
+  &\longrightarrow \text{Plant loads and EOM}
+  \longrightarrow \text{TruthState}
+  \longrightarrow \text{ObjectiveResult}.
+\end{split}
+\]
+
+The last arrow is intentionally independent of the controller. The evaluator
+reads truth telemetry and declared objective geometry; it does not accept a
+controller's internal \texttt{captured} flag as proof.
+
+\subsubsection{The nested levels}
+
+The composition has six nested levels:
+
+\begin{enumerate}
+  \item \textbf{Operating point:} select or solve trim and freeze mass,
+    inertia, atmosphere, source tables, and control bounds.
+  \item \textbf{Mission supervisor:} select the active segment, target,
+    limits, entry conditions, exit event, and fallback policy.
+  \item \textbf{Guidance:} convert a waypoint, path, gate, energy corridor,
+    hover, or terminal objective into a kinematic or attitude reference.
+  \item \textbf{Regulator:} convert reference error into an acceleration,
+    attitude, rate, moment, or wrench demand using LQR, a response law, or a
+    family-specific controller.
+  \item \textbf{Allocation:} map the generalized demand into surfaces,
+    elevons, rotors, thrusters, wheels, gimbals, or other bounded effectors.
+  \item \textbf{Plant and EOM:} evaluate actual loads, integrate the accepted
+    truth state, and publish achieved commands, resources, and margins.
+\end{enumerate}
+
+The corresponding runtime loop is
+
+\[
+\begin{aligned}
+  \text{truth state at }t
+    &\longrightarrow \text{reference at }t
+    \longrightarrow \text{bounded demand at }t \\
+    &\longrightarrow \text{achieved command at }t
+    \longrightarrow \text{loads at }t
+    \longrightarrow \text{truth state at }t+\Delta t.
+\end{aligned}
+\]
+
+The state is not modified by the controller. A controller can request a
+command, and an allocator can limit that request, but only the plant and
+equations of motion produce the next physical state.
+
+\subsubsection{Objective errors and references}
+
+For a position or waypoint objective, define the position and velocity errors
+in the declared common frame as
+
+\[
+  \boldsymbol e_p=\boldsymbol p_{\mathrm{ref}}-\boldsymbol p,
+  \qquad
+  \boldsymbol e_v=\boldsymbol v_{\mathrm{ref}}-\boldsymbol v.
+\]
+
+Additional errors are selected by objective type:
+
+\[
+  e_h=h_{\mathrm{ref}}-h,\qquad
+  e_V=V_{\mathrm{ref}}-V,\qquad
+  e_\psi=\operatorname{wrap}(\psi_{\mathrm{ref}}-\psi),
+  \qquad
+  e_\perp=\text{signed cross-track error}.
+\]
+
+A \texttt{fly\_over} objective resolves to a capture region. A
+\texttt{dwell} adds a duration and speed/rate condition. A
+\texttt{fly\_by\_gate} resolves to an oriented plane, crossing direction,
+and corridor. A \texttt{path\_corridor} resolves to a path tangent and
+cross-track bounds. A terminal state gate adds simultaneous conditions on
+position, altitude, speed, course, flight-path angle, attitude, and rates
+where those channels exist.
+
+The guidance reference and truth evaluator use the same objective definition
+but perform different jobs:
+
+\begin{center}
+\begin{tabular}{p{0.27\linewidth}p{0.62\linewidth}}
+\toprule
+\textbf{Composition item} & \textbf{Meaning} \\
+\midrule
+Objective geometry & What truth telemetry must satisfy. \\
+Guidance reference & The path, velocity, attitude, or energy target offered to the controller. \\
+Controller transition & The controller's internal handoff or reset reason. \\
+Independent result & The truth-based pass/fail result, closest error, tolerance, and margin. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Fixed-wing resolution: the X8 racetrack}
+
+The current X8 composition contains high- and low-altitude gates, left and
+right turn-bank events, and an oriented start/finish gate. Its guidance and
+regulator path is
+
+\[
+\begin{split}
+  \boldsymbol v_{\mathrm{track}} &=
+    \boldsymbol v_{\mathrm{tangent}}
+    +\operatorname{sat}_{v_{\max}}(K_p\boldsymbol e_p)
+    +\hat{\boldsymbol r}\,\operatorname{sat}_{\dot h_{\max}}(K_h e_h),\\
+  \boldsymbol e_R &\approx \frac{1}{2}
+    \sum_{i=1}^{3}\boldsymbol b_i\times\boldsymbol b_{i,\mathrm{ref}},\\
+  \boldsymbol x_X &=[e_{R,x},e_{R,y},e_{R,z},p,q,r]^T,\\
+  \boldsymbol M_{\mathrm{cmd}} &=
+    \boldsymbol M_{\mathrm{trim}}-K_X\boldsymbol x_X.
+\end{split}
+\]
+
+Here the racetrack supplies the local tangent and scheduled bank, while the
+bounded capture terms keep the vehicle near the intended route and altitude.
+The LQR gain $K_X$ is local to the declared trim and its named state/control
+ordering. It is not copied from another aircraft.
+
+The current X8 path ends at a direct canonical moment demand. If a physical
+surface allocator is selected, the next layer would solve a constrained
+allocation problem such as
+
+\[
+  \boldsymbol\delta^{*}=
+  \underset{\boldsymbol\delta\in\mathcal U}{\operatorname{arg\,min}}
+  \left\|\boldsymbol M_{\mathrm{aero}}(\boldsymbol\delta)
+  -\boldsymbol M_{\mathrm{cmd}}\right\|_{W}^{2},
+\]
+
+with surface travel, rate, table-domain, and allocation-residual constraints.
+The current racetrack result should therefore be described as a generic
+attitude-LQR/direct-moment composition with source-bounded aerodynamic loads,
+not as a physical elevon-allocation qualification.
+
+Once the command is applied, the rigid-body plant resolves
+
+\[
+\begin{aligned}
+  m(\dot{\boldsymbol v}_B+\boldsymbol\omega_B\times\boldsymbol v_B)
+    &=\boldsymbol F_{\mathrm{aero},B}+\boldsymbol F_{\mathrm{prop},B}
+      +\boldsymbol F_{g,B},\\
+  I\dot{\boldsymbol\omega}_B
+    +\boldsymbol\omega_B\times(I\boldsymbol\omega_B)
+    &=\boldsymbol M_{\mathrm{aero},B}+\boldsymbol M_{\mathrm{prop},B}.
+\end{aligned}
+\]
+
+The evaluator then checks gate-plane crossing, altitude, speed, bank event,
+terminal state, table margins, and numerical conditions from the resulting
+truth history.
+
+\subsubsection{Multirotor resolution: the Hummingbird cascade}
+
+The current Hummingbird landing composition uses an initial hover dwell,
+motor-shutdown event, touchdown state, and post-contact terminal dwell. A
+multirotor cannot turn a position error directly into a rotor speed without
+first resolving the required force and attitude. The nested cascade is
+
+\[
+\begin{aligned}
+  \boldsymbol a_{\mathrm{cmd}} &=
+    K_p\boldsymbol e_p-K_v\boldsymbol v_{\mathrm{rel}}
+    +\hat{\boldsymbol r}(K_h e_h-K_{\dot h}\dot h),\\
+  \boldsymbol F_{\mathrm{cmd}} &=m(\boldsymbol a_{\mathrm{cmd}}-\boldsymbol g),\\
+  \hat{\boldsymbol t}_{\mathrm{cmd}} &=
+    \frac{\boldsymbol F_{\mathrm{cmd}}}{\|\boldsymbol F_{\mathrm{cmd}}\|},\\
+  \boldsymbol e_{\mathrm{tilt}} &=
+    \hat{\boldsymbol t}_{\mathrm{body}}\times\hat{\boldsymbol t}_{\mathrm{cmd}},\\
+  \boldsymbol M_{\mathrm{tilt}} &=
+    \operatorname{sat}_{M_{\max}}
+    (K_R\boldsymbol e_{\mathrm{tilt}}-K_\omega\boldsymbol\omega).
+\end{aligned}
+\]
+
+If a yaw target is active, its independent heading loop contributes
+
+\[
+  e_\psi=\operatorname{wrap}(\psi_{\mathrm{ref}}-\psi),
+  \qquad
+  M_z=\operatorname{sat}_{M_{z,\max}}
+  (K_\psi e_\psi-K_r r).
+\]
+
+Collective is adjusted from altitude and tilt demand:
+
+\[
+  \Omega_c=\operatorname{clip}\left[
+    \Omega_0+K_\Omega(K_h e_h-K_{\dot h}\dot h+\Delta_{\mathrm{tilt}}),
+    \Omega_{\min},\Omega_{\max}\right].
+\]
+
+The quad-X allocator maps the collective and body-moment demand into rotor
+speeds. With $s_i=\Omega_i^2$ and $\boldsymbol w=[T,L,M,N]^T$,
+
+\[
+  \boldsymbol w=A_{\mathrm{quadX}}\boldsymbol s,
+  \qquad
+  \boldsymbol s^{*}=\operatorname{clip}_{\boldsymbol s_{\min},
+  \boldsymbol s_{\max}}
+  (A_{\mathrm{quadX}}^{-1}\boldsymbol w_{\mathrm{cmd}}).
+\]
+
+The actual rotor speeds, saturation flags, thrust, reaction torque, and
+resource state then enter the rigid-body plant. The current Hummingbird
+composition uses a bounded attitude-moment law and rotor allocation; it does
+not use the X8 attitude LQR. A rate LQR can be inserted at the rate-regulator
+seam, but that is a different realization and must carry its own trim and
+linearization evidence.
+
+\subsubsection{Fidelity mapping}
+
+The same semantic objective can resolve differently at each fidelity:
+
+\begin{longtable}{p{0.18\linewidth}p{0.33\linewidth}p{0.35\linewidth}}
+\toprule
+\textbf{Fidelity} & \textbf{Reference and regulator} & \textbf{What the result can claim} \\
+\midrule
+\endhead
+3-DOF & Objective errors resolve directly into acceleration, lift-vector, bank, flight-path, throttle, or resource commands. & Translation, energy, route, altitude, speed, range, and resource behavior represented by the plant. No physical attitude, body-rate, moment, or effector claim. \\
+Pseudo-6-DOF & A declared response law maps attitude or rate references into bounded quaternion/body-rate motion. & Attitude lag, rate limits, command saturation, and orientation feasibility under the named response law. No physical moment or actuator claim unless explicitly added. \\
+Rigid-body 6-DOF & Guidance resolves to attitude/rate/wrench demand; a regulator and allocator produce actual bounded commands for the integrated plant. & Coupled translation/rotation and only the forces, moments, actuators, and allocation mechanisms actually represented. \\
+\bottomrule
+\end{longtable}
+
+The fidelity mapping is a composition binding, not a promise that all three
+trajectories are identical. Cross-fidelity reports should preserve common
+objectives and measure event-time, terminal-state, energy, resource, and
+margin disagreement.
+
+\subsubsection{Where automatic tuning is weakest}
+
+The repository already automates bounded trim solving, finite-difference local
+linearization, LQR scaling, pole checks, and uncertainty screening. The weaker
+areas are the coupled outer loops and actuator realizations:
+
+\begin{longtable}{p{0.22\linewidth}p{0.31\linewidth}p{0.35\linewidth}}
+\toprule
+\textbf{Area} & \textbf{Current weakness} & \textbf{Next automatic method} \\
+\midrule
+\endhead
+X8 outer guidance & Route capture, altitude capture, bank schedule, and gate timing are manually selected and rerun. & Constrained search over gains, phase timing, bank schedule, and route geometry with hard gate and envelope constraints. \\
+X8 surface realization & The current racetrack uses direct moments rather than a physical elevon allocation solve. & Bounded nonlinear allocation with travel, rate, table-domain, and residual penalties. \\
+Hummingbird cascade & Position, altitude, attitude, yaw, and collective gains are hand-set; bandwidth separation is not yet formalized. & Tune inner rate/attitude loops first, then outer position/altitude/yaw loops with saturation and energy penalties. \\
+Trim and schedules & Not every showcase carries a newly solved source-trim and local $A/B$ artifact. & Continuation over speed, altitude, mass, and configuration with automatic residual and margin gates. \\
+Cross-fidelity mapping & Reduced-order response parameters are not automatically fit to the rigid-body reference. & Identify pseudo-6-DOF response laws from rigid-body step and mission fragments. \\
+Robustness & Nominal tuning and fixed-perturbation tuning remain separate workflows. & Optimize worst-case or percentile objective margin, not nominal score alone. \\
+\bottomrule
+\end{longtable}
+
+The recommended tuning order is plant closure, allocator feasibility, body
+rate, attitude, speed/angle/altitude holds, position and route guidance, then
+mission timing and robustness. A higher-level tuner should not compensate for
+an invalid trim, unstable inner loop, table-domain violation, or hidden
+actuator saturation.
+
 \section{Trajectory objectives and scoring}
 \label{sec:scoring}
 
