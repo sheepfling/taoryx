@@ -540,28 +540,28 @@ def _table_axes(table: ET.Element, breakpoints: dict[str, list[float]]) -> list[
 
 
 def _ungridded(query: list[float], table: ET.Element) -> float:
-    """Evaluate an ungridded table using slice interpolation when available."""
+    """Evaluate an ungridded table with deterministic simplicial interpolation."""
 
     points = [_numbers(element.text) for element in _children_by_local(table, "dataPoint")]
     points = [point for point in points if len(point) == len(query) + 1]
     if not points:
         raise ValueError("ungridded table has no compatible data points")
-    if len(query) == 2:
-        rows: dict[float, list[tuple[float, float]]] = {}
-        for point in points:
-            rows.setdefault(point[0], []).append((point[1], point[2]))
-        if len(rows) >= 2 and all(len(row) >= 2 for row in rows.values()):
-            row_values = [(coordinate, _linear(query[1], [item[0] for item in sorted(row)], [item[1] for item in sorted(row)])) for coordinate, row in sorted(rows.items())]
-            return _linear(query[0], [item[0] for item in row_values], [item[1] for item in row_values])
-    scales = [max(point[index] for point in points) - min(point[index] for point in points) for index in range(len(query))]
-    distances: list[tuple[float, float]] = []
-    for point in points:
-        distance = math.sqrt(sum(((query[index] - point[index]) / (scales[index] or 1.0)) ** 2 for index in range(len(query))))
-        if distance == 0.0:
-            return point[-1]
-        distances.append((distance, point[-1]))
-    weights = [1.0 / distance for distance, _ in distances]
-    return sum(weight * value for weight, (_, value) in zip(weights, distances, strict=True)) / sum(weights)
+    try:
+        import numpy as np
+        from scipy.interpolate import LinearNDInterpolator
+    except ImportError as error:
+        raise ValueError("ungridded interpolation requires scipy") from error
+    interpolator = LinearNDInterpolator(
+        np.asarray([point[:-1] for point in points], dtype=float),
+        np.asarray([point[-1] for point in points], dtype=float),
+    )
+    interpolated = np.asarray(interpolator(np.asarray(query, dtype=float))).reshape(-1)
+    if interpolated.size != 1:
+        raise ValueError("ungridded interpolation returned a non-scalar result")
+    value = float(interpolated[0])
+    if not math.isfinite(value):
+        raise ValueError("ungridded query lies outside the source convex hull")
+    return value
     ####
 
 

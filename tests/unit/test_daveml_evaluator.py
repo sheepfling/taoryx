@@ -208,6 +208,26 @@ def test_typed_ungridded_reference_uses_declared_table_semantics() -> None:
     assert results[0].actual == 15.0
 
 
+def test_ungridded_interpolation_rejects_queries_outside_convex_hull() -> None:
+    payload = b"""
+    <DAVEfunc>
+      <variableDef varID="x"/><variableDef varID="z"/><variableDef varID="y"/>
+      <ungriddedTableDef utID="table">
+        <dataPoint>0 0 0</dataPoint><dataPoint>0 10 10</dataPoint>
+        <dataPoint>10 0 20</dataPoint><dataPoint>10 10 30</dataPoint>
+      </ungriddedTableDef>
+      <function>
+        <independentVarRef varID="x"/><independentVarRef varID="z"/><dependentVarRef varID="y"/>
+        <functionDefn><ungriddedTableRef utID="table"/></functionDefn>
+      </function>
+    </DAVEfunc>
+    """
+    graph = load_daveml_graph(payload, document_id="hull")
+    assert graph.evaluate({"x": 5.0, "z": 5.0}, ("y",))["y"] == pytest.approx(15.0)
+    with pytest.raises(ValueError, match="outside the source convex hull"):
+        graph.evaluate({"x": -1.0, "z": 5.0}, ("y",))
+
+
 def test_official_atmosphere_checkdata_uses_named_variables_and_tolerances() -> None:
     source = Path("resources/aerospace/daveml/official-conformance-v1/atmos_76.dml")
     results = evaluate_daveml_checkdata(source.read_bytes())

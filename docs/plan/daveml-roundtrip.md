@@ -621,22 +621,21 @@ items are complete and reproducible:
 
 The following are intentionally not marked complete:
 
-- The official two-dimensional ungridded fixture has three failed local
-  numeric checks after one pass. Its interpolation rule remains unresolved;
-  tolerances are not weakened, and NASA DAVEtools does not qualify that legacy
-  fixture either. This is a numeric disposition, not a silent pass.
-- Full typed package IR reference resolution, units/dimensions, vector graph
-  execution, and complete ungridded interpolation remain Track A/B work.
+- The official two-dimensional ungridded fixture remains quarantined because
+  its legacy function uses `griddedTableRef` for an `ungriddedTableDef`.
+  Correctly typed ungridded references use deterministic convex-hull linear
+  interpolation; the malformed fixture is fail-closed rather than silently
+  reinterpreted, and source tolerances are not weakened.
+- Full vector table-function and vector checkData semantics remain deferred
+  until an authoritative source requiring them is added to the corpus.
 - F-16 and HL-20 now have source-linked trim, linearization, objective, and
   scenario evidence; F-16 also has a bounded reduced LQR screen. HL-20 tuning
   is explicitly not applicable because the source declares no controls.
 
 The next executable gates are, in order:
 
-1. Resolve and independently test the official ungridded interpolation
-   disposition without changing source tolerances.
-2. Complete typed vector function/checkData semantics if an authoritative
+1. Complete typed vector function/checkData semantics if an authoritative
    source requiring them is added to the corpus.
-3. Continue promotion only through the 16-stage release gate, completion audit,
+2. Continue promotion only through the 18-stage release gate, completion audit,
    and DaveML GitHub workflow; do not promote controller assumptions from
    uncontrolled or open-loop source packages.
