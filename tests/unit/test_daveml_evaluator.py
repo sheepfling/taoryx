@@ -142,6 +142,27 @@ def test_vector_checkdata_evaluates_typed_inputs_and_outputs() -> None:
     assert results[0].actual == (5.0, 7.0, 9.0)
 
 
+def test_vector_table_function_quarantine_has_stable_feature_code() -> None:
+    payload = b"""
+    <DAVEfunc>
+      <variableDef varID="x"/>
+      <variableDef varID="y" initialValue="0 0"/>
+      <function>
+        <independentVarRef varID="x"/><dependentVarRef varID="y"/>
+        <independentVarPts varID="x">0 1</independentVarPts>
+        <dependentVarPts varID="y">0 1</dependentVarPts>
+      </function>
+      <checkData><staticShot name="vector-table">
+        <checkInputs><signal><signalID>x</signalID><signalValue>0.5</signalValue></signal></checkInputs>
+        <checkOutputs><signal><signalID>y</signalID><signalValue>0.5 0.5</signalValue></signal></checkOutputs>
+      </staticShot></checkData>
+    </DAVEfunc>
+    """
+    results = evaluate_daveml_vector_checkdata(payload)
+    assert results[0].status == "unsupported"
+    assert results[0].reason_code == "vector_table_function_semantics"
+
+
 def test_regular_gridded_table_checkdata_is_evaluated() -> None:
     payload = b"""
     <DAVEfunc>
