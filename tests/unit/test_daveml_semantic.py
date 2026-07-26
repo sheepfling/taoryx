@@ -79,6 +79,33 @@ def test_semantic_ir_resolves_typed_table_references() -> None:
     assert reference["target_path"] == "/0/0"
 
 
+def test_typed_semantic_records_are_source_anchored_and_export_stable() -> None:
+    ir = build_daveml_ir(
+        b"""
+        <DAVEfunc>
+          <variableDef varID="alpha" units="deg" initialValue="1 2"><isInput /></variableDef>
+          <griddedTableDef gtID="table"><independentVarPts varID="alpha">0 1</independentVarPts></griddedTableDef>
+          <function><functionDefn><griddedTableRef gtID="table" /></functionDefn></function>
+          <checkData><staticShot name="probe"><checkInputs><signal><signalID>alpha</signalID><signalValue>1.5</signalValue><tol>0.1</tol></signal></checkInputs></staticShot></checkData>
+        </DAVEfunc>
+        """,
+        document_id="typed",
+    )
+
+    assert ir.typed.variables[0].identifier == "alpha"
+    assert ir.typed.variables[0].source_path == "/0/0"
+    assert ir.typed.units[0].dimension == "angle"
+    assert ir.typed.tables[0].identifier == "table"
+    assert ir.typed.tables[0].axes == (("alpha", (0.0, 1.0)),)
+    assert ir.typed.references[0].status == "resolved"
+    assert ir.typed.checks[0].signal_ids == ("alpha",)
+    assert ir.typed.checks[0].signals[0].values == (1.5,)
+    assert ir.typed.checks[0].signals[0].tolerance == 0.1
+    assert ir.typed.components[0].input_ids == ("alpha",)
+    fresh = build_daveml_ir(export_daveml_ir(ir), document_id="typed")
+    assert ir.typed == fresh.typed
+
+
 def test_semantic_ir_marks_legacy_table_reference_type_mismatch() -> None:
     ir = build_daveml_ir(
         b"""

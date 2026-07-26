@@ -595,6 +595,21 @@ def daveml_readiness() -> None:
     ####
 
 
+def daveml_layer_dispositions() -> None:
+    """Validate explicit DAVE-ML family-library layer dispositions."""
+
+    run(
+        tool_script(
+            "validate_daveml_layer_dispositions.py",
+            "--registry",
+            "verification/daveml_family_layer_dispositions.yaml",
+            "--output",
+            "verification/daveml_family_layer_dispositions.json",
+        )
+    )
+    ####
+
+
 def daveml_trim() -> None:
     """Generate reproducible source-backed DaveML trim evidence."""
 
@@ -791,6 +806,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "all-pdfs": all_pdfs,
     "equation-audit": equation_audit,
     "daveml-readiness": daveml_readiness,
+    "daveml-layer-dispositions": daveml_layer_dispositions,
     "daveml-trim": daveml_trim,
     "daveml-atmosphere": daveml_atmosphere,
     "daveml-linearization": daveml_linearization,

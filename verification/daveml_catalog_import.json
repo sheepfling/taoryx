@@ -111,7 +111,7 @@
         "source_documents": [
           {
             "canonical_export_sha256": "78d9ca4209fdcbb58974edb82a7e029a020d0061a7785784c0b2b07848570e44",
-            "canonical_ir_sha256": "6b811d28caefb75bf6cb4c88c2abf707f97fe17b26b770bbf14cf7100cee7d4e",
+            "canonical_ir_sha256": "72e777d03bb6b294f73d776b3ef9c359b6ce42fc7bb81cf8a7cb3c8419c1b77e",
             "catalog_document_id": null,
             "catalog_normalized_path": null,
             "catalog_sha256": null,
@@ -128,7 +128,7 @@
           },
           {
             "canonical_export_sha256": "7c5b8cdf2129cf3ef3c024f44bcef81ab1413f93cdce4df91b9ebea6a266a8e3",
-            "canonical_ir_sha256": "3959781226842e5d1a05fa0d19a88a38587acd5c771c26674b28dddae729ada2",
+            "canonical_ir_sha256": "6fdd8f95538a32ae9d1d739ee2cd792a772c3e27e2a3d0e246c16478c9d981a0",
             "catalog_document_id": "nesc-all-models-f16-package-f16-s119-source-f16-prop",
             "catalog_normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-prop",
             "catalog_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
@@ -145,7 +145,7 @@
           },
           {
             "canonical_export_sha256": "a53c37e7e8e9b23f8d3a428e7a7cf3582221072a1db997755aab0964e4618ccb",
-            "canonical_ir_sha256": "65ac7f5b6aa3328bcee6f0e41abc133f781c5dc26a6ea9703b7044e785cb6af2",
+            "canonical_ir_sha256": "7531e64ccb3b44f6d416dd3a52f43844ce6089dd22d6a94113598447298c041c",
             "catalog_document_id": "nesc-all-models-f16-package-f16-s119-source-f16-inertia",
             "catalog_normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-inertia",
             "catalog_sha256": "e11d4eba5b158d24db7034bd85682ad0b896dd2f3172f007ca3d6d6d4e693c4a",
@@ -231,7 +231,7 @@
         "source_documents": [
           {
             "canonical_export_sha256": "1216498bf6fb0d07565fd06ef47c14bec5a1e40a0fca90bb54371a789d7a5629",
-            "canonical_ir_sha256": "775a61744101414f8ba9027226c0a548d8f1701dfc8de6eb6590048732bd6892",
+            "canonical_ir_sha256": "880e42e77fde5bf6a786321223628126a1ccb6497ceeb3638a8d730023bcda8f",
             "catalog_document_id": "daveml-example-hl20-aero",
             "catalog_normalized_path": "normalized/daveml-example-hl20-aero",
             "catalog_sha256": "8639b55c2525fdb6c0177b8e359de5d6eb984a3b4b35b4d1e5898d54ddc1f44e",
@@ -318,7 +318,7 @@
         "source_documents": [
           {
             "canonical_export_sha256": "1c7a3735946918d7acb31918d7e28f27f49d2c753f81ae224fbe2030d35849c4",
-            "canonical_ir_sha256": "e63210e7224ee2e1bb24db614ed6b537f51559b3d76c57a18bca0bd7882133e5",
+            "canonical_ir_sha256": "e81ec4d59acbad5ec507f90a2de9faf1b467c24cbfba0f5f0d47fd14c3f4d66f",
             "catalog_document_id": "nesc-all-models-two-stage-package-twostage-aero",
             "catalog_normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-aero",
             "catalog_sha256": "49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27",
@@ -335,7 +335,7 @@
           },
           {
             "canonical_export_sha256": "30623e9068588735ac8009fdf0c8cc250cc38d3312a6b2c63a2e8310b53a1d8f",
-            "canonical_ir_sha256": "a1e2c241c6961fbabab599beac6610c4f53a8ae0a4384b0328af4c3ef9e932de",
+            "canonical_ir_sha256": "20edd983779f0de882a5d9cb6446f80d62aec01258127b5c3e6f9df04a552698",
             "catalog_document_id": "nesc-all-models-two-stage-package-twostage-prop",
             "catalog_normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-prop",
             "catalog_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
@@ -352,7 +352,7 @@
           },
           {
             "canonical_export_sha256": "b6727f9bcc0753bc0721f2daa0a1ae7a528c1cec41b966bb3351af96bd8ba5a3",
-            "canonical_ir_sha256": "111bf19a1c26f9457bfc6abfe6323ce1011efef641c7cfac453a4cebee4a03c6",
+            "canonical_ir_sha256": "5d5df498c6f91c7b5a88ce4beb685cf147d27a66255cd6502f63249567ae69b9",
             "catalog_document_id": "nesc-all-models-two-stage-package-twostage-inertia",
             "catalog_normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-inertia",
             "catalog_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
@@ -406,7 +406,7 @@
   "sources": [
     {
       "canonical_export_sha256": "d36d93e3e368fa54dc84c9a1d4ba06da6f3af74a237c0e2bb773379e253dbe38",
-      "canonical_ir_sha256": "74f000aa32b1577b428ad99db1d2506cfd8f0f697118ff0f93162285c73fb327",
+      "canonical_ir_sha256": "c65cd414daa2d5cae28579e511957aad5686da30a3fb94d33db1a00f479187e6",
       "component_role": "environment",
       "document_id": "daveml-example-atmos-76",
       "model_id": "daveml-atmosphere-1976",
@@ -417,7 +417,7 @@
     },
     {
       "canonical_export_sha256": "e1d92eda2e1276823be8c5987a777078c38de6f9ac1e661035a739ea03ecf7df",
-      "canonical_ir_sha256": "3e2ef29b93dfd43919e87466525150bbb49b797b6def38f099a26ab952b9fe7a",
+      "canonical_ir_sha256": "7e1d2891883f87f342998ee4eecc23af363401c19f6a3ce7cba7507426dbd075",
       "component_role": "aerodynamics",
       "document_id": "daveml-example-f16-aero",
       "model_id": "f16-s119",
@@ -428,7 +428,7 @@
     },
     {
       "canonical_export_sha256": "1216498bf6fb0d07565fd06ef47c14bec5a1e40a0fca90bb54371a789d7a5629",
-      "canonical_ir_sha256": "3887ee7a41a14deca10ed3552b90806c8ee325e1d0c7b14b3a57674182062d5c",
+      "canonical_ir_sha256": "0f6130ca2063b2a670ba38305e280030360300f5e1e117b5702b9205143dfbe1",
       "component_role": "aerodynamics",
       "document_id": "daveml-example-hl20-aero",
       "model_id": "hl20-mod-k",
@@ -439,7 +439,7 @@
     },
     {
       "canonical_export_sha256": "4472b61e4632026eac491d19a2b53c00f8d3d5fa410a9c7d9e1f80b50af6af7a",
-      "canonical_ir_sha256": "96761223f027d4f70b5d388976d2eeb5f0f948ea2a9cc2ce8a17b2ad55c25f36",
+      "canonical_ir_sha256": "419adaca025254296d5d39c2b955a0e273472ebe4af923628ad655e57abd4055",
       "component_role": "aerodynamics",
       "document_id": "daveml-example-simple-aero",
       "model_id": "daveml-conformance-suite",
@@ -450,7 +450,7 @@
     },
     {
       "canonical_export_sha256": "fff9a3e94fe1735b7158c2966790ba78c7a517c2f953a5f5efbfa301238374fd",
-      "canonical_ir_sha256": "b861e11ab715909b9d9b7ff7886c2473d05fd933c8bc457449ea7259083878b9",
+      "canonical_ir_sha256": "1b1817039245d3d904e6643383ee91d2663530069fe61251094c8c31c5df816b",
       "component_role": "auxiliary",
       "document_id": "daveml-example-threed-ungridded",
       "model_id": "daveml-conformance-suite",
@@ -461,7 +461,7 @@
     },
     {
       "canonical_export_sha256": "6a06c84b1cb41dec4aa63e0d0018328d29943055279c186a47fd6fb6cda09769",
-      "canonical_ir_sha256": "2d40814f6d3d9259e66e63e112c7c2aa5f43c51a8174d163259fb954ac139eed",
+      "canonical_ir_sha256": "9cede147f11f50063575394fd9216c51f8f7ad9f701ce315f5efd72850e9df21",
       "component_role": "auxiliary",
       "document_id": "daveml-example-twod-table",
       "model_id": "daveml-conformance-suite",
@@ -472,7 +472,7 @@
     },
     {
       "canonical_export_sha256": "18ef85500d2a4cd0d5081438f19cfb97234037956497ad6820352d532f9372db",
-      "canonical_ir_sha256": "3eab34f0cd627196f298a3d70cc5c434e711cfd02d604cb94f2cb1f512904756",
+      "canonical_ir_sha256": "909e58a61e89aadd7e39068104ae3262e621872806ea20f2ee1413754f54cc1e",
       "component_role": "auxiliary",
       "document_id": "daveml-example-twod-ungridded",
       "model_id": "daveml-conformance-suite",
@@ -483,7 +483,7 @@
     },
     {
       "canonical_export_sha256": "cefecdb68f5523188774fba9fe2cb8928341284a5cff898b8d7a9bb361fb630a",
-      "canonical_ir_sha256": "7c02f32dc4b1c63ca5a6845d7a649e5a36b43cc6f0d01a9d8ba4653ea77ad226",
+      "canonical_ir_sha256": "6bd431fe2c63ec871dc856ef01553a78778f19d4d26899ae3f8840a631698eda",
       "component_role": "aerodynamics",
       "document_id": "nesc-all-models-brick-aero",
       "model_id": "nesc-tumbling-brick",
@@ -494,7 +494,7 @@
     },
     {
       "canonical_export_sha256": "1d8ba27861bfaa103541533e1dc754f8be1a6e590850b5ba3a1d765cdc5af5e6",
-      "canonical_ir_sha256": "314b1c02bfcfe75f0fd5fe05769b22941e8c9958fa117b2e2f5ecade7d4e14e9",
+      "canonical_ir_sha256": "fd31f1b249778f18f8158aca61c4d92dae0a2506e9284ee01e0c842efbaca547",
       "component_role": "mass_properties",
       "document_id": "nesc-all-models-brick-inertia",
       "model_id": "nesc-tumbling-brick",
@@ -505,7 +505,7 @@
     },
     {
       "canonical_export_sha256": "a94bc41fb4e3821e20400f8d20ba25c7eff8d910cb826b9f40dd3dc40f584b36",
-      "canonical_ir_sha256": "a32c208d979613bb426a2fd00ac50f4552680ea4c10c17f37ad3158d136f0e3b",
+      "canonical_ir_sha256": "a09125e4559bc34362dc93f83a6ba35a463914eb85a168b77a709fb8fed0cf9a",
       "component_role": "aerodynamics",
       "document_id": "nesc-all-models-cannonball-aero",
       "model_id": "nesc-atmospheric-spheroid",
@@ -516,7 +516,7 @@
     },
     {
       "canonical_export_sha256": "966435d28404ff28db742412792b196cd64d53b393a2e7330a574f5b352f2bc0",
-      "canonical_ir_sha256": "58c8954ccb8060b6f5fbdc57560228184aecaf0c1debe49b30cf96e295d5d312",
+      "canonical_ir_sha256": "08b856e14da314355241f687a54b239455a5fa27b4f9f1b6def0ab40531eb19e",
       "component_role": "mass_properties",
       "document_id": "nesc-all-models-cannonball-inertia",
       "model_id": "nesc-atmospheric-spheroid",
@@ -527,7 +527,7 @@
     },
     {
       "canonical_export_sha256": "7bec4bc4bf0b076169a6dae6e804175c0b3db37c1404fb75d30b31ca7e0454b7",
-      "canonical_ir_sha256": "88de9bf61030921edea120ba5a6e3d7b6e2b12293ba4d74fbeb8eab03dd19782",
+      "canonical_ir_sha256": "7b52a67d7928a50d63043e32a174269bbc07195ec584b0ff1f39f5deaaae2a01",
       "component_role": "aerodynamics",
       "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-aero",
       "model_id": "f16-s119",
@@ -538,7 +538,7 @@
     },
     {
       "canonical_export_sha256": "cd2a3e190a3b776208f7faf055982af4737b8e14fac17043ae89a0febd98b1ed",
-      "canonical_ir_sha256": "b801512d89f940111e7156811fef387657850aee1d3873441293c8bc9f69a668",
+      "canonical_ir_sha256": "4175fe547f30fc80acbebba908b43722416bae7abc7e98dd2f42d6cfa82b7204",
       "component_role": "control_mapping",
       "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-control",
       "model_id": "f16-s119",
@@ -549,7 +549,7 @@
     },
     {
       "canonical_export_sha256": "169d243b3854c12de940b84fab00fb2b9588fc7eea77b0f5782dc3613dea54d2",
-      "canonical_ir_sha256": "50ed36520f1bbd0a1b91c8620d6030471b008cb659ada776c3f7456e71d850f3",
+      "canonical_ir_sha256": "66eed740737f2ba0abde83c0467fc856446e79802f612181f07cb23590a01001",
       "component_role": "guidance_navigation_control",
       "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-gnc",
       "model_id": "f16-s119",
@@ -560,7 +560,7 @@
     },
     {
       "canonical_export_sha256": "18fa56e25478e421083fa41f3b4cd2bd32d3b509620735899e567f246e32b8ff",
-      "canonical_ir_sha256": "b53906a5ab7b091f5f2ead53440a5af1f8f8ab9ea2d365ae1ceeb7e80c8c8df2",
+      "canonical_ir_sha256": "fc94df8940353b4d20ca0996ddd79ac84eafb74a8f1aa8305d57b179c317abd1",
       "component_role": "mass_properties",
       "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-inertia",
       "model_id": "f16-s119",
@@ -571,7 +571,7 @@
     },
     {
       "canonical_export_sha256": "be5efa20eeea87a7ee0072297a4c91bcc92bc7fff4122530e862f45ef9465a13",
-      "canonical_ir_sha256": "5b7f427217c866b728edbf87719a2f62f30676a520122e1c97735fbbfb54215b",
+      "canonical_ir_sha256": "eb7505197047cc3bee904791785ac8af837cb5fb94584941f941932ed83dd1b6",
       "component_role": "propulsion",
       "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-prop",
       "model_id": "f16-s119",
@@ -582,7 +582,7 @@
     },
     {
       "canonical_export_sha256": "8b02a4b82d749e6da3cb638b954dfe1c31865ac98f3fa2817e1d74570d50cccd",
-      "canonical_ir_sha256": "6af14205b92e56d4969c31d34360313be0573a6f64a1c5ab9ac840bdba0984b2",
+      "canonical_ir_sha256": "4f5dd7d7afaec9449ca7eed8b259982ac33d25015d09c2f2b51eeee924bd6f11",
       "component_role": "mass_properties",
       "document_id": "nesc-all-models-orbital-cylinder-inertia",
       "model_id": "nesc-orbital-cylinder",
@@ -593,7 +593,7 @@
     },
     {
       "canonical_export_sha256": "c589db5e0a43cc79b33be635e0a13f44d57cdbff9970c4476d2c22c659731ed4",
-      "canonical_ir_sha256": "577f97a4939135c15b7179a90cc6c84f1a88bad5877bdb67a207f2d2922d134a",
+      "canonical_ir_sha256": "96aec0b21c63eacd7f4d9d1b2f601265714ea07826a1f56f4ab5fec9c66f53e5",
       "component_role": "mass_properties",
       "document_id": "nesc-all-models-orbital-sphere-inertia",
       "model_id": "nesc-orbital-spheroid",
@@ -604,7 +604,7 @@
     },
     {
       "canonical_export_sha256": "de0b8decfab36b72236af4ca39e10ab93fe3937f99e293a75bd5287fb6595e10",
-      "canonical_ir_sha256": "ff715644e3147c14f6a620749424e010c5492d0769722fb4a67e5289f8975c8e",
+      "canonical_ir_sha256": "7a58c4dbb4db7251da651ff61e247ee866b1f5dd01a836688a09876c21e1d6cb",
       "component_role": "mass_properties",
       "document_id": "nesc-all-models-orbital-station-inertia",
       "model_id": "nesc-international-space-station",
@@ -615,7 +615,7 @@
     },
     {
       "canonical_export_sha256": "2f6a8073b8783c7477f0e19228b91aafc84d80333b519667060129b733ea0ddc",
-      "canonical_ir_sha256": "af41c2f33462c277a981fdded71d7d69a9fd081fcec4dc4ceaff0bad8de84c42",
+      "canonical_ir_sha256": "050dd5aa6c3ebd6dacedfdb7350efa34477fc703c860cc48f6013481a3e378e8",
       "component_role": "aerodynamics",
       "document_id": "nesc-all-models-two-stage-package-twostage-aero",
       "model_id": "nesc-two-stage-rocket",
@@ -626,7 +626,7 @@
     },
     {
       "canonical_export_sha256": "63df22094c9b7e66e4fdad5e7e22bb65cc0dfcbe9ad9a7e38549bcfa61bc130f",
-      "canonical_ir_sha256": "aedcb8f97093d732a1f444a1018f53ccb793c0c6dadc57982048548165411e50",
+      "canonical_ir_sha256": "471bd457894ac7a891ac9fbf54ff9e0947b2f0bbcadc159984001648d49332de",
       "component_role": "mass_properties",
       "document_id": "nesc-all-models-two-stage-package-twostage-inertia",
       "model_id": "nesc-two-stage-rocket",
@@ -637,7 +637,7 @@
     },
     {
       "canonical_export_sha256": "9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0",
-      "canonical_ir_sha256": "8152ce12a09c81b3a3687bc09c1084a31c74ccf7612684f88f6abd3218923850",
+      "canonical_ir_sha256": "fde442aa7b079817b375d32d650ac125853610bf741b8c318098324d1ed6e1f5",
       "component_role": "propulsion",
       "document_id": "nesc-all-models-two-stage-package-twostage-prop",
       "model_id": "nesc-two-stage-rocket",

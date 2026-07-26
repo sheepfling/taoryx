@@ -109,8 +109,8 @@ layers:
   propulsion: {version: two-stage-constant-thrust-v1, evidence: source_checked_schedule}
   staging: {version: instantaneous-dry-mass-transition-v1, evidence: source_checked_acceptance}
   environment: {version: US1976-upper-continuation-v1, evidence: package_declared}
-  controllers: {version: pending, evidence: taoryx_reference_design}
-  reductions: {version: pending, evidence: derived_from_parent_plant}
+  controllers: {version: not-applicable-open-loop-v1, evidence: not_applicable_no_declared_controls}
+  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
   trim: {version: not-applicable-open-loop-v1, evidence: not_applicable_no_declared_controls}
   linearization: {version: not-applicable, evidence: not_applicable_current_rocket_contract}
   tuning: {version: not-applicable, evidence: not_applicable_current_open_loop_contract}

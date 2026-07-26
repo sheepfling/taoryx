@@ -26,10 +26,10 @@ layers:
   mass_properties: {version: v1, evidence: source_bound_fixed}
   aerodynamics: {version: v1, evidence: source_checked_semantic_reconstruction}
   propulsion: {version: v1, evidence: source_checked_steady}
-  actuators: {version: pending, evidence: taoryx_engineering_assumption}
-  controller: {version: pending, evidence: taoryx_reference_design}
-  mission: {version: pending, evidence: taoryx_qualification_scenario}
-  reductions: {version: pending, evidence: derived_from_parent_plant}
+  actuators: {version: external-overlay-required-v1, evidence: no_source_actuator_dynamics}
+  controller: {version: external-overlay-required-v1, evidence: no_source_controller_contract}
+  mission: {version: external-overlay-required-v1, evidence: no_source_mission_contract}
+  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
 claims:
   - source-grounded nonlinear powered fixed-wing reference plant
   - subsonic rigid-body 6DOF regression represented by the verified corpus package and embedded evidence
@@ -38,6 +38,6 @@ nonclaims:
   - production F-16 training or operational fidelity
   - actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone
 open_questions:
-  - bind actuator dynamics and controller overlays as separate records
-  - qualify reductions generated from this parent plant
+  - bind actuator dynamics and controller overlays as separate non-DAVE-ML records
+  - qualify reductions generated from this parent plant in a separate reduction tranche
 next_gate: qualify_separate_overlays_and_reductions

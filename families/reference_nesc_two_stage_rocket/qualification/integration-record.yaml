@@ -26,7 +26,8 @@ layers:
   aerodynamics: {version: normalized-daveml-v1, evidence: source_checked_static}
   propulsion: {version: two-stage-constant-thrust-v1, evidence: source_checked_schedule}
   staging: {version: instantaneous-dry-mass-transition-v1, evidence: source_checked_acceptance}
-  reductions: {version: pending, evidence: derived_from_parent_plant}
+  controllers: {version: not-applicable-open-loop-v1, evidence: no_declared_controls}
+  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
 claims:
   - source-grounded NASA/NESC Scenario 17 variable-mass launch vehicle plant
   - package replay passed source-equivalence, event/mass, convergence, and checkpoint-envelope evidence
@@ -36,5 +37,5 @@ nonclaims:
   - reduced-order fidelity before a separate reduction qualification
 open_questions:
   - compare the full scenario history against the participating-simulation family
-  - qualify 3-DOF and pseudo-6DOF reductions from this parent plant
+  - qualify 3-DOF and pseudo-6DOF reductions from this parent plant in a separate reduction tranche
 next_gate: qualify_reduced_order_rocket_and_full_trajectory_comparison

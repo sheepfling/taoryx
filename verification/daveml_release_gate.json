@@ -1,19 +1,20 @@
 {
   "artifacts": {
-    "build/daveml-release-catalog/canonical/export-manifest.json": "94ffb7f59a74350f76d2b7d58057cb7da6d58840518abc709d392f3700035b0a",
+    "build/daveml-release-catalog/canonical/export-manifest.json": "20cff07730e0986aa385088fe813eb543131898552b1bc4a1906503954ca45d9",
     "families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json": "6115f667a61649e865dc5c13334cf6a2e0cc616824c8fa9f268398b2d90968bd",
     "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json": "bbf04df9c151bf9d8991469f32b3e63d2899a244f579172d6fecf13caf36d52f",
     "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json": "3255c0007a9d4af208e97c3f1f82bbaa16d3bbd6544f5e835fbf452a4088e271",
     "verification/daveml_a320_openap_integration.json": "8b4c458881d566fb9bcee28312fd554b4507fb33de0a6a199a989829c9e95bec",
     "verification/daveml_a320_pseudo6dof_integration.json": "ae98e862f60cd317487b96528744947e0049362a190eba2f7d733f85521181ff",
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
-    "verification/daveml_catalog_roundtrip.json": "582bbabb4eee6e4c98be0ec528ddc5b8da16c361f260dfe7bc9d91f2ae2de1d2",
+    "verification/daveml_catalog_roundtrip.json": "da0e360714c62d8dba160ff3d56f94bf5d7b8013b653e2e3ae7b97b00f3b0160",
     "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",
     "verification/daveml_f16_equilibrium_trim_evidence.json": "400da9183034b3f5fd83c4ebcc63ceede5ae7de1729483e8352d99fca803dbf8",
     "verification/daveml_f16_linearization_evidence.json": "e6ddb6b95b2b4fbf4b7d3374124a638d99796053b547de4925a6a5c4db8e2262",
     "verification/daveml_f16_scenario_evidence.json": "a048a12f685429e26ae19e35426c0207226f46e6f9fdc4d467ffcefe554d159e",
     "verification/daveml_f16_trim_evidence.json": "bd131b577c08ec4c3e7640af5ddefce1f7b24908ad1704eeb7f13029a73b8322",
     "verification/daveml_f16_tuning_evidence.json": "76748e3201c7d81b434141be090adf622d4da787ae57f25785e38c67e431b598",
+    "verification/daveml_family_layer_dispositions.json": "e8f15facca97f551980ebcf6fdf02fd8e6386ecfefb7ff485eb5c6fc29ab8f36",
     "verification/daveml_family_readiness.json": "d98a030cdb237cf21433254277a2baa52aa713f488af190492d9964f10931948",
     "verification/daveml_hl20_linearization_evidence.json": "858de314a1c49635547e1343f1769ba8310c4bb01a23d38557fd777e4ead8a02",
     "verification/daveml_hl20_load_evidence.json": "9651fb6c4266daa356ff7abeef0eef767a302c9a6c43efa0467605596438d0d4",
@@ -38,6 +39,19 @@
       "returncode": 0,
       "stderr_tail": "",
       "stdout_tail": "\"388d2192c337c380dd4ebe6d7678815b3b384733113803509eb1298d1a3192cd\",\n          \"function_count\": 0,\n          \"package_member\": \"source/nesc/twostage_inertia.normalized.dml\",\n          \"role\": \"mass_properties\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 23\n        },\n        {\n          \"document_sha256\": \"9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4\",\n          \"function_count\": 0,\n          \"package_member\": \"source/nesc/twostage_prop.normalized.dml\",\n          \"role\": \"propulsion\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 14\n        }\n      ],\n      \"graph_failures\": [],\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"pending_derived_layers\": {},\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_layer_dispositions.py",
+        "--registry",
+        "verification/daveml_family_layer_dispositions.yaml",
+        "--output",
+        "verification/daveml_family_layer_dispositions.json"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "hored surrogate documents round-trip in a fresh process.\",\n          \"status\": \"verified\"\n        },\n        \"full_rigidbody_6dof\": {\n          \"evidence\": \"families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml\",\n          \"failures\": [],\n          \"rationale\": \"The current qualification is pseudo-6DOF and does not claim full rigid-body source equivalence.\",\n          \"status\": \"not_promoted\"\n        },\n        \"stability_augmentation\": {\n          \"evidence\": \"families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json\",\n          \"failures\": [],\n          \"rationale\": \"Bounded Taoryx stability augmentation is explicitly part of the surrogate contract.\",\n          \"status\": \"verified\"\n        }\n      },\n      \"status\": \"verified\"\n    }\n  ],\n  \"family_count\": 5,\n  \"layer_count\": 18,\n  \"registry\": \"verification/daveml_family_layer_dispositions.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-layer-dispositions-report/v1\",\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [
@@ -133,7 +147,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "        \"count\": 0,\n        \"failed\": 0,\n        \"passed\": 0,\n        \"quarantined\": 0,\n        \"results\": [],\n        \"status\": \"not_present\",\n        \"unsupported\": 0,\n        \"vector_count\": 0,\n        \"vector_failed\": 0,\n        \"vector_passed\": 0,\n        \"vector_results\": [],\n        \"vector_unsupported\": 0\n      },\n      \"checkdata_failed\": 0,\n      \"checkdata_status\": \"not_present\",\n      \"exported_sha256\": \"9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0\",\n      \"fresh_process_checkdata\": \"verified\",\n      \"fresh_process_reimport\": \"verified\",\n      \"ir_sha256\": \"a5ce825c91e48fbcde812f97780c46691689454471116b1f3a9df7f5824d9451\",\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"reference_summary\": {},\n      \"source\": \"normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml\",\n      \"source_sha256\": \"297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee\",\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "        \"count\": 0,\n        \"failed\": 0,\n        \"passed\": 0,\n        \"quarantined\": 0,\n        \"results\": [],\n        \"status\": \"not_present\",\n        \"unsupported\": 0,\n        \"vector_count\": 0,\n        \"vector_failed\": 0,\n        \"vector_passed\": 0,\n        \"vector_results\": [],\n        \"vector_unsupported\": 0\n      },\n      \"checkdata_failed\": 0,\n      \"checkdata_status\": \"not_present\",\n      \"exported_sha256\": \"9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0\",\n      \"fresh_process_checkdata\": \"verified\",\n      \"fresh_process_reimport\": \"verified\",\n      \"ir_sha256\": \"fde442aa7b079817b375d32d650ac125853610bf741b8c318098324d1ed6e1f5\",\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"reference_summary\": {},\n      \"source\": \"normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml\",\n      \"source_sha256\": \"297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee\",\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [

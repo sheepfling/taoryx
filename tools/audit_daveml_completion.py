@@ -20,17 +20,26 @@ def sha256(path: Path) -> str:
 
 def main() -> int:
     readiness = json.loads((ROOT / "verification/daveml_family_readiness.json").read_text(encoding="utf-8"))
+    layer_dispositions = json.loads((ROOT / "verification/daveml_family_layer_dispositions.json").read_text(encoding="utf-8"))
     release = json.loads((ROOT / "verification/daveml_release_gate.json").read_text(encoding="utf-8"))
+    pseudo_runtime = json.loads(
+        (ROOT / "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json").read_text(encoding="utf-8")
+    )
     requirements = [
         {"id": "source_intake_and_hashes", "status": "verified", "evidence": "verification/daveml_catalog_import.json"},
         {"id": "catalog_wide_roundtrip", "status": "verified", "evidence": "verification/daveml_catalog_roundtrip.json"},
         {"id": "canonical_ir_and_export", "status": "verified", "evidence": "verification/daveml_official_conformance.json"},
         {"id": "fresh_process_release_gate", "status": release["status"], "evidence": "verification/daveml_release_gate.json"},
         {"id": "family_readiness", "status": readiness["status"], "evidence": "verification/daveml_family_readiness.json"},
+        {"id": "family_library_layer_dispositions", "status": layer_dispositions["status"], "evidence": "verification/daveml_family_layer_dispositions.json"},
         {"id": "official_2d_ungridded_interpolation", "status": "known_gap_quarantined", "evidence": "verification/daveml_official_checkdata.json"},
         {"id": "vector_table_function_semantics", "status": "not_in_authoritative_corpus", "evidence": "docs/plan/daveml-roundtrip.md"},
         {"id": "a320_derived_exact_3dof_product", "status": "verified", "evidence": "families/a320_openap_3dof/qualification/integration-record.yaml"},
-        {"id": "a320_surrogate_composite_6dof_lane", "status": "implementation_in_progress", "evidence": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml"},
+        {
+            "id": "a320_surrogate_composite_6dof_lane",
+            "status": "bounded_runtime_verified" if pseudo_runtime.get("status") == "verified" else "failed",
+            "evidence": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
+        },
         {"id": "a320_exact_source_package", "status": "blocked_missing_source", "evidence": "families/reference_a320/qualification/integration-record.yaml"},
     ]
     report = {
@@ -41,6 +50,11 @@ def main() -> int:
         "release_stage_count": len(release["runs"]),
         "release_artifact_count": len(release["artifacts"]),
         "readiness_family_count": len(readiness["families"]),
+        "known_gaps": [
+            "official_2d_ungridded_interpolation_case_2",
+            "a320_authoritative_source_exact_6dof_acquisition",
+            "vector_table_function_semantics_not_in_authoritative_corpus",
+        ],
         "evidence_hashes": {
             item["evidence"]: sha256(ROOT / item["evidence"])
             for item in requirements

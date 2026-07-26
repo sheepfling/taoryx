@@ -371,8 +371,10 @@ and the host dynamics/environment evidence required by their integration spec.
 
 Current family-library readiness is tracked separately in
 `verification/daveml_family_readiness.yaml`; it deliberately distinguishes
-source/runtime qualification from pending trim, controller, objective, and
-scenario work.
+source/runtime qualification from derived-layer work. The companion
+`verification/daveml_family_layer_dispositions.yaml` makes every downstream
+actuator, allocation, controller, mission, and reduction layer explicit as
+verified, not applicable, externally overlaid, or not promoted.
 
 ## Extended Completion Plan
 
@@ -596,6 +598,11 @@ items are complete and reproducible:
   tuning, scenario scoring, and both family CLI smoke paths, then hashes the
   resulting artifacts. Its
   claim boundary remains source integration, not flight qualification.
+- `tools/validate_daveml_layer_dispositions.py` now validates the explicit
+  source-versus-overlay boundary for every promoted family. Physical actuator
+  dynamics, controllers, missions, and reduced-order models are not silently
+  treated as DAVE-ML source content; each is either verified, not applicable,
+  externally overlaid, or intentionally not promoted with evidence.
 - The F-16 readiness entry now promotes the verified source-channel
   layers (`source_channel_full_dynamics_verified`,
   `source_channel_full_lqr_verified`, and
@@ -614,7 +621,7 @@ items are complete and reproducible:
 - `tools/validate_daveml_hl20_linearization.py` now emits a source-linked
   residual Jacobian around the certified HL-20 alpha trim. The artifact is
   promoted only as a pitch-channel linearization; full 6-DOF dynamics and
-  controller qualification remain explicitly pending.
+  downstream controller overlays remain outside the source-bounded claim.
 - `tools/validate_daveml_hl20_scenario.py` now scores a provenance-linked
   glide-trim smoke contract against trim, positive-lift, and finite-load
   objectives. It does not claim a full-flight trajectory or controller.
@@ -641,6 +648,13 @@ items are complete and reproducible:
 - The semantic IR now exposes a deterministic unit/dimension index for source
   variable definitions while preserving original unit attributes and unknown
   units as `dimension: unknown` for explicit review.
+- The semantic IR now also exposes typed, source-anchored records for variable
+  descriptions and initial values, function input/output/dependency edges,
+  table identifiers, axes and knot values, interpolation/extrapolation and
+  boundary policy markers, check signal values and tolerances, component
+  input/output boundaries, reference dispositions, and retained opaque
+  features. The lossless source tree remains the export authority for any
+  construct not represented by those records.
 - Vector-valued initial values are preserved as typed IR metadata. The runtime
   graph now evaluates vector constants, explicit vector inputs, and a bounded
   elementwise MathML arithmetic subset (addition, subtraction, and scalar
@@ -678,11 +692,15 @@ The following are intentionally not marked complete:
 - F-16 and HL-20 now have source-linked trim, linearization, objective, and
   scenario evidence; F-16 also has a bounded reduced LQR screen. HL-20 tuning
   is explicitly not applicable because the source declares no controls.
+- Downstream family-library overlays and reductions now have explicit
+  evidence-backed dispositions rather than stale `pending` labels. This does
+  not promote an actuator, controller, mission, or reduction without its own
+  qualification report.
 
 The next executable gates are, in order:
 
 1. Complete typed vector table-function semantics if an authoritative
    source requiring them is added to the corpus.
-2. Continue promotion only through the 19-stage release gate, completion audit,
+2. Continue promotion only through the 24-stage release gate, completion audit,
    and DaveML GitHub workflow; do not promote controller assumptions from
    uncontrolled or open-loop source packages.

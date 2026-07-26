@@ -119,10 +119,10 @@ observations:
 layers:
   mass_properties: {version: separate-fixed-binding-v1, evidence: source_bound_fixed_separate_record}
   aerodynamics: {version: mod-k-v1, evidence: source_checked_exact_bytes}
-  actuators: {version: pending, evidence: taoryx_engineering_assumption}
-  allocation: {version: pending, evidence: taoryx_reference_design}
-  controllers: {version: pending, evidence: taoryx_reference_design}
-  reductions: {version: pending, evidence: derived_from_parent_plant}
+  actuators: {version: external-overlay-required-v1, evidence: no_source_actuator_dynamics}
+  allocation: {version: external-overlay-required-v1, evidence: no_source_allocation_contract}
+  controllers: {version: not-applicable-no-declared-controls-v1, evidence: not_applicable_no_declared_controls}
+  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
   trim: {version: source-channel-trim-v1, evidence: source_channel_trim_verified}
   linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
   tuning: {version: not-applicable-no-declared-controls-v1, evidence: not_applicable_no_declared_controls}

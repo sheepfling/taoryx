@@ -1,20 +1,26 @@
 {
   "claim_boundary": "requirement audit; not a flight qualification or historical TAOS compatibility claim",
   "evidence_hashes": {
-    "docs/plan/daveml-roundtrip.md": "b0c35e9d99549f12cb7450ee66f532b078be5f3f450166a24a3afe62d0fa2fd9",
-    "families/a320_openap_3dof/qualification/integration-record.yaml": "0964506dd5e5a26cb404786f418a21501c44cfae52c0ea3047b1ddec517319c8",
-    "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml": "3c164e944fa9c79d83214aff013bc054556cd86641097a417a48fdc4580bb4f1",
+    "docs/plan/daveml-roundtrip.md": "c683ac03ebc8518d8343fe35bda3deb7afe677fe81457ae0d6c14dbf4cf9e20e",
+    "families/a320_openap_3dof/qualification/integration-record.yaml": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
+    "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json": "7c6dee9f8948d4613d178b5b68a0e836732ad4a6d7a572a348c17e007fd678ac",
     "families/reference_a320/qualification/integration-record.yaml": "e8376d380013315898f730f70cd2b8b8ed8278059902bbc356029e2d2fca31bd",
-    "verification/daveml_catalog_import.json": "136a4672f38fb8f5fa1acf2a28ffb0bfa72dbca930345cbf689863e7fb869ff9",
-    "verification/daveml_catalog_roundtrip.json": "06adcf1e82c124e5e737f99b7ef3ba11158dd9f49a10f1b225195c1ac9e1c739",
+    "verification/daveml_catalog_import.json": "2067e1ca4f577b6a0cae4ffc90d3c67f197e846dd1aa7d50b5a883e1801cdd5c",
+    "verification/daveml_catalog_roundtrip.json": "bae51c6da56d8844590626361ed5411a8a4efd0a37c8524f7a322db2af4571b6",
+    "verification/daveml_family_layer_dispositions.json": "70c3366e16d7a71ae509216eed1a974b07310d62eb8831b14b3a704e01a0b2af",
     "verification/daveml_family_readiness.json": "286d9b867ed33455c35550b143c26b091f9762498366bd84624a68f493db816c",
     "verification/daveml_official_checkdata.json": "eb621fa798b0a08e1c579b8197a1c037ba73b0063b9c9142af14e3ca327e6b72",
     "verification/daveml_official_conformance.json": "e8a94e57b364697a25f1844c6ee7000dadc61bab0840a5276d17726d5f274531",
-    "verification/daveml_release_gate.json": "58cf5165b07ac8d290a1ec223318ea372bed782932187c81158c055363d0d96b"
+    "verification/daveml_release_gate.json": "022e55bf92ed1e8d5dac5a0e2f42c73030f126108b810cad73b302f702341e41"
   },
+  "known_gaps": [
+    "official_2d_ungridded_interpolation_case_2",
+    "a320_authoritative_source_exact_6dof_acquisition",
+    "vector_table_function_semantics_not_in_authoritative_corpus"
+  ],
   "readiness_family_count": 3,
-  "release_artifact_count": 18,
-  "release_stage_count": 19,
+  "release_artifact_count": 24,
+  "release_stage_count": 24,
   "requirements": [
     {
       "evidence": "verification/daveml_catalog_import.json",
@@ -42,6 +48,11 @@
       "status": "verified"
     },
     {
+      "evidence": "verification/daveml_family_layer_dispositions.json",
+      "id": "family_library_layer_dispositions",
+      "status": "verified"
+    },
+    {
       "evidence": "verification/daveml_official_checkdata.json",
       "id": "official_2d_ungridded_interpolation",
       "status": "known_gap_quarantined"
@@ -57,9 +68,9 @@
       "status": "verified"
     },
     {
-      "evidence": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+      "evidence": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
       "id": "a320_surrogate_composite_6dof_lane",
-      "status": "implementation_in_progress"
+      "status": "bounded_runtime_verified"
     },
     {
       "evidence": "families/reference_a320/qualification/integration-record.yaml",

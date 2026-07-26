@@ -1,0 +1,164 @@
+{
+  "claim_boundary": "explicit DaveML source versus downstream family-library layer dispositions; not flight qualification",
+  "failures": [],
+  "families": [
+    {
+      "failures": [],
+      "family_id": "reference_f16_s119",
+      "integration_record": "families/reference_f16_s119/qualification/integration-record.yaml",
+      "layer_count": 4,
+      "layers": {
+        "actuators": {
+          "evidence": "families/reference_f16_s119/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "The promoted DAVE-ML plant exposes command channels, not physical actuator dynamics.",
+          "status": "external_overlay_required"
+        },
+        "controllers": {
+          "evidence": "families/reference_f16_s119/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "Controller design is a Taoryx overlay and is not source-exact plant content.",
+          "status": "external_overlay_required"
+        },
+        "mission": {
+          "evidence": "families/reference_f16_s119/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "Mission logic is outside the source package and requires a separate scenario contract.",
+          "status": "external_overlay_required"
+        },
+        "reductions": {
+          "evidence": "families/reference_f16_s119/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "No reduced-order equivalence report has been promoted from the parent plant.",
+          "status": "not_promoted"
+        }
+      },
+      "status": "verified"
+    },
+    {
+      "failures": [],
+      "family_id": "reference_hl20_mod_k",
+      "integration_record": "families/reference_hl20_mod_k/qualification/integration-record.yaml",
+      "layer_count": 4,
+      "layers": {
+        "actuators": {
+          "evidence": "families/reference_hl20_mod_k/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "The source provides direct surface inputs but no physical actuator dynamics.",
+          "status": "external_overlay_required"
+        },
+        "allocation": {
+          "evidence": "families/reference_hl20_mod_k/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "Logical surface allocation is not declared by the authoritative aerodynamic source.",
+          "status": "external_overlay_required"
+        },
+        "controllers": {
+          "evidence": "families/reference_hl20_mod_k/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "No controller is promoted from an uncontrolled source plant.",
+          "status": "not_applicable"
+        },
+        "reductions": {
+          "evidence": "families/reference_hl20_mod_k/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "No reduced-order equivalence report has been promoted from the parent plant.",
+          "status": "not_promoted"
+        }
+      },
+      "status": "verified"
+    },
+    {
+      "failures": [],
+      "family_id": "reference_nesc_two_stage_rocket",
+      "integration_record": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+      "layer_count": 2,
+      "layers": {
+        "controllers": {
+          "evidence": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "The authoritative two-stage source is an open-loop trajectory package with no controls.",
+          "status": "not_applicable"
+        },
+        "reductions": {
+          "evidence": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "Reduced-order rocket fidelity requires a separate comparison against the parent trajectory.",
+          "status": "not_promoted"
+        }
+      },
+      "status": "verified"
+    },
+    {
+      "failures": [],
+      "family_id": "a320_openap_3dof",
+      "integration_record": "families/a320_openap_3dof/qualification/integration-record.yaml",
+      "layer_count": 4,
+      "layers": {
+        "controllers": {
+          "evidence": "families/a320_openap_3dof/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "OpenAP performance data does not provide source-exact actuator or controller dynamics.",
+          "status": "not_in_source_contract"
+        },
+        "objectives": {
+          "evidence": "verification/daveml_a320_openap_integration.json",
+          "failures": [],
+          "rationale": "The family exposes scored performance objectives.",
+          "status": "verified"
+        },
+        "trim": {
+          "evidence": "verification/daveml_a320_openap_integration.json",
+          "failures": [],
+          "rationale": "The derived-exact point-mass family has a reproducible reference trim.",
+          "status": "verified"
+        },
+        "tuning": {
+          "evidence": "verification/daveml_a320_openap_integration.json",
+          "failures": [],
+          "rationale": "The family exposes bounded performance tuning evidence.",
+          "status": "verified"
+        }
+      },
+      "status": "verified"
+    },
+    {
+      "failures": [],
+      "family_id": "a320_openap_jsbsim_pseudo6dof",
+      "integration_record": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+      "layer_count": 4,
+      "layers": {
+        "actuators": {
+          "evidence": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
+          "failures": [],
+          "rationale": "Bounded Taoryx actuator policy is explicitly part of the surrogate contract.",
+          "status": "verified"
+        },
+        "canonical_daveml_export": {
+          "evidence": "families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json",
+          "failures": [],
+          "rationale": "Taoryx-authored surrogate documents round-trip in a fresh process.",
+          "status": "verified"
+        },
+        "full_rigidbody_6dof": {
+          "evidence": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+          "failures": [],
+          "rationale": "The current qualification is pseudo-6DOF and does not claim full rigid-body source equivalence.",
+          "status": "not_promoted"
+        },
+        "stability_augmentation": {
+          "evidence": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
+          "failures": [],
+          "rationale": "Bounded Taoryx stability augmentation is explicitly part of the surrogate contract.",
+          "status": "verified"
+        }
+      },
+      "status": "verified"
+    }
+  ],
+  "family_count": 5,
+  "layer_count": 18,
+  "registry": "verification/daveml_family_layer_dispositions.yaml",
+  "schema_version": "taoryx.daveml-family-layer-dispositions-report/v1",
+  "status": "verified"
+}
