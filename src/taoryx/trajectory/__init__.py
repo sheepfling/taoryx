@@ -37,6 +37,7 @@ from .contracts import (
     ResolvedCase,
     ResolvedValue,
 )
+from .daveml_atmosphere import DAVEMLAtmosphereBinding, load_daveml_atmosphere
 from .daveml_evaluator import DAVEMLCheckResult, DAVEMLGraph, evaluate_daveml_checkdata, load_daveml_graph
 from .daveml_import import (
     DAVEMLCompositeTrimBinding,
@@ -161,9 +162,11 @@ __all__ = [
     "replay_reference_collection",
     "replay_reference_package",
     "DAVEMLCheckResult",
+    "DAVEMLAtmosphereBinding",
     "DAVEMLGraph",
     "evaluate_daveml_checkdata",
     "load_daveml_graph",
+    "load_daveml_atmosphere",
     "DAVEMLDiff",
     "DAVEMLIR",
     "build_daveml_ir",

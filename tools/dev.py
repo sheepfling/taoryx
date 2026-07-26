@@ -602,6 +602,13 @@ def daveml_trim() -> None:
     ####
 
 
+def daveml_atmosphere() -> None:
+    """Generate reproducible DAVE-ML atmosphere evidence."""
+
+    run(tool_script("validate_daveml_atmosphere.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -708,6 +715,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "equation-audit": equation_audit,
     "daveml-readiness": daveml_readiness,
     "daveml-trim": daveml_trim,
+    "daveml-atmosphere": daveml_atmosphere,
     "handoff": handoff,
     "check": check,
     "all": check,

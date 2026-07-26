@@ -522,6 +522,11 @@ items are complete and reproducible:
   source-backed pitch-channel angle-of-attack trim at a declared Mach/airspeed
   point. The artifact retains the same non-claim boundary until the full
   vehicle load, gravity, and atmosphere adapters are integrated.
+- `DAVEMLAtmosphereBinding` and `tools/validate_daveml_atmosphere.py` now bind
+  the official 1976 atmosphere fixture by SHA-256 and emit normalized SI
+  temperature, pressure, density, and speed-of-sound samples. The adapter
+  preserves source ratios and rejects unresolved channels; it does not
+  extrapolate beyond the source domain.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

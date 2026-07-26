@@ -2,7 +2,22 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+from taoryx.trajectory.daveml_atmosphere import load_daveml_atmosphere
 from taoryx.trajectory.daveml_evaluator import evaluate_daveml_checkdata, load_daveml_graph
+
+
+def test_official_atmosphere_binding_preserves_hash_and_normalizes_si() -> None:
+    binding = load_daveml_atmosphere(
+        Path("resources/aerospace/daveml/official-conformance-v1/atmos_76.dml")
+    )
+    values = binding.evaluate(0.0)
+    assert binding.source_sha256 == "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca"
+    assert values["temperature_k"] == pytest.approx(288.15)
+    assert values["pressure_pa"] == pytest.approx(2116.22 * 47.88025898033584)
+    assert values["density_ratio"] == pytest.approx(1.0)
+    assert values["speed_of_sound_m_s"] == pytest.approx(1116.3975415003385 * 0.3048)
 
 
 def test_direct_point_function_checkdata_is_evaluated() -> None:
