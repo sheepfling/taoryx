@@ -556,6 +556,10 @@ items are complete and reproducible:
   `verification/daveml_f16_scenario_evidence.json`. Stability, bounded command,
   and controller-event objectives pass in a clean-process smoke run; this is
   not a flight or mission qualification.
+- The runtime CLI now exposes `taoryx daveml smoke --family ...`. It fail-closes
+  on unsupported family selection, missing/stale evidence, family mismatch, or
+  unresolved source roles, and emits a deterministic
+  `taoryx.daveml-cli-smoke/v1` envelope for F-16 and HL-20.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

@@ -24,7 +24,16 @@ from taoryx.reachability_envelope import (
 from taoryx.reachability_visualization import load_reachability_artifact, render_reachability_plot_bundle
 from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
 from taoryx.table_explorer import InterpolationExplanation, TableInspection, explain_interpolation, inspect_table_file
-from taoryx.trajectory import FamilyCatalog, ResolvedCase, diff_resolved_cases, load_case_intent, load_family_catalog, resolve_case
+from taoryx.trajectory import (
+    FamilyCatalog,
+    ResolvedCase,
+    diff_resolved_cases,
+    load_case_intent,
+    load_daveml_family_graph,
+    load_daveml_family_import,
+    load_family_catalog,
+    resolve_case,
+)
 from taoryx.trajectory.resolution import ResolutionError
 from taoryx.visualization import render_run_artifact_html, render_run_artifact_plots
 from taoryx.x15_native_replay import write_x15_native_boundary_replay
@@ -213,6 +222,11 @@ def main(argv: list[str] | None = None) -> int:
     schema_export.add_argument("--kind", choices=("parameters", "controls", "observations"), required=True)
     schema_export.add_argument("--catalog", type=Path, default=Path("verification/alpha2_family_catalog.yaml"))
     schema_export.add_argument("--output", type=Path)
+    daveml = subparsers.add_parser("daveml", help="run promoted DAVE-ML family smoke paths")
+    daveml_subparsers = daveml.add_subparsers(dest="daveml_command", required=True)
+    daveml_smoke = daveml_subparsers.add_parser("smoke", help="verify a DAVE-ML family smoke evidence chain")
+    daveml_smoke.add_argument("--family", choices=("reference_f16_s119", "reference_hl20_mod_k"), required=True)
+    daveml_smoke.add_argument("--output", type=Path)
     arguments = parser.parse_args(argv)
     if arguments.command == "scenario":
         return _compile_scenario(arguments)
@@ -238,6 +252,8 @@ def main(argv: list[str] | None = None) -> int:
         return _case_command(arguments)
     if arguments.command == "schema":
         return _schema_command(arguments)
+    if arguments.command == "daveml":
+        return _daveml_command(arguments)
     if arguments.max_steps <= 0:
         parser.error("--max-steps must be positive")
     report = run_files(
@@ -267,6 +283,47 @@ def main(argv: list[str] | None = None) -> int:
         for output in report.outputs:
             print(f"output: {output}")
     return report.exit_code
+
+
+def _daveml_command(arguments: argparse.Namespace) -> int:
+    """Run fail-closed DAVE-ML family smoke verification."""
+
+    sidecars = {
+        "reference_f16_s119": Path("families/reference_f16_s119/plant/daveml-import.json"),
+        "reference_hl20_mod_k": Path("families/reference_hl20_mod_k/plant/daveml-import.json"),
+    }
+    evidence = {
+        "reference_f16_s119": Path("verification/daveml_f16_scenario_evidence.json"),
+        "reference_hl20_mod_k": Path("verification/daveml_hl20_trim_evidence.json"),
+    }
+    sidecar = sidecars[arguments.family]
+    evidence_path = evidence[arguments.family]
+    try:
+        record = load_daveml_family_import(sidecar)
+        roles = tuple(document.role for document in record.package.source_documents)
+        for role in roles:
+            load_daveml_family_graph(sidecar, role=role)
+        report = json.loads(evidence_path.read_text(encoding="utf-8"))
+        if report.get("family_id") != arguments.family:
+            raise ValueError("evidence family does not match requested family")
+        if report.get("status") not in {"pass", "verified"}:
+            raise ValueError(f"evidence status is not promotable: {report.get('status')!r}")
+        result = {
+            "schema_version": "taoryx.daveml-cli-smoke/v1",
+            "status": "verified",
+            "family_id": arguments.family,
+            "model_id": record.model_id,
+            "roles_hash_verified": list(roles),
+            "evidence": report,
+        }
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        print(f"error: daveml-smoke-failed: {error}")
+        return 2
+    if arguments.output:
+        arguments.output.parent.mkdir(parents=True, exist_ok=True)
+        arguments.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
 
 
 def _compile_scenario(arguments: argparse.Namespace) -> int:
