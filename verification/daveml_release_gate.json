@@ -1,6 +1,7 @@
 {
   "artifacts": {
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
+    "verification/daveml_catalog_roundtrip.json": "c137a5daed03cc19fb96442c68a2f7afe3bfc8370c5a4cb510056f409151b599",
     "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",
     "verification/daveml_f16_equilibrium_trim_evidence.json": "400da9183034b3f5fd83c4ebcc63ceede5ae7de1729483e8352d99fca803dbf8",
     "verification/daveml_f16_linearization_evidence.json": "66cca0f378b4622cceec09d4441b06b651f62588f515079ea330ed72b7408512",
@@ -102,6 +103,21 @@
       "returncode": 0,
       "stderr_tail": "",
       "stdout_tail": "\"reference_nesc_two_stage_rocket\",\n  \"package\": \"INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair\",\n  \"replay\": {\n    \"collection_id\": null,\n    \"family_id\": null,\n    \"fidelity\": \"6dof\",\n    \"force_moment_residual\": 0.0,\n    \"hold_evidence\": \"validation/acceptance.json#passed\",\n    \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n    \"package\": \"C:\\\\Users\\\\peanu\\\\GIT\\\\sheepfling\\\\taoryx\\\\INBOX\\\\taoryx-daveml-nesc-model-catalog-v1.0\\\\qualified\\\\nesc-two-stage-rocket\\\\nesc-two-stage-rocket-v0.9.txair\",\n    \"runtime_load_contract\": \"taoryx_rigid_body_6dof\",\n    \"runtime_member\": null,\n    \"source_evaluation\": \"verified_pinned_package_acceptance\",\n    \"source_sha256\": \"d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6\",\n    \"status\": \"runtime_replay_qualification_passed\"\n  },\n  \"schema_version\": \"taoryx.daveml-nesc-replay-evidence/v1\",\n  \"status\": \"verified\",\n  \"stderr_tail\": \"\",\n  \"subprocess_returncode\": 0\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/canonical_daveml_roundtrip.py",
+        "--catalog-root",
+        "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+        "--output-dir",
+        "build/daveml-release-catalog",
+        "--summary-output",
+        "verification/daveml_catalog_roundtrip.json"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "\"not_present\",\n        \"unsupported\": 0\n      },\n      \"exported_sha256\": \"63df22094c9b7e66e4fdad5e7e22bb65cc0dfcbe9ad9a7e38549bcfa61bc130f\",\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"source\": \"normalized/nesc-all-models-two-stage-package-twostage-inertia/source.dml\",\n      \"source_sha256\": \"277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b\",\n      \"structural_diff_count\": 0\n    },\n    {\n      \"checkdata\": {\n        \"count\": 0,\n        \"failed\": 0,\n        \"passed\": 0,\n        \"results\": [],\n        \"status\": \"not_present\",\n        \"unsupported\": 0\n      },\n      \"exported_sha256\": \"9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0\",\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"source\": \"normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml\",\n      \"source_sha256\": \"297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee\",\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [
