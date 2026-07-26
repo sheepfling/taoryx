@@ -235,6 +235,7 @@ __all__ = [
     "replay_reference_collection",
     "replay_reference_package",
     "DAVEMLCheckResult",
+    "DAVEMLVectorCheckResult",
     "DAVEMLAtmosphereBinding",
     "DAVEMLInertiaBinding",
     "DAVEMLFixedWingDynamicsBinding",
