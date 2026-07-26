@@ -627,8 +627,10 @@ The following are intentionally not marked complete:
   Correctly typed ungridded references use deterministic convex-hull linear
   interpolation; the malformed fixture is fail-closed rather than silently
   reinterpreted, and source tolerances are not weakened.
-- Full vector table-function and vector checkData semantics remain deferred
-  until an authoritative source requiring them is added to the corpus.
+- Typed vector checkData inputs and outputs are now evaluated through a
+  separate vector-result API with width and tolerance diagnostics. Vector
+  table-function semantics remain deferred until an authoritative source
+  requiring them is added to the corpus.
 - F-16 and HL-20 now have source-linked trim, linearization, objective, and
   scenario evidence; F-16 also has a bounded reduced LQR screen. HL-20 tuning
   is explicitly not applicable because the source declares no controls.
