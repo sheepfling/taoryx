@@ -237,12 +237,14 @@ def _dimension_for_unit(unit: str) -> str:
         "ft_s": "length/time",
         "f": "length",
         "ft": "length",
+        "f2": "length^2",
         "fracMAC": "1",
         "slug": "mass",
         "slug_ft2": "mass*length^2",
         "lb": "force",
         "lbf": "force",
         "s": "time",
+        "s_rad": "time/angle",
     }
     return dimensions.get(unit.strip(), "unknown")
 

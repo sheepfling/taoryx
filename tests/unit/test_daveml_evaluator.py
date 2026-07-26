@@ -85,6 +85,8 @@ def test_typed_graph_exposes_source_dimension() -> None:
     graph = load_daveml_graph(b'<DAVEfunc><variableDef varID="x" units="deg"/></DAVEfunc>')
     assert graph.unit_for("x") == "deg"
     assert graph.dimension_for("x") == "angle"
+    area = load_daveml_graph(b'<DAVEfunc><variableDef varID="s" units="f2"/></DAVEfunc>')
+    assert area.dimension_for("s") == "length^2"
 
 
 def test_typed_graph_evaluates_vector_constant_and_input() -> None:
