@@ -499,6 +499,10 @@ items are complete and reproducible:
   hash-verified typed channel boundary for individual aerodynamic, propulsion,
   and inertia functions. F-16 `cxt` and HL-20 `CL0A0` are covered by focused
   tests with source-unit and output checks.
+- `load_daveml_trim_binding` now composes that boundary with the existing trim
+  solver. A source-backed F-16 pitch-coefficient probe solves elevator trim at
+  fixed air data with a residual below `1e-9`; this is a certified channel
+  probe, not yet a complete force/thrust operating-point qualification.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

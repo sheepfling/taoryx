@@ -318,6 +318,26 @@ def load_daveml_function_channel(
     )
 
 
+def load_daveml_trim_binding(
+    path: str | Path,
+    *,
+    role: str,
+    state_inputs: Mapping[str, str],
+    control_inputs: Mapping[str, str],
+    residual_outputs: Mapping[str, str],
+    fixed_inputs: Mapping[str, float] | None = None,
+) -> DAVEMLTrimBinding:
+    """Load a solver-facing trim binding with package provenance checks."""
+
+    return DAVEMLTrimBinding(
+        graph=load_daveml_family_graph(path, role=role),
+        state_inputs=dict(state_inputs),
+        control_inputs=dict(control_inputs),
+        residual_outputs=dict(residual_outputs),
+        fixed_inputs={} if fixed_inputs is None else dict(fixed_inputs),
+    )
+
+
 def build_daveml_family_import(
     package_path: str | Path,
     *,
@@ -549,4 +569,5 @@ __all__ = [
     "load_daveml_family_import",
     "load_daveml_family_graph",
     "load_daveml_function_channel",
+    "load_daveml_trim_binding",
 ]

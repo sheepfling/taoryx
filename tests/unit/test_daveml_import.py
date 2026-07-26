@@ -12,8 +12,10 @@ from taoryx.trajectory import (
     load_daveml_family_graph,
     load_daveml_family_import,
     load_daveml_function_channel,
+    load_daveml_trim_binding,
     load_reference_family_catalog,
 )
+from taoryx.trim import TrimSpec, solve_trim
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG_ROOT = Path(
@@ -97,6 +99,40 @@ def test_function_channel_rejects_missing_source_function() -> None:
             function_id="not_a_source_function",
             input_channels={"alpha_deg": "alpha"},
         )
+
+
+def test_f16_source_pitch_trim_solves_through_daveml_binding() -> None:
+    binding = load_daveml_trim_binding(
+        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+        role="aerodynamics",
+        state_inputs={},
+        control_inputs={"elevator_deg": "el"},
+        residual_outputs={"pitch_cm": "cm"},
+        fixed_inputs={
+            "vt": 500.0,
+            "alpha": 2.0,
+            "beta": 0.0,
+            "p": 0.0,
+            "q": 0.0,
+            "r": 0.0,
+            "ail": 0.0,
+            "rdr": 0.0,
+            "xcg": 0.35,
+        },
+    )
+    spec = TrimSpec(
+        state_names=(),
+        control_names=("elevator_deg",),
+        residual_names=("pitch_cm",),
+        state_initial={},
+        control_initial={"elevator_deg": 0.0},
+        control_lower={"elevator_deg": -24.0},
+        control_upper={"elevator_deg": 24.0},
+    )
+    result = solve_trim(spec, binding.as_evaluator(), max_nfev=100, residual_tolerance=1.0e-10)
+    assert result.success
+    assert result.controls["elevator_deg"] == pytest.approx(-0.7681660899, abs=1.0e-8)
+    assert abs(result.residuals["pitch_cm"]) < 1.0e-9
 
 
 @pytest.mark.skipif(not CATALOG_ROOT.is_dir(), reason="local DAVE-ML catalog is external to the repository")

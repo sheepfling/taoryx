@@ -51,6 +51,7 @@ from .daveml_import import (
     load_daveml_family_graph,
     load_daveml_family_import,
     load_daveml_function_channel,
+    load_daveml_trim_binding,
 )
 from .daveml_replay import DAVEMLReplayReport, replay_reference_collection, replay_reference_package
 from .daveml_semantic import (
@@ -152,6 +153,7 @@ __all__ = [
     "load_daveml_family_import",
     "load_daveml_family_graph",
     "load_daveml_function_channel",
+    "load_daveml_trim_binding",
     "replay_reference_collection",
     "replay_reference_package",
     "DAVEMLCheckResult",
