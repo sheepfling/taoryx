@@ -21,11 +21,11 @@
         "unsupported": 0
       },
       "derived_layers": {
-        "linearization": "pending_source_trim_jacobian",
-        "objectives": "pending",
-        "scenarios": "trim_hold_only",
+        "linearization": "source_channel_dynamics_verified",
+        "objectives": "source_channel_smoke_verified",
+        "scenarios": "source_channel_smoke_verified",
         "trim": "source_package_regression",
-        "tuning": "pending"
+        "tuning": "source_channel_reduced_lqr_verified"
       },
       "family_id": "reference_f16_s119",
       "graph_bindings": [
@@ -57,11 +57,7 @@
       "graph_failures": [],
       "model_id": "f16-s119-reference",
       "pending_derived_layers": {
-        "linearization": "pending_source_trim_jacobian",
-        "objectives": "pending",
-        "scenarios": "trim_hold_only",
-        "trim": "source_package_regression",
-        "tuning": "pending"
+        "trim": "source_package_regression"
       },
       "source_import_declared": "verified"
     },
@@ -179,11 +175,7 @@
     {
       "family_id": "reference_f16_s119",
       "layers": {
-        "linearization": "pending_source_trim_jacobian",
-        "objectives": "pending",
-        "scenarios": "trim_hold_only",
-        "trim": "source_package_regression",
-        "tuning": "pending"
+        "trim": "source_package_regression"
       }
     },
     {

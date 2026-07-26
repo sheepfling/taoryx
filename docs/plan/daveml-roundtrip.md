@@ -565,6 +565,11 @@ items are complete and reproducible:
   runs readiness, atmosphere, trim, linearization, tuning, scenario scoring,
   and both family CLI smoke paths, then hashes the resulting artifacts. Its
   claim boundary remains source integration, not flight qualification.
+- The F-16 readiness entry now promotes only the verified source-channel
+  layers (`source_channel_dynamics_verified`,
+  `source_channel_reduced_lqr_verified`, and
+  `source_channel_smoke_verified`); the registry continues to leave full
+  equilibrium trim pending and leaves HL-20/NESC derived layers unchanged.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

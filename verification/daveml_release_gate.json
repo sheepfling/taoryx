@@ -5,7 +5,7 @@
     "verification/daveml_f16_scenario_evidence.json": "628ad40114b1c25b4082d6ab9733971c69fde03a182b0dcf437e21ebdce7188a",
     "verification/daveml_f16_trim_evidence.json": "bd131b577c08ec4c3e7640af5ddefce1f7b24908ad1704eeb7f13029a73b8322",
     "verification/daveml_f16_tuning_evidence.json": "ae3f51a44d5ea26264f10122f3bda5a0d1cc8d64d029af89c512673a153dfc00",
-    "verification/daveml_family_readiness.json": "d8a8ace6d995f61228e95bd422fb20899473d118a883bf3f5c6d413e80b6ac3d",
+    "verification/daveml_family_readiness.json": "48279930a0fb5c773d233c02e149a16a76caf99f0a9971c3a9e6d92e95b380b1",
     "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f"
   },
   "claim_boundary": "bounded source integration release gate; not flight qualification",
@@ -21,7 +21,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "     \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_f16_s119\",\n      \"layers\": {\n        \"linearization\": \"pending_source_trim_jacobian\",\n        \"objectives\": \"pending\",\n        \"scenarios\": \"trim_hold_only\",\n        \"trim\": \"source_package_regression\",\n        \"tuning\": \"pending\"\n      }\n    },\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"layers\": {\n        \"linearization\": \"pending_source_trim_jacobian\",\n        \"objectives\": \"pending\",\n        \"scenarios\": \"glide_trim_only\",\n        \"trim\": \"source_package_regression\",\n        \"tuning\": \"pending\"\n      }\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "ocket-scenario17\",\n      \"pending_derived_layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      },\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_f16_s119\",\n      \"layers\": {\n        \"trim\": \"source_package_regression\"\n      }\n    },\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"layers\": {\n        \"linearization\": \"pending_source_trim_jacobian\",\n        \"objectives\": \"pending\",\n        \"scenarios\": \"glide_trim_only\",\n        \"trim\": \"source_package_regression\",\n        \"tuning\": \"pending\"\n      }\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [

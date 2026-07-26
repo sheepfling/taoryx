@@ -108,10 +108,10 @@ layers:
   controllers: {version: pending, evidence: taoryx_reference_design}
   reductions: {version: pending, evidence: derived_from_parent_plant}
   trim: {version: source-package-regression-v1, evidence: source_package_regression}
-  linearization: {version: pending, evidence: pending_source_trim_jacobian}
-  tuning: {version: pending, evidence: pending}
-  objectives: {version: pending, evidence: pending}
-  scenarios: {version: trim-hold-only-v1, evidence: trim_hold_only}
+  linearization: {version: source-channel-dynamics-v1, evidence: source_channel_dynamics_verified}
+  tuning: {version: source-channel-reduced-lqr-v1, evidence: source_channel_reduced_lqr_verified}
+  objectives: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
+  scenarios: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
 bindings:
   - bindings/canonical-controls.yaml
   - bindings/canonical-observations.yaml

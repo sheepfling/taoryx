@@ -12,12 +12,12 @@ families:
     inertia_binding: source_bound_fixed
     atmosphere_binding: source_package_declared
     trim: source_package_regression
-    linearization: pending_source_trim_jacobian
-    tuning: pending
-    objectives: pending
-    scenarios: trim_hold_only
+    linearization: source_channel_dynamics_verified
+    tuning: source_channel_reduced_lqr_verified
+    objectives: source_channel_smoke_verified
+    scenarios: source_channel_smoke_verified
     runtime: runtime_replay_qualification_passed
-    next_gate: source_trim_linearization_and_controller_direction
+    next_gate: full_equilibrium_trim_and_longitudinal_control
   - id: reference_hl20_mod_k
     manifest: families/reference_hl20_mod_k/family.yaml
     source_import: verified
