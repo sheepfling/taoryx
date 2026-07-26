@@ -9,6 +9,10 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 
+from .daveml_compatibility import DAVEMLCompatibilityOverlay
+
+UNGRIDDED_POLICIES = frozenset({"strict_unspecified", "janus_delaunay_linear_qhull_v1", "nearest_neighbor", "user_supplied"})
+
 
 @dataclass(frozen=True, slots=True)
 class DAVEMLCheckResult:
@@ -85,6 +89,7 @@ class DAVEMLGraph:
     variables: Mapping[str, ET.Element]
     variable_names: Mapping[str, str]
     variable_units: Mapping[str, str]
+    ungridded_policy: str = "strict_unspecified"
 
     def evaluate(self, inputs: Mapping[str, float], outputs: Sequence[str]) -> dict[str, float]:
         """Evaluate named scalar outputs against explicit graph inputs."""
@@ -103,6 +108,7 @@ class DAVEMLGraph:
                 self.functions,
                 self.variables,
                 self.variable_names,
+                self.ungridded_policy,
             )
         return result
         ####
@@ -190,9 +196,17 @@ class DAVEMLGraph:
     ####
 
 
-def load_daveml_graph(payload: bytes, *, document_id: str = "daveml-document") -> DAVEMLGraph:
+def load_daveml_graph(
+    payload: bytes,
+    *,
+    document_id: str = "daveml-document",
+    ungridded_policy: str = "strict_unspecified",
+    compatibility_overlay: DAVEMLCompatibilityOverlay | None = None,
+) -> DAVEMLGraph:
     """Parse one DAVE-ML document into a reusable typed graph view."""
 
+    if ungridded_policy not in UNGRIDDED_POLICIES:
+        raise ValueError(f"unknown ungridded interpolation policy: {ungridded_policy}")
     root = ET.fromstring(payload)
     variables = {
         str(element.attrib.get("varID", "")): element
@@ -210,7 +224,14 @@ def load_daveml_graph(payload: bytes, *, document_id: str = "daveml-document") -
         for identifier, element in variables.items()
         if element.attrib.get("units")
     }
-    return DAVEMLGraph(document_id, _function_index(root), variables, variable_names, variable_units)
+    return DAVEMLGraph(
+        document_id,
+        _function_index(root, compatibility_overlay=compatibility_overlay),
+        variables,
+        variable_names,
+        variable_units,
+        ungridded_policy,
+    )
     ####
 
 
@@ -219,6 +240,9 @@ def evaluate_daveml_checkdata(
     *,
     absolute_tolerance: float = 1.0e-5,
     relative_tolerance: float = 1.0e-5,
+    ungridded_policy: str = "strict_unspecified",
+    compatibility_overlay: DAVEMLCompatibilityOverlay | None = None,
+    quarantine: Mapping[str, object] | None = None,
 ) -> tuple[DAVEMLCheckResult, ...]:
     """Evaluate supported static shots from one DAVE-ML document.
 
@@ -229,7 +253,7 @@ def evaluate_daveml_checkdata(
     if absolute_tolerance < 0.0 or relative_tolerance < 0.0:
         raise ValueError("numeric tolerances must be nonnegative")
     root = ET.fromstring(payload)
-    graph = load_daveml_graph(payload)
+    graph = load_daveml_graph(payload, ungridded_policy=ungridded_policy, compatibility_overlay=compatibility_overlay)
     variable_names = graph.variable_names
     results: list[DAVEMLCheckResult] = []
     for shot in _children_by_local(root, "checkData", recursive=True):
@@ -249,6 +273,12 @@ def evaluate_daveml_checkdata(
                 relative_error = absolute_error / max(abs(expected), 1.0e-30)
                 effective_tolerance = absolute_tolerance if declared_tolerance is None else declared_tolerance
                 status = "passed" if absolute_error <= effective_tolerance + relative_tolerance * max(abs(expected), abs(actual)) else "failed"
+                reason = None
+                reason_code = None
+                if status == "failed" and _matches_quarantine(quarantine, case_id, output_id, expected, actual, ungridded_policy):
+                    status = "quarantined"
+                    reason = str(quarantine.get("reason", "case-level compatibility quarantine")) if quarantine else None
+                    reason_code = "legacy_triangulation_ambiguity"
                 results.append(
                     DAVEMLCheckResult(
                         case_id,
@@ -258,7 +288,9 @@ def evaluate_daveml_checkdata(
                         absolute_error,
                         relative_error,
                         status,
+                        reason=reason,
                         absolute_tolerance=effective_tolerance,
+                        reason_code=reason_code,
                     )
                 )
     return tuple(results)
@@ -312,7 +344,11 @@ def _vector_unsupported_code(graph: DAVEMLGraph, identifier: str, reason: str) -
     ####
 
 
-def _function_index(root: ET.Element) -> dict[str, dict[str, object]]:
+def _function_index(
+    root: ET.Element,
+    *,
+    compatibility_overlay: DAVEMLCompatibilityOverlay | None = None,
+) -> dict[str, dict[str, object]]:
     """Index supported function definitions by dependent variable ID."""
 
     breakpoints = {
@@ -359,7 +395,16 @@ def _function_index(root: ET.Element) -> dict[str, dict[str, object]]:
                 table_id = str(reference.attrib.get("gtID", reference.attrib.get("utID", ""))).strip()
                 table = tables.get(table_id)
                 reference_kind = _local(reference.tag)
+                if (
+                    reference_kind == "griddedTableRef"
+                    and table is not None
+                    and _local(table.tag) == "ungriddedTableDef"
+                    and compatibility_overlay is not None
+                    and compatibility_overlay.permits_legacy_ungridded_reference(table_id)
+                ):
+                    reference_kind = "ungriddedTableRef"
             else:
+                table = None
                 reference_kind = None
         else:
             reference_kind = None
@@ -382,6 +427,7 @@ def _evaluate_variable(
     functions: Mapping[str, dict[str, object]],
     variables: Mapping[str, ET.Element],
     variable_names: Mapping[str, str],
+    ungridded_policy: str,
 ) -> float:
     """Resolve one variable through inputs, calculations, or functions."""
 
@@ -399,7 +445,7 @@ def _evaluate_variable(
             variable = variables.get(canonical_id)
             function = functions.get(canonical_id)
             if function is not None:
-                return _evaluate_function(function, resolve)
+                return _evaluate_function(function, resolve, ungridded_policy)
             calculation = _first_child(variable, "calculation") if variable is not None else None
             if calculation is not None:
                 math_node = _first_child(calculation, "math")
@@ -418,7 +464,7 @@ def _evaluate_variable(
     ####
 
 
-def _evaluate_function(function: dict[str, object], resolve: Callable[[str], float]) -> float:
+def _evaluate_function(function: dict[str, object], resolve: Callable[[str], float], ungridded_policy: str) -> float:
     """Evaluate one indexed function."""
 
     independent_values = function.get("independent", [])
@@ -441,7 +487,7 @@ def _evaluate_function(function: dict[str, object], resolve: Callable[[str], flo
     if function.get("kind") == "ungridded":
         if function.get("reference_kind") == "griddedTableRef":
             raise ValueError("griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved")
-        return _ungridded(query, table)
+        return _ungridded(query, table, policy=ungridded_policy)
     axes = function.get("axes", [])
     if not isinstance(axes, list):
         raise ValueError("table breakpoints are unavailable")
@@ -468,10 +514,10 @@ def _evaluate_vector_math(
             raise ValueError("MathML vector ci has no variable identifier")
         return resolve(identifier)
     if tag == "cn":
-        values = _numbers(" ".join(element.itertext()))
-        if len(values) != 1:
+        numeric_values = _numbers(" ".join(element.itertext()))
+        if len(numeric_values) != 1:
             raise ValueError("MathML vector cn must be scalar")
-        return (values[0],)
+        return (numeric_values[0],)
     if tag != "apply":
         raise ValueError(f"unsupported vector MathML element {tag!r}")
     children = list(element)
@@ -481,7 +527,7 @@ def _evaluate_vector_math(
     operands = children[1:]
     if operator not in {"plus", "minus", "times", "divide"} or not operands:
         raise ValueError(f"unsupported vector MathML operator {operator!r}")
-    values = [_evaluate_vector_math(child, resolve) for child in operands]
+    values: list[tuple[float, ...]] = [_evaluate_vector_math(child, resolve) for child in operands]
     vector_operands = [value for value in values if len(value) > 1]
     if not vector_operands:
         scalar_values = [value[0] for value in values]
@@ -620,29 +666,89 @@ def _table_axes(table: ET.Element, breakpoints: dict[str, list[float]]) -> list[
     ####
 
 
-def _ungridded(query: list[float], table: ET.Element) -> float:
+def _ungridded(query: list[float], table: ET.Element, *, policy: str = "strict_unspecified") -> float:
     """Evaluate an ungridded table with deterministic simplicial interpolation."""
 
     points = [_numbers(element.text) for element in _children_by_local(table, "dataPoint")]
     points = [point for point in points if len(point) == len(query) + 1]
     if not points:
         raise ValueError("ungridded table has no compatible data points")
+    if policy == "user_supplied":
+        raise ValueError("user_supplied interpolation requires an explicit runtime backend")
     try:
         import numpy as np
-        from scipy.interpolate import LinearNDInterpolator
+        from scipy.spatial import Delaunay
     except ImportError as error:
         raise ValueError("ungridded interpolation requires scipy") from error
-    interpolator = LinearNDInterpolator(
-        np.asarray([point[:-1] for point in points], dtype=float),
-        np.asarray([point[-1] for point in points], dtype=float),
-    )
-    interpolated = np.asarray(interpolator(np.asarray(query, dtype=float))).reshape(-1)
-    if interpolated.size != 1:
-        raise ValueError("ungridded interpolation returned a non-scalar result")
-    value = float(interpolated[0])
-    if not math.isfinite(value):
+    coordinates = np.asarray([point[:-1] for point in points], dtype=float)
+    values = np.asarray([point[-1] for point in points], dtype=float)
+    query_array = np.asarray(query, dtype=float)
+    if policy == "nearest_neighbor":
+        scales = np.ptp(coordinates, axis=0)
+        scales[scales == 0.0] = 1.0
+        normalized = (coordinates - coordinates.min(axis=0)) / scales
+        nearest = int(np.argmin(np.sum((normalized - (query_array - coordinates.min(axis=0)) / scales) ** 2, axis=1)))
+        return float(values[nearest])
+    if policy not in {"strict_unspecified", "janus_delaunay_linear_qhull_v1"}:
+        raise ValueError(f"unknown ungridded interpolation policy: {policy}")
+    scales = np.ptp(coordinates, axis=0)
+    scales[scales == 0.0] = 1.0
+    origin = coordinates.min(axis=0)
+    normalized = (coordinates - origin) / scales if policy == "janus_delaunay_linear_qhull_v1" else coordinates
+    normalized_query = (query_array - origin) / scales if policy == "janus_delaunay_linear_qhull_v1" else query_array
+    triangulation = Delaunay(normalized, qhull_options="Qbb Qc Qz Q12")
+    if policy == "janus_delaunay_linear_qhull_v1":
+        candidates: list[tuple[tuple[int, ...], int, object]] = []
+        for candidate, transform in enumerate(triangulation.transform):
+            barycentric = transform[: len(query)] @ (normalized_query - transform[len(query)])
+            candidate_weights = np.append(barycentric, 1.0 - barycentric.sum())
+            if np.all(candidate_weights >= -1.0e-10):
+                vertices = tuple(int(item) for item in triangulation.simplices[candidate])
+                candidates.append((tuple(sorted(vertices)), candidate, candidate_weights))
+        if not candidates:
+            raise ValueError("ungridded query lies outside the source convex hull")
+        _, simplex, weights = min(candidates, key=lambda item: (item[0], item[1]))
+        vertices = triangulation.simplices[simplex]
+    else:
+        simplex = int(triangulation.find_simplex(normalized_query))
+        if simplex < 0:
+            raise ValueError("ungridded query lies outside the source convex hull")
+        transform = triangulation.transform[simplex]
+        barycentric = transform[: len(query)] @ (normalized_query - transform[len(query)])
+        weights = np.append(barycentric, 1.0 - barycentric.sum())
+        vertices = triangulation.simplices[simplex]
+    if np.any(weights < -1.0e-10):
         raise ValueError("ungridded query lies outside the source convex hull")
-    return value
+    return float(np.dot(weights, values[vertices]))
+    ####
+
+
+def _matches_quarantine(
+    quarantine: Mapping[str, object] | None,
+    case_id: str,
+    output_id: str,
+    expected: float,
+    actual: float,
+    policy: str,
+) -> bool:
+    """Match only the exact pinned case, value, and interpolation policy."""
+
+    if quarantine is None:
+        return False
+    try:
+        quarantined_expected = quarantine.get("expected")
+        quarantined_actual = quarantine.get("actual")
+        if not isinstance(quarantined_expected, (int, float)) or not isinstance(quarantined_actual, (int, float)):
+            return False
+        return (
+            quarantine.get("case_id") == case_id
+            and quarantine.get("output_id", output_id) == output_id
+            and quarantine.get("policy") == policy
+            and math.isclose(float(quarantined_expected), expected, rel_tol=0.0, abs_tol=0.0)
+            and math.isclose(float(quarantined_actual), actual, rel_tol=0.0, abs_tol=1.0e-12)
+        )
+    except (KeyError, TypeError, ValueError):
+        return False
     ####
 
 

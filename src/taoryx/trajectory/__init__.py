@@ -64,6 +64,12 @@ from .contracts import (
     VariantStatus,
 )
 from .daveml_atmosphere import DAVEMLAtmosphereBinding, load_daveml_atmosphere
+from .daveml_compatibility import (
+    DAVEMLCompatibilityOverlay,
+    load_compatibility_overlay,
+    load_compatibility_overlay_for_payload,
+    load_quarantine_for_payload,
+)
 from .daveml_dynamics import DAVEMLFixedWingDynamicsBinding
 from .daveml_evaluator import (
     DAVEMLCheckResult,
@@ -235,6 +241,7 @@ __all__ = [
     "replay_reference_collection",
     "replay_reference_package",
     "DAVEMLCheckResult",
+    "DAVEMLCompatibilityOverlay",
     "DAVEMLVectorCheckResult",
     "DAVEMLAtmosphereBinding",
     "DAVEMLInertiaBinding",
@@ -243,6 +250,9 @@ __all__ = [
     "evaluate_daveml_checkdata",
     "evaluate_daveml_vector_checkdata",
     "load_daveml_graph",
+    "load_compatibility_overlay",
+    "load_compatibility_overlay_for_payload",
+    "load_quarantine_for_payload",
     "load_daveml_atmosphere",
     "DAVEMLDiff",
     "DAVEMLIR",

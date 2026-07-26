@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import zipfile
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -97,10 +98,15 @@ class CollectionManifest(BaseModel):
     collection_id: str = Field(min_length=1)
     collection_version: str = Field(min_length=1)
     family_id: str = Field(min_length=1)
+    qualification_class: Literal["reference_exact", "derived_exact", "surrogate_composite", "synthetic"] = "reference_exact"
+    manufacturer_validated: bool = False
+    source_exact: bool = False
     canonical_authority: Literal["taoryx_canonical"]
     source_documents: tuple[SourceDocument, ...]
     component_bindings: tuple[ComponentBinding, ...]
     contribution_authority: tuple[ContributionAuthority, ...]
+    authority_map: Mapping[str, str] = Field(default_factory=dict)
+    disabled_contributions: tuple[str, ...] = ()
     transforms: tuple[TransformRecord, ...]
     stateful_components: tuple[StatefulComponentContract, ...]
     runtime_artifact: str = Field(min_length=1)

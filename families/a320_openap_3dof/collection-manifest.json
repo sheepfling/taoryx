@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "collection_type": "taoryx.txcollection/v1alpha1",
+  "collection_id": "a320-openap-3dof",
+  "collection_version": "0.8.0",
+  "family_id": "a320_openap_3dof",
+  "qualification_class": "derived_exact",
+  "manufacturer_validated": false,
+  "source_exact": true,
+  "canonical_authority": "taoryx_canonical",
+  "source_documents": [
+    {
+      "document_id": "a320-openap.runtime",
+      "role": "performance-runtime-specification",
+      "source_path": "qualified-models/a320-openap/runtime/openap-a320.json",
+      "package_member": "qualified-models/a320-openap/runtime/openap-a320.json",
+      "sha256": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+      "byte_identical_to_upstream": false,
+      "upstream_repository": "OpenAP",
+      "upstream_revision": "2.6.0"
+    }
+  ],
+  "component_bindings": [
+    {"component_id": "aerodynamics", "role": "performance-aerodynamics", "source_document_ids": ["a320-openap.runtime"], "outputs": ["aerodynamics.drag", "aerodynamics.normal_force_target"]},
+    {"component_id": "propulsion", "role": "performance-propulsion", "source_document_ids": ["a320-openap.runtime"], "outputs": ["propulsion.thrust", "propulsion.fuel_flow"]},
+    {"component_id": "mass_properties", "role": "scalar-mass-schedule", "source_document_ids": ["a320-openap.runtime"], "outputs": ["mass.scalar_schedule"]}
+  ],
+  "contribution_authority": [
+    {"contribution": "aerodynamics.drag", "producer": "openap-2.6.0", "status": "authoritative", "rationale": "pinned public source reproduction"},
+    {"contribution": "propulsion.thrust", "producer": "openap-2.6.0", "status": "authoritative", "rationale": "pinned public source reproduction"}
+  ],
+  "authority_map": {"aerodynamics.drag": "openap-2.6.0", "propulsion.thrust": "openap-2.6.0", "mass.scalar_schedule": "openap-2.6.0"},
+  "disabled_contributions": [],
+  "transforms": [
+    {"transform_id": "frame.body", "kind": "frame", "source": "FRD", "canonical": "FRD", "reason": "pinned package convention"},
+    {"transform_id": "frame.navigation", "kind": "frame", "source": "NED", "canonical": "NED", "reason": "pinned package convention"}
+  ],
+  "stateful_components": [
+    {"component_id": "equations_of_motion", "classification": "external_required", "states": ["position", "velocity"], "source": "Taoryx runtime", "notes": "point-mass integration remains outside the static performance source"}
+  ],
+  "runtime_artifact": "qualified-models/a320-openap/taoryx-a320-openap-2.6-v0.8.txair",
+  "validation_artifact": "qualified-models/a320-openap/verification-report.json",
+  "source_payload_external": true,
+  "roundtrip_status": "verified"
+}

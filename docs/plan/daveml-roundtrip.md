@@ -31,6 +31,20 @@ fresh import and equivalence report
 | M5 applicable-family qualification | Complete for the currently qualified corpus | F-16, HL-20, and NESC are promoted with source-specific derived-layer dispositions; unqualified catalog records remain source-only |
 | M6 offline CI integration | Complete | `.github/workflows/daveml.yml` runs the fresh-process release gate, completion audit, and regression suite |
 
+### Qualification classes
+
+The collection boundary uses four strict qualification classes:
+
+- `reference_exact`: pinned upstream engineering model with source files and checks sufficient for the claimed reference contract.
+- `derived_exact`: exact numerical reproduction of a pinned public source, without a manufacturer-truth claim.
+- `surrogate_composite`: deliberately fused public sources with a contribution authority map and disabled duplicate contributions.
+- `synthetic`: generated engineering estimates with no source-equivalence claim.
+
+The A320 OpenAP package is `derived_exact`. The OpenAP plus JSBSim
+pseudo-6DOF family is `surrogate_composite` and remains an implementation
+lane, not a source-exact promotion. The source-exact A320 acquisition record
+remains separate and unavailable.
+
 ## Standard collection contracts
 
 `CollectionManifest`, `SourceDocument`, `ComponentBinding`,

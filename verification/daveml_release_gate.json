@@ -2,7 +2,7 @@
   "artifacts": {
     "build/daveml-release-catalog/canonical/export-manifest.json": "94ffb7f59a74350f76d2b7d58057cb7da6d58840518abc709d392f3700035b0a",
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
-    "verification/daveml_catalog_roundtrip.json": "4349163d9ed13cb80c86ca860b782e575fb96cdc4ce02f73ed492b5cf5e84af5",
+    "verification/daveml_catalog_roundtrip.json": "582bbabb4eee6e4c98be0ec528ddc5b8da16c361f260dfe7bc9d91f2ae2de1d2",
     "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",
     "verification/daveml_f16_equilibrium_trim_evidence.json": "400da9183034b3f5fd83c4ebcc63ceede5ae7de1729483e8352d99fca803dbf8",
     "verification/daveml_f16_linearization_evidence.json": "e6ddb6b95b2b4fbf4b7d3374124a638d99796053b547de4925a6a5c4db8e2262",
@@ -16,7 +16,7 @@
     "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f",
     "verification/daveml_nesc_objectives_evidence.json": "9f35f2ebf2ea07dd695bd09800640dd833f0634220b05d23dcaa35f80adfb0e2",
     "verification/daveml_nesc_replay_evidence.json": "12bdd48ea012586295d230618c068def183a0a558bcd530aaaaad62bdd2f5a7b",
-    "verification/daveml_official_checkdata.json": "0935c40000b396ec68b90811935726466f99879aab1a35d5b375eb1bd0417a2b",
+    "verification/daveml_official_checkdata.json": "3cf04390e89031ebdf572e7f8a9b016edb3131ff78ce3c37bc601f720f1c32ca",
     "verification/daveml_official_conformance.json": "deaa6f110a305d0ad555434f4e4c04aa2773d73847324b3e605f816c150de169"
   },
   "claim_boundary": "bounded source integration release gate; not flight qualification",
@@ -128,7 +128,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "   {\n      \"checkdata\": {\n        \"count\": 0,\n        \"failed\": 0,\n        \"passed\": 0,\n        \"results\": [],\n        \"status\": \"not_present\",\n        \"unsupported\": 0,\n        \"vector_count\": 0,\n        \"vector_failed\": 0,\n        \"vector_passed\": 0,\n        \"vector_results\": [],\n        \"vector_unsupported\": 0\n      },\n      \"checkdata_failed\": 0,\n      \"checkdata_status\": \"not_present\",\n      \"exported_sha256\": \"9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0\",\n      \"fresh_process_checkdata\": \"verified\",\n      \"fresh_process_reimport\": \"verified\",\n      \"ir_sha256\": \"a5ce825c91e48fbcde812f97780c46691689454471116b1f3a9df7f5824d9451\",\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"reference_summary\": {},\n      \"source\": \"normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml\",\n      \"source_sha256\": \"297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee\",\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "        \"count\": 0,\n        \"failed\": 0,\n        \"passed\": 0,\n        \"quarantined\": 0,\n        \"results\": [],\n        \"status\": \"not_present\",\n        \"unsupported\": 0,\n        \"vector_count\": 0,\n        \"vector_failed\": 0,\n        \"vector_passed\": 0,\n        \"vector_results\": [],\n        \"vector_unsupported\": 0\n      },\n      \"checkdata_failed\": 0,\n      \"checkdata_status\": \"not_present\",\n      \"exported_sha256\": \"9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0\",\n      \"fresh_process_checkdata\": \"verified\",\n      \"fresh_process_reimport\": \"verified\",\n      \"ir_sha256\": \"a5ce825c91e48fbcde812f97780c46691689454471116b1f3a9df7f5824d9451\",\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"reference_summary\": {},\n      \"source\": \"normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml\",\n      \"source_sha256\": \"297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee\",\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [
@@ -136,11 +136,17 @@
         "tools/evaluate_daveml_checkdata.py",
         "resources/aerospace/daveml/official-conformance-v1",
         "--output",
-        "verification/daveml_official_checkdata.json"
+        "verification/daveml_official_checkdata.json",
+        "--ungridded-policy",
+        "janus_delaunay_linear_qhull_v1",
+        "--compatibility-overlay-dir",
+        "resources/aerospace/daveml/compatibility-overlays",
+        "--quarantine-dir",
+        "resources/aerospace/daveml/compatibility-overlays/quarantines"
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "   \"output_id\": \"CLBASIC\",\n          \"reason\": \"griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved\",\n          \"reason_code\": \"legacy_table_reference_type_mismatch\",\n          \"relative_error\": null,\n          \"status\": \"unsupported\"\n        }\n      ],\n      \"document\": \"twoD_ungridded.dml\",\n      \"failed\": 0,\n      \"passed\": 0,\n      \"unsupported\": 4,\n      \"vector_check_count\": 0,\n      \"vector_checks\": [],\n      \"vector_failed\": 0,\n      \"vector_passed\": 0,\n      \"vector_unsupported\": 0\n    }\n  ],\n  \"limitations\": [\n    \"Direct point functions, nested MathML calculations, and regular gridded tables are evaluated.\",\n    \"Regular-grid queries follow NASA DAVEtools endpoint-clamp behavior outside breakpoint bounds.\",\n    \"Unsupported graph forms remain explicit quarantined results.\",\n    \"Documents without checkData are represented with check_count zero.\"\n  ],\n  \"schema_version\": \"taoryx.daveml-checkdata/v1\",\n  \"status\": \"verified_with_quarantine\"\n}\n"
+      "stdout_tail": "reason_code\": null,\n          \"relative_error\": 1.0451068098926523e-05,\n          \"status\": \"passed\"\n        }\n      ],\n      \"document\": \"twoD_ungridded.dml\",\n      \"failed\": 0,\n      \"passed\": 3,\n      \"quarantined\": 1,\n      \"unsupported\": 0,\n      \"vector_check_count\": 0,\n      \"vector_checks\": [],\n      \"vector_failed\": 0,\n      \"vector_passed\": 0,\n      \"vector_unsupported\": 0\n    }\n  ],\n  \"limitations\": [\n    \"Direct point functions, nested MathML calculations, and regular gridded tables are evaluated.\",\n    \"Regular-grid queries follow NASA DAVEtools endpoint-clamp behavior outside breakpoint bounds.\",\n    \"Unsupported graph forms remain explicit quarantined results.\",\n    \"Documents without checkData are represented with check_count zero.\"\n  ],\n  \"quarantine_dir\": \"resources\\\\aerospace\\\\daveml\\\\compatibility-overlays\\\\quarantines\",\n  \"schema_version\": \"taoryx.daveml-checkdata/v1\",\n  \"status\": \"verified_with_quarantine\",\n  \"ungridded_policy\": \"janus_delaunay_linear_qhull_v1\"\n}\n"
     },
     {
       "command": [

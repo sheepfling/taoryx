@@ -61,6 +61,30 @@ families:
     parent_fidelity: rigid_body_6dof
     next_gate: acquire_and_hash_exact_a320_source_package
     reductions: []
+  - id: a320_openap_3dof
+    status: derived_exact_runtime_baseline_verified
+    integration_record: families/a320_openap_3dof/qualification/integration-record.yaml
+    source_kind: openap
+    parent_fidelity: point_mass_3dof
+    next_gate: build_surrogate_composite_6dof
+    expected_inputs:
+      - role: corpus_archive
+        kind: package
+        relative_path: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
+        sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+    reductions: [performance_trim, objective_and_tuning_binding]
+  - id: a320_openap_jsbsim_pseudo6dof
+    status: surrogate_composite_implementation_in_progress
+    integration_record: families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml
+    source_kind: composite_openap_jsbsim
+    parent_fidelity: pseudo_6dof
+    next_gate: verify_component_replay_and_roundtrip
+    expected_inputs:
+      - role: corpus_archive
+        kind: package
+        relative_path: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
+        sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+    reductions: [performance_trim, objective_and_tuning_binding]
 gates:
   source_integrity: required
   canonical_units_and_frames: required

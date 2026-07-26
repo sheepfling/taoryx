@@ -1,14 +1,16 @@
 {
   "claim_boundary": "requirement audit; not a flight qualification or historical TAOS compatibility claim",
   "evidence_hashes": {
-    "docs/plan/daveml-roundtrip.md": "61d58206c66a3bea80a63258ea40a7e7322bf8b2fe61d3f5f619393b9d3be987",
+    "docs/plan/daveml-roundtrip.md": "b0c35e9d99549f12cb7450ee66f532b078be5f3f450166a24a3afe62d0fa2fd9",
+    "families/a320_openap_3dof/qualification/integration-record.yaml": "0964506dd5e5a26cb404786f418a21501c44cfae52c0ea3047b1ddec517319c8",
+    "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml": "3c164e944fa9c79d83214aff013bc054556cd86641097a417a48fdc4580bb4f1",
     "families/reference_a320/qualification/integration-record.yaml": "e8376d380013315898f730f70cd2b8b8ed8278059902bbc356029e2d2fca31bd",
     "verification/daveml_catalog_import.json": "136a4672f38fb8f5fa1acf2a28ffb0bfa72dbca930345cbf689863e7fb869ff9",
-    "verification/daveml_catalog_roundtrip.json": "19c7a627d21c1c9e3c7112945a6e221a8b864249f9c6fde36c94dab14f83b4b1",
+    "verification/daveml_catalog_roundtrip.json": "06adcf1e82c124e5e737f99b7ef3ba11158dd9f49a10f1b225195c1ac9e1c739",
     "verification/daveml_family_readiness.json": "286d9b867ed33455c35550b143c26b091f9762498366bd84624a68f493db816c",
-    "verification/daveml_official_checkdata.json": "12eaa6139b2115a3db402e73238c06330d413f8b1c4e5b820d9d5b9035365f26",
+    "verification/daveml_official_checkdata.json": "eb621fa798b0a08e1c579b8197a1c037ba73b0063b9c9142af14e3ca327e6b72",
     "verification/daveml_official_conformance.json": "e8a94e57b364697a25f1844c6ee7000dadc61bab0840a5276d17726d5f274531",
-    "verification/daveml_release_gate.json": "ce0b05f2d79f1d260b39dab7af65f9978c25147cc3ebfb131595737b90e1269e"
+    "verification/daveml_release_gate.json": "58cf5165b07ac8d290a1ec223318ea372bed782932187c81158c055363d0d96b"
   },
   "readiness_family_count": 3,
   "release_artifact_count": 18,
@@ -48,6 +50,16 @@
       "evidence": "docs/plan/daveml-roundtrip.md",
       "id": "vector_table_function_semantics",
       "status": "not_in_authoritative_corpus"
+    },
+    {
+      "evidence": "families/a320_openap_3dof/qualification/integration-record.yaml",
+      "id": "a320_derived_exact_3dof_product",
+      "status": "verified"
+    },
+    {
+      "evidence": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+      "id": "a320_surrogate_composite_6dof_lane",
+      "status": "implementation_in_progress"
     },
     {
       "evidence": "families/reference_a320/qualification/integration-record.yaml",

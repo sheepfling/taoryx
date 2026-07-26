@@ -29,6 +29,8 @@ def main() -> int:
         {"id": "family_readiness", "status": readiness["status"], "evidence": "verification/daveml_family_readiness.json"},
         {"id": "official_2d_ungridded_interpolation", "status": "known_gap_quarantined", "evidence": "verification/daveml_official_checkdata.json"},
         {"id": "vector_table_function_semantics", "status": "not_in_authoritative_corpus", "evidence": "docs/plan/daveml-roundtrip.md"},
+        {"id": "a320_derived_exact_3dof_product", "status": "verified", "evidence": "families/a320_openap_3dof/qualification/integration-record.yaml"},
+        {"id": "a320_surrogate_composite_6dof_lane", "status": "implementation_in_progress", "evidence": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml"},
         {"id": "a320_exact_source_package", "status": "blocked_missing_source", "evidence": "families/reference_a320/qualification/integration-record.yaml"},
     ]
     report = {

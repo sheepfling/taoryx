@@ -1,4 +1,5 @@
 {
+  "compatibility_overlay_dir": "resources\\aerospace\\daveml\\compatibility-overlays",
   "documents": [
     {
       "check_count": 126,
@@ -1519,6 +1520,7 @@
       "document": "atmos_76.dml",
       "failed": 0,
       "passed": 126,
+      "quarantined": 0,
       "unsupported": 0,
       "vector_check_count": 0,
       "vector_checks": [],
@@ -2757,6 +2759,7 @@
       "document": "F16_aero.dml",
       "failed": 0,
       "passed": 102,
+      "quarantined": 0,
       "unsupported": 0,
       "vector_check_count": 0,
       "vector_checks": [],
@@ -5651,6 +5654,7 @@
       "document": "HL20_aero.dml",
       "failed": 0,
       "passed": 240,
+      "quarantined": 0,
       "unsupported": 0,
       "vector_check_count": 0,
       "vector_checks": [],
@@ -5664,6 +5668,7 @@
       "document": "simple_aero.dml",
       "failed": 0,
       "passed": 0,
+      "quarantined": 0,
       "unsupported": 0,
       "vector_check_count": 0,
       "vector_checks": [],
@@ -5677,6 +5682,7 @@
       "document": "threeD_ungridded.dml",
       "failed": 0,
       "passed": 0,
+      "quarantined": 0,
       "unsupported": 0,
       "vector_check_count": 0,
       "vector_checks": [],
@@ -5690,6 +5696,7 @@
       "document": "twoD_table.dml",
       "failed": 0,
       "passed": 0,
+      "quarantined": 0,
       "unsupported": 0,
       "vector_check_count": 0,
       "vector_checks": [],
@@ -5701,58 +5708,59 @@
       "check_count": 4,
       "checks": [
         {
-          "absolute_error": null,
+          "absolute_error": 3.333333333328456e-05,
           "absolute_tolerance": 0.0005,
-          "actual": null,
+          "actual": 0.023333333333333286,
           "case_id": "case 1",
           "expected": 0.0233,
           "output_id": "CLBASIC",
-          "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
-          "reason_code": "legacy_table_reference_type_mismatch",
-          "relative_error": null,
-          "status": "unsupported"
+          "reason": null,
+          "reason_code": null,
+          "relative_error": 0.0014306151645186505,
+          "status": "passed"
         },
         {
-          "absolute_error": null,
+          "absolute_error": 0.025000000000000078,
           "absolute_tolerance": 0.0001,
-          "actual": null,
+          "actual": 0.23499999999999993,
           "case_id": "case 2",
           "expected": 0.26,
           "output_id": "CLBASIC",
-          "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
-          "reason_code": "legacy_table_reference_type_mismatch",
-          "relative_error": null,
-          "status": "unsupported"
+          "reason": "Delaunay triangulation ambiguity in legacy fixture",
+          "reason_code": "legacy_triangulation_ambiguity",
+          "relative_error": 0.09615384615384645,
+          "status": "quarantined"
         },
         {
-          "absolute_error": null,
+          "absolute_error": 1.052631578951635e-05,
           "absolute_tolerance": 0.0001,
-          "actual": null,
+          "actual": 0.3822105263157895,
           "case_id": "case 3",
           "expected": 0.3822,
           "output_id": "CLBASIC",
-          "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
-          "reason_code": "legacy_table_reference_type_mismatch",
-          "relative_error": null,
-          "status": "unsupported"
+          "reason": null,
+          "reason_code": null,
+          "relative_error": 2.7541380924951202e-05,
+          "status": "passed"
         },
         {
-          "absolute_error": null,
+          "absolute_error": 1.0526315789238794e-05,
           "absolute_tolerance": 0.0001,
-          "actual": null,
+          "actual": 1.0072105263157893,
           "case_id": "case 4",
           "expected": 1.0072,
           "output_id": "CLBASIC",
-          "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
-          "reason_code": "legacy_table_reference_type_mismatch",
-          "relative_error": null,
-          "status": "unsupported"
+          "reason": null,
+          "reason_code": null,
+          "relative_error": 1.0451068098926523e-05,
+          "status": "passed"
         }
       ],
       "document": "twoD_ungridded.dml",
       "failed": 0,
-      "passed": 0,
-      "unsupported": 4,
+      "passed": 3,
+      "quarantined": 1,
+      "unsupported": 0,
       "vector_check_count": 0,
       "vector_checks": [],
       "vector_failed": 0,
@@ -5766,6 +5774,8 @@
     "Unsupported graph forms remain explicit quarantined results.",
     "Documents without checkData are represented with check_count zero."
   ],
+  "quarantine_dir": "resources\\aerospace\\daveml\\compatibility-overlays\\quarantines",
   "schema_version": "taoryx.daveml-checkdata/v1",
-  "status": "verified_with_quarantine"
+  "status": "verified_with_quarantine",
+  "ungridded_policy": "janus_delaunay_linear_qhull_v1"
 }
