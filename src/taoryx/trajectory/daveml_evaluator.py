@@ -54,6 +54,7 @@ class DAVEMLVectorCheckResult:
     status: str
     reason: str | None = None
     absolute_tolerance: float | None = None
+    reason_code: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-safe vector result."""
@@ -67,6 +68,7 @@ class DAVEMLVectorCheckResult:
             "status": self.status,
             "reason": self.reason,
             "absolute_tolerance": self.absolute_tolerance,
+            "reason_code": self.reason_code,
         }
         ####
 ####
@@ -283,7 +285,8 @@ def evaluate_daveml_vector_checkdata(
                 try:
                     actual = graph.evaluate_vectors(inputs, (resolved_output_id,))[resolved_output_id]
                 except ValueError as error:
-                    results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, None, None, "unsupported", str(error), tolerance))
+                    reason_code = _vector_unsupported_code(graph, resolved_output_id, str(error))
+                    results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, None, None, "unsupported", str(error), tolerance, reason_code))
                     continue
                 if len(actual) != len(expected):
                     results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, actual, None, "failed", "vector widths differ", tolerance))
@@ -292,6 +295,18 @@ def evaluate_daveml_vector_checkdata(
                 status = "passed" if maximum_error <= tolerance else "failed"
                 results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, actual, maximum_error, status, absolute_tolerance=tolerance))
     return tuple(results)
+    ####
+
+
+def _vector_unsupported_code(graph: DAVEMLGraph, identifier: str, reason: str) -> str | None:
+    """Return a stable feature code for a quarantined vector evaluation."""
+
+    function = graph.functions.get(identifier)
+    if isinstance(function, dict) and function.get("kind") in {"grid", "ungridded", "points"}:
+        return "vector_table_function_semantics"
+    if "cyclic vector dependency" in reason:
+        return "vector_dependency_cycle"
+    return None
     ####
 
 
