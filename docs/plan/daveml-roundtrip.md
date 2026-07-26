@@ -532,6 +532,10 @@ items are complete and reproducible:
   declared dynamic-pressure equation `q = 0.5*rho*V^2`; the coupled probe
   remains explicit about speed units and still applies no hidden mass or
   gravity terms.
+- `DAVEMLInertiaBinding` now loads the F-16 mass-properties graph through its
+  verified package/member hash, converts slug and slug-ft2 values to SI, and
+  exposes a signed symmetric body inertia matrix. This is the source-backed
+  inertia seam required before a six-degree-of-freedom dynamics linearization.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

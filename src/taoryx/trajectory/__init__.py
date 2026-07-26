@@ -56,6 +56,7 @@ from .daveml_import import (
     load_daveml_function_channel,
     load_daveml_trim_binding,
 )
+from .daveml_inertia import DAVEMLInertiaBinding
 from .daveml_replay import DAVEMLReplayReport, replay_reference_collection, replay_reference_package
 from .daveml_semantic import (
     DAVEMLIR,
@@ -163,6 +164,7 @@ __all__ = [
     "replay_reference_package",
     "DAVEMLCheckResult",
     "DAVEMLAtmosphereBinding",
+    "DAVEMLInertiaBinding",
     "DAVEMLGraph",
     "evaluate_daveml_checkdata",
     "load_daveml_graph",

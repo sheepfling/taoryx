@@ -10,6 +10,7 @@ from taoryx.trajectory import (
     DAVEMLCompositeTrimBinding,
     DAVEMLFixedWingLoadBinding,
     DAVEMLFunctionChannel,
+    DAVEMLInertiaBinding,
     DAVEMLTrimBinding,
     load_daveml_atmosphere,
     load_daveml_family_graph,
@@ -257,6 +258,20 @@ def test_f16_load_binding_can_derive_dynamic_pressure_from_daveml_atmosphere() -
     )
     expected_q = 0.5 * 1.225 * 152.4**2
     assert loads["aerodynamic_force_x_n"] == pytest.approx(expected_q * 27.870912 * -0.0142)
+
+
+def test_f16_inertia_binding_converts_source_mass_properties_to_si() -> None:
+    graph = load_daveml_family_graph(
+        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+        role="mass_properties",
+    )
+    binding = DAVEMLInertiaBinding(graph)
+    values = binding.evaluate()
+    assert values["mass_kg"] == pytest.approx(637.1595 * 14.59390294)
+    assert values["cg_percent_mac"] == pytest.approx(35.0)
+    assert values["inertia_yy_kg_m2"] == pytest.approx(55814.0 * 1.3558179483314004)
+    matrix = binding.as_inertia_matrix()
+    assert matrix[0][2] == pytest.approx(-982.0 * 1.3558179483314004)
 
 
 @pytest.mark.skipif(not CATALOG_ROOT.is_dir(), reason="local DAVE-ML catalog is external to the repository")
