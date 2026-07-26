@@ -598,6 +598,9 @@ items are complete and reproducible:
 - HL20 tuning is now explicitly `not_applicable_no_declared_controls`: the
   authoritative unpowered aerodynamic package declares no control channels,
   so no controller or tuning artifact is fabricated from an uncontrolled plant.
+- The semantic IR now exposes a deterministic unit/dimension index for source
+  variable definitions while preserving original unit attributes and unknown
+  units as `dimension: unknown` for explicit review.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,

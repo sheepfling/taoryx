@@ -173,6 +173,7 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
         "checks": {"checkData", "checkCase", "check"},
     }
     result: dict[str, list[dict[str, object]]] = {name: [] for name in groups}
+    result["units"] = []
 
     def visit(node: dict[str, object]) -> None:
         tag = str(node.get("tag", ""))
@@ -192,11 +193,43 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
                     }
                 )
                 break
+        unit_name = attributes.get("units", attributes.get("unit"))
+        identifier = attributes.get("varID", attributes.get("name"))
+        if unit_name and identifier:
+            result["units"].append(
+                {
+                    "source_path": node.get("source_path"),
+                    "identifier": identifier,
+                    "unit": unit_name,
+                    "dimension": _dimension_for_unit(unit_name),
+                }
+            )
         for child in children:
             visit(child)
 
     visit(root)
     return {name: entries for name, entries in result.items()}
+
+
+def _dimension_for_unit(unit: str) -> str:
+    """Return a stable dimension signature for common DAVE-ML source units."""
+
+    dimensions = {
+        "nd": "1",
+        "deg": "angle",
+        "rad": "angle",
+        "deg_rad": "angle",
+        "rad_s": "angle/time",
+        "f_s": "length/time",
+        "f": "length",
+        "fracMAC": "1",
+        "slug": "mass",
+        "slug_ft2": "mass*length^2",
+        "lb": "force",
+        "lbf": "force",
+        "s": "time",
+    }
+    return dimensions.get(unit.strip(), "unknown")
 
 
 def _element(node: dict[str, object]) -> Any:

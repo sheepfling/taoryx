@@ -68,4 +68,6 @@ def test_real_reference_sources_roundtrip_through_canonical_ir(package_member: s
     assert ir.source_sha256
     assert ir.root["tag"] == "DAVEfunc"
     assert ir.semantic["functions"]
+    assert ir.semantic["units"]
+    assert all("dimension" in item for item in ir.semantic["units"])
     ####
