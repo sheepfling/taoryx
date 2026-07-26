@@ -96,6 +96,20 @@ def test_semantic_ir_marks_legacy_table_reference_type_mismatch() -> None:
     assert reference["target_tag"] == "ungriddedTableDef"
 
 
+def test_semantic_ir_classifies_modification_reference_as_external_provenance() -> None:
+    ir = build_daveml_ir(
+        b"""
+        <DAVEfunc>
+          <function><provenance><modificationRef refID="prior"/></provenance></function>
+        </DAVEfunc>
+        """,
+        document_id="provenance-reference",
+    )
+    reference = ir.semantic["functions"][0]["references"][0]
+    assert reference["status"] == "external_provenance"
+    assert reference["identifier"] == "prior"
+
+
 @pytest.mark.parametrize(
     "package_member",
     (
