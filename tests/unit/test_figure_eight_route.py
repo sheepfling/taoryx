@@ -119,6 +119,35 @@ def test_figure_eight_route_velocity_is_finite_and_uses_declared_speed() -> None
     ####
 
 
+def test_figure_eight_terminal_route_preserves_declared_course_and_speed() -> None:
+    route = {
+        **ROUTE,
+        "terminal-capture": "true",
+        "terminal-start-s": "100.0",
+        "terminal-target-altitude-m": "100.0",
+        "terminal-speed-mps": "20.0",
+        "terminal-heading-deg": "90.0",
+        "terminal-command-speed-mps": "25.0",
+    }
+    state = RigidBody6DofState(
+        110.0,
+        FrameVector3(Vector3(6_378_237.0, 0.0, 0.0), Frame.ECIC),
+        FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECIC),
+        Quaternion.identity(),
+        Vector3(0.0, 0.0, 0.0),
+        100.0,
+        0.0,
+    )
+
+    velocity = _runtime_route_velocity(route, {}, state, 0.0)
+
+    assert velocity is not None
+    assert velocity.x == pytest.approx(0.0, abs=1.0e-9)
+    assert velocity.y == pytest.approx(20.0, abs=1.0e-9)
+    assert velocity.z == pytest.approx(0.0, abs=1.0e-9)
+    ####
+
+
 def test_figure_eight_reports_tangent_errors_separately_from_range() -> None:
     state = _state(0.0)
     target = _runtime_figure_eight_waypoint_position(ROUTE, state)

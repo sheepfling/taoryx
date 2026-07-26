@@ -2866,9 +2866,23 @@ def _runtime_figure_eight_route_velocity(
         radial_speed = state.velocity.vector.dot(radial_now)
         horizontal_error = position_error - radial_now.scaled(position_error.dot(radial_now))
         horizontal_velocity = state.velocity.vector - radial_now.scaled(radial_speed)
+        latitude_now = math.asin(max(-1.0, min(1.0, radial_now.z)))
+        longitude_now = math.atan2(radial_now.y, radial_now.x)
+        east_now = Vector3(-math.sin(longitude_now), math.cos(longitude_now), 0.0)
+        north_now = Vector3(
+            -math.sin(latitude_now) * math.cos(longitude_now),
+            -math.sin(latitude_now) * math.sin(longitude_now),
+            math.cos(latitude_now),
+        )
         capture_gain = max(0.0, float(route_attributes.get("terminal-capture-gain", "0.8")))
         damping = max(0.0, float(route_attributes.get("terminal-velocity-damping", "0.8")))
-        desired_velocity = horizontal_error.scaled(capture_gain) - horizontal_velocity.scaled(damping)
+        terminal_speed = abs(float(route_attributes.get("terminal-speed-mps", "0.0")))
+        terminal_heading = math.radians(float(route_attributes.get("terminal-heading-deg", "90.0")))
+        terminal_course = (
+            north_now.scaled(terminal_speed * math.cos(terminal_heading))
+            + east_now.scaled(terminal_speed * math.sin(terminal_heading))
+        )
+        desired_velocity = terminal_course + horizontal_error.scaled(capture_gain) - horizontal_velocity.scaled(damping)
         altitude_error = terminal_altitude - (state.position.vector.norm() - 6_378_137.0)
         desired_velocity = desired_velocity + radial_now.scaled(
             float(route_attributes.get("terminal-altitude-gain", "0.8")) * altitude_error
