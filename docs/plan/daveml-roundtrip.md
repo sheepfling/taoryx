@@ -541,6 +541,11 @@ items are complete and reproducible:
   inertia, and optional body gravity. Its focused test verifies translational
   and rotational accelerations; this is the dynamics seam, not yet a certified
   operating-point linearization or controller design.
+- `tools/validate_daveml_linearization.py` now emits
+  `verification/daveml_f16_linearization_evidence.json` with a source-linked
+  6x6/6x1 local dynamics Jacobian and declared central-difference steps. It is
+  a verified channel operating-point artifact, not an equilibrium trim or
+  controller qualification.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

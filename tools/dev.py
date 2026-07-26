@@ -609,6 +609,13 @@ def daveml_atmosphere() -> None:
     ####
 
 
+def daveml_linearization() -> None:
+    """Generate reproducible DAVE-ML dynamics linearization evidence."""
+
+    run(tool_script("validate_daveml_linearization.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -716,6 +723,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-readiness": daveml_readiness,
     "daveml-trim": daveml_trim,
     "daveml-atmosphere": daveml_atmosphere,
+    "daveml-linearization": daveml_linearization,
     "handoff": handoff,
     "check": check,
     "all": check,

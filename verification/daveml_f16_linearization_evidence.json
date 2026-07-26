@@ -1,0 +1,109 @@
+{
+  "a_matrix": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      -152.4
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      152.40000000000032,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "b_matrix": [
+    [
+      -0.00012488788815601115
+    ],
+    [
+      0.0
+    ],
+    [
+      -0.022779550810647642
+    ],
+    [
+      0.0
+    ],
+    [
+      -0.012262961253915738
+    ],
+    [
+      0.0
+    ]
+  ],
+  "claim_boundary": "source-channel operating point; not equilibrium trim or controller qualification",
+  "control_names": [
+    "elevator_deg"
+  ],
+  "family_id": "reference_f16_s119",
+  "perturbations": {
+    "control_step": 0.0001,
+    "method": "central_finite_difference",
+    "state_step": 0.0001
+  },
+  "provenance": {
+    "aerodynamics_document_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+    "aerodynamics_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
+    "mass_properties_document_sha256": "f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28",
+    "mass_properties_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
+  },
+  "schema_version": "taoryx.daveml-linearization-evidence/v1",
+  "state_names": [
+    "u_m_s",
+    "v_m_s",
+    "w_m_s",
+    "p_rad_s",
+    "q_rad_s",
+    "r_rad_s"
+  ],
+  "status": "verified",
+  "trim_controls": {
+    "elevator_deg": 0.0
+  },
+  "trim_state": {
+    "p_rad_s": 0.0,
+    "q_rad_s": 0.0,
+    "r_rad_s": 0.0,
+    "u_m_s": 152.4,
+    "v_m_s": 0.0,
+    "w_m_s": 0.0
+  }
+}
