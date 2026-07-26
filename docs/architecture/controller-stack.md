@@ -416,3 +416,351 @@ Next controller-stack work should be promoted in this order:
 
 The result is a controller architecture that is generic at the seams and
 specific where physics require specificity.
+
+## 8. Two worked objective-to-actuator examples
+
+The two current showcase vehicles make the distinction concrete:
+
+| Vehicle | Physical type | Current nested control shape |
+| --- | --- | --- |
+| Skywalker X8 | Fixed-wing rigid-body 6DOF | Racetrack/path guidance → attitude reference → attitude LQR → direct canonical moment → aerodynamic/propulsive plant |
+| Hummingbird | Quadrotor rigid-body 6DOF | Position/velocity guidance → desired force/thrust direction → bounded attitude moment law + yaw law → collective and quad-X rotor allocation → rotor plant |
+
+Both are rigid-body 6DOF cases, but they do not use the same guidance or
+actuator realization. The shared pieces are the contracts and telemetry
+boundaries.
+
+### 8.1 X8: racetrack objectives resolving to an attitude regulator
+
+The current X8 racetrack has six independently evaluated mission objectives:
+
+```text
+high-altitude level gate
+left-turn bank event
+left-turn exit gate
+low-altitude level gate
+right-turn bank event
+start/finish fly-by gate
+```
+
+The objective declarations define truth acceptance: gate plane, crossing
+direction, altitude, speed, corridor, and time window. They do not directly
+provide a control command. The route reference and the evaluator are separate:
+
+```text
+objective contract / route geometry
+              │
+              ├── guidance reference used by the controller
+              │
+              └── independent truth evaluator used for pass/fail
+```
+
+For the guidance branch, define local position and velocity errors:
+
+\[
+e_p = p_{ref}(t)-p(t), \qquad
+e_v = v_{ref}(t)-v(t).
+\]
+
+The racetrack reference supplies a tangent velocity \(v_t\), and the current
+implementation adds bounded capture terms:
+
+\[
+v_{cmd} = v_t
+       + \operatorname{sat}_{v_{max}}(K_p e_p)
+       + \hat r\,\operatorname{sat}_{\dot h_{max}}(K_h e_h),
+\]
+
+where \(e_h=h_{ref}-h\), \(\hat r\) is the local outward radial direction,
+and the scheduled vertical component is retained when the phase is climbing
+or descending. The phase geometry supplies the left/right bank reference and
+the route tangent; the vehicle does not receive a force injection from this
+calculation.
+
+The desired body attitude is built from the route tangent and bank reference.
+The attitude error is represented in the local body frame as a small-angle
+three-vector, schematically:
+
+\[
+e_R \approx \frac{1}{2}
+\sum_{i=1}^{3} b_i \times b_{i,ref}.
+\]
+
+The current X8 LQR then receives attitude and body-rate error channels:
+
+\[
+x_X =
+\begin{bmatrix}
+e_{R,x} & e_{R,y} & e_{R,z} & p & q & r
+\end{bmatrix}^{T}.
+\]
+
+The generalized demand is a canonical body moment:
+
+\[
+M_{cmd} = M_{trim} - K_X x_X,
+\]
+
+followed by moment and body-rate limits. The rigid-body plant evaluates the
+actual aerodynamic and propulsion loads:
+
+\[
+\begin{aligned}
+F_b &= F_{aero}(\alpha,\beta,p,q,r,\delta)
+      +F_{prop}(T,\text{throttle})+F_{other},\\
+M_b &= M_{aero}(\alpha,\beta,p,q,r,\delta)
+      +M_{prop}+M_{other},\\
+\dot v_b &= F_b/m + g_b - \omega\times v_b,\\
+\dot\omega &= I^{-1}(M_b-\omega\times I\omega).
+\end{aligned}
+\]
+
+The current fixture's \(M_{cmd}\) is applied through the direct canonical
+moment path. Its collective and differential elevon values also participate
+in the coefficient-table plant and hold logic, but there is not yet a
+constrained solve of the form
+
+\[
+\delta_{elevon}^{*}
+=\arg\min_{\delta\in\mathcal U}
+\left\|M_{aero}(\delta)-M_{cmd}\right\|_{W}^{2}
+\]
+
+with physical elevon rate, travel, and allocation residual evidence. That
+equation is the next surface-authority implementation, not a claim of the
+current racetrack run.
+
+The objective evaluator independently checks the resulting truth history:
+
+```text
+truth trajectory → gate-plane crossing, altitude, speed, and timing
+truth attitude   → bank and pitch event checks
+truth telemetry  → envelope, saturation, and terminal evidence
+```
+
+Thus the X8 stack is currently a reusable guidance plus generic LQR regulator
+experiment, with direct-moment realization and source-bounded aerodynamic
+loads.
+
+### 8.2 Hummingbird: position, attitude, yaw, collective, and rotor allocation
+
+The Hummingbird strict landing objective set is:
+
+```text
+initial hover dwell
+motor-shutdown event
+touchdown state and post-contact dwell
+terminal landing contract
+```
+
+The Hummingbird guidance is a cascade because a position error is not directly
+an actuator command. The outer position/velocity loop first forms a desired
+acceleration:
+
+\[
+a_{cmd} = K_p e_p - K_v v_{rel}
+       + \hat r\left(K_h e_h-K_{\dot h}\dot h\right).
+\]
+
+The desired thrust force includes gravity compensation:
+
+\[
+F_{cmd}=m\left(a_{cmd}-g\right),
+\qquad
+\hat t_{cmd}=\frac{F_{cmd}}{\|F_{cmd}\|}.
+\]
+
+The thrust-axis error becomes an attitude demand:
+
+\[
+e_{tilt}=\hat t_{body}\times\hat t_{cmd}.
+\]
+
+The current Hummingbird path uses a bounded attitude-moment law rather than
+the X8 attitude LQR:
+
+\[
+M_{tilt}=\operatorname{sat}_{M_{max}}
+\left(K_R e_{tilt}-K_\omega\omega\right).
+\]
+
+If a yaw target is declared, it is an additional nested heading loop:
+
+\[
+e_\psi=\operatorname{wrap}(\psi_{ref}-\psi),
+\qquad
+M_z=\operatorname{sat}_{M_{z,max}}
+\left(K_\psi e_\psi-K_r r\right).
+\]
+
+Collective is adjusted from the altitude demand, radial rate, and tilt
+compensation:
+
+\[
+\Omega_c = \operatorname{clip}\left(
+  \Omega_0 + K_\Omega
+  \left(K_h e_h-K_{\dot h}\dot h+\Delta_{tilt}\right),
+  \Omega_{min},\Omega_{max}\right).
+\]
+
+The quad-X allocator maps collective and body moments into rotor-speed
+commands. With \(s_i=\Omega_i^2\), the idealized relationship is:
+
+\[
+\begin{bmatrix}T\\L\\M\\N\end{bmatrix}
+= A_{quadX}
+\begin{bmatrix}s_1\\s_2\\s_3\\s_4\end{bmatrix},
+\qquad
+s^{*}=\operatorname{clip}_{s_{min},s_{max}}
+\left(A_{quadX}^{-1}w_{cmd}\right).
+\]
+
+The implemented allocator retains the bounded solve and reports individual
+rotor speed commands and saturation. The plant then produces thrust and
+reaction torque from those actual rotor commands; the EOM, not the guidance
+law, determines the realized translation and attitude.
+
+The important contrast is:
+
+```text
+X8:         route error → attitude LQR → moment demand
+Hummingbird: position error → force/thrust direction → bounded moment
+             + collective/yaw → rotor allocation
+```
+
+This is why “generic LQR controller” is not an accurate description of the
+whole system. LQR is one reusable inner regulator. The outer guidance and the
+actuator realization are family-specific.
+
+## 9. Objective resolution as a typed compilation step
+
+The objective-to-controller relationship should be presented as a compilation
+pipeline rather than as a hidden controller trick:
+
+```text
+ObjectiveSpec
+  + vehicle family
+  + fidelity
+  + environment
+  + trim / operating point
+  + controller realization
+        ↓ resolve
+GuidanceReferenceSpec
+        ↓ execute at accepted truth time
+GuidanceReference(t)
+        ↓ project to capability and limits
+GeneralizedControlRequest(t)
+        ↓ regulate and allocate
+ControlCommand(t)
+        ↓ integrate
+TruthState(t + Δt)
+        ↓ independently evaluate
+ObjectiveResult
+```
+
+For every objective, the resolved artifact should identify:
+
+- objective type and target geometry;
+- reference generator and its gains;
+- regulator role and design ID;
+- allocator and actuator topology;
+- limits, rates, and saturation policy;
+- truth channels used for independent evaluation;
+- terminal or transition semantics;
+- claim and nonclaim.
+
+This makes it possible to answer, for example, “the X8 missed altitude at
+the gate because the guidance reference was infeasible,” separately from “the
+LQR tracked the attitude reference but the elevon allocator saturated.”
+
+## 10. Where automatic tuning is weak today
+
+The current implementation has useful automation at the local LQR-matrix
+level, but much of the nested mission stack is still manually parameterized.
+
+| Area | Current state | Weakness | Recommended automation |
+| --- | --- | --- | --- |
+| Trim | Generic bounded solver and source-trim adapters | Not every showcase starts from a newly solved, frozen trim artifact | Multi-start trim, continuation over speed/altitude/mass, automatic residual and margin gates |
+| Local linearization | Finite-difference `A/B` utility exists | Source-consistent `A/B` artifacts are not yet universal across families | Automatically generate and hash `A/B` at every accepted operating point |
+| LQR `Q/R` | Scaled profiles and pole/uncertainty checks exist | Mission-level tracking and saturation are not part of the design objective | Constrained `Q/R` search using settling time, overshoot, rate, moment, and table-margin metrics |
+| X8 outer guidance | Racetrack gains, bank, altitude capture, and timing are hand-selected | Coupling between route geometry, bank response, and terminal closure is still tuned by reruns | Constrained trajectory optimization over capture gains, bank schedule, phase timing, and horizon |
+| X8 actuator realization | Direct moment path works; elevon tables exist | No physical moment-to-elevon allocation qualification in the racetrack | Bounded nonlinear allocation with rate/travel limits and allocation residual objective |
+| Hummingbird position loop | Hand-set position/velocity/altitude gains | No formal cascade bandwidth separation or source-trim LQR equivalent | Cascade autotuning with inner attitude/rate bandwidth fixed before outer position tuning |
+| Hummingbird yaw loop | Explicit proportional/rate-damping law | Yaw exercise and torque authority are not yet tuned from a common response target | Step-response identification and bounded yaw-gain search with rotor saturation penalty |
+| Rotor collective | Hand-set collective gain and tilt compensation | Thrust margin, battery/resource, and attitude coupling are not jointly optimized | Hover trim plus constrained energy/altitude response tuning |
+| Objective geometry | Timing estimator and declared truth gates exist | The optimizer does not yet choose physically compatible gate spacing and controller gains together | Preflight feasibility oracle plus route-geometry synthesis |
+| Cross-fidelity tuning | Same concepts are documented | No automatic parameter mapping from 3DOF to pseudo-6DOF to 6DOF | Fit reduced-order response parameters to higher-fidelity step and mission fragments |
+| Robustness tuning | Fixed perturbation and evidence contracts exist | Nominal tuning can still be separated from robustness optimization | Tune against worst-case or percentile objective margin, not nominal score alone |
+
+The most important weak seam is the boundary between guidance and physical
+actuation. A controller can be mathematically stable while the requested
+reference is physically unattainable, or a mission can pass a broad gate while
+the actuator layer is saturated. The automatic tuner must therefore score the
+whole nested chain.
+
+## 11. Recommended automatic-tuning order
+
+Do not tune all gains at once. Preserve the nested-loop structure:
+
+```text
+1. plant units, signs, trim, and resource closure
+2. actuator limits and allocation feasibility
+3. body-rate response
+4. attitude response
+5. speed / alpha / altitude inner holds
+6. position, waypoint, and route guidance
+7. mission timing and gate geometry
+8. fixed perturbation and cross-fidelity robustness
+```
+
+For each stage, freeze the lower-level result and expose only the parameters
+owned by the next level. A candidate should be rejected before the outer loop
+is scored when it has invalid trim, unstable inner poles, table-domain
+violations, actuator saturation beyond policy, or resource inconsistency.
+
+The resulting objective for automated tuning should be a structured vector,
+not only one scalar:
+
+\[
+J = \left[
+\begin{array}{c}
+\text{required-objective failures}\\
+\text{terminal miss and worst margin}\\
+\text{settling / overshoot / tracking error}\\
+\text{control and actuator saturation}\\
+\text{table and envelope margin}\\
+\text{energy or resource use}\\
+\text{robustness failure count}
+\end{array}
+\right].
+\]
+
+Use feasibility and hard constraints first, then optimize soft performance.
+This prevents a controller from earning a better score by trading away a
+required altitude gate, actuator authority, or terminal condition.
+
+## 12. Presentation summary
+
+The coworker-facing summary is:
+
+```text
+Objectives say what must happen.
+Guidance turns objectives into references.
+Regulators turn reference errors into generalized demands.
+Allocators turn generalized demands into physical commands.
+The plant turns physical commands into forces and moments.
+The EOM turns forces and moments into truth state.
+The independent evaluator decides whether the objective happened.
+```
+
+For the current examples:
+
+```text
+X8          objective → racetrack reference → attitude LQR → direct moment → plant
+Hummingbird objective → acceleration/thrust reference → bounded attitude/yaw
+            moments + collective → quad-X allocator → rotor plant
+```
+
+That is the architectural story to present: shared seams, nested mathematics,
+family-specific physics, and an explicit list of the seams that still need
+automatic tuning or stronger qualification evidence.
