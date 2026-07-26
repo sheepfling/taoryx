@@ -118,6 +118,8 @@ def test_source_preserving_export_reports_verified_hash_reload(tmp_path: Path) -
     report = export_source_preserving_collection(collection, tmp_path / "exported")
     assert report["status"] == "verified_source_preserving"
     assert report["levels"]["L0"] == "verified"
+    assert report["levels"]["L2"] == "verified_canonical_structure"
+    assert report["levels"]["L3"] == "verified_canonical_numeric_and_checkdata"
     assert (tmp_path / "exported/aerodynamics.dml").read_bytes() == source
     ####
 

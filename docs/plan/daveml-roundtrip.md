@@ -27,7 +27,7 @@ fresh import and equivalence report
 | M2 multi-document binder | F-16 and HL-20 initial slices complete | `tools/build_daveml_collection.py` |
 | M3 source-preserving exporter | Complete for embedded source bytes | `tools/roundtrip_daveml_collection.py` reports L0/L1 |
 | M3 canonical DAVE-ML exporter | In progress | Deterministic source-anchored semantic IR and exporter are implemented in `src/taoryx/trajectory/daveml_semantic.py` |
-| M4 round-trip verifier | Source-layer, collection, package-runtime, and fresh-import structural gates in progress | Canonical export and fresh-process structural/numeric-literal comparison are implemented for collections and `.txair` packages; graph evaluation remains separate |
+| M4 round-trip verifier | Source-layer, canonical collection/package, and fresh-import structural gates complete; runtime qualification remains separate | Collection export now executes canonical IR/export, fresh structural/numeric/checkData comparison, while L4 runtime replay remains an explicit separate gate |
 | M5 four-model qualification | Pending | F-16 and HL-20 collection fixtures are now available; rocket and A320 later |
 | M6 offline CI integration | Pending | Requires stable M3–M5 reports |
 
