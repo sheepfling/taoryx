@@ -122,7 +122,7 @@
       },
       "derived_layers": {
         "linearization": "not_applicable_current_rocket_contract",
-        "objectives": "trajectory_checkpoint_only",
+        "objectives": "trajectory_checkpoint_objectives_verified",
         "scenarios": "scenario17_runtime_replay",
         "trim": "scenario_regression_only",
         "tuning": "not_applicable_current_open_loop_contract"
@@ -157,7 +157,7 @@
       "graph_failures": [],
       "model_id": "nasa-nesc-two-stage-rocket-scenario17",
       "pending_derived_layers": {
-        "objectives": "trajectory_checkpoint_only",
+        "objectives": "trajectory_checkpoint_objectives_verified",
         "trim": "scenario_regression_only"
       },
       "source_import_declared": "verified"
@@ -167,7 +167,7 @@
     {
       "family_id": "reference_nesc_two_stage_rocket",
       "layers": {
-        "objectives": "trajectory_checkpoint_only",
+        "objectives": "trajectory_checkpoint_objectives_verified",
         "trim": "scenario_regression_only"
       }
     }

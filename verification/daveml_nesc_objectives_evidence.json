@@ -1,0 +1,101 @@
+{
+  "acceptance": {
+    "benchmark_passed": true,
+    "schedule_passed": true
+  },
+  "claim_boundary": "source-retained NESC Scenario 17 checkpoint objective qualification; not independent trajectory equivalence",
+  "family_id": "reference_nesc_two_stage_rocket",
+  "objective_report": {
+    "advisory_objectives": 0,
+    "gate_score": 100.0,
+    "objectives": [
+      {
+        "actual": 8315.707961910404,
+        "error": 0.0,
+        "id": "scenario17-altitude-error",
+        "kind": "trajectory",
+        "message": null,
+        "normalized_error": 0.0,
+        "quality_normalized_error": null,
+        "severity": "required",
+        "slack": 1.0,
+        "source": "summary",
+        "status": "pass",
+        "target": 10000.0,
+        "time_s": 200.0,
+        "tolerance": 1.0,
+        "unit": "m",
+        "weight": 1.0
+      },
+      {
+        "actual": 3.3689584977045897,
+        "error": 0.0,
+        "id": "scenario17-pitch-error",
+        "kind": "trajectory",
+        "message": null,
+        "normalized_error": 0.0,
+        "quality_normalized_error": null,
+        "severity": "required",
+        "slack": 1.0,
+        "source": "summary",
+        "status": "pass",
+        "target": 4.0,
+        "time_s": 200.0,
+        "tolerance": 1.0,
+        "unit": "deg",
+        "weight": 1.0
+      },
+      {
+        "actual": 22.016793994513137,
+        "error": 0.0,
+        "id": "scenario17-speed-error",
+        "kind": "trajectory",
+        "message": null,
+        "normalized_error": 0.0,
+        "quality_normalized_error": null,
+        "severity": "required",
+        "slack": 1.0,
+        "source": "summary",
+        "status": "pass",
+        "target": 25.0,
+        "time_s": 200.0,
+        "tolerance": 1.0,
+        "unit": "m/s",
+        "weight": 1.0
+      },
+      {
+        "actual": true,
+        "error": 0.0,
+        "id": "scenario17-schedule",
+        "kind": "staging",
+        "message": null,
+        "normalized_error": 0.0,
+        "quality_normalized_error": 0.0,
+        "severity": "required",
+        "slack": 0.0,
+        "source": "final",
+        "status": "pass",
+        "target": true,
+        "time_s": 200.0,
+        "tolerance": null,
+        "unit": "event",
+        "weight": 1.0
+      }
+    ],
+    "quality_score": null,
+    "required_objectives": 4,
+    "required_passed": 4,
+    "scenario_contract_sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+    "score": 100.0,
+    "score_kind": "gate_compliance_legacy",
+    "status": "pass",
+    "termination": {
+      "reason": "retained package acceptance benchmark",
+      "status": "completed"
+    },
+    "worst_required_normalized_error": 0.0
+  },
+  "package_sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+  "schema_version": "taoryx.daveml-nesc-objectives/v1",
+  "status": "pass"
+}

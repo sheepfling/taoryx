@@ -1,17 +1,17 @@
 {
   "claim_boundary": "requirement audit; not a flight qualification or historical TAOS compatibility claim",
   "evidence_hashes": {
-    "docs/plan/daveml-roundtrip.md": "70896fc7cc0dd34f01ead8d5c68fd49c799ad87395e1be6a816a6d111780c8ce",
+    "docs/plan/daveml-roundtrip.md": "40d8f30bcfcdedc570a32a06758b3216b63f7426ef33f24d8c059d4c12b951af",
     "verification/daveml_catalog_import.json": "58ed91d00341140c6e7dbce53ef4e4ee741f9373becf0be1825ae50056d046ff",
     "verification/daveml_catalog_roundtrip.json": "0b9d03b9fb0f42136cc6cfcae2335a13e13d693d2e0f3d7f51a588811bfd162b",
-    "verification/daveml_family_readiness.json": "c4a91f3786fdb3f30f73102529b0dabecab68ef9b3bf1beb31b921cf18186584",
+    "verification/daveml_family_readiness.json": "a74085e8aceebd6d87db02843cf3524bb8d5aa2d87da46747270609ac4c29831",
     "verification/daveml_official_checkdata.json": "7cc0cc1850f8b14d1eace3970bdd4a0a9deb273c50fe3bceccdd509eadf8dced",
     "verification/daveml_official_conformance.json": "deaa6f110a305d0ad555434f4e4c04aa2773d73847324b3e605f816c150de169",
-    "verification/daveml_release_gate.json": "1261110b9a91750c4c10965686ca3fcd27637a9be88e00c85991ec96939df15f"
+    "verification/daveml_release_gate.json": "cb78369023c198f080dbd807f59dd2a0d61ec2a59c7d99fb671df8501526a362"
   },
   "readiness_family_count": 3,
-  "release_artifact_count": 16,
-  "release_stage_count": 18,
+  "release_artifact_count": 17,
+  "release_stage_count": 19,
   "requirements": [
     {
       "evidence": "verification/daveml_catalog_import.json",

@@ -44,7 +44,7 @@ families:
     trim: scenario_regression_only
     linearization: not_applicable_current_rocket_contract
     tuning: not_applicable_current_open_loop_contract
-    objectives: trajectory_checkpoint_only
+    objectives: trajectory_checkpoint_objectives_verified
     scenarios: scenario17_runtime_replay
     runtime: runtime_replay_qualification_passed
     next_gate: reduced_order_and_full_trajectory_comparison

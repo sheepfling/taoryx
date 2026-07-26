@@ -592,6 +592,10 @@ items are complete and reproducible:
 - `tools/validate_daveml_nesc_replay.py` now invokes the authoritative NESC
   two-stage package replay in a fresh process and records its pinned source,
   acceptance evidence, and rigid-body runtime contract.
+- `tools/validate_daveml_nesc_objectives.py` now scores the package-retained
+  Scenario 17 checkpoint and staging acceptance benchmark through the typed
+  objective contract. The report qualifies trajectory checkpoint objectives
+  without claiming independent full-trajectory equivalence or equilibrium trim.
 - `.github/workflows/daveml.yml` now runs the fresh-process release gate and
   DaveML regression suite on DaveML-relevant changes, publishing the generated
   provenance reports as CI artifacts without invoking LaTeX tasks.
