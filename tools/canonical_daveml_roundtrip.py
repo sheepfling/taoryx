@@ -73,6 +73,7 @@ def main() -> int:
                 "checkdata": _checkdata_summary(check_results, vector_check_results),
             }
         )
+    _write_export_manifest(output, documents)
     report = {
         "status": "verified" if not all_diffs and not all_numeric_diffs else "failed",
         "checkdata_status": _documents_checkdata_status(documents),
@@ -90,6 +91,32 @@ def main() -> int:
     (output / "roundtrip-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if not all_diffs and not all_numeric_diffs and _documents_checkdata_status(documents) != "failed" else 1
+    ####
+
+
+def _write_export_manifest(output: Path, documents: list[dict[str, object]]) -> None:
+    """Write the canonical export provenance sidecar required by the plan."""
+
+    entries = []
+    for document in documents:
+        entries.append(
+            {
+                "document_id": document.get("document_id", document.get("source")),
+                "source_member": document.get("source_member", document.get("source")),
+                "source_sha256": document.get("source_sha256"),
+                "ir_sha256": document.get("ir_sha256"),
+                "exported_sha256": document.get("exported_sha256"),
+                "opaque_paths": document.get("opaque_paths", []),
+            }
+        )
+    manifest = {
+        "schema_version": "taoryx.daveml-export-manifest/v1",
+        "exporter": "taoryx.trajectory.daveml_semantic.export_daveml_ir",
+        "documents": sorted(entries, key=lambda item: str(item["document_id"])),
+    }
+    target = output / "canonical" / "export-manifest.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     ####
 
 
@@ -209,6 +236,7 @@ def _run_package(package: Path, output: Path) -> int:
             "document_id": document_id,
             "source_member": source_member,
             "source_sha256": ir.source_sha256,
+            "ir_sha256": _sha256(ir.canonical_json()),
             "exported_sha256": _sha256(exported),
             "opaque_paths": list(ir.opaque_paths),
             "reference_summary": _reference_summary(ir),
@@ -275,6 +303,7 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
                 "checkdata": checkdata,
                 "checkdata_status": checkdata["status"],
                 "checkdata_failed": checkdata["failed"],
+                "ir_sha256": _sha256(ir.canonical_json()),
             }
         )
     package_reports: list[dict[str, object]] = []
@@ -325,6 +354,7 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
     }
     serialized = json.dumps(report, indent=2, sort_keys=True) + "\n"
     (output / "catalog-roundtrip-report.json").write_text(serialized, encoding="utf-8")
+    _write_export_manifest(output, source_reports)
     if summary_output is not None:
         summary_output.parent.mkdir(parents=True, exist_ok=True)
         summary_output.write_text(serialized, encoding="utf-8")
