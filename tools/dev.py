@@ -708,6 +708,20 @@ def daveml_showcase() -> None:
     ####
 
 
+def daveml_operational_contracts() -> None:
+    """Validate the shared DaveML family operational contracts."""
+
+    run(tool_script("validate_daveml_operational_contracts.py"))
+    ####
+
+
+def daveml_operating_points() -> None:
+    """Validate the DaveML family operating-point catalog."""
+
+    run(tool_script("validate_daveml_operating_points.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -828,6 +842,8 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-nesc-replay": daveml_nesc_replay,
     "daveml-completion-audit": daveml_completion_audit,
     "daveml-showcase": daveml_showcase,
+    "daveml-operational-contracts": daveml_operational_contracts,
+    "daveml-operating-points": daveml_operating_points,
     "handoff": handoff,
     "check": check,
     "all": check,

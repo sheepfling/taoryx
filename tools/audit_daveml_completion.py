@@ -21,6 +21,8 @@ def sha256(path: Path) -> str:
 def main() -> int:
     readiness = json.loads((ROOT / "verification/daveml_family_readiness.json").read_text(encoding="utf-8"))
     layer_dispositions = json.loads((ROOT / "verification/daveml_family_layer_dispositions.json").read_text(encoding="utf-8"))
+    operational_contracts = json.loads((ROOT / "verification/daveml_operational_contracts.json").read_text(encoding="utf-8"))
+    operating_points = json.loads((ROOT / "verification/daveml_operating_point_catalog.json").read_text(encoding="utf-8"))
     release = json.loads((ROOT / "verification/daveml_release_gate.json").read_text(encoding="utf-8"))
     pseudo_runtime = json.loads(
         (ROOT / "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json").read_text(encoding="utf-8")
@@ -32,6 +34,8 @@ def main() -> int:
         {"id": "fresh_process_release_gate", "status": release["status"], "evidence": "verification/daveml_release_gate.json"},
         {"id": "family_readiness", "status": readiness["status"], "evidence": "verification/daveml_family_readiness.json"},
         {"id": "family_library_layer_dispositions", "status": layer_dispositions["status"], "evidence": "verification/daveml_family_layer_dispositions.json"},
+        {"id": "family_operational_contracts", "status": operational_contracts["status"], "evidence": "verification/daveml_operational_contracts.json"},
+        {"id": "family_operating_point_catalog", "status": operating_points["status"], "evidence": "verification/daveml_operating_point_catalog.json"},
         {"id": "official_2d_ungridded_interpolation", "status": "known_gap_quarantined", "evidence": "verification/daveml_official_checkdata.json"},
         {"id": "vector_table_function_semantics", "status": "not_in_authoritative_corpus", "evidence": "docs/plan/daveml-roundtrip.md"},
         {"id": "a320_derived_exact_3dof_product", "status": "verified", "evidence": "families/a320_openap_3dof/qualification/integration-record.yaml"},
@@ -50,6 +54,8 @@ def main() -> int:
         "release_stage_count": len(release["runs"]),
         "release_artifact_count": len(release["artifacts"]),
         "readiness_family_count": len(readiness["families"]),
+        "operational_family_count": operational_contracts["family_count"],
+        "operating_point_family_count": operating_points["family_count"],
         "known_gaps": [
             "official_2d_ungridded_interpolation_case_2",
             "a320_authoritative_source_exact_6dof_acquisition",

@@ -1,7 +1,7 @@
 {
   "claim_boundary": "requirement audit; not a flight qualification or historical TAOS compatibility claim",
   "evidence_hashes": {
-    "docs/plan/daveml-roundtrip.md": "c683ac03ebc8518d8343fe35bda3deb7afe677fe81457ae0d6c14dbf4cf9e20e",
+    "docs/plan/daveml-roundtrip.md": "2c3ffe265dbfd93b1ed1817ed8aaf60f3ffb8949e8183cf78a4b473d6cfc00f6",
     "families/a320_openap_3dof/qualification/integration-record.yaml": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
     "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json": "7c6dee9f8948d4613d178b5b68a0e836732ad4a6d7a572a348c17e007fd678ac",
     "families/reference_a320/qualification/integration-record.yaml": "e8376d380013315898f730f70cd2b8b8ed8278059902bbc356029e2d2fca31bd",
@@ -11,16 +11,20 @@
     "verification/daveml_family_readiness.json": "286d9b867ed33455c35550b143c26b091f9762498366bd84624a68f493db816c",
     "verification/daveml_official_checkdata.json": "eb621fa798b0a08e1c579b8197a1c037ba73b0063b9c9142af14e3ca327e6b72",
     "verification/daveml_official_conformance.json": "e8a94e57b364697a25f1844c6ee7000dadc61bab0840a5276d17726d5f274531",
-    "verification/daveml_release_gate.json": "022e55bf92ed1e8d5dac5a0e2f42c73030f126108b810cad73b302f702341e41"
+    "verification/daveml_operating_point_catalog.json": "61da5063e2cd6ae749dbbf7c01f891640ef257cb3b9f7170c207e40f912112c3",
+    "verification/daveml_operational_contracts.json": "83b9fff61f47b87df387e9969db2425da8f37e1bb710543616d057466ceca0fb",
+    "verification/daveml_release_gate.json": "255c673f339d2e1dc26f16dbbc9cefc3fe86300476242d97b9237ebc065fab5e"
   },
   "known_gaps": [
     "official_2d_ungridded_interpolation_case_2",
     "a320_authoritative_source_exact_6dof_acquisition",
     "vector_table_function_semantics_not_in_authoritative_corpus"
   ],
+  "operating_point_family_count": 5,
+  "operational_family_count": 5,
   "readiness_family_count": 3,
-  "release_artifact_count": 24,
-  "release_stage_count": 24,
+  "release_artifact_count": 26,
+  "release_stage_count": 26,
   "requirements": [
     {
       "evidence": "verification/daveml_catalog_import.json",
@@ -50,6 +54,16 @@
     {
       "evidence": "verification/daveml_family_layer_dispositions.json",
       "id": "family_library_layer_dispositions",
+      "status": "verified"
+    },
+    {
+      "evidence": "verification/daveml_operational_contracts.json",
+      "id": "family_operational_contracts",
+      "status": "verified"
+    },
+    {
+      "evidence": "verification/daveml_operating_point_catalog.json",
+      "id": "family_operating_point_catalog",
       "status": "verified"
     },
     {

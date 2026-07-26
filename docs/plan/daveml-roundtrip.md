@@ -507,6 +507,36 @@ The extended program is complete only when every applicable corpus rung has a
 passing report, every non-applicable rung has an evidence-backed disposition,
 and no generated artifact can overwrite immutable source authority.
 
+## Next Executable Tranche: Family Operational Qualification
+
+The initial source and round-trip tranche, followed by the five-board family
+showcase, is complete. The next long-running workstream is the
+[DaveML Family Operational Qualification Tranche](daveml-family-operational-qualification-tranche.md).
+
+It executes Tracks C through G in a bounded order:
+
+1. Close typed family contracts and fail-closed loading.
+2. Add certified operating-point catalogs for applicable F-16, HL-20, NESC,
+   and A320 lanes.
+3. Qualify multi-point F-16 tuning and explicitly bounded A320 surrogate
+   overlays; keep HL-20 and NESC controller layers non-applicable where their
+   source contracts declare no controls.
+4. Promote objective and scenario runtime contracts with clean-process
+   provenance artifacts.
+5. Run a deterministic cross-family release gate and publish the typed
+   reports.
+
+The tranche preserves `reference_exact`, `derived_exact`,
+`surrogate_composite`, and `synthetic` boundaries. The vector table-function
+gap and quarantined legacy ungridded fixture remain conditional semantic work
+and are not used to block family operational qualification.
+
+OQ-1 and the baseline OQ-2 catalog are now verified for all five lanes. The
+existing applicable linearization, tuning, objective, and runtime evidence is
+included in the 26-stage fresh-process release gate. Multi-point operating
+envelope expansion remains the next bounded increment and is not silently
+represented by the baseline point catalog.
+
 ## Execution Ledger
 
 The current long-running implementation is deliberately staged. The following
