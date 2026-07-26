@@ -10,7 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    payload = path.read_bytes()
+    if path.suffix.casefold() in {".json", ".yaml", ".yml", ".md", ".txt"}:
+        # Evidence reports are text artifacts; normalize checkout line endings
+        # so the requirement audit is reproducible across Windows and CI Linux.
+        payload = payload.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def main() -> int:

@@ -130,6 +130,9 @@ made against that fresh-process result. They also invoke
 `fresh_process_checkdata: verified` for each source whose checkData is
 applicable; explicit quarantines remain non-failing dispositions.
 
+The requirement audit normalizes line endings only for text evidence hashes;
+raw source, package, and generated DAVE-ML payload hashes remain byte-exact.
+
 ## Ingestion And Round-Trip Plan
 
 The machine-readable promotion authority is
