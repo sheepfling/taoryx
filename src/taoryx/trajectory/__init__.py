@@ -38,6 +38,7 @@ from .contracts import (
     ResolvedValue,
 )
 from .daveml_atmosphere import DAVEMLAtmosphereBinding, load_daveml_atmosphere
+from .daveml_dynamics import DAVEMLFixedWingDynamicsBinding
 from .daveml_evaluator import DAVEMLCheckResult, DAVEMLGraph, evaluate_daveml_checkdata, load_daveml_graph
 from .daveml_import import (
     DAVEMLCompositeTrimBinding,
@@ -165,6 +166,7 @@ __all__ = [
     "DAVEMLCheckResult",
     "DAVEMLAtmosphereBinding",
     "DAVEMLInertiaBinding",
+    "DAVEMLFixedWingDynamicsBinding",
     "DAVEMLGraph",
     "evaluate_daveml_checkdata",
     "load_daveml_graph",

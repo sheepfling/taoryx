@@ -8,6 +8,7 @@ import pytest
 
 from taoryx.trajectory import (
     DAVEMLCompositeTrimBinding,
+    DAVEMLFixedWingDynamicsBinding,
     DAVEMLFixedWingLoadBinding,
     DAVEMLFunctionChannel,
     DAVEMLInertiaBinding,
@@ -272,6 +273,35 @@ def test_f16_inertia_binding_converts_source_mass_properties_to_si() -> None:
     assert values["inertia_yy_kg_m2"] == pytest.approx(55814.0 * 1.3558179483314004)
     matrix = binding.as_inertia_matrix()
     assert matrix[0][2] == pytest.approx(-982.0 * 1.3558179483314004)
+
+
+def test_fixed_wing_dynamics_binding_returns_true_newton_euler_derivatives() -> None:
+    aero = load_daveml_trim_binding(
+        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+        role="aerodynamics",
+        state_inputs={},
+        control_inputs={"elevator_deg": "el"},
+        residual_outputs={"cx": "cx", "cy": "cy", "cz": "cz", "cl": "cl", "cm": "cm", "cn": "cn"},
+        fixed_inputs={"vt": 500.0, "alpha": 2.0, "beta": 0.0, "p": 0.0, "q": 0.0, "r": 0.0, "ail": 0.0, "rdr": 0.0, "xcg": 0.35},
+    )
+    loads = DAVEMLFixedWingLoadBinding(
+        aerodynamics=aero,
+        reference_area_m2=27.870912,
+        mean_aerodynamic_chord_m=3.450336,
+        span_m=9.144,
+        dynamic_pressure_pa=1000.0,
+    )
+    dynamics = DAVEMLFixedWingDynamicsBinding(
+        loads=loads,
+        mass_kg=1000.0,
+        inertia_matrix_kg_m2=((100.0, 0.0, 0.0), (0.0, 200.0, 0.0), (0.0, 0.0, 300.0)),
+    )
+    derivatives = dynamics.evaluate(
+        {"u_m_s": 0.0, "v_m_s": 0.0, "w_m_s": 0.0, "p_rad_s": 0.0, "q_rad_s": 0.0, "r_rad_s": 0.0},
+        {"elevator_deg": 0.0},
+    )
+    assert derivatives["u_m_s"] == pytest.approx(1000.0 * 27.870912 * -0.0142 / 1000.0)
+    assert derivatives["q_rad_s"] == pytest.approx(1000.0 * 27.870912 * 3.450336 * -0.0074 / 200.0)
 
 
 @pytest.mark.skipif(not CATALOG_ROOT.is_dir(), reason="local DAVE-ML catalog is external to the repository")

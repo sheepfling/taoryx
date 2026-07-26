@@ -536,6 +536,11 @@ items are complete and reproducible:
   verified package/member hash, converts slug and slug-ft2 values to SI, and
   exposes a signed symmetric body inertia matrix. This is the source-backed
   inertia seam required before a six-degree-of-freedom dynamics linearization.
+- `DAVEMLFixedWingDynamicsBinding` now provides the true body-axis Newton-Euler
+  derivative contract for `u,v,w,p,q,r`, consuming explicit total loads, mass,
+  inertia, and optional body gravity. Its focused test verifies translational
+  and rotational accelerations; this is the dynamics seam, not yet a certified
+  operating-point linearization or controller design.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.
