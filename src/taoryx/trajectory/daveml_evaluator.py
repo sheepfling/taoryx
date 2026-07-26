@@ -23,6 +23,7 @@ class DAVEMLCheckResult:
     status: str
     reason: str | None = None
     absolute_tolerance: float | None = None
+    reason_code: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-safe result."""
@@ -37,6 +38,7 @@ class DAVEMLCheckResult:
             "status": self.status,
             "reason": self.reason,
             "absolute_tolerance": self.absolute_tolerance,
+            "reason_code": self.reason_code,
         }
         ####
 ####
@@ -818,7 +820,12 @@ def _unsupported(
 ) -> DAVEMLCheckResult:
     """Create an explicit quarantined check result."""
 
-    return DAVEMLCheckResult(case_id, output_id, expected, None, None, None, "unsupported", reason, absolute_tolerance)
+    reason_code = (
+        "legacy_table_reference_type_mismatch"
+        if "griddedTableRef resolves to an ungridded table" in reason
+        else "unsupported_scalar_graph"
+    )
+    return DAVEMLCheckResult(case_id, output_id, expected, None, None, None, "unsupported", reason, absolute_tolerance, reason_code)
     ####
 
 

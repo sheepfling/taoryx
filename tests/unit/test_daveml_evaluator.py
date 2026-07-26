@@ -216,6 +216,7 @@ def test_ungridded_official_table_mismatch_is_explicitly_reported() -> None:
     assert [result.status for result in results] == ["unsupported"] * 4
     assert all(result.actual is None for result in results)
     assert all("griddedTableRef" in (result.reason or "") for result in results)
+    assert all(result.reason_code == "legacy_table_reference_type_mismatch" for result in results)
     assert results[0].absolute_tolerance == 0.0005
 
 
