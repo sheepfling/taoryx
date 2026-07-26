@@ -34,7 +34,7 @@ layers:
   actuators: {version: pending, evidence: taoryx_engineering_assumption}
   allocation: {version: pending, evidence: taoryx_reference_design}
   controller: {version: pending, evidence: taoryx_reference_design}
-  mission: {version: pending, evidence: taoryx_qualification_scenario}
+  mission: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
   reductions: {version: pending, evidence: derived_from_parent_plant}
   linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
 claims:

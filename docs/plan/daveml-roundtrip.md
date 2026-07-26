@@ -583,6 +583,9 @@ items are complete and reproducible:
   residual Jacobian around the certified HL-20 alpha trim. The artifact is
   promoted only as a pitch-channel linearization; full 6-DOF dynamics and
   controller qualification remain explicitly pending.
+- `tools/validate_daveml_hl20_scenario.py` now scores a provenance-linked
+  glide-trim smoke contract against trim, positive-lift, and finite-load
+  objectives. It does not claim a full-flight trajectory or controller.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,

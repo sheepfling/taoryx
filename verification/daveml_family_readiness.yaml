@@ -29,10 +29,10 @@ families:
     trim: source_channel_trim_verified
     linearization: source_trim_residual_jacobian_verified
     tuning: pending
-    objectives: pending
-    scenarios: glide_trim_only
+    objectives: source_glide_trim_smoke_verified
+    scenarios: source_glide_trim_smoke_verified
     runtime: runtime_replay_qualification_passed
-    next_gate: source_trim_controller_direction_and_reduced_dynamics
+    next_gate: controller_direction_and_reduced_dynamics
   - id: reference_nesc_two_stage_rocket
     manifest: families/reference_nesc_two_stage_rocket/family.yaml
     source_import: verified

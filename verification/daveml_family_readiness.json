@@ -80,8 +80,8 @@
       },
       "derived_layers": {
         "linearization": "source_trim_residual_jacobian_verified",
-        "objectives": "pending",
-        "scenarios": "glide_trim_only",
+        "objectives": "source_glide_trim_smoke_verified",
+        "scenarios": "source_glide_trim_smoke_verified",
         "trim": "source_channel_trim_verified",
         "tuning": "pending"
       },
@@ -99,8 +99,6 @@
       "graph_failures": [],
       "model_id": "hl20-mod-k-unpowered-6dof",
       "pending_derived_layers": {
-        "objectives": "pending",
-        "scenarios": "glide_trim_only",
         "tuning": "pending"
       },
       "source_import_declared": "verified"
@@ -171,8 +169,6 @@
     {
       "family_id": "reference_hl20_mod_k",
       "layers": {
-        "objectives": "pending",
-        "scenarios": "glide_trim_only",
         "tuning": "pending"
       }
     },

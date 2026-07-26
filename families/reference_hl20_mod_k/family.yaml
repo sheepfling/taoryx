@@ -117,8 +117,8 @@ layers:
   trim: {version: source-channel-trim-v1, evidence: source_channel_trim_verified}
   linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
   tuning: {version: pending, evidence: pending}
-  objectives: {version: pending, evidence: pending}
-  scenarios: {version: glide-trim-only-v1, evidence: glide_trim_only}
+  objectives: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
+  scenarios: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
 bindings:
   - bindings/canonical-controls.yaml
   - bindings/canonical-observations.yaml
