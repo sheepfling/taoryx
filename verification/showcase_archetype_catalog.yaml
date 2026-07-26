@@ -72,3 +72,48 @@ recipes:
       - glide_capture
       - terminal_handoff
     lineage_required: true
+
+  - id: f16-maneuver-trim-evidence-v1
+    family: fighter
+    display_name: F-16 maneuver and trim evidence board
+    priority: 3
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    emphasis: [source-bounded equilibrium trim, local dynamics, LQR screen, maneuver objective evidence]
+    required_events: [equilibrium_trim, maneuver_probe, objective_gate]
+    lineage_required: false
+
+  - id: hl20-glide-entry-evidence-v1
+    family: glide_vehicle
+    display_name: HL-20 glide and entry evidence board
+    priority: 4
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    emphasis: [source-bounded glide trim, entry-channel loads, positive-lift evidence, no-controller claim]
+    required_events: [glide_trim, entry_channel, glide_objective_gate]
+    lineage_required: false
+
+  - id: nesc-two-stage-launch-lineage-v1
+    family: staged_rocket
+    display_name: NESC two-stage launch and object-lineage board
+    priority: 5
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification, object_lineage]
+    emphasis: [source-retained staging, trajectory checkpoints, mass schedule, parent-stage lineage]
+    required_events: [liftoff_stage1_ignition, stage1_burnout, stage1_jettison_stage2_ignition, stage2_burnout, orbit_coast]
+    lineage_required: true
+
+  - id: a320-derived-versus-surrogate-v1
+    family: transport_comparison
+    display_name: A320 derived-exact versus surrogate-composite comparison board
+    priority: 6
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    emphasis: [OpenAP source reproduction, JSBSim rotational surrogate, authority-map comparison, fidelity boundary]
+    required_events: [derived_exact_trim, surrogate_trim, coordinated_turn, control_pulse_bounds]
+    lineage_required: false
+
+  - id: nesc-synthetic-passive-child-deployment-v1
+    family: aero_ballistic_deployment
+    display_name: NESC parent with synthetic passive child deployment board
+    priority: 7
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification, object_lineage]
+    emphasis: [high-energy parent trajectory, accepted-boundary separation, synthetic cylinder, parent-child accounting]
+    required_events: [liftoff_stage1_ignition, stage1_burnout, synthetic_child_separation, stage2_ignition, terminal_checkpoint]
+    lineage_required: true
