@@ -601,12 +601,12 @@ items are complete and reproducible:
 - The semantic IR now exposes a deterministic unit/dimension index for source
   variable definitions while preserving original unit attributes and unknown
   units as `dimension: unknown` for explicit review.
-- Vector-valued initial values are now preserved as typed IR metadata. Runtime
-  graph evaluation remains scalar-only and therefore does not claim vector
-  execution until vector operators and checkData semantics are implemented.
-- The typed graph now evaluates vector constants and explicit vector inputs;
-  vector functions and vector checkData remain fail-closed until their source
-  semantics are implemented.
+- Vector-valued initial values are preserved as typed IR metadata. The runtime
+  graph now evaluates vector constants, explicit vector inputs, and a bounded
+  elementwise MathML arithmetic subset (addition, subtraction, and scalar
+  scaling), with incompatible or cyclic graphs rejected.
+- Vector table functions and vector checkData remain fail-closed until an
+  authoritative source requiring those semantics is added to the corpus.
 - The fresh-process release gate now runs the seven-fixture official conformance
   validator and hashes its deterministic structural/numeric/checkData-signature
   report alongside family runtime evidence.
