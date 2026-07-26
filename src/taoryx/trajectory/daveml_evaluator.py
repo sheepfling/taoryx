@@ -43,6 +43,36 @@ class DAVEMLCheckResult:
 
 
 @dataclass(frozen=True, slots=True)
+class DAVEMLVectorCheckResult:
+    """One evaluated vector-valued static DAVE-ML check shot."""
+
+    case_id: str
+    output_id: str
+    expected: tuple[float, ...]
+    actual: tuple[float, ...] | None
+    maximum_absolute_error: float | None
+    status: str
+    reason: str | None = None
+    absolute_tolerance: float | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a JSON-safe vector result."""
+
+        return {
+            "case_id": self.case_id,
+            "output_id": self.output_id,
+            "expected": list(self.expected),
+            "actual": list(self.actual) if self.actual is not None else None,
+            "maximum_absolute_error": self.maximum_absolute_error,
+            "status": self.status,
+            "reason": self.reason,
+            "absolute_tolerance": self.absolute_tolerance,
+        }
+        ####
+####
+
+
+@dataclass(frozen=True, slots=True)
 class DAVEMLGraph:
     """Typed runtime view of one scalar DAVE-ML document."""
 
@@ -227,6 +257,40 @@ def evaluate_daveml_checkdata(
                         absolute_tolerance=effective_tolerance,
                     )
                 )
+    return tuple(results)
+    ####
+
+
+def evaluate_daveml_vector_checkdata(
+    payload: bytes,
+    *,
+    absolute_tolerance: float = 1.0e-5,
+) -> tuple[DAVEMLVectorCheckResult, ...]:
+    """Evaluate vector-valued static shots through the typed vector graph."""
+
+    if absolute_tolerance < 0.0:
+        raise ValueError("numeric tolerances must be nonnegative")
+    root = ET.fromstring(payload)
+    graph = load_daveml_graph(payload)
+    results: list[DAVEMLVectorCheckResult] = []
+    for shot in _children_by_local(root, "checkData", recursive=True):
+        for case in _children_by_local(shot, "staticShot"):
+            case_id = case.attrib.get("name", "staticShot")
+            inputs = _vector_signals(case, "checkInputs")
+            for output_id, (expected, declared_tolerance) in _vector_output_signals(case).items():
+                resolved_output_id = graph.variable_names.get(output_id, output_id)
+                tolerance = absolute_tolerance if declared_tolerance is None else declared_tolerance
+                try:
+                    actual = graph.evaluate_vectors(inputs, (resolved_output_id,))[resolved_output_id]
+                except ValueError as error:
+                    results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, None, None, "unsupported", str(error), tolerance))
+                    continue
+                if len(actual) != len(expected):
+                    results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, actual, None, "failed", "vector widths differ", tolerance))
+                    continue
+                maximum_error = max(abs(left - right) for left, right in zip(actual, expected, strict=True))
+                status = "passed" if maximum_error <= tolerance else "failed"
+                results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, actual, maximum_error, status, absolute_tolerance=tolerance))
     return tuple(results)
     ####
 
@@ -634,6 +698,22 @@ def _signals(case: ET.Element, group: str) -> dict[str, float]:
     ####
 
 
+def _vector_signals(case: ET.Element, group: str) -> dict[str, tuple[float, ...]]:
+    """Read vector-valued static-shot inputs."""
+
+    result: dict[str, tuple[float, ...]] = {}
+    parent = _first_child(case, group)
+    if parent is None:
+        return result
+    for signal in _children_by_local(parent, "signal"):
+        identifier = _signal_identifier(signal)
+        values = _numbers(_text_of_first(signal, "signalValue"))
+        if identifier and len(values) > 1:
+            result[identifier] = tuple(values)
+    return result
+    ####
+
+
 def _output_signals(case: ET.Element) -> dict[str, tuple[float, float | None]]:
     """Read expected output values and optional source tolerances."""
 
@@ -647,6 +727,23 @@ def _output_signals(case: ET.Element) -> dict[str, tuple[float, float | None]]:
         tolerance_values = _numbers(_text_of_first(signal, "tol"))
         if identifier and len(values) == 1:
             result[identifier] = (values[0], tolerance_values[0] if len(tolerance_values) == 1 else None)
+    return result
+    ####
+
+
+def _vector_output_signals(case: ET.Element) -> dict[str, tuple[tuple[float, ...], float | None]]:
+    """Read vector-valued expected outputs and optional tolerances."""
+
+    result: dict[str, tuple[tuple[float, ...], float | None]] = {}
+    parent = _first_child(case, "checkOutputs")
+    if parent is None:
+        return result
+    for signal in _children_by_local(parent, "signal"):
+        identifier = _signal_identifier(signal)
+        values = _numbers(_text_of_first(signal, "signalValue"))
+        tolerance_values = _numbers(_text_of_first(signal, "tol"))
+        if identifier and len(values) > 1:
+            result[identifier] = (tuple(values), tolerance_values[0] if len(tolerance_values) == 1 else None)
     return result
     ####
 
