@@ -1,6 +1,7 @@
 {
   "artifacts": {
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
+    "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",
     "verification/daveml_f16_equilibrium_trim_evidence.json": "400da9183034b3f5fd83c4ebcc63ceede5ae7de1729483e8352d99fca803dbf8",
     "verification/daveml_f16_linearization_evidence.json": "66cca0f378b4622cceec09d4441b06b651f62588f515079ea330ed72b7408512",
     "verification/daveml_f16_scenario_evidence.json": "628ad40114b1c25b4082d6ab9733971c69fde03a182b0dcf437e21ebdce7188a",
@@ -80,6 +81,15 @@
       "returncode": 0,
       "stderr_tail": "",
       "stdout_tail": "56\": \"1626c1ab6036a151534be7943761cf1e3c20b65b2a9ddd512eca5f676fa76cde\",\n    \"event_schedule_sha256\": \"cf93aaa35bda9b19ec3fd710894e12ae473b520c036b1437d3cb3ef3d359c770\",\n    \"family\": \"reference_hl20_mod_k\",\n    \"initial_state_sha256\": \"f583f897ca6fd30c774539ad009cb38216d2a651c31fdbc28558f9cc2e3a14ae\",\n    \"integrator\": \"source-channel-glide-trim\",\n    \"mass_model_sha256\": \"98664580dee63b2bd07e0a1e9b0003388f1060d5593bbe85f205edbe59eb0c57\",\n    \"output_rate_hz\": 1.0,\n    \"propulsion_model_sha256\": \"3881ee2f3d3b31ffedbc66a2ff993e1d4bf02f671fd70fc1d21773e58adfa825\",\n    \"scenario_id\": \"hl20-mod-k-daveml-glide-trim\",\n    \"schema_version\": 1,\n    \"termination_policy_sha256\": \"f70afada179fa82982569039a287d00d2eafb120f211e06b906ff2409774f455\",\n    \"unit_system\": \"si\",\n    \"vehicle\": \"hl20-mod-k-unpowered-6dof\",\n    \"vehicle_model_sha256\": \"443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63\"\n  },\n  \"schema_version\": \"taoryx.daveml-hl20-scenario-evidence/v1\",\n  \"status\": \"pass\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_collection_roundtrip.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"canonical_documents\": [\n    {\n      \"canonical_export_sha256\": \"e1d92eda2e1276823be8c5987a777078c38de6f9ac1e661035a739ea03ecf7df\",\n      \"checkdata_count\": 102,\n      \"checkdata_failed\": 0,\n      \"checkdata_unsupported\": 0,\n      \"document_id\": \"f16.aerodynamics\",\n      \"numeric_diff_count\": 0,\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"claim_boundary\": \"fresh-process collection L0-L3 canonical round trip; L4 runtime replay remains separate\",\n  \"collection_id\": \"daveml-f16-canonical-smoke\",\n  \"levels\": {\n    \"L0\": \"verified\",\n    \"L1\": \"verified_source_identity\",\n    \"L2\": \"verified_canonical_structure\",\n    \"L3\": \"verified_canonical_numeric_and_checkdata\",\n    \"L4\": \"pending_runtime_replay\"\n  },\n  \"schema_version\": \"taoryx.daveml-collection-roundtrip-evidence/v1\",\n  \"source_sha256\": \"6da3fad6192ebf2bd16170c379890df5db03e67a00e9bbdd1b58646803491e73\",\n  \"status\": \"verified\",\n  \"stderr_tail\": \"\",\n  \"subprocess_returncode\": 0\n}\n"
     },
     {
       "command": [

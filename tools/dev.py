@@ -665,6 +665,13 @@ def daveml_hl20_scenario() -> None:
     ####
 
 
+def daveml_collection_roundtrip() -> None:
+    """Run the fresh-process DAVE-ML collection round trip."""
+
+    run(tool_script("validate_daveml_collection_roundtrip.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -780,6 +787,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-hl20-load": daveml_hl20_load,
     "daveml-hl20-linearization": daveml_hl20_linearization,
     "daveml-hl20-scenario": daveml_hl20_scenario,
+    "daveml-collection-roundtrip": daveml_collection_roundtrip,
     "handoff": handoff,
     "check": check,
     "all": check,
