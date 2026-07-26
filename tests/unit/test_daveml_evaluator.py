@@ -154,6 +154,39 @@ def test_ungridded_official_table_mismatch_is_explicitly_reported() -> None:
     assert results[0].absolute_tolerance == 0.0005
 
 
+def test_typed_ungridded_reference_uses_declared_table_semantics() -> None:
+    payload = b"""
+    <DAVEfunc>
+      <variableDef varID="x" name="x"/>
+      <variableDef varID="z" name="z"/>
+      <variableDef varID="y" name="y"/>
+      <ungriddedTableDef utID="table">
+        <dataPoint>0 0 0</dataPoint>
+        <dataPoint>0 10 10</dataPoint>
+        <dataPoint>10 0 20</dataPoint>
+        <dataPoint>10 10 30</dataPoint>
+      </ungriddedTableDef>
+      <function>
+        <independentVarRef varID="x"/><independentVarRef varID="z"/>
+        <dependentVarRef varID="y"/>
+        <functionDefn><ungriddedTableRef utID="table"/></functionDefn>
+      </function>
+      <checkData><staticShot name="center">
+        <checkInputs>
+          <signal><signalID>x</signalID><signalValue>5</signalValue></signal>
+          <signal><signalID>z</signalID><signalValue>5</signalValue></signal>
+        </checkInputs>
+        <checkOutputs>
+          <signal><signalID>y</signalID><signalValue>15</signalValue></signal>
+        </checkOutputs>
+      </staticShot></checkData>
+    </DAVEfunc>
+    """
+    results = evaluate_daveml_checkdata(payload)
+    assert results[0].status == "passed"
+    assert results[0].actual == 15.0
+
+
 def test_official_atmosphere_checkdata_uses_named_variables_and_tolerances() -> None:
     source = Path("resources/aerospace/daveml/official-conformance-v1/atmos_76.dml")
     results = evaluate_daveml_checkdata(source.read_bytes())
