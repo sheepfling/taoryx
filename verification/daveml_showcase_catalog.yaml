@@ -1,0 +1,78 @@
+schema_version: 1
+catalog_id: taoryx.daveml-family-showcase.v1
+claim_boundary: evidence boards built from qualified DaveML family artifacts; not flight qualification
+output_root: artifacts/showcases/daveml-families
+boards:
+  - id: f16-maneuver-trim-evidence-v1
+    family_id: reference_f16_s119
+    qualification_class: reference_exact
+    fidelity_profiles: [rigid_body_6dof]
+    evidence_grade: source
+    evidence:
+      - verification/daveml_f16_equilibrium_trim_evidence.json
+      - verification/daveml_f16_linearization_evidence.json
+      - verification/daveml_f16_tuning_evidence.json
+      - verification/daveml_f16_scenario_evidence.json
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    claim: Source-bounded F-16 trim and maneuver evidence board for the promoted reference family.
+    nonclaims: [flight qualification, actuator/SAS fidelity, production or training fidelity]
+    events: [equilibrium_trim, maneuver_probe, objective_gate]
+  - id: hl20-glide-entry-evidence-v1
+    family_id: reference_hl20_mod_k
+    qualification_class: reference_exact
+    fidelity_profiles: [rigid_body_6dof]
+    evidence_grade: source
+    evidence:
+      - verification/daveml_hl20_trim_evidence.json
+      - verification/daveml_hl20_load_evidence.json
+      - verification/daveml_hl20_linearization_evidence.json
+      - verification/daveml_hl20_scenario_evidence.json
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    claim: Source-bounded HL-20 glide and entry-channel evidence board.
+    nonclaims: [controller qualification, actuator dynamics, landing or ground contact, full-flight validation]
+    events: [glide_trim, entry_channel, glide_objective_gate]
+  - id: nesc-two-stage-launch-lineage-v1
+    family_id: reference_nesc_two_stage_rocket
+    qualification_class: reference_exact
+    fidelity_profiles: [rigid_body_6dof]
+    evidence_grade: source
+    evidence:
+      - verification/daveml_nesc_replay_evidence.json
+      - verification/daveml_nesc_objectives_evidence.json
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification, object_lineage]
+    claim: Source-retained NESC Scenario 17 launch, staging, trajectory, and object-lineage board.
+    nonclaims: [independent participating-simulation equivalence, flight qualification, reduced-order fidelity]
+    events: [liftoff_stage1_ignition, stage1_burnout, stage1_jettison_stage2_ignition, stage2_burnout, orbit_coast]
+  - id: a320-derived-versus-surrogate-v1
+    family_id: a320_family_comparison
+    qualification_class: mixed
+    fidelity_profiles: [point_mass_3dof, pseudo_6dof]
+    evidence_grade: mixed
+    evidence:
+      - verification/daveml_a320_openap_integration.json
+      - verification/daveml_a320_pseudo6dof_integration.json
+      - families/a320_openap_3dof/qualification/integration-record.yaml
+      - families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    claim: Honest comparison of the derived-exact OpenAP 3-DOF product and Taoryx surrogate-composite pseudo-6DOF product.
+    nonclaims: [Airbus-authoritative data, source-equivalent 6-DOF, identical trajectories across fidelities]
+    events: [derived_exact_trim, surrogate_trim, coordinated_turn, control_pulse_bounds]
+  - id: nesc-synthetic-passive-child-deployment-v1
+    family_id: reference_nesc_two_stage_rocket
+    qualification_class: mixed
+    fidelity_profiles: [rigid_body_6dof, pseudo_6dof]
+    evidence_grade: mixed
+    evidence:
+      - verification/daveml_nesc_replay_evidence.json
+      - verification/daveml_nesc_objectives_evidence.json
+      - docs/plan/alpha3-aero-ballistic-deployment.md
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification, object_lineage]
+    claim: NESC-parent high-energy deployment witness with a synthetic passive cylindrical child.
+    nonclaims: [source-exact child aerodynamics, historical NESC detached-body validation, active child guidance]
+    events: [liftoff_stage1_ignition, stage1_burnout, synthetic_child_separation, stage1_jettison_stage2_ignition, stage2_burnout, terminal_checkpoint]
+    synthetic_child:
+      id: nesc-synthetic-cylinder
+      shape: cylinder
+      mass_kg: 19000.0
+      reference_area_m2: 7.0
+      model: radial-ballistic-witness-v1

@@ -305,3 +305,10 @@ The common recipe and archetype IDs are frozen in
 The typed runtime surface is `taoryx.showcase`, including
 `ShowcaseArchetypeCatalog`, `ObjectLineage`, and
 `ShowcaseRunArtifact.object_lineage`.
+
+The first DaveML-family showcase tranche is now defined and executable in
+[`daveml-family-showcase-tranche.md`](daveml-family-showcase-tranche.md). It
+covers F-16, HL-20, NESC two-stage, the A320 derived-versus-surrogate split,
+and a NESC-parent synthetic passive-child deployment witness. This tranche
+does not promote the remaining NESC source-only atmospheric/orbital/tumbling
+records into executable families.

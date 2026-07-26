@@ -701,6 +701,13 @@ def daveml_completion_audit() -> None:
     ####
 
 
+def daveml_showcase() -> None:
+    """Build the promoted DaveML family evidence-board packs."""
+
+    run(tool_script("build_daveml_showcase_composites.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -820,6 +827,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-collection-roundtrip": daveml_collection_roundtrip,
     "daveml-nesc-replay": daveml_nesc_replay,
     "daveml-completion-audit": daveml_completion_audit,
+    "daveml-showcase": daveml_showcase,
     "handoff": handoff,
     "check": check,
     "all": check,

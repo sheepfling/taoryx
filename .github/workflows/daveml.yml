@@ -43,6 +43,8 @@ jobs:
         run: python tools/dev.py daveml-release
       - name: Emit DaveML completion audit
         run: python tools/dev.py daveml-completion-audit
+      - name: Build DaveML family showcase boards
+        run: python tools/dev.py daveml-showcase
       - name: Run DaveML regression tests
         run: python -m pytest -m daveml --basetemp build/daveml-ci-pytest -q
       - name: Publish DaveML evidence
@@ -52,6 +54,7 @@ jobs:
           name: daveml-release-evidence
           path: |
             verification/daveml_*.json
+            artifacts/showcases/daveml-families/**
             build/daveml-release-catalog/canonical/export-manifest.json
 
   integration:
