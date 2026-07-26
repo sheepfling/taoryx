@@ -23,7 +23,7 @@ def main() -> int:
         {"id": "fresh_process_release_gate", "status": release["status"], "evidence": "verification/daveml_release_gate.json"},
         {"id": "family_readiness", "status": readiness["status"], "evidence": "verification/daveml_family_readiness.json"},
         {"id": "official_2d_ungridded_interpolation", "status": "known_gap_quarantined", "evidence": "verification/daveml_official_checkdata.json"},
-        {"id": "vector_function_and_checkdata_execution", "status": "not_in_authoritative_corpus", "evidence": "docs/plan/daveml-roundtrip.md"},
+        {"id": "vector_table_function_semantics", "status": "not_in_authoritative_corpus", "evidence": "docs/plan/daveml-roundtrip.md"},
     ]
     report = {
         "schema_version": "taoryx.daveml-completion-audit/v1",
