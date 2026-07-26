@@ -595,6 +595,9 @@ items are complete and reproducible:
 - `.github/workflows/daveml.yml` now runs the fresh-process release gate and
   DaveML regression suite on DaveML-relevant changes, publishing the generated
   provenance reports as CI artifacts without invoking LaTeX tasks.
+- HL20 tuning is now explicitly `not_applicable_no_declared_controls`: the
+  authoritative unpowered aerodynamic package declares no control channels,
+  so no controller or tuning artifact is fabricated from an uncontrolled plant.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,

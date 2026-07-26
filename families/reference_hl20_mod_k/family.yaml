@@ -116,7 +116,7 @@ layers:
   reductions: {version: pending, evidence: derived_from_parent_plant}
   trim: {version: source-channel-trim-v1, evidence: source_channel_trim_verified}
   linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
-  tuning: {version: pending, evidence: pending}
+  tuning: {version: not-applicable-no-declared-controls-v1, evidence: not_applicable_no_declared_controls}
   objectives: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
   scenarios: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
 bindings:

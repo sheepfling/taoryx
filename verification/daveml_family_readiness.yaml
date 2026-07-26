@@ -28,7 +28,7 @@ families:
     atmosphere_binding: source_package_declared
     trim: source_channel_trim_verified
     linearization: source_trim_residual_jacobian_verified
-    tuning: pending
+    tuning: not_applicable_no_declared_controls
     objectives: source_glide_trim_smoke_verified
     scenarios: source_glide_trim_smoke_verified
     runtime: runtime_replay_qualification_passed

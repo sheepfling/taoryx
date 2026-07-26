@@ -37,6 +37,7 @@ layers:
   mission: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
   reductions: {version: pending, evidence: derived_from_parent_plant}
   linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
+  tuning: {version: not-applicable-no-declared-controls-v1, evidence: not_applicable_no_declared_controls}
 claims:
   - byte-pinned nonlinear unpowered lifting-body aerodynamic reference
   - broad-Mach force/moment graph represented by the verified corpus source and package evidence
