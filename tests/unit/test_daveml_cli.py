@@ -18,3 +18,10 @@ def test_daveml_cli_smoke_verifies_f16_family(tmp_path: Path, capsys) -> None:
 def test_daveml_cli_smoke_verifies_hl20_family(capsys) -> None:
     assert main(["daveml", "smoke", "--family", "reference_hl20_mod_k"]) == 0
     assert json.loads(capsys.readouterr().out)["status"] == "verified"
+
+
+def test_daveml_cli_smoke_verifies_nesc_family(capsys) -> None:
+    assert main(["daveml", "smoke", "--family", "reference_nesc_two_stage_rocket"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "verified"
+    assert "aerodynamics" in payload["roles_hash_verified"]

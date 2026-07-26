@@ -155,6 +155,20 @@
       "returncode": 0,
       "stderr_tail": "",
       "stdout_tail": "ied\",\n    \"trim\": {\n      \"controls\": {},\n      \"iterations\": 5,\n      \"local_residual_jacobian\": {\n        \"a\": [\n          [\n            -0.004982539442238323\n          ]\n        ],\n        \"b\": [\n          []\n        ],\n        \"control_names\": [],\n        \"method\": \"central_finite_difference\",\n        \"residual_names\": [\n          \"pitch_cm\"\n        ],\n        \"state_names\": [\n          \"alpha_deg\"\n        ]\n      },\n      \"max_residual\": 1.1578411840407199e-14,\n      \"residuals\": {\n        \"pitch_cm\": 1.1578411840407199e-14\n      },\n      \"scaled_residual_norm\": 1.1578411840407199e-14,\n      \"solver_message\": \"`gtol` termination condition is satisfied.\",\n      \"solver_status\": 1,\n      \"state\": {\n        \"alpha_deg\": 6.457652069267908\n      },\n      \"success\": true\n    }\n  },\n  \"family_id\": \"reference_hl20_mod_k\",\n  \"model_id\": \"hl20-mod-k-unpowered-6dof\",\n  \"roles_hash_verified\": [\n    \"aerodynamics\"\n  ],\n  \"schema_version\": \"taoryx.daveml-cli-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "-m",
+        "taoryx.runtime.cli",
+        "daveml",
+        "smoke",
+        "--family",
+        "reference_nesc_two_stage_rocket"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "e\": \"validation/acceptance.json#passed\",\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"package\": \"C:\\\\Users\\\\peanu\\\\GIT\\\\sheepfling\\\\taoryx\\\\INBOX\\\\taoryx-daveml-nesc-model-catalog-v1.0\\\\qualified\\\\nesc-two-stage-rocket\\\\nesc-two-stage-rocket-v0.9.txair\",\n      \"runtime_load_contract\": \"taoryx_rigid_body_6dof\",\n      \"runtime_member\": null,\n      \"source_evaluation\": \"verified_pinned_package_acceptance\",\n      \"source_sha256\": \"d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6\",\n      \"status\": \"runtime_replay_qualification_passed\"\n    },\n    \"schema_version\": \"taoryx.daveml-nesc-replay-evidence/v1\",\n    \"status\": \"verified\",\n    \"stderr_tail\": \"\",\n    \"subprocess_returncode\": 0\n  },\n  \"family_id\": \"reference_nesc_two_stage_rocket\",\n  \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n  \"roles_hash_verified\": [\n    \"aerodynamics\",\n    \"propulsion\",\n    \"mass_properties\"\n  ],\n  \"schema_version\": \"taoryx.daveml-cli-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
     }
   ],
   "schema_version": "taoryx.daveml-release-gate/v1",

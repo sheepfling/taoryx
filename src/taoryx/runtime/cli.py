@@ -225,7 +225,11 @@ def main(argv: list[str] | None = None) -> int:
     daveml = subparsers.add_parser("daveml", help="run promoted DAVE-ML family smoke paths")
     daveml_subparsers = daveml.add_subparsers(dest="daveml_command", required=True)
     daveml_smoke = daveml_subparsers.add_parser("smoke", help="verify a DAVE-ML family smoke evidence chain")
-    daveml_smoke.add_argument("--family", choices=("reference_f16_s119", "reference_hl20_mod_k"), required=True)
+    daveml_smoke.add_argument(
+        "--family",
+        choices=("reference_f16_s119", "reference_hl20_mod_k", "reference_nesc_two_stage_rocket"),
+        required=True,
+    )
     daveml_smoke.add_argument("--output", type=Path)
     arguments = parser.parse_args(argv)
     if arguments.command == "scenario":
@@ -291,10 +295,12 @@ def _daveml_command(arguments: argparse.Namespace) -> int:
     sidecars = {
         "reference_f16_s119": Path("families/reference_f16_s119/plant/daveml-import.json"),
         "reference_hl20_mod_k": Path("families/reference_hl20_mod_k/plant/daveml-import.json"),
+        "reference_nesc_two_stage_rocket": Path("families/reference_nesc_two_stage_rocket/plant/daveml-import.json"),
     }
     evidence = {
         "reference_f16_s119": Path("verification/daveml_f16_scenario_evidence.json"),
         "reference_hl20_mod_k": Path("verification/daveml_hl20_trim_evidence.json"),
+        "reference_nesc_two_stage_rocket": Path("verification/daveml_nesc_replay_evidence.json"),
     }
     sidecar = sidecars[arguments.family]
     evidence_path = evidence[arguments.family]
