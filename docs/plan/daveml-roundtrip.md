@@ -607,6 +607,9 @@ items are complete and reproducible:
 - The typed graph now evaluates vector constants and explicit vector inputs;
   vector functions and vector checkData remain fail-closed until their source
   semantics are implemented.
+- The fresh-process release gate now runs the seven-fixture official conformance
+  validator and hashes its deterministic structural/numeric/checkData-signature
+  report alongside family runtime evidence.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,
