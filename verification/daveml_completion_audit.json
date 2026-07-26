@@ -4,7 +4,7 @@
     "docs/plan/daveml-roundtrip.md": "494271cc9bc58d25a3c02f504caa4835ec2bc36c5ffa20c716b66e37a770ff0e",
     "verification/daveml_catalog_import.json": "58ed91d00341140c6e7dbce53ef4e4ee741f9373becf0be1825ae50056d046ff",
     "verification/daveml_family_readiness.json": "c4a91f3786fdb3f30f73102529b0dabecab68ef9b3bf1beb31b921cf18186584",
-    "verification/daveml_official_checkdata.json": "80e552d2d422550f91d50551ddf08899692b36a82729f7bac74fe0f5b3f044a3",
+    "verification/daveml_official_checkdata.json": "ef4265c3b5965243323a0cb2ec6cc0cf9de771b34251bd66b81fda14ffe79063",
     "verification/daveml_official_conformance.json": "deaa6f110a305d0ad555434f4e4c04aa2773d73847324b3e605f816c150de169",
     "verification/daveml_release_gate.json": "f924b71d1b0b62bee376eaebbccf9f1f5860367927c54ccf2b294f6e3a6cc90c"
   },
