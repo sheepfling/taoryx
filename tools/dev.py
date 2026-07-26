@@ -637,6 +637,13 @@ def daveml_release() -> None:
     ####
 
 
+def daveml_equilibrium_trim() -> None:
+    """Generate reproducible F-16 DAVE-ML equilibrium trim evidence."""
+
+    run(tool_script("validate_daveml_equilibrium_trim.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -748,6 +755,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-tuning": daveml_tuning,
     "daveml-scenario": daveml_scenario,
     "daveml-release": daveml_release,
+    "daveml-equilibrium-trim": daveml_equilibrium_trim,
     "handoff": handoff,
     "check": check,
     "all": check,

@@ -29,6 +29,7 @@ def main() -> int:
         [python, "tools/validate_daveml_family_readiness.py", "--readiness", "verification/daveml_family_readiness.yaml", "--output", "verification/daveml_family_readiness.json"],
         [python, "tools/validate_daveml_atmosphere.py"],
         [python, "tools/validate_daveml_trim.py"],
+        [python, "tools/validate_daveml_equilibrium_trim.py"],
         [python, "tools/validate_daveml_linearization.py"],
         [python, "tools/validate_daveml_tuning.py"],
         [python, "tools/validate_daveml_scenario.py"],
@@ -40,6 +41,7 @@ def main() -> int:
         "verification/daveml_family_readiness.json",
         "verification/daveml_atmosphere_binding.json",
         "verification/daveml_f16_trim_evidence.json",
+        "verification/daveml_f16_equilibrium_trim_evidence.json",
         "verification/daveml_hl20_trim_evidence.json",
         "verification/daveml_f16_linearization_evidence.json",
         "verification/daveml_f16_tuning_evidence.json",
@@ -60,4 +62,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -1,0 +1,55 @@
+{
+  "bounds": {
+    "alpha_deg": [
+      0.0,
+      15.0
+    ],
+    "elevator_deg": [
+      -24.0,
+      24.0
+    ],
+    "power_pct": [
+      0.0,
+      100.0
+    ]
+  },
+  "claim_boundary": "source-backed fixed-altitude/airspeed force-moment equilibrium; not flight qualification",
+  "controls": {
+    "elevator_deg": -0.7560886118577249,
+    "power_pct": 1.130793097701422
+  },
+  "family_id": "reference_f16_s119",
+  "max_residual": 3.3242031349800527e-09,
+  "operating_point": {
+    "geometric_altitude_m": 0.0,
+    "gravity_m_s2": 9.80665,
+    "mass_kg": 9298.64390029893,
+    "true_airspeed_m_s": 152.4
+  },
+  "provenance": {
+    "aerodynamics_document_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+    "aerodynamics_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
+    "atmosphere_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
+    "mass_properties_document_sha256": "f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28",
+    "mass_properties_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
+    "propulsion_document_sha256": "1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4",
+    "propulsion_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
+  },
+  "residuals": {
+    "force_x_n": 3.3242031349800527e-09,
+    "force_z_n": 2.0372681319713593e-10,
+    "moment_y_nm": 1.0738347056774311e-10
+  },
+  "scaled_residual_norm": 3.3321708099642557e-13,
+  "schema_version": "taoryx.daveml-equilibrium-trim/v1",
+  "solver": {
+    "iterations": 11,
+    "message": "`gtol` termination condition is satisfied.",
+    "status": 1,
+    "success": true
+  },
+  "state": {
+    "alpha_deg": 2.147760465658469
+  },
+  "status": "verified"
+}

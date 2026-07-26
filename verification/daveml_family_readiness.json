@@ -24,7 +24,7 @@
         "linearization": "source_channel_dynamics_verified",
         "objectives": "source_channel_smoke_verified",
         "scenarios": "source_channel_smoke_verified",
-        "trim": "source_package_regression",
+        "trim": "source_equilibrium_trim_verified",
         "tuning": "source_channel_reduced_lqr_verified"
       },
       "family_id": "reference_f16_s119",
@@ -56,9 +56,7 @@
       ],
       "graph_failures": [],
       "model_id": "f16-s119-reference",
-      "pending_derived_layers": {
-        "trim": "source_package_regression"
-      },
+      "pending_derived_layers": {},
       "source_import_declared": "verified"
     },
     {
@@ -172,12 +170,6 @@
     }
   ],
   "pending_derived_layers": [
-    {
-      "family_id": "reference_f16_s119",
-      "layers": {
-        "trim": "source_package_regression"
-      }
-    },
     {
       "family_id": "reference_hl20_mod_k",
       "layers": {

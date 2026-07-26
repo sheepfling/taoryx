@@ -11,7 +11,7 @@ families:
     propulsion_binding: source_checked_steady
     inertia_binding: source_bound_fixed
     atmosphere_binding: source_package_declared
-    trim: source_package_regression
+    trim: source_equilibrium_trim_verified
     linearization: source_channel_dynamics_verified
     tuning: source_channel_reduced_lqr_verified
     objectives: source_channel_smoke_verified

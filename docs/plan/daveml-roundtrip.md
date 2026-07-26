@@ -562,14 +562,21 @@ items are complete and reproducible:
   `taoryx.daveml-cli-smoke/v1` envelope for F-16 and HL-20.
 - `tools/validate_daveml_release.py` now executes the fresh-process promotion
   chain and emits `verification/daveml_release_gate.json`. The current gate
-  runs readiness, atmosphere, trim, linearization, tuning, scenario scoring,
-  and both family CLI smoke paths, then hashes the resulting artifacts. Its
+  runs readiness, atmosphere, pitch trim, equilibrium trim, linearization,
+  tuning, scenario scoring, and both family CLI smoke paths, then hashes the
+  resulting artifacts. Its
   claim boundary remains source integration, not flight qualification.
 - The F-16 readiness entry now promotes only the verified source-channel
   layers (`source_channel_dynamics_verified`,
   `source_channel_reduced_lqr_verified`, and
   `source_channel_smoke_verified`); the registry continues to leave full
   equilibrium trim pending and leaves HL-20/NESC derived layers unchanged.
+- `tools/validate_daveml_equilibrium_trim.py` now emits
+  `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
+  three-variable solve (angle of attack, elevator, throttle) using atmosphere,
+  propulsion, mass properties, gravity, and body-load channels. The F-16 trim
+  readiness layer is promoted as `source_equilibrium_trim_verified` for this
+  declared altitude/airspeed point only.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

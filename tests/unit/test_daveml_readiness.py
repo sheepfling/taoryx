@@ -17,6 +17,7 @@ def test_family_readiness_passes_source_and_graph_gates_without_promoting_derive
     assert families["reference_hl20_mod_k"]["checkdata"]["passed"] == 240
     assert families["reference_nesc_two_stage_rocket"]["checkdata"]["computed"] == "no_embedded_cases"
     assert families["reference_f16_s119"]["derived_layers"]["tuning"] == "source_channel_reduced_lqr_verified"
+    assert families["reference_f16_s119"]["derived_layers"]["trim"] == "source_equilibrium_trim_verified"
 
 
 def test_checked_in_readiness_report_is_json_and_matches_registry() -> None:
