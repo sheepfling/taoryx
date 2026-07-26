@@ -108,8 +108,8 @@ layers:
   controllers: {version: pending, evidence: taoryx_reference_design}
   reductions: {version: pending, evidence: derived_from_parent_plant}
   trim: {version: source-equilibrium-trim-v1, evidence: source_equilibrium_trim_verified}
-  linearization: {version: source-channel-dynamics-v1, evidence: source_channel_dynamics_verified}
-  tuning: {version: source-channel-reduced-lqr-v1, evidence: source_channel_reduced_lqr_verified}
+  linearization: {version: source-channel-dynamics-with-propulsion-v2, evidence: source_channel_full_dynamics_verified}
+  tuning: {version: source-channel-full-lqr-v2, evidence: source_channel_full_lqr_verified}
   objectives: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
   scenarios: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
 bindings:

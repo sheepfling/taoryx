@@ -549,8 +549,8 @@ items are complete and reproducible:
 - `tools/validate_daveml_tuning.py` now consumes that Jacobian through the
   existing named LQR factory and emits
   `verification/daveml_f16_tuning_evidence.json`. The reduced five-state screen
-  is controllable and Hurwitz with bounded surface commands; longitudinal speed
-  is explicitly excluded because the source-channel model has rank five.
+  is controllable and Hurwitz with bounded surface and throttle commands. The
+  source propulsion sensitivity restores the longitudinal-speed control channel.
 - `tools/validate_daveml_scenario.py` now drives the existing unit-aware
   objective scorer with a hashed `ScenarioContract`, producing
   `verification/daveml_f16_scenario_evidence.json`. Stability, bounded command,
@@ -567,11 +567,12 @@ items are complete and reproducible:
   resulting artifacts. Its
   claim boundary remains source integration, not flight qualification.
 - The F-16 readiness entry now promotes the verified source-channel
-  layers (`source_channel_dynamics_verified`,
-  `source_channel_reduced_lqr_verified`, and
+  layers (`source_channel_full_dynamics_verified`,
+  `source_channel_full_lqr_verified`, and
   `source_channel_smoke_verified`); the registry continues to leave full
   equilibrium trim point as `source_equilibrium_trim_verified`; full
-  longitudinal-control qualification remains outside the bounded source claim.
+  operating-point expansion and flight qualification remain outside the bounded
+  source claim.
 - `DAVEMLLiftingBodyLoadBinding` now provides the separate HL-20 wind-axis
   `CL/CD/CM` to body-load mapping, including explicit drag/lift signs and
   atmosphere-derived dynamic pressure. It deliberately does not add mass,

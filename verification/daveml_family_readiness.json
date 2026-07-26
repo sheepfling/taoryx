@@ -21,11 +21,11 @@
         "unsupported": 0
       },
       "derived_layers": {
-        "linearization": "source_channel_dynamics_verified",
+        "linearization": "source_channel_full_dynamics_verified",
         "objectives": "source_channel_smoke_verified",
         "scenarios": "source_channel_smoke_verified",
         "trim": "source_equilibrium_trim_verified",
-        "tuning": "source_channel_reduced_lqr_verified"
+        "tuning": "source_channel_full_lqr_verified"
       },
       "family_id": "reference_f16_s119",
       "graph_bindings": [
