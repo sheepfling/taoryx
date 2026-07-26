@@ -527,6 +527,11 @@ items are complete and reproducible:
   temperature, pressure, density, and speed-of-sound samples. The adapter
   preserves source ratios and rejects unresolved channels; it does not
   extrapolate beyond the source domain.
+- `DAVEMLFixedWingLoadBinding.evaluate_with_atmosphere` now composes that
+  environment contract with the F-16-style body-load adapter using the
+  declared dynamic-pressure equation `q = 0.5*rho*V^2`; the coupled probe
+  remains explicit about speed units and still applies no hidden mass or
+  gravity terms.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

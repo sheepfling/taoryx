@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import zipfile
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
@@ -17,6 +18,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .daveml_atmosphere import DAVEMLAtmosphereBinding
 from .daveml_evaluator import DAVEMLGraph, evaluate_daveml_checkdata, load_daveml_graph
 from .daveml_replay import replay_reference_package
 from .daveml_semantic import build_daveml_ir, compare_daveml_ir, compare_daveml_numeric, export_daveml_ir
@@ -243,6 +245,7 @@ class DAVEMLTrimBinding:
 
         return lambda state, controls: self.evaluate(state, controls, environment)
         ####
+
     ####
 
 
@@ -282,6 +285,7 @@ class DAVEMLCompositeTrimBinding:
 
         return lambda state, controls: self.evaluate(state, controls, environment)
         ####
+
     ####
 
 
@@ -355,6 +359,34 @@ class DAVEMLFixedWingLoadBinding:
         """Return a trim-solver-compatible total-load evaluator."""
 
         return lambda state, controls: self.evaluate(state, controls, environment)
+        ####
+
+    def evaluate_with_atmosphere(
+        self,
+        state: Mapping[str, float],
+        controls: Mapping[str, float],
+        atmosphere: DAVEMLAtmosphereBinding,
+        *,
+        geometric_altitude_m: float,
+        true_airspeed_m_s: float,
+        environment: Mapping[str, float] | None = None,
+    ) -> dict[str, float]:
+        """Evaluate loads using atmosphere-derived dynamic pressure."""
+
+        if not math.isfinite(true_airspeed_m_s) or true_airspeed_m_s <= 0.0:
+            raise ValueError("true airspeed must be finite and positive")
+        properties = atmosphere.evaluate(geometric_altitude_m)
+        dynamic_pressure = 0.5 * properties["density_kg_m3"] * true_airspeed_m_s**2
+        return DAVEMLFixedWingLoadBinding(
+            aerodynamics=self.aerodynamics,
+            reference_area_m2=self.reference_area_m2,
+            mean_aerodynamic_chord_m=self.mean_aerodynamic_chord_m,
+            span_m=self.span_m,
+            dynamic_pressure_pa=dynamic_pressure,
+            propulsion=self.propulsion,
+            propulsion_output=self.propulsion_output,
+            thrust_scale_to_newtons=self.thrust_scale_to_newtons,
+        ).evaluate(state, controls, environment)
         ####
     ####
 

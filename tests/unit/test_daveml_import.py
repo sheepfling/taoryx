@@ -11,6 +11,7 @@ from taoryx.trajectory import (
     DAVEMLFixedWingLoadBinding,
     DAVEMLFunctionChannel,
     DAVEMLTrimBinding,
+    load_daveml_atmosphere,
     load_daveml_family_graph,
     load_daveml_family_import,
     load_daveml_function_channel,
@@ -228,6 +229,34 @@ def test_f16_fixed_wing_load_binding_reports_explicit_si_channels() -> None:
     assert loads["total_force_x_n"] == pytest.approx(
         loads["aerodynamic_force_x_n"] + loads["propulsion_force_x_n"]
     )
+
+
+def test_f16_load_binding_can_derive_dynamic_pressure_from_daveml_atmosphere() -> None:
+    aero = load_daveml_trim_binding(
+        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+        role="aerodynamics",
+        state_inputs={},
+        control_inputs={"elevator_deg": "el"},
+        residual_outputs={"cx": "cx", "cy": "cy", "cz": "cz", "cl": "cl", "cm": "cm", "cn": "cn"},
+        fixed_inputs={"vt": 500.0, "alpha": 2.0, "beta": 0.0, "p": 0.0, "q": 0.0, "r": 0.0, "ail": 0.0, "rdr": 0.0, "xcg": 0.35},
+    )
+    binding = DAVEMLFixedWingLoadBinding(
+        aerodynamics=aero,
+        reference_area_m2=27.870912,
+        mean_aerodynamic_chord_m=3.450336,
+        span_m=9.144,
+        dynamic_pressure_pa=1.0,
+    )
+    atmosphere = load_daveml_atmosphere(ROOT / "resources/aerospace/daveml/official-conformance-v1/atmos_76.dml")
+    loads = binding.evaluate_with_atmosphere(
+        {},
+        {"elevator_deg": 0.0},
+        atmosphere,
+        geometric_altitude_m=0.0,
+        true_airspeed_m_s=152.4,
+    )
+    expected_q = 0.5 * 1.225 * 152.4**2
+    assert loads["aerodynamic_force_x_n"] == pytest.approx(expected_q * 27.870912 * -0.0142)
 
 
 @pytest.mark.skipif(not CATALOG_ROOT.is_dir(), reason="local DAVE-ML catalog is external to the repository")
