@@ -77,7 +77,14 @@ def test_typed_graph_can_be_reused_for_named_outputs() -> None:
     values = graph.evaluate({"x": 0.5}, ("y",))
     assert graph.document_id == "fixture"
     assert graph.unit_for("y") is None
+    assert graph.dimension_for("y") is None
     assert values == {"y": 15.0}
+
+
+def test_typed_graph_exposes_source_dimension() -> None:
+    graph = load_daveml_graph(b'<DAVEfunc><variableDef varID="x" units="deg"/></DAVEfunc>')
+    assert graph.unit_for("x") == "deg"
+    assert graph.dimension_for("x") == "angle"
 
 
 def test_typed_graph_evaluates_vector_constant_and_input() -> None:
