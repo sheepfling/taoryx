@@ -628,22 +628,16 @@ The following are intentionally not marked complete:
   fixture either. This is a numeric disposition, not a silent pass.
 - Full typed package IR reference resolution, units/dimensions, vector graph
   execution, and complete ungridded interpolation remain Track A/B work.
-- F-16 and HL-20 certified trim artifacts, trim Jacobians, controller tuning,
-  objective catalogs, and scored smoke scenarios remain Tracks D-F work.
-  Their readiness entries say `source_package_regression` or `pending` rather
-  than implying a certified trim or controller.
+- F-16 and HL-20 now have source-linked trim, linearization, objective, and
+  scenario evidence; F-16 also has a bounded reduced LQR screen. HL-20 tuning
+  is explicitly not applicable because the source declares no controls.
 
 The next executable gates are, in order:
 
 1. Resolve and independently test the official ungridded interpolation
    disposition without changing source tolerances.
-2. Compose typed function channels into source-backed F-16 and HL-20 trim
-   records and residual adapters, then
-   certify at least one operating point per applicable family.
-3. Generate trim-local linearizations, run control-direction probes, and add
-   controller/tuning records only after the trim contracts pass.
-4. Add family objective and scenario artifacts, expose them through the
-   runtime selection path, and emit provenance-complete smoke reports.
-5. Promote only after the CI bundle runs intake, deterministic export twice,
-   fresh import, numeric/check-data evaluation, graph loading, trim, tuning,
-   objective scoring, and runtime replay gates.
+2. Complete typed vector function/checkData semantics if an authoritative
+   source requiring them is added to the corpus.
+3. Continue promotion only through the 16-stage release gate, completion audit,
+   and DaveML GitHub workflow; do not promote controller assumptions from
+   uncontrolled or open-loop source packages.
