@@ -1,0 +1,95 @@
+{
+  "documents": [
+    {
+      "checkdata_count": 1,
+      "checkdata_numeric_literal_count": 294,
+      "checkdata_roundtrip_match": true,
+      "exported_sha256": "d36d93e3e368fa54dc84c9a1d4ba06da6f3af74a237c0e2bb773379e253dbe38",
+      "fixture": "atmos_76.dml",
+      "manifest_hash_match": true,
+      "numeric_diff_count": 0,
+      "opaque_paths": [],
+      "source_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
+      "structural_diff_count": 0
+    },
+    {
+      "checkdata_count": 1,
+      "checkdata_numeric_literal_count": 1241,
+      "checkdata_roundtrip_match": true,
+      "exported_sha256": "e1d92eda2e1276823be8c5987a777078c38de6f9ac1e661035a739ea03ecf7df",
+      "fixture": "F16_aero.dml",
+      "manifest_hash_match": true,
+      "numeric_diff_count": 0,
+      "opaque_paths": [],
+      "source_sha256": "6da3fad6192ebf2bd16170c379890df5db03e67a00e9bbdd1b58646803491e73",
+      "structural_diff_count": 0
+    },
+    {
+      "checkdata_count": 1,
+      "checkdata_numeric_literal_count": 9480,
+      "checkdata_roundtrip_match": true,
+      "exported_sha256": "1216498bf6fb0d07565fd06ef47c14bec5a1e40a0fca90bb54371a789d7a5629",
+      "fixture": "HL20_aero.dml",
+      "manifest_hash_match": true,
+      "numeric_diff_count": 0,
+      "opaque_paths": [],
+      "source_sha256": "8639b55c2525fdb6c0177b8e359de5d6eb984a3b4b35b4d1e5898d54ddc1f44e",
+      "structural_diff_count": 0
+    },
+    {
+      "checkdata_count": 0,
+      "checkdata_numeric_literal_count": 0,
+      "checkdata_roundtrip_match": true,
+      "exported_sha256": "4472b61e4632026eac491d19a2b53c00f8d3d5fa410a9c7d9e1f80b50af6af7a",
+      "fixture": "simple_aero.dml",
+      "manifest_hash_match": true,
+      "numeric_diff_count": 0,
+      "opaque_paths": [],
+      "source_sha256": "7a2148ee89ef4ceacb7663a9bc477e020c1aa58bcfc361f938d60d5d3f18a5d5",
+      "structural_diff_count": 0
+    },
+    {
+      "checkdata_count": 0,
+      "checkdata_numeric_literal_count": 0,
+      "checkdata_roundtrip_match": true,
+      "exported_sha256": "fff9a3e94fe1735b7158c2966790ba78c7a517c2f953a5f5efbfa301238374fd",
+      "fixture": "threeD_ungridded.dml",
+      "manifest_hash_match": true,
+      "numeric_diff_count": 0,
+      "opaque_paths": [],
+      "source_sha256": "1779544def313776a7fe380db05ef097ecd53ad6264aab1e8765f86d21342f79",
+      "structural_diff_count": 0
+    },
+    {
+      "checkdata_count": 0,
+      "checkdata_numeric_literal_count": 0,
+      "checkdata_roundtrip_match": true,
+      "exported_sha256": "6a06c84b1cb41dec4aa63e0d0018328d29943055279c186a47fd6fb6cda09769",
+      "fixture": "twoD_table.dml",
+      "manifest_hash_match": true,
+      "numeric_diff_count": 0,
+      "opaque_paths": [],
+      "source_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
+      "structural_diff_count": 0
+    },
+    {
+      "checkdata_count": 1,
+      "checkdata_numeric_literal_count": 16,
+      "checkdata_roundtrip_match": true,
+      "exported_sha256": "18ef85500d2a4cd0d5081438f19cfb97234037956497ad6820352d532f9372db",
+      "fixture": "twoD_ungridded.dml",
+      "manifest_hash_match": true,
+      "numeric_diff_count": 0,
+      "opaque_paths": [],
+      "source_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
+      "structural_diff_count": 0
+    }
+  ],
+  "fixture_count": 7,
+  "limitations": [
+    "This gate verifies source-preserving semantic export and fresh import.",
+    "DAVE-ML checkData numerical evaluation remains a separate runtime gate."
+  ],
+  "schema_version": "taoryx.daveml-official-conformance/v1",
+  "status": "verified"
+}

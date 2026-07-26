@@ -1,0 +1,14 @@
+schema_version: 1
+kind: taoryx.reference-plant-source-lock/v1alpha1
+family: reference_nesc_two_stage_rocket
+package:
+  relative_to_catalog: qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair
+  sha256: 204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e
+sources:
+  - {role: aerodynamics, relative_to_catalog: normalized/nesc-all-models-two-stage-package-twostage-aero/source.dml, sha256: 49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27}
+  - {role: propulsion, relative_to_catalog: normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml, sha256: 297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee}
+  - {role: mass_properties, relative_to_catalog: normalized/nesc-all-models-two-stage-package-twostage-inertia/source.dml, sha256: 277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b}
+official_all_models_archive:
+  path: raw/nesc/official/All_models.zip
+  sha256: 2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9
+replay_boundary: taoryx_rigid_body_load_contract_and_scenario17_acceptance

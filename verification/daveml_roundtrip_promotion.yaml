@@ -1,0 +1,38 @@
+schema_version: 1
+registry: taoryx-daveml-roundtrip-promotion/v1
+authority: docs/plan/daveml-roundtrip.md
+corpus:
+  resource_id: taoryx-corpus-v1.1
+  archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
+  archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+promotion_order:
+  - {rung: 1, id: official_conformance_fixtures, purpose: serializer_parser_behavior, status: canonical_roundtrip_verified, evidence: resources/aerospace/daveml/official-conformance-v1/manifest.json}
+  - {rung: 2, id: simple_tables_and_atmosphere, purpose: units_tables_and_boundary_policy, status: canonical_roundtrip_verified, evidence: resources/aerospace/daveml/official-conformance-v1/manifest.json}
+  - {rung: 3, id: reference_f16_s119, purpose: multi_document_vehicle_package, status: runtime_replay_qualification_passed}
+  - {rung: 4, id: reference_hl20_mod_k, purpose: exact_aerodynamic_source_and_glide_evidence, status: runtime_replay_qualification_passed}
+  - {rung: 5, id: nesc_two_stage_rocket, purpose: scheduled_mass_propulsion_staging_and_benchmark_evidence, status: canonical_roundtrip_verified_and_runtime_replay_qualification_passed}
+  - {rung: 6, id: remaining_nesc_atmospheric_and_trajectory_cases, purpose: host_environment_and_trajectory_qualification, status: not_applicable_no_corpus_members, evidence: corpus.zip contains no additional NESC atmospheric_or_trajectory DAVE-ML members}
+gates:
+  intake_hashes: required
+  lossless_source_identity: required
+  deterministic_semantic_ir: required
+  canonical_export: required
+  fresh_process_reimport: required
+  structural_diff: required
+  numeric_diff: required
+  checkdata_signature: required_when_present
+  checkdata_numeric_evaluation: required_when_present
+  checkdata_disposition: required_when_not_passing
+  graph_execution: required_for_promoted_families
+  family_library_readiness: required_for_promoted_families
+  runtime_replay: required
+  provenance_report: required
+promotion_rule: >-
+  A rung advances only when its own applicable gates pass; later-family
+  failures cannot downgrade an earlier promoted rung.
+current_gate: repository_validation
+numeric_dispositions:
+  - id: official_twoD_ungridded
+    status: known_numeric_interpolation_gap
+    evidence: verification/daveml_official_checkdata.json
+    requirement: resolve interpolation semantics or retain explicit quarantine; do not weaken source tolerances

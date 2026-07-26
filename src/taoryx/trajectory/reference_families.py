@@ -23,6 +23,7 @@ from .contracts import (
     ObservationSchema,
     ParameterSchema,
 )
+from .daveml_import import load_daveml_family_import
 
 
 class ReferenceSourceLock(BaseModel):
@@ -144,6 +145,7 @@ class ReferenceFamilyManifest(BaseModel):
     display_name: str = Field(min_length=1)
     role: Literal["source-grounded-reference-anchor"]
     source: ReferenceSourceLock
+    daveml_import: str | None = None
     plant: ReferencePlantBinding
     fidelity_profiles: tuple[ReferenceFidelityProfile, ...]
     parameters: tuple[ParameterSchema, ...] = ()
@@ -212,6 +214,18 @@ def load_reference_family_manifest(path: str | Path) -> ReferenceFamilyManifest:
         manifest = ReferenceFamilyManifest.model_validate(payload)
         manifest.fidelity_map()
         manifest.plant.validate_envelope()
+        if manifest.daveml_import is not None:
+            import_record = load_daveml_family_import(source.parent / manifest.daveml_import)
+            if import_record.family_id != manifest.family_id:
+                raise ValueError(
+                    f"DAVE-ML import family mismatch: record={import_record.family_id!r}, "
+                    f"manifest={manifest.family_id!r}"
+                )
+            if import_record.package.sha256 != manifest.source.package_sha256:
+                raise ValueError(
+                    f"DAVE-ML import package hash mismatch: record={import_record.package.sha256!r}, "
+                    f"manifest={manifest.source.package_sha256!r}"
+                )
         return manifest
     except ValueError as error:
         raise ValueError(f"invalid reference family manifest {source}: {error}") from error

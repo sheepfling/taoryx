@@ -7,7 +7,6 @@ import pytest
 
 from taoryx.trajectory import replay_reference_package
 
-
 CORPUS = Path(__file__).parents[2] / "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip"
 
 
@@ -66,3 +65,20 @@ def test_reference_package_rejects_tampered_ledger(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="checksum mismatch"):
         replay_reference_package(tampered)
     ####
+
+
+def test_nesc_two_stage_rocket_replays_qualified_benchmark_evidence() -> None:
+    """The NESC rocket uses benchmark/schedule evidence instead of trim hold."""
+
+    package = Path(__file__).parents[2] / (
+        "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/"
+        "nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair"
+    )
+
+    report = replay_reference_package(package)
+
+    assert report.model_id == "nasa-nesc-two-stage-rocket-scenario17"
+    assert report.fidelity == "6dof"
+    assert report.hold_evidence == "validation/acceptance.json#passed"
+    assert report.force_moment_residual == 0.0
+    assert report.status == "runtime_replay_qualification_passed"

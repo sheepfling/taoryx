@@ -580,6 +580,21 @@ def equation_audit() -> None:
 ####
 
 
+def daveml_readiness() -> None:
+    """Validate promoted DAVE-ML family source and graph gates."""
+
+    run(
+        tool_script(
+            "validate_daveml_family_readiness.py",
+            "--readiness",
+            "verification/daveml_family_readiness.yaml",
+            "--output",
+            "verification/daveml_family_readiness.json",
+        )
+    )
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -684,6 +699,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "taoryx-extension-pdf": taoryx_extension_pdf,
     "all-pdfs": all_pdfs,
     "equation-audit": equation_audit,
+    "daveml-readiness": daveml_readiness,
     "handoff": handoff,
     "check": check,
     "all": check,

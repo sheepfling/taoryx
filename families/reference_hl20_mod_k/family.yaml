@@ -15,6 +15,7 @@ source:
   corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
   availability: local_corpus_input_verified
   license_and_notices: required_from_source_repository
+daveml_import: plant/daveml-import.json
 plant:
   fidelity: rigid_body_6dof
   body_frame: FRD
@@ -113,6 +114,11 @@ layers:
   allocation: {version: pending, evidence: taoryx_reference_design}
   controllers: {version: pending, evidence: taoryx_reference_design}
   reductions: {version: pending, evidence: derived_from_parent_plant}
+  trim: {version: source-package-regression-v1, evidence: source_package_regression}
+  linearization: {version: pending, evidence: pending_source_trim_jacobian}
+  tuning: {version: pending, evidence: pending}
+  objectives: {version: pending, evidence: pending}
+  scenarios: {version: glide-trim-only-v1, evidence: glide_trim_only}
 bindings:
   - bindings/canonical-controls.yaml
   - bindings/canonical-observations.yaml

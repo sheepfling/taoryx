@@ -1,0 +1,651 @@
+{
+  "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+  "claim_boundary": [
+    "Every normalized catalog source completed the canonical structural and numeric cycle.",
+    "Only packages with a qualified txair artifact are promoted to executable reference families.",
+    "Runtime replay evidence remains bounded by each package's declared host contract."
+  ],
+  "family_library": [
+    {
+      "display_name": "DAVE-ML 1976 U.S. Standard Atmosphere",
+      "family_id": null,
+      "library_status": "catalog_source_record_only",
+      "model_id": "daveml-atmosphere-1976",
+      "qualification_status": "conformance-source"
+    },
+    {
+      "display_name": "F-16 S-119",
+      "family_id": "reference_f16_s119",
+      "library_status": "qualified_reference_family",
+      "model_id": "f16-s119",
+      "qualification_status": "qualified-subsonic-baseline"
+    },
+    {
+      "display_name": "NASA HL-20 Mod K Lifting Body",
+      "family_id": "reference_hl20_mod_k",
+      "library_status": "qualified_reference_family",
+      "model_id": "hl20-mod-k",
+      "qualification_status": "qualified-unpowered-baseline"
+    },
+    {
+      "display_name": "NASA/NESC Atmospheric Spheroid",
+      "family_id": null,
+      "library_status": "catalog_source_record_only",
+      "model_id": "nesc-atmospheric-spheroid",
+      "qualification_status": "source-ready"
+    },
+    {
+      "display_name": "NASA/NESC International Space Station",
+      "family_id": null,
+      "library_status": "catalog_source_record_only",
+      "model_id": "nesc-international-space-station",
+      "qualification_status": "source-ready"
+    },
+    {
+      "display_name": "NASA/NESC Orbital Cylinder",
+      "family_id": null,
+      "library_status": "catalog_source_record_only",
+      "model_id": "nesc-orbital-cylinder",
+      "qualification_status": "source-ready"
+    },
+    {
+      "display_name": "NASA/NESC Orbital Spheroid",
+      "family_id": null,
+      "library_status": "catalog_source_record_only",
+      "model_id": "nesc-orbital-spheroid",
+      "qualification_status": "source-ready"
+    },
+    {
+      "display_name": "NASA/NESC Tumbling Brick",
+      "family_id": null,
+      "library_status": "catalog_source_record_only",
+      "model_id": "nesc-tumbling-brick",
+      "qualification_status": "source-ready"
+    },
+    {
+      "display_name": "NASA/NESC Two-Stage Rocket",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "library_status": "qualified_reference_family",
+      "model_id": "nesc-two-stage-rocket",
+      "qualification_status": "qualified-baseline"
+    }
+  ],
+  "model_family_count": 9,
+  "qualified_package_count": 3,
+  "qualified_packages": [
+    {
+      "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
+      "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+      "claims": [
+        "qualified F-16 source package is bound to the Taoryx rigid-body load contract",
+        "package DAVE-ML source members complete the canonical structural and numeric cycle"
+      ],
+      "family_id": "reference_f16_s119",
+      "kind": "taoryx.daveml-family-import/v1alpha1",
+      "model_id": "f16-s119-reference",
+      "nonclaims": [
+        "production F-16 training or operational fidelity",
+        "actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone"
+      ],
+      "package": {
+        "display_name": "F-16 S-119 Reference Aircraft",
+        "fidelity": "6dof",
+        "frames": {
+          "body": "FRD",
+          "navigation": "NED",
+          "quaternion_order": "wxyz"
+        },
+        "model_id": "f16-s119-reference",
+        "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/f16-s119/f16-s119-reference-v0.7.txair",
+        "reference_geometry": {
+          "area_m2": 27.870912,
+          "mean_aerodynamic_chord_m": 3.450336,
+          "span_m": 9.144
+        },
+        "runtime_members": [
+          "runtime/binding.json"
+        ],
+        "schema_version": "0.2.0",
+        "sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
+        "source_documents": [
+          {
+            "canonical_export_sha256": "78d9ca4209fdcbb58974edb82a7e029a020d0061a7785784c0b2b07848570e44",
+            "canonical_ir_sha256": "6b811d28caefb75bf6cb4c88c2abf707f97fe17b26b770bbf14cf7100cee7d4e",
+            "catalog_document_id": null,
+            "catalog_normalized_path": null,
+            "catalog_sha256": null,
+            "checkdata_count": 0,
+            "checkdata_failed": 0,
+            "checkdata_passed": 0,
+            "checkdata_unsupported": 0,
+            "document_id": "f16-s119-reference.aerodynamics",
+            "numeric_diff_count": 0,
+            "package_member": "models/aerodynamics.dml",
+            "package_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+            "role": "aerodynamics",
+            "structural_diff_count": 0
+          },
+          {
+            "canonical_export_sha256": "7c5b8cdf2129cf3ef3c024f44bcef81ab1413f93cdce4df91b9ebea6a266a8e3",
+            "canonical_ir_sha256": "3959781226842e5d1a05fa0d19a88a38587acd5c771c26674b28dddae729ada2",
+            "catalog_document_id": "nesc-all-models-f16-package-f16-s119-source-f16-prop",
+            "catalog_normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-prop",
+            "catalog_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
+            "checkdata_count": 54,
+            "checkdata_failed": 0,
+            "checkdata_passed": 54,
+            "checkdata_unsupported": 0,
+            "document_id": "f16-s119-reference.propulsion",
+            "numeric_diff_count": 0,
+            "package_member": "models/propulsion.dml",
+            "package_sha256": "1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4",
+            "role": "propulsion",
+            "structural_diff_count": 0
+          },
+          {
+            "canonical_export_sha256": "a53c37e7e8e9b23f8d3a428e7a7cf3582221072a1db997755aab0964e4618ccb",
+            "canonical_ir_sha256": "65ac7f5b6aa3328bcee6f0e41abc133f781c5dc26a6ea9703b7044e785cb6af2",
+            "catalog_document_id": "nesc-all-models-f16-package-f16-s119-source-f16-inertia",
+            "catalog_normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-inertia",
+            "catalog_sha256": "e11d4eba5b158d24db7034bd85682ad0b896dd2f3172f007ca3d6d6d4e693c4a",
+            "checkdata_count": 30,
+            "checkdata_failed": 0,
+            "checkdata_passed": 30,
+            "checkdata_unsupported": 0,
+            "document_id": "f16-s119-reference.mass_properties",
+            "numeric_diff_count": 0,
+            "package_member": "models/inertia.dml",
+            "package_sha256": "f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28",
+            "role": "mass_properties",
+            "structural_diff_count": 0
+          }
+        ],
+        "validity_envelope": {
+          "alpha_max_rad": 0.7853981633974483,
+          "alpha_min_rad": -0.17453292519943295,
+          "altitude_max_m": 15240.0,
+          "altitude_min_m": 0.0,
+          "beta_max_rad": 0.5235987755982988,
+          "beta_min_rad": -0.5235987755982988,
+          "mach_max": 1.0,
+          "mach_min": 0.0
+        }
+      },
+      "replay": {
+        "force_moment_residual": 0.0,
+        "hold_evidence": "validation/acceptance.json#reference_trim_hold",
+        "runtime_load_contract": "taoryx_rigid_body_6dof",
+        "source_evaluation": "verified_pinned_package_acceptance",
+        "status": "runtime_replay_qualification_passed"
+      },
+      "roundtrip": {
+        "checkdata_count": 84,
+        "checkdata_failed": 0,
+        "checkdata_passed": 84,
+        "checkdata_status": "verified",
+        "checkdata_unsupported": 0,
+        "document_count": 3,
+        "numeric_diff_count": 0,
+        "status": "verified",
+        "structural_diff_count": 0
+      },
+      "schema_version": 1,
+      "source_authority": "daveml"
+    },
+    {
+      "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
+      "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+      "claims": [
+        "qualified HL-20 source package is bound to the Taoryx rigid-body load contract",
+        "package DAVE-ML aerodynamics complete the canonical structural and numeric cycle"
+      ],
+      "family_id": "reference_hl20_mod_k",
+      "kind": "taoryx.daveml-family-import/v1alpha1",
+      "model_id": "hl20-mod-k-unpowered-6dof",
+      "nonclaims": [
+        "landing gear, ground contact, flare, tire friction, touchdown, or rollout behavior",
+        "generic hypersonic-glider or operational spacecraft performance"
+      ],
+      "package": {
+        "display_name": "NASA HL-20 Mod K Unpowered 6-DOF",
+        "fidelity": "6dof",
+        "frames": {
+          "body": "FRD",
+          "navigation": "NED",
+          "quaternion_order": "wxyz"
+        },
+        "model_id": "hl20-mod-k-unpowered-6dof",
+        "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/hl20-mod-k/hl20-mod-k-unpowered-v0.10.txair",
+        "reference_geometry": {
+          "area_m2": 26.612075808,
+          "mean_aerodynamic_chord_m": 8.607552,
+          "span_m": 4.233672
+        },
+        "runtime_members": [
+          "runtime/aerodynamic-binding.json",
+          "runtime/vehicle-binding.json"
+        ],
+        "schema_version": "0.3.0",
+        "sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+        "source_documents": [
+          {
+            "canonical_export_sha256": "1216498bf6fb0d07565fd06ef47c14bec5a1e40a0fca90bb54371a789d7a5629",
+            "canonical_ir_sha256": "775a61744101414f8ba9027226c0a548d8f1701dfc8de6eb6590048732bd6892",
+            "catalog_document_id": "daveml-example-hl20-aero",
+            "catalog_normalized_path": "normalized/daveml-example-hl20-aero",
+            "catalog_sha256": "8639b55c2525fdb6c0177b8e359de5d6eb984a3b4b35b4d1e5898d54ddc1f44e",
+            "checkdata_count": 240,
+            "checkdata_failed": 0,
+            "checkdata_passed": 240,
+            "checkdata_unsupported": 0,
+            "document_id": "hl20-mod-k-unpowered-6dof.aerodynamics",
+            "numeric_diff_count": 0,
+            "package_member": "models/aerodynamics.dml",
+            "package_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+            "role": "aerodynamics",
+            "structural_diff_count": 0
+          }
+        ],
+        "validity_envelope": {
+          "alpha_max_rad": 0.2617993877991494,
+          "alpha_min_rad": 0.0,
+          "altitude_max_m": 20000.0,
+          "altitude_min_m": -1000.0,
+          "beta_max_rad": 0.17453292519943295,
+          "beta_min_rad": -0.17453292519943295,
+          "mach_max": 4.0,
+          "mach_min": 0.3
+        }
+      },
+      "replay": {
+        "force_moment_residual": 0.0,
+        "hold_evidence": "validation/glide-hold-summary.json",
+        "runtime_load_contract": "taoryx_rigid_body_6dof",
+        "source_evaluation": "verified_pinned_package_artifact",
+        "status": "runtime_replay_qualification_passed"
+      },
+      "roundtrip": {
+        "checkdata_count": 240,
+        "checkdata_failed": 0,
+        "checkdata_passed": 240,
+        "checkdata_status": "verified",
+        "checkdata_unsupported": 0,
+        "document_count": 1,
+        "numeric_diff_count": 0,
+        "status": "verified",
+        "structural_diff_count": 0
+      },
+      "schema_version": 1,
+      "source_authority": "daveml"
+    },
+    {
+      "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
+      "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+      "claims": [
+        "qualified NESC Scenario 17 package is bound to the Taoryx rigid-body load contract",
+        "DAVE-ML aerodynamics, propulsion, and scheduled inertia members are imported as separate components",
+        "staging and variable-mass evidence remains visible through the package acceptance schedule"
+      ],
+      "family_id": "reference_nesc_two_stage_rocket",
+      "kind": "taoryx.daveml-family-import/v1alpha1",
+      "model_id": "nasa-nesc-two-stage-rocket-scenario17",
+      "nonclaims": [
+        "independent full participating-simulation trajectory equivalence",
+        "perigee performance beyond the package's retained acceptance boundary"
+      ],
+      "package": {
+        "display_name": "NASA/NESC Scenario 17 Two-Stage Rocket",
+        "fidelity": "6dof",
+        "frames": {
+          "body": "FRD",
+          "navigation": "NED",
+          "quaternion_order": "wxyz"
+        },
+        "model_id": "nasa-nesc-two-stage-rocket-scenario17",
+        "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
+        "reference_geometry": {
+          "area_m2": 7.0,
+          "mean_aerodynamic_chord_m": 3.0,
+          "span_m": 3.0
+        },
+        "runtime_members": [
+          "runtime/binding.json",
+          "runtime/table-inventory.json"
+        ],
+        "schema_version": "0.3.0",
+        "sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+        "source_documents": [
+          {
+            "canonical_export_sha256": "1c7a3735946918d7acb31918d7e28f27f49d2c753f81ae224fbe2030d35849c4",
+            "canonical_ir_sha256": "e63210e7224ee2e1bb24db614ed6b537f51559b3d76c57a18bca0bd7882133e5",
+            "catalog_document_id": "nesc-all-models-two-stage-package-twostage-aero",
+            "catalog_normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-aero",
+            "catalog_sha256": "49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27",
+            "checkdata_count": 0,
+            "checkdata_failed": 0,
+            "checkdata_passed": 0,
+            "checkdata_unsupported": 0,
+            "document_id": "nasa-nesc-two-stage-rocket-scenario17.aerodynamics",
+            "numeric_diff_count": 0,
+            "package_member": "source/nesc/twostage_aero.normalized.dml",
+            "package_sha256": "d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6",
+            "role": "aerodynamics",
+            "structural_diff_count": 0
+          },
+          {
+            "canonical_export_sha256": "30623e9068588735ac8009fdf0c8cc250cc38d3312a6b2c63a2e8310b53a1d8f",
+            "canonical_ir_sha256": "a1e2c241c6961fbabab599beac6610c4f53a8ae0a4384b0328af4c3ef9e932de",
+            "catalog_document_id": "nesc-all-models-two-stage-package-twostage-prop",
+            "catalog_normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-prop",
+            "catalog_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
+            "checkdata_count": 0,
+            "checkdata_failed": 0,
+            "checkdata_passed": 0,
+            "checkdata_unsupported": 0,
+            "document_id": "nasa-nesc-two-stage-rocket-scenario17.propulsion",
+            "numeric_diff_count": 0,
+            "package_member": "source/nesc/twostage_prop.normalized.dml",
+            "package_sha256": "9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4",
+            "role": "propulsion",
+            "structural_diff_count": 0
+          },
+          {
+            "canonical_export_sha256": "b6727f9bcc0753bc0721f2daa0a1ae7a528c1cec41b966bb3351af96bd8ba5a3",
+            "canonical_ir_sha256": "111bf19a1c26f9457bfc6abfe6323ce1011efef641c7cfac453a4cebee4a03c6",
+            "catalog_document_id": "nesc-all-models-two-stage-package-twostage-inertia",
+            "catalog_normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-inertia",
+            "catalog_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
+            "checkdata_count": 0,
+            "checkdata_failed": 0,
+            "checkdata_passed": 0,
+            "checkdata_unsupported": 0,
+            "document_id": "nasa-nesc-two-stage-rocket-scenario17.mass_properties",
+            "numeric_diff_count": 0,
+            "package_member": "source/nesc/twostage_inertia.normalized.dml",
+            "package_sha256": "388d2192c337c380dd4ebe6d7678815b3b384733113803509eb1298d1a3192cd",
+            "role": "mass_properties",
+            "structural_diff_count": 0
+          }
+        ],
+        "validity_envelope": {
+          "alpha_max_rad": 0.3490658503988659,
+          "alpha_min_rad": -0.3490658503988659,
+          "altitude_max_m": 500000.0,
+          "altitude_min_m": 0.0,
+          "beta_max_rad": 0.3490658503988659,
+          "beta_min_rad": -0.3490658503988659,
+          "mach_max": 40.0,
+          "mach_min": 0.0
+        }
+      },
+      "replay": {
+        "force_moment_residual": 0.0,
+        "hold_evidence": "validation/acceptance.json#passed",
+        "runtime_load_contract": "taoryx_rigid_body_6dof",
+        "source_evaluation": "verified_pinned_package_acceptance",
+        "status": "runtime_replay_qualification_passed"
+      },
+      "roundtrip": {
+        "checkdata_count": 0,
+        "checkdata_failed": 0,
+        "checkdata_passed": 0,
+        "checkdata_status": "not_present",
+        "checkdata_unsupported": 0,
+        "document_count": 3,
+        "numeric_diff_count": 0,
+        "status": "verified",
+        "structural_diff_count": 0
+      },
+      "schema_version": 1,
+      "source_authority": "daveml"
+    }
+  ],
+  "schema_version": "taoryx.daveml-catalog-import/v1",
+  "source_document_count": 22,
+  "sources": [
+    {
+      "canonical_export_sha256": "d36d93e3e368fa54dc84c9a1d4ba06da6f3af74a237c0e2bb773379e253dbe38",
+      "canonical_ir_sha256": "74f000aa32b1577b428ad99db1d2506cfd8f0f697118ff0f93162285c73fb327",
+      "component_role": "environment",
+      "document_id": "daveml-example-atmos-76",
+      "model_id": "daveml-atmosphere-1976",
+      "normalized_path": "normalized/daveml-example-atmos-76/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "e1d92eda2e1276823be8c5987a777078c38de6f9ac1e661035a739ea03ecf7df",
+      "canonical_ir_sha256": "3e2ef29b93dfd43919e87466525150bbb49b797b6def38f099a26ab952b9fe7a",
+      "component_role": "aerodynamics",
+      "document_id": "daveml-example-f16-aero",
+      "model_id": "f16-s119",
+      "normalized_path": "normalized/daveml-example-f16-aero/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "6da3fad6192ebf2bd16170c379890df5db03e67a00e9bbdd1b58646803491e73",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "1216498bf6fb0d07565fd06ef47c14bec5a1e40a0fca90bb54371a789d7a5629",
+      "canonical_ir_sha256": "3887ee7a41a14deca10ed3552b90806c8ee325e1d0c7b14b3a57674182062d5c",
+      "component_role": "aerodynamics",
+      "document_id": "daveml-example-hl20-aero",
+      "model_id": "hl20-mod-k",
+      "normalized_path": "normalized/daveml-example-hl20-aero/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "8639b55c2525fdb6c0177b8e359de5d6eb984a3b4b35b4d1e5898d54ddc1f44e",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "4472b61e4632026eac491d19a2b53c00f8d3d5fa410a9c7d9e1f80b50af6af7a",
+      "canonical_ir_sha256": "96761223f027d4f70b5d388976d2eeb5f0f948ea2a9cc2ce8a17b2ad55c25f36",
+      "component_role": "aerodynamics",
+      "document_id": "daveml-example-simple-aero",
+      "model_id": "daveml-conformance-suite",
+      "normalized_path": "normalized/daveml-example-simple-aero/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "7a2148ee89ef4ceacb7663a9bc477e020c1aa58bcfc361f938d60d5d3f18a5d5",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "fff9a3e94fe1735b7158c2966790ba78c7a517c2f953a5f5efbfa301238374fd",
+      "canonical_ir_sha256": "b861e11ab715909b9d9b7ff7886c2473d05fd933c8bc457449ea7259083878b9",
+      "component_role": "auxiliary",
+      "document_id": "daveml-example-threed-ungridded",
+      "model_id": "daveml-conformance-suite",
+      "normalized_path": "normalized/daveml-example-threed-ungridded/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "1779544def313776a7fe380db05ef097ecd53ad6264aab1e8765f86d21342f79",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "6a06c84b1cb41dec4aa63e0d0018328d29943055279c186a47fd6fb6cda09769",
+      "canonical_ir_sha256": "2d40814f6d3d9259e66e63e112c7c2aa5f43c51a8174d163259fb954ac139eed",
+      "component_role": "auxiliary",
+      "document_id": "daveml-example-twod-table",
+      "model_id": "daveml-conformance-suite",
+      "normalized_path": "normalized/daveml-example-twod-table/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "18ef85500d2a4cd0d5081438f19cfb97234037956497ad6820352d532f9372db",
+      "canonical_ir_sha256": "3eab34f0cd627196f298a3d70cc5c434e711cfd02d604cb94f2cb1f512904756",
+      "component_role": "auxiliary",
+      "document_id": "daveml-example-twod-ungridded",
+      "model_id": "daveml-conformance-suite",
+      "normalized_path": "normalized/daveml-example-twod-ungridded/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "cefecdb68f5523188774fba9fe2cb8928341284a5cff898b8d7a9bb361fb630a",
+      "canonical_ir_sha256": "7c02f32dc4b1c63ca5a6845d7a649e5a36b43cc6f0d01a9d8ba4653ea77ad226",
+      "component_role": "aerodynamics",
+      "document_id": "nesc-all-models-brick-aero",
+      "model_id": "nesc-tumbling-brick",
+      "normalized_path": "normalized/nesc-all-models-brick-aero/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "a5883cfbde33969296a9578ac467e06e5920c5c1dc036d9ff654e111185af31d",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "1d8ba27861bfaa103541533e1dc754f8be1a6e590850b5ba3a1d765cdc5af5e6",
+      "canonical_ir_sha256": "314b1c02bfcfe75f0fd5fe05769b22941e8c9958fa117b2e2f5ecade7d4e14e9",
+      "component_role": "mass_properties",
+      "document_id": "nesc-all-models-brick-inertia",
+      "model_id": "nesc-tumbling-brick",
+      "normalized_path": "normalized/nesc-all-models-brick-inertia/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "eae595902d2f2a6cd96632536ecbd4e55681b66dc3f6bdc22dbe2882247fbfa1",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "a94bc41fb4e3821e20400f8d20ba25c7eff8d910cb826b9f40dd3dc40f584b36",
+      "canonical_ir_sha256": "a32c208d979613bb426a2fd00ac50f4552680ea4c10c17f37ad3158d136f0e3b",
+      "component_role": "aerodynamics",
+      "document_id": "nesc-all-models-cannonball-aero",
+      "model_id": "nesc-atmospheric-spheroid",
+      "normalized_path": "normalized/nesc-all-models-cannonball-aero/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "baabd6eec679445cd3d5aa5d51b39ade99064c515876dfe018fae78b3eb028e5",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "966435d28404ff28db742412792b196cd64d53b393a2e7330a574f5b352f2bc0",
+      "canonical_ir_sha256": "58c8954ccb8060b6f5fbdc57560228184aecaf0c1debe49b30cf96e295d5d312",
+      "component_role": "mass_properties",
+      "document_id": "nesc-all-models-cannonball-inertia",
+      "model_id": "nesc-atmospheric-spheroid",
+      "normalized_path": "normalized/nesc-all-models-cannonball-inertia/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "c00b9047ce9fd4a8ec4185c02be3fb755bb966680c501fe5d815bed1e2c61a9c",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "7bec4bc4bf0b076169a6dae6e804175c0b3db37c1404fb75d30b31ca7e0454b7",
+      "canonical_ir_sha256": "88de9bf61030921edea120ba5a6e3d7b6e2b12293ba4d74fbeb8eab03dd19782",
+      "component_role": "aerodynamics",
+      "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-aero",
+      "model_id": "f16-s119",
+      "normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-aero/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "82796577b989b5f3becb7d13430ff6c619b3ecd2e642a6427b743658fb177e51",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "cd2a3e190a3b776208f7faf055982af4737b8e14fac17043ae89a0febd98b1ed",
+      "canonical_ir_sha256": "b801512d89f940111e7156811fef387657850aee1d3873441293c8bc9f69a668",
+      "component_role": "control_mapping",
+      "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-control",
+      "model_id": "f16-s119",
+      "normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-control/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "bca7789dde61b741de69f697ce8799ee666214d0e1fa203973523774fc3a969b",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "169d243b3854c12de940b84fab00fb2b9588fc7eea77b0f5782dc3613dea54d2",
+      "canonical_ir_sha256": "50ed36520f1bbd0a1b91c8620d6030471b008cb659ada776c3f7456e71d850f3",
+      "component_role": "guidance_navigation_control",
+      "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-gnc",
+      "model_id": "f16-s119",
+      "normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-gnc/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "fc1dbff00cc14b0228973c43cfc17797fd48d2e36950ec039ff4e77d8577827c",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "18fa56e25478e421083fa41f3b4cd2bd32d3b509620735899e567f246e32b8ff",
+      "canonical_ir_sha256": "b53906a5ab7b091f5f2ead53440a5af1f8f8ab9ea2d365ae1ceeb7e80c8c8df2",
+      "component_role": "mass_properties",
+      "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-inertia",
+      "model_id": "f16-s119",
+      "normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-inertia/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "e11d4eba5b158d24db7034bd85682ad0b896dd2f3172f007ca3d6d6d4e693c4a",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "be5efa20eeea87a7ee0072297a4c91bcc92bc7fff4122530e862f45ef9465a13",
+      "canonical_ir_sha256": "5b7f427217c866b728edbf87719a2f62f30676a520122e1c97735fbbfb54215b",
+      "component_role": "propulsion",
+      "document_id": "nesc-all-models-f16-package-f16-s119-source-f16-prop",
+      "model_id": "f16-s119",
+      "normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-prop/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "8b02a4b82d749e6da3cb638b954dfe1c31865ac98f3fa2817e1d74570d50cccd",
+      "canonical_ir_sha256": "6af14205b92e56d4969c31d34360313be0573a6f64a1c5ab9ac840bdba0984b2",
+      "component_role": "mass_properties",
+      "document_id": "nesc-all-models-orbital-cylinder-inertia",
+      "model_id": "nesc-orbital-cylinder",
+      "normalized_path": "normalized/nesc-all-models-orbital-cylinder-inertia/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "9d38ac1e32ec5552d41e587bea7c12a9534ebf88abc951e9f0a3ec660c04818d",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "c589db5e0a43cc79b33be635e0a13f44d57cdbff9970c4476d2c22c659731ed4",
+      "canonical_ir_sha256": "577f97a4939135c15b7179a90cc6c84f1a88bad5877bdb67a207f2d2922d134a",
+      "component_role": "mass_properties",
+      "document_id": "nesc-all-models-orbital-sphere-inertia",
+      "model_id": "nesc-orbital-spheroid",
+      "normalized_path": "normalized/nesc-all-models-orbital-sphere-inertia/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "1fa33be0868c3623ff9089ba04d40653f89d4c89320c66a04a86ab6be9e56767",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "de0b8decfab36b72236af4ca39e10ab93fe3937f99e293a75bd5287fb6595e10",
+      "canonical_ir_sha256": "ff715644e3147c14f6a620749424e010c5492d0769722fb4a67e5289f8975c8e",
+      "component_role": "mass_properties",
+      "document_id": "nesc-all-models-orbital-station-inertia",
+      "model_id": "nesc-international-space-station",
+      "normalized_path": "normalized/nesc-all-models-orbital-station-inertia/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "bdf62927d5221f3e1a9270994ee97235c39827675f24200e43c9f40c55d04086",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "2f6a8073b8783c7477f0e19228b91aafc84d80333b519667060129b733ea0ddc",
+      "canonical_ir_sha256": "af41c2f33462c277a981fdded71d7d69a9fd081fcec4dc4ceaff0bad8de84c42",
+      "component_role": "aerodynamics",
+      "document_id": "nesc-all-models-two-stage-package-twostage-aero",
+      "model_id": "nesc-two-stage-rocket",
+      "normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-aero/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "63df22094c9b7e66e4fdad5e7e22bb65cc0dfcbe9ad9a7e38549bcfa61bc130f",
+      "canonical_ir_sha256": "aedcb8f97093d732a1f444a1018f53ccb793c0c6dadc57982048548165411e50",
+      "component_role": "mass_properties",
+      "document_id": "nesc-all-models-two-stage-package-twostage-inertia",
+      "model_id": "nesc-two-stage-rocket",
+      "normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-inertia/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
+      "structural_diff_count": 0
+    },
+    {
+      "canonical_export_sha256": "9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0",
+      "canonical_ir_sha256": "8152ce12a09c81b3a3687bc09c1084a31c74ccf7612684f88f6abd3218923850",
+      "component_role": "propulsion",
+      "document_id": "nesc-all-models-two-stage-package-twostage-prop",
+      "model_id": "nesc-two-stage-rocket",
+      "normalized_path": "normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml",
+      "numeric_diff_count": 0,
+      "source_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
+      "structural_diff_count": 0
+    }
+  ],
+  "status": "verified"
+}

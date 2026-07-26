@@ -1,0 +1,210 @@
+{
+  "claim_boundary": "source-bounded research integration; not flight qualification",
+  "families": [
+    {
+      "applicable_gates": {
+        "checkdata_declaration": true,
+        "checkdata_numeric_evaluation": true,
+        "graph_execution": true,
+        "layer_declarations": true,
+        "roundtrip": true,
+        "runtime_replay": true,
+        "source_hashes": true
+      },
+      "applicable_gates_status": "passed",
+      "checkdata": {
+        "computed": "verified_all_embedded_cases",
+        "count": 84,
+        "declared": "verified_all_embedded_cases",
+        "failed": 0,
+        "passed": 84,
+        "unsupported": 0
+      },
+      "derived_layers": {
+        "linearization": "pending_source_trim_jacobian",
+        "objectives": "pending",
+        "scenarios": "trim_hold_only",
+        "trim": "source_package_regression",
+        "tuning": "pending"
+      },
+      "family_id": "reference_f16_s119",
+      "graph_bindings": [
+        {
+          "document_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+          "function_count": 18,
+          "package_member": "models/aerodynamics.dml",
+          "role": "aerodynamics",
+          "status": "loaded_hash_verified",
+          "variable_count": 51
+        },
+        {
+          "document_sha256": "f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28",
+          "function_count": 0,
+          "package_member": "models/inertia.dml",
+          "role": "mass_properties",
+          "status": "loaded_hash_verified",
+          "variable_count": 12
+        },
+        {
+          "document_sha256": "1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4",
+          "function_count": 3,
+          "package_member": "models/propulsion.dml",
+          "role": "propulsion",
+          "status": "loaded_hash_verified",
+          "variable_count": 13
+        }
+      ],
+      "graph_failures": [],
+      "model_id": "f16-s119-reference",
+      "pending_derived_layers": {
+        "linearization": "pending_source_trim_jacobian",
+        "objectives": "pending",
+        "scenarios": "trim_hold_only",
+        "trim": "source_package_regression",
+        "tuning": "pending"
+      },
+      "source_import_declared": "verified"
+    },
+    {
+      "applicable_gates": {
+        "checkdata_declaration": true,
+        "checkdata_numeric_evaluation": true,
+        "graph_execution": true,
+        "layer_declarations": true,
+        "roundtrip": true,
+        "runtime_replay": true,
+        "source_hashes": true
+      },
+      "applicable_gates_status": "passed",
+      "checkdata": {
+        "computed": "verified_all_embedded_cases",
+        "count": 240,
+        "declared": "verified_all_embedded_cases",
+        "failed": 0,
+        "passed": 240,
+        "unsupported": 0
+      },
+      "derived_layers": {
+        "linearization": "pending_source_trim_jacobian",
+        "objectives": "pending",
+        "scenarios": "glide_trim_only",
+        "trim": "source_package_regression",
+        "tuning": "pending"
+      },
+      "family_id": "reference_hl20_mod_k",
+      "graph_bindings": [
+        {
+          "document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+          "function_count": 241,
+          "package_member": "models/aerodynamics.dml",
+          "role": "aerodynamics",
+          "status": "loaded_hash_verified",
+          "variable_count": 361
+        }
+      ],
+      "graph_failures": [],
+      "model_id": "hl20-mod-k-unpowered-6dof",
+      "pending_derived_layers": {
+        "linearization": "pending_source_trim_jacobian",
+        "objectives": "pending",
+        "scenarios": "glide_trim_only",
+        "trim": "source_package_regression",
+        "tuning": "pending"
+      },
+      "source_import_declared": "verified"
+    },
+    {
+      "applicable_gates": {
+        "checkdata_declaration": true,
+        "checkdata_numeric_evaluation": true,
+        "graph_execution": true,
+        "layer_declarations": true,
+        "roundtrip": true,
+        "runtime_replay": true,
+        "source_hashes": true
+      },
+      "applicable_gates_status": "passed",
+      "checkdata": {
+        "computed": "no_embedded_cases",
+        "count": 0,
+        "declared": "no_embedded_cases",
+        "failed": 0,
+        "passed": 0,
+        "unsupported": 0
+      },
+      "derived_layers": {
+        "linearization": "not_applicable_current_rocket_contract",
+        "objectives": "trajectory_checkpoint_only",
+        "scenarios": "scenario17_runtime_replay",
+        "trim": "scenario_regression_only",
+        "tuning": "not_applicable_current_open_loop_contract"
+      },
+      "family_id": "reference_nesc_two_stage_rocket",
+      "graph_bindings": [
+        {
+          "document_sha256": "d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6",
+          "function_count": 5,
+          "package_member": "source/nesc/twostage_aero.normalized.dml",
+          "role": "aerodynamics",
+          "status": "loaded_hash_verified",
+          "variable_count": 12
+        },
+        {
+          "document_sha256": "388d2192c337c380dd4ebe6d7678815b3b384733113803509eb1298d1a3192cd",
+          "function_count": 0,
+          "package_member": "source/nesc/twostage_inertia.normalized.dml",
+          "role": "mass_properties",
+          "status": "loaded_hash_verified",
+          "variable_count": 23
+        },
+        {
+          "document_sha256": "9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4",
+          "function_count": 0,
+          "package_member": "source/nesc/twostage_prop.normalized.dml",
+          "role": "propulsion",
+          "status": "loaded_hash_verified",
+          "variable_count": 14
+        }
+      ],
+      "graph_failures": [],
+      "model_id": "nasa-nesc-two-stage-rocket-scenario17",
+      "pending_derived_layers": {
+        "objectives": "trajectory_checkpoint_only",
+        "trim": "scenario_regression_only"
+      },
+      "source_import_declared": "verified"
+    }
+  ],
+  "pending_derived_layers": [
+    {
+      "family_id": "reference_f16_s119",
+      "layers": {
+        "linearization": "pending_source_trim_jacobian",
+        "objectives": "pending",
+        "scenarios": "trim_hold_only",
+        "trim": "source_package_regression",
+        "tuning": "pending"
+      }
+    },
+    {
+      "family_id": "reference_hl20_mod_k",
+      "layers": {
+        "linearization": "pending_source_trim_jacobian",
+        "objectives": "pending",
+        "scenarios": "glide_trim_only",
+        "trim": "source_package_regression",
+        "tuning": "pending"
+      }
+    },
+    {
+      "family_id": "reference_nesc_two_stage_rocket",
+      "layers": {
+        "objectives": "trajectory_checkpoint_only",
+        "trim": "scenario_regression_only"
+      }
+    }
+  ],
+  "readiness_registry": "verification/daveml_family_readiness.yaml",
+  "schema_version": "taoryx.daveml-family-readiness-report/v1",
+  "status": "verified"
+}

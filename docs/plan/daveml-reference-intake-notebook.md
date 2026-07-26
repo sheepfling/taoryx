@@ -1,6 +1,7 @@
 # DAVE-ML reference intake notebook
 
-**Scope:** F-16 S-119 and HL-20 Mod K source-grounded reference families.
+**Scope:** F-16 S-119, HL-20 Mod K, and the NESC two-stage rocket qualified
+reference packages, with the broader INBOX catalog tracked separately.
 
 **Claim boundary:** This notebook records source intake and integration work. A
 recorded source hash is not the same thing as an executable model in the
@@ -83,11 +84,11 @@ temporary extraction. The parser and compiler passed for both source files:
 | HL-20 Mod K exact aero | 361 | 8 | 241 | 169 | 24/24 | Parsed, compiled, and accepted |
 
 This was run with the corpus wheel and `defusedxml` in `/tmp`; neither was
-installed into the repository environment. The remaining gap was package/plant
-replay through the current repository’s runtime boundary, not source-byte
-availability or DAVE-ML static acceptance. That first replay tranche is now
-implemented by `taoryx.trajectory.replay_reference_package` and
-`tools/replay_daveml_reference.py`.
+installed into the repository environment. The package/plant replay gap is now
+closed for the three qualified packages. The active DAVE-ML gap is
+deterministic canonical IR/export and fresh-import comparison, implemented by
+`taoryx.trajectory.daveml_semantic` and
+`tools/canonical_daveml_roundtrip.py`.
 
 ## Standardized library shape
 
@@ -118,11 +119,10 @@ and observation schemas. The loader in
 provider-neutral `FamilyPackage`, so the families can be resolved by the same
 case contract as synthetic families.
 
-This projection is intentionally metadata-only at present. The source plant
-payload remains immutable and external to the checked-in runtime. The next
-implementation gate is still package replay through a native Taoryx DAVE-ML
-adapter; actuator, allocator, controller, reduction, and mission layers remain
-separately versioned overlays.
+This projection remains metadata-only for plant overlays. The source plant
+payload remains immutable and external to the checked-in runtime. Canonical IR
+and export are now a separate source round-trip layer; actuator, allocator,
+controller, reduction, and mission layers remain separately versioned overlays.
 
 The package-binding preflight is available through
 `taoryx.trajectory.inspect_reference_package`. With the local corpus present,
@@ -192,6 +192,26 @@ The replay verifies the package ledger and source identity, checks the pinned
 force/moment evidence where present, exercises the Taoryx rigid-body load
 contract, and requires the package trim/glide hold evidence to pass. It does
 not claim that Taoryx now contains a general-purpose DAVE-ML compiler.
+
+The same command now passes all three qualified packages from
+`INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/`. The F-16 and HL-20
+use trim/glide-hold evidence; the NESC rocket uses benchmark, convergence,
+schedule, and source-equivalence acceptance evidence. The adapter records that
+evidence family explicitly rather than forcing the rocket through a trim
+schema.
+
+For a built collection, replay the declared runtime artifact through the outer
+collection checksum and manifest boundary as well:
+
+```text
+python tools/replay_daveml_collection.py \
+  --json build/f16-s119-collection-replay.json \
+  build/f16-s119.txcollection
+```
+
+The report identifies the collection, family, runtime member, source identity,
+and Taoryx load-contract evidence. This closes the initial package-to-
+collection replay handoff without implying canonical DAVE-ML regeneration.
 
 ## Family-specific notes
 

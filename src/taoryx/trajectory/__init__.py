@@ -19,7 +19,6 @@ from .collections import (
     read_collection_archive,
     write_deterministic_collection,
 )
-from .daveml_replay import DAVEMLReplayReport, replay_reference_package
 from .contracts import (
     AuthorityMode,
     CapabilityStatus,
@@ -37,6 +36,28 @@ from .contracts import (
     ProvenanceRecord,
     ResolvedCase,
     ResolvedValue,
+)
+from .daveml_evaluator import DAVEMLCheckResult, DAVEMLGraph, evaluate_daveml_checkdata, load_daveml_graph
+from .daveml_import import (
+    DAVEMLFamilyGraphBinding,
+    DAVEMLFamilyImport,
+    DAVEMLImportDocument,
+    DAVEMLImportPackage,
+    DAVEMLReplayEvidence,
+    DAVEMLRoundtripEvidence,
+    DAVEMLTrimBinding,
+    build_daveml_family_import,
+    load_daveml_family_graph,
+    load_daveml_family_import,
+)
+from .daveml_replay import DAVEMLReplayReport, replay_reference_collection, replay_reference_package
+from .daveml_semantic import (
+    DAVEMLIR,
+    DAVEMLDiff,
+    build_daveml_ir,
+    compare_daveml_ir,
+    compare_daveml_numeric,
+    export_daveml_ir,
 )
 from .dual_launch import DualLaunchProblem, LaunchMode, render_dual_launch_problems
 from .fidelity_ladder import FidelityProblem, project_state, render_fidelity_problems, scale_problem_step
@@ -117,7 +138,28 @@ __all__ = [
     "inspect_reference_package",
     "write_deterministic_collection",
     "DAVEMLReplayReport",
+    "DAVEMLFamilyImport",
+    "DAVEMLFamilyGraphBinding",
+    "DAVEMLTrimBinding",
+    "DAVEMLImportDocument",
+    "DAVEMLImportPackage",
+    "DAVEMLReplayEvidence",
+    "DAVEMLRoundtripEvidence",
+    "build_daveml_family_import",
+    "load_daveml_family_import",
+    "load_daveml_family_graph",
+    "replay_reference_collection",
     "replay_reference_package",
+    "DAVEMLCheckResult",
+    "DAVEMLGraph",
+    "evaluate_daveml_checkdata",
+    "load_daveml_graph",
+    "DAVEMLDiff",
+    "DAVEMLIR",
+    "build_daveml_ir",
+    "compare_daveml_ir",
+    "compare_daveml_numeric",
+    "export_daveml_ir",
     "diff_resolved_cases",
     "FidelityProblem",
     "load_case_intent",

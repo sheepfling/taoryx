@@ -1,0 +1,62 @@
+schema_version: 1
+registry: taoryx-daveml-family-readiness/v1
+authority: docs/plan/daveml-roundtrip.md
+claim_boundary: source-bounded research integration; not flight qualification
+families:
+  - id: reference_f16_s119
+    manifest: families/reference_f16_s119/family.yaml
+    source_import: verified
+    checkdata: verified_all_embedded_cases
+    aerodynamic_binding: source_checked_semantic_reconstruction
+    propulsion_binding: source_checked_steady
+    inertia_binding: source_bound_fixed
+    atmosphere_binding: source_package_declared
+    trim: source_package_regression
+    linearization: pending_source_trim_jacobian
+    tuning: pending
+    objectives: pending
+    scenarios: trim_hold_only
+    runtime: runtime_replay_qualification_passed
+    next_gate: source_trim_linearization_and_controller_direction
+  - id: reference_hl20_mod_k
+    manifest: families/reference_hl20_mod_k/family.yaml
+    source_import: verified
+    checkdata: verified_all_embedded_cases
+    aerodynamic_binding: source_checked_exact_bytes
+    propulsion_binding: not_applicable_unpowered
+    inertia_binding: separate_fixed_binding
+    atmosphere_binding: source_package_declared
+    trim: source_package_regression
+    linearization: pending_source_trim_jacobian
+    tuning: pending
+    objectives: pending
+    scenarios: glide_trim_only
+    runtime: runtime_replay_qualification_passed
+    next_gate: source_trim_linearization_and_controller_direction
+  - id: reference_nesc_two_stage_rocket
+    manifest: families/reference_nesc_two_stage_rocket/family.yaml
+    source_import: verified
+    checkdata: no_embedded_cases
+    aerodynamic_binding: normalized_daveml_source_checked
+    propulsion_binding: source_checked_schedule
+    inertia_binding: source_checked_schedule
+    atmosphere_binding: package_declared
+    trim: scenario_regression_only
+    linearization: not_applicable_current_rocket_contract
+    tuning: not_applicable_current_open_loop_contract
+    objectives: trajectory_checkpoint_only
+    scenarios: scenario17_runtime_replay
+    runtime: runtime_replay_qualification_passed
+    next_gate: reduced_order_and_full_trajectory_comparison
+gates:
+  source_hashes: required
+  family_binding: required
+  trim: required_when_applicable
+  linearization: required_when_controller_or_reduction_declared
+  tuning: required_when_controller_declared
+  objectives: required_when_scenario_scored
+  runtime_replay: required
+  provenance: required
+  checkdata_numeric_evaluation: required_when_present
+  graph_execution: required
+  derived_layers: explicit_pending_or_verified

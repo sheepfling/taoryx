@@ -1,0 +1,119 @@
+{
+  "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+  "claims": [
+    "qualified F-16 source package is bound to the Taoryx rigid-body load contract",
+    "package DAVE-ML source members complete the canonical structural and numeric cycle"
+  ],
+  "family_id": "reference_f16_s119",
+  "kind": "taoryx.daveml-family-import/v1alpha1",
+  "model_id": "f16-s119-reference",
+  "nonclaims": [
+    "production F-16 training or operational fidelity",
+    "actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone"
+  ],
+  "package": {
+    "display_name": "F-16 S-119 Reference Aircraft",
+    "fidelity": "6dof",
+    "frames": {
+      "body": "FRD",
+      "navigation": "NED",
+      "quaternion_order": "wxyz"
+    },
+    "model_id": "f16-s119-reference",
+    "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/f16-s119/f16-s119-reference-v0.7.txair",
+    "reference_geometry": {
+      "area_m2": 27.870912,
+      "mean_aerodynamic_chord_m": 3.450336,
+      "span_m": 9.144
+    },
+    "runtime_members": [
+      "runtime/binding.json"
+    ],
+    "schema_version": "0.2.0",
+    "sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
+    "source_documents": [
+      {
+        "canonical_export_sha256": "78d9ca4209fdcbb58974edb82a7e029a020d0061a7785784c0b2b07848570e44",
+        "canonical_ir_sha256": "6b811d28caefb75bf6cb4c88c2abf707f97fe17b26b770bbf14cf7100cee7d4e",
+        "catalog_document_id": null,
+        "catalog_normalized_path": null,
+        "catalog_sha256": null,
+        "checkdata_count": 0,
+        "checkdata_failed": 0,
+        "checkdata_passed": 0,
+        "checkdata_unsupported": 0,
+        "document_id": "f16-s119-reference.aerodynamics",
+        "numeric_diff_count": 0,
+        "package_member": "models/aerodynamics.dml",
+        "package_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+        "role": "aerodynamics",
+        "structural_diff_count": 0
+      },
+      {
+        "canonical_export_sha256": "7c5b8cdf2129cf3ef3c024f44bcef81ab1413f93cdce4df91b9ebea6a266a8e3",
+        "canonical_ir_sha256": "3959781226842e5d1a05fa0d19a88a38587acd5c771c26674b28dddae729ada2",
+        "catalog_document_id": "nesc-all-models-f16-package-f16-s119-source-f16-prop",
+        "catalog_normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-prop",
+        "catalog_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
+        "checkdata_count": 54,
+        "checkdata_failed": 0,
+        "checkdata_passed": 54,
+        "checkdata_unsupported": 0,
+        "document_id": "f16-s119-reference.propulsion",
+        "numeric_diff_count": 0,
+        "package_member": "models/propulsion.dml",
+        "package_sha256": "1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4",
+        "role": "propulsion",
+        "structural_diff_count": 0
+      },
+      {
+        "canonical_export_sha256": "a53c37e7e8e9b23f8d3a428e7a7cf3582221072a1db997755aab0964e4618ccb",
+        "canonical_ir_sha256": "65ac7f5b6aa3328bcee6f0e41abc133f781c5dc26a6ea9703b7044e785cb6af2",
+        "catalog_document_id": "nesc-all-models-f16-package-f16-s119-source-f16-inertia",
+        "catalog_normalized_path": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-inertia",
+        "catalog_sha256": "e11d4eba5b158d24db7034bd85682ad0b896dd2f3172f007ca3d6d6d4e693c4a",
+        "checkdata_count": 30,
+        "checkdata_failed": 0,
+        "checkdata_passed": 30,
+        "checkdata_unsupported": 0,
+        "document_id": "f16-s119-reference.mass_properties",
+        "numeric_diff_count": 0,
+        "package_member": "models/inertia.dml",
+        "package_sha256": "f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28",
+        "role": "mass_properties",
+        "structural_diff_count": 0
+      }
+    ],
+    "validity_envelope": {
+      "alpha_max_rad": 0.7853981633974483,
+      "alpha_min_rad": -0.17453292519943295,
+      "altitude_max_m": 15240.0,
+      "altitude_min_m": 0.0,
+      "beta_max_rad": 0.5235987755982988,
+      "beta_min_rad": -0.5235987755982988,
+      "mach_max": 1.0,
+      "mach_min": 0.0
+    }
+  },
+  "replay": {
+    "force_moment_residual": 0.0,
+    "hold_evidence": "validation/acceptance.json#reference_trim_hold",
+    "runtime_load_contract": "taoryx_rigid_body_6dof",
+    "source_evaluation": "verified_pinned_package_acceptance",
+    "status": "runtime_replay_qualification_passed"
+  },
+  "roundtrip": {
+    "checkdata_count": 84,
+    "checkdata_failed": 0,
+    "checkdata_passed": 84,
+    "checkdata_status": "verified",
+    "checkdata_unsupported": 0,
+    "document_count": 3,
+    "numeric_diff_count": 0,
+    "status": "verified",
+    "structural_diff_count": 0
+  },
+  "schema_version": 1,
+  "source_authority": "daveml"
+}
