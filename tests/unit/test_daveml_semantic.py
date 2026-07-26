@@ -61,6 +61,24 @@ def test_semantic_ir_preserves_vector_initial_values_as_typed_metadata() -> None
     ]
 
 
+def test_semantic_ir_resolves_typed_table_references() -> None:
+    ir = build_daveml_ir(
+        b"""
+        <DAVEfunc>
+          <griddedTableDef gtID="table"/>
+          <function>
+            <functionDefn><griddedTableRef gtID="table"/></functionDefn>
+          </function>
+        </DAVEfunc>
+        """,
+        document_id="references",
+    )
+    reference = ir.semantic["functions"][0]["references"][0]
+    assert reference["tag"] == "griddedTableRef"
+    assert reference["status"] == "resolved"
+    assert reference["target_path"] == "/0/0"
+
+
 @pytest.mark.parametrize(
     "package_member",
     (

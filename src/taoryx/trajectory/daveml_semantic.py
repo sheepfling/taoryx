@@ -176,6 +176,59 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
     result["units"] = []
     result["vectors"] = []
 
+    identifiers: dict[tuple[str, str], list[str]] = {}
+
+    def index(node: dict[str, object]) -> None:
+        tag = str(node.get("tag", ""))
+        attributes = node.get("attributes", {})
+        if not tag.endswith("Ref") and isinstance(attributes, dict):
+            for attribute in ("varID", "gtID", "utID", "name"):
+                value = attributes.get(attribute)
+                if value:
+                    identifiers.setdefault((attribute, str(value)), []).append(str(node.get("source_path", "")))
+        children = node.get("children", [])
+        if isinstance(children, list):
+            for child in children:
+                if isinstance(child, dict):
+                    index(child)
+
+    index(root)
+
+    def descendants(node: dict[str, object]) -> list[dict[str, object]]:
+        found: list[dict[str, object]] = []
+        children = node.get("children", [])
+        if not isinstance(children, list):
+            return found
+        for child in children:
+            if isinstance(child, dict):
+                found.append(child)
+                found.extend(descendants(child))
+        return found
+
+    def references(node: dict[str, object]) -> list[dict[str, object]]:
+        resolved: list[dict[str, object]] = []
+        for child in descendants(node):
+            tag = str(child.get("tag", ""))
+            attributes = child.get("attributes", {})
+            if not tag.endswith("Ref") or not isinstance(attributes, dict):
+                continue
+            key_attribute = next((name for name in ("varID", "gtID", "utID", "name") if attributes.get(name)), None)
+            if key_attribute is None:
+                resolved.append({"source_path": child.get("source_path"), "tag": tag, "status": "unresolved"})
+                continue
+            key = (key_attribute, str(attributes[key_attribute]))
+            targets = identifiers.get(key, [])
+            resolved.append(
+                {
+                    "source_path": child.get("source_path"),
+                    "tag": tag,
+                    "identifier": key[1],
+                    "target_path": targets[0] if len(targets) == 1 else None,
+                    "status": "resolved" if len(targets) == 1 else "ambiguous" if targets else "unresolved",
+                }
+            )
+        return resolved
+
     def visit(node: dict[str, object]) -> None:
         tag = str(node.get("tag", ""))
         raw_attributes = node.get("attributes", {})
@@ -184,15 +237,16 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
         children = [child for child in raw_children if isinstance(child, dict)] if isinstance(raw_children, list) else []
         for name, tags in groups.items():
             if tag in tags:
-                result[name].append(
-                    {
-                        "source_path": node.get("source_path"),
-                        "tag": tag,
-                        "attributes": attributes,
-                        "text": node.get("text"),
-                        "child_tags": [str(child.get("tag", "")) for child in children],
-                    }
-                )
+                entry = {
+                    "source_path": node.get("source_path"),
+                    "tag": tag,
+                    "attributes": attributes,
+                    "text": node.get("text"),
+                    "child_tags": [str(child.get("tag", "")) for child in children],
+                }
+                if tag == "function":
+                    entry["references"] = references(node)
+                result[name].append(entry)
                 break
         unit_name = attributes.get("units", attributes.get("unit"))
         identifier = attributes.get("varID", attributes.get("name"))
