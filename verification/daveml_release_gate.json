@@ -1,5 +1,6 @@
 {
   "artifacts": {
+    "build/daveml-release-catalog/canonical/export-manifest.json": "47718266d48fb17ec537d38844f7df8b3bba4769d8e2ebdc369727ec06b6495f",
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
     "verification/daveml_catalog_roundtrip.json": "c202f22f46d96a90d36fe91bcac93b7420c8e639df4349074cd31dfb0d2da372",
     "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",

@@ -7,10 +7,10 @@
     "verification/daveml_family_readiness.json": "d98a030cdb237cf21433254277a2baa52aa713f488af190492d9964f10931948",
     "verification/daveml_official_checkdata.json": "0935c40000b396ec68b90811935726466f99879aab1a35d5b375eb1bd0417a2b",
     "verification/daveml_official_conformance.json": "deaa6f110a305d0ad555434f4e4c04aa2773d73847324b3e605f816c150de169",
-    "verification/daveml_release_gate.json": "b7c7288ff1387f26ff0e5c69a88cba1ac3f7977756cb7b11226aadf1370e574c"
+    "verification/daveml_release_gate.json": "59a2234e0daa7ab4dee2e7091878a8878cc71192d81629273c8854158ebae85a"
   },
   "readiness_family_count": 3,
-  "release_artifact_count": 17,
+  "release_artifact_count": 18,
   "release_stage_count": 19,
   "requirements": [
     {

@@ -11,5 +11,5 @@ def test_daveml_release_gate_is_verified_and_hashes_artifacts() -> None:
     assert report["status"] == "verified"
     assert len(report["runs"]) == 19
     assert all(item["returncode"] == 0 for item in report["runs"])
-    assert len(report["artifacts"]) == 17
+    assert len(report["artifacts"]) == 18
     assert all(len(value) == 64 for value in report["artifacts"].values())
