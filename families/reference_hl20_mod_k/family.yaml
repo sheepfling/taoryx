@@ -114,7 +114,7 @@ layers:
   allocation: {version: pending, evidence: taoryx_reference_design}
   controllers: {version: pending, evidence: taoryx_reference_design}
   reductions: {version: pending, evidence: derived_from_parent_plant}
-  trim: {version: source-package-regression-v1, evidence: source_package_regression}
+  trim: {version: source-channel-trim-v1, evidence: source_channel_trim_verified}
   linearization: {version: pending, evidence: pending_source_trim_jacobian}
   tuning: {version: pending, evidence: pending}
   objectives: {version: pending, evidence: pending}

@@ -6,7 +6,7 @@
     "verification/daveml_f16_scenario_evidence.json": "628ad40114b1c25b4082d6ab9733971c69fde03a182b0dcf437e21ebdce7188a",
     "verification/daveml_f16_trim_evidence.json": "bd131b577c08ec4c3e7640af5ddefce1f7b24908ad1704eeb7f13029a73b8322",
     "verification/daveml_f16_tuning_evidence.json": "ae3f51a44d5ea26264f10122f3bda5a0d1cc8d64d029af89c512673a153dfc00",
-    "verification/daveml_family_readiness.json": "a88057559235b4ec32d3de93ff862edcf75fe9244578838c24cb1ec234b0b9bb",
+    "verification/daveml_family_readiness.json": "8edc40cbd00fc3d984e881d1764fe0d1eeff2aa632a8f55f4159a7fa5f7eb74b",
     "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f"
   },
   "claim_boundary": "bounded source integration release gate; not flight qualification",
@@ -22,7 +22,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "ied\",\n          \"variable_count\": 14\n        }\n      ],\n      \"graph_failures\": [],\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"pending_derived_layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      },\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"layers\": {\n        \"linearization\": \"pending_source_trim_jacobian\",\n        \"objectives\": \"pending\",\n        \"scenarios\": \"glide_trim_only\",\n        \"trim\": \"source_package_regression\",\n        \"tuning\": \"pending\"\n      }\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "sion\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 14\n        }\n      ],\n      \"graph_failures\": [],\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"pending_derived_layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      },\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"layers\": {\n        \"linearization\": \"pending_source_trim_jacobian\",\n        \"objectives\": \"pending\",\n        \"scenarios\": \"glide_trim_only\",\n        \"tuning\": \"pending\"\n      }\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [

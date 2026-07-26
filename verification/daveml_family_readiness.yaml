@@ -26,7 +26,7 @@ families:
     propulsion_binding: not_applicable_unpowered
     inertia_binding: separate_fixed_binding
     atmosphere_binding: source_package_declared
-    trim: source_package_regression
+    trim: source_channel_trim_verified
     linearization: pending_source_trim_jacobian
     tuning: pending
     objectives: pending
