@@ -512,6 +512,11 @@ items are complete and reproducible:
   declared reference geometry and conversion factors. The focused probe
   verifies the channel arithmetic without applying hidden mass or gravity
   assumptions; HL-20 wind-axis/lifting-body mapping remains separate work.
+- `tools/validate_daveml_trim.py` now emits the reproducible
+  `verification/daveml_f16_trim_evidence.json` artifact. It certifies the
+  source-backed F-16 pitch-channel elevator trim and a local residual Jacobian
+  with package/document hashes; it is intentionally not yet a full dynamics
+  linearization or six-degree-of-freedom equilibrium.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.
