@@ -125,7 +125,10 @@ from canonical DAVE-ML regeneration and semantic equivalence.
 Canonical package and catalog cycles now re-import each generated document via
 `tools/reimport_daveml_ir.py` in a separate Python process. Reports mark this
 as `fresh_process_reimport: verified`; structural and numeric comparisons are
-made against that fresh-process result.
+made against that fresh-process result. They also invoke
+`tools/evaluate_daveml_checkdata.py` in a separate process and record
+`fresh_process_checkdata: verified` for each source whose checkData is
+applicable; explicit quarantines remain non-failing dispositions.
 
 ## Ingestion And Round-Trip Plan
 

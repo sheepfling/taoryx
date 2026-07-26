@@ -58,6 +58,7 @@ def main() -> int:
         numeric_diffs = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
         vector_check_results = evaluate_daveml_vector_checkdata(payload)
+        fresh_checkdata = _fresh_process_checkdata(payload, output, stem)
         (output / "canonical" / f"{stem}.ir.json").write_bytes(ir.canonical_json())
         (output / "exported" / f"{stem}.dml").write_bytes(exported)
         for diff in diffs:
@@ -75,6 +76,7 @@ def main() -> int:
                 "structural_diff_count": len(diffs),
                 "numeric_diff_count": len(numeric_diffs),
                 "fresh_process_reimport": "verified",
+                "fresh_process_checkdata": fresh_checkdata,
                 "checkdata": _checkdata_summary(check_results, vector_check_results),
             }
         )
@@ -113,6 +115,7 @@ def _write_export_manifest(output: Path, documents: list[dict[str, object]]) -> 
                 "exported_sha256": document.get("exported_sha256"),
                 "opaque_paths": document.get("opaque_paths", []),
                 "fresh_process_reimport": document.get("fresh_process_reimport", "not_recorded"),
+                "fresh_process_checkdata": document.get("fresh_process_checkdata", "not_recorded"),
             }
         )
     manifest = {
@@ -154,6 +157,38 @@ def _fresh_process_ir(exported: bytes, document_id: str, output: Path, stem: str
             text=True,
         )
         return build_daveml_ir(ir_path.read_bytes(), document_id=document_id)
+    ####
+
+
+def _fresh_process_checkdata(payload: bytes, output: Path, stem: str) -> str:
+    """Evaluate one document's checkData through a separate Python process."""
+
+    with tempfile.TemporaryDirectory(prefix="daveml-checkdata-", dir=output) as directory:
+        directory_path = Path(directory)
+        payload_path = directory_path / f"{stem}.dml"
+        report_path = directory_path / "checkdata.json"
+        payload_path.write_bytes(payload)
+        environment = dict(os.environ)
+        root = Path(__file__).resolve().parents[1]
+        environment["PYTHONPATH"] = str(root / "src")
+        subprocess.run(
+            [
+                sys.executable,
+                str(root / "tools" / "evaluate_daveml_checkdata.py"),
+                str(directory_path),
+                "--output",
+                str(report_path),
+            ],
+            cwd=root,
+            env=environment,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        if report.get("status") == "failed":
+            raise ValueError(f"fresh-process checkData evaluation failed for {stem}")
+        return "verified" if report.get("status") in {"verified", "verified_with_quarantine"} else "not_verified"
     ####
 
 
@@ -265,6 +300,7 @@ def _run_package(package: Path, output: Path) -> int:
         numeric_diffs = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
         vector_check_results = evaluate_daveml_vector_checkdata(payload)
+        fresh_checkdata = _fresh_process_checkdata(payload, output, stem)
         (output / "canonical" / f"{stem}.ir.json").write_bytes(ir.canonical_json())
         (output / "exported" / f"{stem}.dml").write_bytes(exported)
         structural.extend({"document_id": document_id, **diff.to_dict()} for diff in structural_diffs)
@@ -280,6 +316,7 @@ def _run_package(package: Path, output: Path) -> int:
             "structural_diff_count": len(structural_diffs),
             "numeric_diff_count": len(numeric_diffs),
             "fresh_process_reimport": "verified",
+            "fresh_process_checkdata": fresh_checkdata,
             "checkdata": _checkdata_summary(check_results, vector_check_results),
         })
     manifest = _json_member(files, "manifest.json")
@@ -321,11 +358,12 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
         payload = source.read_bytes()
         ir = build_daveml_ir(payload, document_id=source.relative_to(catalog_root).as_posix())
         exported = export_daveml_ir(ir)
-        fresh = build_daveml_ir(exported, document_id=ir.document_id)
+        fresh = _fresh_process_ir(exported, ir.document_id, output, target.name)
         structural = compare_daveml_ir(ir, fresh)
         numeric = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
         vector_check_results = evaluate_daveml_vector_checkdata(payload)
+        fresh_checkdata = _fresh_process_checkdata(payload, output, target.name)
         checkdata = _checkdata_summary(check_results, vector_check_results)
         (target.parent / f"{target.name}.ir.json").write_bytes(ir.canonical_json())
         (target.parent / f"{target.name}.dml").write_bytes(exported)
@@ -342,6 +380,7 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
                 "checkdata_status": checkdata["status"],
                 "checkdata_failed": checkdata["failed"],
                 "fresh_process_reimport": "verified",
+                "fresh_process_checkdata": fresh_checkdata,
                 "ir_sha256": _sha256(ir.canonical_json()),
             }
         )
