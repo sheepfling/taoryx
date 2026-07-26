@@ -1,0 +1,357 @@
+{
+  "claim_boundary": "bounded surrogate binding and authored DAVE-ML channel smoke; not full 6-DOF qualification",
+  "family_id": "a320_openap_jsbsim_pseudo6dof",
+  "model_id": "a320-openap-jsbsim-pseudo6dof",
+  "provenance": {
+    "authorities": {
+      "actuators": "taoryx-policy",
+      "aerodynamics.alpha_mapping": "jsbsim-1.3.1-a320",
+      "aerodynamics.drag": "openap-2.6.0",
+      "aerodynamics.normal_force_target": "openap-2.6.0",
+      "aerodynamics.side_force": "jsbsim-1.3.1-a320",
+      "mass.cg_and_inertia": "jsbsim-rescaled-estimate",
+      "mass.scalar_schedule": "openap-2.6.0",
+      "moments.pitch": "jsbsim-1.3.1-a320",
+      "moments.roll": "jsbsim-1.3.1-a320",
+      "moments.yaw": "jsbsim-1.3.1-a320",
+      "propulsion.fuel_flow": "openap-2.6.0",
+      "propulsion.thrust": "openap-2.6.0",
+      "stability_augmentation": "taoryx-controller"
+    },
+    "corpus_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+    "disabled_contributions": [
+      "jsbsim.aerodynamic_drag",
+      "jsbsim.propulsion_thrust",
+      "jsbsim.fuel_flow"
+    ],
+    "inertia_policy": "linear_mass_rescale_from_jsbsim_empty_mass",
+    "manufacturer_validated": false,
+    "model_id": "a320-openap-jsbsim-pseudo6dof",
+    "openap_package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+    "qualification_class": "surrogate_composite",
+    "source_exact": false
+  },
+  "qualification_class": "surrogate_composite",
+  "result": {
+    "authority_map": {
+      "aerodynamics.drag": "openap-2.6.0",
+      "aerodynamics.normal_force_target": "openap-2.6.0",
+      "aerodynamics.side_force": "jsbsim-1.3.1-a320",
+      "inertia_policy": "linear_mass_rescale_from_jsbsim_empty_mass",
+      "mass.cg_and_inertia": "jsbsim-rescaled-estimate",
+      "mass.scalar_schedule": "openap-2.6.0",
+      "moments.pitch": "jsbsim-1.3.1-a320",
+      "moments.roll": "jsbsim-1.3.1-a320",
+      "moments.yaw": "jsbsim-1.3.1-a320",
+      "propulsion.fuel_flow": "openap-2.6.0",
+      "propulsion.thrust": "openap-2.6.0"
+    },
+    "disabled_contributions": [
+      "jsbsim.aerodynamic_drag",
+      "jsbsim.propulsion_thrust",
+      "jsbsim.fuel_flow"
+    ],
+    "package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+    "performance": {
+      "density_kg_m3": 0.363817166677243,
+      "drag_coefficient": 0.0274576458980491,
+      "drag_n": 32807.7165860874,
+      "dynamic_pressure_pa": 9635.87193700462,
+      "feasible": true,
+      "fuel_flow_at_throttle_kg_s": 0.692155083089858,
+      "fuel_flow_kg_s": 0.696755122612149,
+      "idle_thrust_n": 2844.88376745703,
+      "input": {
+        "altitude_m": 11000.0,
+        "flap_angle_deg": 0.0,
+        "landing_gear_extended": false,
+        "mach": 0.78,
+        "mass_kg": 60000.0,
+        "throttle_ratio": null,
+        "thrust_mode": "cruise",
+        "vertical_speed_mps": 0.0
+      },
+      "lift_coefficient": 0.492446688460403,
+      "lift_n": 588399.0,
+      "maximum_thrust_n": 44606.053202177,
+      "package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+      "qualification_class": "derived_exact",
+      "required_throttle_ratio": 0.7174806937690654,
+      "required_thrust_n": 32807.7165860874,
+      "thrust_margin_n": 11798.336616089597,
+      "thrust_n": 32807.7165860874,
+      "true_airspeed_mps": 230.154204937076
+    },
+    "pitch_moment_coefficient": -0.105,
+    "pitch_moment_nm": -532022.6158320227,
+    "qualification_class": "surrogate_composite",
+    "roll_moment_coefficient": 0.0014785714285714285,
+    "roll_moment_nm": 59136.98194825858,
+    "side_force_coefficient": -0.028571428571428574,
+    "side_force_n": -33685.164723711896,
+    "yaw_moment_coefficient": -0.001,
+    "yaw_moment_nm": -39996.02643843576
+  },
+  "rotational_derivatives": {
+    "pitch_rate_rad_s": -0.1180674347970135,
+    "roll_rate_rad_s": 0.03881863006538279,
+    "yaw_rate_rad_s": -0.006880875246215389
+  },
+  "roundtrip": {
+    "claim_boundary": "Taoryx-authored surrogate-composite DAVE-ML; not upstream source-preserving or manufacturer-authoritative",
+    "collection": "a320-openap-jsbsim-pseudo6dof",
+    "documents": [
+      {
+        "canonical_export_sha256": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+        "checkdata": {
+          "count": 1,
+          "passed": 1,
+          "results": [
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": 32807.7165860874,
+              "case_id": "reference-cruise-drag",
+              "expected": 32807.7165860874,
+              "output_id": "openap_drag_n",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            }
+          ],
+          "status": "verified"
+        },
+        "document_id": "aerodynamics-performance-openap.dml",
+        "fresh_process_reimport": "verified",
+        "numeric_diff_count": 0,
+        "source_sha256": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+        "structural_diff_count": 0
+      },
+      {
+        "canonical_export_sha256": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+        "checkdata": {
+          "count": 4,
+          "passed": 4,
+          "results": [
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": 0.0,
+              "case_id": "reference-side-force",
+              "expected": 0.0,
+              "output_id": "side_force_coefficient",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            },
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": 0.002,
+              "case_id": "reference-roll-pulse",
+              "expected": 0.002,
+              "output_id": "roll_moment_coefficient",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            },
+            {
+              "absolute_error": 6.938893903907228e-18,
+              "absolute_tolerance": 1e-12,
+              "actual": 0.05500000000000001,
+              "case_id": "reference-pitch-pulse",
+              "expected": 0.055,
+              "output_id": "pitch_moment_coefficient",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 1.261617073437678e-16,
+              "status": "passed"
+            },
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": -0.005,
+              "case_id": "reference-yaw-pulse",
+              "expected": -0.005,
+              "output_id": "yaw_moment_coefficient",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            }
+          ],
+          "status": "verified"
+        },
+        "document_id": "aerodynamics-rotational-jsbsim.dml",
+        "fresh_process_reimport": "verified",
+        "numeric_diff_count": 0,
+        "source_sha256": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+        "structural_diff_count": 0
+      },
+      {
+        "canonical_export_sha256": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+        "checkdata": {
+          "count": 1,
+          "passed": 1,
+          "results": [
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": 0.5,
+              "case_id": "identity-control",
+              "expected": 0.5,
+              "output_id": "source_control",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            }
+          ],
+          "status": "verified"
+        },
+        "document_id": "control-mapping.dml",
+        "fresh_process_reimport": "verified",
+        "numeric_diff_count": 0,
+        "source_sha256": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+        "structural_diff_count": 0
+      },
+      {
+        "canonical_export_sha256": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+        "checkdata": {
+          "count": 4,
+          "passed": 4,
+          "results": [
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": 60000.0,
+              "case_id": "mass",
+              "expected": 60000.0,
+              "output_id": "mass_kg",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            },
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": 1523417.5407182917,
+              "case_id": "inertia-xx",
+              "expected": 1523417.5407182917,
+              "output_id": "inertia_xx_kg_m2",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            },
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": 4506091.0889331885,
+              "case_id": "inertia-yy",
+              "expected": 4506091.0889331885,
+              "output_id": "inertia_yy_kg_m2",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            },
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": 5812636.475342919,
+              "case_id": "inertia-zz",
+              "expected": 5812636.475342919,
+              "output_id": "inertia_zz_kg_m2",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            }
+          ],
+          "status": "verified"
+        },
+        "document_id": "mass-properties-estimated.dml",
+        "fresh_process_reimport": "verified",
+        "numeric_diff_count": 0,
+        "source_sha256": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+        "structural_diff_count": 0
+      },
+      {
+        "canonical_export_sha256": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+        "checkdata": {
+          "count": 1,
+          "passed": 1,
+          "results": [
+            {
+              "absolute_error": 0.0,
+              "absolute_tolerance": 1e-12,
+              "actual": 32807.7165860874,
+              "case_id": "reference-cruise-thrust",
+              "expected": 32807.7165860874,
+              "output_id": "openap_thrust_n",
+              "reason": null,
+              "reason_code": null,
+              "relative_error": 0.0,
+              "status": "passed"
+            }
+          ],
+          "status": "verified"
+        },
+        "document_id": "propulsion-openap.dml",
+        "fresh_process_reimport": "verified",
+        "numeric_diff_count": 0,
+        "source_sha256": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+        "structural_diff_count": 0
+      }
+    ],
+    "numeric_diff": [],
+    "provenance": {
+      "documents": {
+        "aerodynamics-performance-openap.dml": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+        "aerodynamics-rotational-jsbsim.dml": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+        "control-mapping.dml": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+        "mass-properties-estimated.dml": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+        "propulsion-openap.dml": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb"
+      },
+      "source": {
+        "authorities": {
+          "actuators": "taoryx-policy",
+          "aerodynamics.alpha_mapping": "jsbsim-1.3.1-a320",
+          "aerodynamics.drag": "openap-2.6.0",
+          "aerodynamics.normal_force_target": "openap-2.6.0",
+          "aerodynamics.side_force": "jsbsim-1.3.1-a320",
+          "mass.cg_and_inertia": "jsbsim-rescaled-estimate",
+          "mass.scalar_schedule": "openap-2.6.0",
+          "moments.pitch": "jsbsim-1.3.1-a320",
+          "moments.roll": "jsbsim-1.3.1-a320",
+          "moments.yaw": "jsbsim-1.3.1-a320",
+          "propulsion.fuel_flow": "openap-2.6.0",
+          "propulsion.thrust": "openap-2.6.0",
+          "stability_augmentation": "taoryx-controller"
+        },
+        "corpus_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+        "disabled_contributions": [
+          "jsbsim.aerodynamic_drag",
+          "jsbsim.propulsion_thrust",
+          "jsbsim.fuel_flow"
+        ],
+        "inertia_policy": "linear_mass_rescale_from_jsbsim_empty_mass",
+        "manufacturer_validated": false,
+        "model_id": "a320-openap-jsbsim-pseudo6dof",
+        "openap_package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+        "qualification_class": "surrogate_composite",
+        "source_exact": false
+      }
+    },
+    "schema_version": "taoryx.a320-pseudo6dof-daveml-roundtrip/v1",
+    "status": "verified",
+    "structural_diff": []
+  },
+  "schema_version": "taoryx.daveml-cli-composite-smoke/v1",
+  "status": "verified"
+}
