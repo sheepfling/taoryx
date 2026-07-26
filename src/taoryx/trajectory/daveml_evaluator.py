@@ -260,10 +260,16 @@ def _function_index(root: ET.Element) -> dict[str, dict[str, object]]:
             if reference is not None:
                 table_id = str(reference.attrib.get("gtID", reference.attrib.get("utID", ""))).strip()
                 table = tables.get(table_id)
+                reference_kind = _local(reference.tag)
+            else:
+                reference_kind = None
+        else:
+            reference_kind = None
         if table is None:
             continue
         functions[dependent[0]] = {
             "kind": "ungridded" if _local(table.tag) == "ungriddedTableDef" else "grid",
+            "reference_kind": reference_kind,
             "independent": independent,
             "table": table,
             "axes": _table_axes(table, breakpoints),
@@ -335,6 +341,8 @@ def _evaluate_function(function: dict[str, object], resolve: Callable[[str], flo
     if not isinstance(table, ET.Element):
         raise ValueError("table definition is unavailable")
     if function.get("kind") == "ungridded":
+        if function.get("reference_kind") == "griddedTableRef":
+            raise ValueError("griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved")
         return _ungridded(query, table)
     axes = function.get("axes", [])
     if not isinstance(axes, list):

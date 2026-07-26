@@ -148,8 +148,9 @@ def test_ungridded_official_table_mismatch_is_explicitly_reported() -> None:
     source = Path("resources/aerospace/daveml/official-conformance-v1/twoD_ungridded.dml")
     results = evaluate_daveml_checkdata(source.read_bytes())
     assert results
-    assert [result.status for result in results] == ["passed", "failed", "failed", "failed"]
-    assert all(result.actual is not None for result in results)
+    assert [result.status for result in results] == ["unsupported"] * 4
+    assert all(result.actual is None for result in results)
+    assert all("griddedTableRef" in (result.reason or "") for result in results)
     assert results[0].absolute_tolerance == 0.0005
 
 

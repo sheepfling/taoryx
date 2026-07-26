@@ -5203,54 +5203,54 @@
       "check_count": 4,
       "checks": [
         {
-          "absolute_error": 3.333333333326027e-05,
+          "absolute_error": null,
           "absolute_tolerance": 0.0005,
-          "actual": 0.02333333333333326,
+          "actual": null,
           "case_id": "case 1",
           "expected": 0.0233,
           "output_id": "CLBASIC",
-          "reason": null,
-          "relative_error": 0.0014306151645176082,
-          "status": "passed"
+          "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
+          "relative_error": null,
+          "status": "unsupported"
         },
         {
-          "absolute_error": 0.012500000000000039,
+          "absolute_error": null,
           "absolute_tolerance": 0.0001,
-          "actual": 0.24749999999999997,
+          "actual": null,
           "case_id": "case 2",
           "expected": 0.26,
           "output_id": "CLBASIC",
-          "reason": null,
-          "relative_error": 0.048076923076923225,
-          "status": "failed"
+          "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
+          "relative_error": null,
+          "status": "unsupported"
         },
         {
-          "absolute_error": 0.0025831578947367873,
+          "absolute_error": null,
           "absolute_tolerance": 0.0001,
-          "actual": 0.3796168421052632,
+          "actual": null,
           "case_id": "case 3",
           "expected": 0.3822,
           "output_id": "CLBASIC",
-          "reason": null,
-          "relative_error": 0.006758654878955488,
-          "status": "failed"
+          "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
+          "relative_error": null,
+          "status": "unsupported"
         },
         {
-          "absolute_error": 0.0005284210526315114,
+          "absolute_error": null,
           "absolute_tolerance": 0.0001,
-          "actual": 1.0077284210526316,
+          "actual": null,
           "case_id": "case 4",
           "expected": 1.0072,
           "output_id": "CLBASIC",
-          "reason": null,
-          "relative_error": 0.0005246436185777515,
-          "status": "failed"
+          "reason": "griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved",
+          "relative_error": null,
+          "status": "unsupported"
         }
       ],
       "document": "twoD_ungridded.dml",
-      "failed": 3,
-      "passed": 1,
-      "unsupported": 0
+      "failed": 0,
+      "passed": 0,
+      "unsupported": 4
     }
   ],
   "limitations": [
@@ -5260,5 +5260,5 @@
     "Documents without checkData are represented with check_count zero."
   ],
   "schema_version": "taoryx.daveml-checkdata/v1",
-  "status": "failed"
+  "status": "verified_with_quarantine"
 }
