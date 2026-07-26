@@ -672,6 +672,13 @@ def daveml_collection_roundtrip() -> None:
     ####
 
 
+def daveml_nesc_replay() -> None:
+    """Run the fresh-process NESC DAVE-ML package replay."""
+
+    run(tool_script("validate_daveml_nesc_replay.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -788,6 +795,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-hl20-linearization": daveml_hl20_linearization,
     "daveml-hl20-scenario": daveml_hl20_scenario,
     "daveml-collection-roundtrip": daveml_collection_roundtrip,
+    "daveml-nesc-replay": daveml_nesc_replay,
     "handoff": handoff,
     "check": check,
     "all": check,

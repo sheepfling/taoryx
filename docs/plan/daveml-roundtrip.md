@@ -589,6 +589,9 @@ items are complete and reproducible:
 - `tools/validate_daveml_collection_roundtrip.py` now constructs a deterministic
   source-backed collection fixture and invokes the collection round-trip CLI in
   a fresh process, proving L0-L3 without conflating that result with L4 replay.
+- `tools/validate_daveml_nesc_replay.py` now invokes the authoritative NESC
+  two-stage package replay in a fresh process and records its pinned source,
+  acceptance evidence, and rigid-body runtime contract.
 - `tools/validate_daveml_equilibrium_trim.py` now emits
   `verification/daveml_f16_equilibrium_trim_evidence.json` from a bounded
   three-variable solve (angle of attack, elevator, throttle) using atmosphere,

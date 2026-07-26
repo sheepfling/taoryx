@@ -11,7 +11,8 @@
     "verification/daveml_hl20_linearization_evidence.json": "858de314a1c49635547e1343f1769ba8310c4bb01a23d38557fd777e4ead8a02",
     "verification/daveml_hl20_load_evidence.json": "9651fb6c4266daa356ff7abeef0eef767a302c9a6c43efa0467605596438d0d4",
     "verification/daveml_hl20_scenario_evidence.json": "f8f60cb946e24d7180ef25fabcf3ec4503b11e4bf5581496ec021c180cc022be",
-    "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f"
+    "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f",
+    "verification/daveml_nesc_replay_evidence.json": "12bdd48ea012586295d230618c068def183a0a558bcd530aaaaad62bdd2f5a7b"
   },
   "claim_boundary": "bounded source integration release gate; not flight qualification",
   "runs": [
@@ -90,6 +91,15 @@
       "returncode": 0,
       "stderr_tail": "",
       "stdout_tail": "{\n  \"canonical_documents\": [\n    {\n      \"canonical_export_sha256\": \"e1d92eda2e1276823be8c5987a777078c38de6f9ac1e661035a739ea03ecf7df\",\n      \"checkdata_count\": 102,\n      \"checkdata_failed\": 0,\n      \"checkdata_unsupported\": 0,\n      \"document_id\": \"f16.aerodynamics\",\n      \"numeric_diff_count\": 0,\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"claim_boundary\": \"fresh-process collection L0-L3 canonical round trip; L4 runtime replay remains separate\",\n  \"collection_id\": \"daveml-f16-canonical-smoke\",\n  \"levels\": {\n    \"L0\": \"verified\",\n    \"L1\": \"verified_source_identity\",\n    \"L2\": \"verified_canonical_structure\",\n    \"L3\": \"verified_canonical_numeric_and_checkdata\",\n    \"L4\": \"pending_runtime_replay\"\n  },\n  \"schema_version\": \"taoryx.daveml-collection-roundtrip-evidence/v1\",\n  \"source_sha256\": \"6da3fad6192ebf2bd16170c379890df5db03e67a00e9bbdd1b58646803491e73\",\n  \"status\": \"verified\",\n  \"stderr_tail\": \"\",\n  \"subprocess_returncode\": 0\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_nesc_replay.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "\"reference_nesc_two_stage_rocket\",\n  \"package\": \"INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair\",\n  \"replay\": {\n    \"collection_id\": null,\n    \"family_id\": null,\n    \"fidelity\": \"6dof\",\n    \"force_moment_residual\": 0.0,\n    \"hold_evidence\": \"validation/acceptance.json#passed\",\n    \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n    \"package\": \"C:\\\\Users\\\\peanu\\\\GIT\\\\sheepfling\\\\taoryx\\\\INBOX\\\\taoryx-daveml-nesc-model-catalog-v1.0\\\\qualified\\\\nesc-two-stage-rocket\\\\nesc-two-stage-rocket-v0.9.txair\",\n    \"runtime_load_contract\": \"taoryx_rigid_body_6dof\",\n    \"runtime_member\": null,\n    \"source_evaluation\": \"verified_pinned_package_acceptance\",\n    \"source_sha256\": \"d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6\",\n    \"status\": \"runtime_replay_qualification_passed\"\n  },\n  \"schema_version\": \"taoryx.daveml-nesc-replay-evidence/v1\",\n  \"status\": \"verified\",\n  \"stderr_tail\": \"\",\n  \"subprocess_returncode\": 0\n}\n"
     },
     {
       "command": [

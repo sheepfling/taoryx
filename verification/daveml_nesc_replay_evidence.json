@@ -1,0 +1,23 @@
+{
+  "claim_boundary": "fresh-process NESC package replay and benchmark acceptance; not independent full trajectory equivalence",
+  "family_id": "reference_nesc_two_stage_rocket",
+  "package": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
+  "replay": {
+    "collection_id": null,
+    "family_id": null,
+    "fidelity": "6dof",
+    "force_moment_residual": 0.0,
+    "hold_evidence": "validation/acceptance.json#passed",
+    "model_id": "nasa-nesc-two-stage-rocket-scenario17",
+    "package": "C:\\Users\\peanu\\GIT\\sheepfling\\taoryx\\INBOX\\taoryx-daveml-nesc-model-catalog-v1.0\\qualified\\nesc-two-stage-rocket\\nesc-two-stage-rocket-v0.9.txair",
+    "runtime_load_contract": "taoryx_rigid_body_6dof",
+    "runtime_member": null,
+    "source_evaluation": "verified_pinned_package_acceptance",
+    "source_sha256": "d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6",
+    "status": "runtime_replay_qualification_passed"
+  },
+  "schema_version": "taoryx.daveml-nesc-replay-evidence/v1",
+  "status": "verified",
+  "stderr_tail": "",
+  "subprocess_returncode": 0
+}
