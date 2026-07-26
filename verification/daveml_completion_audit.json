@@ -1,7 +1,7 @@
 {
   "claim_boundary": "requirement audit; not a flight qualification or historical TAOS compatibility claim",
   "evidence_hashes": {
-    "docs/plan/daveml-roundtrip.md": "af91199a9e0a027e554628c7dab9a282b7867a73118c8039073327d3b26958e4",
+    "docs/plan/daveml-roundtrip.md": "9330f27a39f849dab0b975e7baba2dd9fc023e4f2d1b0fce17dcde0d1facd52d",
     "verification/daveml_catalog_import.json": "58ed91d00341140c6e7dbce53ef4e4ee741f9373becf0be1825ae50056d046ff",
     "verification/daveml_family_readiness.json": "c4a91f3786fdb3f30f73102529b0dabecab68ef9b3bf1beb31b921cf18186584",
     "verification/daveml_official_checkdata.json": "ef4265c3b5965243323a0cb2ec6cc0cf9de771b34251bd66b81fda14ffe79063",
