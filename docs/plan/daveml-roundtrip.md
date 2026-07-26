@@ -546,6 +546,11 @@ items are complete and reproducible:
   6x6/6x1 local dynamics Jacobian and declared central-difference steps. It is
   a verified channel operating-point artifact, not an equilibrium trim or
   controller qualification.
+- `tools/validate_daveml_tuning.py` now consumes that Jacobian through the
+  existing named LQR factory and emits
+  `verification/daveml_f16_tuning_evidence.json`. The reduced five-state screen
+  is controllable and Hurwitz with bounded surface commands; longitudinal speed
+  is explicitly excluded because the source-channel model has rank five.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

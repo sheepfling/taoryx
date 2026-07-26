@@ -26,7 +26,7 @@ def main() -> int:
         sidecar,
         role="aerodynamics",
         state_inputs={},
-        control_inputs={"elevator_deg": "el"},
+        control_inputs={"elevator_deg": "el", "aileron_deg": "ail", "rudder_deg": "rdr"},
         residual_outputs={"cx": "cx", "cy": "cy", "cz": "cz", "cl": "cl", "cm": "cm", "cn": "cn"},
         fixed_inputs={"vt": 500.0, "alpha": 2.0, "beta": 0.0, "p": 0.0, "q": 0.0, "r": 0.0, "ail": 0.0, "rdr": 0.0, "xcg": 0.35},
     )
@@ -47,10 +47,10 @@ def main() -> int:
     )
     spec = TrimSpec(
         state_names=("u_m_s", "v_m_s", "w_m_s", "p_rad_s", "q_rad_s", "r_rad_s"),
-        control_names=("elevator_deg",),
+        control_names=("elevator_deg", "aileron_deg", "rudder_deg"),
         residual_names=("channel_operating_point",),
         state_initial={"u_m_s": 152.4, "v_m_s": 0.0, "w_m_s": 0.0, "p_rad_s": 0.0, "q_rad_s": 0.0, "r_rad_s": 0.0},
-        control_initial={"elevator_deg": 0.0},
+        control_initial={"elevator_deg": 0.0, "aileron_deg": 0.0, "rudder_deg": 0.0},
     )
     result = TrimResult(
         spec=spec,
@@ -99,4 +99,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
