@@ -67,6 +67,7 @@ def main() -> int:
                 "source_sha256": ir.source_sha256,
                 "exported_sha256": _sha256(exported),
                 "opaque_paths": list(ir.opaque_paths),
+                "reference_summary": _reference_summary(ir),
                 "structural_diff_count": len(diffs),
                 "numeric_diff_count": len(numeric_diffs),
                 "checkdata": _checkdata_summary(check_results, vector_check_results),
@@ -160,6 +161,23 @@ def _documents_checkdata_status(documents: list[dict[str, object]]) -> str:
     ####
 
 
+def _reference_summary(ir: object) -> dict[str, int]:
+    """Summarize typed function-reference dispositions from one IR."""
+
+    semantic = getattr(ir, "semantic", {})
+    functions = semantic.get("functions", ()) if isinstance(semantic, dict) else ()
+    statuses: list[str] = []
+    for function in functions if isinstance(functions, list) else ():
+        if not isinstance(function, dict):
+            continue
+        references = function.get("references", ())
+        for reference in references if isinstance(references, list) else ():
+            if isinstance(reference, dict):
+                statuses.append(str(reference.get("status", "unknown")))
+    return {status: statuses.count(status) for status in sorted(set(statuses))}
+    ####
+
+
 def _run_package(package: Path, output: Path) -> int:
     """Run the same gate over DAVE-ML source members in a .txair package."""
 
@@ -193,6 +211,7 @@ def _run_package(package: Path, output: Path) -> int:
             "source_sha256": ir.source_sha256,
             "exported_sha256": _sha256(exported),
             "opaque_paths": list(ir.opaque_paths),
+            "reference_summary": _reference_summary(ir),
             "structural_diff_count": len(structural_diffs),
             "numeric_diff_count": len(numeric_diffs),
             "checkdata": _checkdata_summary(check_results, vector_check_results),
@@ -250,6 +269,7 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
                 "source_sha256": ir.source_sha256,
                 "exported_sha256": _sha256(exported),
                 "opaque_paths": list(ir.opaque_paths),
+                "reference_summary": _reference_summary(ir),
                 "structural_diff_count": len(structural),
                 "numeric_diff_count": len(numeric),
                 "checkdata": checkdata,

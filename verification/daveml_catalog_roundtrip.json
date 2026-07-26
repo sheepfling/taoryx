@@ -1444,6 +1444,9 @@
       "exported_sha256": "d36d93e3e368fa54dc84c9a1d4ba06da6f3af74a237c0e2bb773379e253dbe38",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {
+        "resolved": 9
+      },
       "source": "normalized/daveml-example-atmos-76/source.dml",
       "source_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
       "structural_diff_count": 0
@@ -2590,6 +2593,10 @@
       "exported_sha256": "e1d92eda2e1276823be8c5987a777078c38de6f9ac1e661035a739ea03ecf7df",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {
+        "resolved": 44,
+        "unresolved": 80
+      },
       "source": "normalized/daveml-example-f16-aero/source.dml",
       "source_sha256": "6da3fad6192ebf2bd16170c379890df5db03e67a00e9bbdd1b58646803491e73",
       "structural_diff_count": 0
@@ -5254,6 +5261,10 @@
       "exported_sha256": "1216498bf6fb0d07565fd06ef47c14bec5a1e40a0fca90bb54371a789d7a5629",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {
+        "resolved": 794,
+        "unresolved": 219
+      },
       "source": "normalized/daveml-example-hl20-aero/source.dml",
       "source_sha256": "8639b55c2525fdb6c0177b8e359de5d6eb984a3b4b35b4d1e5898d54ddc1f44e",
       "structural_diff_count": 0
@@ -5277,6 +5288,7 @@
       "exported_sha256": "4472b61e4632026eac491d19a2b53c00f8d3d5fa410a9c7d9e1f80b50af6af7a",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/daveml-example-simple-aero/source.dml",
       "source_sha256": "7a2148ee89ef4ceacb7663a9bc477e020c1aa58bcfc361f938d60d5d3f18a5d5",
       "structural_diff_count": 0
@@ -5300,6 +5312,9 @@
       "exported_sha256": "fff9a3e94fe1735b7158c2966790ba78c7a517c2f953a5f5efbfa301238374fd",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {
+        "resolved": 9
+      },
       "source": "normalized/daveml-example-threed-ungridded/source.dml",
       "source_sha256": "1779544def313776a7fe380db05ef097ecd53ad6264aab1e8765f86d21342f79",
       "structural_diff_count": 0
@@ -5323,6 +5338,10 @@
       "exported_sha256": "6a06c84b1cb41dec4aa63e0d0018328d29943055279c186a47fd6fb6cda09769",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {
+        "resolved": 3,
+        "unresolved": 5
+      },
       "source": "normalized/daveml-example-twod-table/source.dml",
       "source_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
       "structural_diff_count": 0
@@ -5391,6 +5410,10 @@
       "exported_sha256": "18ef85500d2a4cd0d5081438f19cfb97234037956497ad6820352d532f9372db",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {
+        "resolved": 3,
+        "unresolved": 2
+      },
       "source": "normalized/daveml-example-twod-ungridded/source.dml",
       "source_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
       "structural_diff_count": 0
@@ -5414,6 +5437,7 @@
       "exported_sha256": "cefecdb68f5523188774fba9fe2cb8928341284a5cff898b8d7a9bb361fb630a",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-brick-aero/source.dml",
       "source_sha256": "a5883cfbde33969296a9578ac467e06e5920c5c1dc036d9ff654e111185af31d",
       "structural_diff_count": 0
@@ -5437,6 +5461,7 @@
       "exported_sha256": "1d8ba27861bfaa103541533e1dc754f8be1a6e590850b5ba3a1d765cdc5af5e6",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-brick-inertia/source.dml",
       "source_sha256": "eae595902d2f2a6cd96632536ecbd4e55681b66dc3f6bdc22dbe2882247fbfa1",
       "structural_diff_count": 0
@@ -5460,6 +5485,7 @@
       "exported_sha256": "a94bc41fb4e3821e20400f8d20ba25c7eff8d910cb826b9f40dd3dc40f584b36",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-cannonball-aero/source.dml",
       "source_sha256": "baabd6eec679445cd3d5aa5d51b39ade99064c515876dfe018fae78b3eb028e5",
       "structural_diff_count": 0
@@ -5483,6 +5509,7 @@
       "exported_sha256": "966435d28404ff28db742412792b196cd64d53b393a2e7330a574f5b352f2bc0",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-cannonball-inertia/source.dml",
       "source_sha256": "c00b9047ce9fd4a8ec4185c02be3fb755bb966680c501fe5d815bed1e2c61a9c",
       "structural_diff_count": 0
@@ -7091,6 +7118,10 @@
       "exported_sha256": "7bec4bc4bf0b076169a6dae6e804175c0b3db37c1404fb75d30b31ca7e0454b7",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {
+        "resolved": 44,
+        "unresolved": 80
+      },
       "source": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-aero/source.dml",
       "source_sha256": "82796577b989b5f3becb7d13430ff6c619b3ecd2e642a6427b743658fb177e51",
       "structural_diff_count": 0
@@ -7114,6 +7145,7 @@
       "exported_sha256": "cd2a3e190a3b776208f7faf055982af4737b8e14fac17043ae89a0febd98b1ed",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-control/source.dml",
       "source_sha256": "bca7789dde61b741de69f697ce8799ee666214d0e1fa203973523774fc3a969b",
       "structural_diff_count": 0
@@ -7137,6 +7169,7 @@
       "exported_sha256": "169d243b3854c12de940b84fab00fb2b9588fc7eea77b0f5782dc3613dea54d2",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-gnc/source.dml",
       "source_sha256": "fc1dbff00cc14b0228973c43cfc17797fd48d2e36950ec039ff4e77d8577827c",
       "structural_diff_count": 0
@@ -7160,6 +7193,7 @@
       "exported_sha256": "18fa56e25478e421083fa41f3b4cd2bd32d3b509620735899e567f246e32b8ff",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-inertia/source.dml",
       "source_sha256": "e11d4eba5b158d24db7034bd85682ad0b896dd2f3172f007ca3d6d6d4e693c4a",
       "structural_diff_count": 0
@@ -7778,6 +7812,9 @@
       "exported_sha256": "be5efa20eeea87a7ee0072297a4c91bcc92bc7fff4122530e862f45ef9465a13",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {
+        "resolved": 12
+      },
       "source": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-prop/source.dml",
       "source_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
       "structural_diff_count": 0
@@ -7801,6 +7838,7 @@
       "exported_sha256": "8b02a4b82d749e6da3cb638b954dfe1c31865ac98f3fa2817e1d74570d50cccd",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-orbital-cylinder-inertia/source.dml",
       "source_sha256": "9d38ac1e32ec5552d41e587bea7c12a9534ebf88abc951e9f0a3ec660c04818d",
       "structural_diff_count": 0
@@ -7824,6 +7862,7 @@
       "exported_sha256": "c589db5e0a43cc79b33be635e0a13f44d57cdbff9970c4476d2c22c659731ed4",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-orbital-sphere-inertia/source.dml",
       "source_sha256": "1fa33be0868c3623ff9089ba04d40653f89d4c89320c66a04a86ab6be9e56767",
       "structural_diff_count": 0
@@ -7847,6 +7886,7 @@
       "exported_sha256": "de0b8decfab36b72236af4ca39e10ab93fe3937f99e293a75bd5287fb6595e10",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-orbital-station-inertia/source.dml",
       "source_sha256": "bdf62927d5221f3e1a9270994ee97235c39827675f24200e43c9f40c55d04086",
       "structural_diff_count": 0
@@ -7870,6 +7910,10 @@
       "exported_sha256": "2f6a8073b8783c7477f0e19228b91aafc84d80333b519667060129b733ea0ddc",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {
+        "resolved": 10,
+        "unresolved": 10
+      },
       "source": "normalized/nesc-all-models-two-stage-package-twostage-aero/source.dml",
       "source_sha256": "49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27",
       "structural_diff_count": 0
@@ -7893,6 +7937,7 @@
       "exported_sha256": "63df22094c9b7e66e4fdad5e7e22bb65cc0dfcbe9ad9a7e38549bcfa61bc130f",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-two-stage-package-twostage-inertia/source.dml",
       "source_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
       "structural_diff_count": 0
@@ -7916,6 +7961,7 @@
       "exported_sha256": "9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0",
       "numeric_diff_count": 0,
       "opaque_paths": [],
+      "reference_summary": {},
       "source": "normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml",
       "source_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
       "structural_diff_count": 0
