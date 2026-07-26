@@ -491,7 +491,7 @@ items are complete and reproducible:
 - `tools/validate_daveml_family_readiness.py` produces
   `verification/daveml_family_readiness.json`; its applicable source,
   round-trip, graph, check-data, and runtime gates pass for F-16, HL-20, and
-  NESC while retaining pending derived-layer status.
+  NESC with explicit verified or non-applicable derived-layer dispositions.
 - `DAVEMLTrimBinding` provides the explicit solver-facing seam for mapping
   family state, controls, environment inputs, and graph outputs into the
   existing trim evaluator; it is an adapter contract, not a certified trim.
@@ -566,11 +566,12 @@ items are complete and reproducible:
   tuning, scenario scoring, and both family CLI smoke paths, then hashes the
   resulting artifacts. Its
   claim boundary remains source integration, not flight qualification.
-- The F-16 readiness entry now promotes only the verified source-channel
+- The F-16 readiness entry now promotes the verified source-channel
   layers (`source_channel_dynamics_verified`,
   `source_channel_reduced_lqr_verified`, and
   `source_channel_smoke_verified`); the registry continues to leave full
-  equilibrium trim pending and leaves HL-20/NESC derived layers unchanged.
+  equilibrium trim point as `source_equilibrium_trim_verified`; full
+  longitudinal-control qualification remains outside the bounded source claim.
 - `DAVEMLLiftingBodyLoadBinding` now provides the separate HL-20 wind-axis
   `CL/CD/CM` to body-load mapping, including explicit drag/lift signs and
   atmosphere-derived dynamic pressure. It deliberately does not add mass,
@@ -647,6 +648,6 @@ The next executable gates are, in order:
 
 1. Complete typed vector table-function semantics if an authoritative
    source requiring them is added to the corpus.
-2. Continue promotion only through the 18-stage release gate, completion audit,
+2. Continue promotion only through the 19-stage release gate, completion audit,
    and DaveML GitHub workflow; do not promote controller assumptions from
    uncontrolled or open-loop source packages.
