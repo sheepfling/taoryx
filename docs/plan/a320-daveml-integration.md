@@ -74,6 +74,17 @@ The generated collection is canonical regenerated output. It is not an
 upstream Airbus, OpenAP, or JSBSim DAVE-ML package, and it must never be
 promoted to `reference_exact`.
 
+The executable surrogate binding now exists at
+`taoryx.trajectory.a320_pseudo6dof.A320Pseudo6DOFModel`. It verifies the
+immutable corpus hash, uses OpenAP for translational performance, uses the
+normalized JSBSim channels only for side force and roll/pitch/yaw moments, and
+rescales the JSBSim inertia schedule explicitly against OpenAP mass. The
+The five-document authored DAVE-ML collection and fresh-process structural,
+numeric, and checkData round trip are now verified under
+`families/a320_openap_jsbsim_pseudo6dof/daveml/` and its validation report.
+The binding remains `implementation_in_progress` until trim, pulse/turn
+bounds, and runtime-level composite round-trip evidence have their own gate.
+
 ## Parallel transport reference
 
 The generic NASA Transport Class Model is a separate acquisition target for a

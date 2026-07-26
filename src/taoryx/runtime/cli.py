@@ -25,6 +25,10 @@ from taoryx.reachability_visualization import load_reachability_artifact, render
 from taoryx.scenario import ScenarioCompileError, ScenarioCompiler
 from taoryx.table_explorer import InterpolationExplanation, TableInspection, explain_interpolation, inspect_table_file
 from taoryx.trajectory import (
+    A320OpenAPModel,
+    A320OpenAPOperatingPoint,
+    A320Pseudo6DOFModel,
+    A320Pseudo6DOFOperatingPoint,
     FamilyCatalog,
     ResolvedCase,
     diff_resolved_cases,
@@ -227,10 +231,13 @@ def main(argv: list[str] | None = None) -> int:
     daveml_smoke = daveml_subparsers.add_parser("smoke", help="verify a DAVE-ML family smoke evidence chain")
     daveml_smoke.add_argument(
         "--family",
-        choices=("reference_f16_s119", "reference_hl20_mod_k", "reference_nesc_two_stage_rocket"),
+        choices=("a320_openap_3dof", "reference_f16_s119", "reference_hl20_mod_k", "reference_nesc_two_stage_rocket"),
         required=True,
     )
     daveml_smoke.add_argument("--output", type=Path)
+    daveml_composite = daveml_subparsers.add_parser("composite-smoke", help="verify a bounded surrogate-composite smoke path")
+    daveml_composite.add_argument("--family", choices=("a320_openap_jsbsim_pseudo6dof",), required=True)
+    daveml_composite.add_argument("--output", type=Path)
     arguments = parser.parse_args(argv)
     if arguments.command == "scenario":
         return _compile_scenario(arguments)
@@ -292,6 +299,11 @@ def main(argv: list[str] | None = None) -> int:
 def _daveml_command(arguments: argparse.Namespace) -> int:
     """Run fail-closed DAVE-ML family smoke verification."""
 
+    if arguments.daveml_command == "composite-smoke":
+        return _a320_pseudo_smoke(arguments)
+    if arguments.family == "a320_openap_3dof":
+        return _a320_openap_smoke(arguments)
+
     sidecars = {
         "reference_f16_s119": Path("families/reference_f16_s119/plant/daveml-import.json"),
         "reference_hl20_mod_k": Path("families/reference_hl20_mod_k/plant/daveml-import.json"),
@@ -330,6 +342,94 @@ def _daveml_command(arguments: argparse.Namespace) -> int:
         arguments.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
+
+
+def _a320_pseudo_smoke(arguments: argparse.Namespace) -> int:
+    """Run the bounded surrogate binding and authored-DAVE-ML smoke chain."""
+
+    try:
+        model = A320Pseudo6DOFModel.from_repository()
+        point = A320Pseudo6DOFOperatingPoint(
+            A320OpenAPOperatingPoint(11000.0, 0.78, 60000.0),
+            alpha_rad=0.04,
+            beta_rad=0.02,
+            aileron_rad=0.01,
+            elevator_rad=-0.01,
+            rudder_rad=0.01,
+        )
+        performance = model.evaluate(point)
+        roundtrip = json.loads(
+            Path("families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json").read_text(encoding="utf-8")
+        )
+        result = {
+            "schema_version": "taoryx.daveml-cli-composite-smoke/v1",
+            "status": "verified" if roundtrip.get("status") == "verified" else "failed",
+            "family_id": arguments.family,
+            "model_id": "a320-openap-jsbsim-pseudo6dof",
+            "qualification_class": "surrogate_composite",
+            "claim_boundary": "bounded surrogate binding and authored DAVE-ML channel smoke; not full 6-DOF qualification",
+            "provenance": model.provenance,
+            "result": performance.as_dict(),
+            "rotational_derivatives": model.rotational_derivatives(point),
+            "roundtrip": roundtrip,
+        }
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
+        print(f"error: daveml-composite-smoke-failed: {error}")
+        return 2
+    if arguments.output:
+        arguments.output.parent.mkdir(parents=True, exist_ok=True)
+        arguments.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0 if result["status"] == "verified" else 2
+
+
+def _a320_openap_smoke(arguments: argparse.Namespace) -> int:
+    """Run the derived-exact A320 family-library evidence chain."""
+
+    try:
+        model = A320OpenAPModel.from_repository()
+        point = A320OpenAPOperatingPoint(altitude_m=11000.0, mach=0.78, mass_kg=60000.0)
+        performance = model.evaluate(point)
+        trim = model.trim_level_flight(point)
+        tuning = model.tune_cruise_throttle(point)
+        linearization = model.linearize_point_mass(point, trim)
+        result = {
+            "schema_version": "taoryx.daveml-cli-smoke/v1",
+            "status": "verified" if trim.success and tuning.converged else "failed",
+            "family_id": "a320_openap_3dof",
+            "model_id": "a320-openap-3dof",
+            "qualification_class": "derived_exact",
+            "provenance": model.provenance,
+            "performance": performance.as_dict(),
+            "trim": {
+                "success": trim.success,
+                "state": dict(trim.state),
+                "controls": {name: float(value) for name, value in trim.controls.items()},
+                "residuals": dict(trim.residuals),
+            },
+            "tuning": {
+                "status": str(tuning.status),
+                "parameters": list(tuning.parameters),
+                "objective": tuning.objective,
+                "inequality_values": list(tuning.inequality_values),
+            },
+            "linearization": {
+                "state_names": list(linearization.state_names),
+                "control_names": list(linearization.control_names),
+                "a_matrix": linearization.a_matrix.tolist(),
+                "b_matrix": linearization.b_matrix.tolist(),
+                "metadata": linearization.metadata_dict,
+            },
+            "objectives": model.score_level_flight_objectives(performance),
+        }
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        print(f"error: daveml-a320-smoke-failed: {error}")
+        return 2
+    if arguments.output:
+        arguments.output.parent.mkdir(parents=True, exist_ok=True)
+        arguments.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0 if result["status"] == "verified" else 2
 
 
 def _compile_scenario(arguments: argparse.Namespace) -> int:

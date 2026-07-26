@@ -13,6 +13,8 @@ from ..controller_realization import (
     ControllerSchedule,
     preflight_controller_realization,
 )
+from .a320_openap import A320OpenAPEnvelopeError, A320OpenAPModel, A320OpenAPOperatingPoint, A320OpenAPResult
+from .a320_pseudo6dof import A320Pseudo6DOFModel, A320Pseudo6DOFOperatingPoint, A320Pseudo6DOFResult
 from .authority import ArbitrationResult, ControlArbitrator, ControlAuthorityError, ControlDecision
 from .catalog import FamilyCatalog, load_family_catalog
 from .collections import (
@@ -253,6 +255,13 @@ __all__ = [
     "load_compatibility_overlay",
     "load_compatibility_overlay_for_payload",
     "load_quarantine_for_payload",
+    "A320OpenAPEnvelopeError",
+    "A320OpenAPModel",
+    "A320OpenAPOperatingPoint",
+    "A320OpenAPResult",
+    "A320Pseudo6DOFModel",
+    "A320Pseudo6DOFOperatingPoint",
+    "A320Pseudo6DOFResult",
     "load_daveml_atmosphere",
     "DAVEMLDiff",
     "DAVEMLIR",

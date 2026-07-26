@@ -19,6 +19,11 @@ layers:
   aerodynamics: {performance_authority: openap-2.6.0, rotational_authority: jsbsim-1.3.1-a320}
   propulsion: {authority: openap-2.6.0, duplicate_jsbsim_contribution: disabled}
   mass_properties: {scalar_schedule: openap-2.6.0, cg_and_inertia: jsbsim-rescaled-estimate}
+runtime_binding:
+  implementation: taoryx.trajectory.a320_pseudo6dof.A320Pseudo6DOFModel
+  status: executable_surrogate_binding
+  verified: [source_hashes, authority_map, side_force, roll_moment, pitch_moment, yaw_moment, mass_rescaled_inertia, canonical_daveml_export, fresh_process_roundtrip]
+  remaining: [trim_close, coordinated_turn, control_pulse_bounds, runtime_roundtrip]
   actuators: {authority: taoryx-policy, evidence: pending}
   stability_augmentation: {authority: taoryx-controller, evidence: pending}
 claims:
