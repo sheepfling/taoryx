@@ -104,21 +104,22 @@ missions:
         window_end_s: 120.0
   - id: x8-figure-eight-altitude-bank-pitch-v2
     family: skywalker_x8
-    display_name: Skywalker X8 figure-eight altitude, bank, and pitch reversal — nominal case
+    display_name: Skywalker X8 figure-eight altitude, bank, and pitch reversal — nominal airborne pass; terminal pending
     evidence_level: nominal_case_pass_overall_qualification_pending
-    claim: The source-bounded X8 rigid-body surrogate executes a closed figure-eight reference with explicit high/low altitude gates and truth-observable bank and pitch reversals inside the local aerodynamic envelope.
+    claim: The source-bounded X8 rigid-body surrogate executes a figure-eight reference with explicit high/low altitude gates and truth-observable bank and pitch reversals inside the local aerodynamic envelope. An explicit return-to-terminal recovery is exercised, but stable terminal closure remains qualification-pending.
     nonclaims:
       - physical actuator authority or source-validated bank and pitch response
       - flight-test or manufacturer fidelity
       - wind robustness
       - full landing or recovery dynamics
+      - stable return-to-terminal closure
     problem: examples/mission_families/slower_x8/SV03_figure_eight_altitude_reversal_6dof.prb
     tables:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
-    max_steps: 12000
+    max_steps: 21000
     envelope:
       - {channel: speed_m_s, minimum: 2.0, maximum: 27.0}
       - {channel: aero_alpha_deg, minimum: 0.0, maximum: 12.0}
@@ -133,8 +134,8 @@ missions:
     terminal:
       required: true
       dwell_s: 2.0
-      window_start_s: 170.0
-      window_end_s: 180.0
+      window_start_s: 350.0
+      window_end_s: 360.0
       target: {north_m: 0.0, east_m: 0.0, altitude_m: 178.0, speed_m_s: 20.0}
       tolerance: {north_m: 100.0, east_m: 100.0, altitude_m: 8.0, speed_m_s: 4.0}
     objectives:

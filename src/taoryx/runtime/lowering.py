@@ -1438,6 +1438,13 @@ def _lower_rigid_body_case(
         inertia_provider=inertia_provider,
     )
     controller_saturated = {"value": False}
+    ground_contact_mode = vehicle_attributes.get("ground-contact-mode", "none").casefold()
+    ground_contact_segment_text = vehicle_attributes.get("ground-contact-segment")
+    ground_contact_segment = int(ground_contact_segment_text) if ground_contact_segment_text is not None else None
+    if ground_contact_mode not in {"none", "", "settle", "static", "clamp"}:
+        raise ValueError(f"unsupported ground-contact-mode {ground_contact_mode!r}")
+    if ground_contact_mode not in {"none", ""} and ground_contact_segment not in segments:
+        raise ValueError("ground-contact-segment must identify an existing rigid-body segment")
     coordinated_turn_enabled = _runtime_coordinated_turn_enabled(guidance_attributes, route_attributes)
     coordinated_turn_controller = CoordinatedTurnController(
         heading_gain=float(guidance_attributes.get("rectangle-heading-gain-nm-per-rad", "0.0")),
@@ -1450,6 +1457,24 @@ def _lower_rigid_body_case(
         control_values["_rotor_guidance_moment_x"] = 0.0
         control_values["_rotor_guidance_moment_y"] = 0.0
         control_values["_rotor_guidance_moment_z"] = 0.0
+        if ground_contact_segment is not None and active_segment["number"] == ground_contact_segment:
+            # The contact segment is deliberately a small, explicit static-pad
+            # model.  It cancels gravity with a normal reaction and damps any
+            # residual in-plane velocity/rate after the collision impulse.  It
+            # is not a landing-gear, tire, or ground-effect model.
+            gravity_ecic = gravity(state)
+            contact_damping = max(float(vehicle_attributes.get("ground-contact-damping-per-s", "8.0")), 0.0)
+            contact_force_ecic = gravity_ecic.scaled(-state.mass) - state.velocity.vector.scaled(state.mass * contact_damping)
+            contact_force_body = state.attitude.conjugate().rotate(contact_force_ecic)
+            contact_moment = state.body_rate.scaled(-contact_damping)
+            return RigidBodyForceMoment(
+                contact_force_body,
+                contact_moment,
+                0.0,
+                0.0,
+                propulsion_force_body=contact_force_body,
+                propulsion_moment_body=contact_moment,
+            )
         airspeed_target_text = guidance_attributes.get("airspeed-hold-target-mps")
         airspeed_gain_text = guidance_attributes.get("airspeed-hold-gain-throttle-per-mps")
         if airspeed_target_text is not None and airspeed_gain_text is not None:
@@ -2016,6 +2041,11 @@ def _lower_rigid_body_case(
             }
         )
         result["attitude_controller_saturated"] = 1.0 if controller_saturated["value"] else 0.0
+        contact_active = ground_contact_segment is not None and active_segment["number"] == ground_contact_segment
+        result["ground_contact_state"] = 1.0 if contact_active else 0.0
+        result["ground_reaction_n"] = state.mass * earth_mu / max(state.position.vector.norm() ** 2, 1.0) if contact_active else 0.0
+        result["ground_contact_impulse_n_s"] = float(values.get("ground_contact_impulse_n_s", result.get("ground_contact_impulse_n_s", 0.0)))
+        result["ground_contact_mode"] = 1.0 if contact_active else 0.0
         shutdown_time_text = actuator_attributes.get("motor-shutdown-time-s")
         result["motor_shutdown"] = 1.0 if shutdown_time_text is not None and state.time >= float(shutdown_time_text) else 0.0
         result["_segment"] = float(active_segment["number"])
@@ -2065,17 +2095,25 @@ def _lower_rigid_body_case(
     runtime_events = _runtime_event_conditions(problem, parameters, tables)
     for current_segment in segments.values():
         safety_event_name = f"trajectory-{trajectory.number}-earth-intersection-{current_segment.number}"
-        event_targets[safety_event_name] = None
-        events: list[EventCondition] = [
-            EventCondition(
-                safety_event_name,
-                lambda state: _rigid_body_altitude_residual(state),
-                "stop",
-                lambda state: _rigid_body_altitude_residual(state) <= 0.0,
-                signal="earth-intersection",
-                source="taoryx-rigid-body-safety-guard",
+        contact_transition = (
+            ground_contact_mode not in {"none", ""}
+            and ground_contact_segment is not None
+            and current_segment.number != ground_contact_segment
+        )
+        event_action = "goto" if contact_transition else "stop"
+        event_targets[safety_event_name] = ground_contact_segment if contact_transition else None
+        events: list[EventCondition] = []
+        if not (ground_contact_segment is not None and current_segment.number == ground_contact_segment):
+            events.append(
+                EventCondition(
+                    safety_event_name,
+                    lambda state: _rigid_body_altitude_residual(state),
+                    event_action,
+                    lambda state: _rigid_body_altitude_residual(state) <= 0.0,
+                    signal="ground-contact" if contact_transition else "earth-intersection",
+                    source="taoryx-rigid-body-ground-contact" if contact_transition else "taoryx-rigid-body-safety-guard",
+                )
             )
-        ]
         events.extend(runtime_events)
         if thermal_attributes.get("policy", "none").casefold() == "stop":
             thermal_limits = (
@@ -2143,6 +2181,13 @@ def _lower_rigid_body_case(
             return state
         if target not in segments:
             raise ValueError(f"rigid-body event targets missing segment {target}")
+        if ground_contact_segment is not None and target == ground_contact_segment:
+            state = _apply_ground_contact_state(
+                state,
+                restitution=float(vehicle_attributes.get("ground-contact-restitution", "0.0")),
+                static_friction=vehicle_attributes.get("ground-contact-friction", "static").casefold() in {"static", "clamp", "1", "true", "yes"},
+                contact_step_s=max(float(vehicle_attributes.get("ground-contact-step-s", str(step))), 1.0e-6),
+            )
         # Segment reset/increment blocks are the native problem-file seam for
         # staging and release events.  Apply them before switching the force
         # sources so mass and propellant discontinuities are visible to the
@@ -2291,6 +2336,64 @@ def _rigid_body_altitude_residual(state: RuntimeState) -> float:
 
     radius = math.sqrt(sum(state.named.get(name, 0.0) ** 2 for name in ("x", "y", "z")))
     return radius - 6_378_137.0
+
+
+def _apply_ground_contact_state(
+    state: RuntimeState,
+    *,
+    restitution: float,
+    static_friction: bool,
+    contact_step_s: float,
+) -> RuntimeState:
+    """Commit a declared rigid-body ground-contact impulse.
+
+    This is intentionally a small pad/contact contract for showcase and
+    terminal-state work.  It clamps the body to the spherical Earth surface,
+    applies a bounded normal restitution, and optionally consumes tangential
+    velocity as static pad friction.  The pre/post state is retained by the
+    runtime transition ledger, so this is an explicit state discontinuity—not
+    a hidden renderer-side reset.
+    """
+
+    radius_vector = Vector3(state.named.get("x", 0.0), state.named.get("y", 0.0), state.named.get("z", 0.0))
+    radius = max(radius_vector.norm(), 1.0e-12)
+    normal = radius_vector.scaled(1.0 / radius)
+    position = normal.scaled(6_378_137.0)
+    velocity = Vector3(state.named.get("xdt", 0.0), state.named.get("ydt", 0.0), state.named.get("zdt", 0.0))
+    normal_velocity = velocity.dot(normal)
+    tangential_velocity = velocity - normal.scaled(normal_velocity)
+    bounded_restitution = max(0.0, min(1.0, restitution))
+    post_normal_velocity = -bounded_restitution * min(normal_velocity, 0.0)
+    post_tangential_velocity = Vector3(0.0, 0.0, 0.0) if static_friction else tangential_velocity
+    post_velocity = normal.scaled(post_normal_velocity) + post_tangential_velocity
+    mass = float(state.named.get("mass", 0.0))
+    impulse = (post_velocity - velocity).scaled(mass)
+    values = list(state.values)
+    for name, value in zip(
+        ("x", "y", "z", "vx", "vy", "vz", "wx", "wy", "wz"),
+        (position.x, position.y, position.z, post_velocity.x, post_velocity.y, post_velocity.z, 0.0, 0.0, 0.0),
+        strict=True,
+    ):
+        # The rigid-body state indices are stable and the explicit assignment
+        # avoids changing the canonical state vector for a contact-only field.
+        values[RIGID_BODY_STATE_NAMES.index(name)] = value
+    named = {
+        **state.named,
+        "ground_contact_state": 1.0,
+        "ground_contact_impulse_n_s": impulse.norm(),
+        "ground_reaction_n": impulse.norm() / contact_step_s,
+        "ground_contact_normal_velocity_pre_m_s": normal_velocity,
+        "ground_contact_tangential_speed_pre_m_s": tangential_velocity.norm(),
+        "ground_contact_restitution": bounded_restitution,
+    }
+    return RuntimeState(
+        state.time,
+        tuple(values),
+        state.frame,
+        named,
+        RIGID_BODY_STATE_NAMES,
+        state.segment_endpoints,
+    )
 ####
 
 
@@ -2747,6 +2850,34 @@ def _runtime_figure_eight_route_velocity(
     theta = 2.0 * math.pi * max(0.0, min(duration, state.time)) / duration
     radius = 6_378_137.0 + start_altitude
     radial = Vector3(math.cos(latitude) * math.cos(longitude), math.cos(latitude) * math.sin(longitude), math.sin(latitude))
+    terminal_start = float(route_attributes.get("terminal-start-s", str(duration)))
+    if (
+        route_attributes.get("terminal-capture", "false").casefold() in {"1", "true", "yes"}
+        and state.time >= terminal_start
+    ):
+        # The figure-eight is a maneuver reference, not a terminal contract.
+        # Once its declared window is complete, switch to an explicit return
+        # velocity so the aircraft closes a real recovery phase rather than
+        # being judged against home while still flying the final tangent.
+        terminal_altitude = float(route_attributes.get("terminal-target-altitude-m", str(start_altitude)))
+        desired_position = radial.scaled(6_378_137.0 + terminal_altitude)
+        radial_now = state.position.vector.scaled(1.0 / max(state.position.vector.norm(), 1.0e-12))
+        position_error = desired_position - state.position.vector
+        radial_speed = state.velocity.vector.dot(radial_now)
+        horizontal_error = position_error - radial_now.scaled(position_error.dot(radial_now))
+        horizontal_velocity = state.velocity.vector - radial_now.scaled(radial_speed)
+        capture_gain = max(0.0, float(route_attributes.get("terminal-capture-gain", "0.8")))
+        damping = max(0.0, float(route_attributes.get("terminal-velocity-damping", "0.8")))
+        desired_velocity = horizontal_error.scaled(capture_gain) - horizontal_velocity.scaled(damping)
+        altitude_error = terminal_altitude - (state.position.vector.norm() - 6_378_137.0)
+        desired_velocity = desired_velocity + radial_now.scaled(
+            float(route_attributes.get("terminal-altitude-gain", "0.8")) * altitude_error
+            - float(route_attributes.get("terminal-radial-damping", "0.8")) * radial_speed
+        )
+        command_speed = abs(float(route_attributes.get("terminal-command-speed-mps", "20.0")))
+        if command_speed > 0.0 and desired_velocity.norm() > command_speed:
+            desired_velocity = desired_velocity.scaled(command_speed / desired_velocity.norm())
+        return desired_velocity + Vector3(0.0, 0.0, earth_omega).cross(state.position.vector)
     east = Vector3(-math.sin(longitude), math.cos(longitude), 0.0)
     north = Vector3(-math.sin(latitude) * math.cos(longitude), -math.sin(latitude) * math.sin(longitude), math.cos(latitude))
     half_length = 0.5 * float(route_attributes["figure-eight-length-m"])
@@ -2782,6 +2913,12 @@ def _runtime_rectangle_bank_angle(
 
     if route_attributes.get("mode", "").casefold() in {"figure-eight", "figure8"}:
         duration = max(float(route_attributes.get("duration-s", "1.0")), 1.0)
+        terminal_start = float(route_attributes.get("terminal-start-s", str(duration)))
+        if route_attributes.get("terminal-capture", "false").casefold() in {"1", "true", "yes"} and state.time >= terminal_start:
+            # Return-to-terminal guidance is a velocity/heading problem, not
+            # another figure-eight bank command.  Releasing the scheduled bank
+            # here prevents the recovery turn from fighting the terminal gate.
+            return None
         theta = 2.0 * math.pi * max(0.0, min(duration, state.time)) / duration
         scheduled = math.radians(float(route_attributes.get("figure-eight-bank-deg", "20.0"))) * math.sin(theta)
         maximum = abs(float(route_attributes.get("route-max-bank-deg", route_attributes.get("figure-eight-bank-deg", "20.0"))))
@@ -3426,8 +3563,12 @@ def _rigid_body_aerodynamic_model(
             values["symmetric-stabilator-deg"] = min(upper, max(lower, commanded_stabilator_deg))
             values["symmetric_stabilator"] = math.radians(values["symmetric-stabilator-deg"])
             values["symmetric_stabilator_controller_saturated"] = float(commanded_stabilator_deg < lower or commanded_stabilator_deg > upper)
+        terminal_capture_active = (
+            route_attributes.get("terminal-capture", "false").casefold() in {"1", "true", "yes"}
+            and state.time >= float(route_attributes.get("terminal-start-s", "inf"))
+        )
         elevon_hold_gain = float(guidance_attributes.get("collective-elevon-hold-gain-deg-per-deg", "0.0"))
-        if elevon_hold_gain != 0.0:
+        if elevon_hold_gain != 0.0 and not terminal_capture_active:
             position_ecfc, _ = EarthRotationAdapter(earth).ecic_to_ecfc(state.position, state.velocity, time_seconds=state.time)
             sample = environment.sample(time=state.time, position=position_ecfc)
             air_velocity_ecic = EarthRotationAdapter(earth).air_relative_velocity_ecic(
@@ -3444,7 +3585,7 @@ def _rigid_body_aerodynamic_model(
             values["collective_elevon"] = math.radians(values["collective-elevon-deg"])
             values["collective_elevon_controller_saturated"] = float(commanded_elevon_deg < lower or commanded_elevon_deg > upper)
         sideslip_hold_gain = float(guidance_attributes.get("differential-elevon-hold-gain-deg-per-deg", "0.0"))
-        if sideslip_hold_gain != 0.0 and "differential-elevon-deg" in values:
+        if sideslip_hold_gain != 0.0 and "differential-elevon-deg" in values and not terminal_capture_active:
             position_ecfc, _ = EarthRotationAdapter(earth).ecic_to_ecfc(state.position, state.velocity, time_seconds=state.time)
             sample = environment.sample(time=state.time, position=position_ecfc)
             air_velocity_ecic = EarthRotationAdapter(earth).air_relative_velocity_ecic(
@@ -3463,7 +3604,12 @@ def _rigid_body_aerodynamic_model(
         differential_stabilator_gain = float(
             guidance_attributes.get("differential-stabilator-hold-gain-deg-per-deg", str(sideslip_hold_gain))
         )
-        if differential_stabilator_gain != 0.0 and "differential-stabilator-deg" in values and "differential-elevon-deg" not in values:
+        if (
+            differential_stabilator_gain != 0.0
+            and "differential-stabilator-deg" in values
+            and "differential-elevon-deg" not in values
+            and not terminal_capture_active
+        ):
             # The same sideslip-hold idea applies to a differential
             # stabilator.  A separate target name is accepted so legacy
             # differential-elevon fragments remain reusable unchanged.

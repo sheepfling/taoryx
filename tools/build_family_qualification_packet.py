@@ -206,6 +206,27 @@ def _render_board(
 
     stride = max(1, len(rows) // 5000)
     plot_rows = rows[::stride]
+    if not rows:
+        figure, axis = plt.subplots(figsize=(16, 9), layout="constrained")
+        axis.axis("off")
+        axis.text(
+            0.02,
+            0.92,
+            f"{mission['display_name']} — {status.replace('_', ' ').upper()}",
+            fontsize=20,
+            fontweight="bold",
+            color="#991b1b",
+        )
+        axis.text(
+            0.02,
+            0.78,
+            "No truth telemetry was produced. See summary.json and runtime diagnostics for the failure.",
+            fontsize=14,
+            color="#334155",
+        )
+        figure.savefig(packet / "qualification_board.png", dpi=180, bbox_inches="tight", pad_inches=0.25)
+        plt.close(figure)
+        return
     if plot_rows[-1] is not rows[-1]:
         plot_rows = (*plot_rows, rows[-1])
     figure, axes = plt.subplots(3, 2, figsize=(16, 12), layout="constrained")
