@@ -205,6 +205,22 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
                 found.extend(descendants(child))
         return found
 
+    def node_at_path(path: str) -> dict[str, object] | None:
+        """Find one source-anchored node by its deterministic path."""
+
+        if path == "/0":
+            return root
+        node = root
+        for component in path.removeprefix("/0/").split("/"):
+            children = node.get("children", [])
+            if not isinstance(children, list) or not component.isdigit() or int(component) >= len(children):
+                return None
+            child = children[int(component)]
+            if not isinstance(child, dict):
+                return None
+            node = child
+        return node
+
     def references(node: dict[str, object]) -> list[dict[str, object]]:
         resolved: list[dict[str, object]] = []
         for child in descendants(node):
@@ -218,13 +234,27 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
                 continue
             key = (key_attribute, str(attributes[key_attribute]))
             targets = identifiers.get(key, [])
+            legacy_key = None
+            if not targets and key_attribute == "gtID":
+                legacy_key = ("utID", key[1])
+                targets = identifiers.get(legacy_key, [])
+            target_tag = None
+            if len(targets) == 1:
+                target = node_at_path(targets[0])
+                target_tag = str(target.get("tag", "")) if target is not None else None
+            type_mismatch = len(targets) == 1 and (
+                tag == "griddedTableRef" and target_tag == "ungriddedTableDef"
+                or tag == "ungriddedTableRef" and target_tag in {"griddedTableDef", "griddedTable"}
+            )
             resolved.append(
                 {
                     "source_path": child.get("source_path"),
                     "tag": tag,
                     "identifier": key[1],
+                    "resolved_identifier_kind": legacy_key[0] if legacy_key is not None and targets else key_attribute,
                     "target_path": targets[0] if len(targets) == 1 else None,
-                    "status": "resolved" if len(targets) == 1 else "ambiguous" if targets else "unresolved",
+                    "status": "type_mismatch" if type_mismatch else "resolved" if len(targets) == 1 else "ambiguous" if targets else "unresolved",
+                    "target_tag": target_tag,
                 }
             )
         return resolved

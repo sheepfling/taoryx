@@ -79,6 +79,23 @@ def test_semantic_ir_resolves_typed_table_references() -> None:
     assert reference["target_path"] == "/0/0"
 
 
+def test_semantic_ir_marks_legacy_table_reference_type_mismatch() -> None:
+    ir = build_daveml_ir(
+        b"""
+        <DAVEfunc>
+          <ungriddedTableDef utID="table"/>
+          <function>
+            <functionDefn><griddedTableRef gtID="table"/></functionDefn>
+          </function>
+        </DAVEfunc>
+        """,
+        document_id="legacy-reference",
+    )
+    reference = ir.semantic["functions"][0]["references"][0]
+    assert reference["status"] == "type_mismatch"
+    assert reference["target_tag"] == "ungriddedTableDef"
+
+
 @pytest.mark.parametrize(
     "package_member",
     (
