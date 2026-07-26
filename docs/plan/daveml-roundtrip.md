@@ -637,7 +637,7 @@ The following are intentionally not marked complete:
 
 The next executable gates are, in order:
 
-1. Complete typed vector function/checkData semantics if an authoritative
+1. Complete typed vector table-function semantics if an authoritative
    source requiring them is added to the corpus.
 2. Continue promotion only through the 18-stage release gate, completion audit,
    and DaveML GitHub workflow; do not promote controller assumptions from
