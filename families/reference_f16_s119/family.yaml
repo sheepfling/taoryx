@@ -104,9 +104,9 @@ layers:
   mass_properties: {version: v1, evidence: source_bound_fixed}
   aerodynamics: {version: v1, evidence: source_checked_semantic_reconstruction}
   propulsion: {version: v1, evidence: source_checked_steady}
-  actuators: {version: pending, evidence: taoryx_engineering_assumption}
-  controllers: {version: pending, evidence: taoryx_reference_design}
-  reductions: {version: pending, evidence: derived_from_parent_plant}
+  actuators: {version: external-overlay-required-v1, evidence: no_source_actuator_dynamics}
+  controllers: {version: external-overlay-required-v1, evidence: no_source_controller_contract}
+  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
   trim: {version: source-equilibrium-trim-v1, evidence: source_equilibrium_trim_verified}
   linearization: {version: source-channel-dynamics-with-propulsion-v2, evidence: source_channel_full_dynamics_verified}
   tuning: {version: source-channel-full-lqr-v2, evidence: source_channel_full_lqr_verified}

@@ -36,7 +36,7 @@
     "source_documents": [
       {
         "canonical_export_sha256": "1216498bf6fb0d07565fd06ef47c14bec5a1e40a0fca90bb54371a789d7a5629",
-        "canonical_ir_sha256": "775a61744101414f8ba9027226c0a548d8f1701dfc8de6eb6590048732bd6892",
+        "canonical_ir_sha256": "880e42e77fde5bf6a786321223628126a1ccb6497ceeb3638a8d730023bcda8f",
         "catalog_document_id": "daveml-example-hl20-aero",
         "catalog_normalized_path": "normalized/daveml-example-hl20-aero",
         "catalog_sha256": "8639b55c2525fdb6c0177b8e359de5d6eb984a3b4b35b4d1e5898d54ddc1f44e",

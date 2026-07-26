@@ -27,6 +27,7 @@ def main() -> int:
     python = sys.executable
     commands = [
         [python, "tools/validate_daveml_family_readiness.py", "--readiness", "verification/daveml_family_readiness.yaml", "--output", "verification/daveml_family_readiness.json"],
+        [python, "tools/validate_daveml_layer_dispositions.py", "--registry", "verification/daveml_family_layer_dispositions.yaml", "--output", "verification/daveml_family_layer_dispositions.json"],
         [python, "tools/validate_daveml_atmosphere.py"],
         [python, "tools/validate_daveml_trim.py"],
         [python, "tools/validate_daveml_equilibrium_trim.py"],
@@ -65,6 +66,7 @@ def main() -> int:
     runs = tuple(run(command) for command in commands)
     artifacts = (
         "verification/daveml_family_readiness.json",
+        "verification/daveml_family_layer_dispositions.json",
         "verification/daveml_atmosphere_binding.json",
         "verification/daveml_f16_trim_evidence.json",
         "verification/daveml_f16_equilibrium_trim_evidence.json",

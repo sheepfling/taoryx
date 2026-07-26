@@ -26,4 +26,4 @@ claims:
 nonclaims:
   - manufacturer-authoritative A320 data
   - independent alpha/beta aerodynamics, center of gravity, inertia, or rigid-body moments
-next_gate: build_surrogate_composite_6dof
+next_gate: surrogate_composite_6dof_qualified; full_rigidbody_6dof_source_remains_external
