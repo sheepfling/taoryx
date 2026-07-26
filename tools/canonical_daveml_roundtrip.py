@@ -112,6 +112,7 @@ def _write_export_manifest(output: Path, documents: list[dict[str, object]]) -> 
                 "ir_sha256": document.get("ir_sha256"),
                 "exported_sha256": document.get("exported_sha256"),
                 "opaque_paths": document.get("opaque_paths", []),
+                "fresh_process_reimport": document.get("fresh_process_reimport", "not_recorded"),
             }
         )
     manifest = {
