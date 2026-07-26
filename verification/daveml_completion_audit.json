@@ -2,6 +2,7 @@
   "claim_boundary": "requirement audit; not a flight qualification or historical TAOS compatibility claim",
   "evidence_hashes": {
     "docs/plan/daveml-roundtrip.md": "a945e2168dc440696b0944a2e7c75446e88acb9c6d32f8268c1d2d4d6b748da9",
+    "families/reference_a320/qualification/integration-record.yaml": "e8376d380013315898f730f70cd2b8b8ed8278059902bbc356029e2d2fca31bd",
     "verification/daveml_catalog_import.json": "136a4672f38fb8f5fa1acf2a28ffb0bfa72dbca930345cbf689863e7fb869ff9",
     "verification/daveml_catalog_roundtrip.json": "19c7a627d21c1c9e3c7112945a6e221a8b864249f9c6fde36c94dab14f83b4b1",
     "verification/daveml_family_readiness.json": "286d9b867ed33455c35550b143c26b091f9762498366bd84624a68f493db816c",
@@ -47,6 +48,11 @@
       "evidence": "docs/plan/daveml-roundtrip.md",
       "id": "vector_table_function_semantics",
       "status": "not_in_authoritative_corpus"
+    },
+    {
+      "evidence": "families/reference_a320/qualification/integration-record.yaml",
+      "id": "a320_exact_source_package",
+      "status": "blocked_missing_source"
     }
   ],
   "schema_version": "taoryx.daveml-completion-audit/v1",

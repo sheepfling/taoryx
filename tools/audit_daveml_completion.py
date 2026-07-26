@@ -29,6 +29,7 @@ def main() -> int:
         {"id": "family_readiness", "status": readiness["status"], "evidence": "verification/daveml_family_readiness.json"},
         {"id": "official_2d_ungridded_interpolation", "status": "known_gap_quarantined", "evidence": "verification/daveml_official_checkdata.json"},
         {"id": "vector_table_function_semantics", "status": "not_in_authoritative_corpus", "evidence": "docs/plan/daveml-roundtrip.md"},
+        {"id": "a320_exact_source_package", "status": "blocked_missing_source", "evidence": "families/reference_a320/qualification/integration-record.yaml"},
     ]
     report = {
         "schema_version": "taoryx.daveml-completion-audit/v1",
