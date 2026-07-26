@@ -156,20 +156,11 @@
       ],
       "graph_failures": [],
       "model_id": "nasa-nesc-two-stage-rocket-scenario17",
-      "pending_derived_layers": {
-        "objectives": "trajectory_checkpoint_objectives_verified"
-      },
+      "pending_derived_layers": {},
       "source_import_declared": "verified"
     }
   ],
-  "pending_derived_layers": [
-    {
-      "family_id": "reference_nesc_two_stage_rocket",
-      "layers": {
-        "objectives": "trajectory_checkpoint_objectives_verified"
-      }
-    }
-  ],
+  "pending_derived_layers": [],
   "readiness_registry": "verification/daveml_family_readiness.yaml",
   "schema_version": "taoryx.daveml-family-readiness-report/v1",
   "status": "verified"
