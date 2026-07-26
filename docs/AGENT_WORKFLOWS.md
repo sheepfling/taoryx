@@ -42,7 +42,7 @@ ordering, and truth-isolated decision ports.
 | Run a trajectory | [Runtime architecture](architecture/README.md) | `run_files(...)` or `LoadedProgram` |
 | Drive timesteps | [Interactive engine](architecture/interactive-engine.md) | `InteractiveSession.step(...)` |
 | Build plots | [Telemetry](architecture/telemetry.md) | `RunArtifact`, `render_run_artifact_plots(...)` |
-| Add control above trim | [Control contracts](architecture/control-contracts.md) and [LQR](extensions/lqr.md) | `TrimSpec`, `solve_trim`, controller/allocator |
+| Add control above trim | [Controller stack](architecture/controller-stack.md), [Control contracts](architecture/control-contracts.md), and [LQR](extensions/lqr.md) | `TrimSpec`, `solve_trim`, controller/allocator |
 
 ## Grammar validation
 
