@@ -1,0 +1,42 @@
+[
+  {
+    "calculation": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "plus",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "ci",
+              "text": "angleOfAttack_d"
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "ci",
+              "text": "alpha0"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "apply",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "math",
+      "text": null
+    },
+    "variable_id": "AOAdwp"
+  }
+]

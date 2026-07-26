@@ -1,0 +1,46 @@
+{
+  "calculation_count": 17,
+  "declared_outputs": [
+    "stg1fuelFrac",
+    "stg2fuelFrac",
+    "XIXX",
+    "XIYY",
+    "XIZZ",
+    "XIZX",
+    "XIXY",
+    "XIYZ",
+    "XMASS",
+    "vrsPositionOfMrc_X",
+    "DXCG",
+    "DYCG",
+    "DZCG"
+  ],
+  "document_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
+  "function_count": 0,
+  "model_name": "Two-stage to orbit rocket inertia model",
+  "required_inputs": [
+    "stagedFlag",
+    "stg1fuelUsed",
+    "stg2fuelUsed"
+  ],
+  "topological_order": [
+    "vrsStg1RangeOfCM_X",
+    "vrsStg2RangeOfCM_X",
+    "stg1maxFuel",
+    "stg2maxFuel",
+    "stg1IxxRange",
+    "stg2IxxRange",
+    "stg1IyyRange",
+    "stg2IyyRange",
+    "stg2fuelFrac",
+    "stg1fuelFrac",
+    "vrsPositionOfCM_X",
+    "XIXX",
+    "XIYY",
+    "XIZZ",
+    "XMASS",
+    "vrsPositionOfMrc_X",
+    "DXCG"
+  ],
+  "variable_count": 43
+}

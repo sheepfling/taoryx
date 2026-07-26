@@ -1,0 +1,966 @@
+{
+  "breakpoints": [],
+  "check_cases": [],
+  "check_data_provenance": [],
+  "container_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
+  "document_size_bytes": 7196,
+  "functions": [],
+  "gridded_tables": [],
+  "header": {
+    "attributes": {
+      "name": "Two-stage to orbit rocket aero model"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      },
+      {
+        "attributes": {
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "eric.m.queen@nasa.gov",
+        "name": "Eric Queen",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2013-08-10",
+    "description": "Eric Queen's two-stage-to-orbit conceptual model. Inputs to this propulsion model are flags indicating if either stage is firing. Outputs are thrust and mass depletion rate.",
+    "file_version": "Rev A, 2014-Mar-27",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2014-03-27",
+          "modID": "A",
+          "refID": "REF_02"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2014-03-27",
+        "description": "Changed from quotient to divide tag in calculation of propulsion consumption rate, on a suggestion from Michael Madden of LaRC.",
+        "modification_id": "A"
+      }
+    ],
+    "name": "Two-stage to orbit rocket aero model",
+    "raw": {
+      "attributes": {
+        "name": "Two-stage to orbit rocket aero model"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 489 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-08-10"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Rev A, 2014-Mar-27"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Eric Queen's two-stage-to-orbit conceptual model. Inputs to this propulsion model are flags indicating if either stage is firing. Outputs are thrust and mass depletion rate."
+        },
+        {
+          "attributes": {
+            "author": "Queen, Eric M.",
+            "date": "2013-07-15",
+            "refID": "REF_01",
+            "title": "twostagetoorbit.pptx"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Source document for data in this model"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "author": "Michael Madden",
+            "date": "2014-03-27",
+            "refID": "REF_02",
+            "title": "Use of MathML quotient to compute mass rate in two stage rocket propulsion model"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "An email from Michael Madden caught a syntax error: \"I ran into a small obstacle today trying to run the DAVE-ML model of the two stage rocket. The propulsion model (twostage_prop.dml) uses the MathML token 'quotient' to compute the mass rate. Our DAVE-ML translator does not handle the quotient token (though it is not too difficult to add). Nevertheless, I was wondering if there was a specific reason to use quotient over divide. The former would produce mass rates that are truncated whole numbers of kg/s; the latter would, of course, allow mass rates with decimal fractions of kg/s.\""
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2014-03-27",
+            "modID": "A",
+            "refID": "REF_02"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Changed from quotient to divide tag in calculation of propulsion consumption rate, on a suggestion from Michael Madden of LaRC."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "author": "Queen, Eric M.",
+          "date": "2013-07-15",
+          "refID": "REF_01",
+          "title": "twostagetoorbit.pptx"
+        },
+        "description": "Source document for data in this model",
+        "ref_id": "REF_01"
+      },
+      {
+        "attributes": {
+          "author": "Michael Madden",
+          "date": "2014-03-27",
+          "refID": "REF_02",
+          "title": "Use of MathML quotient to compute mass rate in two stage rocket propulsion model"
+        },
+        "description": "An email from Michael Madden caught a syntax error: \"I ran into a small obstacle today trying to run the DAVE-ML model of the two stage rocket. The propulsion model (twostage_prop.dml) uses the MathML token 'quotient' to compute the mass rate. Our DAVE-ML translator does not handle the quotient token (though it is not too difficult to add). Nevertheless, I was wondering if there was a specific reason to use quotient over divide. The former would produce mass rates that are truncated whole numbers of kg/s; the latter would, of course, allow mass rates with decimal fractions of kg/s.\"",
+        "ref_id": "REF_02"
+      }
+    ]
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/two-stage_package/twostage_prop.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage1firing_flag",
+        "units": "nd",
+        "varID": "stg1firing"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "If greater than 0, indicates stage 1 is firing",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage1firing_flag",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "stg1firing"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage2firing_flag",
+        "units": "nd",
+        "varID": "stg2firing"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "If greater than 0, indicates stage 2 is firing",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage2firing_flag",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "stg2firing"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "17000000",
+        "name": "stage1maxThrust",
+        "units": "N",
+        "varID": "stg1maxThrust"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Stage 1 max thrust",
+      "initial_value": 17000000.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage1maxThrust",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "N",
+      "variable_id": "stg1maxThrust"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "5000000",
+        "name": "stage2maxThrust",
+        "units": "N",
+        "varID": "stg2maxThrust"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Stage 2 max thrust",
+      "initial_value": 5000000.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage2maxThrust",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "N",
+      "variable_id": "stg2maxThrust"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "360",
+        "name": "stage1isp",
+        "units": "sec",
+        "varID": "stg1isp"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Stage 1 specific impulse",
+      "initial_value": 360.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage1isp",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "sec",
+      "variable_id": "stg1isp"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "390",
+        "name": "stage2isp",
+        "units": "sec",
+        "varID": "stg2isp"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Stage 2 specific impulse",
+      "initial_value": 390.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage2isp",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "sec",
+      "variable_id": "stg2isp"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "isp",
+        "units": "sec",
+        "varID": "isp"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "stg1isp"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg1firing"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "stg2isp"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg2firing"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0.001"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Current specific impulse for firing engine, if any",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "isp",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "sec",
+      "variable_id": "isp"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "bodyThrustForce_X",
+        "units": "N",
+        "varID": "thrust"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "stg1maxThrust"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg1firing"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "stg2maxThrust"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg2firing"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0."
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Total thrust",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyThrustForce_X",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "N",
+      "variable_id": "thrust"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "massDot",
+        "units": "kg_s",
+        "varID": "mdot"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "divide",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "thrust"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "times",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "isp"
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "cn",
+                                "text": "9.8066"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "thrust"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0."
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Propellant consumption rate",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "massDot",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg_s",
+      "variable_id": "mdot"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0",
+        "name": "bodyThrustForce_Y",
+        "units": "N",
+        "varID": "thrustY"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Sideforce",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyThrustForce_Y",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "N",
+      "variable_id": "thrustY"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0",
+        "name": "bodyThrustForce_Z",
+        "units": "N",
+        "varID": "thrustZ"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Downforce",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyThrustForce_Z",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "N",
+      "variable_id": "thrustZ"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0",
+        "name": "bodyThrustMoment_Roll",
+        "units": "N",
+        "varID": "thrustll"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Rolling moment",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyThrustMoment_Roll",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "N",
+      "variable_id": "thrustll"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0",
+        "name": "bodyThrustMoment_Pitch",
+        "units": "N",
+        "varID": "thrustlm"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Pitching moment",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyThrustMoment_Pitch",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "N",
+      "variable_id": "thrustlm"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0",
+        "name": "bodyThrustMoment_Yaw",
+        "units": "N",
+        "varID": "thrustln"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Yawing moment",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyThrustMoment_Yaw",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "N",
+      "variable_id": "thrustln"
+    }
+  ]
+}

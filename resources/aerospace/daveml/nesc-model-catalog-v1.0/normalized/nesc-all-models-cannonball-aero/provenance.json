@@ -1,0 +1,313 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "baabd6eec679445cd3d5aa5d51b39ade99064c515876dfe018fae78b3eb028e5",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "baabd6eec679445cd3d5aa5d51b39ade99064c515876dfe018fae78b3eb028e5",
+  "header": {
+    "attributes": {
+      "name": "Example cannonball aerodynamic model"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2012-10-04",
+    "description": "A simple constant drag model for a 1-slug, 6\" diameter cannonball",
+    "file_version": "Revision E, 2013-04-19",
+    "modification_records": [
+      {
+        "attributes": {
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": null,
+        "description": "Immediately after releasing mod A, noticed the description was wrong",
+        "modification_id": "B"
+      },
+      {
+        "attributes": {
+          "modID": "C"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": null,
+        "description": "Added reference area output value",
+        "modification_id": "C"
+      },
+      {
+        "attributes": {
+          "modID": "D"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": null,
+        "description": "Corrected reference area output value, thanks to alert reader Deleena Noble at DFRC",
+        "modification_id": "D"
+      },
+      {
+        "attributes": {
+          "modID": "E"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": null,
+        "description": "Corrected reference area output value again; was using surface area equation! Also increased damping to make terminal velocity realistic.",
+        "modification_id": "E"
+      }
+    ],
+    "name": "Example cannonball aerodynamic model",
+    "raw": {
+      "attributes": {
+        "name": "Example cannonball aerodynamic model"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2012-10-04"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Revision E, 2013-04-19"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "A simple constant drag model for a 1-slug, 6\" diameter cannonball"
+        },
+        {
+          "attributes": {
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "MS 132 NASA, Hampton, VA 23681"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Immediately after releasing mod A, noticed the description was wrong"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "modID": "C"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "MS 132 NASA, Hampton, VA 23681"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added reference area output value"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "modID": "D"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "MS 132 NASA, Hampton, VA 23681"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected reference area output value, thanks to alert reader Deleena Noble at DFRC"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "modID": "E"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "MS 132 NASA, Hampton, VA 23681"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected reference area output value again; was using surface area equation! Also increased damping to make terminal velocity realistic."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": []
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/cannonball_aero.dml"
+}

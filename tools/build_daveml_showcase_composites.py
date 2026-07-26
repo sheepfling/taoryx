@@ -26,7 +26,7 @@ from taoryx.showcase import (
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CATALOG = ROOT / "verification/daveml_showcase_catalog.yaml"
 DEFAULT_OUTPUT = ROOT / "artifacts/showcases/daveml-families"
-NESC_EVIDENCE_ZIP = ROOT / "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9-evidence.zip"
+NESC_EVIDENCE_ZIP = ROOT / "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9-evidence.zip"
 NESC_PREFIX = "taoryx-nesc-two-stage-rocket-v0.9/"
 
 

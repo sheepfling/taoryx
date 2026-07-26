@@ -1,0 +1,21 @@
+{
+  "calculation_count": 0,
+  "declared_outputs": [
+    "XIXX",
+    "XIYY",
+    "XIZZ",
+    "XIZX",
+    "XIXY",
+    "XIYZ",
+    "XMASS",
+    "DXCG",
+    "DYCG",
+    "DZCG"
+  ],
+  "document_sha256": "bdf62927d5221f3e1a9270994ee97235c39827675f24200e43c9f40c55d04086",
+  "function_count": 0,
+  "model_name": "Example space station inertia model",
+  "required_inputs": [],
+  "topological_order": [],
+  "variable_count": 10
+}

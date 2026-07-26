@@ -1,0 +1,116 @@
+[
+  {
+    "attributes": {
+      "name": "yawMomentCoefficientFunction1"
+    },
+    "dependent_variable_id": "aeroBodyYawMomentCoefficient_1",
+    "description": "This function computes the yaw moment coefficient using a 3 dimensional ungridded data table defined using an ungriddedTableDef format for storing data.",
+    "function_id": "function-0001",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "5",
+          "min": "-3",
+          "varID": "angleOfAttack"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 5.0,
+        "minimum_value": -3.0,
+        "variable_id": "angleOfAttack"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "12",
+          "min": "-6",
+          "varID": "angleOfSideslip"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 12.0,
+        "minimum_value": -6.0,
+        "variable_id": "angleOfSideslip"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "6",
+          "min": "-6",
+          "varID": "yawControlDeflection"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 6.0,
+        "minimum_value": -6.0,
+        "variable_id": "yawControlDeflection"
+      }
+    ],
+    "issues": [],
+    "name": "yawMomentCoefficientFunction1",
+    "provenance": null,
+    "table_id": "yawMomentCoefficientTable1",
+    "table_kind": "ungridded"
+  },
+  {
+    "attributes": {
+      "name": "yawMomentCoefficientFunction2"
+    },
+    "dependent_variable_id": "aeroBodyYawMomentCoefficient_2",
+    "description": "This function computes the yaw moment coefficient using a 3 dimensional ungridded data table with data stored within the function.",
+    "function_id": "function-0002",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "5",
+          "min": "-3",
+          "varID": "angleOfAttack"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 5.0,
+        "minimum_value": -3.0,
+        "variable_id": "angleOfAttack"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "12",
+          "min": "-6",
+          "varID": "angleOfSideslip"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 12.0,
+        "minimum_value": -6.0,
+        "variable_id": "angleOfSideslip"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "6",
+          "min": "-6",
+          "varID": "yawControlDeflection"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 6.0,
+        "minimum_value": -6.0,
+        "variable_id": "yawControlDeflection"
+      }
+    ],
+    "issues": [],
+    "name": "yawMomentCoefficientFunction2",
+    "provenance": null,
+    "table_id": "ungridded-table-0002",
+    "table_kind": "ungridded"
+  }
+]

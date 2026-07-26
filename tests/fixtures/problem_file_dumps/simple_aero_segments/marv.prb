@@ -1,6 +1,6 @@
 (simple_aero-marv)
 
-# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/marv.yaml
+# Synthetic TAOS translation of tests/fixtures/simple_aero_v1/marv.yaml
 # Simple Aero family: marv
 # Start controls: maneuver_begin_time_to_go_s
 # Stop controls: min_time_to_go_s

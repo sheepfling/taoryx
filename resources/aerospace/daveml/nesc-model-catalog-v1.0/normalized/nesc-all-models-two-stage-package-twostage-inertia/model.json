@@ -1,0 +1,2416 @@
+{
+  "breakpoints": [],
+  "check_cases": [],
+  "check_data_provenance": [],
+  "container_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
+  "document_size_bytes": 17600,
+  "functions": [],
+  "gridded_tables": [],
+  "header": {
+    "attributes": {
+      "name": "Two-stage to orbit rocket inertia model"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      },
+      {
+        "attributes": {
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "eric.m.queen@nasa.gov",
+        "name": "Eric Queen",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2013-08-09",
+    "description": "Eric Queen's two-stage-to-orbit conceptual model. Inputs are amount of fuel burned from stage 1 and stage 2 and a staged flag. Outputs are mass properties and location of current moment reference center (in meters aft of the nose). Also the remaining fraction of fuel remaining in each stage (to judge depletion).",
+    "file_version": "Initial version",
+    "modification_records": [],
+    "name": "Two-stage to orbit rocket inertia model",
+    "raw": {
+      "attributes": {
+        "name": "Two-stage to orbit rocket inertia model"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 489 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-08-09"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Initial version"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Eric Queen's two-stage-to-orbit conceptual model. Inputs are amount of fuel burned from stage 1 and stage 2 and a staged flag. Outputs are mass properties and location of current moment reference center (in meters aft of the nose). Also the remaining fraction of fuel remaining in each stage (to judge depletion)."
+        },
+        {
+          "attributes": {
+            "author": "Queen, Eric M.",
+            "date": "2013-07-15",
+            "refID": "REF01",
+            "title": "twostagetoorbit.pptx"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Source document for data in this model"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "author": "Queen, Eric M.",
+          "date": "2013-07-15",
+          "refID": "REF01",
+          "title": "twostagetoorbit.pptx"
+        },
+        "description": "Source document for data in this model",
+        "ref_id": "REF01"
+      }
+    ]
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/two-stage_package/twostage_inertia.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "name": "rocketHasStaged",
+        "units": "nd",
+        "varID": "stagedFlag"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Indicates if staging has occurred, if greater than zero.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "rocketHasStaged",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "stagedFlag"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage1fuelConsumed",
+        "units": "kg",
+        "varID": "stg1fuelUsed"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Indicates how much fuel has been expended from the first stage; used only if stagedFlag == 0. Used to linearly interpolate mass properties (CG, mass, moments of inertia) between full (0 fuel expended) and empty (all stage 1 fuel expended) reference values for each of these outputs.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage1fuelConsumed",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "stg1fuelUsed"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage2fuelConsumed",
+        "units": "kg",
+        "varID": "stg2fuelUsed"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Indicates how much fuel has been expended from the second stage. Used to linearly interpolate mass properties (CG, mass, moments of inertia) between full (0 fuel expended) and empty (all stage 2 fuel expended) reference values for each of these outputs. Using a value other than 0 while stagedFlag == 0 will result in undefined results.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage2fuelConsumed",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "stg2fuelUsed"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "16.918790",
+        "name": "fullVehicleMomentReferenceCenter",
+        "sign": "+AFT",
+        "units": "m",
+        "varID": "fullVehXref"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Location of the moment reference center for the full (two-stage) vehicle, given in meters and measured from the nose of the vehicle; positive aft.",
+      "initial_value": 16.91879,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "fullVehicleMomentReferenceCenter",
+      "provenance": null,
+      "roles": [],
+      "sign": "+AFT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "fullVehXref"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "4.797980",
+        "name": "secondStageMomentReferenceCenter",
+        "sign": "+AFT",
+        "units": "m",
+        "varID": "stg2Xref"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Location of the moment reference center for the second-stage only vehicle, given in meters and measured from the nose of the vehicle; positive aft.",
+      "initial_value": 4.79798,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "secondStageMomentReferenceCenter",
+      "provenance": null,
+      "roles": [],
+      "sign": "+AFT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "stg2Xref"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "16.91879",
+        "name": "Liftoff_XCG",
+        "units": "m",
+        "varID": "vrsStg1igniteXCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 16.91879,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "Liftoff_XCG",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "vrsStg1igniteXCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "9.421642",
+        "name": "S1Burnout_XCG",
+        "units": "m",
+        "varID": "vrsStg1burnoutXCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 9.421642,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S1Burnout_XCG",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "vrsStg1burnoutXCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "4.79798",
+        "name": "S2Ignite_XCG",
+        "units": "m",
+        "varID": "vrsStg2igniteXCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 4.79798,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S2Ignite_XCG",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "vrsStg2igniteXCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "3.947368",
+        "name": "S2Burnout_XCG",
+        "units": "m",
+        "varID": "vrsStg2burnoutXCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 3.947368,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S2Burnout_XCG",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "vrsStg2burnoutXCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "314000",
+        "name": "Liftoff_Mass",
+        "units": "kg",
+        "varID": "stg1igniteMass"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 314000.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "Liftoff_Mass",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "stg1igniteMass"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "134000",
+        "name": "S1Burnout_Mass",
+        "units": "kg",
+        "varID": "stg1burnoutMass"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 134000.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S1Burnout_Mass",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "stg1burnoutMass"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "99000",
+        "name": "S2Ignite_Mass",
+        "units": "kg",
+        "varID": "stg2igniteMass"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 99000.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S2Ignite_Mass",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "stg2igniteMass"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "19000",
+        "name": "S2Burnout_Mass",
+        "units": "kg",
+        "varID": "stg2burnoutMass"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 19000.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S2Burnout_Mass",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "stg2burnoutMass"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "353250",
+        "name": "Liftoff_Ixx",
+        "units": "kgm2",
+        "varID": "stg1igniteIxx"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 353250.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "Liftoff_Ixx",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg1igniteIxx"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "150750",
+        "name": "S1Burnout_Ixx",
+        "units": "kgm2",
+        "varID": "stg1burnoutIxx"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 150750.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S1Burnout_Ixx",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg1burnoutIxx"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "111375",
+        "name": "S2Ignite_Ixx",
+        "units": "kgm2",
+        "varID": "stg2igniteIxx"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 111375.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S2Ignite_Ixx",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg2igniteIxx"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "21375",
+        "name": "S2Burnout_Ixx",
+        "units": "kgm2",
+        "varID": "stg2burnoutIxx"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 21375.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S2Burnout_Ixx",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg2burnoutIxx"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "33501637.473461",
+        "name": "Liftoff_Iyy",
+        "units": "kgm2",
+        "varID": "stg1igniteIyy"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 33501637.473461,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "Liftoff_Iyy",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg1igniteIyy"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "10886636.572139",
+        "name": "S1Burnout_Iyy",
+        "units": "kgm2",
+        "varID": "stg1burnoutIyy"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 10886636.572139,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S1Burnout_Iyy",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg1burnoutIyy"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "941063.762626",
+        "name": "S2Ignite_Iyy",
+        "units": "kgm2",
+        "varID": "stg2igniteIyy"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 941063.762626,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S2Ignite_Iyy",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg2igniteIyy"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "212384.868421",
+        "name": "S2Burnout_Iyy",
+        "units": "kgm2",
+        "varID": "stg2burnoutIyy"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": 212384.868421,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "S2Burnout_Iyy",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg2burnoutIyy"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage1XCGRange",
+        "units": "m",
+        "varID": "vrsStg1RangeOfCM_X"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "vrsStg1igniteXCG"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "vrsStg1burnoutXCG"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Range of locations of center-of-mass of two-stage rocket prior to staging; determined by subtracting S1Burnout_XCG from Liftoff_XCG values given in REF01",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage1XCGRange",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "vrsStg1RangeOfCM_X"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage2XCGRange",
+        "units": "m",
+        "varID": "vrsStg2RangeOfCM_X"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "vrsStg2igniteXCG"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "vrsStg2burnoutXCG"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Range of values of the center-of-mass of the second stage; determined by subtracting S2Burnout_XCG from S2Ignite_XCG values given in REF01",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage2XCGRange",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "vrsStg2RangeOfCM_X"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage1FuelCapacity",
+        "units": "kg",
+        "varID": "stg1maxFuel"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg1igniteMass"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg1burnoutMass"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Fuel capacity of first stage; determined by subtracting S1Burnout_Mass from Liftoff_Mass values given in REF01",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage1FuelCapacity",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "stg1maxFuel"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage2FuelCapacity",
+        "units": "kg",
+        "varID": "stg2maxFuel"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg2igniteMass"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg2burnoutMass"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Fuel capacity of second stage; determined by subtracting S2Burnout_Mass from S2Ignite_Mass values given in REF01",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage2FuelCapacity",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "stg2maxFuel"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage1IxxRange",
+        "units": "kgm2",
+        "varID": "stg1IxxRange"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg1igniteIxx"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg1burnoutIxx"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Range of values of Ixx of first stage; determined by subtracting S1Burnout_Ixx from Liftoff_Ixx values given in REF01",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage1IxxRange",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg1IxxRange"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage2IxxRange",
+        "units": "kgm2",
+        "varID": "stg2IxxRange"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg2igniteIxx"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg2burnoutIxx"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Range of values of Ixx of second stage; determined by subtracting S2Burnout_Ixx from S2Ignite_Ixx values given in REF01",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage2IxxRange",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg2IxxRange"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage1IyyRange",
+        "units": "kgm2",
+        "varID": "stg1IyyRange"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg1igniteIyy"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg1burnoutIyy"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Range of values of Iyy and Izz of first stage; determined by subtracting S1Burnout_Iyy from Liftoff_Iyy values given in REF01",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage1IyyRange",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg1IyyRange"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stage2IyyRange",
+        "units": "kgm2",
+        "varID": "stg2IyyRange"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg2igniteIyy"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg2burnoutIyy"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Range of values of Iyy and Izz of second stage; determined by subtracting S2Burnout_Iyy from S2Ignite_Iyy values given in REF01",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stage2IyyRange",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "stg2IyyRange"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "vrsPositionOfCM_X",
+        "sign": "+AFT",
+        "units": "m",
+        "varID": "vrsPositionOfCM_X"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "vrsStg2burnoutXCG"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "times",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "vrsStg2RangeOfCM_X"
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg2fuelFrac"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stagedFlag"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "vrsStg1burnoutXCG"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "times",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "vrsStg1RangeOfCM_X"
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg1fuelFrac"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Position of the center of mass along the X-axis of the vehicle reference system (meters, positive aft). Determined by linearly interpolating either the two-stage rocket, or the just the second stage if stagedFlag > 0, between full and empty fuel states, depending on the appropriate fuel fraction value.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "vrsPositionOfCM_X",
+      "provenance": null,
+      "roles": [
+        "isStdAIAA"
+      ],
+      "sign": "+AFT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "vrsPositionOfCM_X"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1",
+        "minValue": "0",
+        "name": "stage1FuelRemainingFrac",
+        "units": "frac",
+        "varID": "stg1fuelFrac"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "divide",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "minus",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "ci",
+                    "text": "stg1maxFuel"
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "ci",
+                    "text": "stg1fuelUsed"
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg1maxFuel"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Fraction of fuel remaining in stage 1, 0-1 (1 is full)",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": 0.0,
+      "name": "stage1FuelRemainingFrac",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "stg1fuelFrac"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1",
+        "minValue": "0",
+        "name": "stage2FuelRemainingFrac",
+        "units": "frac",
+        "varID": "stg2fuelFrac"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "divide",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "minus",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "ci",
+                    "text": "stg2maxFuel"
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "ci",
+                    "text": "stg2fuelUsed"
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "stg2maxFuel"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Fraction of fuel remaining in stage 2, 0-1 (1 is full)",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": 0.0,
+      "name": "stage2FuelRemainingFrac",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "stg2fuelFrac"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "bodyMomentOfInertia_Roll",
+        "units": "kgm2",
+        "varID": "XIXX"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg2burnoutIxx"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "times",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg2IxxRange"
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg2fuelFrac"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stagedFlag"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg1burnoutIxx"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "times",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg1IxxRange"
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg1fuelFrac"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Rolling moment of inertia about the body X axis. Determined by linearly interpolating either the two-stage rocket, or the just the second stage if stagedFlag > 0, between full and empty fuel states, depending on the appropriate fuel fraction value.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyMomentOfInertia_Roll",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "XIXX"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "bodyMomentOfInertia_Pitch",
+        "units": "kgm2",
+        "varID": "XIYY"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg2burnoutIyy"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "times",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg2IyyRange"
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg2fuelFrac"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stagedFlag"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg1burnoutIyy"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "times",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg1IyyRange"
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg1fuelFrac"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Pitching moment of inertia about the body Y axis Determined by linearly interpolating either the two-stage rocket, or the just the second stage if stagedFlag > 0, between full and empty fuel states, depending on the appropriate fuel fraction value.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyMomentOfInertia_Pitch",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "XIYY"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "bodyMomentOfInertia_Yaw",
+        "units": "kgm2",
+        "varID": "XIZZ"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "cn",
+                "text": "1.0"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "XIYY"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Yawing moment of inertia about the body Z axis. Identical to the pitching moment of inertia (XIYY).",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyMomentOfInertia_Yaw",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "XIZZ"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyProductOfInertia_ZX",
+        "units": "kgm2",
+        "varID": "XIZX"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Cross-product of inertia in the body X-Z plane",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyProductOfInertia_ZX",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "XIZX"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyProductOfInertia_XY",
+        "units": "kgm2",
+        "varID": "XIXY"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Cross-product of inertia in the body X-Y plane",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyProductOfInertia_XY",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "XIXY"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyProductOfInertia_YZ",
+        "units": "kgm2",
+        "varID": "XIYZ"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Cross-product of inertia in the body Y-Z plane",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyProductOfInertia_YZ",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm2",
+      "variable_id": "XIYZ"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "totalMass",
+        "units": "kg",
+        "varID": "XMASS"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg2burnoutMass"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "times",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg2maxFuel"
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg2fuelFrac"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stagedFlag"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stg1burnoutMass"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "times",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg1maxFuel"
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "stg1fuelFrac"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Total mass of vehicle Determined by linearly interpolating either the two-stage rocket, or the just the second stage if stagedFlag > 0, between full and empty fuel states, depending on the appropriate fuel fraction value.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "totalMass",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "XMASS"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "vrsPositionOfMrc",
+        "sign": "+AFT",
+        "units": "m",
+        "varID": "vrsPositionOfMrc_X"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "stg2Xref"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "stagedFlag"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "fullVehXref"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Longitudinal location of the moment reference center in meters back from the nose of the vehicle; positive aft. Value changes based on value of staged flag.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "vrsPositionOfMrc",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": "+AFT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "vrsPositionOfMrc_X"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "bodyPositionOfCmWrtMrc_X",
+        "sign": "FWD",
+        "units": "m",
+        "varID": "DXCG"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "vrsPositionOfMrc_X"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "vrsPositionOfCM_X"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Longitudinal location of the center of mass relative to the nose of the vehicle; increasingly positive as the CM moves fwd as fuel is expended.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyPositionOfCmWrtMrc_X",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "FWD",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "DXCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "bodyPositionOfCmWrtMrc_Y",
+        "sign": "RT",
+        "units": "ft",
+        "varID": "DYCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Longitudinal location of the center of mass relative to the centerline of the vehicle; positive if the CM is to the right of the centerline",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyPositionOfCmWrtMrc_Y",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "RT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "DYCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "bodyPositionOfCmWrtMrc_Z",
+        "sign": "DOWN",
+        "units": "ft",
+        "varID": "DZCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Vertical location of the center of mass relative to the centerline of the vehicle; positive if the CM is below the centerline",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyPositionOfCmWrtMrc_Z",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "DOWN",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "DZCG"
+    }
+  ]
+}

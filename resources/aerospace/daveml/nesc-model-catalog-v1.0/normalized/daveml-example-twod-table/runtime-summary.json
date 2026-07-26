@@ -1,0 +1,15 @@
+{
+  "calculation_count": 0,
+  "declared_outputs": [],
+  "document_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
+  "function_count": 1,
+  "model_name": null,
+  "required_inputs": [
+    "ALPHA",
+    "MACH"
+  ],
+  "topological_order": [
+    "CL"
+  ],
+  "variable_count": 3
+}

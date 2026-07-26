@@ -1,0 +1,210 @@
+[
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-atmospheric-spheroid",
+    "parent_fidelity": "3dof-point-mass",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "existing-parent",
+    "target_tier": "3dof-point-mass"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-atmospheric-spheroid",
+    "parent_fidelity": "3dof-point-mass",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "3t+3k1"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-atmospheric-spheroid",
+    "parent_fidelity": "3dof-point-mass",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "6dof-rigid-body-check"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-tumbling-brick",
+    "parent_fidelity": "6dof-rigid-body",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "3t+3k2"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-tumbling-brick",
+    "parent_fidelity": "6dof-rigid-body",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "existing-parent",
+    "target_tier": "6dof-rigid-body"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "f16-s119",
+    "parent_fidelity": "6dof-rigid-body",
+    "source_authority": "DAVE-ML examples and NASA/NESC 2015",
+    "status": "candidate",
+    "target_tier": "3dof-performance"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "f16-s119",
+    "parent_fidelity": "6dof-rigid-body",
+    "source_authority": "DAVE-ML examples and NASA/NESC 2015",
+    "status": "candidate",
+    "target_tier": "3t+3k1"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "f16-s119",
+    "parent_fidelity": "6dof-rigid-body",
+    "source_authority": "DAVE-ML examples and NASA/NESC 2015",
+    "status": "candidate",
+    "target_tier": "3t+3k2"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "f16-s119",
+    "parent_fidelity": "6dof-rigid-body",
+    "source_authority": "DAVE-ML examples and NASA/NESC 2015",
+    "status": "existing-parent",
+    "target_tier": "6dof-rigid-body"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-two-stage-rocket",
+    "parent_fidelity": "6dof-variable-mass",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "3dof-variable-mass"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-two-stage-rocket",
+    "parent_fidelity": "6dof-variable-mass",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "3t+3k1-gravity-turn"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-two-stage-rocket",
+    "parent_fidelity": "6dof-variable-mass",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "existing-parent",
+    "target_tier": "6dof-variable-mass"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-orbital-spheroid",
+    "parent_fidelity": "3dof-orbit",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "existing-parent",
+    "target_tier": "3dof-orbit"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-orbital-spheroid",
+    "parent_fidelity": "3dof-orbit",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "3t+3k1"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-orbital-spheroid",
+    "parent_fidelity": "3dof-orbit",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "6dof-attitude-check"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-orbital-cylinder",
+    "parent_fidelity": "6dof-orbital-rigid-body",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "3dof-orbit"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-orbital-cylinder",
+    "parent_fidelity": "6dof-orbital-rigid-body",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "3t+3k2"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-orbital-cylinder",
+    "parent_fidelity": "6dof-orbital-rigid-body",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "existing-parent",
+    "target_tier": "6dof-orbital-rigid-body"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-international-space-station",
+    "parent_fidelity": "6dof-orbital-rigid-body",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "3dof-orbit"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-international-space-station",
+    "parent_fidelity": "6dof-orbital-rigid-body",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "candidate",
+    "target_tier": "3t+3k2"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "nesc-international-space-station",
+    "parent_fidelity": "6dof-orbital-rigid-body",
+    "source_authority": "NASA/NESC 2015 DAVE-ML",
+    "status": "existing-parent",
+    "target_tier": "6dof-orbital-rigid-body"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "hl20-mod-k",
+    "parent_fidelity": "6dof-unpowered",
+    "source_authority": "Official DAVE-ML example plus separately attributed fixed inertial binding",
+    "status": "candidate",
+    "target_tier": "3dof-glide"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "hl20-mod-k",
+    "parent_fidelity": "6dof-unpowered",
+    "source_authority": "Official DAVE-ML example plus separately attributed fixed inertial binding",
+    "status": "candidate",
+    "target_tier": "3t+3k1"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "hl20-mod-k",
+    "parent_fidelity": "6dof-unpowered",
+    "source_authority": "Official DAVE-ML example plus separately attributed fixed inertial binding",
+    "status": "candidate",
+    "target_tier": "3t+3k2"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "hl20-mod-k",
+    "parent_fidelity": "6dof-unpowered",
+    "source_authority": "Official DAVE-ML example plus separately attributed fixed inertial binding",
+    "status": "existing-parent",
+    "target_tier": "6dof-unpowered"
+  },
+  {
+    "acceptance_rule": "Preserve parent/source behavior over the declared reduction envelope",
+    "model_id": "daveml-atmosphere-1976",
+    "parent_fidelity": "static-environment",
+    "source_authority": "Official DAVE-ML example",
+    "status": "candidate",
+    "target_tier": "environment-table-service"
+  }
+]

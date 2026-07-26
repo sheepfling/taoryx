@@ -1,0 +1,82 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+throttle,pilotControl_throttle,frac,,,,,,0.0,1.0,isInput;isStdAIAA,False,Pilot throttle control position
+longStk,pilotControl_long,frac,,,+AFT,,,-1.0,1.0,isInput;isStdAIAA,False,Longitudinal (pitch) control position
+latStk,pilotControl_lat,frac,,,+RWD,,,-1.0,1.0,isInput;isStdAIAA,False,Lateral (roll) control position
+pedal,pilotControl_yaw,frac,,,+ANR,,,-1.0,1.0,isInput;isStdAIAA,False,Directional (yaw) control position
+sasOn,stabilityAugmentationOn_disc,nd,,,,,,,,isInput,False,"Stability augmentation engage flag (discrete); 1 = SAS engaged, 0 = SAS off"
+apOn,autopilotOn_disc,nd,,,,,,,,isInput,False,"Autopilot engage flag (discrete); 1 = AP engaged, 0 = AP off (forces SAS on)"
+keasCmd,equivalentAirspeedCommand,nmi_h,,,,,,,,isInput,False,Equivalent airspeed command (kt) to autospeed logic
+altCmd,altitudeMslCommand,ft,,,,,,,,isInput,False,Commanded altitude above sea level (ft) for autopilot
+latOffset,lateralDeviationError,ft,,,+RT,,,,,isInput,False,"Lateral deviation from desired courseline (ft, +right of course) for autopilot"
+baseChiCmd,trueBaseCourseCommand,deg,,,+CCFN,,,,,isInput,False,"True heading of desired ground track (deg, +clockwise from north) for autopilot"
+altMsl,altitudeMsl,ft,,,,,,,,isInput;isStdAIAA,False,Geometric altitude above mean sea level (ft)
+Vequiv,equivalentAirspeed,nmi_h,,,,,,,,isInput;isStdAIAA,False,Equivalent airspeed (kt)
+alpha,angleOfAttack,deg,,,,,,,,isInput;isStdAIAA,False,Angle of attack (deg)
+beta,angleOfSideslip,deg,,,+RT,,,,,isInput;isStdAIAA,False,"Angle of sideslipe (deg), +wind in the pilot's right ear"
+phi,eulerAngle_Roll,deg,,,+RWD,,,,,isInput;isStdAIAA,False,"Roll angle of vehicle relative to local level (deg), +right wing down"
+theta,eulerAngle_Pitch,deg,,,+ANU,,,,,isInput;isStdAIAA,False,"Pitch angle of vehicle relative to local level (deg), +nose up"
+psi,eulerAngle_Yaw,deg,,,+CWFN,,,,,isInput;isStdAIAA,False,"Yaw angle of vehicle relative to true North (deg), +clockwise"
+pb,bodyAngularRate_Roll,rad_s,,,+RWD,,,,,isInput;isStdAIAA,False,"Vehicle body-axis roll rate (rad/s), +right wing down"
+qb,bodyAngularRate_Pitch,rad_s,,,+ANU,,,,,isInput;isStdAIAA,False,"Vehicle body-axis pitch rate (rad/s), +aircraft nose up"
+rb,bodyAngularRate_Yaw,rad_s,,,+ANR,,,,,isInput;isStdAIAA,False,Vehicle body-axis yaw rate (rad/s) +aircraft nose right
+throttleTrim,trimmedPilotControl_throttle,frac,,,,,0.1390191130965607,,,isInput,False,Trimmed position of throttle
+longStkTrim,trimmedPilotControl_long,frac,,,+AFT,,0.1296382327486013,,,isInput,False,Trimmed position of pitch control
+fsasOn,forceStabAugOn_disc,nd,,,,,,,,,True,"This flag is on ( > 0.5) if either stability augmentation or autopilot functions have been selected on to ensure stability if autopilot has been requested; 1 = SAS engaged, 0 = SAS off"
+thetaCmdAltErrGain,autopilotAltErrorFeedbackGain,deg_ft,,,,,-0.05,,,,False,Gain in altitude compensator to vary pitch angle from trimmed based on altitude error; positive altitude error (meaning above reference altitude) results in a reduction of commanded pitch angle.
+altErr,autopilotAltitudeError,ft,,,+HI,,,,,,True,Error between commanded and actual altitude (ft). Positive if above commanded altitude.
+deltaThetaCmd,autopilotDeltaPitchCmd,deg,,,+ANU,,,-5.0,5.0,,True,Calculates change in pitch attitude from trimmed value to correct an error in altitude.
+thetaCmd,autopilotPitchCmd,deg,,,+ANU,,,,,,True,Captures and tracks commanded altitude by varying pitch attitude from trimmed value based on altitude error.
+chiEst,trackAngleEst,deg,,,+CWFN,,,,,,True,A quick-and-dirty estimate of vehicle track angle (course angle); reasonable for small pitch and roll angles.
+chiCmdYErrGain,autopilotLatOffsetErrorFeedbackGain,deg_ft,,,,,-0.01,,,,False,Gain in lateral autopilot to vary true heading angle from base course based on lateral offset error; positive lateral offset error (meaning right of courseline) results in a reduction of commanded heading angle.
+phiCmdChiErrGain,autopilotTrackErrorFeedbackGain,deg_deg,,,,,-10.0,,,,False,Gain in lateral autopilot to set commanded bank angle based on track angle error; positive track angle error (meaning heading more clockwise from desired track angle) results in a negative bank angle command.
+deltaChiCmd,autopilotCourseCorrection,deg,,,+CW,,,-30.0,30.0,,True,Commanded track angle adjustment from base course to intercept and/or track desired course; limited to a specified range.
+chiCmd,autopilotCourseCommand,deg,,,+CWFN,,,,,,True,Commanded true track angle to intercept and/or track desired course.
+chiErrUnwrapped,autopilotTrackError,deg,,,+CW,,,,,,True,The difference between commanded and actual true track angle; positive indicates actual track is more clockwise (yawed right) than commanded. This value is not limited to +/- 180 deg.
+chiErr,autopilotTrackErrorWrapped,deg,,,,,,,,,True,This is the track angle error resolved into a range of +/- 180 deg.
+phiCmd,autopilotCommandedBankAngle,deg,,,+RWD,,,-30.0,30.0,,True,Generate bank angle command to move back on-course
+trimmedAlpha,designAngleOfAttack,deg,,,,,2.653813535191715,,,,False,Flight control system design angle of attack (deg)
+trimmedTheta,designEulerAngle_Pitch,deg,,,+ANU,,2.653813535191715,,,,False,"Flight control system design pitch angle of vehicle relative to local level (deg), +nose up"
+trimmedKEAS,designEquivalentAirspeed,nim_h,,,,,287.8088596053291,,,,False,Flight control system design equivalent airspeed (kt)
+keasCmdSw,switchedKEAScmd,nmi_h,,,,,,,,,True,"Velocity reference used to calculate velocity disturbance to feed into LQR SAS. If the autopilot select flag is on, use the commanded airspeed as the reference value; if not, use the trimmed airspeed as the reference value."
+thetaCmdSw,switchedThetaCmd,deg,,,,,,,,,True,"Pitch attitude reference used to calculate pitch angle disturbance to feed into LQR SAS. If the autopilot select flag is on, use the commanded pitch attitude as the reference value; if not, use the trimmed pitch attitude as the reference value."
+phiCmdSw,switchedPhiCmd,deg,,,,,,,,,True,"Roll attitude reference used to calculate roll angle disturbance to feed into LQR SAS. If the autopilot select flag is on, use the commanded roll attitude as the reference value; if not, use 0 as the reference value."
+longLQR11,longLQR_gain_matrix_11,h_nmi,,,,,-0.063009074230494,,,,False,Change to stick with change in airspeed (per kt)
+longLQR12,longLQR_gain_matrix_12,_deg,,,,,0.113230403179271,,,,False,Change to stick with change in angle of attack (per deg)
+longLQR13,longLQR_gain_matrix_13,s_r,,,,,10.113432224566077,,,,False,Change to stick with change in pitch rate (per rad/s)
+longLQR14,longLQR_gain_matrix_14,_deg,,,,,3.154983341632913,,,,False,Change to stick with change in pitch angle (per deg)
+longLQR21,longLQR_gain_matrix_21,h_nmi,,,,,0.997260602961658,,,,False,Change to throttle fraction with change in airspeed
+longLQR22,longLQR_gain_matrix_22,_deg,,,,,-0.025467711176391,,,,False,Change to throttle fraction with change in angle of attack (per deg)
+longLQR23,longLQR_gain_matrix_23,s_r,,,,,1.213308488207827,,,,False,Change to throttle fraction with change in pitch rate (per rad/s)
+longLQR24,longLQR_gain_matrix_24,_deg,,,,,0.208744369535208,,,,False,Change to throttle fraction with change in pitch angle (per deg)
+latdLQR11,latdLQR_gain_matrix_11,_deg,,,,,3.07804394151577,,,,False,Change to lat stick with change in roll angle (per deg)
+latdLQR12,latdLQR_gain_matrix_12,_deg,,,,,0.032365863044163,,,,False,Change to lat stick with change in sideslip angle (per deg)
+latdLQR13,latdLQR_gain_matrix_13,s_r,,,,,4.557858908828332,,,,False,Change to lat stick with change in roll rate (per rad/s)
+latdLQR14,latdLQR_gain_matrix_14,s_r,,,,,0.589443156647647,,,,False,Change to lat stick with change in yaw rate (per rad/s)
+latdLQR21,latdLQR_gain_matrix_21,_deg,,,,,-0.70581745275452,,,,False,Change to rudder pedal input with change in roll angle (per deg)
+latdLQR22,latdLQR_gain_matrix_22,_deg,,,,,-0.256362860634868,,,,False,Change to rudder pedal input with change in sideslip angle (per deg)
+latdLQR23,latdLQR_gain_matrix_23,s_r,,,,,-1.073666149713151,,,,False,Change to rudder pedal input with change in roll rate (per rad/s)
+latdLQR24,latdLQR_gain_matrix_24,s_r,,,,,0.822114635953878,,,,False,Change to rudder pedal input with change in yaw rate (per rad/s)
+deltaVequiv,disturbedEquivalentAirspeed,nmi_h,,,,,,,,,True,Disturbance away from commanded equivalent airspeed (kt)
+deltaAlpha,disturbedAngleOfAttack,deg,,,,,,,,,True,Disturbance away from design angle of attack (deg)
+deltaPhi,disturbedEulerAngle_roll,deg,,,,,,,,,True,Disturbance away from commanded bank angle (deg)
+deltaTheta,disturbedEulerAngle_pitch,deg,,,,,,,,,True,Disturbance away from commanded pitch angle (deg)
+longLQR,deltaLongLQR,frac,,,,,,,,,True,Longitudinal control output from LQR gain matrix; negated to stabilize plant
+throttleLQR,deltaThrottleLQR,frac,,,,,,,,,True,Throttle fraction output from LQR gain matrix; negated to stabilize plant
+latLQR,deltaLatLQR,frac,,,,,,,,,True,Lateral stick output from LQR control system
+dirLQR,deltaDirLQR,frac,,,,,,,,,True,Directional control output from LQR control system
+longLQRsw,switchedDeltaLongLQR,frac,,,,,,,,,True,Switched longitudinal output from LQR so SAS can be disabled
+throttleLQRsw,switchedDeltaThrottleLQR,frac,,,,,,,,,True,Switched throttle output from LQR so SAS can be disabled
+latLQRsw,switchedDeltaLatLQR,frac,,,,,,,,,True,Switched lateral command output from LQR so SAS can be disabled
+dirLQRsw,switchedDeltaDirLQR,frac,,,,,,,,,True,Switched directional command output from LQR so SAS can be disabled
+longStkSw,switchedPilotControl_long,frac,,,,,,,,,True,Ignore longitudinal input from pilot if autopilot selected
+throttleSw,switchedPilotControl_throttle,frac,,,,,,,,,True,Ignore throttle input from pilot if autopilot selected
+latStkSw,switchedPilotControl_lat,frac,,,,,,,,,True,Ignore lateral input from pilot if autopilot selected
+pedalSw,switchedPilotControl_yaw,frac,,,,,,,,,True,Ignore directional input from pilot if autopilot selected
+totLongStk,totalLongCmd,frac,,,,,,-1.0,1.0,,True,"Longitudinal input command to surface mixer. Combines trimmed position, pilot input (if AP off), and stabization (and possibly autopilot) commands (if SAS on)."
+totLatStk,totalLatCmd,frac,,,,,,-1.0,1.0,,True,Lateral input command to surface mixer. Combines pilot input (if AP off) with stabilization (and possibly autopilot) commands (if SAS on).
+totPedal,totalDirCmd,frac,,,,,,-1.0,1.0,,True,Directional input command to surface mixer. Combines pilot input (if AP off) with stabilization (and possibly autopilot) commands (if SAS on).
+totThrottle,totalThrottle,frac,,,,,,0.0,1.0,,True,"Throttle command to power lever output. Combines trimmed throttle position, pilot input (if AP off) with stabilization (and possibly autopilot) commands (if SAS on)."
+el,elevatorDeflection,deg,δe,,trailing edge down,,,,,isOutput;isStdAIAA,True,"Elevator deflection angle, in degrees (+TED)"
+ail,aileronDeflection,deg,δa,,left roll,,,,,isOutput;isStdAIAA,True,"Aileron deflection angle, in degrees (+LWD)"
+rdr,rudderDeflection,deg,δr,,TEL,,,,,isOutput;isStdAIAA,True,"Rudder deflection angle, in degrees (+TEL); includes aileron-to-rudder gain"
+PWR,powerLeverAngle,pct,,,+INCR,,0.0,,,isOutput,True,"Throttle (power lever angle), 0 - 100. 50 is MIL (max dry) thrust; 100 is MAX (burner)"

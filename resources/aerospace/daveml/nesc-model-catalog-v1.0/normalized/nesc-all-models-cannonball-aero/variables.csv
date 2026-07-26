@@ -1,0 +1,8 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+SWING,referenceWingArea,ft2,,,,,0.1963495,,,isOutput;isStdAIAA,False,"Reference area of cannonball (assumed radius is 3"")"
+CL,totalCoefficientOfLift,nd,,,,,0.0,,,isOutput;isStdAIAA,False,Coefficient of Lift
+CD,totalCoefficientOfDrag,nd,,,,,0.1,,,isOutput;isStdAIAA,False,Coefficient of Drag
+CY,aeroBodyForceCoefficient_Y,nd,,,,,0.0,,,isOutput;isStdAIAA,False,Coefficient of Sideforce
+Cl,aeroBodyMomentCoefficient_Roll,nd,,,,,0.0,,,isOutput;isStdAIAA,False,Coefficient of Roll
+Cm,aeroBodyMomentCoefficient_Pitch,nd,,,,,0.0,,,isOutput;isStdAIAA,False,Coefficient of Pitch
+Cn,aeroBodyMomentCoefficient_Yaw,nd,,,,,0.0,,,isOutput;isStdAIAA,False,Coefficient of Yaw

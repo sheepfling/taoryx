@@ -1,0 +1,272 @@
+<?xml version='1.0' encoding='utf-8'?>
+<DAVEfunc xmlns="http://daveml.org/2010/DAVEML" xmlns:m="http://www.w3.org/1998/Math/MathML">
+  <fileHeader name="F-16 inertia model (a la Stevens &amp; Lewis)">
+    <author name="Bruce Jackson" org="NASA Langley Research Center" />
+    <creationDate date="2012-08-07" />
+    <fileVersion>Initial version</fileVersion>
+    <description>Normalized semantic mirror of the Stevens and Lewis F-16 constant mass model.</description>
+  </fileHeader>
+  <variableDef name="vrsPositionOfCM" varID="CG_PCT_MAC" units="pct" initialValue="35" minValue="0" maxValue="100" sign="+AFT">
+    <isInput />
+  </variableDef>
+  <variableDef name="referenceWingChord" varID="CBAR" units="ft" initialValue="11.32" />
+  <variableDef name="bodyMomentOfInertia_Roll" varID="XIXX" units="slugft2" initialValue="9496">
+    <isOutput />
+  </variableDef>
+  <variableDef name="bodyMomentOfInertia_Pitch" varID="XIYY" units="slugft2" initialValue="55814">
+    <isOutput />
+  </variableDef>
+  <variableDef name="bodyMomentOfInertia_Yaw" varID="XIZZ" units="slugft2" initialValue="63100">
+    <isOutput />
+  </variableDef>
+  <variableDef name="bodyProductOfInertia_ZX" varID="XIZX" units="slugft2" initialValue="982">
+    <isOutput />
+  </variableDef>
+  <variableDef name="bodyProductOfInertia_XY" varID="XIXY" units="slugft2" initialValue="0">
+    <isOutput />
+  </variableDef>
+  <variableDef name="bodyProductOfInertia_YZ" varID="XIYZ" units="slugft2" initialValue="0">
+    <isOutput />
+  </variableDef>
+  <variableDef name="totalMass" varID="XMASS" units="slug" initialValue="637.1595">
+    <isOutput />
+  </variableDef>
+  <variableDef name="bodyPositionOfCmWrtMrc_Y" varID="DYCG" units="ft" initialValue="0">
+    <isOutput />
+  </variableDef>
+  <variableDef name="bodyPositionOfCmWrtMrc_Z" varID="DZCG" units="ft" initialValue="0">
+    <isOutput />
+  </variableDef>
+  <variableDef name="bodyPositionOfCmWrtMrc_X" varID="DXCG" units="ft" sign="FWD">
+    <isOutput />
+    <calculation>
+      <m:math>
+        <m:apply>
+          <m:times />
+          <m:cn>0.01</m:cn>
+          <m:ci>CBAR</m:ci>
+          <m:apply>
+            <m:minus />
+            <m:cn>35</m:cn>
+            <m:ci>CG_PCT_MAC</m:ci>
+          </m:apply>
+        </m:apply>
+      </m:math>
+    </calculation>
+  </variableDef>
+  <checkData>
+    <staticShot name="CG at 25 percent MAC">
+      <checkInputs>
+        <signal>
+          <signalName>vrsPositionOfCM</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>25</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>bodyPositionOfCmWrtMrc_X</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>1.132</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyMomentOfInertia_Roll</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>9496</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyMomentOfInertia_Pitch</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>55814</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyMomentOfInertia_Yaw</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>63100</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyProductOfInertia_ZX</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>982</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyProductOfInertia_XY</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyProductOfInertia_YZ</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>totalMass</signalName>
+          <signalUnits>slug</signalUnits>
+          <signalValue>637.1595</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyPositionOfCmWrtMrc_Y</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyPositionOfCmWrtMrc_Z</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="CG at 35 percent MAC">
+      <checkInputs>
+        <signal>
+          <signalName>vrsPositionOfCM</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>35</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>bodyPositionOfCmWrtMrc_X</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyMomentOfInertia_Roll</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>9496</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyMomentOfInertia_Pitch</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>55814</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyMomentOfInertia_Yaw</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>63100</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyProductOfInertia_ZX</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>982</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyProductOfInertia_XY</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyProductOfInertia_YZ</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>totalMass</signalName>
+          <signalUnits>slug</signalUnits>
+          <signalValue>637.1595</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyPositionOfCmWrtMrc_Y</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyPositionOfCmWrtMrc_Z</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="CG at 45 percent MAC">
+      <checkInputs>
+        <signal>
+          <signalName>vrsPositionOfCM</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>45</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>bodyPositionOfCmWrtMrc_X</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>-1.132</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyMomentOfInertia_Roll</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>9496</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyMomentOfInertia_Pitch</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>55814</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyMomentOfInertia_Yaw</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>63100</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyProductOfInertia_ZX</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>982</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyProductOfInertia_XY</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyProductOfInertia_YZ</signalName>
+          <signalUnits>slugft2</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>totalMass</signalName>
+          <signalUnits>slug</signalUnits>
+          <signalValue>637.1595</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyPositionOfCmWrtMrc_Y</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+        <signal>
+          <signalName>bodyPositionOfCmWrtMrc_Z</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-12</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+  </checkData>
+</DAVEfunc>

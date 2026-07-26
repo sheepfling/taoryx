@@ -1,6 +1,6 @@
 (simple_aero-phugoid)
 
-# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/phugoid.yaml
+# Synthetic TAOS translation of tests/fixtures/simple_aero_v1/phugoid.yaml
 # Simple Aero family: phugoid
 # Start controls: start_range_to_go_km, phugoid_amplitude_deg, phugoid_frequency_Hz
 # Stop controls: maneuver_roll_deg, implicit solution termination

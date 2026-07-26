@@ -1,0 +1,21 @@
+{
+  "calculation_count": 0,
+  "declared_outputs": [
+    "XIXX",
+    "XIYY",
+    "XIZZ",
+    "XIZX",
+    "XIXY",
+    "XIYZ",
+    "XMASS",
+    "DXCG",
+    "DYCG",
+    "DZCG"
+  ],
+  "document_sha256": "1fa33be0868c3623ff9089ba04d40653f89d4c89320c66a04a86ab6be9e56767",
+  "function_count": 0,
+  "model_name": "Example orbital spheriod inertia model",
+  "required_inputs": [],
+  "topological_order": [],
+  "variable_count": 10
+}

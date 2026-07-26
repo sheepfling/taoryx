@@ -1,0 +1,23 @@
+{
+  "calculation_count": 1,
+  "declared_outputs": [
+    "XIXX",
+    "XIYY",
+    "XIZZ",
+    "XIZX",
+    "XIXY",
+    "XIYZ",
+    "XMASS",
+    "DYCG",
+    "DZCG",
+    "DXCG"
+  ],
+  "document_sha256": "e11d4eba5b158d24db7034bd85682ad0b896dd2f3172f007ca3d6d6d4e693c4a",
+  "function_count": 0,
+  "model_name": "F-16 inertia model (a la Stevens & Lewis)",
+  "required_inputs": [],
+  "topological_order": [
+    "DXCG"
+  ],
+  "variable_count": 12
+}

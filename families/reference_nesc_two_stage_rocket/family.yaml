@@ -20,7 +20,7 @@ source:
     provenance_note: >-
       The normalized NESC DAVE-ML source exposes CL, CD, and CY directly as
       total angle-dependent outputs; retain the source convention at import.
-  corpus_archive: INBOX/taoryx-daveml-nesc-model-catalog-v1.0/raw/nesc/official/All_models.zip
+  corpus_archive: resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models.zip
   corpus_archive_sha256: 2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9
   availability: local_catalog_input_verified
   license_and_notices: NASA Open Source Agreement Version 1.3; retain package notices

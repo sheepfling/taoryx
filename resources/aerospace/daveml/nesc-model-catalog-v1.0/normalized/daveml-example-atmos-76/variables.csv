@@ -1,0 +1,11 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+alt_ft,GeometricAltitude,ft,,,,,,,,isInput,False,
+SEA_LEVEL_PRESSURE_psf,SeaLevelPressure,lbf_ft2,,,,,2116.22,,,,False,Sea level pressure in lb/ft2
+DEGR_AT_0_DEGF,degR_at_0_degF,dgR_dgF,,,,,459.67,,,,False,Bias value of deg Rankine at 0 deg Farenheit; needed to calculate speed of sound from temperature
+Z_m,GeometricAltitude,m,,,,,,-1000.0,85500.0,,True,"Convert input altitude, in feet, to meters, for function independent value"
+t_amb_C,AmbientTemperature_dgC,dgC,,,,,,,,isOutput,False,Output from table is metric
+p_p0,AmbientPressureRatioToSeaLevel,nd,,,,,,,,,False,"Output from table, but only used locally to calculate ambient pressure output"
+sigma,RatioOfDensityToSeaLevel,nd,,,,,,,,isOutput,False,Direct output from table without conversion
+v_sound_fps,SpeedOfSound,ft_s,,,,,,,,isOutput,True,"Calculated from ambient temperature using equation 3.6 from REF02 C equivalent: *v_sound_fps = 49.02*pow(t_amb_F + DEGR_AT_0_DEGF,0.5);"
+t_amb_F,AmbientTemperature,dgF,,,,,,,,isOutput,True,"Convert table output, in deg C, to deg F"
+p_amb_psf,AmbientPressure,lbf_ft2,,,,,,,,isOutput,True,Converts the ambient pressure ratio found in the tables (p_p0) to English units by multiplying by standard ambient sea level pressure (SEA_LEVEL_PRESSURE_psf)

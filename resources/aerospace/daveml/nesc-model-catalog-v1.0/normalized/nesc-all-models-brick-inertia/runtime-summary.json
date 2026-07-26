@@ -1,0 +1,21 @@
+{
+  "calculation_count": 0,
+  "declared_outputs": [
+    "XIXX",
+    "XIYY",
+    "XIZZ",
+    "XIZX",
+    "XIXY",
+    "XIYZ",
+    "XMASS",
+    "DXCG",
+    "DYCG",
+    "DZCG"
+  ],
+  "document_sha256": "eae595902d2f2a6cd96632536ecbd4e55681b66dc3f6bdc22dbe2882247fbfa1",
+  "function_count": 0,
+  "model_name": "Example brick inertia model",
+  "required_inputs": [],
+  "topological_order": [],
+  "variable_count": 10
+}

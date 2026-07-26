@@ -1,0 +1,6 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+angleOfAttack_d,Angle of attack,deg,,,,,,,,isStdAIAA,False,
+alpha0,Offset angle attack of wing relative to body axis,deg,,,+ANU,,2.0,,,,False,Offset of design plane of wing relative to body axis
+flapdef,Trailing_Edge_Flap_Deflection,deg,,,,,,,,,False,Trailing edge flap deflection in degrees +DOWN
+AOAdwp,Angle of Attach DWP,deg,,,,,,,,,True,Angle of attack of design wing plane in degrees +ANU
+CLBASIC,coefficient of lift due to flaps and angle of attack,nondimensional,,,+UP,,,,,isOutput,False,Calculate the 747-100 basic lift coefficient. This only includes effects for flaps and angle of attack. This is only a small subset of actual aircraft data.

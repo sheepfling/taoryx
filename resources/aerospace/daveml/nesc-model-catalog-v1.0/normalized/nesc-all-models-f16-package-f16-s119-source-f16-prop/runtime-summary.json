@@ -1,0 +1,22 @@
+{
+  "calculation_count": 1,
+  "declared_outputs": [
+    "FEX",
+    "FEY",
+    "FEZ",
+    "TEL",
+    "TEM",
+    "TEN"
+  ],
+  "document_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
+  "function_count": 3,
+  "model_name": "F-16 propulsion model (a la Stevens & Lewis)",
+  "required_inputs": [],
+  "topological_order": [
+    "T_IDLE",
+    "T_MIL",
+    "T_MAX",
+    "FEX"
+  ],
+  "variable_count": 13
+}

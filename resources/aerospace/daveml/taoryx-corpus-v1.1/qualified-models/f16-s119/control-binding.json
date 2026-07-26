@@ -1,0 +1,18 @@
+{
+  "equations": {
+    "aileron_deg": "-21.5 * lateral_ratio",
+    "elevator_deg": "-25 * longitudinal_ratio",
+    "power_lever_angle_pct": "100 * throttle_ratio",
+    "rudder_deg": "-30 * directional_ratio + 0.008 * aileron_deg"
+  },
+  "input_semantics": {
+    "aileron_ratio": "positive right-wing-down command",
+    "elevator_ratio": "positive pilot aft / pitch-up command",
+    "rudder_ratio": "positive aircraft-nose-right command",
+    "throttle_ratio": "0 to 1 power-lever command"
+  },
+  "schema_version": "0.1.0",
+  "upstream_git_blob_sha": "a2f949fb5de5ae13cf1ac2bd83148db768f990b6",
+  "upstream_path": "NESC_data/All_models/F16_package/F16_S119_source/F16_control.dml",
+  "upstream_repository": "nasa/simupy-flight"
+}

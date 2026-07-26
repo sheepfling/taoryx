@@ -1,0 +1,88 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "1fa33be0868c3623ff9089ba04d40653f89d4c89320c66a04a86ab6be9e56767",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "1fa33be0868c3623ff9089ba04d40653f89d4c89320c66a04a86ab6be9e56767",
+  "header": {
+    "attributes": {
+      "name": "Example orbital spheriod inertia model"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2014-09-15",
+    "description": "A simple constant mass matrix for a 1-kg, (1/π)-m diameter sphere",
+    "file_version": "Initial version",
+    "modification_records": [],
+    "name": "Example orbital spheriod inertia model",
+    "raw": {
+      "attributes": {
+        "name": "Example orbital spheriod inertia model"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2014-09-15"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Initial version"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "A simple constant mass matrix for a 1-kg, (1/π)-m diameter sphere"
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": []
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/orbital_sphere_inertia.dml"
+}

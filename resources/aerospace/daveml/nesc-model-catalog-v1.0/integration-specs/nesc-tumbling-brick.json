@@ -1,0 +1,46 @@
+{
+  "acceptance_layers": [
+    "source_integrity",
+    "DAVE-ML parse and semantic validation",
+    "embedded static check cases where supplied",
+    "canonical SI/frame dimensional evaluation",
+    "host-dynamics scenario execution",
+    "trajectory-family comparison"
+  ],
+  "canonical_contract": {
+    "attitude": "scalar-first body-to-navigation quaternion",
+    "body_frame": "FRD",
+    "reference_points": "explicit MRC and CG with audited moment transfer",
+    "units": "SI"
+  },
+  "component_documents": {
+    "aerodynamics": [
+      "nesc-all-models-brick-aero"
+    ],
+    "mass_properties": [
+      "nesc-all-models-brick-inertia"
+    ]
+  },
+  "display_name": "NASA/NESC Tumbling Brick",
+  "host_capabilities": [
+    "US1976",
+    "WGS84",
+    "J2",
+    "quaternion rigid-body EOM"
+  ],
+  "known_gaps": "No standalone Taoryx package yet; damping acceptance must be compared against trajectory family",
+  "model_id": "nesc-tumbling-brick",
+  "qualification_status": "source-ready",
+  "qualified_package": null,
+  "scenario_ids": [
+    "Atmos_02",
+    "Atmos_03"
+  ],
+  "schema_version": "1.0",
+  "source_authority": "NASA/NESC 2015 DAVE-ML",
+  "stateful_sidecar_required": false,
+  "target_fidelities": [
+    "3t+3k2",
+    "6dof-rigid-body"
+  ]
+}

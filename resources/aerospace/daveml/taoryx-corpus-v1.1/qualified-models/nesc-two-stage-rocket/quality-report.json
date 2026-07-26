@@ -1,0 +1,333 @@
+{
+  "acceptance": {
+    "benchmark": {
+      "altitude_maximum_absolute_error_m": 8315.707961910404,
+      "altitude_root_mean_square_error_m": 2609.9292752253155,
+      "checkpoint_count": 11,
+      "comparisons": [
+        {
+          "altitude_error_m": 0.0,
+          "nasa_altitude_m": 0.0,
+          "nasa_pitch_deg": 55.22,
+          "nasa_true_airspeed_mps": 0.03048,
+          "pitch_error_deg": 0.0,
+          "taoryx_altitude_m": 0.0,
+          "taoryx_pitch_deg": 55.22,
+          "taoryx_true_airspeed_mps": 0.03048,
+          "time_s": 0.0,
+          "true_airspeed_error_mps": 0.0
+        },
+        {
+          "altitude_error_m": -0.8123462051035517,
+          "nasa_altitude_m": 449.5,
+          "nasa_pitch_deg": 54.242,
+          "nasa_true_airspeed_mps": 242.74,
+          "pitch_error_deg": -0.0037102017297385714,
+          "taoryx_altitude_m": 448.68765379489645,
+          "taoryx_pitch_deg": 54.23828979827026,
+          "taoryx_true_airspeed_mps": 242.7790767156733,
+          "time_s": 5.0,
+          "true_airspeed_error_mps": 0.0390767156733034
+        },
+        {
+          "altitude_error_m": -1.9650654151412255,
+          "nasa_altitude_m": 1829.3,
+          "nasa_pitch_deg": 43.24,
+          "nasa_true_airspeed_mps": 509.85,
+          "pitch_error_deg": -0.14770652344379442,
+          "taoryx_altitude_m": 1827.3349345848587,
+          "taoryx_pitch_deg": 43.09229347655621,
+          "taoryx_true_airspeed_mps": 509.9139837237671,
+          "time_s": 10.0,
+          "true_airspeed_error_mps": 0.06398372376708039
+        },
+        {
+          "altitude_error_m": -9.093177313543492,
+          "nasa_altitude_m": 7248.4,
+          "nasa_pitch_deg": 39.63,
+          "nasa_true_airspeed_mps": 1132.6,
+          "pitch_error_deg": -0.1536937339630171,
+          "taoryx_altitude_m": 7239.306822686456,
+          "taoryx_pitch_deg": 39.476306266036985,
+          "taoryx_true_airspeed_mps": 1132.8458565307867,
+          "time_s": 20.0,
+          "true_airspeed_error_mps": 0.2458565307867957
+        },
+        {
+          "altitude_error_m": -22.3911187585436,
+          "nasa_altitude_m": 16628.3,
+          "nasa_pitch_deg": 36.82,
+          "nasa_true_airspeed_mps": 1926.28,
+          "pitch_error_deg": -0.133253595723545,
+          "taoryx_altitude_m": 16605.908881241456,
+          "taoryx_pitch_deg": 36.686746404276455,
+          "taoryx_true_airspeed_mps": 1926.7605803166132,
+          "time_s": 30.0,
+          "true_airspeed_error_mps": 0.48058031661321365
+        },
+        {
+          "altitude_error_m": -37.91961060687754,
+          "nasa_altitude_m": 26747.1,
+          "nasa_pitch_deg": 36.13,
+          "nasa_true_airspeed_mps": 2700.39,
+          "pitch_error_deg": 0.0634427862856981,
+          "taoryx_altitude_m": 26709.18038939312,
+          "taoryx_pitch_deg": 36.1934427862857,
+          "taoryx_true_airspeed_mps": 2700.681213537653,
+          "time_s": 37.4,
+          "true_airspeed_error_mps": 0.29121353765322056
+        },
+        {
+          "altitude_error_m": -69.18193147744023,
+          "nasa_altitude_m": 46027.1,
+          "nasa_pitch_deg": 33.97,
+          "nasa_true_airspeed_mps": 2625.5,
+          "pitch_error_deg": 0.06791135956534333,
+          "taoryx_altitude_m": 45957.91806852256,
+          "taoryx_pitch_deg": 34.03791135956534,
+          "taoryx_true_airspeed_mps": 2625.8966542239664,
+          "time_s": 50.0,
+          "true_airspeed_error_mps": 0.3966542239663795
+        },
+        {
+          "altitude_error_m": -190.97071580347256,
+          "nasa_altitude_m": 109110.6,
+          "nasa_pitch_deg": 29.17,
+          "nasa_true_airspeed_mps": 2384.7,
+          "pitch_error_deg": 1.7171290051394834,
+          "taoryx_altitude_m": 108919.62928419653,
+          "taoryx_pitch_deg": 30.887129005139485,
+          "taoryx_true_airspeed_mps": 2385.662188431342,
+          "time_s": 100.0,
+          "true_airspeed_error_mps": 0.9621884313423834
+        },
+        {
+          "altitude_error_m": 21.56512834870955,
+          "nasa_altitude_m": 153860.0,
+          "nasa_pitch_deg": 22.08,
+          "nasa_true_airspeed_mps": 3105.2,
+          "pitch_error_deg": 3.3689584977045897,
+          "taoryx_altitude_m": 153881.5651283487,
+          "taoryx_pitch_deg": 25.448958497704588,
+          "taoryx_true_airspeed_mps": 3101.6350862539944,
+          "time_s": 150.0,
+          "true_airspeed_error_mps": -3.564913746005459
+        },
+        {
+          "altitude_error_m": 2394.6383141617407,
+          "nasa_altitude_m": 184731.0,
+          "nasa_pitch_deg": 17.92,
+          "nasa_true_airspeed_mps": 5098.1,
+          "pitch_error_deg": 3.355489636760435,
+          "taoryx_altitude_m": 187125.63831416174,
+          "taoryx_pitch_deg": 21.275489636760437,
+          "taoryx_true_airspeed_mps": 5085.325364926209,
+          "time_s": 175.0,
+          "true_airspeed_error_mps": -12.774635073791615
+        },
+        {
+          "altitude_error_m": 8315.707961910404,
+          "nasa_altitude_m": 234477.0,
+          "nasa_pitch_deg": 12.16,
+          "nasa_true_airspeed_mps": 8380.7,
+          "pitch_error_deg": 0.2695632205003804,
+          "taoryx_altitude_m": 242792.7079619104,
+          "taoryx_pitch_deg": 12.42956322050038,
+          "taoryx_true_airspeed_mps": 8358.683206005488,
+          "time_s": 200.0,
+          "true_airspeed_error_mps": -22.016793994513137
+        }
+      ],
+      "final_altitude_error_m": 8315.707961910404,
+      "final_pitch_error_deg": 0.2695632205003804,
+      "final_speed_error_mps": -22.016793994513137,
+      "pitch_maximum_absolute_error_deg": 3.3689584977045897,
+      "pitch_root_mean_square_error_deg": 1.528583260259098,
+      "speed_maximum_absolute_error_mps": 22.016793994513137,
+      "speed_root_mean_square_error_mps": 7.758304051660967
+    },
+    "benchmark_passed": true,
+    "convergence": {
+      "coarse_step_s": 0.02,
+      "final_altitude_delta_m": 0.06034884322434664,
+      "final_pitch_delta_deg": 4.516883257643656e-05,
+      "final_true_airspeed_delta_mps": -0.00014266865400713868,
+      "fine_step_s": 0.01,
+      "passed": true
+    },
+    "endpoint_in_nasa_altitude_envelope": true,
+    "endpoint_perigee_above_125_km": false,
+    "passed": true,
+    "schedule_checks": [
+      {
+        "absolute_error_kg": 0.0,
+        "actual_mass_kg": 314000.0,
+        "expected_mass_kg": 314000.0,
+        "name": "liftoff",
+        "passed": true,
+        "phase": "stage1_burn",
+        "time_s": 0.0
+      },
+      {
+        "absolute_error_kg": 0.0,
+        "actual_mass_kg": 134000.0,
+        "expected_mass_kg": 134000.0,
+        "name": "stage1_burnout",
+        "passed": true,
+        "phase": "stack_coast",
+        "time_s": 37.38045176470588
+      },
+      {
+        "absolute_error_kg": 0.0,
+        "actual_mass_kg": 134000.0,
+        "expected_mass_kg": 134000.0,
+        "name": "pre_stage2_ignition_stack",
+        "passed": true,
+        "phase": "stack_coast",
+        "time_s": 134.17045176470586
+      },
+      {
+        "absolute_error_kg": 0.0,
+        "actual_mass_kg": 99000.0,
+        "expected_mass_kg": 99000.0,
+        "name": "post_stage2_ignition",
+        "passed": true,
+        "phase": "stage2_burn",
+        "time_s": 134.1704517647059
+      },
+      {
+        "absolute_error_kg": 0.0,
+        "actual_mass_kg": 19000.0,
+        "expected_mass_kg": 19000.0,
+        "name": "stage2_burnout",
+        "passed": true,
+        "phase": "orbit_coast",
+        "time_s": 195.3636357647059
+      },
+      {
+        "absolute_error_kg": 0.0,
+        "actual_mass_kg": 19000.0,
+        "expected_mass_kg": 19000.0,
+        "name": "nominal_endpoint",
+        "passed": true,
+        "phase": "orbit_coast",
+        "time_s": 200.0
+      }
+    ],
+    "schedule_passed": true,
+    "schema_version": "0.1.0",
+    "source_equivalence_comparisons": 162,
+    "source_equivalence_maximum_absolute_error": 2.7755575615628914e-17,
+    "source_equivalence_passed": true,
+    "warnings": [
+      "The full upper-atmosphere equations above 84.852 km are not included; the runtime uses a documented exponential continuation where aerodynamic loads are tiny.",
+      "NASA participating trajectory traces diverge after second-stage ignition; acceptance uses the simulation-06 checkpoints plus a final-altitude ensemble envelope.",
+      "The 200-second osculating perigee is below 125 km, so the README's qualitative perigee expectation is recorded as not reproduced even though the published trajectory checkpoint envelope is reproduced."
+    ]
+  },
+  "coarse_trajectory_summary": {
+    "duration_s": 200.0,
+    "endpoint_orbit": {
+      "apogee_altitude_m": 6810770.898210134,
+      "apogee_radius_m": 13188907.898210134,
+      "eccentricity": 0.41153198725398016,
+      "inclination_deg": 0.0,
+      "perigee_altitude_m": -879678.239423926,
+      "perigee_radius_m": 5498458.760576074,
+      "semi_major_axis_m": 9343683.329393104,
+      "specific_orbital_energy_j_kg": -21329941.72362914
+    },
+    "final_altitude_m": 242792.76831075363,
+    "final_mass_kg": 19000.0,
+    "final_pitch_deg": 12.429608389332957,
+    "final_true_airspeed_mps": 8358.683063336834,
+    "integration_step_count": 10003,
+    "integration_step_s": 0.02,
+    "maximum_altitude_m": 242792.76831075363,
+    "maximum_dynamic_pressure_pa": 395805.2775490924,
+    "maximum_dynamic_pressure_time_s": 23.599999999999582,
+    "maximum_mach": 30.54420465893285,
+    "maximum_mach_time_s": 195.4,
+    "output_sample_count": 1001,
+    "output_step_s": 0.2,
+    "source_table_clamp_count": 1,
+    "stage1_burnout_s": 37.38045176470588,
+    "stage2_burnout_s": 195.3636357647059,
+    "stage2_ignition_s": 134.1704517647059,
+    "upper_atmosphere_sample_count": 602
+  },
+  "compileall": {
+    "passed": true
+  },
+  "fine_trajectory_summary": {
+    "duration_s": 200.0,
+    "endpoint_orbit": {
+      "apogee_altitude_m": 6810769.830637643,
+      "apogee_radius_m": 13188906.830637643,
+      "eccentricity": 0.4115317979449143,
+      "inclination_deg": 0.0,
+      "perigee_altitude_m": -879676.1782195894,
+      "perigee_radius_m": 5498460.821780411,
+      "semi_major_axis_m": 9343683.826209027,
+      "specific_orbital_energy_j_kg": -21329940.589488164
+    },
+    "final_altitude_m": 242792.7079619104,
+    "final_mass_kg": 19000.0,
+    "final_pitch_deg": 12.42956322050038,
+    "final_true_airspeed_mps": 8358.683206005488,
+    "integration_step_count": 20003,
+    "integration_step_s": 0.01,
+    "maximum_altitude_m": 242792.7079619104,
+    "maximum_dynamic_pressure_pa": 395807.61639727664,
+    "maximum_dynamic_pressure_time_s": 23.700000000000003,
+    "maximum_mach": 30.544205128585062,
+    "maximum_mach_time_s": 195.4,
+    "output_sample_count": 2001,
+    "output_step_s": 0.1,
+    "source_table_clamp_count": 1,
+    "stage1_burnout_s": 37.38045176470588,
+    "stage2_burnout_s": 195.3636357647059,
+    "stage2_ignition_s": 134.1704517647059,
+    "upper_atmosphere_sample_count": 1203
+  },
+  "model_id": "nasa-nesc-two-stage-rocket-scenario17",
+  "package": {
+    "artifact_count": 19,
+    "byte_deterministic_rebuild": true,
+    "integrity_and_source_verification_passed": true,
+    "sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+    "size_bytes": 476619
+  },
+  "package_version": "0.9.0",
+  "pyright": {
+    "errors": 0,
+    "passed": true,
+    "version": "1.1.411",
+    "warnings": 0
+  },
+  "pytest": {
+    "failed": 0,
+    "passed": 105
+  },
+  "ruff": {
+    "passed": true,
+    "version": "0.15.22"
+  },
+  "schema_version": "0.1.0",
+  "wheel": {
+    "clean_install_passed": true,
+    "path": "taoryx_xplane-0.9.0-py3-none-any.whl",
+    "sha256": "8adba99b1db5cd0cbcbe786df2198069620d0cc3ef30014cb018c96980c25de1"
+  },
+  "wheel_smoke": {
+    "cli_model_id": "nasa-nesc-two-stage-rocket-scenario17",
+    "five_second_altitude_m": 448.6876537948847,
+    "package_artifacts": 19,
+    "package_verification_passed": true,
+    "passed": true,
+    "source_comparisons": 162,
+    "source_max_error": 2.7755575615628914e-17,
+    "version": "0.9.0",
+    "wheel_sha256": "8adba99b1db5cd0cbcbe786df2198069620d0cc3ef30014cb018c96980c25de1"
+  }
+}

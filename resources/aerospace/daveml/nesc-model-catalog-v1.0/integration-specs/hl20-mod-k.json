@@ -1,0 +1,42 @@
+{
+  "acceptance_layers": [
+    "source_integrity",
+    "DAVE-ML parse and semantic validation",
+    "embedded static check cases where supplied",
+    "canonical SI/frame dimensional evaluation",
+    "host-dynamics scenario execution",
+    "trajectory-family comparison"
+  ],
+  "canonical_contract": {
+    "attitude": "scalar-first body-to-navigation quaternion",
+    "body_frame": "FRD",
+    "reference_points": "explicit MRC and CG with audited moment transfer",
+    "units": "SI"
+  },
+  "component_documents": {
+    "aerodynamics": [
+      "daveml-example-hl20-aero"
+    ]
+  },
+  "display_name": "NASA HL-20 Mod K Lifting Body",
+  "host_capabilities": [
+    "US1976",
+    "trim",
+    "direct-surface controls",
+    "quaternion EOM"
+  ],
+  "known_gaps": "No propulsion, SAS/actuators, ground contact, or independent NASA trajectory qualification",
+  "model_id": "hl20-mod-k",
+  "qualification_status": "qualified-unpowered-baseline",
+  "qualified_package": "qualified/hl20-mod-k-unpowered-v0.10.txair",
+  "scenario_ids": [],
+  "schema_version": "1.0",
+  "source_authority": "Official DAVE-ML example plus separately attributed fixed inertial binding",
+  "stateful_sidecar_required": false,
+  "target_fidelities": [
+    "3dof-glide",
+    "3t+3k1",
+    "3t+3k2",
+    "6dof-unpowered"
+  ]
+}

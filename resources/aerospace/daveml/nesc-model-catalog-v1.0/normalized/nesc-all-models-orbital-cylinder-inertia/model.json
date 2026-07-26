@@ -1,0 +1,363 @@
+{
+  "breakpoints": [],
+  "check_cases": [],
+  "check_data_provenance": [],
+  "container_sha256": "9d38ac1e32ec5552d41e587bea7c12a9534ebf88abc951e9f0a3ec660c04818d",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "9d38ac1e32ec5552d41e587bea7c12a9534ebf88abc951e9f0a3ec660c04818d",
+  "document_size_bytes": 3917,
+  "functions": [],
+  "gridded_tables": [],
+  "header": {
+    "attributes": {
+      "name": "Example orbital cylinder inertia model"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2014-09-15",
+    "description": "A simple constant mass matrix for a 1,000-kg cylindrical satellite (rocket body).",
+    "file_version": "Initial version",
+    "modification_records": [],
+    "name": "Example orbital cylinder inertia model",
+    "raw": {
+      "attributes": {
+        "name": "Example orbital cylinder inertia model"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2014-09-15"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Initial version"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "A simple constant mass matrix for a 1,000-kg cylindrical satellite (rocket body)."
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": []
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/orbital_cylinder_inertia.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "500",
+        "name": "bodyMomentOfInertia_Roll",
+        "units": "kgm",
+        "varID": "XIXX"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Rolling moment of inertia about the body X axis",
+      "initial_value": 500.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyMomentOfInertia_Roll",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm",
+      "variable_id": "XIXX"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "12250",
+        "name": "bodyMomentOfInertia_Pitch",
+        "units": "kgm",
+        "varID": "XIYY"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Pitching moment of inertia about the body Y axis",
+      "initial_value": 12250.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyMomentOfInertia_Pitch",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm",
+      "variable_id": "XIYY"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "12250",
+        "name": "bodyMomentOfInertia_Yaw",
+        "units": "kgm",
+        "varID": "XIZZ"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Yawing moment of inertia about the body Z axis",
+      "initial_value": 12250.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyMomentOfInertia_Yaw",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm",
+      "variable_id": "XIZZ"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyProductOfInertia_ZX",
+        "units": "kgm",
+        "varID": "XIZX"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Cross-product of inertia in the body X-Z plane",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyProductOfInertia_ZX",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm",
+      "variable_id": "XIZX"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyProductOfInertia_XY",
+        "units": "kgm",
+        "varID": "XIXY"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Cross-product of inertia in the body X-Y plane",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyProductOfInertia_XY",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm",
+      "variable_id": "XIXY"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyProductOfInertia_YZ",
+        "units": "kgm",
+        "varID": "XIYZ"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Cross-product of inertia in the body Y-Z plane",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyProductOfInertia_YZ",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kgm",
+      "variable_id": "XIYZ"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "1000",
+        "name": "totalMass",
+        "units": "kg",
+        "varID": "XMASS"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Total mass of vehicle",
+      "initial_value": 1000.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "totalMass",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "kg",
+      "variable_id": "XMASS"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "6.0",
+        "name": "bodyPositionOfCmWrtMrc_X",
+        "sign": "FWD",
+        "units": "m",
+        "varID": "DXCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Longitudinal location of the center of mass relative to the geometric center of the cylinder, positive if the CM is in front of the center",
+      "initial_value": 6.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyPositionOfCmWrtMrc_X",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "FWD",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "DXCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "bodyPositionOfCmWrtMrc_Y",
+        "sign": "RT",
+        "units": "m",
+        "varID": "DYCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Lateral location of the center of mass relative to the geometric center of the cylinder, positive if the CM is to the right of the center",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyPositionOfCmWrtMrc_Y",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "RT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "DYCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "bodyPositionOfCmWrtMrc_Z",
+        "sign": "DOWN",
+        "units": "m",
+        "varID": "DZCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Vertical location of the center of mass relative to the geometric center of the cylinder, positive if the CM is below the center",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyPositionOfCmWrtMrc_Z",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "DOWN",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "DZCG"
+    }
+  ]
+}

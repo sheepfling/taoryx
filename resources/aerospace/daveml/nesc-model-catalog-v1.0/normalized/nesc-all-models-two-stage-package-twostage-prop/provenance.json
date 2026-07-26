@@ -1,0 +1,231 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
+  "header": {
+    "attributes": {
+      "name": "Two-stage to orbit rocket aero model"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      },
+      {
+        "attributes": {
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "eric.m.queen@nasa.gov",
+        "name": "Eric Queen",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2013-08-10",
+    "description": "Eric Queen's two-stage-to-orbit conceptual model. Inputs to this propulsion model are flags indicating if either stage is firing. Outputs are thrust and mass depletion rate.",
+    "file_version": "Rev A, 2014-Mar-27",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2014-03-27",
+          "modID": "A",
+          "refID": "REF_02"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2014-03-27",
+        "description": "Changed from quotient to divide tag in calculation of propulsion consumption rate, on a suggestion from Michael Madden of LaRC.",
+        "modification_id": "A"
+      }
+    ],
+    "name": "Two-stage to orbit rocket aero model",
+    "raw": {
+      "attributes": {
+        "name": "Two-stage to orbit rocket aero model"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 489 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-08-10"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Rev A, 2014-Mar-27"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Eric Queen's two-stage-to-orbit conceptual model. Inputs to this propulsion model are flags indicating if either stage is firing. Outputs are thrust and mass depletion rate."
+        },
+        {
+          "attributes": {
+            "author": "Queen, Eric M.",
+            "date": "2013-07-15",
+            "refID": "REF_01",
+            "title": "twostagetoorbit.pptx"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Source document for data in this model"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "author": "Michael Madden",
+            "date": "2014-03-27",
+            "refID": "REF_02",
+            "title": "Use of MathML quotient to compute mass rate in two stage rocket propulsion model"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "An email from Michael Madden caught a syntax error: \"I ran into a small obstacle today trying to run the DAVE-ML model of the two stage rocket. The propulsion model (twostage_prop.dml) uses the MathML token 'quotient' to compute the mass rate. Our DAVE-ML translator does not handle the quotient token (though it is not too difficult to add). Nevertheless, I was wondering if there was a specific reason to use quotient over divide. The former would produce mass rates that are truncated whole numbers of kg/s; the latter would, of course, allow mass rates with decimal fractions of kg/s.\""
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2014-03-27",
+            "modID": "A",
+            "refID": "REF_02"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Changed from quotient to divide tag in calculation of propulsion consumption rate, on a suggestion from Michael Madden of LaRC."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "author": "Queen, Eric M.",
+          "date": "2013-07-15",
+          "refID": "REF_01",
+          "title": "twostagetoorbit.pptx"
+        },
+        "description": "Source document for data in this model",
+        "ref_id": "REF_01"
+      },
+      {
+        "attributes": {
+          "author": "Michael Madden",
+          "date": "2014-03-27",
+          "refID": "REF_02",
+          "title": "Use of MathML quotient to compute mass rate in two stage rocket propulsion model"
+        },
+        "description": "An email from Michael Madden caught a syntax error: \"I ran into a small obstacle today trying to run the DAVE-ML model of the two stage rocket. The propulsion model (twostage_prop.dml) uses the MathML token 'quotient' to compute the mass rate. Our DAVE-ML translator does not handle the quotient token (though it is not too difficult to add). Nevertheless, I was wondering if there was a specific reason to use quotient over divide. The former would produce mass rates that are truncated whole numbers of kg/s; the latter would, of course, allow mass rates with decimal fractions of kg/s.\"",
+        "ref_id": "REF_02"
+      }
+    ]
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/two-stage_package/twostage_prop.dml"
+}

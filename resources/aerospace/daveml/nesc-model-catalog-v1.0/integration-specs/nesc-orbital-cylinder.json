@@ -1,0 +1,48 @@
+{
+  "acceptance_layers": [
+    "source_integrity",
+    "DAVE-ML parse and semantic validation",
+    "embedded static check cases where supplied",
+    "canonical SI/frame dimensional evaluation",
+    "host-dynamics scenario execution",
+    "trajectory-family comparison"
+  ],
+  "canonical_contract": {
+    "attitude": "scalar-first body-to-navigation quaternion",
+    "body_frame": "FRD",
+    "reference_points": "explicit MRC and CG with audited moment transfer",
+    "units": "SI"
+  },
+  "component_documents": {
+    "mass_properties": [
+      "nesc-all-models-orbital-cylinder-inertia"
+    ]
+  },
+  "display_name": "NASA/NESC Orbital Cylinder",
+  "host_capabilities": [
+    "WGS84",
+    "orbital EOM",
+    "applied force schedules",
+    "gravity-gradient torque"
+  ],
+  "known_gaps": "Applied loads and gravity-gradient law must be represented by Taoryx scenario/dynamic sidecars",
+  "model_id": "nesc-orbital-cylinder",
+  "qualification_status": "source-ready",
+  "qualified_package": null,
+  "scenario_ids": [
+    "Orbit_06C",
+    "Orbit_06D",
+    "Orbit_10A",
+    "Orbit_10B",
+    "Orbit_10C",
+    "Orbit_10D"
+  ],
+  "schema_version": "1.0",
+  "source_authority": "NASA/NESC 2015 DAVE-ML",
+  "stateful_sidecar_required": true,
+  "target_fidelities": [
+    "3dof-orbit",
+    "3t+3k2",
+    "6dof-orbital-rigid-body"
+  ]
+}

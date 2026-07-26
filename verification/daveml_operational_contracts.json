@@ -49,7 +49,7 @@
       "family_id": "reference_nesc_two_stage_rocket",
       "manifest": "families/reference_nesc_two_stage_rocket/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "98d414a66f00ac619ffb88b40b563effff244db6645b04d3099661e4ed731b51",
+      "manifest_sha256": "619a70a7e87adff16a3e2e53a51de943bf5a80852f76c97cec3fd61bbee7ee44",
       "nonclaim_count": 4,
       "qualification_class": "reference_exact",
       "status": "verified"

@@ -1,0 +1,26 @@
+{
+  "calculation_count": 4,
+  "declared_outputs": [
+    "t_amb_C",
+    "sigma",
+    "v_sound_fps",
+    "t_amb_F",
+    "p_amb_psf"
+  ],
+  "document_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
+  "function_count": 3,
+  "model_name": null,
+  "required_inputs": [
+    "alt_ft"
+  ],
+  "topological_order": [
+    "Z_m",
+    "t_amb_C",
+    "p_p0",
+    "sigma",
+    "t_amb_F",
+    "v_sound_fps",
+    "p_amb_psf"
+  ],
+  "variable_count": 10
+}

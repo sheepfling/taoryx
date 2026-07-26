@@ -1,0 +1,26 @@
+{
+  "calculation_count": 3,
+  "declared_outputs": [
+    "isp",
+    "thrust",
+    "mdot",
+    "thrustY",
+    "thrustZ",
+    "thrustll",
+    "thrustlm",
+    "thrustln"
+  ],
+  "document_sha256": "297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee",
+  "function_count": 0,
+  "model_name": "Two-stage to orbit rocket aero model",
+  "required_inputs": [
+    "stg1firing",
+    "stg2firing"
+  ],
+  "topological_order": [
+    "isp",
+    "thrust",
+    "mdot"
+  ],
+  "variable_count": 14
+}

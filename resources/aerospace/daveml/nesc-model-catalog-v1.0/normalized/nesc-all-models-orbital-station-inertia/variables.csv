@@ -1,0 +1,11 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+XIXX,bodyMomentOfInertia_Roll,kgm,,,,,102000000.0,,,isOutput;isStdAIAA,False,Rolling moment of inertia about the body X axis
+XIYY,bodyMomentOfInertia_Pitch,kgm,,,,,91000000.0,,,isOutput;isStdAIAA,False,Pitching moment of inertia about the body Y axis
+XIZZ,bodyMomentOfInertia_Yaw,kgm,,,,,164000000.0,,,isOutput;isStdAIAA,False,Yawing moment of inertia about the body Z axis
+XIZX,bodyProductOfInertia_ZX,kgm,,,,,5480000.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Z plane
+XIXY,bodyProductOfInertia_XY,kgm,,,,,6960000.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Y plane
+XIYZ,bodyProductOfInertia_YZ,kgm,,,,,-590000.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body Y-Z plane
+XMASS,totalMass,kg,,,,,400000.0,,,isOutput;isStdAIAA,False,Total mass of vehicle
+DXCG,bodyPositionOfCmWrtMrc_X,m,,,FWD,,-3.0,,,isOutput;isStdAIAA,False,"Longitudinal location of the center of mass relative to the geometric center of the space station, positive if the CM is in front of the center"
+DYCG,bodyPositionOfCmWrtMrc_Y,m,,,RT,,-1.5,,,isOutput;isStdAIAA,False,"Lateral location of the center of mass relative to the geometric center of the space station, positive if the CM is to the right of the center"
+DZCG,bodyPositionOfCmWrtMrc_Z,m,,,DOWN,,4.0,,,isOutput;isStdAIAA,False,"Vertical location of the center of mass relative to the geometric center of the space station, positive if the CM is below the center"

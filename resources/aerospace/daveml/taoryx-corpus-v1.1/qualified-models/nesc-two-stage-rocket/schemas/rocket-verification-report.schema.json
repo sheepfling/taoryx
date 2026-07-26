@@ -1,0 +1,250 @@
+{
+  "$defs": {
+    "RocketBenchmarkComparison": {
+      "additionalProperties": false,
+      "description": "Comparison to selected NASA simulation-06 checkpoints.",
+      "properties": {
+        "altitude_maximum_absolute_error_m": {
+          "minimum": 0.0,
+          "title": "Altitude Maximum Absolute Error M",
+          "type": "number"
+        },
+        "altitude_root_mean_square_error_m": {
+          "minimum": 0.0,
+          "title": "Altitude Root Mean Square Error M",
+          "type": "number"
+        },
+        "checkpoint_count": {
+          "exclusiveMinimum": 0,
+          "title": "Checkpoint Count",
+          "type": "integer"
+        },
+        "comparisons": {
+          "items": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "title": "Comparisons",
+          "type": "array"
+        },
+        "final_altitude_error_m": {
+          "title": "Final Altitude Error M",
+          "type": "number"
+        },
+        "final_pitch_error_deg": {
+          "title": "Final Pitch Error Deg",
+          "type": "number"
+        },
+        "final_speed_error_mps": {
+          "title": "Final Speed Error Mps",
+          "type": "number"
+        },
+        "pitch_maximum_absolute_error_deg": {
+          "minimum": 0.0,
+          "title": "Pitch Maximum Absolute Error Deg",
+          "type": "number"
+        },
+        "pitch_root_mean_square_error_deg": {
+          "minimum": 0.0,
+          "title": "Pitch Root Mean Square Error Deg",
+          "type": "number"
+        },
+        "speed_maximum_absolute_error_mps": {
+          "minimum": 0.0,
+          "title": "Speed Maximum Absolute Error Mps",
+          "type": "number"
+        },
+        "speed_root_mean_square_error_mps": {
+          "minimum": 0.0,
+          "title": "Speed Root Mean Square Error Mps",
+          "type": "number"
+        }
+      },
+      "required": [
+        "checkpoint_count",
+        "altitude_root_mean_square_error_m",
+        "altitude_maximum_absolute_error_m",
+        "pitch_root_mean_square_error_deg",
+        "pitch_maximum_absolute_error_deg",
+        "speed_root_mean_square_error_mps",
+        "speed_maximum_absolute_error_mps",
+        "final_altitude_error_m",
+        "final_pitch_error_deg",
+        "final_speed_error_mps",
+        "comparisons"
+      ],
+      "title": "RocketBenchmarkComparison",
+      "type": "object"
+    },
+    "RocketConvergenceReport": {
+      "additionalProperties": false,
+      "description": "Endpoint difference between coarse and fine fixed-step trajectories.",
+      "properties": {
+        "coarse_step_s": {
+          "title": "Coarse Step S",
+          "type": "number"
+        },
+        "final_altitude_delta_m": {
+          "title": "Final Altitude Delta M",
+          "type": "number"
+        },
+        "final_pitch_delta_deg": {
+          "title": "Final Pitch Delta Deg",
+          "type": "number"
+        },
+        "final_true_airspeed_delta_mps": {
+          "title": "Final True Airspeed Delta Mps",
+          "type": "number"
+        },
+        "fine_step_s": {
+          "title": "Fine Step S",
+          "type": "number"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "coarse_step_s",
+        "fine_step_s",
+        "final_altitude_delta_m",
+        "final_pitch_delta_deg",
+        "final_true_airspeed_delta_mps",
+        "passed"
+      ],
+      "title": "RocketConvergenceReport",
+      "type": "object"
+    },
+    "RocketScheduleCheck": {
+      "additionalProperties": false,
+      "description": "One exact mass-property event check.",
+      "properties": {
+        "absolute_error_kg": {
+          "minimum": 0.0,
+          "title": "Absolute Error Kg",
+          "type": "number"
+        },
+        "actual_mass_kg": {
+          "title": "Actual Mass Kg",
+          "type": "number"
+        },
+        "expected_mass_kg": {
+          "title": "Expected Mass Kg",
+          "type": "number"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "phase": {
+          "minLength": 1,
+          "title": "Phase",
+          "type": "string"
+        },
+        "time_s": {
+          "minimum": 0.0,
+          "title": "Time S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "time_s",
+        "expected_mass_kg",
+        "actual_mass_kg",
+        "absolute_error_kg",
+        "phase",
+        "passed"
+      ],
+      "title": "RocketScheduleCheck",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Source, event, convergence, and NASA trajectory acceptance evidence.",
+  "properties": {
+    "benchmark": {
+      "$ref": "#/$defs/RocketBenchmarkComparison"
+    },
+    "benchmark_passed": {
+      "title": "Benchmark Passed",
+      "type": "boolean"
+    },
+    "convergence": {
+      "$ref": "#/$defs/RocketConvergenceReport"
+    },
+    "endpoint_in_nasa_altitude_envelope": {
+      "title": "Endpoint In Nasa Altitude Envelope",
+      "type": "boolean"
+    },
+    "endpoint_perigee_above_125_km": {
+      "title": "Endpoint Perigee Above 125 Km",
+      "type": "boolean"
+    },
+    "passed": {
+      "title": "Passed",
+      "type": "boolean"
+    },
+    "schedule_checks": {
+      "items": {
+        "$ref": "#/$defs/RocketScheduleCheck"
+      },
+      "title": "Schedule Checks",
+      "type": "array"
+    },
+    "schedule_passed": {
+      "title": "Schedule Passed",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_equivalence_comparisons": {
+      "minimum": 1,
+      "title": "Source Equivalence Comparisons",
+      "type": "integer"
+    },
+    "source_equivalence_maximum_absolute_error": {
+      "minimum": 0.0,
+      "title": "Source Equivalence Maximum Absolute Error",
+      "type": "number"
+    },
+    "source_equivalence_passed": {
+      "title": "Source Equivalence Passed",
+      "type": "boolean"
+    },
+    "warnings": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "source_equivalence_comparisons",
+    "source_equivalence_maximum_absolute_error",
+    "source_equivalence_passed",
+    "schedule_checks",
+    "schedule_passed",
+    "benchmark",
+    "benchmark_passed",
+    "convergence",
+    "endpoint_in_nasa_altitude_envelope",
+    "endpoint_perigee_above_125_km",
+    "passed"
+  ],
+  "title": "RocketVerificationReport",
+  "type": "object"
+}

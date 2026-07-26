@@ -1,0 +1,63 @@
+{
+  "artifact": "taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_summary": {
+    "archive_inventory": [
+      {
+        "archive": "raw/nesc/official/All_models.zip",
+        "compressed_bytes": 1466405,
+        "member_count": 34,
+        "status": "ok"
+      },
+      {
+        "archive": "raw/nesc/official/Atmospheric_checkcases.zip",
+        "compressed_bytes": 24890355,
+        "member_count": 101,
+        "status": "ok"
+      }
+    ],
+    "atmospheric_scenario_count": 19,
+    "atmospheric_trajectory_archive_included": true,
+    "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
+    "catalog_version": "1.0.0",
+    "check_failed_document_count": 1,
+    "check_passed_document_count": 4,
+    "compile_failed_count": 2,
+    "compile_passed_count": 20,
+    "created_utc": "2026-07-25T04:33:44+00:00",
+    "embedded_check_case_count": 112,
+    "embedded_check_passed_count": 66,
+    "fixture_count": 7,
+    "function_count": 293,
+    "gridded_table_count": 218,
+    "initial_conditions_workbook_included": false,
+    "model_family_count": 9,
+    "official_all_models_archive_included": true,
+    "official_initial_conditions_url": "https://nescacademy.nasa.gov/src/flightsim/Scenarios/Initial_Conditions.xlsx",
+    "official_orbital_archive_url": "https://nescacademy.nasa.gov/src/flightsim/Datasets/Orbital_checkcases.zip",
+    "orbital_scenario_count": 26,
+    "orbital_trajectory_archive_included": false,
+    "parse_passed_count": 22,
+    "pinned_simupy_flight_commit": "70754e6916afc206e8c0abb386d1a9c98bf8f561",
+    "qualified_package_count": 3,
+    "scenario_count": 45,
+    "source_document_count": 22,
+    "table_point_count": 8368,
+    "ungridded_table_count": 3,
+    "variable_count": 834
+  },
+  "created_utc": "2026-07-25T04:33:44+00:00",
+  "description": "Official DAVE-ML examples and NASA/NESC 2015 model/scenario resource catalog for Taoryx incorporation.",
+  "entrypoints": {
+    "documents": "catalog/source-documents.csv",
+    "models": "catalog/models.csv",
+    "readme": "README.md",
+    "roadmap": "catalog/implementation-roadmap.csv",
+    "scenarios": "catalog/scenarios.csv",
+    "sqlite": "catalog.sqlite",
+    "summary": "catalog/catalog-summary.json",
+    "verification": "scripts/verify_catalog.py"
+  },
+  "file_count_before_checksum_ledger": 536,
+  "uncompressed_bytes_before_checksum_ledger": 112744847,
+  "version": "1.0.0"
+}

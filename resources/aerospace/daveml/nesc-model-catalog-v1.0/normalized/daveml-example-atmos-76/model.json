@@ -1,0 +1,3143 @@
+{
+  "breakpoints": [
+    {
+      "attributes": {
+        "bpID": "Z_m_pts"
+      },
+      "breakpoint_id": "Z_m_pts",
+      "description": "Geometric altitude, Z, breakpoint set in meters",
+      "issues": [],
+      "name": null,
+      "units": null,
+      "values": [
+        -1000.0,
+        -500.0,
+        0.0,
+        1000.0,
+        1500.0,
+        2000.0,
+        2500.0,
+        3000.0,
+        3500.0,
+        4000.0,
+        4500.0,
+        5000.0,
+        5500.0,
+        6000.0,
+        6500.0,
+        7000.0,
+        7500.0,
+        8000.0,
+        8500.0,
+        9000.0,
+        9500.0,
+        10000.0,
+        10500.0,
+        11000.0,
+        11100.0,
+        12000.0,
+        13000.0,
+        14000.0,
+        15000.0,
+        16000.0,
+        17000.0,
+        18000.0,
+        19000.0,
+        20000.0,
+        20100.0,
+        21000.0,
+        22000.0,
+        23000.0,
+        24000.0,
+        25000.0,
+        26000.0,
+        27000.0,
+        28000.0,
+        29000.0,
+        30000.0,
+        31000.0,
+        32000.0,
+        33000.0,
+        34000.0,
+        35000.0,
+        36000.0,
+        37000.0,
+        38000.0,
+        39000.0,
+        40000.0,
+        41000.0,
+        42000.0,
+        43000.0,
+        44000.0,
+        45000.0,
+        46000.0,
+        47400.0,
+        48000.0,
+        50000.0,
+        51000.0,
+        51500.0,
+        52000.0,
+        53000.0,
+        54000.0,
+        55000.0,
+        56000.0,
+        57000.0,
+        58000.0,
+        59000.0,
+        60000.0,
+        61000.0,
+        62000.0,
+        63000.0,
+        64000.0,
+        65000.0,
+        66000.0,
+        67000.0,
+        68000.0,
+        69000.0,
+        70000.0,
+        71000.0,
+        72000.0,
+        73000.0,
+        74000.0,
+        75000.0,
+        76000.0,
+        77000.0,
+        78000.0,
+        79000.0,
+        80000.0,
+        81000.0,
+        82000.0,
+        83000.0,
+        84000.0,
+        85000.0,
+        85500.0
+      ]
+    }
+  ],
+  "check_cases": [
+    {
+      "attributes": {
+        "name": "sea level"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 0.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "sea level",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 59.0
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 2116.22
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 1.0
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "5000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 5000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "5000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 41.2
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 1761.12
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.8616
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "10000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 10000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "10000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 23.36
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 1455.84
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.73866
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "15000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 15000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "15000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 5.55
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 1194.336
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.6292
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "20000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 20000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "20000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -12.3
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 972.576
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.5328
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "25000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 25000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "25000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -30.2
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 785.376
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.4481
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "30000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 30000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "30000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -48.0
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 628.416
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.3741
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "35000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 35000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "35000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -65.8
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 497.952
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.3099
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "40000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 40000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "40000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -69.7
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 391.68
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.2462
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "45000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 45000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "45000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -69.7
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 308.016
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.1936
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "50000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 50000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "50000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -69.7
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 242.208
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.1522
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "55000 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 55000.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "55000 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -69.7
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 192.24
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.12082
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "60695 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 60695.53806
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "60695 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -69.7
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 146.0890153
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.091816
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "67257 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 67257.21785
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "67257 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -68.9188
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 106.7865774
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.066981
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "73818 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 73818.89764
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "73818 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -65.3422
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 78.22818852
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.048623
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "80380 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 80380.57743
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "80380 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -61.7692
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 57.47865142
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.035405
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "86942 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 86942.25722
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "86942 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -58.198
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 42.35825952
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.025859
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "93503 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 93503.93701
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "93503 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -54.6286
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 31.30524246
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.018943
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "100065 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 100065.6168
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "100065 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -51.0628
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 23.20223608
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.013918
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "103018 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 103018.3727
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "103018 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -49.4572
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 20.29560791
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.012126
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "106299 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 106299.2126
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "106299 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -46.912
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 17.50240913
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.010393
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "109580 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 109580.0525
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "109580 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -41.9242
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 15.11637108
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0088688
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "112860 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 112860.8924
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "112860 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -36.9364
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 13.07866284
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0075829
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "116141 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 116141.7323
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "116141 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -31.9522
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 11.33553243
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0064956
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "119422 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 119422.5722
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "119422 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -26.968
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 9.84148111
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0055745
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "122703 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 122703.4121
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "122703 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -21.9874
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 8.558416924
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0047926
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "125984 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 125984.252
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "125984 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -17.0068
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 7.454808194
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0041277
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "129265 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 129265.0919
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "129265 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -12.028
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 6.503990548
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0035611
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "132545 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 132545.9318
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "132545 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -7.0492
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 5.68310881
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0030774
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "135826 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 135826.7717
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "135826 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -2.074
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 4.973328622
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0026638
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "139107 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 139107.6115
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "139107 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 2.8994
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 4.358566712
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0023095
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "142388 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 142388.4514
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "142388 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 7.8728
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 3.825490894
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0020055
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "145669 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 145669.2913
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "145669 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 12.8444
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 3.362461958
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0017441
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "152230 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 152230.9711
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "152230 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 22.7804
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 2.60824115
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0013251
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "160761 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 160761.1549
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "160761 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 27.5
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 1.886715941
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.0009492
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "175524 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 175524.9344
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "175524 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": 17.1338
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 1.075801599
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.00055299
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "188648 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 188648.294
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "188648 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -2.6626
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 0.640981876
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.00034377
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "205052 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 205052.4934
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "205052 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -27.3928
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 0.325114879
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 0.00018434
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "221456 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 221456.6929
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "221456 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -52.0852
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 0.158629735
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 9.549e-05
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "237860 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 237860.8924
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "237860 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -75.757
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 0.074099443
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 4.7307e-05
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "254265 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 254265.0919
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "254265 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -93.6994
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 0.033269095
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 2.2259e-05
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "270669 ft"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "GeometricAltitude",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 270669.2913
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "270669 ft",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "AmbientTemperature",
+          "identifier_kind": "signalName",
+          "tolerance": 0.4,
+          "units": "dgF",
+          "value": -110.8948
+        },
+        {
+          "attributes": {},
+          "identifier": "AmbientPressure",
+          "identifier_kind": "signalName",
+          "tolerance": 2.5,
+          "units": "lbf_ft2",
+          "value": 0.014379292
+        },
+        {
+          "attributes": {},
+          "identifier": "RatioOfDensityToSeaLevel",
+          "identifier_kind": "signalName",
+          "tolerance": 0.002,
+          "units": "nd",
+          "value": 1.0105e-05
+        }
+      ],
+      "reference_id": null
+    }
+  ],
+  "check_data_provenance": [],
+  "container_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
+  "document_size_bytes": 47083,
+  "functions": [
+    {
+      "attributes": {
+        "name": "T_dgC_function"
+      },
+      "dependent_variable_id": "t_amb_C",
+      "description": "Table lookup for ambient temperature; returns ambient temperature in degrees C (in variable t_amb_C) based on input value of Z_m (geometric altitude, meters) using the breakpoint values in Z_m_pts and the table defined in T_dgC_table.",
+      "function_id": "function-0001",
+      "independent_variables": [
+        {
+          "attributes": {
+            "varID": "Z_m"
+          },
+          "extrapolation": null,
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": null,
+          "minimum_value": null,
+          "variable_id": "Z_m"
+        }
+      ],
+      "issues": [],
+      "name": "T_dgC_function",
+      "provenance": null,
+      "table_id": "T_dgC_table",
+      "table_kind": "gridded"
+    },
+    {
+      "attributes": {
+        "name": "P_P0_function"
+      },
+      "dependent_variable_id": "p_p0",
+      "description": "Table lookup for pressure ratio; returns ambient pressure normalized with SL pressure (in variable p_p0) based on input value of Z_m (geometric altitude, meters) using the breakpoint values in Z_m_pts and the table defined in P_P0_table.",
+      "function_id": "function-0002",
+      "independent_variables": [
+        {
+          "attributes": {
+            "varID": "Z_m"
+          },
+          "extrapolation": null,
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": null,
+          "minimum_value": null,
+          "variable_id": "Z_m"
+        }
+      ],
+      "issues": [],
+      "name": "P_P0_function",
+      "provenance": null,
+      "table_id": "P_P0_table",
+      "table_kind": "gridded"
+    },
+    {
+      "attributes": {
+        "name": "sigma_function"
+      },
+      "dependent_variable_id": "sigma",
+      "description": "Table lookup for density ratio; returns density normalized with SL density (in variable sigma) based on input value of Z_m (geometric altitude, meters) using the breakpoint values in Z_m_pts and the table defined in sigma_table.",
+      "function_id": "function-0003",
+      "independent_variables": [
+        {
+          "attributes": {
+            "varID": "Z_m"
+          },
+          "extrapolation": null,
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": null,
+          "minimum_value": null,
+          "variable_id": "Z_m"
+        }
+      ],
+      "issues": [],
+      "name": "sigma_function",
+      "provenance": null,
+      "table_id": "sigma_table",
+      "table_kind": "gridded"
+    }
+  ],
+  "gridded_tables": [
+    {
+      "attributes": {
+        "gtID": "T_dgC_table"
+      },
+      "breakpoint_ids": [
+        "Z_m_pts"
+      ],
+      "declared_id": "T_dgC_table",
+      "description": "1976 atmosphere table I ambient temperatures in degrees C",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": null,
+      "provenance": null,
+      "shape": [
+        101
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "T_dgC_table",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        21.501,
+        18.25,
+        15.0,
+        8.501,
+        5.252,
+        2.004,
+        -1.244,
+        -4.491,
+        -7.737,
+        -10.984,
+        -14.229,
+        -17.474,
+        -20.719,
+        -23.963,
+        -27.207,
+        -30.45,
+        -33.693,
+        -36.935,
+        -40.176,
+        -43.417,
+        -46.658,
+        -49.898,
+        -53.137,
+        -56.376,
+        -56.5,
+        -56.5,
+        -56.5,
+        -56.5,
+        -56.5,
+        -56.5,
+        -56.5,
+        -56.5,
+        -56.5,
+        -56.5,
+        -56.463,
+        -55.569,
+        -54.576,
+        -53.583,
+        -52.59,
+        -51.598,
+        -50.606,
+        -49.614,
+        -48.623,
+        -47.632,
+        -46.641,
+        -45.65,
+        -44.66,
+        -42.177,
+        -39.407,
+        -36.637,
+        -33.686,
+        -31.1,
+        -28.332,
+        -25.566,
+        -22.8,
+        -20.036,
+        -17.272,
+        -14.509,
+        -11.747,
+        -8.986,
+        -6.225,
+        -2.5,
+        -2.5,
+        -2.5,
+        -2.5,
+        -2.741,
+        -4.119,
+        -6.873,
+        -9.626,
+        -12.379,
+        -15.131,
+        -17.882,
+        -20.632,
+        -23.381,
+        -26.129,
+        -28.876,
+        -31.623,
+        -34.369,
+        -37.114,
+        -39.858,
+        -42.601,
+        -45.343,
+        -48.085,
+        -50.825,
+        -53.565,
+        -56.304,
+        -58.887,
+        -60.842,
+        -62.797,
+        -64.751,
+        -66.704,
+        -68.657,
+        -70.609,
+        -72.56,
+        -74.511,
+        -76.462,
+        -78.411,
+        -80.36,
+        -82.309,
+        -84.257,
+        -85.23
+      ]
+    },
+    {
+      "attributes": {
+        "gtID": "P_P0_table"
+      },
+      "breakpoint_ids": [
+        "Z_m_pts"
+      ],
+      "declared_id": "P_P0_table",
+      "description": "1976 atmosphere table I ambient pressure ratios (relative to sea level)",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": null,
+      "provenance": null,
+      "shape": [
+        101
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "P_P0_table",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        1.1244,
+        1.0607,
+        1.0,
+        0.887,
+        0.83453,
+        0.78461,
+        0.73715,
+        0.69204,
+        0.6492,
+        0.60854,
+        0.56997,
+        0.53341,
+        0.49878,
+        0.466,
+        0.43499,
+        0.40567,
+        0.37798,
+        0.35185,
+        0.3272,
+        0.30397,
+        0.2821,
+        0.26153,
+        0.24219,
+        0.22403,
+        0.22053,
+        0.19145,
+        0.16362,
+        0.13985,
+        0.11953,
+        0.10217,
+        0.08734,
+        0.074663,
+        0.063829,
+        0.05457,
+        0.053721,
+        0.046671,
+        0.039945,
+        0.034215,
+        0.029328,
+        0.025158,
+        0.021597,
+        0.018553,
+        0.01595,
+        0.013722,
+        0.011813,
+        0.010177,
+        0.0087743,
+        0.0075727,
+        0.0065473,
+        0.0056708,
+        0.00492,
+        0.0042758,
+        0.003722,
+        0.0032452,
+        0.0028338,
+        0.0024784,
+        0.0021709,
+        0.0019042,
+        0.0016728,
+        0.0014615,
+        0.0012962,
+        0.0010877,
+        0.0010095,
+        0.00078735,
+        0.00069536,
+        0.00065349,
+        0.00061401,
+        0.00054156,
+        0.00047705,
+        0.00041969,
+        0.00036873,
+        0.00032353,
+        0.00028348,
+        0.00024803,
+        0.00021671,
+        0.00018907,
+        0.0001647,
+        0.00014325,
+        0.00012441,
+        0.00010786,
+        9.3372e-05,
+        8.0688e-05,
+        6.9607e-05,
+        5.9942e-05,
+        5.1526e-05,
+        4.421e-05,
+        3.7861e-05,
+        3.2373e-05,
+        2.7642e-05,
+        2.3569e-05,
+        2.0067e-05,
+        1.706e-05,
+        1.4481e-05,
+        1.2274e-05,
+        1.0387e-05,
+        8.7761e-06,
+        7.4028e-06,
+        6.3421e-06,
+        5.241e-06,
+        4.3985e-06,
+        4.0269e-06
+      ]
+    },
+    {
+      "attributes": {
+        "gtID": "sigma_table"
+      },
+      "breakpoint_ids": [
+        "Z_m_pts"
+      ],
+      "declared_id": "sigma_table",
+      "description": "1976 atmosphere table I density ratios (relative to sea level)",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": null,
+      "provenance": null,
+      "shape": [
+        101
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "sigma_table",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        1.0996,
+        1.0489,
+        1.0,
+        0.90748,
+        0.86376,
+        0.82168,
+        0.78119,
+        0.74225,
+        0.70482,
+        0.66885,
+        0.63432,
+        0.60117,
+        0.56936,
+        0.53887,
+        0.50964,
+        0.48165,
+        0.45485,
+        0.42921,
+        0.4047,
+        0.38128,
+        0.35891,
+        0.33756,
+        0.3172,
+        0.2978,
+        0.29332,
+        0.25464,
+        0.21763,
+        0.18601,
+        0.15898,
+        0.13589,
+        0.11616,
+        0.099304,
+        0.084894,
+        0.07258,
+        0.071439,
+        0.061808,
+        0.052661,
+        0.044903,
+        0.038317,
+        0.032722,
+        0.027965,
+        0.023917,
+        0.02047,
+        0.017533,
+        0.015029,
+        0.012891,
+        0.011065,
+        0.0094474,
+        0.0080714,
+        0.0069089,
+        0.0059248,
+        0.0050902,
+        0.0043809,
+        0.0037769,
+        0.0032618,
+        0.0028216,
+        0.0024447,
+        0.0021216,
+        0.001844,
+        0.0016051,
+        0.0013993,
+        0.0011581,
+        0.0010749,
+        0.00083827,
+        0.00074033,
+        0.00069637,
+        0.00065765,
+        0.00058605,
+        0.00052164,
+        0.00046376,
+        0.0004118,
+        0.00036521,
+        0.00032348,
+        0.00028615,
+        0.0002528,
+        0.00022303,
+        0.0001965,
+        0.00017288,
+        0.00015188,
+        0.00013323,
+        0.0001167,
+        0.00010206,
+        8.9118e-05,
+        7.769e-05,
+        6.7616e-05,
+        5.8747e-05,
+        5.0917e-05,
+        4.3938e-05,
+        3.7866e-05,
+        3.2589e-05,
+        2.8009e-05,
+        2.4039e-05,
+        2.0603e-05,
+        1.7632e-05,
+        1.5068e-05,
+        1.2857e-05,
+        1.0954e-05,
+        9.3178e-06,
+        7.9134e-06,
+        6.7099e-06,
+        6.1747e-06
+      ]
+    }
+  ],
+  "header": {
+    "attributes": {},
+    "authors": [
+      {
+        "attributes": {
+          "email": "e.b.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "e.b.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2011-01-21",
+    "description": "Standard 1976 atmosphere. Based on tables built for iOS app, \"FlightMechanic\", by Bruce Jackson dated 2010-08-07.",
+    "file_version": "Mod A, 2011-01-25",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2011-01-25",
+          "modID": "A"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2011-01-25",
+        "description": "Added xmlns=\"http://www.w3.org/1998/Math/MathML\" to <math> elements as required.",
+        "modification_id": "A"
+      }
+    ],
+    "name": null,
+    "raw": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "email": "e.b.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2011-01-21"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Mod A, 2011-01-25"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Standard 1976 atmosphere. Based on tables built for iOS app, \"FlightMechanic\", by Bruce Jackson dated 2010-08-07."
+        },
+        {
+          "attributes": {
+            "accession": "",
+            "author": "NOASS, NASA, USAF Joint Publication",
+            "date": "1976-01-01",
+            "refID": "REF01",
+            "title": "US Standard Atmosphere, 1976"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Data hand-entered from Table I: Geometric Altitude, Metric Units, p53ff"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "accession": "Ronald Press, New York",
+            "author": "Shapiro, Ascher H.",
+            "date": "1953-01-01",
+            "refID": "REF02",
+            "title": "The Dynamics and Thermodynamics of Compressible Flow, Volume I"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Used equation 3.6 on page 48 for relationship between temperature and speed-of-sound"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2011-01-25",
+            "modID": "A"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "MS 132 NASA, Hampton, VA 23681"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added xmlns=\"http://www.w3.org/1998/Math/MathML\" to <math> elements as required."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "",
+          "author": "NOASS, NASA, USAF Joint Publication",
+          "date": "1976-01-01",
+          "refID": "REF01",
+          "title": "US Standard Atmosphere, 1976"
+        },
+        "description": "Data hand-entered from Table I: Geometric Altitude, Metric Units, p53ff",
+        "ref_id": "REF01"
+      },
+      {
+        "attributes": {
+          "accession": "Ronald Press, New York",
+          "author": "Shapiro, Ascher H.",
+          "date": "1953-01-01",
+          "refID": "REF02",
+          "title": "The Dynamics and Thermodynamics of Compressible Flow, Volume I"
+        },
+        "description": "Used equation 3.6 on page 48 for relationship between temperature and speed-of-sound",
+        "ref_id": "REF02"
+      }
+    ]
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/atmos_76.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "name": "GeometricAltitude",
+        "units": "ft",
+        "varID": "alt_ft"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "GeometricAltitude",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "alt_ft"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "2116.22",
+        "name": "SeaLevelPressure",
+        "units": "lbf_ft2",
+        "varID": "SEA_LEVEL_PRESSURE_psf"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Sea level pressure in lb/ft2",
+      "initial_value": 2116.22,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "SeaLevelPressure",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "lbf_ft2",
+      "variable_id": "SEA_LEVEL_PRESSURE_psf"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "459.67",
+        "name": "degR_at_0_degF",
+        "units": "dgR_dgF",
+        "varID": "DEGR_AT_0_DEGF"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Bias value of deg Rankine at 0 deg Farenheit; needed to calculate speed of sound from temperature",
+      "initial_value": 459.67,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "degR_at_0_degF",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "dgR_dgF",
+      "variable_id": "DEGR_AT_0_DEGF"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "85500",
+        "minValue": "-1000",
+        "name": "GeometricAltitude",
+        "units": "m",
+        "varID": "Z_m"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "alt_ft"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "cn",
+                "text": "0.3048"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Convert input altitude, in feet, to meters, for function independent value",
+      "initial_value": null,
+      "maximum_value": 85500.0,
+      "minimum_value": -1000.0,
+      "name": "GeometricAltitude",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "Z_m"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "AmbientTemperature_dgC",
+        "units": "dgC",
+        "varID": "t_amb_C"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Output from table is metric",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "AmbientTemperature_dgC",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "dgC",
+      "variable_id": "t_amb_C"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "AmbientPressureRatioToSeaLevel",
+        "units": "nd",
+        "varID": "p_p0"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Output from table, but only used locally to calculate ambient pressure output",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "AmbientPressureRatioToSeaLevel",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "p_p0"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "RatioOfDensityToSeaLevel",
+        "units": "nd",
+        "varID": "sigma"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Direct output from table without conversion",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "RatioOfDensityToSeaLevel",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "sigma"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "SpeedOfSound",
+        "units": "ft_s",
+        "varID": "v_sound_fps"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "cn",
+                "text": "49.02"
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "power",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "plus",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "t_amb_F"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "DEGR_AT_0_DEGF"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "cn",
+                    "text": "0.5"
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Calculated from ambient temperature using equation 3.6 from REF02 C equivalent: *v_sound_fps = 49.02*pow(t_amb_F + DEGR_AT_0_DEGF,0.5);",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "SpeedOfSound",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft_s",
+      "variable_id": "v_sound_fps"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "AmbientTemperature",
+        "units": "dgF",
+        "varID": "t_amb_F"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "cn",
+                "text": "32.0"
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "divide",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "t_amb_C"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "9.0"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "cn",
+                    "text": "5.0"
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Convert table output, in deg C, to deg F",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "AmbientTemperature",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "dgF",
+      "variable_id": "t_amb_F"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "AmbientPressure",
+        "units": "lbf_ft2",
+        "varID": "p_amb_psf"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "SEA_LEVEL_PRESSURE_psf"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "p_p0"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Converts the ambient pressure ratio found in the tables (p_p0) to English units by multiplying by standard ambient sea level pressure (SEA_LEVEL_PRESSURE_psf)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "AmbientPressure",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "lbf_ft2",
+      "variable_id": "p_amb_psf"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+stg1firing,stage1firing_flag,nd,,,,,,,,isInput,False,"If greater than 0, indicates stage 1 is firing"
+stg2firing,stage2firing_flag,nd,,,,,,,,isInput,False,"If greater than 0, indicates stage 2 is firing"
+stg1maxThrust,stage1maxThrust,N,,,,,17000000.0,,,,False,Stage 1 max thrust
+stg2maxThrust,stage2maxThrust,N,,,,,5000000.0,,,,False,Stage 2 max thrust
+stg1isp,stage1isp,sec,,,,,360.0,,,,False,Stage 1 specific impulse
+stg2isp,stage2isp,sec,,,,,390.0,,,,False,Stage 2 specific impulse
+isp,isp,sec,,,,,,,,isOutput;isStdAIAA,True,"Current specific impulse for firing engine, if any"
+thrust,bodyThrustForce_X,N,,,,,,,,isOutput;isStdAIAA,True,Total thrust
+mdot,massDot,kg_s,,,,,,,,isOutput;isStdAIAA,True,Propellant consumption rate
+thrustY,bodyThrustForce_Y,N,,,,,0.0,,,isOutput;isStdAIAA,False,Sideforce
+thrustZ,bodyThrustForce_Z,N,,,,,0.0,,,isOutput;isStdAIAA,False,Downforce
+thrustll,bodyThrustMoment_Roll,N,,,,,0.0,,,isOutput;isStdAIAA,False,Rolling moment
+thrustlm,bodyThrustMoment_Pitch,N,,,,,0.0,,,isOutput;isStdAIAA,False,Pitching moment
+thrustln,bodyThrustMoment_Yaw,N,,,,,0.0,,,isOutput;isStdAIAA,False,Yawing moment

@@ -1,0 +1,16 @@
+{
+  "component_paths": {
+    "aerodynamics": "models/aerodynamics.dml",
+    "mass_properties": "models/inertia.dml",
+    "propulsion": "models/propulsion.dml"
+  },
+  "frames": {
+    "body": "FRD",
+    "navigation": "NED"
+  },
+  "fuel_flow_available": false,
+  "mass_model": "constant",
+  "model_class": "taoryx_xplane.daveml.f16_vehicle.F16S119AircraftModel",
+  "propulsion_model": "steady_state",
+  "schema_version": "0.1.0"
+}

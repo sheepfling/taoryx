@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from taoryx.objectives import ObjectiveSpec, score_objectives
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE = ROOT / "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair"
+PACKAGE = ROOT / "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair"
 
 
 def _sha256(path: Path) -> str:

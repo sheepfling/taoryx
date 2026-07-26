@@ -1,0 +1,30 @@
+{
+  "calculation_count": 1,
+  "declared_outputs": [
+    "cbar",
+    "bspan",
+    "sref",
+    "totalCoefficientOfLift",
+    "totalCoefficientOfDrag",
+    "aeroBodyForceCoefficient_Y",
+    "aeroBodyMomentCoefficient_Roll",
+    "aeroBodyMomentCoefficient_Pitch",
+    "aeroBodyMomentCoefficient_Yaw"
+  ],
+  "document_sha256": "49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27",
+  "function_count": 5,
+  "model_name": "Two-stage to orbit rocket aero model",
+  "required_inputs": [
+    "alpha",
+    "beta"
+  ],
+  "topological_order": [
+    "totalCoefficientOfLift",
+    "alphaT",
+    "totalCoefficientOfDrag",
+    "aeroBodyForceCoefficient_Y",
+    "aeroBodyMomentCoefficient_Pitch",
+    "aeroBodyMomentCoefficient_Yaw"
+  ],
+  "variable_count": 12
+}

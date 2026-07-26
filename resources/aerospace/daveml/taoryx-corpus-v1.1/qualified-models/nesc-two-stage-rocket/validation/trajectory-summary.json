@@ -1,0 +1,31 @@
+{
+  "duration_s": 200.0,
+  "endpoint_orbit": {
+    "apogee_altitude_m": 6810769.830637643,
+    "apogee_radius_m": 13188906.830637643,
+    "eccentricity": 0.4115317979449143,
+    "inclination_deg": 0.0,
+    "perigee_altitude_m": -879676.1782195894,
+    "perigee_radius_m": 5498460.821780411,
+    "semi_major_axis_m": 9343683.826209027,
+    "specific_orbital_energy_j_kg": -21329940.589488164
+  },
+  "final_altitude_m": 242792.7079619104,
+  "final_mass_kg": 19000.0,
+  "final_pitch_deg": 12.42956322050038,
+  "final_true_airspeed_mps": 8358.683206005488,
+  "integration_step_count": 20003,
+  "integration_step_s": 0.01,
+  "maximum_altitude_m": 242792.7079619104,
+  "maximum_dynamic_pressure_pa": 395807.61639727664,
+  "maximum_dynamic_pressure_time_s": 23.700000000000003,
+  "maximum_mach": 30.544205128585062,
+  "maximum_mach_time_s": 195.4,
+  "output_sample_count": 2001,
+  "output_step_s": 0.1,
+  "source_table_clamp_count": 1,
+  "stage1_burnout_s": 37.38045176470588,
+  "stage2_burnout_s": 195.3636357647059,
+  "stage2_ignition_s": 134.1704517647059,
+  "upper_atmosphere_sample_count": 1203
+}

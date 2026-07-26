@@ -1,7 +1,6 @@
 # Simple Aero simple-aero seed corpus
 
-This directory is a tracked copy of the inbox bundle at
-`INBOX/simple_aero-snippet-v1/simple_aero`.
+This directory is the tracked canonical Simple Aero seed corpus.
 
 It is data-only and intentionally narrow:
 - one manifest that lists the checked-in examples

@@ -1,0 +1,453 @@
+{
+  "gridded": [
+    {
+      "attributes": {
+        "gtID": "CX_table_def",
+        "name": "CX_table"
+      },
+      "breakpoint_ids": [
+        "DE1",
+        "ALPHA1"
+      ],
+      "declared_id": "CX_table_def",
+      "description": null,
+      "function_name": "Basic CX",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CX_table",
+      "provenance": null,
+      "shape": [
+        5,
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CX_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "CZ0_table_def",
+        "name": "CZ0_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "CZ0_table_def",
+      "description": null,
+      "function_name": "Basic CZ",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CZ0_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CZ0_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Cm0_table_def",
+        "name": "Cm0_table"
+      },
+      "breakpoint_ids": [
+        "DE1",
+        "ALPHA1"
+      ],
+      "declared_id": "Cm0_table_def",
+      "description": null,
+      "function_name": "Basic Cm",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cm0_table",
+      "provenance": null,
+      "shape": [
+        5,
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cm0_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Cl0_table_def",
+        "name": "Cl0_table"
+      },
+      "breakpoint_ids": [
+        "BETA1",
+        "ALPHA1"
+      ],
+      "declared_id": "Cl0_table_def",
+      "description": null,
+      "function_name": "Basic Cl",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cl0_table",
+      "provenance": null,
+      "shape": [
+        7,
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cl0_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Cn0_table_def",
+        "name": "Cn0_table"
+      },
+      "breakpoint_ids": [
+        "BETA1",
+        "ALPHA1"
+      ],
+      "declared_id": "Cn0_table_def",
+      "description": null,
+      "function_name": "Basic Cn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cn0_table",
+      "provenance": null,
+      "shape": [
+        7,
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cn0_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "CXq_table_def",
+        "name": "CXq_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "CXq_table_def",
+      "description": null,
+      "function_name": "CXq",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CXq_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CXq_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "CYr_table_def",
+        "name": "CYr_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "CYr_table_def",
+      "description": null,
+      "function_name": "CYr",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CYr_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CYr_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "CYp_table_def",
+        "name": "CYp_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "CYp_table_def",
+      "description": null,
+      "function_name": "CYp",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CYp_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CYp_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "CZq_table_def",
+        "name": "CZq_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "CZq_table_def",
+      "description": null,
+      "function_name": "CZq",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CZq_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CZq_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Clr_table_def",
+        "name": "Clr_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "Clr_table_def",
+      "description": null,
+      "function_name": "Clr",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Clr_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Clr_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Clp_table_def",
+        "name": "Clp_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "Clp_table_def",
+      "description": null,
+      "function_name": "Clp",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Clp_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Clp_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Cmq_table_def",
+        "name": "Cmq_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "Cmq_table_def",
+      "description": null,
+      "function_name": "Cmq",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cmq_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cmq_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Cnr_table_def",
+        "name": "Cnr_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "Cnr_table_def",
+      "description": null,
+      "function_name": "Cnr",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cnr_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cnr_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Cnp_table_def",
+        "name": "Cnp_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "Cnp_table_def",
+      "description": null,
+      "function_name": "Cnp",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cnp_table",
+      "provenance": null,
+      "shape": [
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cnp_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "dlda_table_def",
+        "name": "dlda_table"
+      },
+      "breakpoint_ids": [
+        "BETA2",
+        "ALPHA1"
+      ],
+      "declared_id": "dlda_table_def",
+      "description": null,
+      "function_name": "dlda",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "dlda_table",
+      "provenance": null,
+      "shape": [
+        7,
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "dlda_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "dldr_table_def",
+        "name": "dldr_table"
+      },
+      "breakpoint_ids": [
+        "BETA2",
+        "ALPHA1"
+      ],
+      "declared_id": "dldr_table_def",
+      "description": null,
+      "function_name": "dldr",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "dldr_table",
+      "provenance": null,
+      "shape": [
+        7,
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "dldr_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "dnda_table_def",
+        "name": "dnda_table"
+      },
+      "breakpoint_ids": [
+        "BETA2",
+        "ALPHA1"
+      ],
+      "declared_id": "dnda_table_def",
+      "description": null,
+      "function_name": "dnda",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "dnda_table",
+      "provenance": null,
+      "shape": [
+        7,
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "dnda_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "dndr_table_def",
+        "name": "dndr_table"
+      },
+      "breakpoint_ids": [
+        "BETA2",
+        "ALPHA1"
+      ],
+      "declared_id": "dndr_table_def",
+      "description": null,
+      "function_name": "dndr",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "dndr_table",
+      "provenance": null,
+      "shape": [
+        7,
+        12
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "dndr_table_def",
+      "uncertainty": null,
+      "units": null
+    }
+  ],
+  "ungridded": []
+}

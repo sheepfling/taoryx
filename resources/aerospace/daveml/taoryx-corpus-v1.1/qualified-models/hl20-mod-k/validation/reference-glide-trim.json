@@ -1,0 +1,139 @@
+{
+  "aerodynamic_evaluation": {
+    "center_of_gravity_fraction_reference_chord": 0.555,
+    "clamp_events": [],
+    "drag_coefficient": 0.06648240994327441,
+    "dynamic_pressure_pa": 17813.996247059476,
+    "force_coefficients_at_cg": {
+      "cx": -0.0521617588031045,
+      "cy": 0.0,
+      "cz": -0.1714688176604256
+    },
+    "force_moment": {
+      "aerodynamic_force_body_n": {
+        "x": -24728.190343867816,
+        "y": 0.0,
+        "z": -81287.77975355789
+      },
+      "aerodynamic_moment_body_nm": {
+        "x": 0.0,
+        "y": -5.308982364207054e-12,
+        "z": 0.0
+      },
+      "fuel_flow_kg_s": 0.0,
+      "gear_force_body_n": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "gear_moment_body_nm": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "other_force_body_n": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "other_moment_body_nm": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "propulsion_force_body_n": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "propulsion_moment_body_nm": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "status": {
+        "diagnostics": {
+          "center_of_gravity_fraction": 0.555,
+          "cl": 0.0,
+          "cm": -1.3010426069826053e-18,
+          "cn": 0.0,
+          "cx": -0.0521617588031045,
+          "cy": 0.0,
+          "cz": -0.1714688176604256,
+          "drag_coefficient": 0.06648240994327441,
+          "dynamic_pressure_pa": 17813.996247059476,
+          "lift_coefficient": 0.16644066113612965,
+          "moment_reference_fraction": 0.54
+        },
+        "disposition": "valid",
+        "warnings": []
+      }
+    },
+    "lift_coefficient": 0.16644066113612965,
+    "moment_coefficients_at_cg": {
+      "cl_roll": 0.0,
+      "cm_pitch": -1.3010426069826053e-18,
+      "cn_yaw": 0.0
+    },
+    "moment_coefficients_at_mrc": {
+      "cl_roll": 0.0,
+      "cm_pitch": 0.002572032264906385,
+      "cn_yaw": 0.0
+    },
+    "moment_reference_fraction": 0.54,
+    "reference_geometry": {
+      "area_m2": 26.612075808,
+      "mean_aerodynamic_chord_m": 8.607552,
+      "span_m": 4.233672
+    },
+    "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "source_git_blob_sha": "71e01b91e3a299a5b272c69f9a8296039aca59eb",
+    "source_inputs": {
+      "angleOfAttack": 4.8535019926495275,
+      "angleOfSideslip": 0.0,
+      "bodyAngularRate_Pitch": 0.0,
+      "bodyAngularRate_Roll": 0.0,
+      "bodyAngularRate_Yaw": 0.0,
+      "heightOfCgWrtRwy": 34.725,
+      "landingGearExtension": 0.0,
+      "leftWingFlapDeflection": 0.0,
+      "lowerLeftBodyFlapDeflection": 10.053651806619676,
+      "lowerRightBodyFlapDeflection": 10.053651806619676,
+      "mach": 0.6863645076378166,
+      "rightWingFlapDeflection": 0.0,
+      "rudderDeflection": 0.0,
+      "trueAirspeed": 721.7847769028871,
+      "upperLeftBodyFlapDeflection": 0.0,
+      "upperRightBodyFlapDeflection": 0.0
+    },
+    "source_outputs": {
+      "aeroBodyForceCoefficient_Y": 0.0,
+      "aeroBodyMomentCoefficient_Pitch": 0.002572032264906385,
+      "aeroBodyMomentCoefficient_Roll": 0.0,
+      "aeroBodyMomentCoefficient_Yaw": 0.0,
+      "referenceWingArea": 286.45,
+      "referenceWingChord": 28.24,
+      "referenceWingSpan": 13.89,
+      "totalCoefficientOfDrag": 0.06648240994327441,
+      "totalCoefficientOfLift": 0.16644066113612965,
+      "vrsPositionOfMrc_X": 0.54
+    }
+  },
+  "alpha_rad": 0.08470959002383988,
+  "altitude_m": 5000.0,
+  "converged": true,
+  "drag_coefficient": 0.06648240994327441,
+  "drag_n": 31517.144462132186,
+  "flight_path_angle_rad": -0.3800201690554702,
+  "iterations": 4,
+  "lift_coefficient": 0.16644066113612965,
+  "lift_n": 78904.09456991812,
+  "mach": 0.6863645076378166,
+  "pitch_attitude_rad": -0.2953105790316303,
+  "residual_drag_n": -7.275957614183426e-12,
+  "residual_lift_n": 2.9103830456733704e-11,
+  "residual_pitch_moment_nm": -5.308982364207054e-12,
+  "symmetric_lower_body_flap_trailing_edge_down_rad": 0.17546932587458958,
+  "true_airspeed_mps": 220.0,
+  "weight_n": 84965.796265
+}

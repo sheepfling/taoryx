@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DAVEfunc xmlns="http://daveml.org/2010/DAVEML">
+  <fileHeader name="Two-stage to orbit rocket aero model">
+    <author name="Bruce Jackson" org="NASA Langley Research Center"/>
+    <author name="Eric Queen" org="NASA Langley Research Center"/>
+    <creationDate date="2013-08-09"/>
+    <fileVersion>Taoryx normalized semantic reconstruction</fileVersion>
+    <description>Semantically normalized from pinned NASA/NESC scenario-17 source data.</description>
+  </fileHeader>
+  <variableDef name="angleOfAttack" varID="alpha" units="deg"><isInput/></variableDef>
+  <variableDef name="angleOfSideslip" varID="beta" units="deg"><isInput/></variableDef>
+  <variableDef name="longitudinalReferenceLength" varID="cbar" units="m" initialValue="3.0"><isOutput/></variableDef>
+  <variableDef name="lateralReferenceLength" varID="bspan" units="m" initialValue="3.0"><isOutput/></variableDef>
+  <variableDef name="referenceArea" varID="sref" units="m2" initialValue="7.0"><isOutput/></variableDef>
+  <variableDef name="totalAlpha" varID="alphaT" units="deg">
+    <calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><power/><apply><plus/><apply><power/><ci>alpha</ci><cn>2</cn></apply><apply><power/><ci>beta</ci><cn>2</cn></apply></apply><cn>0.5</cn></apply></math></calculation>
+  </variableDef>
+  <variableDef name="liftCoefficient" varID="CL" units="nd"><isOutput/></variableDef>
+  <variableDef name="dragCoefficient" varID="CD" units="nd"><isOutput/></variableDef>
+  <variableDef name="sideforceCoefficient" varID="CY" units="nd"><isOutput/></variableDef>
+  <variableDef name="rollingMomentCoefficient" varID="Cl" units="nd" initialValue="0"><isOutput/></variableDef>
+  <variableDef name="pitchingMomentCoefficient" varID="Cm" units="nd"><isOutput/></variableDef>
+  <variableDef name="yawingMomentCoefficient" varID="Cn" units="nd"><isOutput/></variableDef>
+  <breakpointDef name="force-angle" bpID="ANGLE_FORCE" units="deg"><bpVals>-10 -8 -6 -4 -2 0 2 4 6 8 10</bpVals></breakpointDef>
+  <breakpointDef name="moment-angle" bpID="ANGLE_MOMENT" units="deg"><bpVals>-20 0 20</bpVals></breakpointDef>
+  <function name="lift">
+    <independentVarRef varID="alpha" min="-10.0" max="10.0" extrapolate="neither"/>
+    <dependentVarRef varID="CL"/>
+    <functionDefn name="lift_definition"><griddedTableDef name="lift_table" gtID="lift_table"><breakpointRefs><bpRef bpID="ANGLE_FORCE"/></breakpointRefs><dataTable>-1.6000000000000001 -1 -0.72999999999999998 -0.48999999999999999 -0.23999999999999999 0 0.23999999999999999 0.48999999999999999 0.72999999999999998 1 1.6000000000000001</dataTable></griddedTableDef></functionDefn>
+  </function>
+  <function name="drag">
+    <independentVarRef varID="alphaT" min="-10.0" max="10.0" extrapolate="neither"/>
+    <dependentVarRef varID="CD"/>
+    <functionDefn name="drag_definition"><griddedTableDef name="drag_table" gtID="drag_table"><breakpointRefs><bpRef bpID="ANGLE_FORCE"/></breakpointRefs><dataTable>0.47999999999999998 0.38 0.31 0.25 0.23000000000000001 0.20999999999999999 0.23000000000000001 0.25 0.31 0.38 0.47999999999999998</dataTable></griddedTableDef></functionDefn>
+  </function>
+  <function name="side">
+    <independentVarRef varID="beta" min="-10.0" max="10.0" extrapolate="neither"/>
+    <dependentVarRef varID="CY"/>
+    <functionDefn name="side_definition"><griddedTableDef name="side_table" gtID="side_table"><breakpointRefs><bpRef bpID="ANGLE_FORCE"/></breakpointRefs><dataTable>1.6000000000000001 1 0.72999999999999998 0.48999999999999999 0.23999999999999999 0 -0.23999999999999999 -0.48999999999999999 -0.72999999999999998 -1 -1.6000000000000001</dataTable></griddedTableDef></functionDefn>
+  </function>
+  <function name="pitch">
+    <independentVarRef varID="alpha" min="-20.0" max="20.0" extrapolate="neither"/>
+    <dependentVarRef varID="Cm"/>
+    <functionDefn name="pitch_definition"><griddedTableDef name="pitch_table" gtID="pitch_table"><breakpointRefs><bpRef bpID="ANGLE_MOMENT"/></breakpointRefs><dataTable>0.59999999999999998 0 -0.59999999999999998</dataTable></griddedTableDef></functionDefn>
+  </function>
+  <function name="yaw">
+    <independentVarRef varID="beta" min="-20.0" max="20.0" extrapolate="neither"/>
+    <dependentVarRef varID="Cn"/>
+    <functionDefn name="yaw_definition"><griddedTableDef name="yaw_table" gtID="yaw_table"><breakpointRefs><bpRef bpID="ANGLE_MOMENT"/></breakpointRefs><dataTable>-0.59999999999999998 0 0.59999999999999998</dataTable></griddedTableDef></functionDefn>
+  </function>
+</DAVEfunc>

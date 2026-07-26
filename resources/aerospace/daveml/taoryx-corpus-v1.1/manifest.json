@@ -24,8 +24,18 @@
       "source_hashes": {
         "aerodynamics": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec"
       }
+    },
+    {
+      "family": "reference_nesc_two_stage_rocket",
+      "path": "qualified-models/nesc-two-stage-rocket/taoryx-nesc-two-stage-rocket-v0.9.txair",
+      "sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+      "source_hashes": {
+        "aerodynamics": "d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6",
+        "propulsion": "9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4",
+        "mass_properties": "388d2192c337c380dd4ebe6d7678815b3b384733113803509eb1298d1a3192cd"
+      }
     }
   ],
   "storage_policy": "committed_exact_input_archive",
-  "runtime_claim": "source_package_replay_pending"
+  "runtime_claim": "source_package_replay_verified"
 }

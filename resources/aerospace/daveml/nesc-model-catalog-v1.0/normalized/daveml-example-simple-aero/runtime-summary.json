@@ -1,0 +1,14 @@
+{
+  "calculation_count": 0,
+  "declared_outputs": [],
+  "document_sha256": "7a2148ee89ef4ceacb7663a9bc477e020c1aa58bcfc361f938d60d5d3f18a5d5",
+  "function_count": 1,
+  "model_name": null,
+  "required_inputs": [
+    "alpdeg"
+  ],
+  "topological_order": [
+    "cl"
+  ],
+  "variable_count": 2
+}

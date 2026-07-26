@@ -1,6 +1,6 @@
 (simple_aero-cbcr)
 
-# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/cbcr.yaml
+# Synthetic TAOS translation of tests/fixtures/simple_aero_v1/cbcr.yaml
 # Simple Aero family: cbcr
 # Start controls: go_left, maneuver_altitude_start_km
 # Stop controls: maneuver_duration_s, min_time_to_go_s

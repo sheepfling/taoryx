@@ -1,0 +1,28 @@
+capability_id,category,status,needed_by,current_evidence,exit_criterion,priority
+daveml-regular-tables,model-runtime,implemented,all,Current DAVE-ML runtime and F-16/HL-20/rocket baselines,All gridded fixtures and source check cases pass,0
+daveml-mathml,model-runtime,implemented,all,Typed MathML evaluator,Required operators compile and execute deterministically,0
+daveml-ungridded-2d,model-runtime,missing,DAVE-ML conformance,Source parses but execution is intentionally unsupported,Named scattered-data policy passes twoD_ungridded source checks,0
+daveml-ungridded-3d,model-runtime,missing,DAVE-ML conformance,Source parses but execution is intentionally unsupported,Named scattered-data policy passes threeD_ungridded source checks,0
+daveml-dtd-validation,model-runtime,planned,round-trip/export,Typed semantic validation exists,Offline XML catalog validates against pinned DAVEfunc 2.0.2 dependencies,1
+point-mass-3dof,dynamics,implemented,spheroids; F-16 reductions; rocket reductions,A320 and other Taoryx point-mass baselines,NESC sphere cases execute against reference trajectories,1
+quaternion-6dof,dynamics,implemented,brick; F-16; rocket; cylinder; ISS; HL-20,"F-16, rocket, and HL-20 rigid-body validation",Brick and orbital attitude cases pass trajectory acceptance,1
+variable-mass-staging,dynamics,implemented,two-stage rocket,NESC rocket v0.9,Event-aligned staging reproduces accepted checkpoints,1
+mrc-to-cg-transfer,dynamics,implemented,F-16; rocket; HL-20,Existing qualified adapters,Cross-product transfer tests pass for all source conventions,1
+flat-earth-ned,environment,implemented,selected atmospheric cases,Current 6-DOF validator,Flat-Earth NESC checks pass,2
+spherical-earth,environment,partial,Atmos_04; Atmos_05,Round-Earth support exists in parts of tooling,Stationary and rotating sphere cases pass,1
+wgs84-geodesy,environment,implemented,most atmospheric/orbital cases,Rocket and existing environment models,Datum and frame outputs match NESC definitions,1
+earth-rotation,environment,implemented,Atmos_05 onward; orbital,Rocket and orbital-aware code paths,Coriolis/transport-rate cases pass,1
+gravity-inverse-square,environment,partial,round-Earth and orbital cases,Existing rocket/orbital utilities,Sphere and orbital propagation cases pass,1
+gravity-j2,environment,implemented,atmospheric WGS84 cases,NESC rocket baseline,Sphere/brick/F-16 J2 scenarios pass,1
+gravity-4x4,environment,missing,Orbit_03A;07A;07C,None in qualified baseline,Orbit comparisons pass within NESC ensemble tolerance,2
+gravity-8x8,environment,missing,Orbit_03B;07B;07D,None in qualified baseline,Orbit comparisons pass within NESC ensemble tolerance,2
+third-body-ephemeris,environment,missing,Orbit_04;07A-D;FULL,None in qualified baseline,Solar/lunar acceleration and trajectory checks pass,2
+us1976-to-1000km,environment,partial,atmospheric cases; rocket,US1976 implementation with upper continuation,Official atmosphere check cases pass through 1000 km,1
+met-atmosphere,environment,missing,orbital drag cases,None in qualified baseline,Minimal/mean/maximal solar cases reproduce NESC density/trajectory families,2
+steady-wind,environment,planned,Atmos_07,Wind interfaces exist conceptually,Atmos_07 passes,1
+wind-shear,environment,planned,Atmos_08,Wind interfaces exist conceptually,Atmos_08 passes,1
+gravity-gradient-torque,dynamics,missing,Orbit_10A-D;FULL,None in qualified baseline,Cylinder attitude cases pass,2
+applied-load-schedules,scenario,planned,Orbit_06C-D;09A-D;FULL,Event scheduling exists for rocket,Exact force/torque onset and duration tests pass,2
+nesc-output-contract,validation,planned,all scenarios,Existing CSV evidence formats differ by model,Canonical NESC column adapter emits comparison-ready histories,1
+trajectory-ensemble-comparator,validation,planned,all scenarios,Model-specific comparisons exist,"Automated interpolation, angle wrapping, and ensemble metrics are reported",1
+taoryx-collection-roundtrip,interchange,planned,all DAVE-ML models,Round-trip architecture plan exists,DAVE-ML → collection → txair → regenerated DAVE-ML equivalence passes,2

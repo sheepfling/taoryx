@@ -1,0 +1,40 @@
+{
+  "gridded": [
+    {
+      "attributes": {
+        "name": "CL_TABLE"
+      },
+      "breakpoint_ids": [
+        "MACH1",
+        "ALPHA1"
+      ],
+      "declared_id": null,
+      "description": null,
+      "function_name": "Basic CL",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CL_TABLE",
+      "provenance": null,
+      "shape": [
+        10,
+        6
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [
+        {
+          "attributes": {
+            "value": "95%"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "confidenceBound",
+          "text": null
+        }
+      ],
+      "table_id": "gridded-table-0001",
+      "uncertainty": null,
+      "units": null
+    }
+  ],
+  "ungridded": []
+}

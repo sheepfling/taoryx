@@ -1,0 +1,6 @@
+event,time_s,phase_after_event
+liftoff_stage1_ignition,0,stage1_burn
+stage1_burnout,37.380451764705882,stack_coast
+stage1_jettison_stage2_ignition,134.17045176470589,stage2_burn
+stage2_burnout,195.36363576470589,orbit_coast
+nominal_endpoint,200,orbit_coast

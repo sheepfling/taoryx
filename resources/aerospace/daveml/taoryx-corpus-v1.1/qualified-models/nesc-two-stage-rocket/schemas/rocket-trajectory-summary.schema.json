@@ -1,0 +1,179 @@
+{
+  "$defs": {
+    "RocketOrbitalElements": {
+      "additionalProperties": false,
+      "description": "Osculating endpoint orbit diagnostics.",
+      "properties": {
+        "apogee_altitude_m": {
+          "title": "Apogee Altitude M",
+          "type": "number"
+        },
+        "apogee_radius_m": {
+          "title": "Apogee Radius M",
+          "type": "number"
+        },
+        "eccentricity": {
+          "minimum": 0.0,
+          "title": "Eccentricity",
+          "type": "number"
+        },
+        "inclination_deg": {
+          "minimum": 0.0,
+          "title": "Inclination Deg",
+          "type": "number"
+        },
+        "perigee_altitude_m": {
+          "title": "Perigee Altitude M",
+          "type": "number"
+        },
+        "perigee_radius_m": {
+          "title": "Perigee Radius M",
+          "type": "number"
+        },
+        "semi_major_axis_m": {
+          "title": "Semi Major Axis M",
+          "type": "number"
+        },
+        "specific_orbital_energy_j_kg": {
+          "title": "Specific Orbital Energy J Kg",
+          "type": "number"
+        }
+      },
+      "required": [
+        "specific_orbital_energy_j_kg",
+        "semi_major_axis_m",
+        "eccentricity",
+        "inclination_deg",
+        "perigee_radius_m",
+        "apogee_radius_m",
+        "perigee_altitude_m",
+        "apogee_altitude_m"
+      ],
+      "title": "RocketOrbitalElements",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Compact event, extrema, and endpoint report.",
+  "properties": {
+    "duration_s": {
+      "exclusiveMinimum": 0.0,
+      "title": "Duration S",
+      "type": "number"
+    },
+    "endpoint_orbit": {
+      "$ref": "#/$defs/RocketOrbitalElements"
+    },
+    "final_altitude_m": {
+      "title": "Final Altitude M",
+      "type": "number"
+    },
+    "final_mass_kg": {
+      "exclusiveMinimum": 0.0,
+      "title": "Final Mass Kg",
+      "type": "number"
+    },
+    "final_pitch_deg": {
+      "title": "Final Pitch Deg",
+      "type": "number"
+    },
+    "final_true_airspeed_mps": {
+      "minimum": 0.0,
+      "title": "Final True Airspeed Mps",
+      "type": "number"
+    },
+    "integration_step_count": {
+      "exclusiveMinimum": 0,
+      "title": "Integration Step Count",
+      "type": "integer"
+    },
+    "integration_step_s": {
+      "exclusiveMinimum": 0.0,
+      "title": "Integration Step S",
+      "type": "number"
+    },
+    "maximum_altitude_m": {
+      "title": "Maximum Altitude M",
+      "type": "number"
+    },
+    "maximum_dynamic_pressure_pa": {
+      "minimum": 0.0,
+      "title": "Maximum Dynamic Pressure Pa",
+      "type": "number"
+    },
+    "maximum_dynamic_pressure_time_s": {
+      "minimum": 0.0,
+      "title": "Maximum Dynamic Pressure Time S",
+      "type": "number"
+    },
+    "maximum_mach": {
+      "minimum": 0.0,
+      "title": "Maximum Mach",
+      "type": "number"
+    },
+    "maximum_mach_time_s": {
+      "minimum": 0.0,
+      "title": "Maximum Mach Time S",
+      "type": "number"
+    },
+    "output_sample_count": {
+      "exclusiveMinimum": 0,
+      "title": "Output Sample Count",
+      "type": "integer"
+    },
+    "output_step_s": {
+      "exclusiveMinimum": 0.0,
+      "title": "Output Step S",
+      "type": "number"
+    },
+    "source_table_clamp_count": {
+      "minimum": 0,
+      "title": "Source Table Clamp Count",
+      "type": "integer"
+    },
+    "stage1_burnout_s": {
+      "exclusiveMinimum": 0.0,
+      "title": "Stage1 Burnout S",
+      "type": "number"
+    },
+    "stage2_burnout_s": {
+      "exclusiveMinimum": 0.0,
+      "title": "Stage2 Burnout S",
+      "type": "number"
+    },
+    "stage2_ignition_s": {
+      "exclusiveMinimum": 0.0,
+      "title": "Stage2 Ignition S",
+      "type": "number"
+    },
+    "upper_atmosphere_sample_count": {
+      "minimum": 0,
+      "title": "Upper Atmosphere Sample Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "duration_s",
+    "integration_step_s",
+    "output_step_s",
+    "integration_step_count",
+    "output_sample_count",
+    "stage1_burnout_s",
+    "stage2_ignition_s",
+    "stage2_burnout_s",
+    "maximum_dynamic_pressure_pa",
+    "maximum_dynamic_pressure_time_s",
+    "maximum_mach",
+    "maximum_mach_time_s",
+    "maximum_altitude_m",
+    "final_altitude_m",
+    "final_true_airspeed_mps",
+    "final_pitch_deg",
+    "final_mass_kg",
+    "endpoint_orbit",
+    "source_table_clamp_count",
+    "upper_atmosphere_sample_count"
+  ],
+  "title": "RocketTrajectorySummary",
+  "type": "object"
+}

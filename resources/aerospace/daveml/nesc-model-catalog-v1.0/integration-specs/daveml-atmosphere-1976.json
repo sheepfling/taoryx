@@ -1,0 +1,37 @@
+{
+  "acceptance_layers": [
+    "source_integrity",
+    "DAVE-ML parse and semantic validation",
+    "embedded static check cases where supplied",
+    "canonical SI/frame dimensional evaluation",
+    "host-dynamics scenario execution",
+    "trajectory-family comparison"
+  ],
+  "canonical_contract": {
+    "attitude": "scalar-first body-to-navigation quaternion",
+    "body_frame": "FRD",
+    "reference_points": "explicit MRC and CG with audited moment transfer",
+    "units": "SI"
+  },
+  "component_documents": {
+    "environment": [
+      "daveml-example-atmos-76"
+    ]
+  },
+  "display_name": "DAVE-ML 1976 U.S. Standard Atmosphere",
+  "host_capabilities": [
+    "DAVE-ML table evaluator",
+    "geometric/geopotential conversion host"
+  ],
+  "known_gaps": "Current runtime needs stronger signal-name resolution to pass all embedded checks reliably",
+  "model_id": "daveml-atmosphere-1976",
+  "qualification_status": "conformance-source",
+  "qualified_package": null,
+  "scenario_ids": [],
+  "schema_version": "1.0",
+  "source_authority": "Official DAVE-ML example",
+  "stateful_sidecar_required": false,
+  "target_fidelities": [
+    "environment-table-service"
+  ]
+}

@@ -1,0 +1,1509 @@
+{
+  "breakpoints": [],
+  "check_cases": [],
+  "check_data_provenance": [],
+  "container_sha256": "1779544def313776a7fe380db05ef097ecd53ad6264aab1e8765f86d21342f79",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "DAVEfunc.dtd"
+  },
+  "document_sha256": "1779544def313776a7fe380db05ef097ecd53ad6264aab1e8765f86d21342f79",
+  "document_size_bytes": 12231,
+  "functions": [
+    {
+      "attributes": {
+        "name": "yawMomentCoefficientFunction1"
+      },
+      "dependent_variable_id": "aeroBodyYawMomentCoefficient_1",
+      "description": "This function computes the yaw moment coefficient using a 3 dimensional ungridded data table defined using an ungriddedTableDef format for storing data.",
+      "function_id": "function-0001",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "5",
+            "min": "-3",
+            "varID": "angleOfAttack"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 5.0,
+          "minimum_value": -3.0,
+          "variable_id": "angleOfAttack"
+        },
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "12",
+            "min": "-6",
+            "varID": "angleOfSideslip"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 12.0,
+          "minimum_value": -6.0,
+          "variable_id": "angleOfSideslip"
+        },
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "6",
+            "min": "-6",
+            "varID": "yawControlDeflection"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 6.0,
+          "minimum_value": -6.0,
+          "variable_id": "yawControlDeflection"
+        }
+      ],
+      "issues": [],
+      "name": "yawMomentCoefficientFunction1",
+      "provenance": null,
+      "table_id": "yawMomentCoefficientTable1",
+      "table_kind": "ungridded"
+    },
+    {
+      "attributes": {
+        "name": "yawMomentCoefficientFunction2"
+      },
+      "dependent_variable_id": "aeroBodyYawMomentCoefficient_2",
+      "description": "This function computes the yaw moment coefficient using a 3 dimensional ungridded data table with data stored within the function.",
+      "function_id": "function-0002",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "5",
+            "min": "-3",
+            "varID": "angleOfAttack"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 5.0,
+          "minimum_value": -3.0,
+          "variable_id": "angleOfAttack"
+        },
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "12",
+            "min": "-6",
+            "varID": "angleOfSideslip"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 12.0,
+          "minimum_value": -6.0,
+          "variable_id": "angleOfSideslip"
+        },
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "6",
+            "min": "-6",
+            "varID": "yawControlDeflection"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 6.0,
+          "minimum_value": -6.0,
+          "variable_id": "yawControlDeflection"
+        }
+      ],
+      "issues": [],
+      "name": "yawMomentCoefficientFunction2",
+      "provenance": null,
+      "table_id": "ungridded-table-0002",
+      "table_kind": "ungridded"
+    }
+  ],
+  "gridded_tables": [],
+  "header": {
+    "attributes": {},
+    "authors": [
+      {
+        "attributes": {
+          "email": "Geoff.Brian@dsto.defence.gov.au",
+          "name": "Geoff Brian",
+          "org": "DSTO"
+        },
+        "email": "Geoff.Brian@dsto.defence.gov.au",
+        "name": "Geoff Brian",
+        "organization": "DSTO"
+      }
+    ],
+    "creation_date": "2006-09-12",
+    "description": "This file contains an example of a 3 dimensional ungridded dataset. The data encapsulated in the ungridded table is yawing moment coefficient, being a function of angle of attack, angle of sideslip and yaw control effector.",
+    "file_version": "$Revision: 171 $",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2006-11-01",
+          "modID": "Mod001"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "Geoff.Brian@dsto.defence.gov.au",
+              "name": "Geoff Brian",
+              "org": "DSTO"
+            },
+            "email": "Geoff.Brian@dsto.defence.gov.au",
+            "name": "Geoff Brian",
+            "organization": "DSTO"
+          }
+        ],
+        "date": "2006-11-01",
+        "description": "Just for the Record.",
+        "modification_id": "Mod001"
+      },
+      {
+        "attributes": {
+          "date": "2006-11-15",
+          "modID": "Mod002"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2006-11-15",
+        "description": "Added date to modificationRecord Mod001; added automatic Revision keyword to fileVersion.",
+        "modification_id": "Mod002"
+      },
+      {
+        "attributes": {
+          "date": "2010-05-07",
+          "modID": "Mod003"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-05-07",
+        "description": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change",
+        "modification_id": "Mod003"
+      }
+    ],
+    "name": null,
+    "raw": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "email": "Geoff.Brian@dsto.defence.gov.au",
+            "name": "Geoff Brian",
+            "org": "DSTO"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-09-12"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileCreationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "$Revision: 171 $"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "This file contains an example of a 3 dimensional ungridded dataset. The data encapsulated in the ungridded table is yawing moment coefficient, being a function of angle of attack, angle of sideslip and yaw control effector."
+        },
+        {
+          "attributes": {
+            "accession": "ISBN 1-2345-678-9",
+            "author": "Joe Smith",
+            "date": "2004-01-01",
+            "refID": "Ref01",
+            "title": "A Generic Aircraft Simulation Model (does not really exist)"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-01",
+            "modID": "Mod001"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "Geoff.Brian@dsto.defence.gov.au",
+                "name": "Geoff Brian",
+                "org": "DSTO"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Just for the Record."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-15",
+            "modID": "Mod002"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added date to modificationRecord Mod001; added automatic Revision keyword to fileVersion."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-05-07",
+            "modID": "Mod003"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "ISBN 1-2345-678-9",
+          "author": "Joe Smith",
+          "date": "2004-01-01",
+          "refID": "Ref01",
+          "title": "A Generic Aircraft Simulation Model (does not really exist)"
+        },
+        "description": null,
+        "ref_id": "Ref01"
+      }
+    ]
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/threeD_ungridded.dml",
+  "ungridded_tables": [
+    {
+      "attributes": {
+        "name": "yawMomentCoefficientTable1",
+        "units": "ND",
+        "utID": "yawMomentCoefficientTable1"
+      },
+      "declared_id": "yawMomentCoefficientTable1",
+      "description": null,
+      "function_name": null,
+      "independent_dimension_count": 3,
+      "issues": [],
+      "name": "yawMomentCoefficientTable1",
+      "points": [
+        {
+          "attributes": {},
+          "dependent_value": -0.00350641,
+          "independent_values": [
+            -1.8330592,
+            -5.3490387,
+            -4.7258599
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0120538,
+          "independent_values": [
+            -1.9302179,
+            -4.9698462,
+            0.2798654
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0207089,
+          "independent_values": [
+            -2.1213095,
+            -5.0383145,
+            5.2146443
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.000882368,
+          "independent_values": [
+            0.2522004,
+            -4.9587161,
+            -5.231286
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0111846,
+          "independent_values": [
+            0.3368831,
+            -5.0797159,
+            -0.337054
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0208758,
+          "independent_values": [
+            0.2987289,
+            -4.9691198,
+            5.2868938
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00219842,
+          "independent_values": [
+            1.8858257,
+            -5.2077654,
+            -4.7313074
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0111726,
+          "independent_values": [
+            1.8031083,
+            -4.7072954,
+            0.0541231
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0208074,
+          "independent_values": [
+            1.7773659,
+            -5.0317988,
+            5.1507477
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00225906,
+          "independent_values": [
+            3.8104785,
+            -5.2982162,
+            -4.7152852
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0116563,
+          "independent_values": [
+            4.2631596,
+            -5.1695257,
+            -0.134341
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0215506,
+          "independent_values": [
+            4.0470946,
+            -5.2541017,
+            5.0686926
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0113462,
+          "independent_values": [
+            -1.8882611,
+            0.2422452,
+            -5.1959304
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.000253915,
+          "independent_values": [
+            -2.1796091,
+            0.0542085,
+            0.2454711
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00875431,
+          "independent_values": [
+            -2.2699103,
+            -0.3146657,
+            4.8638859
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0105144,
+          "independent_values": [
+            0.0148579,
+            0.1095599,
+            -4.96395
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.000487753,
+          "independent_values": [
+            -0.1214591,
+            -0.004796,
+            0.2788827
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00816086,
+          "independent_values": [
+            0.0610233,
+            0.2029588,
+            5.0831767
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0106762,
+          "independent_values": [
+            1.7593356,
+            -0.0149007,
+            -5.0494446
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.000332616,
+          "independent_values": [
+            1.9717048,
+            -0.0870861,
+            0.0763833
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0093807,
+          "independent_values": [
+            2.0228263,
+            -0.2962294,
+            5.1777078
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.010196,
+          "independent_values": [
+            4.0567507,
+            -0.2948622,
+            -5.1002243
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.000312733,
+          "independent_values": [
+            3.6534822,
+            0.2163747,
+            0.13699
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00809437,
+          "independent_values": [
+            3.6848003,
+            0.0884533,
+            4.8214805
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.02453,
+          "independent_values": [
+            -2.3347682,
+            5.228872,
+            -4.7193014
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0133447,
+          "independent_values": [
+            -2.306035,
+            4.9652745,
+            0.232461
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.00556052,
+          "independent_values": [
+            -1.8675176,
+            5.0754646,
+            5.1169942
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0250468,
+          "independent_values": [
+            0.0004379,
+            5.1220145,
+            -5.2734993
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0124083,
+          "independent_values": [
+            -0.1977035,
+            4.7462188,
+            0.0664495
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.00475277,
+          "independent_values": [
+            -0.1467742,
+            5.0470092,
+            5.1806131
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0242646,
+          "independent_values": [
+            1.6599338,
+            4.9352809,
+            -5.1210532
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0125658,
+          "independent_values": [
+            2.2719825,
+            4.8865093,
+            0.031521
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.00491779,
+          "independent_values": [
+            2.0406858,
+            5.3253471,
+            5.2880688
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0243518,
+          "independent_values": [
+            4.0179983,
+            5.0826426,
+            -4.9597629
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0128886,
+          "independent_values": [
+            4.2863811,
+            4.8806558,
+            -0.2877697
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.00471241,
+          "independent_values": [
+            3.9289361,
+            5.2246849,
+            4.9758705
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0386951,
+          "independent_values": [
+            -2.2809763,
+            9.9844584,
+            -4.880079
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.027546,
+          "independent_values": [
+            -2.073307,
+            9.9204337,
+            0.0241722
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0188357,
+          "independent_values": [
+            -1.7624546,
+            9.9153493,
+            5.1985794
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0375762,
+          "independent_values": [
+            0.2279962,
+            9.8962508,
+            -4.7811258
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.028144,
+          "independent_values": [
+            -0.2800363,
+            10.3004593,
+            0.1413907
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0179398,
+          "independent_values": [
+            0.0828562,
+            9.9008011,
+            5.2962722
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.037712,
+          "independent_values": [
+            1.826223,
+            10.0939436,
+            -4.6710211
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0278079,
+          "independent_values": [
+            1.7762123,
+            10.1556398,
+            -0.1307093
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.018244,
+          "independent_values": [
+            2.2258599,
+            9.800972,
+            4.6721747
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0368199,
+          "independent_values": [
+            3.7892651,
+            9.8017197,
+            -4.8026383
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0252014,
+          "independent_values": [
+            4.0150716,
+            9.6815531,
+            -0.0630955
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0164312,
+          "independent_values": [
+            4.1677953,
+            9.8754433,
+            5.1776223
+          ],
+          "modification_id": null
+        }
+      ],
+      "provenance": null,
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "yawMomentCoefficientTable1",
+      "uncertainty": null,
+      "units": "ND"
+    },
+    {
+      "attributes": {},
+      "declared_id": null,
+      "description": null,
+      "function_name": "yawMomentCoefficientFunction2",
+      "independent_dimension_count": 3,
+      "issues": [],
+      "name": null,
+      "points": [
+        {
+          "attributes": {},
+          "dependent_value": -0.00350641,
+          "independent_values": [
+            -1.8330592,
+            -5.3490387,
+            -4.7258599
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0120538,
+          "independent_values": [
+            -1.9302179,
+            -4.9698462,
+            0.2798654
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0207089,
+          "independent_values": [
+            -2.1213095,
+            -5.0383145,
+            5.2146443
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.000882368,
+          "independent_values": [
+            0.2522004,
+            -4.9587161,
+            -5.231286
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0111846,
+          "independent_values": [
+            0.3368831,
+            -5.0797159,
+            -0.337054
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0208758,
+          "independent_values": [
+            0.2987289,
+            -4.9691198,
+            5.2868938
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00219842,
+          "independent_values": [
+            1.8858257,
+            -5.2077654,
+            -4.7313074
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0111726,
+          "independent_values": [
+            1.8031083,
+            -4.7072954,
+            0.0541231
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0208074,
+          "independent_values": [
+            1.7773659,
+            -5.0317988,
+            5.1507477
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00225906,
+          "independent_values": [
+            3.8104785,
+            -5.2982162,
+            -4.7152852
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0116563,
+          "independent_values": [
+            4.2631596,
+            -5.1695257,
+            -0.134341
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0215506,
+          "independent_values": [
+            4.0470946,
+            -5.2541017,
+            5.0686926
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0113462,
+          "independent_values": [
+            -1.8882611,
+            0.2422452,
+            -5.1959304
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.000253915,
+          "independent_values": [
+            -2.1796091,
+            0.0542085,
+            0.2454711
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00875431,
+          "independent_values": [
+            -2.2699103,
+            -0.3146657,
+            4.8638859
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0105144,
+          "independent_values": [
+            0.0148579,
+            0.1095599,
+            -4.96395
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.000487753,
+          "independent_values": [
+            -0.1214591,
+            -0.004796,
+            0.2788827
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00816086,
+          "independent_values": [
+            0.0610233,
+            0.2029588,
+            5.0831767
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0106762,
+          "independent_values": [
+            1.7593356,
+            -0.0149007,
+            -5.0494446
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.000332616,
+          "independent_values": [
+            1.9717048,
+            -0.0870861,
+            0.0763833
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.0093807,
+          "independent_values": [
+            2.0228263,
+            -0.2962294,
+            5.1777078
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.010196,
+          "independent_values": [
+            4.0567507,
+            -0.2948622,
+            -5.1002243
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.000312733,
+          "independent_values": [
+            3.6534822,
+            0.2163747,
+            0.13699
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.00809437,
+          "independent_values": [
+            3.6848003,
+            0.0884533,
+            4.8214805
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.02453,
+          "independent_values": [
+            -2.3347682,
+            5.228872,
+            -4.7193014
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0133447,
+          "independent_values": [
+            -2.306035,
+            4.9652745,
+            0.232461
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.00556052,
+          "independent_values": [
+            -1.8675176,
+            5.0754646,
+            5.1169942
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0250468,
+          "independent_values": [
+            0.0004379,
+            5.1220145,
+            -5.2734993
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0124083,
+          "independent_values": [
+            -0.1977035,
+            4.7462188,
+            0.0664495
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.00475277,
+          "independent_values": [
+            -0.1467742,
+            5.0470092,
+            5.1806131
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0242646,
+          "independent_values": [
+            1.6599338,
+            4.9352809,
+            -5.1210532
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0125658,
+          "independent_values": [
+            2.2719825,
+            4.8865093,
+            0.031521
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.00491779,
+          "independent_values": [
+            2.0406858,
+            5.3253471,
+            5.2880688
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0243518,
+          "independent_values": [
+            4.0179983,
+            5.0826426,
+            -4.9597629
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0128886,
+          "independent_values": [
+            4.2863811,
+            4.8806558,
+            -0.2877697
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.00471241,
+          "independent_values": [
+            3.9289361,
+            5.2246849,
+            4.9758705
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0386951,
+          "independent_values": [
+            -2.2809763,
+            9.9844584,
+            -4.880079
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.027546,
+          "independent_values": [
+            -2.073307,
+            9.9204337,
+            0.0241722
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0188357,
+          "independent_values": [
+            -1.7624546,
+            9.9153493,
+            5.1985794
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0375762,
+          "independent_values": [
+            0.2279962,
+            9.8962508,
+            -4.7811258
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.028144,
+          "independent_values": [
+            -0.2800363,
+            10.3004593,
+            0.1413907
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0179398,
+          "independent_values": [
+            0.0828562,
+            9.9008011,
+            5.2962722
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.037712,
+          "independent_values": [
+            1.826223,
+            10.0939436,
+            -4.6710211
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0278079,
+          "independent_values": [
+            1.7762123,
+            10.1556398,
+            -0.1307093
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.018244,
+          "independent_values": [
+            2.2258599,
+            9.800972,
+            4.6721747
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0368199,
+          "independent_values": [
+            3.7892651,
+            9.8017197,
+            -4.8026383
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0252014,
+          "independent_values": [
+            4.0150716,
+            9.6815531,
+            -0.0630955
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.0164312,
+          "independent_values": [
+            4.1677953,
+            9.8754433,
+            5.1776223
+          ],
+          "modification_id": null
+        }
+      ],
+      "provenance": null,
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "ungridded-table-0002",
+      "uncertainty": null,
+      "units": null
+    }
+  ],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "axisSystem": "Body Axis",
+        "name": "angleOfAttack_d",
+        "sign": "ANU",
+        "symbol": "α",
+        "units": "d",
+        "varID": "angleOfAttack"
+      },
+      "axis_system": "Body Axis",
+      "calculation": null,
+      "description": "Instantaneous body reference angle of attack",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "angleOfAttack_d",
+      "provenance": null,
+      "roles": [
+        "isStdAIAA"
+      ],
+      "sign": "ANU",
+      "symbol": "α",
+      "uncertainty": null,
+      "units": "d",
+      "variable_id": "angleOfAttack"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "axisSystem": "Body Axis",
+        "name": "angleOfSideslip_d",
+        "sign": "ANL",
+        "symbol": "β",
+        "units": "d",
+        "varID": "angleOfSideslip"
+      },
+      "axis_system": "Body Axis",
+      "calculation": null,
+      "description": "Instantaneous body reference angle of sideslip",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "angleOfSideslip_d",
+      "provenance": null,
+      "roles": [
+        "isStdAIAA"
+      ],
+      "sign": "ANL",
+      "symbol": "β",
+      "uncertainty": null,
+      "units": "d",
+      "variable_id": "angleOfSideslip"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "axisSystem": "Body Axis",
+        "name": "yawControlDeflection_d",
+        "sign": "TEL",
+        "symbol": "δr",
+        "units": "d",
+        "varID": "yawControlDeflection"
+      },
+      "axis_system": "Body Axis",
+      "calculation": null,
+      "description": "Instantaneous body reference angle of sideslip",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "yawControlDeflection_d",
+      "provenance": null,
+      "roles": [],
+      "sign": "TEL",
+      "symbol": "δr",
+      "uncertainty": null,
+      "units": "d",
+      "variable_id": "yawControlDeflection"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "axisSystem": "Body Axis",
+        "name": "aeroBodyYawMomentCoefficient_1",
+        "symbol": "Cn",
+        "units": "ND",
+        "varID": "aeroBodyYawMomentCoefficient_1"
+      },
+      "axis_system": "Body Axis",
+      "calculation": null,
+      "description": "Total yawing moment coefficient",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "aeroBodyYawMomentCoefficient_1",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": null,
+      "symbol": "Cn",
+      "uncertainty": null,
+      "units": "ND",
+      "variable_id": "aeroBodyYawMomentCoefficient_1"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "axisSystem": "Body Axis",
+        "name": "aeroBodyYawMomentCoefficient_2",
+        "symbol": "Cn",
+        "units": "ND",
+        "varID": "aeroBodyYawMomentCoefficient_2"
+      },
+      "axis_system": "Body Axis",
+      "calculation": null,
+      "description": "Total yawing moment coefficient",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "aeroBodyYawMomentCoefficient_2",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": null,
+      "symbol": "Cn",
+      "uncertainty": null,
+      "units": "ND",
+      "variable_id": "aeroBodyYawMomentCoefficient_2"
+    }
+  ]
+}

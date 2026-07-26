@@ -1,6 +1,6 @@
 (simple_aero-cbcr-left)
 
-# Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/cbcr.yaml
+# Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/cbcr.yaml
 # Working set: boost, coast-to-apogee, maneuver, terminal propnav
 
 # Simple Aero metadata:

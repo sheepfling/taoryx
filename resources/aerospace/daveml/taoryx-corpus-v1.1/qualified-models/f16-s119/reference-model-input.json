@@ -1,0 +1,82 @@
+{
+  "actual_controls": {
+    "aileron_ratio": 0.0,
+    "elevator_ratio": 0.12970163035515778,
+    "pitch_trim_ratio": 0.0,
+    "roll_trim_ratio": 0.0,
+    "rudder_ratio": 0.0,
+    "throttle_ratio": [
+      0.1390408357542583
+    ],
+    "yaw_trim_ratio": 0.0
+  },
+  "atmosphere": {
+    "density_kg_m3": 0.9042674313614082,
+    "pressure_pa": 69646.49653920882,
+    "speed_of_sound_mps": 328.37131381353333,
+    "temperature_k": 268.3122444,
+    "wind_ned_mps": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    }
+  },
+  "commanded_controls": {
+    "aileron_ratio": 0.0,
+    "elevator_ratio": 0.12970163035515778,
+    "pitch_trim_ratio": 0.0,
+    "roll_trim_ratio": 0.0,
+    "rudder_ratio": 0.0,
+    "throttle_ratio": [
+      0.1390408357542583
+    ],
+    "yaw_trim_ratio": 0.0
+  },
+  "configuration": {
+    "flap_ratio": 0.0,
+    "gear_ratio": 0.0,
+    "slat_ratio": 0.0,
+    "speedbrake_ratio": 0.0,
+    "spoiler_ratio": 0.0
+  },
+  "mass": {
+    "center_of_gravity_body_m": {
+      "x": 0.34503360000000005,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "inertia_body_kg_m2": {
+      "ixx_kg_m2": 12874.847237354978,
+      "ixy_kg_m2": 0.0,
+      "ixz_kg_m2": 1331.4132252614352,
+      "iyy_kg_m2": 75673.62296816878,
+      "iyz_kg_m2": 0.0,
+      "izz_kg_m2": 85552.11253971136
+    },
+    "mass_kg": 9298.643898518936
+  },
+  "rigid_body": {
+    "air_velocity_body_mps": {
+      "x": 172.23545996014465,
+      "y": 0.0,
+      "z": 7.992150327561883
+    },
+    "altitude_m": 3051.9624000000003,
+    "angular_rate_body_rad_s": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "attitude_body_to_ned": {
+      "w": 0.99973124913056,
+      "x": 0.0,
+      "y": 0.023182526002362223,
+      "z": 0.0
+    },
+    "position_ned_m": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    }
+  }
+}

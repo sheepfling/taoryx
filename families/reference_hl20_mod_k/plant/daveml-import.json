@@ -1,6 +1,6 @@
 {
   "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
-  "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_root": "resources/aerospace/daveml/nesc-model-catalog-v1.0",
   "claims": [
     "qualified HL-20 source package is bound to the Taoryx rigid-body load contract",
     "package DAVE-ML aerodynamics complete the canonical structural and numeric cycle"
@@ -28,7 +28,7 @@
       "baseline_rule": "do_not_apply_static_control_subtraction_to_source_terms"
     },
     "model_id": "hl20-mod-k-unpowered-6dof",
-    "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/hl20-mod-k/hl20-mod-k-unpowered-v0.10.txair",
+    "path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/hl20-mod-k/hl20-mod-k-unpowered-v0.10.txair",
     "reference_geometry": {
       "area_m2": 26.612075808,
       "mean_aerodynamic_chord_m": 8.607552,

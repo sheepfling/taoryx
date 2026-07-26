@@ -1,6 +1,6 @@
 {
   "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
-  "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_root": "resources/aerospace/daveml/nesc-model-catalog-v1.0",
   "claims": [
     "qualified NESC Scenario 17 package is bound to the Taoryx rigid-body load contract",
     "DAVE-ML aerodynamics, propulsion, and scheduled inertia members are imported as separate components",
@@ -29,7 +29,7 @@
       "baseline_rule": "do_not_apply_static_control_subtraction"
     },
     "model_id": "nasa-nesc-two-stage-rocket-scenario17",
-    "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
+    "path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
     "reference_geometry": {
       "area_m2": 7.0,
       "mean_aerodynamic_chord_m": 3.0,
