@@ -41,6 +41,7 @@ from .daveml_evaluator import DAVEMLCheckResult, DAVEMLGraph, evaluate_daveml_ch
 from .daveml_import import (
     DAVEMLFamilyGraphBinding,
     DAVEMLFamilyImport,
+    DAVEMLFunctionChannel,
     DAVEMLImportDocument,
     DAVEMLImportPackage,
     DAVEMLReplayEvidence,
@@ -49,6 +50,7 @@ from .daveml_import import (
     build_daveml_family_import,
     load_daveml_family_graph,
     load_daveml_family_import,
+    load_daveml_function_channel,
 )
 from .daveml_replay import DAVEMLReplayReport, replay_reference_collection, replay_reference_package
 from .daveml_semantic import (
@@ -140,6 +142,7 @@ __all__ = [
     "DAVEMLReplayReport",
     "DAVEMLFamilyImport",
     "DAVEMLFamilyGraphBinding",
+    "DAVEMLFunctionChannel",
     "DAVEMLTrimBinding",
     "DAVEMLImportDocument",
     "DAVEMLImportPackage",
@@ -148,6 +151,7 @@ __all__ = [
     "build_daveml_family_import",
     "load_daveml_family_import",
     "load_daveml_family_graph",
+    "load_daveml_function_channel",
     "replay_reference_collection",
     "replay_reference_package",
     "DAVEMLCheckResult",

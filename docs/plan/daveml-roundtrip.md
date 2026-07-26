@@ -495,6 +495,10 @@ items are complete and reproducible:
 - `DAVEMLTrimBinding` provides the explicit solver-facing seam for mapping
   family state, controls, environment inputs, and graph outputs into the
   existing trim evaluator; it is an adapter contract, not a certified trim.
+- `DAVEMLFunctionChannel` and `load_daveml_function_channel` now provide a
+  hash-verified typed channel boundary for individual aerodynamic, propulsion,
+  and inertia functions. F-16 `cxt` and HL-20 `CL0A0` are covered by focused
+  tests with source-unit and output checks.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.
@@ -516,7 +520,8 @@ The next executable gates are, in order:
 
 1. Resolve and independently test the official ungridded interpolation
    disposition without changing source tolerances.
-2. Add source-backed F-16 and HL-20 trim records and residual adapters, then
+2. Compose typed function channels into source-backed F-16 and HL-20 trim
+   records and residual adapters, then
    certify at least one operating point per applicable family.
 3. Generate trim-local linearizations, run control-direction probes, and add
    controller/tuning records only after the trim contracts pass.

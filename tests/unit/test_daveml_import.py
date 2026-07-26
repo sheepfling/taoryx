@@ -6,7 +6,14 @@ from pathlib import Path
 
 import pytest
 
-from taoryx.trajectory import DAVEMLTrimBinding, load_daveml_family_graph, load_daveml_family_import, load_reference_family_catalog
+from taoryx.trajectory import (
+    DAVEMLFunctionChannel,
+    DAVEMLTrimBinding,
+    load_daveml_family_graph,
+    load_daveml_family_import,
+    load_daveml_function_channel,
+    load_reference_family_catalog,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG_ROOT = Path(
@@ -55,6 +62,41 @@ def test_family_graph_binding_verifies_package_and_source_member_before_executio
         fixed_inputs={"mach": 0.0},
     )
     assert trim_binding.evaluate({"altitude_ft": 0.0}, {"power_pct": 0.0}) == {"thrust_lbf": 1060.0}
+
+
+def test_function_channel_declares_source_inputs_units_and_output() -> None:
+    channel = load_daveml_function_channel(
+        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+        role="aerodynamics",
+        function_id="cxt",
+        input_channels={"elevator_deg": "el", "alpha_deg": "alpha"},
+    )
+    assert isinstance(channel, DAVEMLFunctionChannel)
+    assert channel.input_unit("elevator_deg") == "deg"
+    assert channel.input_unit("alpha_deg") == "deg"
+    assert channel.output_unit() == "nd"
+    assert channel.evaluate({"elevator_deg": 0.0, "alpha_deg": 0.0}) == -0.021
+
+
+def test_hl20_function_channel_preserves_hash_verified_graph_boundary() -> None:
+    channel = load_daveml_function_channel(
+        ROOT / "families/reference_hl20_mod_k/plant/daveml-import.json",
+        role="aerodynamics",
+        function_id="CL0A0",
+        input_channels={"mach": "XMACH"},
+    )
+    assert channel.graph.document_sha256 == "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec"
+    assert channel.evaluate({"mach": 1.0}) == pytest.approx(-0.07936)
+
+
+def test_function_channel_rejects_missing_source_function() -> None:
+    with pytest.raises(ValueError, match="not present"):
+        load_daveml_function_channel(
+            ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+            role="aerodynamics",
+            function_id="not_a_source_function",
+            input_channels={"alpha_deg": "alpha"},
+        )
 
 
 @pytest.mark.skipif(not CATALOG_ROOT.is_dir(), reason="local DAVE-ML catalog is external to the repository")

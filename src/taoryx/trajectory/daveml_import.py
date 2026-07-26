@@ -137,6 +137,67 @@ class DAVEMLFamilyGraphBinding:
 
 
 @dataclass(frozen=True, slots=True)
+class DAVEMLFunctionChannel:
+    """Typed channel adapter for one hash-verified DAVE-ML function."""
+
+    graph: DAVEMLFamilyGraphBinding
+    function_id: str
+    input_channels: Mapping[str, str]
+    output_channel: str
+
+    def __post_init__(self) -> None:
+        if self.function_id not in self.graph.graph.functions:
+            raise ValueError(
+                f"DAVE-ML function {self.function_id!r} is not present in "
+                f"{self.graph.family_id!r}/{self.graph.role!r}"
+            )
+        if not self.input_channels:
+            raise ValueError("DAVE-ML function channel requires at least one input")
+        channel_names = tuple(self.input_channels)
+        if len(channel_names) != len(set(channel_names)) or not all(channel_names):
+            raise ValueError("DAVE-ML function input channel names must be unique and non-empty")
+        source_ids = tuple(self.input_channels.values())
+        if len(source_ids) != len(set(source_ids)) or not all(source_ids):
+            raise ValueError("DAVE-ML function source inputs must be unique and non-empty")
+        if self.output_channel not in self.graph.graph.variables:
+            raise ValueError(f"DAVE-ML function output variable {self.output_channel!r} is unresolved")
+        missing = [source_id for source_id in source_ids if source_id not in self.graph.graph.variables]
+        if missing:
+            raise ValueError("DAVE-ML function input variables are unresolved: " + ", ".join(sorted(missing)))
+        ####
+
+    def evaluate(self, channels: Mapping[str, float]) -> float:
+        """Evaluate the source function from named family-library channels."""
+
+        missing = set(self.input_channels) - set(channels)
+        if missing:
+            raise KeyError("DAVE-ML function channels are missing: " + ", ".join(sorted(missing)))
+        values = {
+            source_id: float(channels[channel])
+            for channel, source_id in self.input_channels.items()
+        }
+        return self.graph.evaluate(values, (self.output_channel,))[self.output_channel]
+        ####
+
+    def input_unit(self, channel: str) -> str | None:
+        """Return the source unit for one public input channel."""
+
+        try:
+            source_id = self.input_channels[channel]
+        except KeyError as error:
+            raise KeyError(f"unknown DAVE-ML function channel {channel!r}") from error
+        return self.graph.unit_for(source_id)
+        ####
+
+    def output_unit(self) -> str | None:
+        """Return the declared source unit for the output channel."""
+
+        return self.graph.unit_for(self.output_channel)
+        ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
 class DAVEMLTrimBinding:
     """Explicit DAVE-ML input/output mapping usable by the trim solver."""
 
@@ -235,6 +296,25 @@ def load_daveml_family_graph(path: str | Path, *, role: str) -> DAVEMLFamilyGrap
         package_member=document.package_member,
         document_sha256=document_sha256,
         graph=load_daveml_graph(payload, document_id=document.document_id),
+    )
+
+
+def load_daveml_function_channel(
+    path: str | Path,
+    *,
+    role: str,
+    function_id: str,
+    input_channels: Mapping[str, str],
+    output_channel: str | None = None,
+) -> DAVEMLFunctionChannel:
+    """Load a typed function channel while preserving package provenance."""
+
+    graph = load_daveml_family_graph(path, role=role)
+    return DAVEMLFunctionChannel(
+        graph=graph,
+        function_id=function_id,
+        input_channels=dict(input_channels),
+        output_channel=output_channel or function_id,
     )
 
 
@@ -460,6 +540,7 @@ def _resolve_package_path(sidecar: Path, package_label: str) -> Path:
 __all__ = [
     "DAVEMLFamilyImport",
     "DAVEMLFamilyGraphBinding",
+    "DAVEMLFunctionChannel",
     "DAVEMLImportDocument",
     "DAVEMLImportPackage",
     "DAVEMLReplayEvidence",
@@ -467,4 +548,5 @@ __all__ = [
     "build_daveml_family_import",
     "load_daveml_family_import",
     "load_daveml_family_graph",
+    "load_daveml_function_channel",
 ]
