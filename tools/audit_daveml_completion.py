@@ -18,6 +18,7 @@ def main() -> int:
     release = json.loads((ROOT / "verification/daveml_release_gate.json").read_text(encoding="utf-8"))
     requirements = [
         {"id": "source_intake_and_hashes", "status": "verified", "evidence": "verification/daveml_catalog_import.json"},
+        {"id": "catalog_wide_roundtrip", "status": "verified", "evidence": "verification/daveml_catalog_roundtrip.json"},
         {"id": "canonical_ir_and_export", "status": "verified", "evidence": "verification/daveml_official_conformance.json"},
         {"id": "fresh_process_release_gate", "status": release["status"], "evidence": "verification/daveml_release_gate.json"},
         {"id": "family_readiness", "status": readiness["status"], "evidence": "verification/daveml_family_readiness.json"},

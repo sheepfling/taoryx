@@ -25,11 +25,12 @@ def main() -> int:
     parser.add_argument("artifact", type=Path, nargs="?", help="verified .txcollection or .txair archive")
     parser.add_argument("--catalog-root", type=Path, help="INBOX DAVE-ML catalog root to cycle")
     parser.add_argument("--output-dir", type=Path, required=True, help="derived report directory")
+    parser.add_argument("--summary-output", type=Path, help="optional compact copy of the catalog report")
     arguments = parser.parse_args()
     if (arguments.artifact is None) == (arguments.catalog_root is None):
         parser.error("provide exactly one of ARTIFACT or --catalog-root")
     if arguments.catalog_root is not None:
-        return _run_catalog(arguments.catalog_root, arguments.output_dir)
+        return _run_catalog(arguments.catalog_root, arguments.output_dir, arguments.summary_output)
     if arguments.artifact.suffix.casefold() == ".txair":
         return _run_package(arguments.artifact, arguments.output_dir)
     contents = read_collection_archive(arguments.artifact)
@@ -210,7 +211,7 @@ def _run_package(package: Path, output: Path) -> int:
     ####
 
 
-def _run_catalog(catalog_root: Path, output: Path) -> int:
+def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None = None) -> int:
     """Cycle every normalized source and qualified package in an INBOX catalog."""
 
     normalized = sorted(catalog_root.glob("normalized/*/source.dml"))
@@ -277,7 +278,11 @@ def _run_catalog(catalog_root: Path, output: Path) -> int:
             "Runtime replay and semantic graph equivalence remain separate evidence layers.",
         ],
     }
-    (output / "catalog-roundtrip-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    serialized = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    (output / "catalog-roundtrip-report.json").write_text(serialized, encoding="utf-8")
+    if summary_output is not None:
+        summary_output.parent.mkdir(parents=True, exist_ok=True)
+        summary_output.write_text(serialized, encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0
 
