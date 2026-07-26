@@ -5,6 +5,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import subprocess
+import sys
+import tempfile
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -48,12 +52,12 @@ def main() -> int:
             continue
         ir = build_daveml_ir(payload, document_id=document.document_id)
         exported = export_daveml_ir(ir)
-        fresh = build_daveml_ir(exported, document_id=document.document_id)
+        stem = Path(source_member).stem
+        fresh = _fresh_process_ir(exported, document.document_id, output, stem)
         diffs = compare_daveml_ir(ir, fresh)
         numeric_diffs = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
         vector_check_results = evaluate_daveml_vector_checkdata(payload)
-        stem = Path(source_member).stem
         (output / "canonical" / f"{stem}.ir.json").write_bytes(ir.canonical_json())
         (output / "exported" / f"{stem}.dml").write_bytes(exported)
         for diff in diffs:
@@ -70,6 +74,7 @@ def main() -> int:
                 "reference_summary": _reference_summary(ir),
                 "structural_diff_count": len(diffs),
                 "numeric_diff_count": len(numeric_diffs),
+                "fresh_process_reimport": "verified",
                 "checkdata": _checkdata_summary(check_results, vector_check_results),
             }
         )
@@ -117,6 +122,37 @@ def _write_export_manifest(output: Path, documents: list[dict[str, object]]) -> 
     target = output / "canonical" / "export-manifest.json"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    ####
+
+
+def _fresh_process_ir(exported: bytes, document_id: str, output: Path, stem: str):
+    """Re-import exported bytes through a separate Python process."""
+
+    with tempfile.TemporaryDirectory(prefix="daveml-fresh-", dir=output) as directory:
+        directory_path = Path(directory)
+        payload_path = directory_path / f"{stem}.dml"
+        ir_path = directory_path / f"{stem}.ir.json"
+        payload_path.write_bytes(exported)
+        environment = dict(os.environ)
+        root = Path(__file__).resolve().parents[1]
+        environment["PYTHONPATH"] = str(root / "src")
+        subprocess.run(
+            [
+                sys.executable,
+                str(root / "tools" / "reimport_daveml_ir.py"),
+                str(payload_path),
+                "--document-id",
+                document_id,
+                "--output",
+                str(ir_path),
+            ],
+            cwd=root,
+            env=environment,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return build_daveml_ir(ir_path.read_bytes(), document_id=document_id)
     ####
 
 
@@ -222,12 +258,12 @@ def _run_package(package: Path, output: Path) -> int:
         document_id = source_member
         ir = build_daveml_ir(payload, document_id=document_id)
         exported = export_daveml_ir(ir)
-        fresh = build_daveml_ir(exported, document_id=document_id)
+        stem = Path(source_member).stem
+        fresh = _fresh_process_ir(exported, document_id, output, stem)
         structural_diffs = compare_daveml_ir(ir, fresh)
         numeric_diffs = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
         vector_check_results = evaluate_daveml_vector_checkdata(payload)
-        stem = Path(source_member).stem
         (output / "canonical" / f"{stem}.ir.json").write_bytes(ir.canonical_json())
         (output / "exported" / f"{stem}.dml").write_bytes(exported)
         structural.extend({"document_id": document_id, **diff.to_dict()} for diff in structural_diffs)
@@ -242,6 +278,7 @@ def _run_package(package: Path, output: Path) -> int:
             "reference_summary": _reference_summary(ir),
             "structural_diff_count": len(structural_diffs),
             "numeric_diff_count": len(numeric_diffs),
+            "fresh_process_reimport": "verified",
             "checkdata": _checkdata_summary(check_results, vector_check_results),
         })
     manifest = _json_member(files, "manifest.json")
@@ -303,6 +340,7 @@ def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None =
                 "checkdata": checkdata,
                 "checkdata_status": checkdata["status"],
                 "checkdata_failed": checkdata["failed"],
+                "fresh_process_reimport": "verified",
                 "ir_sha256": _sha256(ir.canonical_json()),
             }
         )
