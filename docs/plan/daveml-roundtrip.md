@@ -507,6 +507,11 @@ items are complete and reproducible:
   component bindings. A focused F-16 probe evaluates aerodynamic pitch
   coefficient and propulsion thrust together without collapsing their source
   provenance; force-balance residual composition remains the next gate.
+- `DAVEMLFixedWingLoadBinding` now converts hash-verified F-16 body-axis
+  coefficients and lbf thrust into explicit SI force and moment channels using
+  declared reference geometry and conversion factors. The focused probe
+  verifies the channel arithmetic without applying hidden mass or gravity
+  assumptions; HL-20 wind-axis/lifting-body mapping remains separate work.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.

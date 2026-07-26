@@ -285,6 +285,80 @@ class DAVEMLCompositeTrimBinding:
     ####
 
 
+@dataclass(frozen=True, slots=True)
+class DAVEMLFixedWingLoadBinding:
+    """Convert source coefficient channels into explicit body loads in SI."""
+
+    aerodynamics: DAVEMLTrimBinding
+    reference_area_m2: float
+    mean_aerodynamic_chord_m: float
+    span_m: float
+    dynamic_pressure_pa: float
+    propulsion: DAVEMLTrimBinding | None = None
+    propulsion_output: str = "thrust_lbf"
+    thrust_scale_to_newtons: float = 4.4482216152605
+
+    def __post_init__(self) -> None:
+        values = (
+            self.reference_area_m2,
+            self.mean_aerodynamic_chord_m,
+            self.span_m,
+            self.dynamic_pressure_pa,
+            self.thrust_scale_to_newtons,
+        )
+        if not all(float(value) > 0.0 for value in values):
+            raise ValueError("DAVE-ML fixed-wing load geometry and scales must be positive")
+        required = {"cx", "cy", "cz", "cl", "cm", "cn"}
+        missing = required - set(self.aerodynamics.residual_outputs)
+        if missing:
+            raise ValueError("DAVE-ML aerodynamic load channels are missing: " + ", ".join(sorted(missing)))
+        if self.propulsion is not None and self.propulsion_output not in self.propulsion.residual_outputs:
+            raise ValueError(f"DAVE-ML propulsion output {self.propulsion_output!r} is unresolved")
+        ####
+
+    def evaluate(
+        self,
+        state: Mapping[str, float],
+        controls: Mapping[str, float],
+        environment: Mapping[str, float] | None = None,
+    ) -> dict[str, float]:
+        """Return force/moment channels without applying gravity or mass balance."""
+
+        coefficients = self.aerodynamics.evaluate(state, controls, environment)
+        scale = self.dynamic_pressure_pa * self.reference_area_m2
+        loads = {
+            "aerodynamic_force_x_n": scale * coefficients["cx"],
+            "aerodynamic_force_y_n": scale * coefficients["cy"],
+            "aerodynamic_force_z_n": scale * coefficients["cz"],
+            "aerodynamic_moment_x_nm": scale * self.span_m * coefficients["cl"],
+            "aerodynamic_moment_y_nm": scale * self.mean_aerodynamic_chord_m * coefficients["cm"],
+            "aerodynamic_moment_z_nm": scale * self.span_m * coefficients["cn"],
+        }
+        if self.propulsion is not None:
+            thrust = self.propulsion.evaluate(state, controls, environment)[self.propulsion_output]
+            loads["propulsion_force_x_n"] = self.thrust_scale_to_newtons * thrust
+        else:
+            loads["propulsion_force_x_n"] = 0.0
+        loads["total_force_x_n"] = loads["aerodynamic_force_x_n"] + loads["propulsion_force_x_n"]
+        loads["total_force_y_n"] = loads["aerodynamic_force_y_n"]
+        loads["total_force_z_n"] = loads["aerodynamic_force_z_n"]
+        loads["total_moment_x_nm"] = loads["aerodynamic_moment_x_nm"]
+        loads["total_moment_y_nm"] = loads["aerodynamic_moment_y_nm"]
+        loads["total_moment_z_nm"] = loads["aerodynamic_moment_z_nm"]
+        return loads
+        ####
+
+    def as_evaluator(
+        self,
+        environment: Mapping[str, float] | None = None,
+    ) -> Callable[[Mapping[str, float], Mapping[str, float]], Mapping[str, float]]:
+        """Return a trim-solver-compatible total-load evaluator."""
+
+        return lambda state, controls: self.evaluate(state, controls, environment)
+        ####
+    ####
+
+
 def load_daveml_family_import(path: str | Path) -> DAVEMLFamilyImport:
     """Load and validate one family import sidecar."""
 
@@ -600,6 +674,7 @@ __all__ = [
     "DAVEMLFamilyImport",
     "DAVEMLFamilyGraphBinding",
     "DAVEMLCompositeTrimBinding",
+    "DAVEMLFixedWingLoadBinding",
     "DAVEMLFunctionChannel",
     "DAVEMLImportDocument",
     "DAVEMLImportPackage",

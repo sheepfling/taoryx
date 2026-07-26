@@ -8,6 +8,7 @@ import pytest
 
 from taoryx.trajectory import (
     DAVEMLCompositeTrimBinding,
+    DAVEMLFixedWingLoadBinding,
     DAVEMLFunctionChannel,
     DAVEMLTrimBinding,
     load_daveml_family_graph,
@@ -170,6 +171,63 @@ def test_f16_aero_and_propulsion_bindings_compose_without_losing_provenance() ->
     assert values["pitch_cm"] == pytest.approx(-0.0074)
     assert values["thrust_lbf"] == pytest.approx(1060.0)
     assert aero.graph.document_sha256 != propulsion.graph.document_sha256
+
+
+def test_f16_fixed_wing_load_binding_reports_explicit_si_channels() -> None:
+    aero = load_daveml_trim_binding(
+        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+        role="aerodynamics",
+        state_inputs={},
+        control_inputs={"elevator_deg": "el"},
+        residual_outputs={
+            "cx": "cx",
+            "cy": "cy",
+            "cz": "cz",
+            "cl": "cl",
+            "cm": "cm",
+            "cn": "cn",
+        },
+        fixed_inputs={
+            "vt": 500.0,
+            "alpha": 2.0,
+            "beta": 0.0,
+            "p": 0.0,
+            "q": 0.0,
+            "r": 0.0,
+            "ail": 0.0,
+            "rdr": 0.0,
+            "xcg": 0.35,
+        },
+    )
+    propulsion = load_daveml_trim_binding(
+        ROOT / "families/reference_f16_s119/plant/daveml-import.json",
+        role="propulsion",
+        state_inputs={"altitude_ft": "altitudeMSL", "mach": "mach"},
+        control_inputs={"power_pct": "powerLeverAngle"},
+        residual_outputs={"thrust_lbf": "thrustBodyForce_X"},
+    )
+    binding = DAVEMLFixedWingLoadBinding(
+        aerodynamics=aero,
+        propulsion=propulsion,
+        reference_area_m2=27.870912,
+        mean_aerodynamic_chord_m=3.450336,
+        span_m=9.144,
+        dynamic_pressure_pa=1000.0,
+    )
+    loads = binding.evaluate(
+        {"altitude_ft": 0.0, "mach": 0.0},
+        {"elevator_deg": 0.0, "power_pct": 0.0},
+    )
+    scale = 1000.0 * 27.870912
+    assert loads["aerodynamic_force_x_n"] == pytest.approx(scale * -0.0142)
+    assert loads["aerodynamic_force_z_n"] == pytest.approx(scale * -0.2264)
+    assert loads["aerodynamic_moment_y_nm"] == pytest.approx(
+        scale * 3.450336 * -0.0074
+    )
+    assert loads["propulsion_force_x_n"] == pytest.approx(1060.0 * 4.4482216152605)
+    assert loads["total_force_x_n"] == pytest.approx(
+        loads["aerodynamic_force_x_n"] + loads["propulsion_force_x_n"]
+    )
 
 
 @pytest.mark.skipif(not CATALOG_ROOT.is_dir(), reason="local DAVE-ML catalog is external to the repository")
