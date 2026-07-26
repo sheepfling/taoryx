@@ -630,6 +630,13 @@ def daveml_scenario() -> None:
     ####
 
 
+def daveml_release() -> None:
+    """Run the fresh-process DAVE-ML promotion gate."""
+
+    run(tool_script("validate_daveml_release.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -740,6 +747,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-linearization": daveml_linearization,
     "daveml-tuning": daveml_tuning,
     "daveml-scenario": daveml_scenario,
+    "daveml-release": daveml_release,
     "handoff": handoff,
     "check": check,
     "all": check,

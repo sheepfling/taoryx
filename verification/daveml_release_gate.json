@@ -1,0 +1,102 @@
+{
+  "artifacts": {
+    "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
+    "verification/daveml_f16_linearization_evidence.json": "66cca0f378b4622cceec09d4441b06b651f62588f515079ea330ed72b7408512",
+    "verification/daveml_f16_scenario_evidence.json": "628ad40114b1c25b4082d6ab9733971c69fde03a182b0dcf437e21ebdce7188a",
+    "verification/daveml_f16_trim_evidence.json": "bd131b577c08ec4c3e7640af5ddefce1f7b24908ad1704eeb7f13029a73b8322",
+    "verification/daveml_f16_tuning_evidence.json": "ae3f51a44d5ea26264f10122f3bda5a0d1cc8d64d029af89c512673a153dfc00",
+    "verification/daveml_family_readiness.json": "d8a8ace6d995f61228e95bd422fb20899473d118a883bf3f5c6d413e80b6ac3d",
+    "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f"
+  },
+  "claim_boundary": "bounded source integration release gate; not flight qualification",
+  "runs": [
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_family_readiness.py",
+        "--readiness",
+        "verification/daveml_family_readiness.yaml",
+        "--output",
+        "verification/daveml_family_readiness.json"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "     \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_f16_s119\",\n      \"layers\": {\n        \"linearization\": \"pending_source_trim_jacobian\",\n        \"objectives\": \"pending\",\n        \"scenarios\": \"trim_hold_only\",\n        \"trim\": \"source_package_regression\",\n        \"tuning\": \"pending\"\n      }\n    },\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"layers\": {\n        \"linearization\": \"pending_source_trim_jacobian\",\n        \"objectives\": \"pending\",\n        \"scenarios\": \"glide_trim_only\",\n        \"trim\": \"source_package_regression\",\n        \"tuning\": \"pending\"\n      }\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_atmosphere.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "tric_altitude_m\": 3048.0,\n      \"pressure_pa\": 69704.35096190107,\n      \"pressure_psf\": 1455.8056377791997,\n      \"pressure_ratio\": 0.68792736,\n      \"speed_of_sound_fps\": 1077.3535385155928,\n      \"speed_of_sound_m_s\": 328.3773585395527,\n      \"temperature_c\": -4.802616,\n      \"temperature_k\": 268.347384\n    },\n    {\n      \"density_kg_m3\": 0.18796204000000002,\n      \"density_ratio\": 0.1534384,\n      \"geometric_altitude_m\": 15240.0,\n      \"pressure_pa\": 11689.23541960647,\n      \"pressure_psf\": 244.13475759199997,\n      \"pressure_ratio\": 0.1153636,\n      \"speed_of_sound_fps\": 968.0301995227217,\n      \"speed_of_sound_m_s\": 295.05560481452557,\n      \"temperature_c\": -56.5,\n      \"temperature_k\": 216.64999999999998\n    }\n  ],\n  \"schema_version\": \"taoryx.daveml-atmosphere-evidence/v1\",\n  \"source\": {\n    \"path\": \"resources\\\\aerospace\\\\daveml\\\\official-conformance-v1\\\\atmos_76.dml\",\n    \"sha256\": \"b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca\"\n  },\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_trim.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "dence/v1\",\n  \"source\": {\n    \"document_sha256\": \"b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec\",\n    \"package_member\": \"models/aerodynamics.dml\",\n    \"package_sha256\": \"443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63\"\n  },\n  \"status\": \"verified\",\n  \"trim\": {\n    \"controls\": {},\n    \"iterations\": 5,\n    \"local_residual_jacobian\": {\n      \"a\": [\n        [\n          -0.004982539442238323\n        ]\n      ],\n      \"b\": [\n        []\n      ],\n      \"control_names\": [],\n      \"method\": \"central_finite_difference\",\n      \"residual_names\": [\n        \"pitch_cm\"\n      ],\n      \"state_names\": [\n        \"alpha_deg\"\n      ]\n    },\n    \"max_residual\": 1.1578411840407199e-14,\n    \"residuals\": {\n      \"pitch_cm\": 1.1578411840407199e-14\n    },\n    \"scaled_residual_norm\": 1.1578411840407199e-14,\n    \"solver_message\": \"`gtol` termination condition is satisfied.\",\n    \"solver_status\": 1,\n    \"state\": {\n      \"alpha_deg\": 6.457652069267908\n    },\n    \"success\": true\n  }\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_linearization.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "119\",\n  \"perturbations\": {\n    \"control_step\": 0.0001,\n    \"method\": \"central_finite_difference\",\n    \"state_step\": 0.0001\n  },\n  \"provenance\": {\n    \"aerodynamics_document_sha256\": \"272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764\",\n    \"aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n    \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"schema_version\": \"taoryx.daveml-linearization-evidence/v1\",\n  \"state_names\": [\n    \"u_m_s\",\n    \"v_m_s\",\n    \"w_m_s\",\n    \"p_rad_s\",\n    \"q_rad_s\",\n    \"r_rad_s\"\n  ],\n  \"status\": \"verified\",\n  \"trim_controls\": {\n    \"aileron_deg\": 0.0,\n    \"elevator_deg\": 0.0,\n    \"rudder_deg\": 0.0\n  },\n  \"trim_state\": {\n    \"p_rad_s\": 0.0,\n    \"q_rad_s\": 0.0,\n    \"r_rad_s\": 0.0,\n    \"u_m_s\": 152.4,\n    \"v_m_s\": 0.0,\n    \"w_m_s\": 0.0\n  }\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_tuning.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n    \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"q_matrix\": [\n    [\n      2.0,\n      0.0,\n      0.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      2.0,\n      0.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      2.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      0.0,\n      2.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      0.0,\n      0.0,\n      2.0\n    ]\n  ],\n  \"r_matrix\": [\n    [\n      1.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      1.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      1.0\n    ]\n  ],\n  \"schema_version\": \"taoryx.daveml-tuning-evidence/v1\",\n  \"state_names\": [\n    \"v_m_s\",\n    \"w_m_s\",\n    \"p_rad_s\",\n    \"q_rad_s\",\n    \"r_rad_s\"\n  ],\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_scenario.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": ",\n    \"output_rate_hz\": 10.0,\n    \"propulsion_model_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"scenario_id\": \"f16-s119-daveml-controller-smoke\",\n    \"schema_version\": 1,\n    \"termination_policy_sha256\": \"f70afada179fa82982569039a287d00d2eafb120f211e06b906ff2409774f455\",\n    \"unit_system\": \"si\",\n    \"vehicle\": \"f16-s119-reference\",\n    \"vehicle_model_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"schema_version\": \"taoryx.daveml-scenario-evidence/v1\",\n  \"status\": \"pass\",\n  \"tuning_provenance\": {\n    \"aerodynamics_document_sha256\": \"272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764\",\n    \"aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n    \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  }\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "-m",
+        "taoryx.runtime.cli",
+        "daveml",
+        "smoke",
+        "--family",
+        "reference_f16_s119"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "a287d00d2eafb120f211e06b906ff2409774f455\",\n      \"unit_system\": \"si\",\n      \"vehicle\": \"f16-s119-reference\",\n      \"vehicle_model_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n    },\n    \"schema_version\": \"taoryx.daveml-scenario-evidence/v1\",\n    \"status\": \"pass\",\n    \"tuning_provenance\": {\n      \"aerodynamics_document_sha256\": \"272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764\",\n      \"aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n      \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n      \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n    }\n  },\n  \"family_id\": \"reference_f16_s119\",\n  \"model_id\": \"f16-s119-reference\",\n  \"roles_hash_verified\": [\n    \"aerodynamics\",\n    \"propulsion\",\n    \"mass_properties\"\n  ],\n  \"schema_version\": \"taoryx.daveml-cli-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "-m",
+        "taoryx.runtime.cli",
+        "daveml",
+        "smoke",
+        "--family",
+        "reference_hl20_mod_k"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "ied\",\n    \"trim\": {\n      \"controls\": {},\n      \"iterations\": 5,\n      \"local_residual_jacobian\": {\n        \"a\": [\n          [\n            -0.004982539442238323\n          ]\n        ],\n        \"b\": [\n          []\n        ],\n        \"control_names\": [],\n        \"method\": \"central_finite_difference\",\n        \"residual_names\": [\n          \"pitch_cm\"\n        ],\n        \"state_names\": [\n          \"alpha_deg\"\n        ]\n      },\n      \"max_residual\": 1.1578411840407199e-14,\n      \"residuals\": {\n        \"pitch_cm\": 1.1578411840407199e-14\n      },\n      \"scaled_residual_norm\": 1.1578411840407199e-14,\n      \"solver_message\": \"`gtol` termination condition is satisfied.\",\n      \"solver_status\": 1,\n      \"state\": {\n        \"alpha_deg\": 6.457652069267908\n      },\n      \"success\": true\n    }\n  },\n  \"family_id\": \"reference_hl20_mod_k\",\n  \"model_id\": \"hl20-mod-k-unpowered-6dof\",\n  \"roles_hash_verified\": [\n    \"aerodynamics\"\n  ],\n  \"schema_version\": \"taoryx.daveml-cli-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
+    }
+  ],
+  "schema_version": "taoryx.daveml-release-gate/v1",
+  "status": "verified"
+}

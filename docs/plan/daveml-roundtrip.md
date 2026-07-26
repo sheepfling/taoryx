@@ -560,6 +560,11 @@ items are complete and reproducible:
   on unsupported family selection, missing/stale evidence, family mismatch, or
   unresolved source roles, and emits a deterministic
   `taoryx.daveml-cli-smoke/v1` envelope for F-16 and HL-20.
+- `tools/validate_daveml_release.py` now executes the fresh-process promotion
+  chain and emits `verification/daveml_release_gate.json`. The current gate
+  runs readiness, atmosphere, trim, linearization, tuning, scenario scoring,
+  and both family CLI smoke paths, then hashes the resulting artifacts. Its
+  claim boundary remains source integration, not flight qualification.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.
