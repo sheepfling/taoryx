@@ -11,6 +11,7 @@ from taoryx.modes import Quaternion
 from taoryx.rigid_body import RigidBody6DofState
 from taoryx.runtime.lowering import (
     _runtime_coordinated_turn_enabled,
+    _runtime_figure_eight_pitch_angle,
     _runtime_figure_eight_waypoint_position,
     _runtime_rectangle_bank_angle,
     _runtime_route_tracking_geometry,
@@ -75,6 +76,28 @@ def test_figure_eight_bank_reverses_sign_between_lobes() -> None:
     assert first_lobe > 0.0
     assert second_lobe < 0.0
     assert math.degrees(abs(first_lobe)) == pytest.approx(12.0)
+    ####
+
+
+def test_figure_eight_pitch_reverses_sign_between_lobes() -> None:
+    route = {**ROUTE, "figure-eight-pitch-deg": "4.0"}
+    first_lobe = _runtime_figure_eight_pitch_angle(route, math.pi / 2.0)
+    second_lobe = _runtime_figure_eight_pitch_angle(route, 3.0 * math.pi / 2.0)
+
+    assert math.degrees(first_lobe) == pytest.approx(4.0)
+    assert math.degrees(second_lobe) == pytest.approx(-4.0)
+    ####
+
+
+def test_figure_eight_altitude_reference_returns_to_start() -> None:
+    route = {**ROUTE, "figure-eight-altitude-amplitude-m": "8.0"}
+    start = _runtime_figure_eight_waypoint_position(route, _state(0.0))
+    peak = _runtime_figure_eight_waypoint_position(route, _state(25.0))
+    finish = _runtime_figure_eight_waypoint_position(route, _state(100.0))
+
+    assert start is not None and peak is not None and finish is not None
+    assert (finish - start).norm() < 1.0e-9
+    assert peak.norm() - start.norm() == pytest.approx(8.0, abs=1.0e-2)
     ####
 
 

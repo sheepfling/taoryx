@@ -81,6 +81,13 @@ class AutoTuneCandidate:
             "status": self.status,
             "closed_loop_eigenvalues": poles,
             "condition_number": self.lqr.condition_number if self.lqr is not None else None,
+            "matrix_sha256": {
+                "a": self.lqr.a_sha256 if self.lqr is not None else None,
+                "b": self.lqr.b_sha256 if self.lqr is not None else None,
+                "q": self.lqr.q_sha256 if self.lqr is not None else None,
+                "r": self.lqr.r_sha256 if self.lqr is not None else None,
+                "k": self.lqr.k_sha256 if self.lqr is not None else None,
+            },
             "robustness": {
                 "nominal_max_real_pole": self.robustness.nominal_max_real_pole,
                 "worst_max_real_pole": self.robustness.worst_max_real_pole,

@@ -142,6 +142,37 @@ def test_attitude_lqr_uses_flattened_matrix_tables() -> None:
     controller = _build_attitude_lqr(document.problems[0], Vector3(2.0, 3.0, 4.0), {}, matrices)
     assert controller is not None
     assert controller.result.gain.shape == (3, 6)
+    assert controller.nominal.realization is not None
+    assert controller.nominal.realization.a_sha256 is not None
+    assert controller.nominal.realization.control_path[-1] == "plant"
+
+
+def test_rate_lqr_uses_body_rates_and_rate_realization_contract() -> None:
+    """The rate-loop witness is three-state and carries physical provenance."""
+
+    document = parse_problem_text(
+        "(rate-lqr)\n"
+        "*runtime lqr rate states=wx,wy,wz controls=moment-x,moment-y,moment-z q-rate=1 r-moment=0.5\n"
+        "*end\n",
+        profile=GrammarProfile.TAORYX,
+    )
+
+    controller = _build_attitude_lqr(
+        document.problems[0],
+        Vector3(0.00365, 0.00368, 0.00703),
+        {"maximum-moment": "1", "allocator": "hummingbird-quad-x"},
+        {},
+        initial_mass_kg=0.5,
+        controller_name="rate",
+    )
+    assert controller is not None
+    assert controller.result.gain.shape == (3, 3)
+    assert controller.result.state_names == ("wx", "wy", "wz")
+    assert controller.nominal.realization is not None
+    assert controller.nominal.realization.role == "rate"
+    assert tuple(channel.unit for channel in controller.nominal.realization.states) == ("rad/s",) * 3
+    assert controller.nominal.realization.control_path == ("guidance", "rate_lqr", "allocator", "actuator", "plant")
+    assert controller.result.hurwitz
 
 
 def test_profile_attitude_lqr_uses_nominal_mass_ratio_and_inertia_scale() -> None:

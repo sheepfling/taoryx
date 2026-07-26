@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from taoryx.language.grammar_contracts import GrammarProfile
+from taoryx.runtime.program import LoadedProgram
 from taoryx.runtime.runner import RunReport, run_files
 from taoryx.validation import PhaseWindow, independent_force_closure, independent_moment_closure, require_bounded, require_net_change
 from taoryx.visualization import render_run_artifact_plots
@@ -18,6 +19,7 @@ LEVEL_SETTLING = ROOT / "examples/mission_families/slower_x8/SV03_long_level_set
 SOURCE_TRIM_HOLD = ROOT / "examples/mission_families/slower_x8/SV03_source_trim_hold_30_6dof.prb"
 ROUTE = ROOT / "examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb"
 FIGURE_EIGHT = ROOT / "examples/mission_families/slower_x8/SV03_figure_eight_route_6dof.prb"
+FIGURE_EIGHT_LQR = ROOT / "examples/mission_families/slower_x8/SV03_figure_eight_altitude_reversal_6dof.prb"
 WAYPOINT = ROOT / "examples/mission_families/slower_x8/SV03_basic_waypoint_altitude_6dof.prb"
 APPROACH = ROOT / "examples/mission_families/slower_x8/SV03_approach_go_around_6dof.prb"
 TABLE_ROOT = ROOT / "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables"
@@ -45,7 +47,24 @@ def _run_x8(output_dir: Path) -> RunReport:
         integrator="rk4",
         profile=GrammarProfile.TAORYX,
     )
-####
+    ####
+
+
+def test_x8_figure_eight_declares_common_attitude_lqr_realization() -> None:
+    """The fixed-wing witness resolves through the same realization contract."""
+
+    program = LoadedProgram.load(FIGURE_EIGHT_LQR, TABLES, profile=GrammarProfile.TAORYX)
+    metadata = program.case().metadata
+    realization = metadata["controller_realization"]
+    assert isinstance(realization, dict)
+    assert realization["role"] == "attitude"
+    assert realization["implementation"] == "lqr"
+    assert realization["a_sha256"]
+    assert realization["b_sha256"]
+    assert realization["k_sha256"]
+    assert realization["scenario_overrides_allowed"] is False
+    assert realization["control_path"] == ["guidance", "reference_shaping", "attitude_lqr", "allocator", "actuator", "plant"]
+    ####
 
 
 def _run_x8_level_settling(output_dir: Path) -> RunReport:

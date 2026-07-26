@@ -6,7 +6,7 @@ import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from .reachability_visualization import load_reachability_artifact
 from .runtime.runner import run_files
@@ -195,7 +195,9 @@ def _replay_sample(
         if telemetry is not None:
             comparison["native_replay_terminal_speed_m_s"] = _telemetry_speed(telemetry)
             comparison["native_replay_terminal_mass_kg"] = _telemetry_last(telemetry, "taos.mass_kg") or _telemetry_last(telemetry, "mass.total")
-    diagnostics = tuple({"code": item.code, "message": item.message} for item in report.diagnostics)
+    diagnostics: tuple[dict[str, object], ...] = tuple(
+        {"code": item.code, "message": item.message} for item in report.diagnostics
+    )
     return X15NativeReplayRecord(
         query_id=query_id,
         reduced_classification=str(sample.get("classification", "unknown")),
@@ -265,9 +267,9 @@ def _checkpoint_bridge(checkpoint: dict[str, Any]) -> dict[str, object]:
 
 
 def _native_problem_text(bridge: dict[str, object], duration_s: float) -> str:
-    position = bridge["position_ecic_m"]
-    velocity = bridge["velocity_ecic_m_s"]
-    quaternion = bridge["attitude_quaternion_wxyz"]
+    position = cast(list[float], bridge["position_ecic_m"])
+    velocity = cast(list[float], bridge["velocity_ecic_m_s"])
+    quaternion = cast(list[float], bridge["attitude_quaternion_wxyz"])
     return f"""(x15-native-reachability-replay)
 *title Selective X-15 native rigid-body replay from a reduced-order checkpoint
 *mode rigid-body-6dof

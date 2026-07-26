@@ -29,6 +29,7 @@ from . import (
     scenario,
     searches,
     segmentation,
+    showcase,
     simulation,
     state,
     state_rates,
@@ -53,8 +54,37 @@ from .controller_design import (
     build_lqr_controller,
     load_controller_catalog,
 )
+from .controller_inventory import ControllerInventory, ControllerInventoryEntry
+from .controller_realization import (
+    AllocationResult,
+    ClosedLoopPole,
+    ControllerChannel,
+    ControllerPreflightIssue,
+    ControllerPreflightReport,
+    ControllerProvenance,
+    ControllerQualificationStatus,
+    ControllerRealization,
+    ControllerRuntimeState,
+    ControllerSchedule,
+    GeneralizedControlRequest,
+    GuidanceReference,
+    preflight_controller_realization,
+)
+from .controller_registry import (
+    ControllerBackendFactory,
+    ControllerBackendRegistry,
+    ControllerBackendSpec,
+    ControllerBackendStatus,
+    default_controller_backend_registry,
+)
 from .family_debug_rendering import FamilyDebugRenderReport, render_family_debug_artifacts
 from .family_debugging import DebugFamily, FamilyDebugPlan, build_family_debug_plan, family_profile
+from .mission_objectives import (
+    ControllerTransition,
+    TruthObjectiveResult,
+    TruthObjectiveSpec,
+    evaluate_truth_objectives,
+)
 from .modes import DynamicsMode, Kinematic6DofState, Quaternion
 from .objectives import ObjectiveResult, ObjectiveSpec, score_objective, score_objectives
 from .outputs import DynamicsKind, EventRecord, RunArtifact, SegmentSpan, TelemetryChannel, VehicleKind, VehicleTelemetry, build_run_artifact
@@ -135,6 +165,18 @@ from .segmentation import (
     TransitionPolicy,
     transition_audit,
 )
+from .showcase import (
+    ArtifactFile,
+    EvidenceBoardSpec,
+    FailureCode,
+    FamilyShowcaseTemplate,
+    FidelityShowcaseRealization,
+    MissionSegmentSpec,
+    ShowcaseRunArtifact,
+    StartContract,
+    TerminalContract,
+    VehicleShowcaseBinding,
+)
 from .state import PointMassRates, PointMassState
 from .table_explorer import (
     AxisInterpolationBracket,
@@ -148,19 +190,6 @@ from .table_explorer import (
     inspect_table_file,
 )
 from .trajectory.evaluation import objective_report_to_evaluation
-from . import showcase
-from .showcase import (
-    ArtifactFile,
-    EvidenceBoardSpec,
-    FailureCode,
-    FidelityShowcaseRealization,
-    FamilyShowcaseTemplate,
-    MissionSegmentSpec,
-    ShowcaseRunArtifact,
-    StartContract,
-    TerminalContract,
-    VehicleShowcaseBinding,
-)
 from .trim import (
     DynamicsLinearization,
     TrimGate,
@@ -240,3 +269,26 @@ __all__ += ["showcase", "ArtifactFile", "EvidenceBoardSpec", "FailureCode", "Fid
 __all__ = ["__version__", "AutoTuneCandidate", "AutoTuneLimits", "AutoTuneReport", "ReachabilityCatalog", "ReachabilityCommonObject", "ReachabilityFamilySpec", "ReachabilityProfileSpec", "ReachabilityStudySemantic", "DetachedBodyTrajectory", "EnvelopeBounds", "EnvelopeSample", "EnvelopeTermination", "LaunchCommand", "PointMass3DofState", "Pseudo6DofState", "RigidBody6DofReachabilityState", "ReachabilityEnvelope", "ReachabilityFidelity", "ReachabilitySearchSpace", "RocketGlideVehicle", "RocketStageSpec", "SearchAxis", "StageSeparationSpec", "StagedRocketSpec", "TerminalCriteria", "TrajectoryResult", "ReachabilityPlotReport", "load_reachability_artifact", "plot_children_trajectories", "plot_deployment_timeline", "plot_fidelity_progression", "plot_flown_trajectories", "plot_parent_trajectory", "plot_projected_area", "plot_search_coverage", "plot_terminal_capability", "render_reachability_plot_bundle", "X15IntegrationPreflight", "X15ReachabilityBundle", "x15_integration_preflight", "run_x15_reachability_tiers", "write_x15_reachability_bundle", "x15_reachability_commands", "x15_source_staging_contract", "x15_surrogate_vehicle", "generate_launch_grid", "run_reachability_envelope", "simulate_rocket_glide", "auto_tune_lqr_profiles", "default_attitude_linearization", "OnboardingFinding", "VehicleOnboardingReport", "load_reachability_catalog", "validate_all_vehicle_onboarding", "validate_vehicle_onboarding", "aerodynamics", "atmosphere", "attitude", "contracts", "coordinates", "earth", "equations", "forces", "geodesy", "gravity", "guidance", "iip", "language", "linalg", "modes", "numeric", "objectives", "optimization", "outputs", "radar", "reachability_catalog", "reachability_envelope", "reachability_visualization", "x15_reachability", "rigid_body", "rigid_body_frames", "rotorcraft", "runtime", "scenario", "segmentation", "searches", "simulation", "state", "state_rates", "table_explorer", "tables", "trim", "validation", "vehicle", "visualization", "AeroQueryContext", "AerodynamicOutput", "AxisInterpolationBracket", "ControlContract", "ControlDirectionProbe", "ControlDirectionResult", "ControllerDesignCatalog", "ControllerDesignMethod", "ControllerDesignSpec", "DebugFamily", "DetachedBodyDefinition", "DetachedBodyShape", "Direction", "DynamicsKind", "DynamicsLinearization", "DynamicsMode", "EarthRotationAdapter", "EventRecord", "FamilyDebugPlan", "GoalSpec", "FamilyDebugRenderReport", "ImpulseFrame", "InterpolationExplanation", "Kinematic6DofState", "MassProperties", "ObjectiveResult", "ObjectiveSpec", "OutputContract", "PhaseWindow", "PointMassRates", "PointMassState", "PreparedAerodynamicCoefficients", "PreparedCoefficientTable", "PropulsionOutput", "PropellantType", "PropulsionCapabilities", "StageMassDefinition", "StageDefinition", "StageSeparationEvent", "StagedVehicleDefinition", "StagedPropulsion", "QuadRotorAllocation", "Quaternion", "RIGID_BODY_STATE_NAMES", "RandomSeed", "ResolutionRecord", "ResolvedScenario", "RigidBody6DofModel", "RigidBody6DofState", "RigidBodyForceMoment", "RotorCommandSet", "RunArtifact", "ScenarioCompileError", "ScenarioCompiler", "ScenarioRequest", "ScenarioRuntimeContract", "ScenarioSource", "SegmentSpan", "SegmentSpec", "SegmentationCatalog", "SegmentationScenario", "StatusContract", "TableAerodynamicModel", "TableInspection", "TableInspectionArtifact", "TableInspectionFormat", "TableInspectionStatus", "TelemetryChannel", "ThermalAssessment", "ThermalLimits", "TransitionEventSpec", "TransitionPolicy", "TrimCatalog", "TrimCatalogEntry", "TrimResult", "TrimSpec", "TumblingPolicy", "VehicleKind", "VehicleTelemetry", "actuator_saturation_fraction", "assess_thermal_limits", "audit_control_directions", "build_family_debug_plan", "build_lqr_controller", "build_run_artifact", "capture_time", "dwell_in_band", "energy_balance_residual", "explain_interpolation", "family_profile", "finite_difference_dynamics_linearization", "finite_difference_linearization", "independent_force_closure", "inspect_table_document", "inspect_table_file", "integral_mass_balance_error", "load_controller_catalog", "load_trim_catalog", "phase_slice", "render_family_debug_artifacts", "render_run_artifact_html", "render_run_artifact_plots", "require_bounded", "require_change_of_sign", "require_channel", "require_monotonic", "require_net_change", "score_objective", "score_objectives", "require_net_change", "settling_time", "solve_trim", "specific_energy", "timestep_convergence_error", "transition_audit", "wrapped_angle_error"]
 __all__ += ["TrimGate", "TrimGateResult", "TrimProcedure", "TrimProcedureResult", "solve_trim_continuation", "solve_trim_procedure", "objective_report_to_evaluation"]
 __all__ += ["showcase", "ArtifactFile", "EvidenceBoardSpec", "FailureCode", "FidelityShowcaseRealization", "FamilyShowcaseTemplate", "MissionSegmentSpec", "ShowcaseRunArtifact", "StartContract", "TerminalContract", "VehicleShowcaseBinding"]
+__all__ += ["ControllerTransition", "TruthObjectiveResult", "TruthObjectiveSpec", "evaluate_truth_objectives"]
+__all__ += [
+    "AllocationResult",
+    "ClosedLoopPole",
+    "ControllerChannel",
+    "ControllerInventory",
+    "ControllerInventoryEntry",
+    "ControllerBackendFactory",
+    "ControllerBackendRegistry",
+    "ControllerBackendSpec",
+    "ControllerBackendStatus",
+    "ControllerProvenance",
+    "ControllerQualificationStatus",
+    "ControllerPreflightIssue",
+    "ControllerPreflightReport",
+    "ControllerRealization",
+    "ControllerRuntimeState",
+    "ControllerSchedule",
+    "GeneralizedControlRequest",
+    "GuidanceReference",
+    "default_controller_backend_registry",
+    "preflight_controller_realization",
+]

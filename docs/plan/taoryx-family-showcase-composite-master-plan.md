@@ -17,6 +17,44 @@ first migration set. New families must use the same path; a new vehicle may
 declare a fidelity as unsupported or not qualified, but it must not receive
 placeholder physics merely to fill a plot.
 
+## Alpha 3 priority tranche: B747 and X-15
+
+The current four-family composites remain useful integration baselines, but
+they are not interchangeable family-qualification evidence. The next two
+showcases should deliberately span opposite ends of the mission spectrum:
+
+- **B747:** a slow, transport-scale energy-management and stabilized-arrival
+  mission. Its visible proof is climb/cruise/descent geometry, true airspeed,
+  Mach, specific energy, fuel, lift/drag/thrust, and a simultaneous arrival
+  gate. It must not be reduced to a larger X8 route or an aerobatic bank demo.
+- **X-15 / boost-glide:** a multi-phase mission storyboard. Its visible proof
+  is the ordered carrier → release → boost → burnout/coast → entry → glide →
+  terminal sequence, state evolution at each event, and parent/child object
+  lineage when a spent stage is represented.
+
+These two recipes are the first templates for the reusable showcase surface.
+They are recorded in
+[`verification/showcase_archetype_catalog.yaml`](../../verification/showcase_archetype_catalog.yaml)
+and validated by `tools/audit_showcase_archetype_catalog.py`.
+
+## Common showcase archetypes
+
+Every family recipe composes a subset of the same five proof products:
+
+| Archetype | Core question | B747 emphasis | X-15 emphasis |
+|---|---|---|---|
+| `mission_geometry` | What path did it fly? | altitude-vs-downrange and large-radius route | phase-colored boost/coast/entry/glide path |
+| `mission_timeline` | What happened, and in what order? | climb, cruise, turns, descent, arrival | release, ignition, max-Q, burnout, separation, apogee, entry, handoff |
+| `dynamics_and_resources` | How did the vehicle achieve it? | energy, fuel, throttle, lift/drag/thrust | Mach, dynamic pressure, energy, acceleration, mass |
+| `envelope_and_qualification` | Was the result valid and how close were the limits? | alpha/lift/thrust/fuel/Mach/table margins and arrival residuals | Q/load/alpha/Mach/energy/terminal-corridor margins |
+| `object_lineage` | Which objects were active after release or separation? | not required | carrier, X-15, spent booster, glide/terminal bodies |
+
+The renderer must consume the same run artifact for all five products. Missing
+physics is shown as `unavailable`; it is never synthesized to complete a
+layout. Object lineage is an accepted-boundary record with stable object IDs,
+parent IDs, spawn/separation events, active intervals, and terminal
+dispositions—not a decorative icon layer.
+
 ## Alpha 2 extension: M0 foundation
 
 Alpha 2 remains closed at `A2-CLOSEOUT-PASS`. This is a post-closeout extension
@@ -72,14 +110,21 @@ unhashed files, and mismatched run identities.
 
 Create full family packs for:
 
+- **B747 first:** airborne trim → climb to cruise → cruise stabilization →
+  large-radius right turn → long cruise leg → second turn → managed descent →
+  multidimensional stabilized-arrival gate;
+- **X-15 second:** carrier/release → ignition and powered segment → burnout/coast
+  and apogee → atmospheric entry → glide capture → energy management → terminal
+  handoff, with object-lineage evidence for any detached booster;
 - Hummingbird: spool → takeoff → hover → 3D waypoint box → yaw scan → gust
   recovery → return → precision landing/disarm;
 - X8: stabilize → climb → right/left route legs → altitude and speed changes
   → return/recovery;
-- B747: airborne trim → shallow climb → large-radius right/left turns → speed
-  reduction → descent → stabilized arrival;
-- X-15: release → powered segment → burnout/coast → energy-management bank
-  reversals → terminal corridor.
+
+The existing Hummingbird and X8 nominal packets remain regression and
+integration evidence until their family-specific mission contracts are
+re-run under the same archetype renderer. A controller transition or scalar
+score cannot promote an unevaluated objective.
 
 Exit: each pack has a complete lifecycle, named events, achieved controls,
 terminal semantics, convergence, replay, and family-appropriate claim limits.
@@ -172,4 +217,3 @@ explicit terminal set rather than timing out, and reproduce a self-contained
 artifact pack containing telemetry, controls, effectors, resources,
 provenance, evaluation, convergence, robustness, plots, and exact claim
 boundaries.
-

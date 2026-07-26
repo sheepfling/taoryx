@@ -17,6 +17,13 @@ missions:
       factors: [1.0, 0.5, 0.25]
       channels: [altitude_m, speed_m_s]
       tolerances: {altitude_m: 0.5, speed_m_s: 0.05}
+    showcase:
+      route_frame: local_ned
+      waypoints:
+        - {id: start, north_m: 0.0, east_m: 0.0, altitude_m: 100.0, capture_radius_m: 50.0, objective: trim-start, completion_event: start-contract}
+        - {id: arrival, north_m: 0.0, east_m: 3339.6, altitude_m: 100.0, capture_radius_m: 500.0, objective: route-capture, completion_event: b747-arrival-captured}
+      required_objectives: [trim-start, route-capture, stabilized-arrival]
+      objective_events: [start-contract, b747-arrival-captured, stabilized-arrival]
     objectives:
       - {id: duration, kind: controller_mission, channel: duration_s, target: 20.0, tolerance: 0.01, quality_limit: 0.10, unit: s, source: summary}
       - {id: route-capture, kind: route_transition, channel: range_to_target_m, target: 500.0, tolerance: 1.0, quality_limit: 100.0, unit: m, comparison: maximum, source: final}
@@ -43,6 +50,16 @@ missions:
       factors: [1.0, 0.5, 0.25]
       channels: [altitude_m, speed_m_s]
       tolerances: {altitude_m: 1.0, speed_m_s: 0.1}
+    showcase:
+      route_frame: local_ned
+      waypoints:
+        - {id: start, north_m: 0.0, east_m: 0.0, altitude_m: 178.0, capture_radius_m: 25.0, objective: trim-start, completion_event: start-contract}
+        - {id: corner-1, north_m: 615.0, east_m: 0.0, altitude_m: 178.0, capture_radius_m: 75.0, objective: east-leg, completion_event: x8-corner-1-captured}
+        - {id: corner-2, north_m: 615.0, east_m: 615.0, altitude_m: 210.0, capture_radius_m: 75.0, objective: elevated-corner, completion_event: x8-corner-2-captured}
+        - {id: corner-3, north_m: 0.0, east_m: 615.0, altitude_m: 178.0, capture_radius_m: 75.0, objective: north-leg, completion_event: x8-corner-3-captured}
+        - {id: return, north_m: 0.0, east_m: 0.0, altitude_m: 178.0, capture_radius_m: 300.0, objective: return-capture, completion_event: x8-return-captured}
+      required_objectives: [trim-start, east-leg, elevated-corner, north-leg, return-capture, stabilized-arrival]
+      objective_events: [start-contract, x8-corner-1-captured, x8-corner-2-captured, x8-corner-3-captured, x8-return-captured, stabilized-arrival]
     objectives:
       - {id: duration, kind: controller_mission, channel: duration_s, target: 120.0, tolerance: 0.01, quality_limit: 0.10, unit: s, source: summary}
       - {id: final-corner-capture, kind: waypoint, channel: range_to_target_m, target: 300.0, tolerance: 1.0, quality_limit: 50.0, unit: m, comparison: maximum, source: final}
@@ -71,6 +88,15 @@ missions:
       factors: [1.0, 0.5, 0.25]
       channels: [altitude_m, speed_m_s]
       tolerances: {altitude_m: 0.2, speed_m_s: 0.05}
+    showcase:
+      route_frame: local_ned
+      waypoints:
+        - {id: pad, north_m: 0.0, east_m: 0.0, altitude_m: 2.0, capture_radius_m: 0.05, objective: hover-start, completion_event: start-contract}
+        - {id: north, north_m: 0.5, east_m: 0.0, altitude_m: 2.0, capture_radius_m: 0.10, objective: north-leg, completion_event: hummingbird-north-captured}
+        - {id: elevated, north_m: 0.5, east_m: 0.5, altitude_m: 3.0, capture_radius_m: 0.10, objective: elevated-corner, completion_event: hummingbird-elevated-captured}
+        - {id: return, north_m: 0.0, east_m: 0.0, altitude_m: 2.0, capture_radius_m: 0.20, objective: return-capture, completion_event: hummingbird-return-captured}
+      required_objectives: [hover-start, north-leg, elevated-corner, return-capture, landed]
+      objective_events: [start-contract, hummingbird-north-captured, hummingbird-elevated-captured, hummingbird-return-captured, landed]
     objectives:
       - {id: duration, kind: controller_mission, channel: duration_s, target: 40.0, tolerance: 0.01, quality_limit: 0.10, unit: s, source: summary}
       - {id: return-capture, kind: waypoint, channel: range_to_target_m, target: 0.20, tolerance: 0.01, quality_limit: 0.10, unit: m, comparison: maximum, source: final}
@@ -96,6 +122,14 @@ missions:
       factors: [1.0, 0.5, 0.25]
       channels: [altitude_m, speed_m_s]
       tolerances: {altitude_m: 10.0, speed_m_s: 1.0}
+    showcase:
+      route_frame: local_ned
+      waypoints:
+        - {id: release, north_m: 0.0, east_m: 0.0, altitude_m: 21500.0, capture_radius_m: 1000.0, objective: release-contract, completion_event: start-contract}
+        - {id: energy-corridor, north_m: 20500.0, east_m: 46900.0, altitude_m: 23000.0, capture_radius_m: 5000.0, objective: energy-corridor, completion_event: x15-energy-corridor-captured}
+        - {id: terminal, north_m: 20500.0, east_m: 46900.0, altitude_m: 21500.0, capture_radius_m: 5000.0, objective: route-transition, completion_event: x15-terminal-handoff}
+      required_objectives: [release-contract, powered-transition, energy-corridor, propnav-transition, terminal-handoff]
+      objective_events: [start-contract, powered-transition, x15-energy-corridor-captured, propnav-transition, x15-terminal-handoff]
     objectives:
       - {id: duration, kind: controller_transition, channel: duration_s, target: 35.0, tolerance: 0.01, quality_limit: 0.10, unit: s, source: summary}
       - {id: propnav-transition, kind: guidance, channel: pro_nav_active, target: 1.0, tolerance: 0.01, quality_limit: 1.0, unit: "1", comparison: minimum, source: max_abs}

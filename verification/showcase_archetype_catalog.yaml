@@ -1,0 +1,74 @@
+schema_version: 1
+id: taoryx-showcase-archetypes-v1
+claim_boundary: reusable evidence products and mission-story recipes; not vehicle validity
+
+archetypes:
+  - id: mission_geometry
+    display_name: Mission geometry
+    purpose: Show the complete commanded and realized path, including start, objectives, turns, and terminal region.
+    required_modules: [trajectory_3d, trajectory_plan, trajectory_vertical, terminal_corridor]
+    optional_modules: [top_down_inset, altitude_downrange_inset]
+  - id: mission_timeline
+    display_name: Mission timeline
+    purpose: Show ordered segments, physical events, controller transitions, and independent truth adjudication.
+    required_modules: [mission_timeline, event_table, segment_markers]
+    optional_modules: [object_lifecycle, synchronized_cursor]
+  - id: dynamics_and_resources
+    display_name: Dynamics and resources
+    purpose: Show the state evolution and energy/resource behavior that explains how the mission was achieved.
+    required_modules: [kinematics_primary, energy_and_resources, semantic_controls]
+    optional_modules: [physical_effectors, attitude_and_rates, propulsion_and_mass_flow]
+  - id: envelope_and_qualification
+    display_name: Envelope and qualification
+    purpose: Show table/state/resource margins, terminal residuals, closure, convergence, and robustness evidence.
+    required_modules: [envelope_margins, tracking_errors, numerical_and_replay, qualification_summary]
+    optional_modules: [robustness_summary, source_parity]
+  - id: object_lineage
+    display_name: Object lineage
+    purpose: Show parent, release, separation, active interval, terminal disposition, and child trajectories when objects are created.
+    required_modules: [object_lifecycle, parent_child_geometry, lineage_event_table]
+    optional_modules: [inactive_object_fade, impact_footprints]
+
+recipes:
+  - id: b747-transport-energy-arrival-v1
+    family: heavy_transport
+    display_name: B747 transport energy-management and stabilized-arrival pack
+    priority: 1
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    emphasis:
+      - long-horizon airborne trim and stabilization
+      - climb to cruise and speed capture
+      - large-radius right and left turns
+      - managed descent and multidimensional arrival gate
+      - AoA, lift, drag, thrust, Mach, fuel, and table-margin evidence
+    required_events:
+      - airborne_trim
+      - cruise_capture
+      - right_turn_gate
+      - left_turn_gate
+      - descent_start
+      - arrival_gate
+    lineage_required: false
+
+  - id: x15-boost-glide-storyboard-v1
+    family: rocket_glide
+    display_name: X-15 boost-glide mission storyboard and object-lineage pack
+    priority: 2
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification, object_lineage]
+    emphasis:
+      - carrier release and separation
+      - powered boost, burnout, and coast/apogee
+      - atmospheric entry and glide capture
+      - energy-management and terminal handoff
+      - parent/child lifecycle and detached-booster propagation
+    required_events:
+      - carrier_release
+      - ignition
+      - max_q
+      - burnout
+      - separation
+      - apogee
+      - entry
+      - glide_capture
+      - terminal_handoff
+    lineage_required: true

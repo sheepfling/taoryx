@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import uuid
 import zipfile
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -760,6 +761,110 @@ def _expectation_evaluation(expected: dict[str, Any], metrics: dict[str, Any]) -
         "status": "pass" if all(bool(item["passed"]) for item in checks) else "fail",
         "check_count": len(checks),
         "checks": checks,
+    }
+    ####
+
+
+def _showcase_contract_evidence(specification: Mapping[str, Any], mission_dir: Path) -> dict[str, Any] | None:
+    """Resolve declared waypoints into observed, family-local evidence.
+
+    Waypoints are declarations, not invented telemetry.  A capture is marked
+    observed only when the runtime advances its route leg or the final state is
+    inside the declared capture radius.  Final objective scoring remains a
+    separate field so a final score cannot masquerade as an execution event.
+    """
+
+    raw_contract = specification.get("showcase")
+    if not isinstance(raw_contract, Mapping):
+        return None
+    telemetry_path = mission_dir / "run" / "telemetry.csv"
+    rows: list[dict[str, float]] = []
+    if telemetry_path.exists():
+        with telemetry_path.open(newline="", encoding="utf-8") as stream:
+            for raw in csv.DictReader(stream):
+                row: dict[str, float] = {}
+                for key, value in raw.items():
+                    if value in (None, ""):
+                        continue
+                    try:
+                        number = float(value)
+                    except (TypeError, ValueError):
+                        continue
+                    if math.isfinite(number):
+                        row[key] = number
+                rows.append(row)
+    waypoints = tuple(item for item in raw_contract.get("waypoints", ()) if isinstance(item, Mapping))
+    final_row = rows[-1] if rows else {}
+    objective_evidence: list[dict[str, Any]] = []
+    events: list[dict[str, Any]] = []
+    for index, waypoint in enumerate(waypoints):
+        waypoint_id = str(waypoint.get("id", f"waypoint-{index}"))
+        objective = str(waypoint.get("objective", waypoint_id))
+        completion_event = str(waypoint.get("completion_event", f"{waypoint_id}-captured"))
+        capture_radius = float(waypoint.get("capture_radius_m", 0.0))
+        capture_row: dict[str, float] | None = None
+        source = "not_observed"
+        if rows and index == 0:
+            capture_row = rows[0]
+            source = "initial_state"
+        elif rows:
+            # Route-leg indices are zero-based in the canonical telemetry.
+            for row in rows:
+                leg = row.get("route_leg_index")
+                if leg is not None and leg >= float(index):
+                    capture_row = row
+                    source = "runtime.route_leg_index"
+                    break
+            if capture_row is None:
+                final_error = final_row.get("range_to_target_m")
+                if final_error is not None and final_error <= capture_radius:
+                    capture_row = final_row
+                    source = "final_state_within_capture_radius"
+        captured = capture_row is not None
+        time_s = None if capture_row is None else capture_row.get("time_s", capture_row.get("time"))
+        if capture_row is None:
+            actual_error = None
+        elif index == 0 and source == "initial_state":
+            # The start contract is evaluated against its declared initial
+            # waypoint, not the mission's later active target.
+            actual_error = 0.0
+        else:
+            actual_error = capture_row.get("range_to_target_m")
+        objective_evidence.append(
+            {
+                "waypoint_id": waypoint_id,
+                "objective": objective,
+                "completion_event": completion_event,
+                "status": "observed" if captured else "not_observed",
+                "time_s": time_s,
+                "actual_error_m": actual_error,
+                "capture_radius_m": capture_radius,
+                "source": source,
+            }
+        )
+        if captured:
+            events.append(
+                {
+                    "id": completion_event,
+                    "kind": "waypoint_capture",
+                    "time_s": time_s,
+                    "waypoint_id": waypoint_id,
+                    "objective": objective,
+                    "source": source,
+                }
+            )
+    required_objectives = tuple(str(item) for item in raw_contract.get("required_objectives", ()) if isinstance(item, str))
+    observed_objectives = {str(item["objective"]) for item in objective_evidence if item["status"] == "observed"}
+    return {
+        "schema_version": 1,
+        "route_frame": str(raw_contract.get("route_frame", "declared")),
+        "waypoints": [dict(item) for item in waypoints],
+        "required_objectives": list(required_objectives),
+        "objective_events": [str(item) for item in raw_contract.get("objective_events", ()) if isinstance(item, str)],
+        "objective_evidence": objective_evidence,
+        "events": events,
+        "required_objectives_observed": sorted(observed_objectives.intersection(required_objectives)),
+        "claim_boundary": "declared waypoint/objective evidence; capture status is independent of final scalar scoring",
     }
     ####
 
@@ -1758,6 +1863,7 @@ def build(
             int(mission["max_steps"]),
             plots=plots,
         )
+        summary["showcase_contract"] = _showcase_contract_evidence(mission, mission_dir)
         summary["objective_evaluation"] = _objective_evaluation(
             tuple(dict(item) for item in mission.get("objectives", ())),
             summary,
@@ -1795,6 +1901,7 @@ def build(
                 "summary": (mission_dir / "summary.json").relative_to(packet).as_posix(),
                 "claim_boundary": controller_mission_claim_boundary,
                 "objective_evaluation": summary["objective_evaluation"],
+                "showcase_contract": summary.get("showcase_contract"),
                 "closure_evaluation": summary["closure_evaluation"],
                 "convergence": summary["convergence"],
                 "evaluation": summary["evaluation"],

@@ -9,11 +9,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .controller_realization import ClosedLoopPole, ControllerChannel, ControllerFidelity, ControllerRealization, ControllerRole
 from .runtime.lqr import LqrController, solve_continuous_lqr
 from .trim import TrimResult
 
@@ -43,6 +44,21 @@ class ControllerDesignSpec(BaseModel):
     allocator: str = Field(min_length=1)
     states: tuple[str, ...] = ()
     controls: tuple[str, ...] = ()
+    role: str = "unspecified"
+    implementation_version: str = "unversioned"
+    fidelity: str = "rigid_body_6dof"
+    state_units: tuple[str, ...] = ()
+    state_frames: tuple[str, ...] = ()
+    control_units: tuple[str, ...] = ()
+    control_frames: tuple[str, ...] = ()
+    plant_source: str = "unspecified"
+    linearization_source: str = "unspecified"
+    q_id: str = "unspecified"
+    r_id: str = "unspecified"
+    state_scale_id: str = "unspecified"
+    control_scale_id: str = "unspecified"
+    fallback_controller_id: str | None = None
+    scenario_overrides_allowed: bool = False
     notes: str = ""
 
     @model_validator(mode="after")
@@ -53,6 +69,14 @@ class ControllerDesignSpec(BaseModel):
             raise ValueError(f"controller design {self.id!r} has duplicate controls")
         if set(self.states) & set(self.controls):
             raise ValueError(f"controller design {self.id!r} overlaps state and control names")
+        for values, label, expected in (
+            (self.state_units, "state_units", len(self.states)),
+            (self.state_frames, "state_frames", len(self.states)),
+            (self.control_units, "control_units", len(self.controls)),
+            (self.control_frames, "control_frames", len(self.controls)),
+        ):
+            if values and len(values) != expected:
+                raise ValueError(f"controller design {self.id!r} {label} must match its channel count")
         return self
         ####
     ####
@@ -128,11 +152,66 @@ def build_lqr_controller(
         state_names=design.states,
         control_names=design.controls,
     )
+    realization = _build_lqr_realization(design, trim, result)
     return LqrController(
         result,
         state_trim=trim.state,
         control_trim=trim.controls,
         lower=lower or {},
         upper=upper or {},
+        realization=realization,
+    )
+    ####
+
+
+def _build_lqr_realization(design: ControllerDesignSpec, trim: TrimResult, result: object) -> ControllerRealization:
+    """Build the immutable runtime contract attached to a factory result."""
+
+    from .runtime.lqr import LqrResult
+
+    if not isinstance(result, LqrResult):
+        raise TypeError("LQR realization requires an LqrResult")
+    state_units = design.state_units or tuple("unspecified" for _ in design.states)
+    state_frames = design.state_frames or tuple("unspecified" for _ in design.states)
+    control_units = design.control_units or tuple("unspecified" for _ in design.controls)
+    control_frames = design.control_frames or tuple("unspecified" for _ in design.controls)
+    channels = tuple(
+        ControllerChannel(name=name, order=index, unit=state_units[index], frame=state_frames[index], scale=1.0)
+        for index, name in enumerate(design.states)
+    )
+    inputs = tuple(
+        ControllerChannel(name=name, order=index, unit=control_units[index], frame=control_frames[index], scale=1.0)
+        for index, name in enumerate(design.controls)
+    )
+    poles = tuple(ClosedLoopPole(real=float(value.real), imaginary=float(value.imag)) for value in result.closed_loop_eigenvalues)
+    return ControllerRealization(
+        id=f"{design.id}:realization",
+        role=cast(ControllerRole, design.role) if design.role in {"guidance", "attitude", "rate", "local_regulator", "integral_regulator", "allocator", "actuator", "fallback", "baseline", "unspecified"} else "unspecified",
+        implementation="lqr",
+        implementation_version=design.implementation_version,
+        fidelity=cast(ControllerFidelity, design.fidelity) if design.fidelity in {"point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"} else "rigid_body_6dof",
+        design_id=design.id,
+        states=channels,
+        inputs=inputs,
+        plant_source=design.plant_source,
+        linearization_source=design.linearization_source,
+        operating_point={"trim": design.trim},
+        state_scale_id=design.state_scale_id,
+        control_scale_id=design.control_scale_id,
+        q_id=design.q_id,
+        r_id=design.r_id,
+        a_sha256=result.a_sha256,
+        b_sha256=result.b_sha256,
+        q_sha256=result.q_sha256,
+        r_sha256=result.r_sha256,
+        k_sha256=result.k_sha256,
+        closed_loop_poles=poles,
+        closed_loop_max_real_pole=result.maximum_real_pole,
+        allocator_id=design.allocator,
+        control_path=("guidance", "reference_shaping", "lqr", "allocator", "actuator", "plant"),
+        fallback_controller_id=design.fallback_controller_id,
+        scenario_overrides_allowed=design.scenario_overrides_allowed,
+        claim_status="design",
+        provenance={"trim": design.trim, "notes": design.notes},
     )
     ####

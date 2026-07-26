@@ -15,6 +15,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ..controller_realization import ControllerRealization
+
 CapabilityStatus = Literal["native", "emulated", "approximated", "unsupported"]
 FidelityProfile = Literal["point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"]
 ParameterKind = Literal["number", "integer", "boolean", "string"]
@@ -445,6 +447,7 @@ class ResolvedCase(BaseModel):
     mission: str
     segment_plan: str
     controller: str
+    controller_realization: ControllerRealization | None = None
     parameters: dict[str, ResolvedValue]
     controls: tuple[ControlSchema, ...]
     observations: tuple[ObservationSchema, ...]
@@ -473,6 +476,11 @@ class ResolvedCase(BaseModel):
 
         payload = self.model_dump(mode="json")
         payload.pop("identity_sha256", None)
+        # Preserve the pre-realization Alpha 2 identity for cases that do not
+        # yet select a controller.  Once a realization exists it is part of
+        # the immutable case identity.
+        if self.controller_realization is None:
+            payload.pop("controller_realization", None)
         return payload
         ####
 

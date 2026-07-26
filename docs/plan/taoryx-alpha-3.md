@@ -221,3 +221,87 @@ also Alpha 4 work rather than an Alpha 3 exit gate.
 
 The Alpha 4 scale and backend plan is maintained in
 [`taoryx-alpha-4.md`](taoryx-alpha-4.md).
+
+## Immediate Alpha 3 execution tranche — B747 and X-15 showcase endpoints
+
+The first showcase work should not be another four-family scoreboard. The
+current composites are retained as integration baselines, while two
+family-appropriate endpoint templates are rebuilt through the common
+qualification path:
+
+### A3-SHOWCASE-1 — B747 transport energy-management pack
+
+Mission:
+
+```text
+airborne trim
+→ climb to cruise
+→ cruise stabilization
+→ large-radius right turn
+→ long cruise leg
+→ second turn
+→ managed descent
+→ stabilized arrival gate
+```
+
+Required visual products:
+
+- mission geometry: complete 3D/top-down/side/altitude-downrange path with
+  family-local event markers;
+- energy management: altitude, true airspeed, Mach, flight-path angle,
+  specific energy, fuel remaining, throttle, lift, drag, and thrust;
+- terminal arrival: along-track, cross-track, altitude, heading, vertical
+  speed, airspeed, and bank in one simultaneous arrival contract; and
+- envelope: alpha, lift, available thrust, fuel, Mach, table-domain, and
+  minimum-margin evidence.
+
+Exit criteria:
+
+- both right and left large-radius turns are completed in the declared order;
+- cruise altitude/speed dwell and managed descent are independently evaluated;
+- the terminal gate passes all required dimensions for the required dwell;
+- no runway takeoff/landing claim is made without low-speed/high-lift,
+  gear/contact, brake, and steering evidence; and
+- every displayed scalar is traceable to raw telemetry and the metric
+  dictionary.
+
+### A3-SHOWCASE-2 — X-15 boost-glide storyboard and lineage pack
+
+Mission:
+
+```text
+carrier → release → ignition/boost → burnout/coast → apogee
+→ atmospheric entry → glide capture → energy management → terminal handoff
+```
+
+Required visual products:
+
+- mission storyboard with phase-colored trajectory;
+- synchronized altitude, Mach, dynamic pressure, specific energy, mass,
+  acceleration, vertical speed, and flight-path angle with event markers;
+- vehicle lifecycle showing carrier, X-15, booster/glider roles and active
+  intervals; and
+- ordered event table for release, ignition, max-Q, burnout, separation,
+  apogee, entry, glide capture, and terminal handoff.
+
+When separation creates a detached body, the packet must include a typed
+object-lineage graph with parent/child IDs, accepted event time, pre/post
+states, active interval, and terminal disposition. A mass subtraction without
+an auditable child is not lineage evidence. The aero-ballistic deployment
+contract remains the source of truth for accepted-boundary spawning.
+
+Exit criteria:
+
+- event order is complete and deterministic;
+- source-supported versus estimated phases are visibly separated;
+- parent and detached-body mass/resource accounting closes exactly once;
+- terminal handoff is multidimensional, not a timeout or loose position score;
+- batch and stepwise runs agree at every event boundary; and
+- the packet states explicitly whether the X-15 result is a source-bounded
+  surrogate, a reduced model, or a rigid-body witness.
+
+The common recipe and archetype IDs are frozen in
+[`verification/showcase_archetype_catalog.yaml`](../../verification/showcase_archetype_catalog.yaml).
+The typed runtime surface is `taoryx.showcase`, including
+`ShowcaseArchetypeCatalog`, `ObjectLineage`, and
+`ShowcaseRunArtifact.object_lineage`.

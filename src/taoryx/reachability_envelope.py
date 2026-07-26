@@ -17,6 +17,7 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field, fields
 from enum import StrEnum
 from pathlib import Path
+from typing import Any, cast
 
 from .contracts import Frame, FrameVector3
 from .contracts import Vector3 as ContractVector3
@@ -108,7 +109,11 @@ def _clamp(value: float, lower: float, upper: float) -> float:
 
 
 def _optional_float(value: object) -> float | None:
-    return None if value is None else float(value)
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        raise ValueError(f"expected a numeric value, got {type(value).__name__}")
+    return float(value)
 
 
 def _wrap_angle(angle: float) -> float:
@@ -191,7 +196,7 @@ class RocketGlideVehicle:
                 }
             )
         parameters.update(overrides)
-        return cls(**parameters)
+        return cls(**cast(Any, parameters))
 
     def __post_init__(self) -> None:
         positive = (
@@ -385,13 +390,13 @@ class TerminalCriteria:
             _validate_finite("max_impact_radius_m", self.max_impact_radius_m)
             if self.max_impact_radius_m < 0.0:
                 raise ValueError("max_impact_radius_m must be non-negative")
-        for name, value in (
+        for name, impact_value in (
             ("min_impact_speed_m_s", self.min_impact_speed_m_s),
             ("max_impact_speed_m_s", self.max_impact_speed_m_s),
         ):
-            if value is not None:
-                _validate_finite(name, value)
-                if value < 0.0:
+            if impact_value is not None:
+                _validate_finite(name, impact_value)
+                if impact_value < 0.0:
                     raise ValueError(f"{name} must be non-negative")
         if (
             self.min_impact_speed_m_s is not None
@@ -422,10 +427,10 @@ class TerminalCriteria:
             raise ValueError("target_position_m must contain three values")
         max_speed = payload.get("max_speed_m_s")
         return cls(
-            min_speed_m_s=float(payload.get("min_speed_m_s", 0.0)),
-            max_speed_m_s=math.inf if max_speed is None else float(max_speed),
+            min_speed_m_s=_optional_float(payload.get("min_speed_m_s")) or 0.0,
+            max_speed_m_s=math.inf if max_speed is None else (_optional_float(max_speed) or 0.0),
             require_ground_contact=bool(payload.get("require_ground_contact", False)),
-            target_position_m=tuple(float(value) for value in target),  # type: ignore[arg-type]
+            target_position_m=cast(Vector3, tuple(float(value) for value in target)),
             max_impact_radius_m=_optional_float(payload.get("max_impact_radius_m")),
             min_impact_speed_m_s=_optional_float(payload.get("min_impact_speed_m_s")),
             max_impact_speed_m_s=_optional_float(payload.get("max_impact_speed_m_s")),
@@ -805,11 +810,11 @@ def _launch_state(vehicle: RocketGlideVehicle, command: LaunchCommand, fidelity:
     }
     if fidelity in {ReachabilityFidelity.PSEUDO_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF}:
         return Pseudo6DofState(
-            **common,
+            **cast(Any, common),
             attitude_rad=(0.0, 0.0, 0.0),
             attitude_rate_rad_s=(0.0, 0.0, 0.0),
         )
-    return PointMass3DofState(**common)
+    return PointMass3DofState(**cast(Any, common))
     ####
 
 
@@ -925,13 +930,16 @@ def _rk4_step(
     step_size_s: float,
     fidelity: ReachabilityFidelity,
 ) -> State:
-    first = _derivative(vehicle, command, state, fidelity)
-    second = _state_with_delta(state, first, 0.5 * step_size_s)
-    second = _derivative(vehicle, command, second, fidelity)
-    third = _state_with_delta(state, second, 0.5 * step_size_s)
-    third = _derivative(vehicle, command, third, fidelity)
-    fourth = _state_with_delta(state, third, step_size_s)
-    fourth = _derivative(vehicle, command, fourth, fidelity)
+    if isinstance(state, RigidBody6DofReachabilityState):
+        raise TypeError("reduced RK4 step cannot integrate a rigid-body reachability state")
+    reduced_state = state
+    first = _derivative(vehicle, command, reduced_state, fidelity)
+    second_state = cast(PointMass3DofState, _state_with_delta(reduced_state, first, 0.5 * step_size_s))
+    second = _derivative(vehicle, command, second_state, fidelity)
+    third_state = cast(PointMass3DofState, _state_with_delta(reduced_state, second, 0.5 * step_size_s))
+    third = _derivative(vehicle, command, third_state, fidelity)
+    fourth_state = cast(PointMass3DofState, _state_with_delta(reduced_state, third, step_size_s))
+    fourth = _derivative(vehicle, command, fourth_state, fidelity)
 
     position_rate = tuple(
         (first.position_m_s[index] + 2.0 * second.position_m_s[index] + 2.0 * third.position_m_s[index] + fourth.position_m_s[index]) / 6.0
@@ -942,18 +950,18 @@ def _rk4_step(
         for index in range(3)
     )
     mass_rate = (first.mass_kg_s + 2.0 * second.mass_kg_s + 2.0 * third.mass_kg_s + fourth.mass_kg_s) / 6.0
-    updated_position = _add(state.position_m, _scale(position_rate, step_size_s))
-    updated_velocity = _add(state.velocity_m_s, _scale(velocity_rate, step_size_s))
-    updated_mass = max(state.mass_kg + mass_rate * step_size_s, vehicle.release_mass_kg)
+    updated_position = _add(reduced_state.position_m, _scale(cast(Vector3, position_rate), step_size_s))
+    updated_velocity = _add(reduced_state.velocity_m_s, _scale(cast(Vector3, velocity_rate), step_size_s))
+    updated_mass = max(reduced_state.mass_kg + mass_rate * step_size_s, vehicle.release_mass_kg)
     if vehicle.has_booster:
-        if state.time_s < vehicle.booster_burn_time_s <= state.time_s + step_size_s:
+        if reduced_state.time_s < vehicle.booster_burn_time_s <= reduced_state.time_s + step_size_s:
             updated_mass = vehicle.burnout_mass_kg
-        if state.time_s < vehicle.booster_release_time_s <= state.time_s + step_size_s:
+        if reduced_state.time_s < vehicle.booster_release_time_s <= reduced_state.time_s + step_size_s:
             updated_mass = vehicle.release_mass_kg
-    elif state.time_s < vehicle.burn_time_s <= state.time_s + step_size_s:
+    elif reduced_state.time_s < vehicle.burn_time_s <= reduced_state.time_s + step_size_s:
         updated_mass = vehicle.release_mass_kg
-    next_phase = vehicle.phase_at(state.time_s + step_size_s)
-    if isinstance(state, Pseudo6DofState):
+    next_phase = vehicle.phase_at(reduced_state.time_s + step_size_s)
+    if isinstance(reduced_state, Pseudo6DofState):
         attitude_rate = tuple(
             (first.attitude_rad_s[index] + 2.0 * second.attitude_rad_s[index] + 2.0 * third.attitude_rad_s[index] + fourth.attitude_rad_s[index]) / 6.0
             for index in range(3)
@@ -962,10 +970,10 @@ def _rk4_step(
             (first.attitude_rate_rad_s2[index] + 2.0 * second.attitude_rate_rad_s2[index] + 2.0 * third.attitude_rate_rad_s2[index] + fourth.attitude_rate_rad_s2[index]) / 6.0
             for index in range(3)
         )
-        attitude = _add(state.attitude_rad, _scale(attitude_rate, step_size_s))
-        rates = _add(state.attitude_rate_rad_s, _scale(rate_acceleration, step_size_s))
+        attitude = _add(reduced_state.attitude_rad, _scale(cast(Vector3, attitude_rate), step_size_s))
+        rates = _add(reduced_state.attitude_rate_rad_s, _scale(cast(Vector3, rate_acceleration), step_size_s))
         return Pseudo6DofState(
-            state.time_s + step_size_s,
+            reduced_state.time_s + step_size_s,
             updated_position,
             updated_velocity,
             updated_mass,
@@ -974,7 +982,7 @@ def _rk4_step(
             rates,
         )
     return PointMass3DofState(
-        state.time_s + step_size_s,
+        reduced_state.time_s + step_size_s,
         updated_position,
         updated_velocity,
         updated_mass,
@@ -989,6 +997,8 @@ def _body_longitudinal_axis(state: State) -> Vector3:
     if isinstance(state, RigidBody6DofReachabilityState):
         axis = state.native.attitude.rotate(ContractVector3(1.0, 0.0, 0.0))
         return (axis.x, axis.y, axis.z)
+    if not isinstance(state, Pseudo6DofState):
+        return (1.0, 0.0, 0.0)
     pitch = state.attitude_rad[1]
     yaw = state.attitude_rad[2]
     return (math.cos(pitch) * math.cos(yaw), math.cos(pitch) * math.sin(yaw), math.sin(pitch))
@@ -1185,10 +1195,11 @@ def _ballistic_rk4_step(vehicle: RocketGlideVehicle, state: State, step_size_s: 
 
     if isinstance(state, RigidBody6DofReachabilityState):
         return _rigid_body_rk4_step(vehicle, state, step_size_s)
-    first = _ballistic_derivative(vehicle, state)
-    second = _ballistic_derivative(vehicle, _state_with_delta(state, first, 0.5 * step_size_s))
-    third = _ballistic_derivative(vehicle, _state_with_delta(state, second, 0.5 * step_size_s))
-    fourth = _ballistic_derivative(vehicle, _state_with_delta(state, third, step_size_s))
+    reduced_state = state
+    first = _ballistic_derivative(vehicle, reduced_state)
+    second = _ballistic_derivative(vehicle, _state_with_delta(reduced_state, first, 0.5 * step_size_s))
+    third = _ballistic_derivative(vehicle, _state_with_delta(reduced_state, second, 0.5 * step_size_s))
+    fourth = _ballistic_derivative(vehicle, _state_with_delta(reduced_state, third, step_size_s))
     position_rate = tuple(
         (first.position_m_s[index] + 2.0 * second.position_m_s[index] + 2.0 * third.position_m_s[index] + fourth.position_m_s[index]) / 6.0
         for index in range(3)
@@ -1197,9 +1208,9 @@ def _ballistic_rk4_step(vehicle: RocketGlideVehicle, state: State, step_size_s: 
         (first.velocity_m_s2[index] + 2.0 * second.velocity_m_s2[index] + 2.0 * third.velocity_m_s2[index] + fourth.velocity_m_s2[index]) / 6.0
         for index in range(3)
     )
-    position = _add(state.position_m, _scale(position_rate, step_size_s))
-    velocity = _add(state.velocity_m_s, _scale(velocity_rate, step_size_s))
-    if isinstance(state, Pseudo6DofState):
+    position = _add(reduced_state.position_m, _scale(cast(Vector3, position_rate), step_size_s))
+    velocity = _add(reduced_state.velocity_m_s, _scale(cast(Vector3, velocity_rate), step_size_s))
+    if isinstance(reduced_state, Pseudo6DofState):
         attitude_rate = tuple(
             (first.attitude_rad_s[index] + 2.0 * second.attitude_rad_s[index] + 2.0 * third.attitude_rad_s[index] + fourth.attitude_rad_s[index]) / 6.0
             for index in range(3)
@@ -1209,15 +1220,15 @@ def _ballistic_rk4_step(vehicle: RocketGlideVehicle, state: State, step_size_s: 
             for index in range(3)
         )
         return Pseudo6DofState(
-            state.time_s + step_size_s,
+            reduced_state.time_s + step_size_s,
             position,
             velocity,
             state.mass_kg,
             "ballistic",
-            _add(state.attitude_rad, _scale(attitude_rate, step_size_s)),
-            _add(state.attitude_rate_rad_s, _scale(rate_acceleration, step_size_s)),
+            _add(reduced_state.attitude_rad, _scale(cast(Vector3, attitude_rate), step_size_s)),
+            _add(reduced_state.attitude_rate_rad_s, _scale(cast(Vector3, rate_acceleration), step_size_s)),
         )
-    return PointMass3DofState(state.time_s + step_size_s, position, velocity, state.mass_kg, "ballistic")
+    return PointMass3DofState(reduced_state.time_s + step_size_s, position, velocity, reduced_state.mass_kg, "ballistic")
     ####
 
 
@@ -1269,7 +1280,7 @@ def _detached_initial_state(body: DetachedBodyDefinition, parent: State, fidelit
     child_delta = impulse.scaled(-1.0 / body.mass_kg)
     child_velocity = _add(parent.velocity_m_s, (child_delta.x, child_delta.y, child_delta.z))
     if fidelity is ReachabilityFidelity.RIGID_BODY_6DOF:
-        angular_rate = (
+        native_angular_rate = (
             ContractVector3(0.0, 0.0, 0.0)
             if body.tumbling_policy is TumblingPolicy.FIXED_ATTITUDE
             else body.initial_angular_rate_body_rad_s
@@ -1279,14 +1290,14 @@ def _detached_initial_state(body: DetachedBodyDefinition, parent: State, fidelit
             FrameVector3(ContractVector3(*parent.position_m), Frame.ECIC),
             FrameVector3(ContractVector3(*child_velocity), Frame.ECIC),
             _parent_attitude(parent),
-            angular_rate,
+            native_angular_rate,
             body.mass_kg,
             0.0,
         )
         return RigidBody6DofReachabilityState(native)
     if fidelity in {ReachabilityFidelity.PSEUDO_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF}:
         attitude = parent.attitude_rad if isinstance(parent, Pseudo6DofState) else (0.0, 0.0, 0.0)
-        angular_rate = (
+        reduced_angular_rate: Vector3 = (
             (0.0, 0.0, 0.0)
             if body.tumbling_policy is TumblingPolicy.FIXED_ATTITUDE
             else (
@@ -1302,7 +1313,7 @@ def _detached_initial_state(body: DetachedBodyDefinition, parent: State, fidelit
             body.mass_kg,
             "ballistic",
             attitude,
-            angular_rate,
+            reduced_angular_rate,
         )
     return PointMass3DofState(parent.time_s, parent.position_m, child_velocity, body.mass_kg, "ballistic")
     ####
@@ -1585,10 +1596,10 @@ def _detached_body_from_dict(payload: Mapping[str, object]) -> DetachedBodyDefin
         raise ValueError("serialized detached body center_of_pressure_m must have three components")
     return DetachedBodyDefinition(
         str(payload["body_id"]),
-        float(payload["mass_kg"]),
+        float(cast(Any, payload["mass_kg"])),
         DetachedBodyShape(str(payload["shape"])),
         tuple(float(value) for value in dimensions),
-        float(payload["reference_area_m2"]),
+        float(cast(Any, payload["reference_area_m2"])),
         TumblingPolicy(str(payload.get("tumbling_policy", TumblingPolicy.FIXED_ATTITUDE.value))),
         inertia,
         ContractVector3(*(float(value) for value in angular_payload)),

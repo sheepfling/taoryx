@@ -350,6 +350,14 @@ def _objective_markers(payload: dict[str, Any], rows: list[dict[str, float]]) ->
         if active > 0.5 and previous_pro_nav <= 0.5:
             markers.append((time_s, "ProNav activation"))
         previous_pro_nav = active
+    showcase = payload.get("showcase_contract", {})
+    if isinstance(showcase, dict):
+        for event in showcase.get("events", ()):
+            if not isinstance(event, dict):
+                continue
+            time_s = event.get("time_s")
+            if isinstance(time_s, (int, float)) and math.isfinite(float(time_s)):
+                markers.append((float(time_s), str(event.get("id", "waypoint capture"))))
     unique: dict[float, str] = {}
     for time_s, label in markers:
         key = round(time_s, 9)
@@ -370,6 +378,16 @@ def _compact_marker_label(label: str) -> str:
         return "finish"
     if label == "ProNav activation":
         return "PN"
+    if label == "start-contract":
+        return "start"
+    if label == "landed":
+        return "land"
+    if label.endswith("-captured"):
+        return "capture"
+    if label.endswith("-handoff"):
+        return "handoff"
+    if "energy-corridor" in label:
+        return "energy"
     if label.startswith("waypoint leg "):
         return "W" + label.removeprefix("waypoint leg ")
     if label.startswith("figure-eight phase "):
@@ -466,7 +484,7 @@ def _render_objective_score_timeline(records: dict[str, tuple[Path, dict[str, An
             # same waypoint or guidance event.
             axis.vlines(time_s, row - 0.22, row + 0.22, color="#dc2626", linestyle="--", linewidth=0.9, alpha=0.55)
             short_label = _compact_marker_label(label)
-            axis.text(time_s, row + 0.16, short_label, color="#b91c1c", fontsize=8, ha="left", va="bottom", rotation=90)
+            axis.text(time_s, row + 0.16, short_label, color="#b91c1c", fontsize=7, ha="left", va="bottom", rotation=45)
     axis.set_yticks(range(len(FAMILY_ORDER)), [FAMILY_LABELS[family] for family in FAMILY_ORDER])
     axis.set_xlabel("mission time (s)")
     axis.set_xlim(left=0.0, right=max(durations, default=1.0) * 1.04)
@@ -574,27 +592,52 @@ def _draw_multiseries_panel(axis: Any, rows: list[dict[str, float]], markers: li
     ####
 
 
-def _draw_trajectory_panel(axis: Any, rows: list[dict[str, float]], markers: list[tuple[float, str]], *, three_dimensional: bool = False) -> None:
-    """Draw the complete route, including explicit start and terminal markers."""
+def _trajectory_coordinates(rows: list[dict[str, float]]) -> tuple[list[float], list[float], list[float]] | None:
+    """Return local north/east/altitude coordinates from canonical telemetry."""
 
     north = _first_series(rows, ("north_m", "position_north_m", "x_m"))
     east = _first_series(rows, ("east_m", "position_east_m", "y_m"))
     altitude = _first_series(rows, ("altitude_m", "alt"))
-    if north is None or east is None:
+    if north is not None and east is not None:
+        return north[2], east[2], [] if altitude is None else altitude[2]
+    latitude = _first_series(rows, ("latitude_deg", "latgd"))
+    longitude = _first_series(rows, ("longitude_deg", "long"))
+    if latitude is None or longitude is None:
+        return None
+    lat0 = math.radians(latitude[2][0])
+    north_values = [(value - latitude[2][0]) * 111_320.0 for value in latitude[2]]
+    east_values = [(value - longitude[2][0]) * 111_320.0 * math.cos(lat0) for value in longitude[2]]
+    return north_values, east_values, [] if altitude is None else altitude[2]
+    ####
+
+
+def _draw_trajectory_panel(axis: Any, rows: list[dict[str, float]], markers: list[tuple[float, str]], *, three_dimensional: bool = False, waypoints: tuple[dict[str, Any], ...] = ()) -> None:
+    """Draw the complete route, including explicit start and terminal markers."""
+
+    coordinates = _trajectory_coordinates(rows)
+    if coordinates is None:
         text = getattr(axis, "text2D", axis.text)
         text(0.5, 0.5, "trajectory coordinates unavailable", ha="center", va="center", transform=axis.transAxes)
         axis.set_title("Complete mission geometry", loc="left", fontweight="bold")
         return
-    north_values, east_values = north[2], east[2]
-    if three_dimensional and altitude is not None:
-        axis.plot(north_values, east_values, altitude[2], color="#2563eb", linewidth=1.8)
-        axis.scatter([north_values[0]], [east_values[0]], [altitude[2][0]], color="#16a34a", label="start")
-        axis.scatter([north_values[-1]], [east_values[-1]], [altitude[2][-1]], color="#dc2626", label="terminal")
+    north_values, east_values, altitude_values = coordinates
+    if three_dimensional and altitude_values:
+        axis.plot(north_values, east_values, altitude_values, color="#2563eb", linewidth=1.8, label="actual path")
+        axis.scatter([north_values[0]], [east_values[0]], [altitude_values[0]], color="#16a34a", label="start")
+        axis.scatter([north_values[-1]], [east_values[-1]], [altitude_values[-1]], color="#dc2626", label="terminal")
+        if waypoints:
+            axis.plot([float(item["north_m"]) for item in waypoints], [float(item["east_m"]) for item in waypoints], [float(item.get("altitude_m", 0.0)) for item in waypoints], color="#64748b", linestyle=":", linewidth=1.1, label="commanded objectives")
+            axis.scatter([float(item["north_m"]) for item in waypoints], [float(item["east_m"]) for item in waypoints], [float(item.get("altitude_m", 0.0)) for item in waypoints], color="#dc2626", s=22)
         axis.set_zlabel("altitude (m)")
     else:
         axis.plot(north_values, east_values, color="#2563eb", linewidth=1.8, label="actual path")
         axis.scatter([north_values[0]], [east_values[0]], color="#16a34a", label="start")
         axis.scatter([north_values[-1]], [east_values[-1]], color="#dc2626", label="terminal")
+        if waypoints:
+            axis.plot([float(item["north_m"]) for item in waypoints], [float(item["east_m"]) for item in waypoints], color="#64748b", linestyle=":", linewidth=1.1, label="commanded objectives")
+            axis.scatter([float(item["north_m"]) for item in waypoints], [float(item["east_m"]) for item in waypoints], color="#dc2626", s=25)
+            for item in waypoints:
+                axis.annotate(str(item.get("id", "objective")), (float(item["north_m"]), float(item["east_m"])), fontsize=7, color="#7f1d1d")
         axis.set_ylabel("east (m)")
     axis.set_xlabel("north (m)")
     axis.set_title("Complete mission geometry", loc="left", fontweight="bold")
@@ -617,9 +660,11 @@ def _render_flagship_board(family: str, mission_dir: Path, output: Path, plt: An
     telemetry = _telemetry_rows(mission_dir)
     payload = json.loads((mission_dir / "summary.json").read_text(encoding="utf-8"))
     markers = _objective_markers(payload, telemetry)
+    showcase = payload.get("showcase_contract", {})
+    waypoints = tuple(showcase.get("waypoints", ())) if isinstance(showcase, dict) else ()
     figure = plt.figure(figsize=(21, 15), layout="constrained")
-    _draw_trajectory_panel(figure.add_subplot(3, 4, 1, projection="3d"), telemetry, markers, three_dimensional=True)
-    _draw_trajectory_panel(figure.add_subplot(3, 4, 2), telemetry, markers)
+    _draw_trajectory_panel(figure.add_subplot(3, 4, 1, projection="3d"), telemetry, markers, three_dimensional=True, waypoints=waypoints)
+    _draw_trajectory_panel(figure.add_subplot(3, 4, 2), telemetry, markers, waypoints=waypoints)
     _draw_telemetry_panel(figure.add_subplot(3, 4, 3), telemetry, markers, "Altitude", ("altitude_m", "alt"), "m")
     _draw_telemetry_panel(figure.add_subplot(3, 4, 4), telemetry, markers, "True airspeed", ("speed_m_s", "vel"), "m/s")
     _draw_multiseries_panel(figure.add_subplot(3, 4, 5), telemetry, markers, "AoA / bank / sideslip", (

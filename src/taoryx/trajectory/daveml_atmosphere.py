@@ -6,6 +6,7 @@ import hashlib
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, cast
 
 from .daveml_evaluator import DAVEMLGraph, load_daveml_graph
 
@@ -92,10 +93,9 @@ def load_daveml_atmosphere(path: str | Path, **kwargs: object) -> DAVEMLAtmosphe
         graph=load_daveml_graph(payload, document_id=source_path.name),
         source_path=source_path,
         source_sha256=hashlib.sha256(payload).hexdigest(),
-        **kwargs,
+        **cast(Any, kwargs),
     )
     ####
 
 
 __all__ = ["DAVEMLAtmosphereBinding", "load_daveml_atmosphere"]
-

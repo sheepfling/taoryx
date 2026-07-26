@@ -4,6 +4,15 @@ The contract models in this package are intentionally independent from the
 native TAOS runtime.  They describe a case before a provider compiles it.
 """
 
+from ..controller_realization import (
+    ClosedLoopPole,
+    ControllerChannel,
+    ControllerPreflightIssue,
+    ControllerPreflightReport,
+    ControllerRealization,
+    ControllerSchedule,
+    preflight_controller_realization,
+)
 from .authority import ArbitrationResult, ControlArbitrator, ControlAuthorityError, ControlDecision
 from .catalog import FamilyCatalog, load_family_catalog
 from .collections import (
@@ -124,6 +133,12 @@ from .resolution import ResolutionError, diff_resolved_cases, load_case_intent, 
 
 __all__ = [
     "AllocationSchema",
+    "ClosedLoopPole",
+    "ControllerChannel",
+    "ControllerPreflightIssue",
+    "ControllerPreflightReport",
+    "ControllerRealization",
+    "ControllerSchedule",
     "CapabilityStatus",
     "AuthorityMode",
     "ArbitrationResult",
@@ -174,6 +189,7 @@ __all__ = [
     "VariantResolutionReport",
     "VariantSpace",
     "VariantStatus",
+    "preflight_controller_realization",
     "ResolutionError",
     "SessionState",
     "SourceDocument",

@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from importlib.util import find_spec
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from ..controller_realization import ControllerRealization
 
 
 class LqrUnavailableError(RuntimeError):
@@ -39,6 +44,11 @@ class LqrResult:
     condition_number: float
     state_names: tuple[str, ...]
     control_names: tuple[str, ...]
+    a_sha256: str | None = None
+    b_sha256: str | None = None
+    q_sha256: str | None = None
+    r_sha256: str | None = None
+    k_sha256: str | None = None
 
     @property
     def maximum_real_pole(self) -> float:
@@ -123,6 +133,7 @@ class LqrController:
     lower: Mapping[str, float] = field(default_factory=dict)
     upper: Mapping[str, float] = field(default_factory=dict)
     robustness: LqrRobustnessReport | None = None
+    realization: ControllerRealization | None = None
 
     def command(self, state: Mapping[str, float]) -> LqrCommand:
         """Return ``u_trim - K(x - x_trim)`` with optional saturation."""
@@ -294,6 +305,11 @@ def solve_continuous_lqr(
         condition_number=float(np.linalg.cond(r_matrix)),
         state_names=tuple(state_names),
         control_names=tuple(control_names),
+        a_sha256=_matrix_sha256(a_matrix),
+        b_sha256=_matrix_sha256(b_matrix),
+        q_sha256=_matrix_sha256(q_matrix),
+        r_sha256=_matrix_sha256(r_matrix),
+        k_sha256=_matrix_sha256(gain),
     )
 ####
 
@@ -340,6 +356,11 @@ def solve_scaled_continuous_lqr(
     return replace(
         normalized_result,
         gain=normalized_to_control @ normalized_result.gain @ state_to_normalized,
+        a_sha256=_matrix_sha256(np.asarray(a, dtype=float)),
+        b_sha256=_matrix_sha256(np.asarray(b, dtype=float)),
+        q_sha256=_matrix_sha256(np.asarray(q, dtype=float)),
+        r_sha256=_matrix_sha256(np.asarray(r, dtype=float)),
+        k_sha256=_matrix_sha256(normalized_to_control @ normalized_result.gain @ state_to_normalized),
     )
 ####
 
@@ -382,4 +403,15 @@ def assess_lqr_robustness(
         samples=len(perturbations),
         stable=max(real_parts) < 0.0,
     )
+####
+
+
+def _matrix_sha256(matrix: Any) -> str:
+    """Hash a finite numeric matrix with shape and dtype in the payload."""
+
+    import numpy as np
+
+    array = np.ascontiguousarray(np.asarray(matrix, dtype=np.float64))
+    header = json.dumps({"shape": list(array.shape), "dtype": str(array.dtype)}, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(header + b"\0" + array.tobytes(order="C")).hexdigest()
 ####

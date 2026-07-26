@@ -99,3 +99,60 @@ and `RunArtifact` output paths.
 Existing `.prb` scenarios remain unchanged when no segment controller is
 provided. This is an opt-in Python/runtime bridge, not a new problem-language
 feature.
+
+## LQR-first provenance retrofit
+
+The primary regulator is selected through the controller realization contract;
+it is not selected by hidden scenario gains. The active path is recorded as:
+
+```text
+guidance/reference
+  -> LQR-family regulator
+  -> generalized demand
+  -> allocation/mixer
+  -> actuator limits/dynamics
+  -> plant
+```
+
+`ControllerProvenance`, `GuidanceReference`, `GeneralizedControlRequest`,
+`AllocationResult`, and `ControllerRuntimeState` provide the machine-readable
+boundary for this path. A runtime record identifies the design and matrix
+hashes, active trim and schedule, requested demand, allocated command,
+achieved actuator state, saturation/rate limiting, and transition events.
+
+Existing rule-based or PID-like paths are retained as explicit baseline
+controllers. A scenario containing gain overrides can be reproduced and
+compared, but cannot receive `controller_qualified`. Use
+`tools/audit_controller_inventory.py` to verify that every active family path
+is classified before migrating it to LQR/RSLQR/LQI.
+
+Backend selection is likewise explicit. `ControllerBackendRegistry` resolves a
+named implementation during case construction; it does not branch on vehicle
+or route names. The default registry exposes the implemented fixed-point LQR,
+declared gain-scheduled/RSLQR/LQI promotion points, and the regression-only
+`legacy_pid_baseline`. Declared-but-unimplemented backends fail closed when a
+factory is requested, and legacy baselines are never qualification eligible.
+
+### Rate-loop realization and rotor allocation
+
+Rigid-body cases may declare a separate `*runtime lqr rate` block with the
+ordered body-rate state `(wx, wy, wz)` and moment inputs
+`(moment-x, moment-y, moment-z)`. This is a rate regulator, not an attitude
+regulator with its angle states removed by convention. Its default plant
+linearization is the dimensional body-rate relation
+
+```text
+dot([wx, wy, wz]) = diag(1/Ix, 1/Iy, 1/Iz) [moment-x, moment-y, moment-z]
+```
+
+When a rotor allocator is declared, the LQR request is converted from the
+canonical rigid-body moment frame into the source wrench frame before rotor
+allocation. For the Hummingbird source `+Z`-up convention, source roll and
+pitch moments reverse sign while source yaw retains sign; the direct-wrench
+model then applies the inverse load-frame conversion exactly once. The
+requested canonical moment, individual rotor commands, saturation state, and
+realization metadata are retained as runtime evidence.
+
+If no rate LQR is declared, the historical rotor-rate-damping path remains
+available as an explicit regression baseline. Declaring a rate LQR disables
+that duplicate damping term so the active rate authority has one owner.

@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from taoryx.aerodynamics import maximum_lift_to_drag
 from taoryx.attitude import EulerAngles, euler_angles_to_body_basis
 from taoryx.contracts import Angle, Basis3, EarthModel, Frame, FrameVector3, Latitude, Longitude, Quantity, Unit, Vector3
+from taoryx.controller_realization import ClosedLoopPole, ControllerChannel, ControllerImplementation, ControllerRealization, ControllerRole
 from taoryx.coordinates import geocentric_unit_vectors, geodetic_unit_vectors
 from taoryx.dynamics import ConstraintMode, apply_rail_constraint
 from taoryx.equations.geodesy import CartesianVector3
@@ -1395,6 +1396,14 @@ def _lower_rigid_body_case(
     )
     inertia_provider = _runtime_inertia_provider(vehicle_attributes, inertia, named["mass"])
     attitude_lqr = _build_attitude_lqr(problem, inertia, actuator_attributes, tables, initial_mass_kg=named["mass"])
+    rate_lqr = _build_attitude_lqr(
+        problem,
+        inertia,
+        actuator_attributes,
+        tables,
+        initial_mass_kg=named["mass"],
+        controller_name="rate",
+    )
     segment = segments[trajectory.start_segment]
     step = _segment_step_size(segment, parameters, 0.01)
     earth_omega = _earth_parameters(problem, parameters)[1]
@@ -1425,6 +1434,8 @@ def _lower_rigid_body_case(
         parameters=parameters,
         wind_blocks=tuple(block for block in problem.blocks if isinstance(block, WindBlock)),
         rotor_allocation=rotor_allocation,
+        rate_controller=rate_lqr,
+        inertia_provider=inertia_provider,
     )
     controller_saturated = {"value": False}
     coordinated_turn_enabled = _runtime_coordinated_turn_enabled(guidance_attributes, route_attributes)
@@ -1931,6 +1942,27 @@ def _lower_rigid_body_case(
             # bank measurement.
             result["route_bank_achieved_deg"] = result["local_roll_deg"]
             result["route_bank_tracking_error_deg"] = result["route_bank_command_deg"] - result["route_bank_achieved_deg"]
+        if route_attributes.get("mode", "").casefold() in {"figure-eight", "figure8"}:
+            duration = max(float(route_attributes.get("duration-s", "1.0")), 1.0)
+            theta = 2.0 * math.pi * max(0.0, min(duration, state.time)) / duration
+            route_pitch = _runtime_figure_eight_pitch_angle(route_attributes, theta)
+            result["route_pitch_command_deg"] = math.degrees(route_pitch)
+            result["route_pitch_achieved_deg"] = result["local_pitch_deg"]
+            result["route_pitch_tracking_error_deg"] = result["route_pitch_command_deg"] - result["route_pitch_achieved_deg"]
+        for name in (
+            "rate_lqr_request_moment_x_nm",
+            "rate_lqr_request_moment_y_nm",
+            "rate_lqr_request_moment_z_nm",
+            "rate_lqr_saturated",
+            "rotor_command_saturated",
+            "rotorcraft_yaw_target_deg",
+            "rotorcraft_yaw_achieved_deg",
+            "rotorcraft_yaw_error_deg",
+            "rotorcraft_yaw_moment_nm",
+            "rotorcraft_yaw_control_active",
+        ):
+            if name in control_values:
+                result[name] = float(control_values[name])
         for block in segments[active_segment["number"]].blocks:
             if not isinstance(block, FlyBlock) or block.guidance_variable is None:
                 continue
@@ -2148,7 +2180,18 @@ def _lower_rigid_body_case(
     runtime.metadata["target"] = dict(_runtime_attributes(problem, "target"))
     runtime.metadata["route"] = dict(route_attributes)
     runtime.metadata["thermal"] = dict(thermal_attributes)
+    # Keep the historical flat attitude declaration for existing consumers;
+    # the role-indexed view is the extensible contract for mixed controllers.
     runtime.metadata["lqr"] = _runtime_lqr_attributes(problem, "attitude")
+    runtime.metadata["lqr_by_role"] = {
+        "attitude": _runtime_lqr_attributes(problem, "attitude"),
+        "rate": _runtime_lqr_attributes(problem, "rate"),
+    }
+    runtime.metadata["controller_realization"] = _runtime_controller_realization_metadata(attitude_lqr or rate_lqr)
+    runtime.metadata["controller_realizations"] = {
+        "attitude": _runtime_controller_realization_metadata(attitude_lqr),
+        "rate": _runtime_controller_realization_metadata(rate_lqr),
+    }
     runtime.metadata["telemetry"] = dict(_runtime_attributes(problem, "telemetry"))
     runtime.metadata["controls"] = dict(control_values)
     _register_sensor_clock_metadata(runtime)
@@ -2587,11 +2630,28 @@ def _runtime_figure_eight_waypoint_position(
     radial = Vector3(math.cos(latitude) * math.cos(longitude), math.cos(latitude) * math.sin(longitude), math.sin(latitude))
     east = Vector3(-math.sin(longitude), math.cos(longitude), 0.0)
     north = Vector3(-math.sin(latitude) * math.cos(longitude), -math.sin(latitude) * math.sin(longitude), math.cos(latitude))
+    altitude_offset = _runtime_figure_eight_altitude_offset(route_attributes, theta)
     return (
         radial.scaled(radius)
         + east.scaled(0.5 * float(route_attributes["figure-eight-length-m"]) * math.sin(theta))
         + north.scaled(0.5 * float(route_attributes["figure-eight-width-m"]) * math.sin(theta) * math.cos(theta))
+        + radial.scaled(altitude_offset)
     )
+    ####
+
+
+def _runtime_figure_eight_altitude_offset(route_attributes: Mapping[str, str], theta: float) -> float:
+    """Return the declared smooth altitude excursion for a figure-eight."""
+
+    amplitude = float(route_attributes.get("figure-eight-altitude-amplitude-m", "0.0"))
+    return amplitude * math.sin(theta)
+    ####
+
+
+def _runtime_figure_eight_pitch_angle(route_attributes: Mapping[str, str], theta: float) -> float:
+    """Return the signed path-pitch command scheduled over the two lobes."""
+
+    return math.radians(float(route_attributes.get("figure-eight-pitch-deg", "0.0"))) * math.sin(theta)
     ####
 
 
@@ -2695,16 +2755,20 @@ def _runtime_figure_eight_route_velocity(
     north_offset = half_width * math.sin(theta) * math.cos(theta)
     east_rate = half_length * math.cos(theta)
     north_rate = half_width * math.cos(2.0 * theta)
-    desired_position = radial.scaled(radius) + east.scaled(east_offset) + north.scaled(north_offset)
+    altitude_offset = _runtime_figure_eight_altitude_offset(route_attributes, theta)
+    desired_position = radial.scaled(radius + altitude_offset) + east.scaled(east_offset) + north.scaled(north_offset)
     tangent = east.scaled(east_rate) + north.scaled(north_rate)
     tangent = tangent.scaled(1.0 / max(tangent.norm(), 1.0e-12))
     speed = abs(float(route_attributes.get("figure-eight-speed-mps", "0.0")))
     if speed <= 0.0:
         speed = math.hypot(east_rate, north_rate) * 2.0 * math.pi / duration
+    pitch = _runtime_figure_eight_pitch_angle(route_attributes, theta)
+    horizontal_speed = speed * math.cos(pitch)
+    altitude_rate = float(route_attributes.get("figure-eight-altitude-amplitude-m", "0.0")) * (2.0 * math.pi / duration) * math.cos(theta)
     correction = desired_position - state.position.vector
     correction_gain = float(route_attributes.get("position-capture-gain", "0.0"))
     correction = limit_vector_norm(correction.scaled(correction_gain), max(float(route_attributes.get("position-capture-max-correction-mps", str(max(speed * 0.25, 1.0)))), 0.0))
-    return tangent.scaled(speed) + correction + Vector3(0.0, 0.0, earth_omega).cross(state.position.vector)
+    return tangent.scaled(horizontal_speed) + radial.scaled(speed * math.sin(pitch) + altitude_rate) + correction + Vector3(0.0, 0.0, earth_omega).cross(state.position.vector)
     ####
 ####
 
@@ -3057,6 +3121,8 @@ def _rigid_body_aerodynamic_model(
     parameters: Mapping[str, float] = {},
     wind_blocks: Sequence[WindBlock] = (),
     rotor_allocation: QuadRotorAllocation | None = None,
+    rate_controller: GainScheduledLqrController | None = None,
+    inertia_provider: Callable[[RigidBody6DofState], Vector3] | None = None,
 ) -> TableAerodynamicModel | DirectWrenchTableModel | None:
     """Build the explicit TAORYX table-aero bridge for rigid-body cases.
 
@@ -3122,6 +3188,11 @@ def _rigid_body_aerodynamic_model(
     )
     environment = _rigid_body_environment(atmosphere, wind_blocks, parameters=parameters, tables=tables)
     resolved_area = next((table.reference_area for table in tables.values() if table.reference_area is not None), reference_area)
+    default_inertia = Vector3(
+        float(vehicle_attributes.get("inertia-x", "1.0")),
+        float(vehicle_attributes.get("inertia-y", "1.0")),
+        float(vehicle_attributes.get("inertia-z", "1.0")),
+    )
 
     target_position = _runtime_target_position(target_attributes, earth, EarthRotationAdapter(earth), 0.0)
     navigation_gain = float(guidance_attributes.get("propnav-gain", "0.0"))
@@ -3170,8 +3241,46 @@ def _rigid_body_aerodynamic_model(
             values["rotor_speed"] = max(0.0, min(1500.0, values["rotor_speed"] + max(-correction_limit, min(correction_limit, correction))))
             values["altitude_hold_error_m"] = float(altitude_target) - current_altitude
         if rotor_allocation is not None:
-            rotor_rate_damping = float(guidance_attributes.get("rotor-rate-damping-nm-s-per-rad", "0.0"))
-            if rotor_rate_damping > 0.0:
+            if rate_controller is not None:
+                current_inertia = inertia_provider(state) if inertia_provider is not None else default_inertia
+                rate_command = rate_controller.command(
+                    {
+                        "wx": state.body_rate.x,
+                        "wy": state.body_rate.y,
+                        "wz": state.body_rate.z,
+                    },
+                    mass_kg=state.mass,
+                    inertia=(current_inertia.x, current_inertia.y, current_inertia.z),
+                )
+                canonical_moment = Vector3(
+                    rate_command.controls["moment-x"],
+                    rate_command.controls["moment-y"],
+                    rate_command.controls["moment-z"],
+                )
+                if aero_wrench_frame.casefold() == "source-z-up":
+                    requested_moment = Vector3(
+                        -canonical_moment.x,
+                        -canonical_moment.y,
+                        canonical_moment.z,
+                    )
+                else:
+                    requested_moment = canonical_moment
+                commands = rotor_allocation.allocate(float(values["rotor_speed"]), requested_moment)
+                for index, speed in enumerate(commands.values, start=1):
+                    values[f"rotor-{index}-speed"] = speed
+                control_state["rate_lqr_request_moment_x_nm"] = canonical_moment.x
+                control_state["rate_lqr_request_moment_y_nm"] = canonical_moment.y
+                control_state["rate_lqr_request_moment_z_nm"] = canonical_moment.z
+                control_state["rate_lqr_saturated"] = float(bool(rate_command.saturated))
+                control_state["rotor_command_saturated"] = float(
+                    any(
+                        speed in {rotor_allocation.minimum_speed_rad_s, rotor_allocation.maximum_speed_rad_s}
+                        for speed in commands.values
+                    )
+                )
+            else:
+                rotor_rate_damping = float(guidance_attributes.get("rotor-rate-damping-nm-s-per-rad", "0.0"))
+            if rate_controller is None and rotor_rate_damping > 0.0:
                 source_sign = 1.0 if aero_wrench_frame.casefold() == "source-z-up" else -1.0
                 requested_moment = Vector3(
                     source_sign * rotor_rate_damping * state.body_rate.x,
@@ -3234,7 +3343,11 @@ def _rigid_body_aerodynamic_model(
                     rotor_attitude_error,
                     state.body_rate,
                     attitude_gain=float(guidance_attributes.get("rotorcraft-attitude-gain-nm-per-rad", "0.05")),
-                    rate_damping=float(guidance_attributes.get("rotorcraft-rate-damping-nm-s-per-rad", "0.01")),
+                    rate_damping=(
+                        0.0
+                        if rate_controller is not None
+                        else float(guidance_attributes.get("rotorcraft-rate-damping-nm-s-per-rad", "0.01"))
+                    ),
                     maximum_moment=maximum_moment,
                     maximum_body_rate=maximum_body_rate,
                 )
@@ -3242,6 +3355,30 @@ def _rigid_body_aerodynamic_model(
                 control_state["_rotor_guidance_moment_y"] = rotor_controller.moment_body.y
                 control_state["_rotor_guidance_moment_z"] = rotor_controller.moment_body.z
                 control_state["_rotor_controller_saturated"] = float(rotor_controller.saturated)
+                yaw_target_text = guidance_attributes.get("rotorcraft-yaw-target-deg")
+                if yaw_target_text is not None:
+                    actual_heading_deg = _rigid_body_local_attitude_observables(state, EarthRotationAdapter(earth))["local_heading_deg"]
+                    yaw_target_deg = float(yaw_target_text)
+                    yaw_error = math.atan2(
+                        math.sin(math.radians(yaw_target_deg - actual_heading_deg)),
+                        math.cos(math.radians(yaw_target_deg - actual_heading_deg)),
+                    )
+                    yaw_moment = (
+                        float(guidance_attributes.get("rotorcraft-yaw-gain-nm-per-rad", "0.05")) * yaw_error
+                        - float(guidance_attributes.get("rotorcraft-yaw-rate-damping-nm-s-per-rad", "0.01")) * state.body_rate.z
+                    )
+                    yaw_moment_limit_text = guidance_attributes.get("rotorcraft-yaw-maximum-moment", maximum_moment_text)
+                    yaw_moment_limit = None if yaw_moment_limit_text is None else abs(float(yaw_moment_limit_text))
+                    if yaw_moment_limit is not None:
+                        yaw_moment = max(-yaw_moment_limit, min(yaw_moment_limit, yaw_moment))
+                    control_state["_rotor_guidance_moment_z"] += yaw_moment
+                    control_state["rotorcraft_yaw_target_deg"] = yaw_target_deg
+                    control_state["rotorcraft_yaw_achieved_deg"] = actual_heading_deg
+                    control_state["rotorcraft_yaw_error_deg"] = math.degrees(yaw_error)
+                    control_state["rotorcraft_yaw_moment_nm"] = yaw_moment
+                    control_state["rotorcraft_yaw_control_active"] = 1.0
+                else:
+                    control_state["rotorcraft_yaw_control_active"] = 0.0
                 collective_gain = float(guidance_attributes.get("rotorcraft-collective-gain-rad-s-per-mps2", "20.0"))
                 tilt_compensation = max(0.0, desired_force_norm / max(abs(gravity_ecic.norm() * state.mass), 1.0e-12) - 1.0)
                 values["rotor_speed"] = max(
@@ -3780,6 +3917,21 @@ def _runtime_lqr_attributes(problem: Problem, name: str) -> dict[str, str]:
     ####
 
 
+def _runtime_controller_realization_metadata(controller: object | None) -> dict[str, object]:
+    """Expose the active controller contract in the resolved runtime metadata."""
+
+    if controller is None:
+        return {"status": "not_configured"}
+    realization = getattr(controller, "realization", None)
+    if realization is None:
+        nominal = getattr(controller, "nominal", None)
+        realization = getattr(nominal, "realization", None)
+    if realization is None:
+        return {"status": "configured_without_realization"}
+    return {"status": "configured", **realization.model_dump(mode="json")}
+    ####
+
+
 def _runtime_sensor_clocks(problem: Problem) -> tuple[SensorClockSpec, ...]:
     """Lower declarative sensor clocks without inventing measurements."""
 
@@ -3869,10 +4021,14 @@ def _build_attitude_lqr(
     tables: Mapping[str, RuntimeTable],
     *,
     initial_mass_kg: float | None = None,
+    controller_name: str = "attitude",
 ) -> GainScheduledLqrController | None:
-    """Build the native six-state rigid-body attitude LQR when declared."""
+    """Build a declared rigid-body attitude or rate LQR when present."""
 
-    attributes = _runtime_lqr_attributes(problem, "attitude")
+    controller_name = controller_name.casefold()
+    if controller_name not in {"attitude", "rate"}:
+        raise ValueError("runtime LQR controller name must be attitude or rate")
+    attributes = _runtime_lqr_attributes(problem, controller_name)
     if not attributes:
         return None
     profile_id = attributes.get("profile")
@@ -3883,18 +4039,29 @@ def _build_attitude_lqr(
         attributes = {**profile_attributes, **attributes}
     import numpy as np
 
-    state_names = ("attitude-error-x", "attitude-error-y", "attitude-error-z", "wx", "wy", "wz")
+    state_names = (
+        ("attitude-error-x", "attitude-error-y", "attitude-error-z", "wx", "wy", "wz")
+        if controller_name == "attitude"
+        else ("wx", "wy", "wz")
+    )
     control_names = ("moment-x", "moment-y", "moment-z")
-    a_matrix = _lqr_matrix_source(tables, attributes.get("a-table"), (6, 6))
-    b_matrix = _lqr_matrix_source(tables, attributes.get("b-table"), (6, 3))
+    state_dimension = len(state_names)
+    a_matrix = _lqr_matrix_source(tables, attributes.get("a-table"), (state_dimension, state_dimension))
+    b_matrix = _lqr_matrix_source(tables, attributes.get("b-table"), (state_dimension, 3))
     b_table_supplied = b_matrix is not None
     if a_matrix is None:
-        a_matrix = np.zeros((6, 6), dtype=float)
-        a_matrix[:3, 3:] = np.eye(3)
+        a_matrix = np.zeros((state_dimension, state_dimension), dtype=float)
+        if controller_name == "attitude":
+            a_matrix[:3, 3:] = np.eye(3)
     angle_weight = float(attributes.get("q-angle", "1.0"))
     rate_weight = float(attributes.get("q-rate", "1.0"))
     moment_weight = float(attributes.get("r-moment", "1.0"))
-    q_matrix = _lqr_weight_source(tables, attributes.get("q-table"), (6, 6), (angle_weight, angle_weight, angle_weight, rate_weight, rate_weight, rate_weight))
+    q_diagonal = (
+        (angle_weight, angle_weight, angle_weight, rate_weight, rate_weight, rate_weight)
+        if controller_name == "attitude"
+        else (rate_weight, rate_weight, rate_weight)
+    )
+    q_matrix = _lqr_weight_source(tables, attributes.get("q-table"), (state_dimension, state_dimension), q_diagonal)
     r_matrix = _lqr_weight_source(tables, attributes.get("r-table"), (3, 3), (moment_weight, moment_weight, moment_weight))
     state_angle_scale = attributes.get("state-angle-scale-rad")
     state_rate_scale = attributes.get("state-rate-scale-rad-s")
@@ -3903,12 +4070,19 @@ def _build_attitude_lqr(
     mass_scaling = attributes.get("mass-scaling", "none").casefold()
     scaled = any(value is not None for value in (state_angle_scale, state_rate_scale, control_moment_scale))
     if scaled:
-        if any(value is None for value in (state_angle_scale, state_rate_scale, control_moment_scale)):
+        required_scales = (state_rate_scale, control_moment_scale) if controller_name == "rate" else (state_angle_scale, state_rate_scale, control_moment_scale)
+        if any(value is None for value in required_scales):
+            controller_label = "rate" if controller_name == "rate" else "attitude"
             raise ValueError(
-                "scaled attitude LQR requires state-angle-scale-rad, "
-                "state-rate-scale-rad-s, and control-moment-scale-nm"
+                f"scaled {controller_label} LQR requires "
+                + (
+                    "state-rate-scale-rad-s and control-moment-scale-nm"
+                    if controller_name == "rate"
+                    else "state-angle-scale-rad, state-rate-scale-rad-s, and control-moment-scale-nm"
+                )
             )
-        assert state_angle_scale is not None
+        if controller_name == "attitude":
+            assert state_angle_scale is not None
         assert state_rate_scale is not None
         assert control_moment_scale is not None
     angle_scale = float(state_angle_scale) if state_angle_scale is not None else 1.0
@@ -3925,13 +4099,16 @@ def _build_attitude_lqr(
         samples=int(attributes.get("uncertainty-samples", "9")),
         seed=int(attributes.get("uncertainty-seed", "1995")),
     )
+    update = attributes.get("update", "initial").casefold()
+    scheduled_implementation: ControllerImplementation = "gain_scheduled_lqr" if update in {"mass", "operating-point", "schedule"} else "lqr"
 
     def build(current_mass_kg: float | None, current_inertia: tuple[float, float, float] | None) -> LqrController:
         current = Vector3(*(current_inertia or (inertia.x, inertia.y, inertia.z)))
         effective_b = cast(Any, b_matrix)
         if effective_b is None:
-            effective_b = np.zeros((6, 3), dtype=float)
-            effective_b[3:, :] = np.diag((1.0 / current.x, 1.0 / current.y, 1.0 / current.z))
+            effective_b = np.zeros((state_dimension, 3), dtype=float)
+            row = 3 if controller_name == "attitude" else 0
+            effective_b[row:, :] = np.diag((1.0 / current.x, 1.0 / current.y, 1.0 / current.z))
         if scaled:
             effective_moment_scale = moment_scale
             if mass_scaling == "nominal-ratio":
@@ -3946,7 +4123,11 @@ def _build_attitude_lqr(
                 cast(Sequence[Sequence[float]], effective_b),
                 cast(Sequence[Sequence[float]], q_matrix),
                 cast(Sequence[Sequence[float]], r_matrix),
-                state_scales=(angle_scale,) * 3 + (rate_scale,) * 3,
+                state_scales=(
+                    (angle_scale,) * 3 + (rate_scale,) * 3
+                    if controller_name == "attitude"
+                    else (rate_scale,) * 3
+                ),
                 control_scales=(effective_moment_scale,) * 3,
                 state_names=state_names,
                 control_names=control_names,
@@ -3968,12 +4149,12 @@ def _build_attitude_lqr(
         ) if uncertainty.a_fraction > 0.0 or uncertainty.b_fraction > 0.0 else None
         if not result.hurwitz:
             raise ValueError(
-                "attitude LQR closed-loop poles are not strictly stable: "
+                f"{controller_name} LQR closed-loop poles are not strictly stable: "
                 f"maximum real pole={result.maximum_real_pole:.6g}"
             )
         if robustness is not None and not robustness.stable and attributes.get("uncertainty-policy", "fail-closed").casefold() == "fail-closed":
             raise ValueError(
-                "attitude LQR is not stable across the declared derivative uncertainty envelope: "
+                f"{controller_name} LQR is not stable across the declared derivative uncertainty envelope: "
                 f"worst maximum real pole={robustness.worst_max_real_pole:.6g}"
             )
         limits = {
@@ -3984,13 +4165,76 @@ def _build_attitude_lqr(
             name: maximum_moment
             for name in control_names
         } if maximum_moment is not None else {}
-        return LqrController(result, lower=limits, upper=uppers, robustness=robustness)
+        state_unit = "rad" if controller_name == "attitude" else "rad/s"
+        state_scale = angle_scale if controller_name == "attitude" else rate_scale
+        realization_role: ControllerRole = "attitude" if controller_name == "attitude" else "rate"
+        realization_id = f"runtime-{controller_name}-lqr:{profile_id or 'inline'}"
+        design_id = profile_id or f"inline-{controller_name}-lqr"
+        realization = ControllerRealization(
+            id=realization_id,
+            role=realization_role,
+            implementation=scheduled_implementation,
+            implementation_version="runtime-scaled-lqr-v1" if scaled else "runtime-lqr-v1",
+            fidelity="rigid_body_6dof",
+            design_id=design_id,
+            states=tuple(
+                ControllerChannel(
+                    name=name,
+                    order=index,
+                    unit=state_unit if controller_name == "rate" or index >= 3 else "rad",
+                    frame="body",
+                    scale=state_scale if controller_name == "rate" or index >= 3 else angle_scale,
+                )
+                for index, name in enumerate(state_names)
+            ),
+            inputs=tuple(
+                ControllerChannel(
+                    name=name,
+                    order=index,
+                    unit="N*m",
+                    frame="body",
+                    scale=effective_moment_scale if scaled else 1.0,
+                    lower=limits.get(name),
+                    upper=uppers.get(name),
+                )
+                for index, name in enumerate(control_names)
+            ),
+            plant_source=f"problem:{problem.name}",
+            linearization_source=f"runtime-{controller_name}-linearization",
+            operating_point={"mass_kg": current_mass_kg if current_mass_kg is not None else "initial"},
+            state_scale_id=profile_id or "runtime-state-scales-v1",
+            control_scale_id=profile_id or "runtime-control-scales-v1",
+            q_id=attributes.get("q-table", "inline-q"),
+            r_id=attributes.get("r-table", "inline-r"),
+            a_sha256=result.a_sha256,
+            b_sha256=result.b_sha256,
+            q_sha256=result.q_sha256,
+            r_sha256=result.r_sha256,
+            k_sha256=result.k_sha256,
+            closed_loop_poles=tuple(ClosedLoopPole(real=float(value.real), imaginary=float(value.imag)) for value in result.closed_loop_eigenvalues),
+            closed_loop_max_real_pole=result.maximum_real_pole,
+            allocator_id=actuator_attributes.get("allocator", f"runtime-{controller_name}-moment"),
+            control_path=(
+                ("guidance", "reference_shaping", "attitude_lqr", "allocator", "actuator", "plant")
+                if controller_name == "attitude"
+                else ("guidance", "rate_lqr", "allocator", "actuator", "plant")
+            ),
+            fallback_controller_id=attributes.get("fallback-controller"),
+            scenario_overrides_allowed=attributes.get("allow-scenario-gain-override", "false").casefold() == "true",
+            claim_status="design",
+            provenance={
+                "problem": problem.name,
+                "profile": profile_id or "inline",
+                "update": attributes.get("update", "initial"),
+                "controller": controller_name,
+            },
+        )
+        return LqrController(result, lower=limits, upper=uppers, robustness=robustness, realization=realization)
 
     nominal = build(initial_mass_kg, (inertia.x, inertia.y, inertia.z))
-    update = attributes.get("update", "initial").casefold()
     if update in {"mass", "operating-point", "schedule"} and b_table_supplied:
         raise ValueError(
-            "mass-scheduled attitude LQR requires a runtime-generated or per-operating-point B matrix; "
+            f"mass-scheduled {controller_name} LQR requires a runtime-generated or per-operating-point B matrix; "
             "a fixed b-table cannot claim mass scheduling"
         )
     if update in {"mass", "operating-point", "schedule"}:

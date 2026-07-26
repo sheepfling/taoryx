@@ -24,6 +24,14 @@ EvidenceGrade = Literal[
     "mixed",
     "unavailable",
 ]
+ShowcaseArchetype = Literal[
+    "mission_geometry",
+    "mission_timeline",
+    "dynamics_and_resources",
+    "envelope_and_qualification",
+    "object_lineage",
+]
+LineageEventType = Literal["spawn", "release", "separation", "terminal", "death"]
 StartContractType = Literal[
     "grounded",
     "trimmed_airborne",
@@ -95,6 +103,148 @@ class TerminalContract(BaseModel):
 ####
 
 
+class ShowcaseArchetypeSpec(BaseModel):
+    """One reusable human-facing proof archetype."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: ShowcaseArchetype
+    display_name: str = Field(min_length=1)
+    purpose: str = Field(min_length=1)
+    required_modules: tuple[str, ...] = Field(min_length=1)
+    optional_modules: tuple[str, ...] = ()
+####
+
+
+class ShowcaseRecipe(BaseModel):
+    """Family-specific realization of the common showcase archetypes."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    family: str = Field(min_length=1)
+    display_name: str = Field(min_length=1)
+    priority: int = Field(ge=1)
+    archetypes: tuple[ShowcaseArchetype, ...] = Field(min_length=4)
+    emphasis: tuple[str, ...] = Field(min_length=1)
+    required_events: tuple[str, ...] = ()
+    lineage_required: bool = False
+
+    @model_validator(mode="after")
+    def validate_archetypes(self) -> ShowcaseRecipe:
+        if len(self.archetypes) != len(set(self.archetypes)):
+            raise ValueError("showcase recipe archetypes must be unique")
+        if self.lineage_required and "object_lineage" not in self.archetypes:
+            raise ValueError("lineage-required showcase recipe must include object_lineage")
+        return self
+        ####
+    ####
+
+
+class ShowcaseArchetypeCatalog(BaseModel):
+    """Versioned catalog of shared proof products and family recipes."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    schema_version: int = 1
+    id: str = Field(min_length=1)
+    claim_boundary: str = Field(min_length=1)
+    archetypes: tuple[ShowcaseArchetypeSpec, ...] = Field(min_length=5)
+    recipes: tuple[ShowcaseRecipe, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_catalog(self) -> ShowcaseArchetypeCatalog:
+        expected = {"mission_geometry", "mission_timeline", "dynamics_and_resources", "envelope_and_qualification", "object_lineage"}
+        actual = {item.id for item in self.archetypes}
+        if actual != expected:
+            raise ValueError(f"showcase archetype catalog must define exactly {sorted(expected)}")
+        recipe_ids = [recipe.id for recipe in self.recipes]
+        if len(recipe_ids) != len(set(recipe_ids)):
+            raise ValueError("showcase recipe IDs must be unique")
+        return self
+        ####
+    ####
+
+
+class ObjectLineageEvent(BaseModel):
+    """Accepted-boundary lifecycle event for one mission object."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    event_type: LineageEventType
+    object_id: str = Field(min_length=1)
+    parent_object_id: str | None = None
+    time_s: float = Field(ge=0.0)
+    reason: str = Field(min_length=1)
+####
+
+
+class ObjectLineageNode(BaseModel):
+    """One active object and its parent/terminal disposition."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str = Field(min_length=1)
+    role: str = Field(min_length=1)
+    parent_id: str | None = None
+    spawn_event_id: str | None = None
+    active_from_s: float = Field(ge=0.0)
+    active_to_s: float | None = Field(default=None, ge=0.0)
+    death_event_id: str | None = None
+    terminal_disposition: str | None = None
+
+    @model_validator(mode="after")
+    def validate_interval(self) -> ObjectLineageNode:
+        if self.active_to_s is not None and self.active_to_s < self.active_from_s:
+            raise ValueError("lineage active_to_s must not precede active_from_s")
+        return self
+        ####
+    ####
+
+
+class ObjectLineage(BaseModel):
+    """A replayable parent/child graph for release, staging, and termination."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    nodes: tuple[ObjectLineageNode, ...] = Field(min_length=1)
+    events: tuple[ObjectLineageEvent, ...] = ()
+
+    @model_validator(mode="after")
+    def validate_graph(self) -> ObjectLineage:
+        node_ids = {node.id for node in self.nodes}
+        if len(node_ids) != len(self.nodes):
+            raise ValueError("lineage node IDs must be unique")
+        event_ids = {event.id for event in self.events}
+        if len(event_ids) != len(self.events):
+            raise ValueError("lineage event IDs must be unique")
+        node_by_id = {node.id: node for node in self.nodes}
+        for node in self.nodes:
+            if node.parent_id is not None and node.parent_id not in node_ids:
+                raise ValueError(f"lineage parent is unknown: {node.parent_id}")
+            if node.spawn_event_id is not None and node.spawn_event_id not in event_ids:
+                raise ValueError(f"lineage spawn event is unknown: {node.spawn_event_id}")
+            if node.death_event_id is not None and node.death_event_id not in event_ids:
+                raise ValueError(f"lineage death event is unknown: {node.death_event_id}")
+        for event in self.events:
+            if event.object_id not in node_ids:
+                raise ValueError(f"lineage event object is unknown: {event.object_id}")
+            if event.parent_object_id is not None and event.parent_object_id not in node_ids:
+                raise ValueError(f"lineage event parent is unknown: {event.parent_object_id}")
+        for node in self.nodes:
+            seen: set[str] = set()
+            current = node
+            while current.parent_id is not None:
+                if current.id in seen:
+                    raise ValueError("lineage parent graph must be acyclic")
+                seen.add(current.id)
+                current = node_by_id[current.parent_id]
+        return self
+        ####
+    ####
+
+
 class FamilyShowcaseTemplate(BaseModel):
     """Semantic mission template shared by vehicles in one physical family."""
 
@@ -113,6 +263,13 @@ class FamilyShowcaseTemplate(BaseModel):
     terminal_contract: TerminalContract
     plot_modules: tuple[str, ...] = ()
     robustness_profile: str | None = None
+    archetypes: tuple[ShowcaseArchetype, ...] = (
+        "mission_geometry",
+        "mission_timeline",
+        "dynamics_and_resources",
+        "envelope_and_qualification",
+    )
+    lineage_required: bool = False
 
     @model_validator(mode="after")
     def validate_segments(self) -> FamilyShowcaseTemplate:
@@ -124,6 +281,8 @@ class FamilyShowcaseTemplate(BaseModel):
         missing = set(self.required_events).difference(events)
         if missing:
             raise ValueError(f"showcase required events are not produced: {sorted(missing)}")
+        if self.lineage_required and "object_lineage" not in self.archetypes:
+            raise ValueError("lineage-required showcase must include object_lineage")
         return self
         ####
     ####
@@ -215,6 +374,8 @@ class ShowcaseRunArtifact(BaseModel):
     nonclaims: tuple[str, ...] = ()
     files: tuple[ArtifactFile, ...] = Field(min_length=1)
     board: EvidenceBoardSpec
+    archetypes: tuple[ShowcaseArchetype, ...] = ()
+    object_lineage: ObjectLineage | None = None
 
     @model_validator(mode="after")
     def validate_artifacts(self) -> ShowcaseRunArtifact:
@@ -224,6 +385,8 @@ class ShowcaseRunArtifact(BaseModel):
         required = {item.path for item in self.files if item.required}
         if "manifest.json" not in required:
             raise ValueError("showcase artifact must include a required manifest.json")
+        if "object_lineage" in self.archetypes and self.object_lineage is None:
+            raise ValueError("object_lineage archetype requires a lineage artifact")
         return self
         ####
     ####
@@ -233,9 +396,17 @@ __all__ = [
     "ArtifactFile",
     "EvidenceBoardSpec",
     "FailureCode",
+    "LineageEventType",
     "FidelityShowcaseRealization",
     "FamilyShowcaseTemplate",
     "MissionSegmentSpec",
+    "ObjectLineage",
+    "ObjectLineageEvent",
+    "ObjectLineageNode",
+    "ShowcaseArchetype",
+    "ShowcaseArchetypeCatalog",
+    "ShowcaseArchetypeSpec",
+    "ShowcaseRecipe",
     "ShowcaseRunArtifact",
     "StartContract",
     "TerminalContract",

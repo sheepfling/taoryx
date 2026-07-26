@@ -417,7 +417,7 @@ def _reachability_command(arguments: argparse.Namespace) -> int:
 
     try:
         if arguments.reachability_command == "x15":
-            bundle = write_x15_reachability_bundle(
+            reachability_bundle = write_x15_reachability_bundle(
                 arguments.output_dir,
                 workers=arguments.workers,
                 step_size_s=arguments.step_size_s,
@@ -425,17 +425,17 @@ def _reachability_command(arguments: argparse.Namespace) -> int:
                 criteria=_criteria_from_arguments(arguments),
                 dpi=arguments.dpi,
             )
-            print(f"wrote X-15 reachability bundle: {bundle.manifest_path.parent}")
+            print(f"wrote X-15 reachability bundle: {reachability_bundle.manifest_path.parent}")
             return 0
         if arguments.reachability_command == "x15-native-replay":
-            bundle = write_x15_native_boundary_replay(
+            native_bundle = write_x15_native_boundary_replay(
                 arguments.envelope,
                 arguments.output_dir,
                 max_points=arguments.max_points,
                 duration_s=arguments.duration_s,
                 max_steps=arguments.max_steps,
             )
-            print(f"wrote X-15 native replay bundle: {bundle.manifest_path.parent}")
+            print(f"wrote X-15 native replay bundle: {native_bundle.manifest_path.parent}")
             return 0
         if arguments.reachability_command == "run":
             azimuths = arguments.azimuth_deg or (-30.0, 0.0, 30.0)

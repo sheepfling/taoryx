@@ -245,12 +245,6 @@ def _dimension_for_unit(unit: str) -> str:
     return dimensions.get(unit.strip(), "unknown")
 
 
-def _parse_numbers(value: str) -> tuple[float, ...]:
-    """Parse scalar tokens for vector metadata without evaluating a graph."""
-
-    return tuple(float(token) for token in re.findall(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?", value))
-
-
 def _element(node: dict[str, object]) -> Any:
     """Recreate one XML element from IR."""
 

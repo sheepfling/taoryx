@@ -10,6 +10,20 @@ designs:
     allocator: b747-standard
     states: [alpha, beta, p, q, r]
     controls: [elevator, aileron, rudder]
+    role: local_regulator
+    implementation_version: scaled-lqr-v1
+    fidelity: rigid_body_6dof
+    state_units: [rad, rad, rad/s, rad/s, rad/s]
+    state_frames: [body, body, body, body, body]
+    control_units: [rad, rad, rad]
+    control_frames: [actuator, actuator, actuator]
+    plant_source: b747-source-anchor
+    linearization_source: b747-condition3-trim-v1
+    q_id: b747-standard-q-v1
+    r_id: b747-standard-r-v1
+    state_scale_id: b747-standard-state-scales-v1
+    control_scale_id: b747-standard-control-scales-v1
+    scenario_overrides_allowed: false
     notes: Local source-anchor design; no global B747 envelope claim.
   - id: x8-local-lqr
     method: lqr
@@ -17,6 +31,20 @@ designs:
     allocator: x8-elevons
     states: [alpha, beta, p, q, r]
     controls: [collective-elevon, differential-elevon]
+    role: local_regulator
+    implementation_version: scaled-lqr-v1
+    fidelity: rigid_body_6dof
+    state_units: [rad, rad, rad/s, rad/s, rad/s]
+    state_frames: [body, body, body, body, body]
+    control_units: [rad, rad]
+    control_frames: [actuator, actuator]
+    plant_source: skywalker-x8-flight-identified-surrogate
+    linearization_source: x8-powered-trim-v1
+    q_id: x8-standard-q-v1
+    r_id: x8-standard-r-v1
+    state_scale_id: x8-standard-state-scales-v1
+    control_scale_id: x8-standard-control-scales-v1
+    scenario_overrides_allowed: false
     notes: Local flight-identified design; retain source envelope limits.
   - id: hummingbird-rate-lqr
     method: lqr
@@ -24,6 +52,20 @@ designs:
     allocator: hummingbird-quad-x
     states: [p, q, r]
     controls: [moment_x_nm, moment_y_nm, moment_z_nm]
+    role: rate
+    implementation_version: scaled-lqr-v1
+    fidelity: rigid_body_6dof
+    state_units: [rad/s, rad/s, rad/s]
+    state_frames: [body, body, body]
+    control_units: [N*m, N*m, N*m]
+    control_frames: [body, body, body]
+    plant_source: hummingbird-hover-surrogate
+    linearization_source: hummingbird-hover-v1
+    q_id: hummingbird-standard-q-v1
+    r_id: hummingbird-standard-r-v1
+    state_scale_id: hummingbird-standard-state-scales-v1
+    control_scale_id: hummingbird-standard-control-scales-v1
+    scenario_overrides_allowed: false
     notes: Rate-loop design around equal-rotor hover; position control is separate.
   - id: x15-bank-lqr
     method: lqr
@@ -31,4 +73,18 @@ designs:
     allocator: x15-bank
     states: [alpha, beta, p, q, r]
     controls: [differential-stabilator, rudder]
+    role: local_regulator
+    implementation_version: scaled-lqr-v1
+    fidelity: rigid_body_6dof
+    state_units: [rad, rad, rad/s, rad/s, rad/s]
+    state_frames: [body, body, body, body, body]
+    control_units: [rad, rad]
+    control_frames: [actuator, actuator]
+    plant_source: x15-release-glide-surrogate
+    linearization_source: x15-release-glide-v1
+    q_id: x15-standard-q-v1
+    r_id: x15-standard-r-v1
+    state_scale_id: x15-standard-state-scales-v1
+    control_scale_id: x15-standard-control-scales-v1
+    scenario_overrides_allowed: false
     notes: Local unpowered-glide design; not a terminal-guidance claim.

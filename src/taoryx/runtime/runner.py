@@ -162,7 +162,22 @@ def run_files(
         {
             key: value
             for key, value in case.problem.metadata.items()
-            if key in {"dynamics_mode", "parameters", "vehicle", "actuator", "target", "route", "controls", "thermal", "telemetry", "native_pipeline"}
+            if key in {
+                "dynamics_mode",
+                "parameters",
+                "vehicle",
+                "actuator",
+                "target",
+                "route",
+                "controls",
+                "thermal",
+                "telemetry",
+                "native_pipeline",
+                "lqr",
+                "lqr_by_role",
+                "controller_realization",
+                "controller_realizations",
+            }
         }
         for case in lowered.cases
     )

@@ -1,0 +1,138 @@
+schema_version: 1
+id: taoryx-controller-inventory-v1
+claim_boundary: >-
+  Runtime-path inventory and migration status. Baseline entries are retained
+  for regression and are not controller-qualified evidence.
+entries:
+  # These are the currently active problem-file paths.  Their gains are
+  # explicit runtime-status parameters, so they remain baseline evidence until
+  # the common LQR seam replaces them.
+  - id: b747-route-guidance-baseline
+    family: b747
+    vehicle_id: b747
+    classification: guidance
+    implementation: rule_based
+    source: examples/mission_families/slower_b747/SV01_bounded_route_controller_6dof.prb:10
+    path: [mission, guidance, plant]
+    active_runtime: true
+    legacy_baseline: true
+    scenario_gain_overrides: true
+    qualification_eligible: false
+    gain_owner: problem-file-runtime-status
+    declared_gains: [propnav-gain, attitude-gain, rate-damping, alpha-hold-gain-deg-per-deg]
+    notes: Retain as showcase-v0 comparison; not eligible for controller_qualified.
+  - id: b747-local-lqr-design
+    family: b747
+    vehicle_id: b747
+    classification: primary_regulator
+    implementation: lqr
+    source: verification/controller_designs.yaml:b747-local-lqr
+    path: [guidance, reference_shaping, lqr, allocator, actuator, plant]
+    design_id: b747-local-lqr
+    active_runtime: false
+    legacy_baseline: false
+    scenario_gain_overrides: false
+    qualification_eligible: true
+    gain_owner: controller_design_catalog
+    notes: Candidate source-anchor local design; requires plant authority and schedule qualification.
+
+  - id: skywalker-x8-route-guidance-baseline
+    family: skywalker_x8
+    vehicle_id: skywalker_x8
+    classification: guidance
+    implementation: rule_based
+    source: examples/mission_families/slower_x8/SV03_bounded_route_controller_6dof.prb:9
+    path: [mission, guidance, plant]
+    active_runtime: true
+    legacy_baseline: true
+    scenario_gain_overrides: true
+    qualification_eligible: false
+    gain_owner: problem-file-runtime-status
+    declared_gains: [propnav-gain, attitude-gain, rate-damping, max-sideslip-deg]
+    notes: Preserve for sign/frame diagnosis and comparison only.
+  - id: skywalker-x8-local-lqr-design
+    family: skywalker_x8
+    vehicle_id: skywalker_x8
+    classification: primary_regulator
+    implementation: lqr
+    source: verification/controller_designs.yaml:x8-local-lqr
+    path: [guidance, reference_shaping, lqr, allocator, actuator, plant]
+    design_id: x8-local-lqr
+    active_runtime: false
+    legacy_baseline: false
+    scenario_gain_overrides: false
+    qualification_eligible: true
+    gain_owner: controller_design_catalog
+    notes: Must resolve bank/pitch sign and frame conventions before route migration.
+  - id: skywalker-x8-figure-eight-attitude-lqr-witness
+    family: skywalker_x8
+    vehicle_id: skywalker_x8
+    classification: primary_regulator
+    implementation: lqr
+    source: examples/mission_families/slower_x8/SV03_figure_eight_altitude_reversal_6dof.prb:11
+    path: [guidance, reference_shaping, attitude_lqr, allocator, actuator, plant]
+    active_runtime: true
+    legacy_baseline: false
+    scenario_gain_overrides: true
+    qualification_eligible: false
+    gain_owner: problem-file-runtime-lqr
+    declared_gains: [q-angle, q-rate, r-moment]
+    notes: Wiring witness only; route-specific surface and sideslip gains remain outside the LQR contract.
+
+  - id: hummingbird-position-attitude-baseline
+    family: hummingbird
+    vehicle_id: hummingbird
+    classification: legacy_or_special_case
+    implementation: rule_based
+    source: examples/mission_families/slower_hummingbird/SV05_return_home_land_6dof.prb:9
+    path: [mission, guidance, attitude, allocator, actuator, plant]
+    active_runtime: true
+    legacy_baseline: true
+    scenario_gain_overrides: true
+    qualification_eligible: false
+    gain_owner: problem-file-runtime-status
+    declared_gains: [rotorcraft-waypoint-gain-mps2-per-m, rotorcraft-velocity-damping-per-s, rotorcraft-attitude-gain-nm-per-rad, rotorcraft-rate-damping-nm-s-per-rad]
+    notes: Position/attitude path retained as a baseline while rate LQR is migrated first.
+  - id: hummingbird-rate-lqr-design
+    family: hummingbird
+    vehicle_id: hummingbird
+    classification: primary_regulator
+    implementation: lqr
+    source: verification/controller_designs.yaml:hummingbird-rate-lqr
+    path: [guidance, attitude, rate, lqr, allocator, actuator, plant]
+    design_id: hummingbird-rate-lqr
+    active_runtime: true
+    legacy_baseline: false
+    scenario_gain_overrides: false
+    qualification_eligible: true
+    gain_owner: controller_design_catalog
+    notes: First vertical-lift migration witness at examples/mission_families/slower_hummingbird/SV05_rate_lqr_hover_6dof.prb; motor-speed allocation remains subordinate to the rate loop.
+
+  - id: x15-phase-guidance-baseline
+    family: x15
+    vehicle_id: x15
+    classification: legacy_or_special_case
+    implementation: rule_based
+    source: examples/showcases/x15_rocket_to_hawaii/source_trim_then_propnav_6dof.prb:9
+    path: [mission, phase_manager, guidance, actuator, plant]
+    active_runtime: true
+    legacy_baseline: true
+    scenario_gain_overrides: true
+    qualification_eligible: false
+    gain_owner: problem-file-runtime-status
+    declared_gains: [propnav-gain, surface-pitch-gain-deg-per-rad, surface-roll-gain-deg-per-rad, surface-yaw-gain-deg-per-rad]
+    notes: Source-trim/ProNav baseline; California-to-Hawaii remains a staged boost-glide surrogate.
+  - id: x15-bank-lqr-design
+    family: x15
+    vehicle_id: x15
+    classification: primary_regulator
+    implementation: lqr
+    source: verification/controller_designs.yaml:x15-bank-lqr
+    path: [phase_manager, guidance, reference_shaping, lqr, allocator, actuator, plant]
+    design_id: x15-bank-lqr
+    active_runtime: false
+    legacy_baseline: false
+    scenario_gain_overrides: false
+    qualification_eligible: true
+    gain_owner: controller_design_catalog
+    notes: Local release/glide design; regime scheduling and stage lineage remain separate gates.

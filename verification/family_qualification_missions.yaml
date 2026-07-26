@@ -1,0 +1,171 @@
+schema_version: 1
+id: taoryx_family_qualification_missions_v1
+claim_boundary: independent truth-evaluated family qualification; integration baselines remain nonqualified
+missions:
+  - id: hummingbird-hover-to-touchdown-strict-v1
+    family: hummingbird
+    display_name: Hummingbird strict hover-to-touchdown baseline
+    evidence_level: integration_baseline_probe
+    claim: The source-bounded Hummingbird surrogate can hold its declared airborne start and execute the available motor-shutdown landing segment under an independent truth evaluator.
+    nonclaims:
+      - takeoff from ground
+      - elevated box waypoint capture
+      - gust recovery
+      - hardware or flight validity
+    problem: examples/mission_families/slower_hummingbird/SV05_return_home_land_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmy.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
+    max_steps: 25000
+    terminal:
+      required: true
+      dwell_s: 1.0
+      target: {north_m: 0.0, east_m: 0.0, altitude_m: 0.0, speed_m_s: 0.0}
+      tolerance: {north_m: 0.05, east_m: 0.05, altitude_m: 0.05, speed_m_s: 0.05}
+    objectives:
+      - id: initial-hover-dwell
+        objective_type: dwell
+        target: {north_m: 0.0, east_m: 0.0, altitude_m: 2.0, speed_m_s: 0.0}
+        tolerance: {north_m: 0.05, east_m: 0.05, altitude_m: 0.05, speed_m_s: 0.05}
+        dwell_s: 2.0
+      - id: motor-shutdown
+        objective_type: event
+        event_id: motor-shutdown
+      - id: touchdown-state
+        objective_type: touchdown
+        target: {north_m: 0.0, east_m: 0.0, altitude_m: 0.0, speed_m_s: 0.0}
+        tolerance: {north_m: 0.05, east_m: 0.05, altitude_m: 0.05, speed_m_s: 0.05}
+        dwell_s: 1.0
+  - id: x8-fixed-wing-flyby-route-v1
+    family: skywalker_x8
+    display_name: Skywalker X8 left-hand fly-by waypoint sequence — nominal case
+    evidence_level: nominal_case_pass_overall_qualification_pending
+    claim: The source-bounded X8 rigid-body surrogate crosses four declared, oriented route gates inside the local aerodynamic envelope under independent truth evaluation.
+    nonclaims:
+      - closed-route terminal capture
+      - physical actuator authority or source-validated bank response
+      - flight-test or manufacturer fidelity
+      - wind robustness
+      - full landing or recovery dynamics
+    problem: examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 7000
+    envelope:
+      - {channel: speed_m_s, minimum: 2.0, maximum: 27.0}
+      - {channel: aero_alpha_deg, minimum: 0.0, maximum: 12.0}
+      - {channel: aero_sideslip_deg, minimum: -5.0, maximum: 5.0}
+    terminal:
+      required: true
+      dwell_s: 2.0
+      window_start_s: 115.0
+      window_end_s: 120.0
+      target: {north_m: 0.0, east_m: 0.0, altitude_m: 178.0, speed_m_s: 17.9}
+      tolerance: {north_m: 100.0, east_m: 100.0, altitude_m: 40.0, speed_m_s: 5.0}
+    objectives:
+      - id: east-turn-gate
+        objective_type: fly_by_gate
+        target: {north_m: 0.0, east_m: 615.0, altitude_m: 178.0}
+        tolerance: {corridor_m: 150.0}
+        gate_normal: [0.0, 1.0, 0.0]
+        crossing_direction: 1
+        window_start_s: 0.0
+        window_end_s: 40.0
+      - id: north-turn-gate
+        objective_type: fly_by_gate
+        target: {north_m: 615.0, east_m: 700.0, altitude_m: 210.0}
+        tolerance: {corridor_m: 150.0}
+        gate_normal: [1.0, 0.0, 0.0]
+        crossing_direction: 1
+        window_start_s: 40.0
+        window_end_s: 80.0
+      - id: west-turn-gate
+        objective_type: fly_by_gate
+        target: {north_m: 615.0, east_m: 200.0, altitude_m: 178.0}
+        tolerance: {corridor_m: 150.0}
+        gate_normal: [0.0, -1.0, 0.0]
+        crossing_direction: 1
+        window_start_s: 80.0
+        window_end_s: 110.0
+      - id: south-turn-gate
+        objective_type: fly_by_gate
+        target: {north_m: 400.0, east_m: 25.0, altitude_m: 178.0}
+        tolerance: {corridor_m: 150.0}
+        gate_normal: [-1.0, 0.0, 0.0]
+        crossing_direction: 1
+        window_start_s: 100.0
+        window_end_s: 120.0
+  - id: x8-figure-eight-altitude-bank-pitch-v2
+    family: skywalker_x8
+    display_name: Skywalker X8 figure-eight altitude, bank, and pitch reversal — nominal case
+    evidence_level: nominal_case_pass_overall_qualification_pending
+    claim: The source-bounded X8 rigid-body surrogate executes a closed figure-eight reference with explicit high/low altitude gates and truth-observable bank and pitch reversals inside the local aerodynamic envelope.
+    nonclaims:
+      - physical actuator authority or source-validated bank and pitch response
+      - flight-test or manufacturer fidelity
+      - wind robustness
+      - full landing or recovery dynamics
+    problem: examples/mission_families/slower_x8/SV03_figure_eight_altitude_reversal_6dof.prb
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 12000
+    envelope:
+      - {channel: speed_m_s, minimum: 2.0, maximum: 27.0}
+      - {channel: aero_alpha_deg, minimum: 0.0, maximum: 12.0}
+      - {channel: aero_sideslip_deg, minimum: -5.0, maximum: 5.0}
+    truth_events:
+      - {id: bank-positive-response, channel: local_roll_deg, predicate: at_least, threshold: 1.0, window_start_s: 0.0, window_end_s: 90.0}
+      - {id: bank-negative-response, channel: local_roll_deg, predicate: at_most, threshold: -1.0, window_start_s: 90.0, window_end_s: 180.0}
+      # Require the positive pitch excursion after the initial trimmed sample;
+      # t=0 is not evidence that the pitch command was exercised.
+      - {id: pitch-positive-response, channel: local_pitch_deg, predicate: at_least, threshold: 9.0, window_start_s: 20.0, window_end_s: 90.0}
+      - {id: pitch-negative-response, channel: local_pitch_deg, predicate: at_most, threshold: -0.5, window_start_s: 90.0, window_end_s: 180.0}
+    terminal:
+      required: true
+      dwell_s: 2.0
+      window_start_s: 170.0
+      window_end_s: 180.0
+      target: {north_m: 0.0, east_m: 0.0, altitude_m: 178.0, speed_m_s: 20.0}
+      tolerance: {north_m: 100.0, east_m: 100.0, altitude_m: 8.0, speed_m_s: 4.0}
+    objectives:
+      - id: bank-positive-response
+        objective_type: event
+        event_id: bank-positive-response
+      - id: altitude-high-gate
+        objective_type: fly_by_gate
+        # Oriented gate plane at the high-altitude lobe crossing.  The
+        # altitude and speed requirements remain independent truth checks.
+        target: {north_m: 116.295, east_m: 559.924, altitude_m: 220.0, speed_m_s: 20.0}
+        tolerance: {corridor_m: 120.0, altitude_m: 15.0, speed_m_s: 3.0}
+        gate_normal: [-0.3431, 0.9393, 0.0]
+        crossing_direction: 1
+        window_start_s: 20.0
+        window_end_s: 60.0
+      - id: bank-negative-response
+        objective_type: event
+        event_id: bank-negative-response
+      - id: pitch-positive-response
+        objective_type: event
+        event_id: pitch-positive-response
+      - id: altitude-low-gate
+        objective_type: fly_by_gate
+        # Opposite-oriented gate plane at the descending low-altitude lobe.
+        target: {north_m: 111.138, east_m: -582.126, altitude_m: 170.0, speed_m_s: 20.0}
+        tolerance: {corridor_m: 120.0, altitude_m: 20.0, speed_m_s: 4.0}
+        gate_normal: [-0.5358, -0.8443, 0.0]
+        crossing_direction: 1
+        window_start_s: 110.0
+        window_end_s: 150.0
+      - id: pitch-negative-response
+        objective_type: event
+        event_id: pitch-negative-response
