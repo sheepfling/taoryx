@@ -226,7 +226,7 @@ def _checkdata_summary(results: object, vector_results: object = ()) -> dict[str
         else "failed"
         if "failed" in statuses
         else "verified_with_quarantine"
-        if "unsupported" in statuses
+        if "unsupported" in statuses or "quarantined" in statuses
         else "verified"
     )
     return {
@@ -234,6 +234,7 @@ def _checkdata_summary(results: object, vector_results: object = ()) -> dict[str
         "passed": statuses.count("passed"),
         "failed": statuses.count("failed"),
         "unsupported": statuses.count("unsupported"),
+        "quarantined": statuses.count("quarantined"),
         "status": status,
         "results": [result.to_dict() for result in values],
         "vector_count": len(vector_values),

@@ -83,9 +83,13 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     """Apply overlapping grammar/equation/algorithm views to collected tests."""
 
     for item in items:
-        relative_path = str(Path(str(item.fspath)).resolve().relative_to(ROOT))
+        relative_path = Path(str(item.fspath)).resolve().relative_to(ROOT).as_posix()
         if relative_path.startswith("tests/parser/"):
             item.add_marker("grammar")
+        if relative_path.startswith("tests/unit/test_daveml"):
+            item.add_marker("daveml")
+        if relative_path.startswith("tests/e2e/"):
+            item.add_marker("integration")
         if relative_path.startswith("tests/parser/test_table_parser.py"):
             item.add_marker("table")
         for view, paths in VIEW_FILES.items():
