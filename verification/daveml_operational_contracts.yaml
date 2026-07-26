@@ -1,0 +1,77 @@
+schema_version: 1
+registry: taoryx-daveml-operational-contracts/v1
+claim_boundary: source-bounded family-library operational integration; not flight qualification
+canonical_units: SI
+families:
+  - id: reference_f16_s119
+    manifest: families/reference_f16_s119/family.yaml
+    qualification_class: reference_exact
+    source_authority: reference_f16_s119
+    frames: {body: FRD, navigation: NED, quaternion_order: wxyz}
+    reference_geometry: {area_m2: 27.870912, mean_aerodynamic_chord_m: 3.450336, span_m: 9.144}
+    validity_envelope: {mach_min: 0.0, mach_max: 1.0, alpha_min_rad: -0.1745329252, alpha_max_rad: 0.7853981634, beta_min_rad: -0.5235987756, beta_max_rad: 0.5235987756, altitude_min_m: 0.0, altitude_max_m: 15240.0}
+    bindings:
+      - {id: aerodynamics, required: true, source_role: aerodynamic_binding, outputs: [force_body, moment_body]}
+      - {id: propulsion, required: true, source_role: propulsion_binding, outputs: [thrust, fuel_flow]}
+      - {id: mass_properties, required: true, source_role: inertia_binding, outputs: [mass, center_of_gravity, inertia]}
+      - {id: atmosphere, required: true, source_role: atmosphere_binding, outputs: [temperature, pressure, density, speed_of_sound]}
+      - {id: controls, required: true, source_role: controls, outputs: [elevator, aileron, rudder, throttle]}
+    applicability: {trim: required, linearization: required, tuning: required, objectives: required, scenarios: required}
+    nonclaims: [flight_certification, production_actuator_dynamics, manufacturer_operational_fidelity]
+  - id: reference_hl20_mod_k
+    manifest: families/reference_hl20_mod_k/family.yaml
+    qualification_class: reference_exact
+    source_authority: reference_hl20_mod_k
+    frames: {body: FRD, navigation: NED, quaternion_order: wxyz}
+    reference_geometry: {area_m2: 26.612075808, mean_aerodynamic_chord_m: 8.607552, span_m: 4.233672}
+    validity_envelope: {mach_min: 0.3, mach_max: 4.0, alpha_min_rad: 0.0, alpha_max_rad: 0.2617993878, beta_min_rad: -0.1745329252, beta_max_rad: 0.1745329252, altitude_min_m: -1000.0, altitude_max_m: 20000.0}
+    bindings:
+      - {id: aerodynamics, required: true, source_role: aerodynamic_binding, outputs: [force_body, moment_body]}
+      - {id: mass_properties, required: true, source_role: inertia_binding, outputs: [mass, center_of_gravity, inertia]}
+      - {id: atmosphere, required: true, source_role: atmosphere_binding, outputs: [temperature, pressure, density, speed_of_sound]}
+      - {id: direct_surfaces, required: true, source_role: controls, outputs: [body_flaps, wing_flaps, rudder]}
+    applicability: {trim: required, linearization: required, tuning: not_applicable, objectives: required, scenarios: required}
+    nonclaims: [controller_design, actuator_dynamics, landing_contact, flight_certification]
+  - id: reference_nesc_two_stage_rocket
+    manifest: families/reference_nesc_two_stage_rocket/family.yaml
+    qualification_class: reference_exact
+    source_authority: reference_nesc_two_stage_rocket
+    frames: {body: FRD, navigation: NED, quaternion_order: wxyz}
+    reference_geometry: {area_m2: 7.0, mean_aerodynamic_chord_m: 3.0, span_m: 3.0}
+    validity_envelope: {mach_min: 0.0, mach_max: 40.0, alpha_min_rad: -0.3490658504, alpha_max_rad: 0.3490658504, beta_min_rad: -0.3490658504, beta_max_rad: 0.3490658504, altitude_min_m: 0.0, altitude_max_m: 500000.0}
+    bindings:
+      - {id: aerodynamics, required: true, source_role: aerodynamic_binding, outputs: [force_body]}
+      - {id: propulsion, required: true, source_role: propulsion_binding, outputs: [thrust, mass_flow, stage_events]}
+      - {id: mass_properties, required: true, source_role: inertia_binding, outputs: [mass, center_of_gravity, inertia]}
+      - {id: atmosphere, required: true, source_role: atmosphere_binding, outputs: [temperature, pressure, density, speed_of_sound]}
+      - {id: staging, required: true, source_role: staging, outputs: [stage_lineage, separation_events]}
+    applicability: {trim: not_applicable, linearization: not_applicable, tuning: not_applicable, objectives: required, scenarios: required}
+    nonclaims: [controller_design, equilibrium_trim, independent_full_trajectory_equivalence, flight_certification]
+  - id: a320_openap_3dof
+    manifest: families/a320_openap_3dof/collection-manifest.json
+    qualification_class: derived_exact
+    source_authority: openap-2.6.0
+    frames: {body: FRD, navigation: NED, quaternion_order: wxyz}
+    reference_geometry: {area_m2: 122.6, mean_aerodynamic_chord_m: 4.29, span_m: 34.1}
+    validity_envelope: {mach_min: 0.0, mach_max: 0.86, alpha_min_rad: -0.1745329252, alpha_max_rad: 0.2617993878, beta_min_rad: 0.0, beta_max_rad: 0.0, altitude_min_m: 0.0, altitude_max_m: 13000.0}
+    bindings:
+      - {id: performance_aerodynamics, required: true, source_role: aerodynamics, outputs: [drag, normal_force_target]}
+      - {id: performance_propulsion, required: true, source_role: propulsion, outputs: [thrust, fuel_flow]}
+      - {id: scalar_mass_schedule, required: true, source_role: mass_properties, outputs: [mass]}
+    applicability: {trim: required, linearization: required, tuning: not_applicable, objectives: required, scenarios: required}
+    nonclaims: [manufacturer_truth, source_exact_dynamics, actuator_dynamics, rigid_body_6dof_equivalence]
+  - id: a320_openap_jsbsim_pseudo6dof
+    manifest: families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json
+    qualification_class: surrogate_composite
+    source_authority: taoryx-authority-map
+    frames: {body: FRD, navigation: NED, quaternion_order: wxyz}
+    reference_geometry: {area_m2: 122.6, mean_aerodynamic_chord_m: 4.29, span_m: 34.1}
+    validity_envelope: {mach_min: 0.0, mach_max: 0.86, alpha_min_rad: -0.1745329252, alpha_max_rad: 0.2617993878, beta_min_rad: -0.1745329252, beta_max_rad: 0.1745329252, altitude_min_m: 0.0, altitude_max_m: 13000.0}
+    bindings:
+      - {id: performance_aerodynamics, required: true, source_role: aerodynamics-performance, outputs: [drag, normal_force_target]}
+      - {id: rotational_aerodynamics, required: true, source_role: aerodynamics-rotational, outputs: [side_force, roll_moment, pitch_moment, yaw_moment]}
+      - {id: performance_propulsion, required: true, source_role: propulsion, outputs: [thrust, fuel_flow]}
+      - {id: estimated_mass_properties, required: true, source_role: mass-properties, outputs: [mass, center_of_gravity, inertia]}
+      - {id: taoryx_control_overlay, required: true, source_role: actuators, outputs: [surface_positions, engine_response]}
+    applicability: {trim: required, linearization: required, tuning: required, objectives: required, scenarios: required}
+    nonclaims: [manufacturer_truth, source_exact_dynamics, Airbus_validation, source_exact_actuator_dynamics]

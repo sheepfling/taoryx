@@ -28,6 +28,7 @@ def main() -> int:
     commands = [
         [python, "tools/validate_daveml_family_readiness.py", "--readiness", "verification/daveml_family_readiness.yaml", "--output", "verification/daveml_family_readiness.json"],
         [python, "tools/validate_daveml_layer_dispositions.py", "--registry", "verification/daveml_family_layer_dispositions.yaml", "--output", "verification/daveml_family_layer_dispositions.json"],
+        [python, "tools/validate_daveml_operational_contracts.py"],
         [python, "tools/validate_daveml_atmosphere.py"],
         [python, "tools/validate_daveml_trim.py"],
         [python, "tools/validate_daveml_equilibrium_trim.py"],
@@ -62,11 +63,14 @@ def main() -> int:
         [python, "tools/validate_a320_pseudo6dof_daveml.py"],
         [python, "tools/validate_a320_pseudo6dof_runtime.py"],
         [python, "-m", "taoryx.runtime.cli", "daveml", "composite-smoke", "--family", "a320_openap_jsbsim_pseudo6dof", "--output", "verification/daveml_a320_pseudo6dof_integration.json"],
+        [python, "tools/validate_daveml_operating_points.py"],
     ]
     runs = tuple(run(command) for command in commands)
     artifacts = (
         "verification/daveml_family_readiness.json",
         "verification/daveml_family_layer_dispositions.json",
+        "verification/daveml_operational_contracts.json",
+        "verification/daveml_operating_point_catalog.json",
         "verification/daveml_atmosphere_binding.json",
         "verification/daveml_f16_trim_evidence.json",
         "verification/daveml_f16_equilibrium_trim_evidence.json",

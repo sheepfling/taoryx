@@ -312,3 +312,26 @@ covers F-16, HL-20, NESC two-stage, the A320 derived-versus-surrogate split,
 and a NESC-parent synthetic passive-child deployment witness. This tranche
 does not promote the remaining NESC source-only atmospheric/orbital/tumbling
 records into executable families.
+
+## Next DaveML Tranche — Family Operational Qualification
+
+The next long-running DaveML workstream is defined in
+[`daveml-family-operational-qualification-tranche.md`](daveml-family-operational-qualification-tranche.md).
+It closes the gap between a verified DAVE-ML round trip/showcase artifact and
+an operational Taoryx family-library product:
+
+1. typed family contracts and fail-closed provenance loading;
+2. certified operating-point catalogs for F-16, HL-20, NESC, and both A320
+   fidelity lanes;
+3. applicable multi-point linearization and tuning, with explicit
+   non-applicable dispositions for uncontrolled/open-loop sources;
+4. clean-process objective and scenario runtime contracts; and
+5. a deterministic cross-family release gate.
+
+The tranche preserves source, derived, surrogate, synthetic, and nonclaim
+boundaries. LaTeX, B747/X-15 parallel work, manufacturer-authoritative A320
+source acquisition, and source-only NESC records remain out of scope.
+
+The operational-contract and baseline operating-point artifacts are now part
+of the DaveML release gate. The next increment expands the certified operating
+point envelope rather than changing the source qualification classes.
