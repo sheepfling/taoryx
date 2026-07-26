@@ -26,10 +26,10 @@ fresh import and equivalence report
 | M1 lossless source layer | Complete for local F-16 inputs | Exact source hashes and package members are embedded by the builder |
 | M2 multi-document binder | F-16 and HL-20 initial slices complete | `tools/build_daveml_collection.py` |
 | M3 source-preserving exporter | Complete for embedded source bytes | `tools/roundtrip_daveml_collection.py` reports L0/L1 |
-| M3 canonical DAVE-ML exporter | In progress | Deterministic source-anchored semantic IR and exporter are implemented in `src/taoryx/trajectory/daveml_semantic.py` |
-| M4 round-trip verifier | Source-layer, canonical collection/package, and fresh-import structural gates complete; runtime qualification remains separate | Collection export now executes canonical IR/export, fresh structural/numeric/checkData comparison, while L4 runtime replay remains an explicit separate gate |
-| M5 four-model qualification | Pending | F-16 and HL-20 collection fixtures are now available; rocket and A320 later |
-| M6 offline CI integration | Pending | Requires stable M3–M5 reports |
+| M3 canonical DAVE-ML exporter | Complete for the promoted corpus | Deterministic source-anchored semantic IR and exporter are implemented in `src/taoryx/trajectory/daveml_semantic.py` |
+| M4 round-trip verifier | Complete for promoted source and runtime claims | Collection export performs fresh structural/numeric/checkData comparison; L4 replay is separately enforced by the release gate |
+| M5 applicable-family qualification | Complete for the currently qualified corpus | F-16, HL-20, and NESC are promoted with source-specific derived-layer dispositions; unqualified catalog records remain source-only |
+| M6 offline CI integration | Complete | `.github/workflows/daveml.yml` runs the fresh-process release gate, completion audit, and regression suite |
 
 ## Standard collection contracts
 
@@ -296,12 +296,11 @@ The initial round-trip tranche is complete when:
   an unqualified numerical coincidence.
 
 The current implementation has completed intake, lossless collection build,
-collection/runtime replay, and qualified-package evidence for the three
-packages. The canonical exporter and fresh-import structural/numeric-literal
-comparison are implemented. The next implementation gate is evaluator-backed
-   comparison of seeded values, boundaries, and declared check cases. The
-   official-fixture gate now preserves and compares `checkData` signatures;
-   numerical execution of those cases remains a separate runtime adapter.
+collection/runtime replay, qualified-package evidence for the three packages,
+canonical export, fresh-import structural/numeric comparison, and fresh-process
+checkData evaluation. The official two-dimensional ungridded fixture remains
+explicitly quarantined because its interpolation contract is unresolved; this
+is not converted into a pass by weakening source tolerances.
 
 The catalog-wide source/package cycle is executable:
 
