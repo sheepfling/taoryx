@@ -623,6 +623,13 @@ def daveml_tuning() -> None:
     ####
 
 
+def daveml_scenario() -> None:
+    """Generate reproducible DAVE-ML smoke scenario evidence."""
+
+    run(tool_script("validate_daveml_scenario.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -732,6 +739,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-atmosphere": daveml_atmosphere,
     "daveml-linearization": daveml_linearization,
     "daveml-tuning": daveml_tuning,
+    "daveml-scenario": daveml_scenario,
     "handoff": handoff,
     "check": check,
     "all": check,

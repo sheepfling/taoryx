@@ -551,6 +551,11 @@ items are complete and reproducible:
   `verification/daveml_f16_tuning_evidence.json`. The reduced five-state screen
   is controllable and Hurwitz with bounded surface commands; longitudinal speed
   is explicitly excluded because the source-channel model has rank five.
+- `tools/validate_daveml_scenario.py` now drives the existing unit-aware
+  objective scorer with a hashed `ScenarioContract`, producing
+  `verification/daveml_f16_scenario_evidence.json`. Stability, bounded command,
+  and controller-event objectives pass in a clean-process smoke run; this is
+  not a flight or mission qualification.
 - Family manifests now repeat the trim, linearization, tuning, objective, and
   scenario evidence dispositions, and readiness validation fails if those
   declarations drift.
