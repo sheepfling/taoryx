@@ -655,7 +655,8 @@ The following are intentionally not marked complete:
   reinterpreted, and source tolerances are not weakened. The DAVE-ML reference
   documents the input-coordinate convention but leaves the specific ungridded
   interpolation algorithm to the implementer, so the fixture's expected values
-  do not provide enough authority to select a legacy triangulation policy.
+  do not provide enough authority to select a legacy triangulation policy; see
+  the [DAVE-ML interpolation reference](https://daveml.org/DTDs/prod/Ref/interpolation.html).
 - Typed vector checkData inputs and outputs are now evaluated through a
   separate vector-result API with width and tolerance diagnostics. Vector
   table-function semantics remain deferred until an authoritative source
