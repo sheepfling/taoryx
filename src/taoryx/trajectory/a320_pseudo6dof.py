@@ -15,6 +15,7 @@ from zipfile import ZipFile
 from .a320_openap import CORPUS_RELATIVE_PATH, CORPUS_SHA256, A320OpenAPModel, A320OpenAPOperatingPoint, A320OpenAPResult
 
 JSBSIM_PREFIX = "taoryx-aerospace-data-corpus-v1.1/source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/"
+RATE_DAMPING_PER_S = 10.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,6 +31,7 @@ class A320Pseudo6DOFOperatingPoint:
     aileron_rad: float = 0.0
     elevator_rad: float = 0.0
     rudder_rad: float = 0.0
+    bank_angle_rad: float = 0.0
 
     def __post_init__(self) -> None:
         values = (
@@ -41,6 +43,7 @@ class A320Pseudo6DOFOperatingPoint:
             self.aileron_rad,
             self.elevator_rad,
             self.rudder_rad,
+            self.bank_angle_rad,
         )
         if not all(math.isfinite(value) for value in values):
             raise ValueError("A320 pseudo-6DOF channels must be finite")
@@ -80,6 +83,7 @@ class A320Pseudo6DOFResult:
             "yaw_moment_nm": self.yaw_moment_nm,
             "package_sha256": self.package_sha256,
             "qualification_class": self.qualification_class,
+            "rate_damping_per_s": RATE_DAMPING_PER_S,
             "authority_map": {
                 "aerodynamics.drag": "openap-2.6.0",
                 "aerodynamics.normal_force_target": "openap-2.6.0",
@@ -90,8 +94,12 @@ class A320Pseudo6DOFResult:
                 "propulsion.thrust": "openap-2.6.0",
                 "propulsion.fuel_flow": "openap-2.6.0",
                 "mass.scalar_schedule": "openap-2.6.0",
-            "mass.cg_and_inertia": "jsbsim-rescaled-estimate",
+                "mass.cg_and_inertia": "jsbsim-rescaled-estimate",
+            },
             "inertia_policy": "linear_mass_rescale_from_jsbsim_empty_mass",
+            "rate_damping_policy": {
+                "type": "diagonal_body_rate_feedback",
+                "coefficient_per_s": RATE_DAMPING_PER_S,
             },
             "disabled_contributions": [
                 "jsbsim.aerodynamic_drag",
@@ -154,6 +162,10 @@ class A320Pseudo6DOFModel:
             "openap_package_sha256": self.package_sha256,
             "corpus_sha256": CORPUS_SHA256,
             "inertia_policy": "linear_mass_rescale_from_jsbsim_empty_mass",
+            "rate_damping_policy": {
+                "type": "diagonal_body_rate_feedback",
+                "coefficient_per_s": RATE_DAMPING_PER_S,
+            },
             "authorities": {
                 "aerodynamics.drag": "openap-2.6.0",
                 "aerodynamics.normal_force_target": "openap-2.6.0",
@@ -224,6 +236,154 @@ class A320Pseudo6DOFModel:
             "pitch_rate_rad_s": result.pitch_moment_nm / inertia[1],
             "yaw_rate_rad_s": result.yaw_moment_nm / inertia[2],
         }
+        ####
+
+    def six_dof_derivatives(self, state: Mapping[str, float], controls: Mapping[str, float], *, thrust_mode: str = "cruise") -> dict[str, float]:
+        """Return the named reduced-order pseudo-6DOF state derivatives.
+
+        OpenAP supplies the translational channels. The alpha/beta closures
+        are Taoryx policy terms, while the body-rate derivatives come from the
+        normalized JSBSim moment channels and the explicitly rescaled inertia.
+        """
+
+        point = A320Pseudo6DOFOperatingPoint(
+            A320OpenAPOperatingPoint(
+                altitude_m=float(state["altitude_m"]),
+                mach=float(state["mach"]),
+                mass_kg=float(state["mass_kg"]),
+                thrust_mode=thrust_mode,  # type: ignore[arg-type]
+                throttle_ratio=float(controls["throttle_ratio"]),
+                vertical_speed_mps=float(controls.get("vertical_speed_mps", 0.0)),
+            ),
+            alpha_rad=float(state["alpha_rad"]),
+            beta_rad=float(state["beta_rad"]),
+            roll_rate_rad_s=float(state["roll_rate_rad_s"]),
+            pitch_rate_rad_s=float(state["pitch_rate_rad_s"]),
+            yaw_rate_rad_s=float(state["yaw_rate_rad_s"]),
+            aileron_rad=float(controls["aileron_rad"]),
+            elevator_rad=float(controls["elevator_rad"]),
+            rudder_rad=float(controls["rudder_rad"]),
+            bank_angle_rad=float(controls.get("bank_angle_rad", 0.0)),
+        )
+        performance = self.openap.point_mass_derivatives(
+            {name: float(state[name]) for name in ("altitude_m", "mach", "mass_kg")},
+            {
+                "throttle_ratio": float(controls["throttle_ratio"]),
+                "flight_path_angle_rad": float(controls["flight_path_angle_rad"]),
+            },
+            thrust_mode=thrust_mode,
+        )
+        rotational = self.rotational_derivatives(point)
+        beta_rate = point.yaw_rate_rad_s - 0.4 * point.beta_rad + 0.1 * point.rudder_rad + 0.02 * point.bank_angle_rad
+        alpha_rate = point.pitch_rate_rad_s - 0.4 * point.alpha_rad + 0.05 * point.elevator_rad
+        return {
+            **performance,
+            "alpha_rad": alpha_rate,
+            "beta_rad": beta_rate,
+            "roll_rate_rad_s": rotational["roll_rate_rad_s"] - RATE_DAMPING_PER_S * point.roll_rate_rad_s,
+            "pitch_rate_rad_s": rotational["pitch_rate_rad_s"] - RATE_DAMPING_PER_S * point.pitch_rate_rad_s,
+            "yaw_rate_rad_s": rotational["yaw_rate_rad_s"] - RATE_DAMPING_PER_S * point.yaw_rate_rad_s,
+        }
+        ####
+
+    def trim_pseudo6dof(self, point: A320OpenAPOperatingPoint):
+        """Solve the bounded reduced-order pseudo-6DOF equilibrium trim."""
+
+        from taoryx.trim import TrimSpec, solve_trim
+
+        baseline = self.openap.evaluate(point)
+        spec = TrimSpec(
+            state_names=("alpha_rad",),
+            control_names=("throttle_ratio", "flight_path_angle_rad", "aileron_rad", "elevator_rad", "rudder_rad"),
+            residual_names=("altitude_m", "mach", "alpha_rad", "beta_rad", "roll_rate_rad_s", "pitch_rate_rad_s", "yaw_rate_rad_s"),
+            state_initial={"alpha_rad": 0.0},
+            control_initial={
+                "throttle_ratio": baseline.required_throttle_ratio,
+                "flight_path_angle_rad": 0.0,
+                "aileron_rad": 0.0,
+                "elevator_rad": 0.0,
+                "rudder_rad": 0.0,
+            },
+            state_lower={"alpha_rad": -0.2},
+            state_upper={"alpha_rad": 0.2},
+            control_lower={
+                "throttle_ratio": 0.0,
+                "flight_path_angle_rad": -0.2,
+                "aileron_rad": -0.2,
+                "elevator_rad": -0.2,
+                "rudder_rad": -0.2,
+            },
+            control_upper={
+                "throttle_ratio": 1.0,
+                "flight_path_angle_rad": 0.2,
+                "aileron_rad": 0.2,
+                "elevator_rad": 0.2,
+                "rudder_rad": 0.2,
+            },
+            residual_scales={
+                "altitude_m": 1.0,
+                "mach": 0.01,
+                "alpha_rad": 0.1,
+                "beta_rad": 0.1,
+                "roll_rate_rad_s": 0.1,
+                "pitch_rate_rad_s": 0.1,
+                "yaw_rate_rad_s": 0.1,
+            },
+        )
+
+        def residuals(state: Mapping[str, float], controls: Mapping[str, float]) -> Mapping[str, float]:
+            derivatives = self.six_dof_derivatives(
+                {
+                    "altitude_m": point.altitude_m,
+                    "mach": point.mach,
+                    "mass_kg": point.mass_kg,
+                    "range_m": 0.0,
+                    "alpha_rad": float(state["alpha_rad"]),
+                    "beta_rad": 0.0,
+                    "roll_rate_rad_s": 0.0,
+                    "pitch_rate_rad_s": 0.0,
+                    "yaw_rate_rad_s": 0.0,
+                },
+                controls,
+                thrust_mode=point.thrust_mode,
+            )
+            return {
+                "altitude_m": derivatives["altitude_m"],
+                "mach": derivatives["mach"],
+                "alpha_rad": derivatives["alpha_rad"],
+                "beta_rad": derivatives["beta_rad"],
+                "roll_rate_rad_s": derivatives["roll_rate_rad_s"],
+                "pitch_rate_rad_s": derivatives["pitch_rate_rad_s"],
+                "yaw_rate_rad_s": derivatives["yaw_rate_rad_s"],
+            }
+
+        return solve_trim(spec, residuals, max_nfev=1000, residual_tolerance=1.0e-9, acceptance_tolerance=1.0e-6)
+        ####
+
+    def simulate_reduced_case(
+        self,
+        state: Mapping[str, float],
+        controls: Mapping[str, float],
+        *,
+        duration_s: float,
+        step_s: float = 0.05,
+        thrust_mode: str = "cruise",
+    ) -> tuple[dict[str, float], ...]:
+        """Integrate the named reduced-order state with deterministic Euler steps."""
+
+        if duration_s <= 0.0 or step_s <= 0.0 or not all(math.isfinite(value) for value in (duration_s, step_s)):
+            raise ValueError("simulation duration and step must be finite and positive")
+        current = {name: float(value) for name, value in state.items()}
+        history = [dict(current)]
+        steps = int(math.ceil(duration_s / step_s))
+        for _ in range(steps):
+            derivatives = self.six_dof_derivatives(current, controls, thrust_mode=thrust_mode)
+            actual_step = min(step_s, duration_s - len(history[1:]) * step_s)
+            if actual_step <= 0.0:
+                break
+            current = {name: current[name] + actual_step * derivatives[name] for name in current}
+            history.append(dict(current))
+        return tuple(history)
         ####
 
     def inertia_for_mass(self, mass_kg: float) -> tuple[float, float, float]:

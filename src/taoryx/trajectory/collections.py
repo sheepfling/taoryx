@@ -111,6 +111,7 @@ class CollectionManifest(BaseModel):
     stateful_components: tuple[StatefulComponentContract, ...]
     runtime_artifact: str = Field(min_length=1)
     validation_artifact: str = Field(min_length=1)
+    runtime_qualification_artifact: str | None = None
     source_payload_external: bool = True
     roundtrip_status: Literal["not_started", "source_preserving_pending", "verified"] = "not_started"
 
