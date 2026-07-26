@@ -113,7 +113,7 @@ class DAVEMLGraph:
         inputs: Mapping[str, Sequence[float]],
         outputs: Sequence[str],
     ) -> dict[str, tuple[float, ...]]:
-        """Evaluate vector constants and explicit vector inputs fail-closed."""
+        """Evaluate vector constants, inputs, and bounded vector calculations."""
 
         mapped_inputs: dict[str, tuple[float, ...]] = {}
         for identifier, values in inputs.items():
@@ -122,18 +122,35 @@ class DAVEMLGraph:
                 raise ValueError(f"DAVE-ML vector input {identifier!r} must be finite and non-empty")
             mapped_inputs[self.variable_names.get(identifier, identifier)] = vector
         result: dict[str, tuple[float, ...]] = {}
+        visiting: set[str] = set()
+
+        @lru_cache(maxsize=None)
+        def resolve(identifier: str) -> tuple[float, ...]:
+            canonical_id = self.variable_names.get(identifier, identifier)
+            if canonical_id in mapped_inputs:
+                return mapped_inputs[canonical_id]
+            if canonical_id in visiting:
+                raise ValueError(f"cyclic vector dependency at {canonical_id!r}")
+            visiting.add(canonical_id)
+            try:
+                variable = self.variables.get(canonical_id)
+                calculation = _first_child(variable, "calculation") if variable is not None else None
+                if calculation is not None:
+                    math_node = _first_child(calculation, "math")
+                    expression = next(iter(list(math_node)), None) if math_node is not None else None
+                    if expression is not None:
+                        return _evaluate_vector_math(expression, resolve)
+                initial = variable.attrib.get("initialValue") if variable is not None else None
+                values = _numbers(initial) if initial is not None else []
+                if len(values) >= 1 and canonical_id not in self.functions:
+                    return tuple(values)
+                raise ValueError(f"vector variable {canonical_id!r} has no supported vector source")
+            finally:
+                visiting.remove(canonical_id)
+
         for output in outputs:
             identifier = self.variable_names.get(output, output)
-            if identifier in mapped_inputs:
-                result[output] = mapped_inputs[identifier]
-                continue
-            variable = self.variables.get(identifier)
-            initial = variable.attrib.get("initialValue") if variable is not None else None
-            values = _numbers(initial) if initial is not None else []
-            if len(values) > 1 and identifier not in self.functions:
-                result[output] = tuple(values)
-                continue
-            raise ValueError(f"DAVE-ML vector output {identifier!r} has no supported vector source")
+            result[output] = resolve(identifier)
         return result
         ####
     ####
@@ -354,6 +371,63 @@ def _evaluate_function(function: dict[str, object], resolve: Callable[[str], flo
     if len(values) != expected_size:
         raise ValueError("gridded table data size does not match breakpoints")
     return _multilinear(query, axes, values)
+    ####
+
+
+def _evaluate_vector_math(
+    element: ET.Element,
+    resolve: Callable[[str], tuple[float, ...]],
+) -> tuple[float, ...]:
+    """Evaluate the bounded elementwise vector MathML subset."""
+
+    tag = _local(element.tag)
+    if tag == "ci":
+        identifier = " ".join(element.itertext()).strip()
+        if not identifier:
+            raise ValueError("MathML vector ci has no variable identifier")
+        return resolve(identifier)
+    if tag == "cn":
+        values = _numbers(" ".join(element.itertext()))
+        if len(values) != 1:
+            raise ValueError("MathML vector cn must be scalar")
+        return (values[0],)
+    if tag != "apply":
+        raise ValueError(f"unsupported vector MathML element {tag!r}")
+    children = list(element)
+    if not children:
+        raise ValueError("MathML vector apply has no operator")
+    operator = _local(children[0].tag)
+    operands = children[1:]
+    if operator not in {"plus", "minus", "times", "divide"} or not operands:
+        raise ValueError(f"unsupported vector MathML operator {operator!r}")
+    values = [_evaluate_vector_math(child, resolve) for child in operands]
+    vector_operands = [value for value in values if len(value) > 1]
+    if not vector_operands:
+        scalar_values = [value[0] for value in values]
+        if operator == "plus":
+            return (sum(scalar_values),)
+        if operator == "minus":
+            return ((-scalar_values[0],) if len(scalar_values) == 1 else (scalar_values[0] - scalar_values[1],))
+        if operator == "times":
+            return (math.prod(scalar_values),)
+        if len(scalar_values) != 2:
+            raise ValueError("vector divide requires two operands")
+        return (scalar_values[0] / scalar_values[1],)
+    width = len(vector_operands[0])
+    if any(len(value) not in {1, width} for value in values):
+        raise ValueError("vector MathML operands have incompatible widths")
+    expanded = [value if len(value) == width else value * width for value in values]
+    if operator == "plus":
+        return tuple(sum(value[index] for value in expanded) for index in range(width))
+    if operator == "minus":
+        if len(expanded) == 1:
+            return tuple(-value for value in expanded[0])
+        return tuple(expanded[0][index] - expanded[1][index] for index in range(width))
+    if operator == "times":
+        return tuple(math.prod(value[index] for value in expanded) for index in range(width))
+    if len(expanded) != 2:
+        raise ValueError("vector divide requires two operands")
+    return tuple(expanded[0][index] / expanded[1][index] for index in range(width))
     ####
 
 

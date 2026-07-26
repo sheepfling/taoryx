@@ -98,6 +98,27 @@ def test_typed_graph_evaluates_vector_constant_and_input() -> None:
         graph.evaluate_vectors({}, ("w",))
 
 
+def test_typed_graph_evaluates_bounded_vector_calculations() -> None:
+    payload = b"""
+    <DAVEfunc>
+      <variableDef varID="a" initialValue="1 2 3"/>
+      <variableDef varID="b" initialValue="4 5 6"/>
+      <variableDef varID="scale" initialValue="2"/>
+      <variableDef varID="sum">
+        <calculation><math><apply><plus/><ci>a</ci><ci>b</ci></apply></math></calculation>
+      </variableDef>
+      <variableDef varID="scaled">
+        <calculation><math><apply><times/><ci>sum</ci><ci>scale</ci></apply></math></calculation>
+      </variableDef>
+    </DAVEfunc>
+    """
+    graph = load_daveml_graph(payload, document_id="vector-math")
+    assert graph.evaluate_vectors({}, ("sum", "scaled")) == {
+        "sum": (5.0, 7.0, 9.0),
+        "scaled": (10.0, 14.0, 18.0),
+    }
+
+
 def test_regular_gridded_table_checkdata_is_evaluated() -> None:
     payload = b"""
     <DAVEfunc>
