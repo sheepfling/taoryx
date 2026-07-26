@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
-    "verification/daveml_catalog_roundtrip.json": "e63f5fc57ced60fec6eb23dc8124d51f4760c20d735c2db6afec041cb2d74530",
+    "verification/daveml_catalog_roundtrip.json": "fc30ae6f48bd3bee43f37b8a3fddb86e2d15f350681790f17cdc78c0ed4da938",
     "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",
     "verification/daveml_f16_equilibrium_trim_evidence.json": "400da9183034b3f5fd83c4ebcc63ceede5ae7de1729483e8352d99fca803dbf8",
     "verification/daveml_f16_linearization_evidence.json": "66cca0f378b4622cceec09d4441b06b651f62588f515079ea330ed72b7408512",

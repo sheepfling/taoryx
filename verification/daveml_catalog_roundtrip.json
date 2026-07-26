@@ -2594,8 +2594,8 @@
       "numeric_diff_count": 0,
       "opaque_paths": [],
       "reference_summary": {
-        "resolved": 44,
-        "unresolved": 80
+        "resolved": 70,
+        "unresolved": 54
       },
       "source": "normalized/daveml-example-f16-aero/source.dml",
       "source_sha256": "6da3fad6192ebf2bd16170c379890df5db03e67a00e9bbdd1b58646803491e73",
@@ -5262,8 +5262,8 @@
       "numeric_diff_count": 0,
       "opaque_paths": [],
       "reference_summary": {
-        "resolved": 794,
-        "unresolved": 219
+        "resolved": 915,
+        "unresolved": 98
       },
       "source": "normalized/daveml-example-hl20-aero/source.dml",
       "source_sha256": "8639b55c2525fdb6c0177b8e359de5d6eb984a3b4b35b4d1e5898d54ddc1f44e",
@@ -5339,8 +5339,8 @@
       "numeric_diff_count": 0,
       "opaque_paths": [],
       "reference_summary": {
-        "resolved": 3,
-        "unresolved": 5
+        "resolved": 5,
+        "unresolved": 3
       },
       "source": "normalized/daveml-example-twod-table/source.dml",
       "source_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
@@ -7119,8 +7119,8 @@
       "numeric_diff_count": 0,
       "opaque_paths": [],
       "reference_summary": {
-        "resolved": 44,
-        "unresolved": 80
+        "resolved": 70,
+        "unresolved": 54
       },
       "source": "normalized/nesc-all-models-f16-package-f16-s119-source-f16-aero/source.dml",
       "source_sha256": "82796577b989b5f3becb7d13430ff6c619b3ecd2e642a6427b743658fb177e51",
@@ -7911,8 +7911,8 @@
       "numeric_diff_count": 0,
       "opaque_paths": [],
       "reference_summary": {
-        "resolved": 10,
-        "unresolved": 10
+        "resolved": 15,
+        "unresolved": 5
       },
       "source": "normalized/nesc-all-models-two-stage-package-twostage-aero/source.dml",
       "source_sha256": "49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27",

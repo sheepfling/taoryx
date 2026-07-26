@@ -182,7 +182,7 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
         tag = str(node.get("tag", ""))
         attributes = node.get("attributes", {})
         if not tag.endswith("Ref") and isinstance(attributes, dict):
-            for attribute in ("varID", "gtID", "utID", "name"):
+            for attribute in ("varID", "gtID", "utID", "bpID", "name"):
                 value = attributes.get(attribute)
                 if value:
                     identifiers.setdefault((attribute, str(value)), []).append(str(node.get("source_path", "")))
@@ -228,7 +228,7 @@ def _semantic_projection(root: dict[str, object]) -> dict[str, object]:
             attributes = child.get("attributes", {})
             if not tag.endswith("Ref") or not isinstance(attributes, dict):
                 continue
-            key_attribute = next((name for name in ("varID", "gtID", "utID", "name") if attributes.get(name)), None)
+            key_attribute = next((name for name in ("varID", "gtID", "utID", "bpID", "name") if attributes.get(name)), None)
             if key_attribute is None:
                 resolved.append({"source_path": child.get("source_path"), "tag": tag, "status": "unresolved"})
                 continue
