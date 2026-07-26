@@ -1,0 +1,80 @@
+[
+  {
+    "attributes": {
+      "name": "T_dgC_function"
+    },
+    "dependent_variable_id": "t_amb_C",
+    "description": "Table lookup for ambient temperature; returns ambient temperature in degrees C (in variable t_amb_C) based on input value of Z_m (geometric altitude, meters) using the breakpoint values in Z_m_pts and the table defined in T_dgC_table.",
+    "function_id": "function-0001",
+    "independent_variables": [
+      {
+        "attributes": {
+          "varID": "Z_m"
+        },
+        "extrapolation": null,
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": null,
+        "minimum_value": null,
+        "variable_id": "Z_m"
+      }
+    ],
+    "issues": [],
+    "name": "T_dgC_function",
+    "provenance": null,
+    "table_id": "T_dgC_table",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "P_P0_function"
+    },
+    "dependent_variable_id": "p_p0",
+    "description": "Table lookup for pressure ratio; returns ambient pressure normalized with SL pressure (in variable p_p0) based on input value of Z_m (geometric altitude, meters) using the breakpoint values in Z_m_pts and the table defined in P_P0_table.",
+    "function_id": "function-0002",
+    "independent_variables": [
+      {
+        "attributes": {
+          "varID": "Z_m"
+        },
+        "extrapolation": null,
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": null,
+        "minimum_value": null,
+        "variable_id": "Z_m"
+      }
+    ],
+    "issues": [],
+    "name": "P_P0_function",
+    "provenance": null,
+    "table_id": "P_P0_table",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "sigma_function"
+    },
+    "dependent_variable_id": "sigma",
+    "description": "Table lookup for density ratio; returns density normalized with SL density (in variable sigma) based on input value of Z_m (geometric altitude, meters) using the breakpoint values in Z_m_pts and the table defined in sigma_table.",
+    "function_id": "function-0003",
+    "independent_variables": [
+      {
+        "attributes": {
+          "varID": "Z_m"
+        },
+        "extrapolation": null,
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": null,
+        "minimum_value": null,
+        "variable_id": "Z_m"
+      }
+    ],
+    "issues": [],
+    "name": "sigma_function",
+    "provenance": null,
+    "table_id": "sigma_table",
+    "table_kind": "gridded"
+  }
+]

@@ -1,0 +1,2058 @@
+[
+  {
+    "attributes": {
+      "name": "Basic CX"
+    },
+    "dependent_variable_id": "cxt",
+    "description": "Basic coefficient of X-force table as a function of angle of attack and elevator",
+    "function_id": "function-0001",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "24.0",
+          "min": "-24.0",
+          "varID": "el"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 24.0,
+        "minimum_value": -24.0,
+        "variable_id": "el"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Basic CX",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-03-28",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-03-28"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CX_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "Basic CZ"
+    },
+    "dependent_variable_id": "czt",
+    "description": "Basic coefficient of Z-force table as a function of angle of attack",
+    "function_id": "function-0002",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Basic CZ",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-03-28",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-03-28"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CZ0_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "Basic Cm"
+    },
+    "dependent_variable_id": "cmt",
+    "description": "Basic coefficient of pitching-moment as a function of angle of attack and elevator",
+    "function_id": "function-0003",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "24.0",
+          "min": "-24.0",
+          "varID": "el"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 24.0,
+        "minimum_value": -24.0,
+        "variable_id": "el"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Basic Cm",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-03-28",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-03-28"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Cm0_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "Basic Cl"
+    },
+    "dependent_variable_id": "absCl0",
+    "description": "Basic coefficient of rolling moment as a function of angle of attack and sideslip angle",
+    "function_id": "function-0004",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "30.0",
+          "min": "0.0",
+          "varID": "absbeta"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 30.0,
+        "minimum_value": 0.0,
+        "variable_id": "absbeta"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Basic Cl",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-03-28",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-03-28"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Cl0_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "Basic Cn"
+    },
+    "dependent_variable_id": "absCn0",
+    "description": "Basic coefficient of yawing moment as a function of angle of attack and sideslip angle",
+    "function_id": "function-0005",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "30.0",
+          "min": "0.0",
+          "varID": "absbeta"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 30.0,
+        "minimum_value": 0.0,
+        "variable_id": "absbeta"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Basic Cn",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-03-28",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-03-28"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Cn0_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "CXq"
+    },
+    "dependent_variable_id": "cxq",
+    "description": "Damping derivative: axial force due to pitch rate as a function of angle-of-attack",
+    "function_id": "function-0006",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "CXq",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CXq_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "CYr"
+    },
+    "dependent_variable_id": "cyr",
+    "description": "Damping derivative: lateral force due to yaw rate as a function of angle-of-attack",
+    "function_id": "function-0007",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "CYr",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CYr_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "CYp"
+    },
+    "dependent_variable_id": "cyp",
+    "description": "Damping derivative: lateral force due to roll rate as a function of angle-of-attack",
+    "function_id": "function-0008",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "CYp",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CYp_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "CZq"
+    },
+    "dependent_variable_id": "czq",
+    "description": "Damping derivative: normal force due to pitch rate as a function of angle-of-attack",
+    "function_id": "function-0009",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "CZq",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CZq_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "Clr"
+    },
+    "dependent_variable_id": "clr",
+    "description": "Damping derivative: rolling moment due to yaw rate as a function of angle-of-attack",
+    "function_id": "function-0010",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Clr",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Clr_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "Clp"
+    },
+    "dependent_variable_id": "clp",
+    "description": "Damping derivative: rolling moment due to roll rate as a function of angle-of-attack",
+    "function_id": "function-0011",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Clp",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Clp_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "Cmq"
+    },
+    "dependent_variable_id": "cmq",
+    "description": "Damping derivative: pitching moment due to pitch rate as a function of angle-of-attack",
+    "function_id": "function-0012",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Cmq",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Cmq_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "Cnr"
+    },
+    "dependent_variable_id": "cnr",
+    "description": "Damping derivative: yawing moment due to yaw rate as a function of angle-of-attack",
+    "function_id": "function-0013",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Cnr",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Cnr_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "Cnp"
+    },
+    "dependent_variable_id": "cnp",
+    "description": "Damping derivative: yawing moment due to roll rate as a function of angle-of-attack",
+    "function_id": "function-0014",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "Cnp",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Cnp_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "dlda"
+    },
+    "dependent_variable_id": "dclda",
+    "description": "Rolling moment increment due to aileron deflection as a function of angles of attack and sideslip",
+    "function_id": "function-0015",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "30.0",
+          "min": "-30.0",
+          "varID": "beta"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 30.0,
+        "minimum_value": -30.0,
+        "variable_id": "beta"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "dlda",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "dlda_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "dldr"
+    },
+    "dependent_variable_id": "dcldr",
+    "description": "Rolling moment increment due to rudder deflection as a function of angles of attack and sideslip",
+    "function_id": "function-0016",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "30.0",
+          "min": "-30.0",
+          "varID": "beta"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 30.0,
+        "minimum_value": -30.0,
+        "variable_id": "beta"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "dldr",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "dldr_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "dnda"
+    },
+    "dependent_variable_id": "dcnda",
+    "description": "Yawing moment increment due to aileron deflection as a function of angles of attack and sideslip",
+    "function_id": "function-0017",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "30.0",
+          "min": "-30.0",
+          "varID": "beta"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 30.0,
+        "minimum_value": -30.0,
+        "variable_id": "beta"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "dnda",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "dnda_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "dndr"
+    },
+    "dependent_variable_id": "dcndr",
+    "description": "Yawing moment increment due to rudder deflection as a function of angles of attack and sideslip",
+    "function_id": "function-0018",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "30.0",
+          "min": "-30.0",
+          "varID": "beta"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 30.0,
+        "minimum_value": -30.0,
+        "variable_id": "beta"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "45.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 45.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "dndr",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2002-04-04",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02",
+        "REF03"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2002-04-04"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF03"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "dndr_table_def",
+    "table_kind": "gridded"
+  }
+]

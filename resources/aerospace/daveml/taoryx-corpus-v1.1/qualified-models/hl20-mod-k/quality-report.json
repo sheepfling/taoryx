@@ -1,0 +1,98 @@
+{
+  "caveats": [
+    "The package is unpowered and uses fixed mass, CG, and inertia.",
+    "Surface deflections are direct inputs; actuator and control-law dynamics are absent.",
+    "The five-second glide hold is an internal consistency check, not an independent NASA trajectory comparison.",
+    "The mass and inertia binding is separately attributed and is not part of the aerodynamic DAVE-ML document."
+  ],
+  "compileall": {
+    "passed": true
+  },
+  "glide_hold": {
+    "down_distance_error_m": 4.831690603168681e-12,
+    "duration_s": 5.0,
+    "maximum_angular_rate_rad_s": 3.0959134338359706e-16,
+    "maximum_body_velocity_drift_mps": 0.0,
+    "maximum_speed_drift_mps": 0.0,
+    "north_distance_error_m": 1.2505552149377763e-12,
+    "passed": true,
+    "quaternion_endpoint_error": 0.0,
+    "sample_count": 501,
+    "step_s": 0.01
+  },
+  "model_id": "hl20-mod-k-unpowered-6dof",
+  "package": {
+    "byte_deterministic_rebuild": true,
+    "integrity_and_regeneration_passed": true,
+    "manifest_artifact_count": 16,
+    "path": "taoryx-hl20-mod-k-unpowered-v0.10.txair",
+    "regenerated_artifacts_match": true,
+    "sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+    "size_bytes": 361152,
+    "zip_member_count": 18
+  },
+  "package_version": "0.10.0",
+  "pyright": {
+    "errors": 0,
+    "passed": true,
+    "version": "1.1.411",
+    "warnings": 0
+  },
+  "pytest": {
+    "failed": 0,
+    "passed": 117,
+    "version": "9.0.2"
+  },
+  "ruff": {
+    "passed": true,
+    "version": "0.15.22"
+  },
+  "schema_version": "0.1.0",
+  "source": {
+    "breakpoints": 8,
+    "embedded_failures": 0,
+    "embedded_static_shots": 24,
+    "functions": 241,
+    "git_blob_sha": "71e01b91e3a299a5b272c69f9a8296039aca59eb",
+    "gridded_tables": 169,
+    "parser_issues": 0,
+    "revision": "Mod K, 2010-12-01",
+    "sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "table_values": 6247,
+    "variables": 361
+  },
+  "trim": {
+    "alpha_deg": 4.8535019926495275,
+    "altitude_m": 5000.0,
+    "converged": true,
+    "flight_path_angle_deg": -21.77355181672649,
+    "iterations": 4,
+    "mach": 0.6863645076378166,
+    "maximum_absolute_residual_si": 2.9103830456733704e-11,
+    "pitch_attitude_deg": -16.920049824076965,
+    "symmetric_lower_body_flap_deg": 10.053651806619676,
+    "true_airspeed_mps": 220.0
+  },
+  "wheel": {
+    "clean_install_passed": true,
+    "clean_install_smoke": {
+      "embedded_case_count": 24,
+      "installed_version": "0.10.0",
+      "package_artifacts": 16,
+      "package_crc_bad_member": null,
+      "package_integrity_loaded": true,
+      "package_members": 18,
+      "package_model_id": "hl20-mod-k-unpowered-6dof",
+      "package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+      "passed": true,
+      "reference_evaluation_disposition": "valid",
+      "source_acceptance_passed": true,
+      "trim_alpha_deg": 4.8535019926495275,
+      "trim_converged": true,
+      "trim_lower_body_flap_deg": 10.053651806619676
+    },
+    "path": "taoryx_xplane-0.10.0-py3-none-any.whl",
+    "sha256": "4c37146a75b2e2c822b2b15928efe1ddc5c718681072584caedd06c2c5b293f6",
+    "size_bytes": 218154
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "error": "Function 'function-0001' references missing table 'CLBAlfaFlap_Table'.",
+  "error_type": "DaveMlCompileError"
+}

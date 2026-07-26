@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DAVEfunc xmlns="http://daveml.org/2010/DAVEML">
+  <fileHeader name="Two-stage to orbit rocket propulsion model">
+    <author name="Bruce Jackson" org="NASA Langley Research Center"/>
+    <author name="Eric Queen" org="NASA Langley Research Center"/>
+    <creationDate date="2013-08-09"/>
+    <fileVersion>Taoryx normalized semantic reconstruction</fileVersion>
+    <description>Semantically normalized from pinned NASA/NESC scenario-17 source data.</description>
+  </fileHeader>
+  <variableDef name="stage1firing_flag" varID="stg1firing" units="nd"><isInput/></variableDef>
+  <variableDef name="stage2firing_flag" varID="stg2firing" units="nd"><isInput/></variableDef>
+  <variableDef name="stage1maxThrust" varID="stg1maxThrust" units="N" initialValue="17000000.0"/>
+  <variableDef name="stage2maxThrust" varID="stg2maxThrust" units="N" initialValue="5000000.0"/>
+  <variableDef name="stage1isp" varID="stg1isp" units="sec" initialValue="360.0"/>
+  <variableDef name="stage2isp" varID="stg2isp" units="sec" initialValue="390.0"/>
+  <variableDef name="isp" varID="isp" units="sec">
+    <calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><piecewise><piece><ci>stg1isp</ci><apply><gt/><ci>stg1firing</ci><cn>0</cn></apply></piece><piece><ci>stg2isp</ci><apply><gt/><ci>stg2firing</ci><cn>0</cn></apply></piece><otherwise><cn>0.001</cn></otherwise></piecewise></apply></math></calculation>
+  </variableDef>
+  <variableDef name="bodyThrustForce_X" varID="thrust" units="N">
+    <calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><piecewise><piece><ci>stg1maxThrust</ci><apply><gt/><ci>stg1firing</ci><cn>0</cn></apply></piece><piece><ci>stg2maxThrust</ci><apply><gt/><ci>stg2firing</ci><cn>0</cn></apply></piece><otherwise><cn>0</cn></otherwise></piecewise></apply></math></calculation><isOutput/>
+  </variableDef>
+  <variableDef name="massDot" varID="mdot" units="kg_s">
+    <calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><piecewise><piece><apply><divide/><ci>thrust</ci><apply><times/><ci>isp</ci><cn>9.8066</cn></apply></apply><apply><gt/><ci>thrust</ci><cn>0</cn></apply></piece><otherwise><cn>0</cn></otherwise></piecewise></apply></math></calculation><isOutput/>
+  </variableDef>
+  <variableDef name="bodyThrustForce_Y" varID="thrustY" units="N" initialValue="0"><isOutput/></variableDef>
+  <variableDef name="bodyThrustForce_Z" varID="thrustZ" units="N" initialValue="0"><isOutput/></variableDef>
+  <variableDef name="bodyThrustMoment_Roll" varID="thrustL" units="Nm" initialValue="0"><isOutput/></variableDef>
+  <variableDef name="bodyThrustMoment_Pitch" varID="thrustM" units="Nm" initialValue="0"><isOutput/></variableDef>
+  <variableDef name="bodyThrustMoment_Yaw" varID="thrustN" units="Nm" initialValue="0"><isOutput/></variableDef>
+
+
+</DAVEfunc>

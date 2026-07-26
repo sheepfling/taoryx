@@ -1,0 +1,17 @@
+status	url	path
+failed	https://nescacademy.nasa.gov/src/flightsim/Models/All_models.zip	raw/nesc/official/All_models.zip
+failed	https://nescacademy.nasa.gov/src/flightsim/Scenarios/Initial_Conditions.xlsx	raw/nesc/official/Initial_Conditions.xlsx
+failed	https://nescacademy.nasa.gov/src/flightsim/Datasets/Atmospheric_checkcases.zip	raw/nesc/official/Atmospheric_checkcases.zip
+failed	https://nescacademy.nasa.gov/src/flightsim/Datasets/Orbital_checkcases.zip	raw/nesc/official/Orbital_checkcases.zip
+failed-optional	https://nescacademy.nasa.gov/flightsim/2015	raw/nesc/official/NESC-2015-index.html
+ok-optional	https://www.daveml.org/examples/index.html	raw/daveml/examples/index.html
+ok	https://www.daveml.org/examples/simple_aero.dml	raw/daveml/examples/simple_aero.dml
+ok	https://www.daveml.org/examples/twoD_table.dml	raw/daveml/examples/twoD_table.dml
+ok	https://www.daveml.org/examples/twoD_ungridded.dml	raw/daveml/examples/twoD_ungridded.dml
+ok	https://www.daveml.org/examples/threeD_ungridded.dml	raw/daveml/examples/threeD_ungridded.dml
+ok	https://www.daveml.org/examples/atmos_76.dml	raw/daveml/examples/atmos_76.dml
+ok	https://www.daveml.org/examples/F16_aero.dml	raw/daveml/examples/F16_aero.dml
+ok	https://www.daveml.org/examples/HL20_aero.dml.gz	raw/daveml/examples/HL20_aero.dml.gz
+ok	https://www.daveml.org/DTDs/2p0p2/DAVEfunc.dtd	raw/daveml/schema/DAVEfunc-2.0.2.dtd
+ok-optional	https://www.daveml.org/DTDs/2p0p2/DAVE-ML_ref.pdf	raw/daveml/schema/DAVE-ML-2.0.2-reference.pdf
+ok	https://codeload.github.com/nasa/simupy-flight/zip/70754e6916afc206e8c0abb386d1a9c98bf8f561	/home/runner/work/_temp/simupy-flight.zip

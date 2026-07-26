@@ -1,7 +1,7 @@
 # DAVE-ML reference intake notebook
 
 **Scope:** F-16 S-119, HL-20 Mod K, and the NESC two-stage rocket qualified
-reference packages, with the broader INBOX catalog tracked separately.
+reference packages, with the broader canonical catalog tracked separately.
 
 **Claim boundary:** This notebook records source intake and integration work. A
 recorded source hash is not the same thing as an executable model in the
@@ -179,8 +179,8 @@ identity (L0/L1); it does not yet establish canonical regenerated DAVE-ML or
 runtime replay (L2–L4).
 
 The collection is deliberately a derived artifact. The repository retains the
-builder and the source/hash contracts, while the source payload remains in the
-external `INBOX` corpus until its distribution policy is settled.
+builder, source/hash contracts, and promoted canonical source payload under
+`resources/aerospace/daveml/`.
 
 Run the package/runtime replay with:
 
@@ -194,7 +194,7 @@ contract, and requires the package trim/glide hold evidence to pass. It does
 not claim that Taoryx now contains a general-purpose DAVE-ML compiler.
 
 The same command now passes all three qualified packages from
-`INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/`. The F-16 and HL-20
+`resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/`. The F-16 and HL-20
 use trim/glide-hold evidence; the NESC rocket uses benchmark, convergence,
 schedule, and source-equivalence acceptance evidence. The adapter records that
 evidence family explicitly rather than forcing the rocket through a trim

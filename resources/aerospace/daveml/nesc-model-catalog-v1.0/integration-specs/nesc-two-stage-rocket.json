@@ -1,0 +1,50 @@
+{
+  "acceptance_layers": [
+    "source_integrity",
+    "DAVE-ML parse and semantic validation",
+    "embedded static check cases where supplied",
+    "canonical SI/frame dimensional evaluation",
+    "host-dynamics scenario execution",
+    "trajectory-family comparison"
+  ],
+  "canonical_contract": {
+    "attitude": "scalar-first body-to-navigation quaternion",
+    "body_frame": "FRD",
+    "reference_points": "explicit MRC and CG with audited moment transfer",
+    "units": "SI"
+  },
+  "component_documents": {
+    "aerodynamics": [
+      "nesc-all-models-two-stage-package-twostage-aero"
+    ],
+    "mass_properties": [
+      "nesc-all-models-two-stage-package-twostage-inertia"
+    ],
+    "propulsion": [
+      "nesc-all-models-two-stage-package-twostage-prop"
+    ]
+  },
+  "display_name": "NASA/NESC Two-Stage Rocket",
+  "host_capabilities": [
+    "US1976",
+    "WGS84",
+    "J2",
+    "fuel integration",
+    "burnout/coast/staging events"
+  ],
+  "known_gaps": "Independent full trajectory-family qualification remains; existing perigee discrepancy stays visible",
+  "model_id": "nesc-two-stage-rocket",
+  "qualification_status": "qualified-baseline",
+  "qualified_package": "qualified/nesc-two-stage-rocket-v0.9.txair",
+  "scenario_ids": [
+    "Atmos_17"
+  ],
+  "schema_version": "1.0",
+  "source_authority": "NASA/NESC 2015 DAVE-ML",
+  "stateful_sidecar_required": true,
+  "target_fidelities": [
+    "3dof-variable-mass",
+    "3t+3k1-gravity-turn",
+    "6dof-variable-mass"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "gridded": [
+    {
+      "attributes": {
+        "gtID": "T_dgC_table"
+      },
+      "breakpoint_ids": [
+        "Z_m_pts"
+      ],
+      "declared_id": "T_dgC_table",
+      "description": "1976 atmosphere table I ambient temperatures in degrees C",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": null,
+      "provenance": null,
+      "shape": [
+        101
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "T_dgC_table",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "P_P0_table"
+      },
+      "breakpoint_ids": [
+        "Z_m_pts"
+      ],
+      "declared_id": "P_P0_table",
+      "description": "1976 atmosphere table I ambient pressure ratios (relative to sea level)",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": null,
+      "provenance": null,
+      "shape": [
+        101
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "P_P0_table",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "sigma_table"
+      },
+      "breakpoint_ids": [
+        "Z_m_pts"
+      ],
+      "declared_id": "sigma_table",
+      "description": "1976 atmosphere table I density ratios (relative to sea level)",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": null,
+      "provenance": null,
+      "shape": [
+        101
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "sigma_table",
+      "uncertainty": null,
+      "units": null
+    }
+  ],
+  "ungridded": []
+}

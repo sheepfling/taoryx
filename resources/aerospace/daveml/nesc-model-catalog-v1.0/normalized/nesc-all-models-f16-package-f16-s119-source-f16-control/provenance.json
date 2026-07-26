@@ -1,0 +1,438 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "bca7789dde61b741de69f697ce8799ee666214d0e1fa203973523774fc3a969b",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "bca7789dde61b741de69f697ce8799ee666214d0e1fa203973523774fc3a969b",
+  "header": {
+    "attributes": {
+      "name": "F-16 simple control system"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2012-08-09",
+    "description": "Control system for DAVE-ML example F-16 aircraft model. Includes LQR inner-loop and loop-closure outerloop autopilot to follow altitude, courseline, and airspeed commands. The gains are set for a nominal flight condition of 10,013 ft MSL at Mach 0.525 (565.7 ft/s true airspeed or 287.8 kt equivalent) which correspond with atmospheric scenarios 11, 13, 15 and 16 of reference 1. Inputs are pilot primary flight controls, autopilot settings, mode selection flags, and feedback of various flight condition parameters. Outputs are control surface deflection commands for the F-16 described in reference 2.",
+    "file_version": "Revision F, 2013-10-22",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2013-01-03",
+          "modID": "A"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-01-03",
+        "description": "The original version of this model, dated 2012-08-09, was a simple mixer that took pilot controls and converted them into control surface deflections directly. This version includes an LQR-designed longitudinal and lateral-directional stabilization system as well as logic to follow altitude, airspeed, and ground track angle. Lateral offset from course feedback can be provided to improve performance or zero can be provided for just a heading command feature.",
+        "modification_id": "A"
+      },
+      {
+        "attributes": {
+          "date": "2013-01-09",
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-01-09",
+        "description": "Provided values for trimmed stick and throttle.",
+        "modification_id": "B"
+      },
+      {
+        "attributes": {
+          "date": "2013-01-11",
+          "modID": "C"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-01-11",
+        "description": "Moved trim values to proper location in file (no effect on realizations, just easier for humans to interpret).",
+        "modification_id": "C"
+      },
+      {
+        "attributes": {
+          "date": "2013-06-06",
+          "modID": "D"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-06-06",
+        "description": "At the suggestion of Michael Madden, changed trimmedPilotControl_throttle and trimmedPilotControl_long variables into inputs. While their trimmed values are given for my Simulink sim, small difference in atmosphere and gravitation models may require slightly different values in other implementations.",
+        "modification_id": "D"
+      },
+      {
+        "attributes": {
+          "date": "2013-09-12",
+          "modID": "E"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-09-12",
+        "description": "After finding an error in the implementation of the subsonic aero database, new trim values for stick and throttle were generated and place here in the longStkTrim and throttleTrim constants. Also updated LQR gain matrices.",
+        "modification_id": "E"
+      },
+      {
+        "attributes": {
+          "date": "2013-10-22",
+          "modID": "F"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-10-22",
+        "description": "Incorporated OR function to ensure stability augmentation is on if autopilot function has been selected.",
+        "modification_id": "F"
+      }
+    ],
+    "name": "F-16 simple control system",
+    "raw": {
+      "attributes": {
+        "name": "F-16 simple control system"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2012-08-09"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Revision F, 2013-10-22"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Control system for DAVE-ML example F-16 aircraft model. Includes LQR inner-loop and loop-closure outerloop autopilot to follow altitude, courseline, and airspeed commands. The gains are set for a nominal flight condition of 10,013 ft MSL at Mach 0.525 (565.7 ft/s true airspeed or 287.8 kt equivalent) which correspond with atmospheric scenarios 11, 13, 15 and 16 of reference 1. Inputs are pilot primary flight controls, autopilot settings, mode selection flags, and feedback of various flight condition parameters. Outputs are control surface deflection commands for the F-16 described in reference 2."
+        },
+        {
+          "attributes": {
+            "author": "Jackson, E. Bruce; Shelton, Robert O.; et al.",
+            "date": "2013-08-00",
+            "refID": "REF01",
+            "title": "Development of Verification Data for Flight Simulations"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "A planned AIAA report describing the efforts to generate checkcase data for flight simulations of simple aerospacecraft for use in gaining confidence in other flight simulation tools. To be presented at the 2013 AIAA Modeling and Simulation Conference in Boston, MA, August 2013."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "accession": "NASA TM-2003-212145",
+            "author": "Garza, Fredrico R.; and Morelli, Eugene A.",
+            "date": "2003-01",
+            "href": "http://techreports.larc.nasa.gov/ltrs/PDF/2003/tm/NASA-2003-tm212145.pdf",
+            "refID": "REF02",
+            "title": "A Collection of Nonlinear Aircraft Simulations in MATLAB"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-01-03",
+            "modID": "A"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "The original version of this model, dated 2012-08-09, was a simple mixer that took pilot controls and converted them into control surface deflections directly. This version includes an LQR-designed longitudinal and lateral-directional stabilization system as well as logic to follow altitude, airspeed, and ground track angle. Lateral offset from course feedback can be provided to improve performance or zero can be provided for just a heading command feature."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-01-09",
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Provided values for trimmed stick and throttle."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-01-11",
+            "modID": "C"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Moved trim values to proper location in file (no effect on realizations, just easier for humans to interpret)."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-06-06",
+            "modID": "D"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "At the suggestion of Michael Madden, changed trimmedPilotControl_throttle and trimmedPilotControl_long variables into inputs. While their trimmed values are given for my Simulink sim, small difference in atmosphere and gravitation models may require slightly different values in other implementations."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-09-12",
+            "modID": "E"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "After finding an error in the implementation of the subsonic aero database, new trim values for stick and throttle were generated and place here in the longStkTrim and throttleTrim constants. Also updated LQR gain matrices."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-10-22",
+            "modID": "F"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Incorporated OR function to ensure stability augmentation is on if autopilot function has been selected."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "author": "Jackson, E. Bruce; Shelton, Robert O.; et al.",
+          "date": "2013-08-00",
+          "refID": "REF01",
+          "title": "Development of Verification Data for Flight Simulations"
+        },
+        "description": "A planned AIAA report describing the efforts to generate checkcase data for flight simulations of simple aerospacecraft for use in gaining confidence in other flight simulation tools. To be presented at the 2013 AIAA Modeling and Simulation Conference in Boston, MA, August 2013.",
+        "ref_id": "REF01"
+      },
+      {
+        "attributes": {
+          "accession": "NASA TM-2003-212145",
+          "author": "Garza, Fredrico R.; and Morelli, Eugene A.",
+          "date": "2003-01",
+          "href": "http://techreports.larc.nasa.gov/ltrs/PDF/2003/tm/NASA-2003-tm212145.pdf",
+          "refID": "REF02",
+          "title": "A Collection of Nonlinear Aircraft Simulations in MATLAB"
+        },
+        "description": null,
+        "ref_id": "REF02"
+      }
+    ]
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/F16_package/F16_S119_source/F16_control.dml"
+}

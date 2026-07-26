@@ -1,0 +1,77 @@
+{
+  "aircraft_verification": {
+    "component_case_counts": {
+      "aerodynamics": 17,
+      "mass_properties": 3,
+      "propulsion": 9
+    },
+    "passed": true,
+    "trim": {
+      "alpha_rad": 0.046369206000629846,
+      "converged": true,
+      "dynamic_pressure_pa": 13441.450740674618,
+      "elevator_control_ratio": 0.12970163035515778,
+      "elevator_trailing_edge_down_rad": -0.05659301237255313,
+      "iterations": 3,
+      "mach": 0.5250787165224478,
+      "mass_kg": 9298.643898518936,
+      "power_lever_angle_pct": 13.90408357542583,
+      "required_thrust_n": 10527.699366849421,
+      "residual_force_x_n": 1.901753421407193e-09,
+      "residual_force_z_n": -1.1408701539039612e-07,
+      "residual_pitch_moment_nm": -3.5625273023720933e-07,
+      "throttle_ratio": 0.1390408357542583
+    },
+    "trim_hold": {
+      "duration_s": 5.0,
+      "forward_distance_error_m": 1.5518253349000588e-10,
+      "maximum_altitude_drift_m": 1.0627445590216666e-09,
+      "maximum_angular_rate_rad_s": 1.4081125926282345e-12,
+      "maximum_speed_drift_mps": 8.591882760811131e-11,
+      "passed": true,
+      "quaternion_endpoint_error": 1.6705197476095517e-12,
+      "sample_count": 501,
+      "step_s": 0.01
+    }
+  },
+  "declared_limitations": [
+    "Subsonic aerodynamic envelope through Mach 1.0.",
+    "Steady-state thrust only; no spool dynamics or fuel flow.",
+    "Constant mass and inertia; no fuel-burn schedule.",
+    "Direct algebraic controls; no SAS, autopilot, or actuator states.",
+    "No ground contact, stores, damage, or flexible modes.",
+    "Flat-Earth propagation is a validation harness, not a world model."
+  ],
+  "python_requirement": ">=3.12",
+  "quality_gates": {
+    "compileall": {
+      "passed": true
+    },
+    "installed_wheel_smoke": {
+      "passed": true
+    },
+    "pyright_strict": {
+      "errors": 0,
+      "passed": true,
+      "warnings": 0
+    },
+    "pytest": {
+      "passed": true,
+      "test_count": 94
+    },
+    "ruff": {
+      "passed": true
+    },
+    "txair_zip_crc": {
+      "passed": true
+    },
+    "wheel_build": {
+      "passed": true
+    },
+    "wheel_zip_crc": {
+      "passed": true
+    }
+  },
+  "release_version": "0.7.0",
+  "schema_version": "0.1.0"
+}

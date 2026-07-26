@@ -1,0 +1,13 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+CG_PCT_MAC,vrsPositionOfCM,pct,,,+AFT,,35.0,,,isInput,False,Longitudinal location of the center of mass in percent of MAC. Reference location is 35%.
+CBAR,referenceWingChord,ft,,,,,11.32,,,isStdAIAA,False,"Mean aerodynamic chord, needed for center-of-mass calculations"
+XIXX,bodyMomentOfInertia_Roll,slugft2,,,,,9496.0,,,isOutput;isStdAIAA,False,Rolling moment of inertia about the body X axis
+XIYY,bodyMomentOfInertia_Pitch,slugft2,,,,,55814.0,,,isOutput;isStdAIAA,False,Pitching moment of inertia about the body Y axis
+XIZZ,bodyMomentOfInertia_Yaw,slugft2,,,,,63100.0,,,isOutput;isStdAIAA,False,Yawing moment of inertia about the body Z axis
+XIZX,bodyProductOfInertia_ZX,slugft2,,,,,982.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Z plane
+XIXY,bodyProductOfInertia_XY,slugft2,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Y plane
+XIYZ,bodyProductOfInertia_YZ,slugft2,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body Y-Z plane
+XMASS,totalMass,slug,,,,,637.1595,,,isOutput;isStdAIAA,False,"Total mass of vehicle (20,500 lbm)"
+DYCG,bodyPositionOfCmWrtMrc_Y,ft,,,RT,,0.0,,,isOutput;isStdAIAA,False,"Lateral location of the center of mass relative to the plane of symmetry (0 BL), positive if the CM is right of the X-Z plane."
+DZCG,bodyPositionOfCmWrtMrc_Z,ft,,,DOWN,,0.0,,,isOutput;isStdAIAA,False,"Vertical location of the center of mass relative to the bottom of the flat part of the belly, positive if the CM is below the waterline of the vehicle."
+DXCG,bodyPositionOfCmWrtMrc_X,ft,,,FWD,,,,,isOutput;isStdAIAA,True,"Longitudinal location of the center of mass relative to the moment reference center (35% MAC), positive if the CM is forward of the MRC. Calculated as (35 - CG_PCT_MAC)*CBAR/100."

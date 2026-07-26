@@ -7,7 +7,7 @@ problems:
     title: Simple Aero translation ballistic
     source_bundle: ../../simple_aero_v1/ballistic.yaml
     comments:
-      - "Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/ballistic.yaml"
+      - "Synthetic TAOS translation of tests/fixtures/simple_aero_v1/ballistic.yaml"
       - "Simple Aero family: ballistic"
       - "Start controls: launch_point, aimpoint, initial_altitude_m, initial_speed_mps"
       - "Stop controls: coast_time_s, optimization termination"
@@ -30,7 +30,7 @@ problems:
     title: Simple Aero translation cbcr left turn
     source_bundle: ../../simple_aero_v1/cbcr.yaml
     comments:
-      - "Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/cbcr.yaml"
+      - "Synthetic TAOS translation of tests/fixtures/simple_aero_v1/cbcr.yaml"
       - "Simple Aero family: cbcr"
       - "Start controls: go_left, maneuver_altitude_start_km"
       - "Stop controls: maneuver_duration_s, min_time_to_go_s"
@@ -53,7 +53,7 @@ problems:
     title: Simple Aero translation crossrange
     source_bundle: ../../simple_aero_v1/crossrange.yaml
     comments:
-      - "Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/crossrange.yaml"
+      - "Synthetic TAOS translation of tests/fixtures/simple_aero_v1/crossrange.yaml"
       - "Simple Aero family: crossrange"
       - "Start controls: initial_heading_error_deg"
       - "Stop controls: min_time_to_go_s"
@@ -76,7 +76,7 @@ problems:
     title: Simple Aero translation marv
     source_bundle: ../../simple_aero_v1/marv.yaml
     comments:
-      - "Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/marv.yaml"
+      - "Synthetic TAOS translation of tests/fixtures/simple_aero_v1/marv.yaml"
       - "Simple Aero family: marv"
       - "Start controls: maneuver_begin_time_to_go_s"
       - "Stop controls: min_time_to_go_s"
@@ -99,7 +99,7 @@ problems:
     title: Simple Aero translation phugoid
     source_bundle: ../../simple_aero_v1/phugoid.yaml
     comments:
-      - "Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/phugoid.yaml"
+      - "Synthetic TAOS translation of tests/fixtures/simple_aero_v1/phugoid.yaml"
       - "Simple Aero family: phugoid"
       - "Start controls: start_range_to_go_km, phugoid_amplitude_deg, phugoid_frequency_Hz"
       - "Stop controls: maneuver_roll_deg, implicit solution termination"
@@ -127,7 +127,7 @@ problems:
     title: Simple Aero translation range extension
     source_bundle: ../../simple_aero_v1/range_extension.yaml
     comments:
-      - "Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/range_extension.yaml"
+      - "Synthetic TAOS translation of tests/fixtures/simple_aero_v1/range_extension.yaml"
       - "Simple Aero family: range_extension"
       - "Start controls: min_time_to_go_s"
       - "Stop controls: minimum range-to-go gating"
@@ -150,7 +150,7 @@ problems:
     title: Simple Aero translation skip
     source_bundle: ../../simple_aero_v1/skip.yaml
     comments:
-      - "Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/skip.yaml"
+      - "Synthetic TAOS translation of tests/fixtures/simple_aero_v1/skip.yaml"
       - "Simple Aero family: skip"
       - "Start controls: maneuver_begin_time_to_go_s"
       - "Stop controls: maneuver logic and trajectory termination"
@@ -173,7 +173,7 @@ problems:
     title: Simple Aero translation slalom
     source_bundle: ../../simple_aero_v1/slalom.yaml
     comments:
-      - "Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/slalom.yaml"
+      - "Synthetic TAOS translation of tests/fixtures/simple_aero_v1/slalom.yaml"
       - "Simple Aero family: slalom"
       - "Start controls: start_range_to_go_km"
       - "Stop controls: end_range_to_go_km, min_time_to_go_s"
@@ -196,7 +196,7 @@ problems:
     title: Simple Aero translation weave
     source_bundle: ../../simple_aero_v1/weave.yaml
     comments:
-      - "Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/weave.yaml"
+      - "Synthetic TAOS translation of tests/fixtures/simple_aero_v1/weave.yaml"
       - "Simple Aero family: weave"
       - "Start controls: weave_end_range_to_go_km"
       - "Stop controls: min_time_to_go_s"

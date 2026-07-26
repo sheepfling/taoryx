@@ -1,0 +1,148 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "277707b8e1f26f99f6b2068c79a243bd3a450e325e2ef7dbc2f9a39e7b52570b",
+  "header": {
+    "attributes": {
+      "name": "Two-stage to orbit rocket inertia model"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      },
+      {
+        "attributes": {
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "eric.m.queen@nasa.gov",
+        "name": "Eric Queen",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2013-08-09",
+    "description": "Eric Queen's two-stage-to-orbit conceptual model. Inputs are amount of fuel burned from stage 1 and stage 2 and a staged flag. Outputs are mass properties and location of current moment reference center (in meters aft of the nose). Also the remaining fraction of fuel remaining in each stage (to judge depletion).",
+    "file_version": "Initial version",
+    "modification_records": [],
+    "name": "Two-stage to orbit rocket inertia model",
+    "raw": {
+      "attributes": {
+        "name": "Two-stage to orbit rocket inertia model"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 489 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-08-09"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Initial version"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Eric Queen's two-stage-to-orbit conceptual model. Inputs are amount of fuel burned from stage 1 and stage 2 and a staged flag. Outputs are mass properties and location of current moment reference center (in meters aft of the nose). Also the remaining fraction of fuel remaining in each stage (to judge depletion)."
+        },
+        {
+          "attributes": {
+            "author": "Queen, Eric M.",
+            "date": "2013-07-15",
+            "refID": "REF01",
+            "title": "twostagetoorbit.pptx"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Source document for data in this model"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "author": "Queen, Eric M.",
+          "date": "2013-07-15",
+          "refID": "REF01",
+          "title": "twostagetoorbit.pptx"
+        },
+        "description": "Source document for data in this model",
+        "ref_id": "REF01"
+      }
+    ]
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/two-stage_package/twostage_inertia.dml"
+}

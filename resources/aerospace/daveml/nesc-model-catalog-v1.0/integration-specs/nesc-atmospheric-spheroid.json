@@ -1,0 +1,53 @@
+{
+  "acceptance_layers": [
+    "source_integrity",
+    "DAVE-ML parse and semantic validation",
+    "embedded static check cases where supplied",
+    "canonical SI/frame dimensional evaluation",
+    "host-dynamics scenario execution",
+    "trajectory-family comparison"
+  ],
+  "canonical_contract": {
+    "attitude": "scalar-first body-to-navigation quaternion",
+    "body_frame": "FRD",
+    "reference_points": "explicit MRC and CG with audited moment transfer",
+    "units": "SI"
+  },
+  "component_documents": {
+    "aerodynamics": [
+      "nesc-all-models-cannonball-aero"
+    ],
+    "mass_properties": [
+      "nesc-all-models-cannonball-inertia"
+    ]
+  },
+  "display_name": "NASA/NESC Atmospheric Spheroid",
+  "host_capabilities": [
+    "US1976",
+    "wind models",
+    "round/WGS84 Earth",
+    "inverse-square/J2 gravity"
+  ],
+  "known_gaps": "No standalone Taoryx package yet; scenario-owned environment and initial conditions",
+  "model_id": "nesc-atmospheric-spheroid",
+  "qualification_status": "source-ready",
+  "qualified_package": null,
+  "scenario_ids": [
+    "Atmos_01",
+    "Atmos_04",
+    "Atmos_05",
+    "Atmos_06",
+    "Atmos_07",
+    "Atmos_08",
+    "Atmos_09",
+    "Atmos_10"
+  ],
+  "schema_version": "1.0",
+  "source_authority": "NASA/NESC 2015 DAVE-ML",
+  "stateful_sidecar_required": false,
+  "target_fidelities": [
+    "3dof-point-mass",
+    "3t+3k1",
+    "6dof-rigid-body-check"
+  ]
+}

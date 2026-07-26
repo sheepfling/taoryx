@@ -1,0 +1,4 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+ALPHA,alpha,deg,#x3B1,,,,,,,,False,"Instantaneous true angle-of-attack, in degrees"
+MACH,Mach,ND,M,,,,,,,,False,
+CL,CL,nd,CL,,,,,,,,False,Coefficient of lift based on alpha and mach.

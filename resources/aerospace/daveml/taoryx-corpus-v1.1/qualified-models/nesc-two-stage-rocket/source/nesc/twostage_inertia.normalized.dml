@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DAVEfunc xmlns="http://daveml.org/2010/DAVEML">
+  <fileHeader name="Two-stage to orbit rocket inertia model">
+    <author name="Bruce Jackson" org="NASA Langley Research Center"/>
+    <author name="Eric Queen" org="NASA Langley Research Center"/>
+    <creationDate date="2013-08-09"/>
+    <fileVersion>Taoryx normalized semantic reconstruction</fileVersion>
+    <description>Semantically normalized from pinned NASA/NESC scenario-17 source data.</description>
+  </fileHeader>
+  <variableDef name="rocketHasStaged" varID="stagedFlag" units="nd"><isInput/></variableDef>
+  <variableDef name="stage1fuelConsumed" varID="stg1fuelUsed" units="kg"><isInput/></variableDef>
+  <variableDef name="stage2fuelConsumed" varID="stg2fuelUsed" units="kg"><isInput/></variableDef>
+  <variableDef name="fullVehicleMomentReferenceCenter" varID="fullMrc" units="m" initialValue="16.91879"/>
+  <variableDef name="secondStageMomentReferenceCenter" varID="stage2Mrc" units="m" initialValue="4.79798"/>
+  <variableDef name="stage1MaxFuel" varID="stg1maxFuel" units="kg" initialValue="180000.0"/>
+  <variableDef name="stage2MaxFuel" varID="stg2maxFuel" units="kg" initialValue="80000.0"/>
+  <variableDef name="stage1FuelRemainingFrac" varID="stg1fuelFrac" units="frac" minValue="0" maxValue="1"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><divide/><apply><minus/><ci>stg1maxFuel</ci><ci>stg1fuelUsed</ci></apply><ci>stg1maxFuel</ci></apply></math></calculation><isOutput/></variableDef>
+  <variableDef name="stage2FuelRemainingFrac" varID="stg2fuelFrac" units="frac" minValue="0" maxValue="1"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><divide/><apply><minus/><ci>stg2maxFuel</ci><ci>stg2fuelUsed</ci></apply><ci>stg2maxFuel</ci></apply></math></calculation><isOutput/></variableDef>
+  <variableDef name="stage1Cg" varID="stage1Cg" units="m"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><plus/><cn>9.421642</cn><apply><times/><cn>7.497148000000001</cn><ci>stg1fuelFrac</ci></apply></apply></math></calculation></variableDef>
+  <variableDef name="stage2Cg" varID="stage2Cg" units="m"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><plus/><cn>3.947368</cn><apply><times/><cn>0.8506119999999999</cn><ci>stg2fuelFrac</ci></apply></apply></math></calculation></variableDef>
+  <variableDef name="currentCg" varID="currentCg" units="m"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><piecewise><piece><ci>stage2Cg</ci><apply><gt/><ci>stagedFlag</ci><cn>0</cn></apply></piece><otherwise><ci>stage1Cg</ci></otherwise></piecewise></apply></math></calculation></variableDef>
+  <variableDef name="vrsPositionOfMrc" varID="MRC" units="m"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><piecewise><piece><ci>stage2Mrc</ci><apply><gt/><ci>stagedFlag</ci><cn>0</cn></apply></piece><otherwise><ci>fullMrc</ci></otherwise></piecewise></apply></math></calculation><isOutput/></variableDef>
+  <variableDef name="bodyPositionOfCmWrtMrc_X" varID="DXCG" units="m"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><minus/><ci>MRC</ci><ci>currentCg</ci></apply></math></calculation><isOutput/></variableDef>
+  <variableDef name="totalMass" varID="XMASS" units="kg"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><piecewise><piece><apply><plus/><cn>19000.0</cn><apply><times/><cn>80000.0</cn><ci>stg2fuelFrac</ci></apply></apply><apply><gt/><ci>stagedFlag</ci><cn>0</cn></apply></piece><otherwise><apply><plus/><cn>134000.0</cn><apply><times/><cn>180000.0</cn><ci>stg1fuelFrac</ci></apply></apply></otherwise></piecewise></apply></math></calculation><isOutput/></variableDef>
+  <variableDef name="bodyMomentOfInertia_Roll" varID="XIXX" units="kgm2"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><piecewise><piece><apply><plus/><cn>21375.0</cn><apply><times/><cn>90000.0</cn><ci>stg2fuelFrac</ci></apply></apply><apply><gt/><ci>stagedFlag</ci><cn>0</cn></apply></piece><otherwise><apply><plus/><cn>150750.0</cn><apply><times/><cn>202500.0</cn><ci>stg1fuelFrac</ci></apply></apply></otherwise></piecewise></apply></math></calculation><isOutput/></variableDef>
+  <variableDef name="bodyMomentOfInertia_Pitch" varID="XIYY" units="kgm2"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><apply><piecewise><piece><apply><plus/><cn>212384.868421</cn><apply><times/><cn>728678.894205</cn><ci>stg2fuelFrac</ci></apply></apply><apply><gt/><ci>stagedFlag</ci><cn>0</cn></apply></piece><otherwise><apply><plus/><cn>10886636.572139</cn><apply><times/><cn>22615000.901322</cn><ci>stg1fuelFrac</ci></apply></apply></otherwise></piecewise></apply></math></calculation><isOutput/></variableDef>
+  <variableDef name="bodyMomentOfInertia_Yaw" varID="XIZZ" units="kgm2"><calculation><math xmlns="http://www.w3.org/1998/Math/MathML"><ci>XIYY</ci></math></calculation><isOutput/></variableDef>
+  <variableDef name="bodyProductOfInertia_ZX" varID="XIZX" units="kgm2" initialValue="0"><isOutput/></variableDef>
+  <variableDef name="bodyProductOfInertia_XY" varID="XIXY" units="kgm2" initialValue="0"><isOutput/></variableDef>
+  <variableDef name="bodyProductOfInertia_YZ" varID="XIYZ" units="kgm2" initialValue="0"><isOutput/></variableDef>
+  <variableDef name="bodyPositionOfCmWrtMrc_Y" varID="DYCG" units="m" initialValue="0"><isOutput/></variableDef>
+  <variableDef name="bodyPositionOfCmWrtMrc_Z" varID="DZCG" units="m" initialValue="0"><isOutput/></variableDef>
+
+
+</DAVEfunc>

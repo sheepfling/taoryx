@@ -1,0 +1,349 @@
+{
+  "breakpoints": [],
+  "check_cases": [],
+  "check_data_provenance": [],
+  "container_sha256": "7a2148ee89ef4ceacb7663a9bc477e020c1aa58bcfc361f938d60d5d3f18a5d5",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "DAVEfunc.dtd"
+  },
+  "document_sha256": "7a2148ee89ef4ceacb7663a9bc477e020c1aa58bcfc361f938d60d5d3f18a5d5",
+  "document_size_bytes": 1857,
+  "functions": [
+    {
+      "attributes": {
+        "name": "CL"
+      },
+      "dependent_variable_id": "cl",
+      "description": null,
+      "function_id": "function-0001",
+      "independent_variables": [
+        {
+          "attributes": {
+            "varID": "alpdeg"
+          },
+          "extrapolation": null,
+          "inline_breakpoints": [
+            -4.0,
+            0.0,
+            4.0,
+            8.0,
+            12.0,
+            16.0
+          ],
+          "interpolation": null,
+          "maximum_value": null,
+          "minimum_value": null,
+          "variable_id": "alpdeg"
+        }
+      ],
+      "issues": [],
+      "name": "CL",
+      "provenance": null,
+      "table_id": "function-0001-table",
+      "table_kind": "gridded"
+    }
+  ],
+  "gridded_tables": [
+    {
+      "attributes": {
+        "name": "CL table"
+      },
+      "breakpoint_ids": [],
+      "declared_id": null,
+      "description": null,
+      "function_name": "CL",
+      "inline_breakpoints": [
+        [
+          -4.0,
+          0.0,
+          4.0,
+          8.0,
+          12.0,
+          16.0
+        ]
+      ],
+      "issues": [],
+      "name": "CL table",
+      "provenance": null,
+      "shape": [
+        6
+      ],
+      "source_kind": "legacy-simple-function",
+      "supplemental_nodes": [],
+      "table_id": "function-0001-table",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        0.0,
+        0.2,
+        0.4,
+        0.8,
+        1.0,
+        1.2
+      ]
+    }
+  ],
+  "header": {
+    "attributes": {},
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2002-03-11",
+    "description": "Coefficient of lift (non-dimensional) versus angle-of-attack, deg. Example file for DAVE function table format. This example is the simplest version.",
+    "file_version": null,
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2002-03-11",
+          "modID": "A"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2002-03-11",
+        "description": "Added varID to dependentVarPts and independentVarPts, per DTD 1.5b2 change. Also changed author's xns address to e-mail address.",
+        "modification_id": "A"
+      },
+      {
+        "attributes": {
+          "date": "2006-11-17",
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2006-11-17",
+        "description": "Added date to modificationRecord per DTD 1.9 change.",
+        "modification_id": "B"
+      },
+      {
+        "attributes": {
+          "date": "2010-05-07",
+          "modID": "C"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-05-07",
+        "description": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change",
+        "modification_id": "C"
+      }
+    ],
+    "name": null,
+    "raw": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2002-03-11"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileCreationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Coefficient of lift (non-dimensional) versus angle-of-attack, deg. Example file for DAVE function table format. This example is the simplest version."
+        },
+        {
+          "attributes": {
+            "date": "2002-03-11",
+            "modID": "A"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added varID to dependentVarPts and independentVarPts, per DTD 1.5b2 change. Also changed author's xns address to e-mail address."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-17",
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added date to modificationRecord per DTD 1.9 change."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-05-07",
+            "modID": "C"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": []
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/simple_aero.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "name": "alpha",
+        "units": "deg",
+        "varID": "alpdeg"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "alpha",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "alpdeg"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "CL",
+        "units": "",
+        "varID": "cl"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "CL",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "",
+      "variable_id": "cl"
+    }
+  ]
+}

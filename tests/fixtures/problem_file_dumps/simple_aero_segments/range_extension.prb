@@ -1,6 +1,6 @@
 (simple_aero-range-extension)
 
-# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/range_extension.yaml
+# Synthetic TAOS translation of tests/fixtures/simple_aero_v1/range_extension.yaml
 # Simple Aero family: range_extension
 # Start controls: min_time_to_go_s
 # Stop controls: minimum range-to-go gating

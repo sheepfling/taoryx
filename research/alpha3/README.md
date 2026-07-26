@@ -30,10 +30,10 @@ directory look complete. They remain external when the registry records:
 5. source role and intended model boundary;
 6. the command that validates or ingests the payload.
 
-This is the current policy for the aerospace corpus under `INBOX/`. The
-configuration, provenance, source locks, acceptance contracts, and workflow
-documentation belong in Git. A release or contributor bundle may provide the
-external payload separately.
+The aerospace DAVE-ML source bundles used by Alpha 3 are promoted under
+`resources/aerospace/daveml/` with immutable manifests and hash ledgers. A
+temporary acquisition directory may be used during intake, but it is never a
+runtime or provenance dependency.
 
 ## Contributor workflow
 

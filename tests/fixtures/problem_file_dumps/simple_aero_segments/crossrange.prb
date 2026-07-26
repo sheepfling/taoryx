@@ -1,6 +1,6 @@
 (simple_aero-crossrange)
 
-# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/crossrange.yaml
+# Synthetic TAOS translation of tests/fixtures/simple_aero_v1/crossrange.yaml
 # Simple Aero family: crossrange
 # Start controls: initial_heading_error_deg
 # Stop controls: min_time_to_go_s

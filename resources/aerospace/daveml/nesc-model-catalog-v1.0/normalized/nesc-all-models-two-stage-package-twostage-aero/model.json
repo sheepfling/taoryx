@@ -1,0 +1,1395 @@
+{
+  "breakpoints": [
+    {
+      "attributes": {
+        "bpID": "ALPHA1",
+        "name": "alpha_bp_for_forces",
+        "units": "deg"
+      },
+      "breakpoint_id": "ALPHA1",
+      "description": "Angle-of-attack breakpoints for aero force coefficient tables",
+      "issues": [],
+      "name": "alpha_bp_for_forces",
+      "units": "deg",
+      "values": [
+        -10.0,
+        -8.0,
+        -6.0,
+        -4.0,
+        -2.0,
+        0.0,
+        2.0,
+        4.0,
+        6.0,
+        8.0,
+        10.0
+      ]
+    },
+    {
+      "attributes": {
+        "bpID": "ALPHA2",
+        "name": "alpha_bp_for_moments",
+        "units": "deg"
+      },
+      "breakpoint_id": "ALPHA2",
+      "description": "Angle-of-attack breakpoints for aero moment coefficient tables",
+      "issues": [],
+      "name": "alpha_bp_for_moments",
+      "units": "deg",
+      "values": [
+        -20.0,
+        0.0,
+        20.0
+      ]
+    },
+    {
+      "attributes": {
+        "bpID": "BETA1",
+        "name": "beta_bp_for_forces",
+        "units": "deg"
+      },
+      "breakpoint_id": "BETA1",
+      "description": "Angle-of-sideslip breakpoints for aero force coeffcient tables",
+      "issues": [],
+      "name": "beta_bp_for_forces",
+      "units": "deg",
+      "values": [
+        -10.0,
+        -8.0,
+        -6.0,
+        -4.0,
+        -2.0,
+        0.0,
+        2.0,
+        4.0,
+        6.0,
+        8.0,
+        10.0
+      ]
+    },
+    {
+      "attributes": {
+        "bpID": "BETA2",
+        "name": "beta_bp_for_moments",
+        "units": "deg"
+      },
+      "breakpoint_id": "BETA2",
+      "description": "Angle-of-sideslip breakpoints for aero moment coefficient tables",
+      "issues": [],
+      "name": "beta_bp_for_moments",
+      "units": "deg",
+      "values": [
+        -20.0,
+        0.0,
+        20.0
+      ]
+    }
+  ],
+  "check_cases": [],
+  "check_data_provenance": [],
+  "container_sha256": "49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "49df37f2ab8ad3b9c6f181bb3c32ad828304870371b3e058512c08e359579a27",
+  "document_size_bytes": 12131,
+  "functions": [
+    {
+      "attributes": {
+        "name": "LiftCoefficient_fcn"
+      },
+      "dependent_variable_id": "totalCoefficientOfLift",
+      "description": "Lift coefficient table as a function of angle of attack",
+      "function_id": "function-0001",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "10.0",
+            "min": "-10.0",
+            "varID": "alpha"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 10.0,
+          "minimum_value": -10.0,
+          "variable_id": "alpha"
+        }
+      ],
+      "issues": [],
+      "name": "LiftCoefficient_fcn",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2013-08-09",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "eric.m.queen@nasa.gov",
+                "name": "Eric Queen",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2013-08-09"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "table_id": "CL_table_def",
+      "table_kind": "gridded"
+    },
+    {
+      "attributes": {
+        "name": "DragCoefficient_fcn"
+      },
+      "dependent_variable_id": "totalCoefficientOfDrag",
+      "description": "Drag coefficient table as a function of total angle of attack",
+      "function_id": "function-0002",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "10.0",
+            "min": "-10.0",
+            "varID": "alphaT"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 10.0,
+          "minimum_value": -10.0,
+          "variable_id": "alphaT"
+        }
+      ],
+      "issues": [],
+      "name": "DragCoefficient_fcn",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2013-08-09",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "eric.m.queen@nasa.gov",
+                "name": "Eric Queen",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2013-08-09"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "table_id": "CD_table_def",
+      "table_kind": "gridded"
+    },
+    {
+      "attributes": {
+        "name": "SideforceCoefficient_fcn"
+      },
+      "dependent_variable_id": "aeroBodyForceCoefficient_Y",
+      "description": "Sideforce coefficient table as a function of angle of sideslip",
+      "function_id": "function-0003",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "10.0",
+            "min": "-10.0",
+            "varID": "beta"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 10.0,
+          "minimum_value": -10.0,
+          "variable_id": "beta"
+        }
+      ],
+      "issues": [],
+      "name": "SideforceCoefficient_fcn",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2013-08-09",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "eric.m.queen@nasa.gov",
+                "name": "Eric Queen",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2013-08-09"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "table_id": "CY_table_def",
+      "table_kind": "gridded"
+    },
+    {
+      "attributes": {
+        "name": "PitchingMomentCoefficient_fcn"
+      },
+      "dependent_variable_id": "aeroBodyMomentCoefficient_Pitch",
+      "description": "Pitching moment coefficient table as a function of angle of attack",
+      "function_id": "function-0004",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "20.0",
+            "min": "-20.0",
+            "varID": "alpha"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 20.0,
+          "minimum_value": -20.0,
+          "variable_id": "alpha"
+        }
+      ],
+      "issues": [],
+      "name": "PitchingMomentCoefficient_fcn",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2013-08-09",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "eric.m.queen@nasa.gov",
+                "name": "Eric Queen",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2013-08-09"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "table_id": "Cm_table_def",
+      "table_kind": "gridded"
+    },
+    {
+      "attributes": {
+        "name": "YawingMomentCoefficient_fcn"
+      },
+      "dependent_variable_id": "aeroBodyMomentCoefficient_Yaw",
+      "description": "Yawing moment coefficient table as a function of angle of sideslip",
+      "function_id": "function-0005",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "20.0",
+            "min": "-20.0",
+            "varID": "beta"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 20.0,
+          "minimum_value": -20.0,
+          "variable_id": "beta"
+        }
+      ],
+      "issues": [],
+      "name": "YawingMomentCoefficient_fcn",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2013-08-09",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "eric.m.queen@nasa.gov",
+                "name": "Eric Queen",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2013-08-09"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "table_id": "Cn_table_def",
+      "table_kind": "gridded"
+    }
+  ],
+  "gridded_tables": [
+    {
+      "attributes": {
+        "gtID": "CL_table_def",
+        "name": "CL_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "CL_table_def",
+      "description": null,
+      "function_name": "LiftCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CL_table",
+      "provenance": null,
+      "shape": [
+        11
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CL_table_def",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        -1.6,
+        -1.0,
+        -0.73,
+        -0.49,
+        -0.24,
+        0.0,
+        0.24,
+        0.49,
+        0.73,
+        1.0,
+        1.6
+      ]
+    },
+    {
+      "attributes": {
+        "gtID": "CD_table_def",
+        "name": "CD_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "CD_table_def",
+      "description": null,
+      "function_name": "DragCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CD_table",
+      "provenance": null,
+      "shape": [
+        11
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CD_table_def",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        0.48,
+        0.38,
+        0.31,
+        0.25,
+        0.23,
+        0.21,
+        0.23,
+        0.25,
+        0.31,
+        0.38,
+        0.48
+      ]
+    },
+    {
+      "attributes": {
+        "gtID": "CY_table_def",
+        "name": "CYtable"
+      },
+      "breakpoint_ids": [
+        "BETA1"
+      ],
+      "declared_id": "CY_table_def",
+      "description": null,
+      "function_name": "SideforceCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CYtable",
+      "provenance": null,
+      "shape": [
+        11
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CY_table_def",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        1.6,
+        1.0,
+        0.73,
+        0.49,
+        0.24,
+        0.0,
+        -0.24,
+        -0.49,
+        -0.73,
+        -1.0,
+        -1.6
+      ]
+    },
+    {
+      "attributes": {
+        "gtID": "Cm_table_def",
+        "name": "Cm_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA2"
+      ],
+      "declared_id": "Cm_table_def",
+      "description": null,
+      "function_name": "PitchingMomentCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cm_table",
+      "provenance": null,
+      "shape": [
+        3
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cm_table_def",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        0.6,
+        0.0,
+        -0.6
+      ]
+    },
+    {
+      "attributes": {
+        "gtID": "Cn_table_def",
+        "name": "Cn_table"
+      },
+      "breakpoint_ids": [
+        "BETA2"
+      ],
+      "declared_id": "Cn_table_def",
+      "description": null,
+      "function_name": "YawingMomentCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cn_table",
+      "provenance": null,
+      "shape": [
+        3
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cn_table_def",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        -0.6,
+        0.0,
+        0.6
+      ]
+    }
+  ],
+  "header": {
+    "attributes": {
+      "name": "Two-stage to orbit rocket aero model"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      },
+      {
+        "attributes": {
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "eric.m.queen@nasa.gov",
+        "name": "Eric Queen",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2013-08-09",
+    "description": "Eric Queen's two-stage-to-orbit conceptual model. Inputs to this aero model are alpha and beta in degrees. Outputs are force and moment coefficients in Lift, Drag, Sideforce, and pitch and yaw moments. Rolling moment is zero. Moments are defined about the moment reference center, which is a function of vehicle configuration (staged or not). The position of the moment reference center is an output of the inertia properties model. A slight modification has been made to make drag coefficient a function of total alpha instead of just alpha.",
+    "file_version": "Rev A, 2014-Mar-27",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2014-03-27",
+          "modID": "A",
+          "refID": "REF_02"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2014-03-27",
+        "description": "Added values for reference lengths and areas based on the email from Eric Queen.",
+        "modification_id": "A"
+      },
+      {
+        "attributes": {
+          "date": "2014-03-27",
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2014-03-27",
+        "description": "Corrected syntax error in previous revision, which I unfortunately posted without validating; thanks to alert user Michael Madden of LaRC.",
+        "modification_id": "B"
+      }
+    ],
+    "name": "Two-stage to orbit rocket aero model",
+    "raw": {
+      "attributes": {
+        "name": "Two-stage to orbit rocket aero model"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 489 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-08-09"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Rev A, 2014-Mar-27"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Eric Queen's two-stage-to-orbit conceptual model. Inputs to this aero model are alpha and beta in degrees. Outputs are force and moment coefficients in Lift, Drag, Sideforce, and pitch and yaw moments. Rolling moment is zero. Moments are defined about the moment reference center, which is a function of vehicle configuration (staged or not). The position of the moment reference center is an output of the inertia properties model. A slight modification has been made to make drag coefficient a function of total alpha instead of just alpha."
+        },
+        {
+          "attributes": {
+            "author": "Queen, Eric M.",
+            "date": "2013-07-15",
+            "refID": "REF01",
+            "title": "twostagetoorbit.pptx"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Source document for data in this model"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "author": "Queen, Eric M.",
+            "date": "2014-07-15",
+            "refID": "REF_02",
+            "title": "twostage_refs_email.txt"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Follow-up email answer to questions regarding aero reference lengths and area."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2014-03-27",
+            "modID": "A",
+            "refID": "REF_02"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added values for reference lengths and areas based on the email from Eric Queen."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2014-03-27",
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected syntax error in previous revision, which I unfortunately posted without validating; thanks to alert user Michael Madden of LaRC."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "author": "Queen, Eric M.",
+          "date": "2013-07-15",
+          "refID": "REF01",
+          "title": "twostagetoorbit.pptx"
+        },
+        "description": "Source document for data in this model",
+        "ref_id": "REF01"
+      },
+      {
+        "attributes": {
+          "author": "Queen, Eric M.",
+          "date": "2014-07-15",
+          "refID": "REF_02",
+          "title": "twostage_refs_email.txt"
+        },
+        "description": "Follow-up email answer to questions regarding aero reference lengths and area.",
+        "ref_id": "REF_02"
+      }
+    ]
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/two-stage_package/twostage_aero.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "name": "angleOfAttack",
+        "symbol": "α",
+        "units": "deg",
+        "varID": "alpha"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Instantaneous true angle-of-attack, in degrees",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "angleOfAttack",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": "α",
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "alpha"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "angleOfSideslip",
+        "sign": "wind in right ear",
+        "symbol": "β",
+        "units": "deg",
+        "varID": "beta"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Instantaneous true angle-of-sideslip, in degrees",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "angleOfSideslip",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "wind in right ear",
+      "symbol": "β",
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "beta"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "3",
+        "name": "longitudinalReferenceLength",
+        "units": "m",
+        "varID": "cbar"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Length of aerodynamic chord",
+      "initial_value": 3.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "longitudinalReferenceLength",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "cbar"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "3",
+        "name": "lateralReferencelength",
+        "units": "m",
+        "varID": "bspan"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Length of aerodynamic span",
+      "initial_value": 3.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "lateralReferencelength",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m",
+      "variable_id": "bspan"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "7",
+        "name": "referenceArea",
+        "units": "m2",
+        "varID": "sref"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Reference area of aerodynamic model",
+      "initial_value": 7.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "referenceArea",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "m2",
+      "variable_id": "sref"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "totalAlpha",
+        "units": "deg",
+        "varID": "alphaT"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "power",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "plus",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "power",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "alpha"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "2."
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "power",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "beta"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "2."
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "cn",
+                "text": "0.5"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Total aerodynamic angle of X-axis to V-vector",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "totalAlpha",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "alphaT"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "liftCoefficient",
+        "units": "nd",
+        "varID": "totalCoefficientOfLift"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Lift coefficient output from lookup table.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "liftCoefficient",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "totalCoefficientOfLift"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "dragCoefficient",
+        "units": "nd",
+        "varID": "totalCoefficientOfDrag"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Drag coefficient output from lookup table.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "dragCoefficient",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "totalCoefficientOfDrag"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "sideforceCoefficient",
+        "units": "nd",
+        "varID": "aeroBodyForceCoefficient_Y"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Sideforce coefficient output from lookup table.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "sideforceCoefficient",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "aeroBodyForceCoefficient_Y"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "rollingMomentCoefficient",
+        "units": "nd",
+        "varID": "aeroBodyMomentCoefficient_Roll"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Rolling moment coefficient (hardwired to 0)",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "rollingMomentCoefficient",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "aeroBodyMomentCoefficient_Roll"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "pitchingMomentCoefficient",
+        "units": "nd",
+        "varID": "aeroBodyMomentCoefficient_Pitch"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Pitching moment coefficient output from lookup table.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "pitchingMomentCoefficient",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "aeroBodyMomentCoefficient_Pitch"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "yawingMomentCoefficient",
+        "units": "nd",
+        "varID": "aeroBodyMomentCoefficient_Yaw"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Yawing moment coefficient output from lookup table.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "yawingMomentCoefficient",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "aeroBodyMomentCoefficient_Yaw"
+    }
+  ]
+}

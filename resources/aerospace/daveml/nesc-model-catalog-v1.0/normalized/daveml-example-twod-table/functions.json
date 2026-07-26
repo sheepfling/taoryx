@@ -1,0 +1,125 @@
+[
+  {
+    "attributes": {
+      "name": "Basic CL"
+    },
+    "dependent_variable_id": "CL",
+    "description": "Basic coefficient of lift table as a function of Mach and angle of attack",
+    "function_id": "function-0001",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "max",
+          "max": "0.95",
+          "min": "0.3",
+          "varID": "MACH"
+        },
+        "extrapolation": "max",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 0.95,
+        "minimum_value": 0.3,
+        "variable_id": "MACH"
+      },
+      {
+        "attributes": {
+          "extrapolate": "both",
+          "max": "15.0",
+          "min": "0.0",
+          "varID": "ALPHA"
+        },
+        "extrapolation": "both",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 15.0,
+        "minimum_value": 0.0,
+        "variable_id": "ALPHA"
+      }
+    ],
+    "issues": [],
+    "name": "Basic CL",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center",
+            "xns": "@bjax"
+          },
+          "email": null,
+          "name": "Bruce Jackson",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "Jul-1994",
+      "description": null,
+      "document_refs": [
+        "REF01",
+        "REF02"
+      ],
+      "modification_refs": [
+        "A"
+      ],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center",
+              "xns": "@bjax"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "Jul-1994"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "functionCreationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF02"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          },
+          {
+            "attributes": {
+              "modID": "A"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "modificationRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "gridded-table-0001",
+    "table_kind": "gridded"
+  }
+]

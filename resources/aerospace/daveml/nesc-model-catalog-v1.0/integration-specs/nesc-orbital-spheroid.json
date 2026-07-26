@@ -1,0 +1,48 @@
+{
+  "acceptance_layers": [
+    "source_integrity",
+    "DAVE-ML parse and semantic validation",
+    "embedded static check cases where supplied",
+    "canonical SI/frame dimensional evaluation",
+    "host-dynamics scenario execution",
+    "trajectory-family comparison"
+  ],
+  "canonical_contract": {
+    "attitude": "scalar-first body-to-navigation quaternion",
+    "body_frame": "FRD",
+    "reference_points": "explicit MRC and CG with audited moment transfer",
+    "units": "SI"
+  },
+  "component_documents": {
+    "mass_properties": [
+      "nesc-all-models-orbital-sphere-inertia"
+    ]
+  },
+  "display_name": "NASA/NESC Orbital Spheroid",
+  "host_capabilities": [
+    "WGS84",
+    "inverse-square/4x4/8x8 gravity",
+    "third body",
+    "MET atmosphere"
+  ],
+  "known_gaps": "Drag coefficients and force authority are partly scenario-owned rather than entirely in DAVE-ML",
+  "model_id": "nesc-orbital-spheroid",
+  "qualification_status": "source-ready",
+  "qualified_package": null,
+  "scenario_ids": [
+    "Orbit_06A",
+    "Orbit_06B",
+    "Orbit_07A",
+    "Orbit_07B",
+    "Orbit_07C",
+    "Orbit_07D"
+  ],
+  "schema_version": "1.0",
+  "source_authority": "NASA/NESC 2015 DAVE-ML",
+  "stateful_sidecar_required": false,
+  "target_fidelities": [
+    "3dof-orbit",
+    "3t+3k1",
+    "6dof-attitude-check"
+  ]
+}

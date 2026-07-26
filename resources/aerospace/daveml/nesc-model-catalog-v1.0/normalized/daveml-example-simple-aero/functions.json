@@ -1,0 +1,35 @@
+[
+  {
+    "attributes": {
+      "name": "CL"
+    },
+    "dependent_variable_id": "cl",
+    "description": null,
+    "function_id": "function-0001",
+    "independent_variables": [
+      {
+        "attributes": {
+          "varID": "alpdeg"
+        },
+        "extrapolation": null,
+        "inline_breakpoints": [
+          -4.0,
+          0.0,
+          4.0,
+          8.0,
+          12.0,
+          16.0
+        ],
+        "interpolation": null,
+        "maximum_value": null,
+        "minimum_value": null,
+        "variable_id": "alpdeg"
+      }
+    ],
+    "issues": [],
+    "name": "CL",
+    "provenance": null,
+    "table_id": "function-0001-table",
+    "table_kind": "gridded"
+  }
+]

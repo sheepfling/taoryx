@@ -1,0 +1,756 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "6da3fad6192ebf2bd16170c379890df5db03e67a00e9bbdd1b58646803491e73",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "6da3fad6192ebf2bd16170c379890df5db03e67a00e9bbdd1b58646803491e73",
+  "header": {
+    "attributes": {
+      "name": "F-16 Subsonic Aerodynamics Model (a la Garza)"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2003-06-10",
+    "description": "F-16 aero data file. Based on Morelli's adaptation of Stevens and Lewis' F-16 example [1] described in Garza & Morelli's TM [2]. Obtained from E. A. Morelli in the form of Matlab scripts [3] & [4].",
+    "file_version": "Mod K, 2011-01-28",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2004-02-11",
+          "modID": "A"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2004-02-11",
+        "description": "Added checkcase static shots and internal values for debugging purposes.",
+        "modification_id": "A"
+      },
+      {
+        "attributes": {
+          "date": "2006-11-16",
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2006-11-16",
+        "description": "Corrected to DAVEfunc.dtd 1.9 standards: replaced xns with email; corrected dates to ANSI; replaced docIC with refID in documentRefs; added fileVersion element",
+        "modification_id": "B"
+      },
+      {
+        "attributes": {
+          "date": "2006-11-28",
+          "modID": "C"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2006-11-28",
+        "description": "Resorted variableDefs so they appear in proper order, in response to bug report from Giovanni Cignoni. Reindented file using emacs nxml-mode.",
+        "modification_id": "C"
+      },
+      {
+        "attributes": {
+          "date": "2008-02-27",
+          "modID": "D"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2008-02-27",
+        "description": "Updated to DAVE-ML 2.0: replaced fileCreationDate and functionCreationDate with new creationDate element; changed to my email alias.",
+        "modification_id": "D"
+      },
+      {
+        "attributes": {
+          "date": "2008-10-08",
+          "modID": "E"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2008-10-08",
+        "description": "Updated to DAVE-ML 2.0: replaced signalID elements with varID elements in checkcase data.",
+        "modification_id": "E"
+      },
+      {
+        "attributes": {
+          "date": "2008-11-07",
+          "modID": "F"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2008-11-07",
+        "description": "Updated to new AIAA standard variable names.",
+        "modification_id": "F"
+      },
+      {
+        "attributes": {
+          "date": "2010-01-07",
+          "modID": "G"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-01-07",
+        "description": "Rev 400. Corrected description of MRC x-location constant; updated to Jan 10 S-119 units-of-measure encoding. Renamed deprecated griddedTables to griddedTableDefs.",
+        "modification_id": "G"
+      },
+      {
+        "attributes": {
+          "date": "2010-01-28",
+          "modID": "H"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-01-28",
+        "description": "Rev 403. Hopefully this time I fixed the problems with internal variable values for positive and negative pitch rate check cases, and with names of yaw rate check cases, originally cited by Trey Arthur and re-discovered by Missy Hill. Untabified (all whitespace are now spaces, not tabs for easier viewing in any text editor",
+        "modification_id": "H"
+      },
+      {
+        "attributes": {
+          "date": "2010-05-10",
+          "modID": "I"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-05-10",
+        "description": "Removed auto revision field, since we're now under git. Added xmlns attribute to DAVEfunc to conform to DTD 2, RC3.",
+        "modification_id": "I"
+      },
+      {
+        "attributes": {
+          "date": "2011-01-07",
+          "modID": "J"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2011-01-07",
+        "description": "Added namespace to <math> elements, xmlns attribute to DAVEfunc, and gtIDs to conform to DTD 2.0 RC4; corrected PUBLIC ID string.",
+        "modification_id": "J"
+      },
+      {
+        "attributes": {
+          "date": "2011-01-28",
+          "modID": "K"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2011-01-28",
+        "description": "Corrected systemID in DOCTYPE to include full formal URL to 2p0 DAVEfunc.dtd",
+        "modification_id": "K"
+      }
+    ],
+    "name": "F-16 Subsonic Aerodynamics Model (a la Garza)",
+    "raw": {
+      "attributes": {
+        "name": "F-16 Subsonic Aerodynamics Model (a la Garza)"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2003-06-10"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Mod K, 2011-01-28"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "F-16 aero data file. Based on Morelli's adaptation of Stevens and Lewis' F-16 example [1] described in Garza & Morelli's TM [2]. Obtained from E. A. Morelli in the form of Matlab scripts [3] & [4]."
+        },
+        {
+          "attributes": {
+            "accession": "ISBN O-471-61397-5",
+            "author": "Stevens, Brian L. and Lewis, Frank L.",
+            "date": "1992",
+            "refID": "REF01",
+            "title": "Aircraft Control and Simulation"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "accession": "NASA TM-2003-212145",
+            "author": "Garza, Fredrico R.; and Morelli, Eugene A.",
+            "date": "2003-01",
+            "href": "http://techreports.larc.nasa.gov/ltrs/PDF/2003/tm/NASA-2003-tm212145.pdf",
+            "refID": "REF02",
+            "title": "A Collection of Nonlinear Aircraft Simulations in MATLAB"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "author": "Morelli, Eugene A.",
+            "date": "1995-06-17",
+            "refID": "REF03",
+            "title": "f16_aero.m"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "author": "Morelli, Eugene A.",
+            "date": "1995-06-17",
+            "refID": "REF04",
+            "title": "f16_aero_setup.m"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "author": "Bruce Jackson",
+            "date": "2004-02-13",
+            "refID": "NOTE1",
+            "title": "Checkcase data source"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "From E. A. Morelli's f16 matlab script, dated 09-Oct-2000; Generated using 'make_DAVEML_checkcases.m'"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2004-02-11",
+            "modID": "A"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added checkcase static shots and internal values for debugging purposes."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-16",
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected to DAVEfunc.dtd 1.9 standards: replaced xns with email; corrected dates to ANSI; replaced docIC with refID in documentRefs; added fileVersion element"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-28",
+            "modID": "C"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Resorted variableDefs so they appear in proper order, in response to bug report from Giovanni Cignoni. Reindented file using emacs nxml-mode."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2008-02-27",
+            "modID": "D"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Updated to DAVE-ML 2.0: replaced fileCreationDate and functionCreationDate with new creationDate element; changed to my email alias."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2008-10-08",
+            "modID": "E"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Updated to DAVE-ML 2.0: replaced signalID elements with varID elements in checkcase data."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2008-11-07",
+            "modID": "F"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Updated to new AIAA standard variable names."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-01-07",
+            "modID": "G"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Rev 400. Corrected description of MRC x-location constant; updated to Jan 10 S-119 units-of-measure encoding. Renamed deprecated griddedTables to griddedTableDefs."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-01-28",
+            "modID": "H"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Rev 403. Hopefully this time I fixed the problems with internal variable values for positive and negative pitch rate check cases, and with names of yaw rate check cases, originally cited by Trey Arthur and re-discovered by Missy Hill. Untabified (all whitespace are now spaces, not tabs for easier viewing in any text editor"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-05-10",
+            "modID": "I"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Removed auto revision field, since we're now under git. Added xmlns attribute to DAVEfunc to conform to DTD 2, RC3."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2011-01-07",
+            "modID": "J"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added namespace to <math> elements, xmlns attribute to DAVEfunc, and gtIDs to conform to DTD 2.0 RC4; corrected PUBLIC ID string."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2011-01-28",
+            "modID": "K"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected systemID in DOCTYPE to include full formal URL to 2p0 DAVEfunc.dtd"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "ISBN O-471-61397-5",
+          "author": "Stevens, Brian L. and Lewis, Frank L.",
+          "date": "1992",
+          "refID": "REF01",
+          "title": "Aircraft Control and Simulation"
+        },
+        "description": null,
+        "ref_id": "REF01"
+      },
+      {
+        "attributes": {
+          "accession": "NASA TM-2003-212145",
+          "author": "Garza, Fredrico R.; and Morelli, Eugene A.",
+          "date": "2003-01",
+          "href": "http://techreports.larc.nasa.gov/ltrs/PDF/2003/tm/NASA-2003-tm212145.pdf",
+          "refID": "REF02",
+          "title": "A Collection of Nonlinear Aircraft Simulations in MATLAB"
+        },
+        "description": null,
+        "ref_id": "REF02"
+      },
+      {
+        "attributes": {
+          "author": "Morelli, Eugene A.",
+          "date": "1995-06-17",
+          "refID": "REF03",
+          "title": "f16_aero.m"
+        },
+        "description": null,
+        "ref_id": "REF03"
+      },
+      {
+        "attributes": {
+          "author": "Morelli, Eugene A.",
+          "date": "1995-06-17",
+          "refID": "REF04",
+          "title": "f16_aero_setup.m"
+        },
+        "description": null,
+        "ref_id": "REF04"
+      },
+      {
+        "attributes": {
+          "author": "Bruce Jackson",
+          "date": "2004-02-13",
+          "refID": "NOTE1",
+          "title": "Checkcase data source"
+        },
+        "description": "From E. A. Morelli's f16 matlab script, dated 09-Oct-2000; Generated using 'make_DAVEML_checkcases.m'",
+        "ref_id": "NOTE1"
+      }
+    ]
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/F16_aero.dml"
+}

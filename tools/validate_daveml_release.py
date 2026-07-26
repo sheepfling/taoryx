@@ -38,7 +38,7 @@ def main() -> int:
         [python, "tools/validate_daveml_collection_roundtrip.py"],
         [python, "tools/validate_daveml_nesc_replay.py"],
         [python, "tools/validate_daveml_nesc_objectives.py"],
-        [python, "tools/canonical_daveml_roundtrip.py", "--catalog-root", "INBOX/taoryx-daveml-nesc-model-catalog-v1.0", "--output-dir", "build/daveml-release-catalog", "--summary-output", "verification/daveml_catalog_roundtrip.json"],
+        [python, "tools/canonical_daveml_roundtrip.py", "--catalog-root", "resources/aerospace/daveml/nesc-model-catalog-v1.0", "--output-dir", "build/daveml-release-catalog", "--summary-output", "verification/daveml_catalog_roundtrip.json"],
         [
             python,
             "tools/evaluate_daveml_checkdata.py",

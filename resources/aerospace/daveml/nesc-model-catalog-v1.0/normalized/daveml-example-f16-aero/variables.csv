@@ -1,0 +1,52 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+vt,trueAirspeed,f_s,V,,,,,,,isStdAIAA,False,"True airspeed, ft/sec"
+alpha,angleOfAttack,deg,α,,,,,,,isStdAIAA,False,"Instantaneous true angle-of-attack, in degrees"
+beta,angleOfSideslip,deg,β,,wind in right ear,,,,,isStdAIAA,False,"Instantaneous true angle-of-sideslip, in degrees"
+p,bodyAngularRate_Roll,rad_s,p,,right wing down,,,,,isStdAIAA,False,"Body roll rate, rad/sec"
+q,bodyAngularRate_Pitch,rad_s,q,,aircraft nose up,,,,,isStdAIAA,False,"Body pitch rate, rad/sec"
+r,bodyAngularRate_Yaw,rad_s,r,,aircraft nose right,,,,,isStdAIAA,False,"Body yaw rate, rad/sec"
+el,elevatorDeflection,deg,δe,,trailing edge down,,,,,isStdAIAA,False,"Elevator deflection angle, in degrees (+TED)"
+ail,aileronDeflection,deg,δa,,left roll,,,,,isStdAIAA,False,"Aileron deflection angle, in degrees (+LWD)"
+rdr,rudderDeflection,deg,δr,,TEL,,,,,isStdAIAA,False,"Rudder deflection angle, in degrees (+TEL)"
+xcg,bodyPositionOfCgWrtWingLeadingEdge_X,fracMAC,,,aft,,,,,isStdAIAA,False,"CG location relative to wing leading edge, expressed as a fraction of aerodynamic chord length"
+rtd,rtd,deg_rad,,,,,,,,,True,Conversion constant from radians to degrees
+xcgr,bodyPositionOfMrcWrtWingLeadingEdge_X,fracMAC,,,,,0.35,,,isStdAIAA,False,"Location of moment reference center relative to wing leading edge, expressed as a fraction of aerodynamic chord length."
+cbar,referenceWingChord,f,,,,,11.32,,,isStdAIAA,False,"Length of aerodynamic chord, ft"
+bspan,referenceWingSpan,f,,,,,30.0,,,isStdAIAA,False,"Length of aerodynamic span, ft"
+del,del,nd,,,,,,,,,True,Normalized elevator deflection (note range is beyond breakpoint range)
+dail,dail,nd,,,,,,,,,True,Normalized aileron deflection.
+drdr,drdr,nd,,,,,,,,,True,Normalized rudder deflection.
+cxt,CX0,nd,,,forward,,,,,,False,Basic coefficient of force in the X-body direction (+FWD). Function table based on angle of attack and elevator deflection.
+cy0,CY0,nd,,,right,,,,,,True,"Basic coefficient of force in the Y-body direction (+right). Function of sideslip angle, aileron and rudder deflection."
+czt,CZ0,nd,,,down,,,,,,False,Basic coefficient of force in the Z-body direction (+DWN). Function table based on angle of attack and elevator deflection.
+cz1,CZ1,nd,,,down,,,,,,True,"Coefficient of force in the Z-body direction, modified from basic CZ0 to include effects of sideslip and elevator deflection."
+tvt,tvt,f_s,,,,,,,,,True,Twice velocity.
+b2v,b2v,nd,,,,,,,,,True,Wing span over 2 times velocity. Used for coefficient normalization.
+cq2v,cq2v,nd,,,,,,,,,True,Chord times pitch rate over 2 times velocity. Used to normalize aero coefficients.
+absbeta,absbeta,deg,,,,,,,,,True,"Absolute value of angle-of-sideslip, deg."
+absCl0,absCl0,nd,,,,,,,,,False,Absolute value of rolling moment coefficient
+absCn0,absCn0,nd,,,,,,,,,False,Absolute value of yawing moment coefficient
+clt,Cl0,nd,,,right wing down,,,,,,True,Basic coefficient of moment around the X-body direction (roll) (+RWD)
+cmt,Cm0,nd,,,nose up,,,,,,False,Basic coefficient of moment around the Y-body direction (pitch) (+ANU)
+cnt,Cn0,nd,,,nose right,,,,,,True,Basic coefficient of moment around the Z-body direction (yaw) (+RWD)
+cxq,CXq,_rad,,,fwd/+up,,,,,,False,Damping derivative: axial force increment per radian/sec of pitch rate
+cyr,CYr,_rad,,,right/+right,,,,,,False,Damping derivative: lateral force increment per radian/sec of yaw rate
+cyp,CYp,_rad,,,right/+right,,,,,,False,Damping derivative: lateral force increment per radian/sec of roll rate
+czq,CZq,_rad,,,down/+up,,,,,,False,Damping derivative: vertical force increment per radian/sec of pitch rate
+clr,Clr,_rad,,,right/+right,,,,,,False,Damping derivative: rolling moment increment per radian/sec of yaw rate
+clp,Clp,s_rad,,,right/+right,,,,,,False,Damping derivative: rolling moment increment per radian/sec of roll rate
+cmq,Cmq,s_rad,,,up/+up,,,,,,False,Damping derivative: pitching moment increment per radian/sec of pitch rate
+cnr,Cnr,s_rad,,,right/+right,,,,,,False,Damping derivative: yawing moment increment per radian/sec of yaw rate
+cnp,Cnp,s_rad,,,right/+right,,,,,,False,Damping derivative: yawing moment increment per radian/sec of roll rate
+dclda,ClDA,_deg,,,right/+left,,,,,,False,Control power derivative: rolling moment per deg of aileron deflection
+dcldr,ClDR,_deg,,,right/+left,,,,,,False,Control power derivative: rolling moment per deg of rudder deflection
+dcnda,CnDA,_deg,,,right/+left,,,,,,False,Control power derivative: yawing moment per deg of aileron deflection
+dcndr,CnDR,_deg,,,right/+left,,,,,,False,Control power derivative: yawing moment per deg of rudder deflection
+cl1,Cl1,nd,,,,,,,,,True,"Initial value of rolling moment, less damping terms"
+cn1,Cn,nd,,,,,,,,,True,Initial value of rolling moment coefficient without damping terms
+cx,aeroBodyForceCoefficient_X,nd,,,FWD,,,,,isOutput;isStdAIAA,True,Total coefficient of force along the body X-axis.
+cy,aeroBodyForceCoefficient_Y,nd,,,RIGHT,,,,,isOutput;isStdAIAA,True,Total coefficient of force along the body Y-axis
+cz,aeroBodyForceCoefficient_Z,nd,,,DOWN,,,,,isOutput;isStdAIAA,True,Total coefficient of force along the body Z-axis.
+cl,aeroBodyMomentCoefficient_Roll,nd,,,RWD,,,,,isOutput;isStdAIAA,True,Total coefficient of moment around the body X-axis (rolling moment)
+cm,aeroBodyMomentCoefficient_Pitch,nd,,,ANU,,,,,isOutput;isStdAIAA,True,Total coefficient of moment around the body Y-axis (pitching moment)
+cn,aeroBodyMomentCoefficient_Yaw,nd,,,ANR,,,,,isOutput;isStdAIAA,True,Total coefficient of moment around the body Z-axis (yawing moment)

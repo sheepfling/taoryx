@@ -71,7 +71,7 @@ def test_nesc_two_stage_rocket_replays_qualified_benchmark_evidence() -> None:
     """The NESC rocket uses benchmark/schedule evidence instead of trim hold."""
 
     package = Path(__file__).parents[2] / (
-        "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/"
+        "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/"
         "nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair"
     )
 

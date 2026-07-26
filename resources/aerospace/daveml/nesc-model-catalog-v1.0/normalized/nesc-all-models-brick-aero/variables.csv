@@ -1,0 +1,22 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+SWING,referenceWingArea,ft2,,,,,0.22222,,,isOutput;isStdAIAA,False,"Reference area of brick aero model (assumed area is 8"" by 4"")"
+BSPAN,referenceWingSpan,ft,,,,,0.33333,,,isOutput;isStdAIAA,False,"Width of brick model (4""), used as reference lateral length"
+CBAR,referenceWingChord,ft,,,,,0.66667,,,isOutput;isStdAIAA,False,"Length of brick model (8""), used as reference longitudinal length"
+CLP_DAMPING,roll damping from roll rate,_rad,,,,,-1.0,,,,False,Constant fake roll damping due to roll rate of brick test vehicle
+CLR_DAMPING,roll damping from yaw rate,_rad,,,,,0.0,,,,False,Constant fake roll damping due to yaw rate of brick test vehicle
+CMQ_DAMPING,pitch damping from pitch rate,_rad,,,,,-1.0,,,,False,Constant fake pitch damping of brick test vehicle
+CNP_DAMPING,yaw damping from roll rate,_rad,,,,,0.0,,,,False,Constant fake yaw damping due to roll rate of brick test vehicle
+CNR_DAMPING,yaw damping from yaw rate,_rad,,,,,-1.0,,,,False,Constant fake yaw damping due to yaw rate of brick test vehicle
+VRW,trueAirspeed,ft_s,,,,,,0.5,,isInput;isStdAIAA,False,"Velocity of vehicle w.r.t. airmass, ft/sec (always +)"
+PB,bodyAngularRate_Roll,rad_s,,,RWD,,,,,isInput;isStdAIAA,False,"Body-axis roll rate, radians/sec (+right wing down)"
+QB,bodyAngularRate_Pitch,rad_s,,,ANU,,,,,isInput;isStdAIAA,False,"Body-axis pitch rate, radians/sec (+aircraft nose up)"
+RB,bodyAngularRate_Yaw,rad_s,,,ANR,,,,,isInput;isStdAIAA,False,"Body-axis yaw rate, radians/sec (+aircraft nose right)"
+PBO2V,PBO2V,nd,,,,,,,,,True,Non-dimensionalized body roll rate w.r.t. airmass
+QCO2V,QCO2V,nd,,,,,,,,,True,Non-dimensionalized body pitch rate w.r.t. airmass
+RBO2V,RBO2V,nd,,,,,,,,,True,Non-dimensionalized body yaw rate w.r.t. airmass
+CL,totalCoefficientOfLift,nd,,,,,0.0,,,isOutput;isStdAIAA,False,Coefficient of Lift
+CD,totalCoefficientOfDrag,nd,,,,,0.01,,,isOutput;isStdAIAA,False,Fake coefficient of drag for a standard brick
+CY,aeroBodyForceCoefficient_Y,nd,,,,,0.0,,,isOutput;isStdAIAA,False,Coefficient of Sideforce
+Cl,aeroBodyMomentCoefficient_Roll,nd,,,,,,,,isOutput;isStdAIAA,True,Cl = Clp*pb/2V + Clr*rb/2V
+Cm,aeroBodyMomentCoefficient_Pitch,nd,,,,,,,,isOutput;isStdAIAA,True,Cm = Cmq*qc/2V
+Cn,aeroBodyMomentCoefficient_Yaw,nd,,,,,,,,isOutput;isStdAIAA,True,Cn = Cnp*pb/2V + Cnr*rb/2V

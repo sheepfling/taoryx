@@ -1,0 +1,11 @@
+{
+  "row_counts": {
+    "tables/aerodynamic-force-coefficients.csv": 11,
+    "tables/aerodynamic-moment-coefficients.csv": 3,
+    "tables/mass-properties-schedule.csv": 204,
+    "tables/mission-events.csv": 5,
+    "tables/propulsion-stages.csv": 2,
+    "validation/nasa-sim06-checkpoints.csv": 11
+  },
+  "total_rows": 236
+}

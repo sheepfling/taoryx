@@ -1,0 +1,55 @@
+{
+  "commit": "70754e6916afc206e8c0abb386d1a9c98bf8f561",
+  "license": "NASA Open Source Agreement Version 1.3",
+  "normalization": {
+    "byte_identical_to_upstream": false,
+    "description": "The package contains deterministic semantic reconstructions of the three pinned DAVE-ML models. Upstream paths and Git blob SHAs are retained for exact retrieval."
+  },
+  "normalized_artifacts": {
+    "source/nesc/twostage_aero.normalized.dml": {
+      "sha256": "d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6",
+      "size_bytes": 4548
+    },
+    "source/nesc/twostage_inertia.normalized.dml": {
+      "sha256": "388d2192c337c380dd4ebe6d7678815b3b384733113803509eb1298d1a3192cd",
+      "size_bytes": 5565
+    },
+    "source/nesc/twostage_prop.normalized.dml": {
+      "sha256": "9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4",
+      "size_bytes": 2853
+    }
+  },
+  "reference_trajectories": [
+    {
+      "git_blob_sha": "8ea7d10d070d8fb4cede0d0034ad2e46ab6a93d1",
+      "path": "NESC_data/Atmospheric_checkcases/Atmos_17_TwoStageRocketToOrbit/Atmos_17_sim_04.csv"
+    },
+    {
+      "git_blob_sha": "2d80997833cde5c019119cc1317a3f0a2f75238e",
+      "path": "NESC_data/Atmospheric_checkcases/Atmos_17_TwoStageRocketToOrbit/Atmos_17_sim_05.csv"
+    },
+    {
+      "git_blob_sha": "badf899d06d9150acc52011267e6a357bedfffc5",
+      "path": "NESC_data/Atmospheric_checkcases/Atmos_17_TwoStageRocketToOrbit/Atmos_17_sim_06.csv"
+    }
+  ],
+  "repository": "nasa/simupy-flight",
+  "source_files": [
+    {
+      "git_blob_sha": "8415a58f0cd1ec5c0ae3a9881813e5e473c25b13",
+      "path": "NESC_data/All_models/two-stage_package/twostage_aero.dml"
+    },
+    {
+      "git_blob_sha": "a8050f8673b224f32d9fb85991fdba224cb2948a",
+      "path": "NESC_data/All_models/two-stage_package/twostage_prop.dml"
+    },
+    {
+      "git_blob_sha": "5e1a1d5a16daf6ebaf3cd8e305d95f2690011155",
+      "path": "NESC_data/All_models/two-stage_package/twostage_inertia.dml"
+    },
+    {
+      "git_blob_sha": "e684ae988496d5d71fb668ba6f3128a7ade64eec",
+      "path": "NESC_data/All_models/two-stage_package/README.html"
+    }
+  ]
+}

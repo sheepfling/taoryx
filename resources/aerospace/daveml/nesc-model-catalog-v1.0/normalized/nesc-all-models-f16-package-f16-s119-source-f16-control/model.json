@@ -1,0 +1,4914 @@
+{
+  "breakpoints": [],
+  "check_cases": [],
+  "check_data_provenance": [],
+  "container_sha256": "bca7789dde61b741de69f697ce8799ee666214d0e1fa203973523774fc3a969b",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "bca7789dde61b741de69f697ce8799ee666214d0e1fa203973523774fc3a969b",
+  "document_size_bytes": 39614,
+  "functions": [],
+  "gridded_tables": [],
+  "header": {
+    "attributes": {
+      "name": "F-16 simple control system"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2012-08-09",
+    "description": "Control system for DAVE-ML example F-16 aircraft model. Includes LQR inner-loop and loop-closure outerloop autopilot to follow altitude, courseline, and airspeed commands. The gains are set for a nominal flight condition of 10,013 ft MSL at Mach 0.525 (565.7 ft/s true airspeed or 287.8 kt equivalent) which correspond with atmospheric scenarios 11, 13, 15 and 16 of reference 1. Inputs are pilot primary flight controls, autopilot settings, mode selection flags, and feedback of various flight condition parameters. Outputs are control surface deflection commands for the F-16 described in reference 2.",
+    "file_version": "Revision F, 2013-10-22",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2013-01-03",
+          "modID": "A"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-01-03",
+        "description": "The original version of this model, dated 2012-08-09, was a simple mixer that took pilot controls and converted them into control surface deflections directly. This version includes an LQR-designed longitudinal and lateral-directional stabilization system as well as logic to follow altitude, airspeed, and ground track angle. Lateral offset from course feedback can be provided to improve performance or zero can be provided for just a heading command feature.",
+        "modification_id": "A"
+      },
+      {
+        "attributes": {
+          "date": "2013-01-09",
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-01-09",
+        "description": "Provided values for trimmed stick and throttle.",
+        "modification_id": "B"
+      },
+      {
+        "attributes": {
+          "date": "2013-01-11",
+          "modID": "C"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-01-11",
+        "description": "Moved trim values to proper location in file (no effect on realizations, just easier for humans to interpret).",
+        "modification_id": "C"
+      },
+      {
+        "attributes": {
+          "date": "2013-06-06",
+          "modID": "D"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-06-06",
+        "description": "At the suggestion of Michael Madden, changed trimmedPilotControl_throttle and trimmedPilotControl_long variables into inputs. While their trimmed values are given for my Simulink sim, small difference in atmosphere and gravitation models may require slightly different values in other implementations.",
+        "modification_id": "D"
+      },
+      {
+        "attributes": {
+          "date": "2013-09-12",
+          "modID": "E"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-09-12",
+        "description": "After finding an error in the implementation of the subsonic aero database, new trim values for stick and throttle were generated and place here in the longStkTrim and throttleTrim constants. Also updated LQR gain matrices.",
+        "modification_id": "E"
+      },
+      {
+        "attributes": {
+          "date": "2013-10-22",
+          "modID": "F"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2013-10-22",
+        "description": "Incorporated OR function to ensure stability augmentation is on if autopilot function has been selected.",
+        "modification_id": "F"
+      }
+    ],
+    "name": "F-16 simple control system",
+    "raw": {
+      "attributes": {
+        "name": "F-16 simple control system"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2012-08-09"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Revision F, 2013-10-22"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Control system for DAVE-ML example F-16 aircraft model. Includes LQR inner-loop and loop-closure outerloop autopilot to follow altitude, courseline, and airspeed commands. The gains are set for a nominal flight condition of 10,013 ft MSL at Mach 0.525 (565.7 ft/s true airspeed or 287.8 kt equivalent) which correspond with atmospheric scenarios 11, 13, 15 and 16 of reference 1. Inputs are pilot primary flight controls, autopilot settings, mode selection flags, and feedback of various flight condition parameters. Outputs are control surface deflection commands for the F-16 described in reference 2."
+        },
+        {
+          "attributes": {
+            "author": "Jackson, E. Bruce; Shelton, Robert O.; et al.",
+            "date": "2013-08-00",
+            "refID": "REF01",
+            "title": "Development of Verification Data for Flight Simulations"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "A planned AIAA report describing the efforts to generate checkcase data for flight simulations of simple aerospacecraft for use in gaining confidence in other flight simulation tools. To be presented at the 2013 AIAA Modeling and Simulation Conference in Boston, MA, August 2013."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "accession": "NASA TM-2003-212145",
+            "author": "Garza, Fredrico R.; and Morelli, Eugene A.",
+            "date": "2003-01",
+            "href": "http://techreports.larc.nasa.gov/ltrs/PDF/2003/tm/NASA-2003-tm212145.pdf",
+            "refID": "REF02",
+            "title": "A Collection of Nonlinear Aircraft Simulations in MATLAB"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-01-03",
+            "modID": "A"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "The original version of this model, dated 2012-08-09, was a simple mixer that took pilot controls and converted them into control surface deflections directly. This version includes an LQR-designed longitudinal and lateral-directional stabilization system as well as logic to follow altitude, airspeed, and ground track angle. Lateral offset from course feedback can be provided to improve performance or zero can be provided for just a heading command feature."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-01-09",
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Provided values for trimmed stick and throttle."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-01-11",
+            "modID": "C"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Moved trim values to proper location in file (no effect on realizations, just easier for humans to interpret)."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-06-06",
+            "modID": "D"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "At the suggestion of Michael Madden, changed trimmedPilotControl_throttle and trimmedPilotControl_long variables into inputs. While their trimmed values are given for my Simulink sim, small difference in atmosphere and gravitation models may require slightly different values in other implementations."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-09-12",
+            "modID": "E"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "After finding an error in the implementation of the subsonic aero database, new trim values for stick and throttle were generated and place here in the longStkTrim and throttleTrim constants. Also updated LQR gain matrices."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2013-10-22",
+            "modID": "F"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Incorporated OR function to ensure stability augmentation is on if autopilot function has been selected."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "author": "Jackson, E. Bruce; Shelton, Robert O.; et al.",
+          "date": "2013-08-00",
+          "refID": "REF01",
+          "title": "Development of Verification Data for Flight Simulations"
+        },
+        "description": "A planned AIAA report describing the efforts to generate checkcase data for flight simulations of simple aerospacecraft for use in gaining confidence in other flight simulation tools. To be presented at the 2013 AIAA Modeling and Simulation Conference in Boston, MA, August 2013.",
+        "ref_id": "REF01"
+      },
+      {
+        "attributes": {
+          "accession": "NASA TM-2003-212145",
+          "author": "Garza, Fredrico R.; and Morelli, Eugene A.",
+          "date": "2003-01",
+          "href": "http://techreports.larc.nasa.gov/ltrs/PDF/2003/tm/NASA-2003-tm212145.pdf",
+          "refID": "REF02",
+          "title": "A Collection of Nonlinear Aircraft Simulations in MATLAB"
+        },
+        "description": null,
+        "ref_id": "REF02"
+      }
+    ]
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/F16_package/F16_S119_source/F16_control.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1.0",
+        "minValue": "0.0",
+        "name": "pilotControl_throttle",
+        "units": "frac",
+        "varID": "throttle"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Pilot throttle control position",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": 0.0,
+      "name": "pilotControl_throttle",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "throttle"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1.0",
+        "minValue": "-1.0",
+        "name": "pilotControl_long",
+        "sign": "+AFT",
+        "units": "frac",
+        "varID": "longStk"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Longitudinal (pitch) control position",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": -1.0,
+      "name": "pilotControl_long",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+AFT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "longStk"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1.0",
+        "minValue": "-1.0",
+        "name": "pilotControl_lat",
+        "sign": "+RWD",
+        "units": "frac",
+        "varID": "latStk"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Lateral (roll) control position",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": -1.0,
+      "name": "pilotControl_lat",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+RWD",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "latStk"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1.0",
+        "minValue": "-1.0",
+        "name": "pilotControl_yaw",
+        "sign": "+ANR",
+        "units": "frac",
+        "varID": "pedal"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Directional (yaw) control position",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": -1.0,
+      "name": "pilotControl_yaw",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+ANR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "pedal"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "stabilityAugmentationOn_disc",
+        "units": "nd",
+        "varID": "sasOn"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Stability augmentation engage flag (discrete); 1 = SAS engaged, 0 = SAS off",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "stabilityAugmentationOn_disc",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "sasOn"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "autopilotOn_disc",
+        "units": "nd",
+        "varID": "apOn"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Autopilot engage flag (discrete); 1 = AP engaged, 0 = AP off (forces SAS on)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "autopilotOn_disc",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "apOn"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "equivalentAirspeedCommand",
+        "units": "nmi_h",
+        "varID": "keasCmd"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Equivalent airspeed command (kt) to autospeed logic",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "equivalentAirspeedCommand",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nmi_h",
+      "variable_id": "keasCmd"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "altitudeMslCommand",
+        "units": "ft",
+        "varID": "altCmd"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Commanded altitude above sea level (ft) for autopilot",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "altitudeMslCommand",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "altCmd"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "lateralDeviationError",
+        "sign": "+RT",
+        "units": "ft",
+        "varID": "latOffset"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Lateral deviation from desired courseline (ft, +right of course) for autopilot",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "lateralDeviationError",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": "+RT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "latOffset"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "trueBaseCourseCommand",
+        "sign": "+CCFN",
+        "units": "deg",
+        "varID": "baseChiCmd"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "True heading of desired ground track (deg, +clockwise from north) for autopilot",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "trueBaseCourseCommand",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": "+CCFN",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "baseChiCmd"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "altitudeMsl",
+        "units": "ft",
+        "varID": "altMsl"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Geometric altitude above mean sea level (ft)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "altitudeMsl",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "altMsl"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "equivalentAirspeed",
+        "units": "nmi_h",
+        "varID": "Vequiv"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Equivalent airspeed (kt)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "equivalentAirspeed",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nmi_h",
+      "variable_id": "Vequiv"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "angleOfAttack",
+        "units": "deg",
+        "varID": "alpha"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Angle of attack (deg)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "angleOfAttack",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "alpha"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "angleOfSideslip",
+        "sign": "+RT",
+        "units": "deg",
+        "varID": "beta"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Angle of sideslipe (deg), +wind in the pilot's right ear",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "angleOfSideslip",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+RT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "beta"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "eulerAngle_Roll",
+        "sign": "+RWD",
+        "units": "deg",
+        "varID": "phi"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Roll angle of vehicle relative to local level (deg), +right wing down",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "eulerAngle_Roll",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+RWD",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "phi"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "eulerAngle_Pitch",
+        "sign": "+ANU",
+        "units": "deg",
+        "varID": "theta"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Pitch angle of vehicle relative to local level (deg), +nose up",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "eulerAngle_Pitch",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+ANU",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "theta"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "eulerAngle_Yaw",
+        "sign": "+CWFN",
+        "units": "deg",
+        "varID": "psi"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Yaw angle of vehicle relative to true North (deg), +clockwise",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "eulerAngle_Yaw",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+CWFN",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "psi"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "bodyAngularRate_Roll",
+        "sign": "+RWD",
+        "units": "rad_s",
+        "varID": "pb"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Vehicle body-axis roll rate (rad/s), +right wing down",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyAngularRate_Roll",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+RWD",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "rad_s",
+      "variable_id": "pb"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "bodyAngularRate_Pitch",
+        "sign": "+ANU",
+        "units": "rad_s",
+        "varID": "qb"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Vehicle body-axis pitch rate (rad/s), +aircraft nose up",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyAngularRate_Pitch",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+ANU",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "rad_s",
+      "variable_id": "qb"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "bodyAngularRate_Yaw",
+        "sign": "+ANR",
+        "units": "rad_s",
+        "varID": "rb"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Vehicle body-axis yaw rate (rad/s) +aircraft nose right",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyAngularRate_Yaw",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+ANR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "rad_s",
+      "variable_id": "rb"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.1390191130965607",
+        "name": "trimmedPilotControl_throttle",
+        "units": "frac",
+        "varID": "throttleTrim"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Trimmed position of throttle",
+      "initial_value": 0.1390191130965607,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "trimmedPilotControl_throttle",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "throttleTrim"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.1296382327486013",
+        "name": "trimmedPilotControl_long",
+        "sign": "+AFT",
+        "units": "frac",
+        "varID": "longStkTrim"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Trimmed position of pitch control",
+      "initial_value": 0.1296382327486013,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "trimmedPilotControl_long",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": "+AFT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "longStkTrim"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "forceStabAugOn_disc",
+        "units": "nd",
+        "varID": "fsasOn"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "sasOn"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "apOn"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "This flag is on ( > 0.5) if either stability augmentation or autopilot functions have been selected on to ensure stability if autopilot has been requested; 1 = SAS engaged, 0 = SAS off",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "forceStabAugOn_disc",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "fsasOn"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "-0.05",
+        "name": "autopilotAltErrorFeedbackGain",
+        "units": "deg_ft",
+        "varID": "thetaCmdAltErrGain"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Gain in altitude compensator to vary pitch angle from trimmed based on altitude error; positive altitude error (meaning above reference altitude) results in a reduction of commanded pitch angle.",
+      "initial_value": -0.05,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "autopilotAltErrorFeedbackGain",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg_ft",
+      "variable_id": "thetaCmdAltErrGain"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "autopilotAltitudeError",
+        "sign": "+HI",
+        "units": "ft",
+        "varID": "altErr"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "altMsl"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "altCmd"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Error between commanded and actual altitude (ft). Positive if above commanded altitude.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "autopilotAltitudeError",
+      "provenance": null,
+      "roles": [],
+      "sign": "+HI",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "altErr"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "5",
+        "minValue": "-5",
+        "name": "autopilotDeltaPitchCmd",
+        "sign": "+ANU",
+        "units": "deg",
+        "varID": "deltaThetaCmd"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "altErr"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "thetaCmdAltErrGain"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Calculates change in pitch attitude from trimmed value to correct an error in altitude.",
+      "initial_value": null,
+      "maximum_value": 5.0,
+      "minimum_value": -5.0,
+      "name": "autopilotDeltaPitchCmd",
+      "provenance": null,
+      "roles": [],
+      "sign": "+ANU",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "deltaThetaCmd"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "autopilotPitchCmd",
+        "sign": "+ANU",
+        "units": "deg",
+        "varID": "thetaCmd"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "deltaThetaCmd"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "trimmedTheta"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Captures and tracks commanded altitude by varying pitch attitude from trimmed value based on altitude error.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "autopilotPitchCmd",
+      "provenance": null,
+      "roles": [],
+      "sign": "+ANU",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "thetaCmd"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "trackAngleEst",
+        "sign": "+CWFN",
+        "units": "deg",
+        "varID": "chiEst"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "beta"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "psi"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "A quick-and-dirty estimate of vehicle track angle (course angle); reasonable for small pitch and roll angles.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "trackAngleEst",
+      "provenance": null,
+      "roles": [],
+      "sign": "+CWFN",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "chiEst"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "-0.01",
+        "name": "autopilotLatOffsetErrorFeedbackGain",
+        "units": "deg_ft",
+        "varID": "chiCmdYErrGain"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Gain in lateral autopilot to vary true heading angle from base course based on lateral offset error; positive lateral offset error (meaning right of courseline) results in a reduction of commanded heading angle.",
+      "initial_value": -0.01,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "autopilotLatOffsetErrorFeedbackGain",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg_ft",
+      "variable_id": "chiCmdYErrGain"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "-10",
+        "name": "autopilotTrackErrorFeedbackGain",
+        "units": "deg_deg",
+        "varID": "phiCmdChiErrGain"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Gain in lateral autopilot to set commanded bank angle based on track angle error; positive track angle error (meaning heading more clockwise from desired track angle) results in a negative bank angle command.",
+      "initial_value": -10.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "autopilotTrackErrorFeedbackGain",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg_deg",
+      "variable_id": "phiCmdChiErrGain"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "30",
+        "minValue": "-30",
+        "name": "autopilotCourseCorrection",
+        "sign": "+CW",
+        "units": "deg",
+        "varID": "deltaChiCmd"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "chiCmdYErrGain"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "latOffset"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Commanded track angle adjustment from base course to intercept and/or track desired course; limited to a specified range.",
+      "initial_value": null,
+      "maximum_value": 30.0,
+      "minimum_value": -30.0,
+      "name": "autopilotCourseCorrection",
+      "provenance": null,
+      "roles": [],
+      "sign": "+CW",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "deltaChiCmd"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "autopilotCourseCommand",
+        "sign": "+CWFN",
+        "units": "deg",
+        "varID": "chiCmd"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "deltaChiCmd"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "baseChiCmd"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Commanded true track angle to intercept and/or track desired course.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "autopilotCourseCommand",
+      "provenance": null,
+      "roles": [],
+      "sign": "+CWFN",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "chiCmd"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "autopilotTrackError",
+        "sign": "+CW",
+        "units": "deg",
+        "varID": "chiErrUnwrapped"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "chiEst"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "chiCmd"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "The difference between commanded and actual true track angle; positive indicates actual track is more clockwise (yawed right) than commanded. This value is not limited to +/- 180 deg.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "autopilotTrackError",
+      "provenance": null,
+      "roles": [],
+      "sign": "+CW",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "chiErrUnwrapped"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "autopilotTrackErrorWrapped",
+        "units": "deg",
+        "varID": "chiErr"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [
+                                  {
+                                    "attributes": {},
+                                    "children": [
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "minus",
+                                        "text": null
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "ci",
+                                        "text": "chiErrUnwrapped"
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "cn",
+                                        "text": "360.0"
+                                      }
+                                    ],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "apply",
+                                    "text": null
+                                  },
+                                  {
+                                    "attributes": {},
+                                    "children": [
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "gt",
+                                        "text": null
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "ci",
+                                        "text": "chiErrUnwrapped"
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "cn",
+                                        "text": "0."
+                                      }
+                                    ],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "apply",
+                                    "text": null
+                                  }
+                                ],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "piece",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [
+                                  {
+                                    "attributes": {},
+                                    "children": [
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "plus",
+                                        "text": null
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "ci",
+                                        "text": "chiErrUnwrapped"
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "cn",
+                                        "text": "360.0"
+                                      }
+                                    ],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "apply",
+                                    "text": null
+                                  }
+                                ],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "otherwise",
+                                "text": null
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "piecewise",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "abs",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "chiErrUnwrapped"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "180.0"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "chiErrUnwrapped"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "This is the track angle error resolved into a range of +/- 180 deg.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "autopilotTrackErrorWrapped",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "chiErr"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "30",
+        "minValue": "-30",
+        "name": "autopilotCommandedBankAngle",
+        "sign": "+RWD",
+        "units": "deg",
+        "varID": "phiCmd"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "phiCmdChiErrGain"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "chiErr"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Generate bank angle command to move back on-course",
+      "initial_value": null,
+      "maximum_value": 30.0,
+      "minimum_value": -30.0,
+      "name": "autopilotCommandedBankAngle",
+      "provenance": null,
+      "roles": [],
+      "sign": "+RWD",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "phiCmd"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "2.653813535191715",
+        "name": "designAngleOfAttack",
+        "units": "deg",
+        "varID": "trimmedAlpha"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Flight control system design angle of attack (deg)",
+      "initial_value": 2.653813535191715,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "designAngleOfAttack",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "trimmedAlpha"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "2.653813535191715",
+        "name": "designEulerAngle_Pitch",
+        "sign": "+ANU",
+        "units": "deg",
+        "varID": "trimmedTheta"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Flight control system design pitch angle of vehicle relative to local level (deg), +nose up",
+      "initial_value": 2.653813535191715,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "designEulerAngle_Pitch",
+      "provenance": null,
+      "roles": [],
+      "sign": "+ANU",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "trimmedTheta"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "2.878088596053291e+02",
+        "name": "designEquivalentAirspeed",
+        "units": "nim_h",
+        "varID": "trimmedKEAS"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Flight control system design equivalent airspeed (kt)",
+      "initial_value": 287.8088596053291,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "designEquivalentAirspeed",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nim_h",
+      "variable_id": "trimmedKEAS"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedKEAScmd",
+        "units": "nmi_h",
+        "varID": "keasCmdSw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "keasCmd"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "apOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "trimmedKEAS"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Velocity reference used to calculate velocity disturbance to feed into LQR SAS. If the autopilot select flag is on, use the commanded airspeed as the reference value; if not, use the trimmed airspeed as the reference value.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedKEAScmd",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nmi_h",
+      "variable_id": "keasCmdSw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedThetaCmd",
+        "units": "deg",
+        "varID": "thetaCmdSw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "thetaCmd"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "apOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "trimmedTheta"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Pitch attitude reference used to calculate pitch angle disturbance to feed into LQR SAS. If the autopilot select flag is on, use the commanded pitch attitude as the reference value; if not, use the trimmed pitch attitude as the reference value.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedThetaCmd",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "thetaCmdSw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedPhiCmd",
+        "units": "deg",
+        "varID": "phiCmdSw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "phiCmd"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "apOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0."
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Roll attitude reference used to calculate roll angle disturbance to feed into LQR SAS. If the autopilot select flag is on, use the commanded roll attitude as the reference value; if not, use 0 as the reference value.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedPhiCmd",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "phiCmdSw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "-0.063009074230494",
+        "name": "longLQR_gain_matrix_11",
+        "units": "h_nmi",
+        "varID": "longLQR11"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to stick with change in airspeed (per kt)",
+      "initial_value": -0.063009074230494,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "longLQR_gain_matrix_11",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "h_nmi",
+      "variable_id": "longLQR11"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.113230403179271",
+        "name": "longLQR_gain_matrix_12",
+        "units": "_deg",
+        "varID": "longLQR12"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to stick with change in angle of attack (per deg)",
+      "initial_value": 0.113230403179271,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "longLQR_gain_matrix_12",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "_deg",
+      "variable_id": "longLQR12"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "10.113432224566077",
+        "name": "longLQR_gain_matrix_13",
+        "units": "s_r",
+        "varID": "longLQR13"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to stick with change in pitch rate (per rad/s)",
+      "initial_value": 10.113432224566077,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "longLQR_gain_matrix_13",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "s_r",
+      "variable_id": "longLQR13"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "3.154983341632913",
+        "name": "longLQR_gain_matrix_14",
+        "units": "_deg",
+        "varID": "longLQR14"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to stick with change in pitch angle (per deg)",
+      "initial_value": 3.154983341632913,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "longLQR_gain_matrix_14",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "_deg",
+      "variable_id": "longLQR14"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.997260602961658",
+        "name": "longLQR_gain_matrix_21",
+        "units": "h_nmi",
+        "varID": "longLQR21"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to throttle fraction with change in airspeed",
+      "initial_value": 0.997260602961658,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "longLQR_gain_matrix_21",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "h_nmi",
+      "variable_id": "longLQR21"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "-0.025467711176391",
+        "name": "longLQR_gain_matrix_22",
+        "units": "_deg",
+        "varID": "longLQR22"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to throttle fraction with change in angle of attack (per deg)",
+      "initial_value": -0.025467711176391,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "longLQR_gain_matrix_22",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "_deg",
+      "variable_id": "longLQR22"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "1.213308488207827",
+        "name": "longLQR_gain_matrix_23",
+        "units": "s_r",
+        "varID": "longLQR23"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to throttle fraction with change in pitch rate (per rad/s)",
+      "initial_value": 1.213308488207827,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "longLQR_gain_matrix_23",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "s_r",
+      "variable_id": "longLQR23"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.208744369535208",
+        "name": "longLQR_gain_matrix_24",
+        "units": "_deg",
+        "varID": "longLQR24"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to throttle fraction with change in pitch angle (per deg)",
+      "initial_value": 0.208744369535208,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "longLQR_gain_matrix_24",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "_deg",
+      "variable_id": "longLQR24"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "3.078043941515770",
+        "name": "latdLQR_gain_matrix_11",
+        "units": "_deg",
+        "varID": "latdLQR11"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to lat stick with change in roll angle (per deg)",
+      "initial_value": 3.07804394151577,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "latdLQR_gain_matrix_11",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "_deg",
+      "variable_id": "latdLQR11"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.032365863044163",
+        "name": "latdLQR_gain_matrix_12",
+        "units": "_deg",
+        "varID": "latdLQR12"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to lat stick with change in sideslip angle (per deg)",
+      "initial_value": 0.032365863044163,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "latdLQR_gain_matrix_12",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "_deg",
+      "variable_id": "latdLQR12"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "4.557858908828332",
+        "name": "latdLQR_gain_matrix_13",
+        "units": "s_r",
+        "varID": "latdLQR13"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to lat stick with change in roll rate (per rad/s)",
+      "initial_value": 4.557858908828332,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "latdLQR_gain_matrix_13",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "s_r",
+      "variable_id": "latdLQR13"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.589443156647647",
+        "name": "latdLQR_gain_matrix_14",
+        "units": "s_r",
+        "varID": "latdLQR14"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to lat stick with change in yaw rate (per rad/s)",
+      "initial_value": 0.589443156647647,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "latdLQR_gain_matrix_14",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "s_r",
+      "variable_id": "latdLQR14"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "-0.705817452754520",
+        "name": "latdLQR_gain_matrix_21",
+        "units": "_deg",
+        "varID": "latdLQR21"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to rudder pedal input with change in roll angle (per deg)",
+      "initial_value": -0.70581745275452,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "latdLQR_gain_matrix_21",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "_deg",
+      "variable_id": "latdLQR21"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "-0.256362860634868",
+        "name": "latdLQR_gain_matrix_22",
+        "units": "_deg",
+        "varID": "latdLQR22"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to rudder pedal input with change in sideslip angle (per deg)",
+      "initial_value": -0.256362860634868,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "latdLQR_gain_matrix_22",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "_deg",
+      "variable_id": "latdLQR22"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "-1.073666149713151",
+        "name": "latdLQR_gain_matrix_23",
+        "units": "s_r",
+        "varID": "latdLQR23"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to rudder pedal input with change in roll rate (per rad/s)",
+      "initial_value": -1.073666149713151,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "latdLQR_gain_matrix_23",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "s_r",
+      "variable_id": "latdLQR23"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.822114635953878",
+        "name": "latdLQR_gain_matrix_24",
+        "units": "s_r",
+        "varID": "latdLQR24"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Change to rudder pedal input with change in yaw rate (per rad/s)",
+      "initial_value": 0.822114635953878,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "latdLQR_gain_matrix_24",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "s_r",
+      "variable_id": "latdLQR24"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "disturbedEquivalentAirspeed",
+        "units": "nmi_h",
+        "varID": "deltaVequiv"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "Vequiv"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "keasCmdSw"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Disturbance away from commanded equivalent airspeed (kt)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "disturbedEquivalentAirspeed",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nmi_h",
+      "variable_id": "deltaVequiv"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "disturbedAngleOfAttack",
+        "units": "deg",
+        "varID": "deltaAlpha"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "alpha"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "trimmedAlpha"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Disturbance away from design angle of attack (deg)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "disturbedAngleOfAttack",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "deltaAlpha"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "disturbedEulerAngle_roll",
+        "units": "deg",
+        "varID": "deltaPhi"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "phi"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "phiCmdSw"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Disturbance away from commanded bank angle (deg)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "disturbedEulerAngle_roll",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "deltaPhi"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "disturbedEulerAngle_pitch",
+        "units": "deg",
+        "varID": "deltaTheta"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "theta"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "thetaCmdSw"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Disturbance away from commanded pitch angle (deg)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "disturbedEulerAngle_pitch",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "deltaTheta"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "deltaLongLQR",
+        "units": "frac",
+        "varID": "longLQR"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "plus",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longLQR11"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "deltaVequiv"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longLQR12"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "deltaAlpha"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longLQR13"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "qb"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longLQR14"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "deltaTheta"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Longitudinal control output from LQR gain matrix; negated to stabilize plant",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "deltaLongLQR",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "longLQR"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "deltaThrottleLQR",
+        "units": "frac",
+        "varID": "throttleLQR"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "plus",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longLQR21"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "deltaVequiv"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longLQR22"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "deltaAlpha"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longLQR23"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "qb"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longLQR24"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "deltaTheta"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Throttle fraction output from LQR gain matrix; negated to stabilize plant",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "deltaThrottleLQR",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "throttleLQR"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "deltaLatLQR",
+        "units": "frac",
+        "varID": "latLQR"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "plus",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latdLQR11"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "deltaPhi"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latdLQR12"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "beta"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latdLQR13"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "pb"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latdLQR14"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "rb"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Lateral stick output from LQR control system",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "deltaLatLQR",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "latLQR"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "deltaDirLQR",
+        "units": "frac",
+        "varID": "dirLQR"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "minus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "plus",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latdLQR21"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "deltaPhi"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latdLQR22"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "beta"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latdLQR23"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "pb"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "times",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latdLQR24"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "rb"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "apply",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Directional control output from LQR control system",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "deltaDirLQR",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "dirLQR"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedDeltaLongLQR",
+        "units": "frac",
+        "varID": "longLQRsw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longLQR"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "fsasOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Switched longitudinal output from LQR so SAS can be disabled",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedDeltaLongLQR",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "longLQRsw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedDeltaThrottleLQR",
+        "units": "frac",
+        "varID": "throttleLQRsw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "throttleLQR"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "fsasOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Switched throttle output from LQR so SAS can be disabled",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedDeltaThrottleLQR",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "throttleLQRsw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedDeltaLatLQR",
+        "units": "frac",
+        "varID": "latLQRsw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latLQR"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "fsasOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Switched lateral command output from LQR so SAS can be disabled",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedDeltaLatLQR",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "latLQRsw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedDeltaDirLQR",
+        "units": "frac",
+        "varID": "dirLQRsw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "dirLQR"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "gt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "fsasOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Switched directional command output from LQR so SAS can be disabled",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedDeltaDirLQR",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "dirLQRsw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedPilotControl_long",
+        "units": "frac",
+        "varID": "longStkSw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "longStk"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "lt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "apOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Ignore longitudinal input from pilot if autopilot selected",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedPilotControl_long",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "longStkSw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedPilotControl_throttle",
+        "units": "frac",
+        "varID": "throttleSw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "throttle"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "lt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "apOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Ignore throttle input from pilot if autopilot selected",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedPilotControl_throttle",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "throttleSw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedPilotControl_lat",
+        "units": "frac",
+        "varID": "latStkSw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "latStk"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "lt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "apOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Ignore lateral input from pilot if autopilot selected",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedPilotControl_lat",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "latStkSw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "switchedPilotControl_yaw",
+        "units": "frac",
+        "varID": "pedalSw"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "ci",
+                        "text": "pedal"
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "lt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "apOn"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "cn",
+                            "text": "0.5"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "cn",
+                        "text": "0"
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Ignore directional input from pilot if autopilot selected",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "switchedPilotControl_yaw",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "pedalSw"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1.0",
+        "minValue": "-1.0",
+        "name": "totalLongCmd",
+        "units": "frac",
+        "varID": "totLongStk"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "longStkTrim"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "longStkSw"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "longLQRsw"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Longitudinal input command to surface mixer. Combines trimmed position, pilot input (if AP off), and stabization (and possibly autopilot) commands (if SAS on).",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": -1.0,
+      "name": "totalLongCmd",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "totLongStk"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1.0",
+        "minValue": "-1.0",
+        "name": "totalLatCmd",
+        "units": "frac",
+        "varID": "totLatStk"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "latStkSw"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "latLQRsw"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Lateral input command to surface mixer. Combines pilot input (if AP off) with stabilization (and possibly autopilot) commands (if SAS on).",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": -1.0,
+      "name": "totalLatCmd",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "totLatStk"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1.0",
+        "minValue": "-1.0",
+        "name": "totalDirCmd",
+        "units": "frac",
+        "varID": "totPedal"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "pedalSw"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "dirLQRsw"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Directional input command to surface mixer. Combines pilot input (if AP off) with stabilization (and possibly autopilot) commands (if SAS on).",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": -1.0,
+      "name": "totalDirCmd",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "totPedal"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "maxValue": "1.0",
+        "minValue": "0.0",
+        "name": "totalThrottle",
+        "units": "frac",
+        "varID": "totThrottle"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "throttleTrim"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "throttleSw"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "throttleLQRsw"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Throttle command to power lever output. Combines trimmed throttle position, pilot input (if AP off) with stabilization (and possibly autopilot) commands (if SAS on).",
+      "initial_value": null,
+      "maximum_value": 1.0,
+      "minimum_value": 0.0,
+      "name": "totalThrottle",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "frac",
+      "variable_id": "totThrottle"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "elevatorDeflection",
+        "sign": "trailing edge down",
+        "symbol": "δe",
+        "units": "deg",
+        "varID": "el"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "cn",
+                "text": "-25."
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "totLongStk"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Elevator deflection angle, in degrees (+TED)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "elevatorDeflection",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "trailing edge down",
+      "symbol": "δe",
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "el"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "aileronDeflection",
+        "sign": "left roll",
+        "symbol": "δa",
+        "units": "deg",
+        "varID": "ail"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "cn",
+                "text": "-21.5"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "totLatStk"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Aileron deflection angle, in degrees (+LWD)",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "aileronDeflection",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "left roll",
+      "symbol": "δa",
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "ail"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "rudderDeflection",
+        "sign": "TEL",
+        "symbol": "δr",
+        "units": "deg",
+        "varID": "rdr"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "times",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "cn",
+                    "text": "-30."
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "ci",
+                    "text": "totPedal"
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "times",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "cn",
+                    "text": "0.008"
+                  },
+                  {
+                    "attributes": {},
+                    "children": [],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "ci",
+                    "text": "ail"
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "apply",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Rudder deflection angle, in degrees (+TEL); includes aileron-to-rudder gain",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "rudderDeflection",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "TEL",
+      "symbol": "δr",
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "rdr"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "powerLeverAngle",
+        "sign": "+INCR",
+        "units": "pct",
+        "varID": "PWR"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "times",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "cn",
+                "text": "100."
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "ci",
+                "text": "totThrottle"
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Throttle (power lever angle), 0 - 100. 50 is MIL (max dry) thrust; 100 is MAX (burner)",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "powerLeverAngle",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": "+INCR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "pct",
+      "variable_id": "PWR"
+    }
+  ]
+}

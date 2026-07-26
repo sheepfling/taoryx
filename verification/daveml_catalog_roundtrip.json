@@ -1,5 +1,5 @@
 {
-  "catalog_root": "INBOX\\taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_root": "resources\\aerospace\\daveml\\nesc-model-catalog-v1.0",
   "limitations": [
     "The normalized source layer is the input authority for catalog-wide cycling.",
     "Canonical XML export is deterministic but does not claim byte identity with raw source XML.",

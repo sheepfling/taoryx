@@ -1,6 +1,6 @@
 {
   "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
-  "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_root": "resources/aerospace/daveml/nesc-model-catalog-v1.0",
   "claim_boundary": [
     "Every normalized catalog source completed the canonical structural and numeric cycle.",
     "Only packages with a qualified txair artifact are promoted to executable reference families.",
@@ -76,7 +76,7 @@
   "qualified_packages": [
     {
       "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
-      "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+      "catalog_root": "resources/aerospace/daveml/nesc-model-catalog-v1.0",
       "claims": [
         "qualified F-16 source package is bound to the Taoryx rigid-body load contract",
         "package DAVE-ML source members complete the canonical structural and numeric cycle"
@@ -97,7 +97,7 @@
           "quaternion_order": "wxyz"
         },
         "model_id": "f16-s119-reference",
-        "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/f16-s119/f16-s119-reference-v0.7.txair",
+        "path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/f16-s119/f16-s119-reference-v0.7.txair",
         "reference_geometry": {
           "area_m2": 27.870912,
           "mean_aerodynamic_chord_m": 3.450336,
@@ -195,7 +195,7 @@
     },
     {
       "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
-      "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+      "catalog_root": "resources/aerospace/daveml/nesc-model-catalog-v1.0",
       "claims": [
         "qualified HL-20 source package is bound to the Taoryx rigid-body load contract",
         "package DAVE-ML aerodynamics complete the canonical structural and numeric cycle"
@@ -216,7 +216,7 @@
           "quaternion_order": "wxyz"
         },
         "model_id": "hl20-mod-k-unpowered-6dof",
-        "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/hl20-mod-k/hl20-mod-k-unpowered-v0.10.txair",
+        "path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/hl20-mod-k/hl20-mod-k-unpowered-v0.10.txair",
         "reference_geometry": {
           "area_m2": 26.612075808,
           "mean_aerodynamic_chord_m": 8.607552,
@@ -281,7 +281,7 @@
     },
     {
       "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
-      "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+      "catalog_root": "resources/aerospace/daveml/nesc-model-catalog-v1.0",
       "claims": [
         "qualified NESC Scenario 17 package is bound to the Taoryx rigid-body load contract",
         "DAVE-ML aerodynamics, propulsion, and scheduled inertia members are imported as separate components",
@@ -303,7 +303,7 @@
           "quaternion_order": "wxyz"
         },
         "model_id": "nasa-nesc-two-stage-rocket-scenario17",
-        "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
+        "path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
         "reference_geometry": {
           "area_m2": 7.0,
           "mean_aerodynamic_chord_m": 3.0,

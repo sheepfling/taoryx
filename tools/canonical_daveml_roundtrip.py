@@ -28,7 +28,7 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("artifact", type=Path, nargs="?", help="verified .txcollection or .txair archive")
-    parser.add_argument("--catalog-root", type=Path, help="INBOX DAVE-ML catalog root to cycle")
+    parser.add_argument("--catalog-root", type=Path, help="canonical DAVE-ML catalog root to cycle")
     parser.add_argument("--output-dir", type=Path, required=True, help="derived report directory")
     parser.add_argument("--summary-output", type=Path, help="optional compact copy of the catalog report")
     arguments = parser.parse_args()
@@ -344,7 +344,7 @@ def _run_package(package: Path, output: Path) -> int:
 
 
 def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None = None) -> int:
-    """Cycle every normalized source and qualified package in an INBOX catalog."""
+    """Cycle every normalized source and qualified package in a canonical catalog."""
 
     normalized = sorted(catalog_root.glob("normalized/*/source.dml"))
     packages = sorted(catalog_root.glob("qualified/**/*.txair"))

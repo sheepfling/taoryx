@@ -118,7 +118,6 @@ ipython_config.py
 .pdm-build/
 
 # pixi
-/INBOX/
 .trashcan/
 /qa/
 /artifacts/

@@ -1,0 +1,39 @@
+{
+  "gridded": [],
+  "ungridded": [
+    {
+      "attributes": {
+        "name": "yawMomentCoefficientTable1",
+        "units": "ND",
+        "utID": "yawMomentCoefficientTable1"
+      },
+      "declared_id": "yawMomentCoefficientTable1",
+      "description": null,
+      "function_name": null,
+      "independent_dimension_count": 3,
+      "issues": [],
+      "name": "yawMomentCoefficientTable1",
+      "provenance": null,
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "yawMomentCoefficientTable1",
+      "uncertainty": null,
+      "units": "ND"
+    },
+    {
+      "attributes": {},
+      "declared_id": null,
+      "description": null,
+      "function_name": "yawMomentCoefficientFunction2",
+      "independent_dimension_count": 3,
+      "issues": [],
+      "name": null,
+      "provenance": null,
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "ungridded-table-0002",
+      "uncertainty": null,
+      "units": null
+    }
+  ]
+}

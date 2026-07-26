@@ -1,0 +1,14 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+PWR,powerLeverAngle,pct,,,+INCR,,0.0,,,isInput,False,"Throttle (power lever angle), 0 - 100. 50 is MIL (max dry) thrust; 100 is MAX (burner)"
+ALT,altitudeMSL,ft,,,+INCR,,0.0,,,isInput;isStdAIAA,False,Altitude above sea level
+RMACH,mach,nd,,,+INCR,,0.0,,,isInput;isStdAIAA,False,Flight Mach number
+MIL_PWR,milPwr,nd,,,+INCR,,50.0,,,,False,"Power lever angle for military power - above this, we get afterburners"
+T_IDLE,idleThrust,lb,,,+INCR,,0.0,,,,False,Idle thrust at current flight conditions with power at 0. Output of function table.
+T_MIL,militaryThrust,lb,,,+INCR,,0.0,,,,False,Max dry thrust at current flight conditions with power at 50. Output of function table.
+T_MAX,maxThrust,lb,,,+INCR,,0.0,,,,False,Max augmented thrust at current flight conditions with power at 100. Output of function table.
+FEX,thrustBodyForce_X,lbf,,,FWD,,,,,isOutput;isStdAIAA,True,"Net steady-state thrust of the engine for given flight conditions, power lever angle, in the body X axis. If PWR below MIL_PWR, interpolate between T_IDLE and T_MIL. If PWR is above MIL_PWR, interpolate between T_MAX and T_MIL."
+FEY,thrustBodyForce_Y,lbf,,,+RT,,0.0,,,isOutput;isStdAIAA,False,"Net steady-state thrust of the engine for given flight conditions, power lever angle, in the body Y axis"
+FEZ,thrustBodyForce_Z,lbf,,,+DWN,,0.0,,,isOutput;isStdAIAA,False,"Net steady-state thrust of the engine for given flight conditions, power lever angle, in the body Z axis"
+TEL,thrustBodyMoment_Roll,ftlbf,,,+RWD,,0.0,,,isOutput;isStdAIAA,False,"Net steady-state moment of the engine for given flight conditions, power lever angle, about the body X axis"
+TEM,thrustBodyMoment_Pitch,ftlbf,,,+ANU,,0.0,,,isOutput;isStdAIAA,False,"Net steady-state moment of the engine for given flight conditions, power lever angle, about the body Y axis"
+TEN,thrustBodyMoment_Yaw,ftlbf,,,+ANR,,0.0,,,isOutput;isStdAIAA,False,"Net steady-state moment of the engine for given flight conditions, power lever angle, about the body Z axis"

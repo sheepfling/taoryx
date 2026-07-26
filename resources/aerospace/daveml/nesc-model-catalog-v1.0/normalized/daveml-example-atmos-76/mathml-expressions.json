@@ -1,0 +1,250 @@
+[
+  {
+    "calculation": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "times",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "ci",
+              "text": "alt_ft"
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "cn",
+              "text": "0.3048"
+            }
+          ],
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "tag": "apply",
+          "text": null
+        }
+      ],
+      "namespace": "http://www.w3.org/1998/Math/MathML",
+      "tag": "math",
+      "text": null
+    },
+    "variable_id": "Z_m"
+  },
+  {
+    "calculation": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "times",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "cn",
+              "text": "49.02"
+            },
+            {
+              "attributes": {},
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "power",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "plus",
+                      "text": null
+                    },
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "ci",
+                      "text": "t_amb_F"
+                    },
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "ci",
+                      "text": "DEGR_AT_0_DEGF"
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "apply",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "cn",
+                  "text": "0.5"
+                }
+              ],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "apply",
+              "text": null
+            }
+          ],
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "tag": "apply",
+          "text": null
+        }
+      ],
+      "namespace": "http://www.w3.org/1998/Math/MathML",
+      "tag": "math",
+      "text": null
+    },
+    "variable_id": "v_sound_fps"
+  },
+  {
+    "calculation": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "plus",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "cn",
+              "text": "32.0"
+            },
+            {
+              "attributes": {},
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "divide",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "times",
+                      "text": null
+                    },
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "ci",
+                      "text": "t_amb_C"
+                    },
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "cn",
+                      "text": "9.0"
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "apply",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "cn",
+                  "text": "5.0"
+                }
+              ],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "apply",
+              "text": null
+            }
+          ],
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "tag": "apply",
+          "text": null
+        }
+      ],
+      "namespace": "http://www.w3.org/1998/Math/MathML",
+      "tag": "math",
+      "text": null
+    },
+    "variable_id": "t_amb_F"
+  },
+  {
+    "calculation": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "times",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "ci",
+              "text": "SEA_LEVEL_PRESSURE_psf"
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "ci",
+              "text": "p_p0"
+            }
+          ],
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "tag": "apply",
+          "text": null
+        }
+      ],
+      "namespace": "http://www.w3.org/1998/Math/MathML",
+      "tag": "math",
+      "text": null
+    },
+    "variable_id": "p_amb_psf"
+  }
+]

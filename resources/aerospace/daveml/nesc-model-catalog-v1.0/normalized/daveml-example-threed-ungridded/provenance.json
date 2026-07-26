@@ -1,0 +1,252 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "1779544def313776a7fe380db05ef097ecd53ad6264aab1e8765f86d21342f79",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "DAVEfunc.dtd"
+  },
+  "document_sha256": "1779544def313776a7fe380db05ef097ecd53ad6264aab1e8765f86d21342f79",
+  "header": {
+    "attributes": {},
+    "authors": [
+      {
+        "attributes": {
+          "email": "Geoff.Brian@dsto.defence.gov.au",
+          "name": "Geoff Brian",
+          "org": "DSTO"
+        },
+        "email": "Geoff.Brian@dsto.defence.gov.au",
+        "name": "Geoff Brian",
+        "organization": "DSTO"
+      }
+    ],
+    "creation_date": "2006-09-12",
+    "description": "This file contains an example of a 3 dimensional ungridded dataset. The data encapsulated in the ungridded table is yawing moment coefficient, being a function of angle of attack, angle of sideslip and yaw control effector.",
+    "file_version": "$Revision: 171 $",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2006-11-01",
+          "modID": "Mod001"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "Geoff.Brian@dsto.defence.gov.au",
+              "name": "Geoff Brian",
+              "org": "DSTO"
+            },
+            "email": "Geoff.Brian@dsto.defence.gov.au",
+            "name": "Geoff Brian",
+            "organization": "DSTO"
+          }
+        ],
+        "date": "2006-11-01",
+        "description": "Just for the Record.",
+        "modification_id": "Mod001"
+      },
+      {
+        "attributes": {
+          "date": "2006-11-15",
+          "modID": "Mod002"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2006-11-15",
+        "description": "Added date to modificationRecord Mod001; added automatic Revision keyword to fileVersion.",
+        "modification_id": "Mod002"
+      },
+      {
+        "attributes": {
+          "date": "2010-05-07",
+          "modID": "Mod003"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-05-07",
+        "description": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change",
+        "modification_id": "Mod003"
+      }
+    ],
+    "name": null,
+    "raw": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "email": "Geoff.Brian@dsto.defence.gov.au",
+            "name": "Geoff Brian",
+            "org": "DSTO"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-09-12"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileCreationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "$Revision: 171 $"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "This file contains an example of a 3 dimensional ungridded dataset. The data encapsulated in the ungridded table is yawing moment coefficient, being a function of angle of attack, angle of sideslip and yaw control effector."
+        },
+        {
+          "attributes": {
+            "accession": "ISBN 1-2345-678-9",
+            "author": "Joe Smith",
+            "date": "2004-01-01",
+            "refID": "Ref01",
+            "title": "A Generic Aircraft Simulation Model (does not really exist)"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-01",
+            "modID": "Mod001"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "Geoff.Brian@dsto.defence.gov.au",
+                "name": "Geoff Brian",
+                "org": "DSTO"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Just for the Record."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-15",
+            "modID": "Mod002"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added date to modificationRecord Mod001; added automatic Revision keyword to fileVersion."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-05-07",
+            "modID": "Mod003"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "ISBN 1-2345-678-9",
+          "author": "Joe Smith",
+          "date": "2004-01-01",
+          "refID": "Ref01",
+          "title": "A Generic Aircraft Simulation Model (does not really exist)"
+        },
+        "description": null,
+        "ref_id": "Ref01"
+      }
+    ]
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/threeD_ungridded.dml"
+}

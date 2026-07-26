@@ -1,0 +1,57 @@
+{
+  "additionalProperties": false,
+  "description": "Integrity, source-runtime, and optional trajectory package verification.",
+  "properties": {
+    "artifact_count": {
+      "title": "Artifact Count",
+      "type": "integer"
+    },
+    "embedded_acceptance_passed": {
+      "title": "Embedded Acceptance Passed",
+      "type": "boolean"
+    },
+    "model_id": {
+      "title": "Model Id",
+      "type": "string"
+    },
+    "passed": {
+      "title": "Passed",
+      "type": "boolean"
+    },
+    "rerun_acceptance_passed": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rerun Acceptance Passed"
+    },
+    "rerun_trajectory": {
+      "title": "Rerun Trajectory",
+      "type": "boolean"
+    },
+    "source_equivalence_maximum_absolute_error": {
+      "title": "Source Equivalence Maximum Absolute Error",
+      "type": "number"
+    },
+    "source_equivalence_passed": {
+      "title": "Source Equivalence Passed",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "model_id",
+    "artifact_count",
+    "embedded_acceptance_passed",
+    "source_equivalence_maximum_absolute_error",
+    "source_equivalence_passed",
+    "rerun_trajectory",
+    "passed"
+  ],
+  "title": "RocketPackageVerification",
+  "type": "object"
+}

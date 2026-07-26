@@ -1,0 +1,318 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "DAVEfunc.dtd"
+  },
+  "document_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
+  "header": {
+    "attributes": {},
+    "authors": [
+      {
+        "attributes": {
+          "email": "e.b.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "e.b.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2002-03-01",
+    "description": "Coefficient of lift (non-dimensional) - single two-dimensional table. Example file for DAVE function table format. This example is more complex.",
+    "file_version": "$Revision: 108 $",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2002-03-01",
+          "modID": "A",
+          "refID": "REF03"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "name": "Hildrup, Bruce L.",
+              "org": "SAID Patuxent River"
+            },
+            "email": null,
+            "name": "Hildrup, Bruce L.",
+            "organization": "SAID Patuxent River"
+          }
+        ],
+        "date": "2002-03-01",
+        "description": "Reversed sign on drag term for better performance!",
+        "modification_id": "A"
+      },
+      {
+        "attributes": {
+          "date": "2006-11-16",
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2006-11-16",
+        "description": "Renamed from .xml to .dml; changed to conform to DAVEfunc.dtd 1.9: added 'date' to modification record, renamed docID attribute in documentRefs to refID; corrected date formats to ISO; added fileVersion element with Revision keyword.",
+        "modification_id": "B"
+      },
+      {
+        "attributes": {
+          "date": "2010-05-07",
+          "modID": "C"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-05-07",
+        "description": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change; changed no dimension abbreviation from ND to nd per draft 2 AIAA S-119 document. Added declaration of xlink namespace.",
+        "modification_id": "C"
+      }
+    ],
+    "name": null,
+    "raw": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "email": "e.b.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2002-03-01"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileCreationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "$Revision: 108 $"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Coefficient of lift (non-dimensional) - single two-dimensional table. Example file for DAVE function table format. This example is more complex."
+        },
+        {
+          "attributes": {
+            "accession": "NASA TM-4302",
+            "author": "Raney, David L.",
+            "date": "1992-07-31",
+            "refID": "REF01",
+            "title": "F-19A Basic Aerodynamics Model"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "accession": "NASA TM-4303",
+            "author": "Buggati, Richard W.",
+            "date": "1993-07-31",
+            "href": "http://dcb.larc.nasa.gov/models/tm4303.pdf",
+            "refID": "REF02",
+            "title": "F-19A Rotary Aerodynamics Model"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "accession": "Vol. 45, Number 12",
+            "author": "Aviation Leak & Space Tautology",
+            "date": "1993-07-03",
+            "refID": "REF03",
+            "title": "F-19A Falling Short on Design Performance Numbers"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2002-03-01",
+            "modID": "A",
+            "refID": "REF03"
+          },
+          "children": [
+            {
+              "attributes": {
+                "name": "Hildrup, Bruce L.",
+                "org": "SAID Patuxent River"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "1087 Exploration Parkway Ste 201 Lexington Park, MD 20654"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Reversed sign on drag term for better performance!"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-16",
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "MS308 NASA Hampton VA 23681 USA"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Renamed from .xml to .dml; changed to conform to DAVEfunc.dtd 1.9: added 'date' to modification record, renamed docID attribute in documentRefs to refID; corrected date formats to ISO; added fileVersion element with Revision keyword."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-05-07",
+            "modID": "C"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change; changed no dimension abbreviation from ND to nd per draft 2 AIAA S-119 document. Added declaration of xlink namespace."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "NASA TM-4302",
+          "author": "Raney, David L.",
+          "date": "1992-07-31",
+          "refID": "REF01",
+          "title": "F-19A Basic Aerodynamics Model"
+        },
+        "description": null,
+        "ref_id": "REF01"
+      },
+      {
+        "attributes": {
+          "accession": "NASA TM-4303",
+          "author": "Buggati, Richard W.",
+          "date": "1993-07-31",
+          "href": "http://dcb.larc.nasa.gov/models/tm4303.pdf",
+          "refID": "REF02",
+          "title": "F-19A Rotary Aerodynamics Model"
+        },
+        "description": null,
+        "ref_id": "REF02"
+      },
+      {
+        "attributes": {
+          "accession": "Vol. 45, Number 12",
+          "author": "Aviation Leak & Space Tautology",
+          "date": "1993-07-03",
+          "refID": "REF03",
+          "title": "F-19A Falling Short on Design Performance Numbers"
+        },
+        "description": null,
+        "ref_id": "REF03"
+      }
+    ]
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/twoD_table.dml"
+}

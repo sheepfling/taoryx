@@ -1,0 +1,11 @@
+{
+  "cli_model_id": "nasa-nesc-two-stage-rocket-scenario17",
+  "five_second_altitude_m": 448.6876537948847,
+  "package_artifacts": 19,
+  "package_verification_passed": true,
+  "passed": true,
+  "source_comparisons": 162,
+  "source_max_error": 2.7755575615628914e-17,
+  "version": "0.9.0",
+  "wheel_sha256": "8adba99b1db5cd0cbcbe786df2198069620d0cc3ef30014cb018c96980c25de1"
+}

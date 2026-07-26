@@ -1,0 +1,665 @@
+<?xml version='1.0' encoding='utf-8'?>
+<DAVEfunc xmlns="http://daveml.org/2010/DAVEML" xmlns:m="http://www.w3.org/1998/Math/MathML">
+  <fileHeader name="F-16 propulsion model (a la Stevens &amp; Lewis)">
+    <author name="Bruce Jackson" org="NASA Langley Research Center" />
+    <creationDate date="2012-08-07" />
+    <fileVersion>Initial version</fileVersion>
+    <description>Normalized semantic mirror of the Stevens and Lewis F-16 steady thrust model.</description>
+  </fileHeader>
+  <variableDef name="powerLeverAngle" varID="PWR" units="pct" initialValue="0" minValue="0" maxValue="100" sign="+INCR">
+    <isInput />
+  </variableDef>
+  <variableDef name="altitudeMSL" varID="ALT" units="ft" initialValue="0">
+    <isInput />
+  </variableDef>
+  <variableDef name="mach" varID="RMACH" units="nd" initialValue="0">
+    <isInput />
+  </variableDef>
+  <variableDef name="milPwr" varID="MIL_PWR" units="pct" initialValue="50" />
+  <variableDef name="idleThrust" varID="T_IDLE" units="lbf" initialValue="0" />
+  <variableDef name="militaryThrust" varID="T_MIL" units="lbf" initialValue="0" />
+  <variableDef name="maxThrust" varID="T_MAX" units="lbf" initialValue="0" />
+  <variableDef name="thrustBodyForce_X" varID="FEX" units="lbf" sign="FWD">
+    <isOutput />
+    <calculation>
+      <m:math>
+        <m:apply>
+          <m:piecewise>
+            <m:piece>
+              <m:apply>
+                <m:plus />
+                <m:ci>T_IDLE</m:ci>
+                <m:apply>
+                  <m:divide />
+                  <m:apply>
+                    <m:times />
+                    <m:ci>PWR</m:ci>
+                    <m:apply>
+                      <m:minus />
+                      <m:ci>T_MIL</m:ci>
+                      <m:ci>T_IDLE</m:ci>
+                    </m:apply>
+                  </m:apply>
+                  <m:ci>MIL_PWR</m:ci>
+                </m:apply>
+              </m:apply>
+              <m:apply>
+                <m:lt />
+                <m:ci>PWR</m:ci>
+                <m:ci>MIL_PWR</m:ci>
+              </m:apply>
+            </m:piece>
+            <m:otherwise>
+              <m:apply>
+                <m:plus />
+                <m:ci>T_MIL</m:ci>
+                <m:apply>
+                  <m:divide />
+                  <m:apply>
+                    <m:times />
+                    <m:apply>
+                      <m:minus />
+                      <m:ci>PWR</m:ci>
+                      <m:ci>MIL_PWR</m:ci>
+                    </m:apply>
+                    <m:apply>
+                      <m:minus />
+                      <m:ci>T_MAX</m:ci>
+                      <m:ci>T_MIL</m:ci>
+                    </m:apply>
+                  </m:apply>
+                  <m:apply>
+                    <m:minus />
+                    <m:cn>100</m:cn>
+                    <m:ci>MIL_PWR</m:ci>
+                  </m:apply>
+                </m:apply>
+              </m:apply>
+            </m:otherwise>
+          </m:piecewise>
+        </m:apply>
+      </m:math>
+    </calculation>
+  </variableDef>
+  <variableDef name="thrustBodyForce_Y" varID="FEY" units="lbf" initialValue="0" sign="+RT">
+    <isOutput />
+  </variableDef>
+  <variableDef name="thrustBodyForce_Z" varID="FEZ" units="lbf" initialValue="0" sign="+DWN">
+    <isOutput />
+  </variableDef>
+  <variableDef name="thrustBodyMoment_Roll" varID="TEL" units="ftlbf" initialValue="0" sign="+RWD">
+    <isOutput />
+  </variableDef>
+  <variableDef name="thrustBodyMoment_Pitch" varID="TEM" units="ftlbf" initialValue="0" sign="+ANU">
+    <isOutput />
+  </variableDef>
+  <variableDef name="thrustBodyMoment_Yaw" varID="TEN" units="ftlbf" initialValue="0" sign="+ANR">
+    <isOutput />
+  </variableDef>
+  <breakpointDef name="Alt points" bpID="ALT_PTS" units="ft">
+    <bpVals>0, 10000, 20000, 30000, 40000, 50000</bpVals>
+  </breakpointDef>
+  <breakpointDef name="Mach points" bpID="MACH_PTS" units="nd">
+    <bpVals>0, 0.2, 0.4, 0.6, 0.8, 1</bpVals>
+  </breakpointDef>
+  <griddedTableDef name="T_IDLE table" gtID="T_IDLE_table">
+    <breakpointRefs>
+      <bpRef bpID="MACH_PTS" />
+      <bpRef bpID="ALT_PTS" />
+    </breakpointRefs>
+    <dataTable>1060, 670, 880, 1140, 1500, 1860, 635, 425, 690, 1010, 1330, 1700, 60, 25, 345, 755, 1130, 1525, -1020, -710, -300, 350, 910, 1360, -2700, -1900, -1300, -247, 600, 1100, -3600, -1400, -595, -342, -200, 700</dataTable>
+  </griddedTableDef>
+  <griddedTableDef name="T_MIL table" gtID="T_MIL_table">
+    <breakpointRefs>
+      <bpRef bpID="MACH_PTS" />
+      <bpRef bpID="ALT_PTS" />
+    </breakpointRefs>
+    <dataTable>12680, 9150, 6200, 3950, 2450, 1400, 12680, 9150, 6313, 4040, 2470, 1400, 12610, 9312, 6610, 4290, 2600, 1560, 12640, 9839, 7090, 4660, 2840, 1660, 12390, 10176, 7750, 5320, 3250, 1930, 11680, 9848, 8050, 6100, 3800, 2310</dataTable>
+  </griddedTableDef>
+  <griddedTableDef name="T_MAX table" gtID="T_MAX_table">
+    <breakpointRefs>
+      <bpRef bpID="MACH_PTS" />
+      <bpRef bpID="ALT_PTS" />
+    </breakpointRefs>
+    <dataTable>20000, 15000, 10800, 7000, 4000, 2500, 21420, 15700, 11225, 7323, 4435, 2600, 22700, 16860, 12250, 8154, 5000, 2835, 24240, 18910, 13760, 9285, 5700, 3215.3, 28070, 21075, 15975, 11115, 6860, 3950, 28885, 23319, 18300, 13484, 8642, 5057</dataTable>
+  </griddedTableDef>
+  <function name="T_IDLE_fn">
+    <independentVarRef varID="RMACH" min="0" max="1" extrapolate="neither" />
+    <independentVarRef varID="ALT" min="0" max="50000" extrapolate="neither" />
+    <dependentVarRef varID="T_IDLE" />
+    <functionDefn name="T_IDLE_fn_definition">
+      <griddedTableRef gtID="T_IDLE_table" />
+    </functionDefn>
+  </function>
+  <function name="T_MIL_fn">
+    <independentVarRef varID="RMACH" min="0" max="1" extrapolate="neither" />
+    <independentVarRef varID="ALT" min="0" max="50000" extrapolate="neither" />
+    <dependentVarRef varID="T_MIL" />
+    <functionDefn name="T_MIL_fn_definition">
+      <griddedTableRef gtID="T_MIL_table" />
+    </functionDefn>
+  </function>
+  <function name="T_MAX_fn">
+    <independentVarRef varID="RMACH" min="0" max="1" extrapolate="neither" />
+    <independentVarRef varID="ALT" min="0" max="50000" extrapolate="neither" />
+    <dependentVarRef varID="T_MAX" />
+    <functionDefn name="T_MAX_fn_definition">
+      <griddedTableRef gtID="T_MAX_table" />
+    </functionDefn>
+  </function>
+  <checkData>
+    <staticShot name="sea-level idle">
+      <checkInputs>
+        <signal>
+          <signalName>powerLeverAngle</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>0</signalValue>
+        </signal>
+        <signal>
+          <signalName>altitudeMSL</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+        </signal>
+        <signal>
+          <signalName>mach</signalName>
+          <signalUnits>nd</signalUnits>
+          <signalValue>0</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>thrustBodyForce_X</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>1060</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Y</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Z</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Roll</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Pitch</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Yaw</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="sea-level military">
+      <checkInputs>
+        <signal>
+          <signalName>powerLeverAngle</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>50</signalValue>
+        </signal>
+        <signal>
+          <signalName>altitudeMSL</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+        </signal>
+        <signal>
+          <signalName>mach</signalName>
+          <signalUnits>nd</signalUnits>
+          <signalValue>0</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>thrustBodyForce_X</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>12680</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Y</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Z</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Roll</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Pitch</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Yaw</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="sea-level maximum">
+      <checkInputs>
+        <signal>
+          <signalName>powerLeverAngle</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>100</signalValue>
+        </signal>
+        <signal>
+          <signalName>altitudeMSL</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+        </signal>
+        <signal>
+          <signalName>mach</signalName>
+          <signalUnits>nd</signalUnits>
+          <signalValue>0</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>thrustBodyForce_X</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>20000</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Y</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Z</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Roll</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Pitch</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Yaw</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="sea-level Mach-one maximum">
+      <checkInputs>
+        <signal>
+          <signalName>powerLeverAngle</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>100</signalValue>
+        </signal>
+        <signal>
+          <signalName>altitudeMSL</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>0</signalValue>
+        </signal>
+        <signal>
+          <signalName>mach</signalName>
+          <signalUnits>nd</signalUnits>
+          <signalValue>1</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>thrustBodyForce_X</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>28885</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Y</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Z</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Roll</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Pitch</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Yaw</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="upper-corner idle">
+      <checkInputs>
+        <signal>
+          <signalName>powerLeverAngle</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>0</signalValue>
+        </signal>
+        <signal>
+          <signalName>altitudeMSL</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>50000</signalValue>
+        </signal>
+        <signal>
+          <signalName>mach</signalName>
+          <signalUnits>nd</signalUnits>
+          <signalValue>1</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>thrustBodyForce_X</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>700</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Y</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Z</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Roll</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Pitch</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Yaw</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="upper-corner military">
+      <checkInputs>
+        <signal>
+          <signalName>powerLeverAngle</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>50</signalValue>
+        </signal>
+        <signal>
+          <signalName>altitudeMSL</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>50000</signalValue>
+        </signal>
+        <signal>
+          <signalName>mach</signalName>
+          <signalUnits>nd</signalUnits>
+          <signalValue>1</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>thrustBodyForce_X</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>2310</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Y</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Z</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Roll</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Pitch</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Yaw</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="upper-corner maximum">
+      <checkInputs>
+        <signal>
+          <signalName>powerLeverAngle</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>100</signalValue>
+        </signal>
+        <signal>
+          <signalName>altitudeMSL</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>50000</signalValue>
+        </signal>
+        <signal>
+          <signalName>mach</signalName>
+          <signalUnits>nd</signalUnits>
+          <signalValue>1</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>thrustBodyForce_X</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>5057</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Y</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Z</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Roll</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Pitch</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Yaw</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="interior below military">
+      <checkInputs>
+        <signal>
+          <signalName>powerLeverAngle</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>42.3</signalValue>
+        </signal>
+        <signal>
+          <signalName>altitudeMSL</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>23507</signalValue>
+        </signal>
+        <signal>
+          <signalName>mach</signalName>
+          <signalUnits>nd</signalUnits>
+          <signalValue>0.625</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>thrustBodyForce_X</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>5319.3491</signalValue>
+          <tol>0.001</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Y</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Z</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Roll</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Pitch</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Yaw</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+    <staticShot name="interior above military">
+      <checkInputs>
+        <signal>
+          <signalName>powerLeverAngle</signalName>
+          <signalUnits>pct</signalUnits>
+          <signalValue>88.3</signalValue>
+        </signal>
+        <signal>
+          <signalName>altitudeMSL</signalName>
+          <signalUnits>ft</signalUnits>
+          <signalValue>33537</signalValue>
+        </signal>
+        <signal>
+          <signalName>mach</signalName>
+          <signalUnits>nd</signalUnits>
+          <signalValue>0.895</signalValue>
+        </signal>
+      </checkInputs>
+      <checkOutputs>
+        <signal>
+          <signalName>thrustBodyForce_X</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>9298.8926</signalValue>
+          <tol>0.0006</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Y</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyForce_Z</signalName>
+          <signalUnits>lbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Roll</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Pitch</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+        <signal>
+          <signalName>thrustBodyMoment_Yaw</signalName>
+          <signalUnits>ftlbf</signalUnits>
+          <signalValue>0</signalValue>
+          <tol>1e-05</tol>
+        </signal>
+      </checkOutputs>
+    </staticShot>
+  </checkData>
+</DAVEfunc>

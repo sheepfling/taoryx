@@ -1,7 +1,7 @@
 # Legacy toolkit adoption review
 
 Reviewed source:
-`INBOX/taos_legacy_preservation_intial_work_maybe_faulty/toolkit/`
+the preserved legacy toolkit acquisition archive
 
 Review status: quarantine analysis only. No legacy source has been promoted into
 the package.

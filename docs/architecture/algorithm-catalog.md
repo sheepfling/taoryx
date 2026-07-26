@@ -25,8 +25,8 @@ compatibility.
 ## Promotion rule
 
 The reviewed catalog is promoted under `metadata/algorithm_catalog/`. The
-ignored `INBOX/taos-algorithm-catalog-v1` bundle remains an intake copy and is
-not a runtime dependency. `algorithm_status.csv` is generated from the tracked
+Any temporary algorithm-catalog acquisition remains an intake copy and is not
+a runtime dependency. `algorithm_status.csv` is generated from the tracked
 JSON catalog and the implementation ledger by
 `tools/generate_algorithm_status.py`.
 

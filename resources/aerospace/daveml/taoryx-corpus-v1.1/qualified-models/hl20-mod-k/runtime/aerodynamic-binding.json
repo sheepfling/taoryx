@@ -1,0 +1,50 @@
+{
+  "dimensionalization": {
+    "force": "qbar*S*[CX,CY,CZ]",
+    "moment": "qbar*S*[b*Cl,cbar*Cm,b*Cn]"
+  },
+  "force_conversion": {
+    "cx": "CL*sin(alpha)-CD*cos(alpha)",
+    "cy": "CY",
+    "cz": "-CL*cos(alpha)-CD*sin(alpha)"
+  },
+  "frames": {
+    "canonical_body": "FRD",
+    "source_body": "forward-right-down"
+  },
+  "free_air_height_m": 10.58418,
+  "limitations": [
+    "The source angle-of-attack upper limit varies with Mach.",
+    "Direct source surface deflections are used; no actuator or control-law dynamics are added.",
+    "Source clamping is surfaced in every evaluation status."
+  ],
+  "model": "NASA HL-20 Mod K aerodynamic model",
+  "moment_reference_fraction": 0.54,
+  "moment_transfer": {
+    "cl_cg": "Cl_mrc",
+    "cm_cg": "Cm_mrc+dxcg*CZ",
+    "cn_cg": "Cn_mrc-dxcg*(cbar/span)*CY",
+    "dxcg": "cg_fraction-reference_fraction"
+  },
+  "reference_geometry_si": {
+    "area_m2": 26.612075808,
+    "mean_aerodynamic_chord_m": 8.607552,
+    "span_m": 4.233672
+  },
+  "schema_version": "2.0",
+  "source_identity": {
+    "file_version": "Mod K, 2010-12-01",
+    "git_blob_sha": "71e01b91e3a299a5b272c69f9a8296039aca59eb",
+    "raw_url": "https://raw.githubusercontent.com/DyadLang/DyadDemos/9e10c296a173403bdfc993ac626759b6e6f77b2e/HL20Demo/assets/shared/HL20_aero.dml",
+    "repository_full_name": "DyadLang/DyadDemos",
+    "repository_path": "HL20Demo/assets/shared/HL20_aero.dml",
+    "repository_ref": "9e10c296a173403bdfc993ac626759b6e6f77b2e"
+  },
+  "source_units": {
+    "angles_and_surface_deflections": "deg",
+    "body_rates": "rad/s",
+    "coefficients": "dimensionless",
+    "heightOfCgWrtRwy": "ft",
+    "trueAirspeed": "ft/s"
+  }
+}

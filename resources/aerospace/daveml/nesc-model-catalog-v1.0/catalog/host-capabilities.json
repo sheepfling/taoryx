@@ -1,0 +1,245 @@
+[
+  {
+    "capability_id": "daveml-regular-tables",
+    "category": "model-runtime",
+    "current_evidence": "Current DAVE-ML runtime and F-16/HL-20/rocket baselines",
+    "exit_criterion": "All gridded fixtures and source check cases pass",
+    "needed_by": "all",
+    "priority": 0,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "daveml-mathml",
+    "category": "model-runtime",
+    "current_evidence": "Typed MathML evaluator",
+    "exit_criterion": "Required operators compile and execute deterministically",
+    "needed_by": "all",
+    "priority": 0,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "daveml-ungridded-2d",
+    "category": "model-runtime",
+    "current_evidence": "Source parses but execution is intentionally unsupported",
+    "exit_criterion": "Named scattered-data policy passes twoD_ungridded source checks",
+    "needed_by": "DAVE-ML conformance",
+    "priority": 0,
+    "status": "missing"
+  },
+  {
+    "capability_id": "daveml-ungridded-3d",
+    "category": "model-runtime",
+    "current_evidence": "Source parses but execution is intentionally unsupported",
+    "exit_criterion": "Named scattered-data policy passes threeD_ungridded source checks",
+    "needed_by": "DAVE-ML conformance",
+    "priority": 0,
+    "status": "missing"
+  },
+  {
+    "capability_id": "daveml-dtd-validation",
+    "category": "model-runtime",
+    "current_evidence": "Typed semantic validation exists",
+    "exit_criterion": "Offline XML catalog validates against pinned DAVEfunc 2.0.2 dependencies",
+    "needed_by": "round-trip/export",
+    "priority": 1,
+    "status": "planned"
+  },
+  {
+    "capability_id": "point-mass-3dof",
+    "category": "dynamics",
+    "current_evidence": "A320 and other Taoryx point-mass baselines",
+    "exit_criterion": "NESC sphere cases execute against reference trajectories",
+    "needed_by": "spheroids; F-16 reductions; rocket reductions",
+    "priority": 1,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "quaternion-6dof",
+    "category": "dynamics",
+    "current_evidence": "F-16, rocket, and HL-20 rigid-body validation",
+    "exit_criterion": "Brick and orbital attitude cases pass trajectory acceptance",
+    "needed_by": "brick; F-16; rocket; cylinder; ISS; HL-20",
+    "priority": 1,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "variable-mass-staging",
+    "category": "dynamics",
+    "current_evidence": "NESC rocket v0.9",
+    "exit_criterion": "Event-aligned staging reproduces accepted checkpoints",
+    "needed_by": "two-stage rocket",
+    "priority": 1,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "mrc-to-cg-transfer",
+    "category": "dynamics",
+    "current_evidence": "Existing qualified adapters",
+    "exit_criterion": "Cross-product transfer tests pass for all source conventions",
+    "needed_by": "F-16; rocket; HL-20",
+    "priority": 1,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "flat-earth-ned",
+    "category": "environment",
+    "current_evidence": "Current 6-DOF validator",
+    "exit_criterion": "Flat-Earth NESC checks pass",
+    "needed_by": "selected atmospheric cases",
+    "priority": 2,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "spherical-earth",
+    "category": "environment",
+    "current_evidence": "Round-Earth support exists in parts of tooling",
+    "exit_criterion": "Stationary and rotating sphere cases pass",
+    "needed_by": "Atmos_04; Atmos_05",
+    "priority": 1,
+    "status": "partial"
+  },
+  {
+    "capability_id": "wgs84-geodesy",
+    "category": "environment",
+    "current_evidence": "Rocket and existing environment models",
+    "exit_criterion": "Datum and frame outputs match NESC definitions",
+    "needed_by": "most atmospheric/orbital cases",
+    "priority": 1,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "earth-rotation",
+    "category": "environment",
+    "current_evidence": "Rocket and orbital-aware code paths",
+    "exit_criterion": "Coriolis/transport-rate cases pass",
+    "needed_by": "Atmos_05 onward; orbital",
+    "priority": 1,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "gravity-inverse-square",
+    "category": "environment",
+    "current_evidence": "Existing rocket/orbital utilities",
+    "exit_criterion": "Sphere and orbital propagation cases pass",
+    "needed_by": "round-Earth and orbital cases",
+    "priority": 1,
+    "status": "partial"
+  },
+  {
+    "capability_id": "gravity-j2",
+    "category": "environment",
+    "current_evidence": "NESC rocket baseline",
+    "exit_criterion": "Sphere/brick/F-16 J2 scenarios pass",
+    "needed_by": "atmospheric WGS84 cases",
+    "priority": 1,
+    "status": "implemented"
+  },
+  {
+    "capability_id": "gravity-4x4",
+    "category": "environment",
+    "current_evidence": "None in qualified baseline",
+    "exit_criterion": "Orbit comparisons pass within NESC ensemble tolerance",
+    "needed_by": "Orbit_03A;07A;07C",
+    "priority": 2,
+    "status": "missing"
+  },
+  {
+    "capability_id": "gravity-8x8",
+    "category": "environment",
+    "current_evidence": "None in qualified baseline",
+    "exit_criterion": "Orbit comparisons pass within NESC ensemble tolerance",
+    "needed_by": "Orbit_03B;07B;07D",
+    "priority": 2,
+    "status": "missing"
+  },
+  {
+    "capability_id": "third-body-ephemeris",
+    "category": "environment",
+    "current_evidence": "None in qualified baseline",
+    "exit_criterion": "Solar/lunar acceleration and trajectory checks pass",
+    "needed_by": "Orbit_04;07A-D;FULL",
+    "priority": 2,
+    "status": "missing"
+  },
+  {
+    "capability_id": "us1976-to-1000km",
+    "category": "environment",
+    "current_evidence": "US1976 implementation with upper continuation",
+    "exit_criterion": "Official atmosphere check cases pass through 1000 km",
+    "needed_by": "atmospheric cases; rocket",
+    "priority": 1,
+    "status": "partial"
+  },
+  {
+    "capability_id": "met-atmosphere",
+    "category": "environment",
+    "current_evidence": "None in qualified baseline",
+    "exit_criterion": "Minimal/mean/maximal solar cases reproduce NESC density/trajectory families",
+    "needed_by": "orbital drag cases",
+    "priority": 2,
+    "status": "missing"
+  },
+  {
+    "capability_id": "steady-wind",
+    "category": "environment",
+    "current_evidence": "Wind interfaces exist conceptually",
+    "exit_criterion": "Atmos_07 passes",
+    "needed_by": "Atmos_07",
+    "priority": 1,
+    "status": "planned"
+  },
+  {
+    "capability_id": "wind-shear",
+    "category": "environment",
+    "current_evidence": "Wind interfaces exist conceptually",
+    "exit_criterion": "Atmos_08 passes",
+    "needed_by": "Atmos_08",
+    "priority": 1,
+    "status": "planned"
+  },
+  {
+    "capability_id": "gravity-gradient-torque",
+    "category": "dynamics",
+    "current_evidence": "None in qualified baseline",
+    "exit_criterion": "Cylinder attitude cases pass",
+    "needed_by": "Orbit_10A-D;FULL",
+    "priority": 2,
+    "status": "missing"
+  },
+  {
+    "capability_id": "applied-load-schedules",
+    "category": "scenario",
+    "current_evidence": "Event scheduling exists for rocket",
+    "exit_criterion": "Exact force/torque onset and duration tests pass",
+    "needed_by": "Orbit_06C-D;09A-D;FULL",
+    "priority": 2,
+    "status": "planned"
+  },
+  {
+    "capability_id": "nesc-output-contract",
+    "category": "validation",
+    "current_evidence": "Existing CSV evidence formats differ by model",
+    "exit_criterion": "Canonical NESC column adapter emits comparison-ready histories",
+    "needed_by": "all scenarios",
+    "priority": 1,
+    "status": "planned"
+  },
+  {
+    "capability_id": "trajectory-ensemble-comparator",
+    "category": "validation",
+    "current_evidence": "Model-specific comparisons exist",
+    "exit_criterion": "Automated interpolation, angle wrapping, and ensemble metrics are reported",
+    "needed_by": "all scenarios",
+    "priority": 1,
+    "status": "planned"
+  },
+  {
+    "capability_id": "taoryx-collection-roundtrip",
+    "category": "interchange",
+    "current_evidence": "Round-trip architecture plan exists",
+    "exit_criterion": "DAVE-ML → collection → txair → regenerated DAVE-ML equivalence passes",
+    "needed_by": "all DAVE-ML models",
+    "priority": 2,
+    "status": "planned"
+  }
+]

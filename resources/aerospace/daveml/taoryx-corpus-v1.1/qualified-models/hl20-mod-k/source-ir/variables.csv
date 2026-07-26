@@ -1,0 +1,362 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+ALP_UNLIM,angleOfAttack,deg,α,,ANU,,,,,isInput;isStdAIAA,False,"Instantaneous true angle-of-attack, in degrees (before alpha limiter)"
+BETA,angleOfSideslip,deg,β,,ANL,,,,,isInput;isStdAIAA,False,"Instantaneous true angle-of-sideslip, in degrees"
+XMACH,mach,nd,M,,,,,,,isInput;isStdAIAA,False,Mach number (dimensionless)
+PB,bodyAngularRate_Roll,rad_s,p,,,,,,,isInput;isStdAIAA,False,"Body axis roll rate, radians/sec (+RWD)"
+QB,bodyAngularRate_Pitch,rad_s,q,,,,,,,isInput;isStdAIAA,False,"Body axis pitch rate, radians/sec (+RWD)"
+RB,bodyAngularRate_Yaw,rad_s,r,,,,,,,isInput;isStdAIAA,False,"Body axis yaw rate, radians/sec (+RWD)"
+VRW,trueAirspeed,f_s,Vrw,,,,,,,isInput;isStdAIAA,False,"Velocity of vehicle w.r.t. airmass, ft/sec (always +)"
+H_rwy,heightOfCgWrtRwy,f,Hrwy,,,,,,,isInput;isStdAIAA,False,"Height of ref. pt. above ground, ft"
+DBFUL,upperLeftBodyFlapDeflection,deg,δbful,,ted,,,,,isInput,False,"Upper left body flap deflection, deg, +TED (so deflections are always zero or negative)."
+DBFUR,upperRightBodyFlapDeflection,deg,δbfur,,ted,,,,,isInput,False,"Upper right body flap deflection, deg, +TED (so deflections are always zero or negative)."
+DBFLL,lowerLeftBodyFlapDeflection,deg,δbfll,,ted,,,,,isInput,False,"Lower left body flap deflection, deg, +TED (so deflections are always zero or positive)."
+DBFLR,lowerRightBodyFlapDeflection,deg,δbflr,,ted,,,,,isInput,False,"Lower right body flap deflection, deg, +TED (so deflections are always zero or positive)."
+DWFL,leftWingFlapDeflection,deg,δwfl,,ted,,,,,isInput,False,"Left wing flap deflection, deg, +TED"
+DWFR,rightWingFlapDeflection,deg,δwfr,,ted,,,,,isInput,False,"Right wing flap deflection, deg, +TED"
+DRUD,rudderDeflection,deg,δr,,tel,,,,,isInput,False,"Rudder deflection, deg, +TE left"
+DLG,landingGearExtension,deg,δlg,,ext,,,,,isInput,False,"Landing gear extension angle, deg (0 = retracted, 90 = down)"
+CBAR,referenceWingChord,f,,,,,28.24,,,isOutput;isStdAIAA,False,"Body length of HL-20, used as reference longitudinal length"
+BSPAN,referenceWingSpan,f,b,,,,13.89,,,isOutput;isStdAIAA,False,"Width of HL-20, used as reference lateral length"
+SWING,referenceWingArea,f2,S,,,,286.45,,,isOutput;isStdAIAA,False,Reference area of HL-20 aero model
+XRP,vrsPositionOfMrc_X,fracMAC,xrp,,aft,,0.54,,,isOutput;isStdAIAA,False,"Longitudinal location of ref pt, fraction (0-1) of body length (+AFT)"
+CMQ0,Cmq_0,nd,,,,,-0.22364,,,,False,Aerodynamic pitch damping due to pitch rate due to alpha^0 (constant term).
+CMQ1,Cmq_1,nd,,,,,0.020457,,,,False,Aerodynamic pitch damping due to pitch rate due to alpha^1.
+CMQ2,Cmq_2,nd,,,,,-0.0016741,,,,False,Aerodynamic pitch damping due to pitch rate due to alpha^2.
+CMQ3,Cmq_3,nd,,,,,3.1618e-05,,,,False,Aerodynamic pitch damping due to pitch rate due to alpha^3.
+CNP0,Cnp_0,nd,,,,,0.40031,,,,False,Aerodynamic yaw damping due to roll rate due to alpha^0 (constant term).
+CNP1,Cnp_1,nd,,,,,-0.015518,,,,False,Aerodynamic yaw damping due to roll rate due to alpha^1.
+CNP2,Cnp_2,nd,,,,,-0.00012143,,,,False,Aerodynamic yaw damping due to roll rate due to alpha^2.
+CNP3,Cnp_3,nd,,,,,1.824e-05,,,,False,Aerodynamic yaw damping due to roll rate due to alpha^3.
+CNR0,Cnr_0,nd,,,,,-0.79533,,,,False,Aerodynamic yaw damping due to yaw rate due to alpha^0 (constant term).
+CNR1,Cnr_1,nd,,,,,-0.012647,,,,False,Aerodynamic yaw damping due to yaw rate due to alpha^1.
+CNR2,Cnr_2,nd,,,,,0.00032696,,,,False,Aerodynamic yaw damping due to yaw rate due to alpha^2.
+CNR3,Cnr_3,nd,,,,,-6.5929e-06,,,,False,Aerodynamic yaw damping due to yaw rate due to alpha^3.
+CLP0,Clp_0,nd,,,,,-0.55242,,,,False,Aerodynamic roll damping due to roll rate due to alpha^0 (constant term).
+CLP1,Clp_1,nd,,,,,0.014478,,,,False,Aerodynamic roll damping due to roll rate due to alpha^1.
+CLP2,Clp_2,nd,,,,,-0.0011545,,,,False,Aerodynamic roll damping due to roll rate due to alpha^2.
+CLP3,Clp_3,nd,,,,,1.7706e-05,,,,False,Aerodynamic roll damping due to roll rate due to alpha^3.
+CLR0,Clr_0,nd,,,,,0.44685,,,,False,Aerodynamic roll damping due to yaw rate due to alpha^0 (constant term).
+CLR1,Clr_1,nd,,,,,0.067411,,,,False,Aerodynamic roll damping due to yaw rate due to alpha^1.
+CLR2,Clr_2,nd,,,,,-0.0051866,,,,False,Aerodynamic roll damping due to yaw rate due to alpha^2.
+CLR3,Clr_3,nd,,,,,0.00012659,,,,False,Aerodynamic roll damping due to yaw rate due to alpha^3.
+ALP_MAX_LIM,Upper limit of alpha,deg,,,anu,,,,,,False,Output of ALPHA_MAX_LIMIT function vs Mach
+ALP,Limited_angle_of_attack,deg,,,anu,,,,,,True,"Instantaneous angle of attack, limited as a function of Mach number, degrees. If unlimited alpha (ALP_UNLIM) is less than -2, output -2 (lower alpha limit at all Mach). If unlimited alpha is greater than ALP_MAX_LIM, a function of Mach, output ALP_MAX_LIM. Otherwise, output current value of ALP_UNLIM."
+abs_rud,abs_rud,deg,,,,,,,,,True,Absolute value of rudder deflection angle
+HOB,hob,nd,h/b,,,,,,,,True,"Height of ref. pt. above ground, normalized by span (width) of vehicle."
+PBO2V,pbo2V,nd,pb/2V,,,,,,,,True,Non-dimensionalized body roll rate w.r.t. airmass
+QCO2V,qco2V,nd,qc/2V,,,,,,,,True,Non-dimensionalized body pitch rate w.r.t. airmass
+RBO2V,rbo2V,nd,rb/2V,,,,,,,,True,Non-dimensionalized body yaw rate w.r.t. airmass
+CL0A0,CLo_0,nd,,,,,,,,,False,Output of CL0A0 function; lift contribution of vehicle due to alpha^0 (constant term).
+CL0A1,CLo_1,nd,,,,,,,,,False,Output of CL0A1 function; lift contribution of vehicle due to alpha^1.
+CL0A2,CLo_2,nd,,,,,,,,,False,Output of CL0A2 function; lift contribution of vehicle due to alpha^2.
+CL0A3,CLo_3,nd,,,,,,,,,False,Output of CL0A3 function; lift contribution of vehicle due to alpha^3.
+CL0,CLo,nd,,,,,,,,,True,Lift contribution of basic vehicle CLo = CLo_0 + alpha*(CLo_1 + alpha*(CLo_2 + alpha*CLo_3))
+CD0A0,CDo_0,nd,,,,,,,,,False,Output of CD0A0 function; drag contribution of vehicle due to alpha^0 (constant term).
+CD0A1,CDo_1,nd,,,,,,,,,False,Output of CD0A1 function; drag contribution of vehicle due to alpha^1.
+CD0A2,CDo_2,nd,,,,,,,,,False,Output of CD0A2 function; drag contribution of vehicle due to alpha^2.
+CD0A3,CDo_3,nd,,,,,,,,,False,Output of CD0A3 function; drag contribution of vehicle due to alpha^3.
+CD0,CDo,nd,,,,,,,,,True,Drag contribution of basic vehicle CDo = CDo_0 + alpha*(CDo_1 + alpha*(CDo_2 + alpha*CDo_3))
+CM0A0,Cmo_0,nd,,,,,,,,,False,Output of CM0A0 function; pitching moment contribution of vehicle due to alpha^0 (constant term).
+CM0A1,Cmo_1,nd,,,,,,,,,False,Output of CM0A1 function; pitching moment contribution of vehicle due to alpha^1.
+CM0A2,Cmo_2,nd,,,,,,,,,False,Output of CM0A2 function; pitching moment contribution of vehicle due to alpha^2.
+CM0A3,Cmo_3,nd,,,,,,,,,False,Output of CM0A3 function; pitching moment contribution of vehicle due to alpha^3.
+CM0,Cmo,nd,,,,,,,,,True,Pitching moment contribution of basic vehicle Cmo = Cmo_0 + alpha*(Cmo_1 + alpha*(Cmo_2 + alpha*Cmo_3))
+CY0A0,CYBo_0,nd,,,,,,,,,False,Output of CY0A0 function; sideforce per sideslip contribution of vehicle due to alpha^0 (constant term).
+CY0A1,CYBo_1,nd,,,,,,,,,False,Output of CY0A1 function; sideforce per sideslip contribution of vehicle due to alpha^1.
+CY0A2,CYBo_2,nd,,,,,,,,,False,Output of CY0A2 function; sideforce per sideslip contribution of vehicle due to alpha^2.
+CY0A3,CYBo_3,nd,,,,,,,,,False,Output of CY0A3 function; sideforce per sideslip contribution of vehicle due to alpha^3.
+CYB,CYBo,nd,,,,,,,,,True,Sideforce contribution of basic vehicle due to sideslip CYBo = CYBo_0 + alpha*(CYBo_1 + alpha*(CYBo_2 + alpha*CYBo_3))
+CR0A0,ClBo_0,nd,,,,,,,,,False,Output of CR0A0 function; rolling moment per sideslip contribution of vehicle due to alpha^0 (constant term).
+CR0A1,ClBo_1,nd,,,,,,,,,False,Output of CR0A1 function; rolling moment per sideslip contribution of vehicle due to alpha^1.
+CR0A2,ClBo_2,nd,,,,,,,,,False,Output of CR0A2 function; rolling moment per sideslip contribution of vehicle due to alpha^2.
+CR0A3,ClBo_3,nd,,,,,,,,,False,Output of CR0A3 function; rolling moment per sideslip contribution of vehicle due to alpha^3.
+CRB,ClBo,nd,,,,,,,,,True,Rolling moment contribution of basic vehicle due to sideslip ClBo = ClBo_0 + alpha*(ClBo_1 + alpha*(ClBo_2 + alpha*ClBo_3))
+CN0A0,CnBo_0,nd,,,,,,,,,False,Output of CN0A0 function; yawing moment per sideslip contribution of vehicle due to alpha^0 (constant term).
+CN0A1,CnBo_1,nd,,,,,,,,,False,Output of CN0A1 function; yawing moment per sideslip contribution of vehicle due to alpha^1.
+CN0A2,CnBo_2,nd,,,,,,,,,False,Output of CN0A2 function; yawing moment per sideslip contribution of vehicle due to alpha^2.
+CN0A3,CnBo_3,nd,,,,,,,,,False,Output of CN0A3 function; yawing moment per sideslip contribution of vehicle due to alpha^3.
+CNB,CnBo,nd,,,,,,,,,True,Yawing moment contribution of basic vehicle due to sideslip Cno = Cno_0 + alpha*(Cno_1 + alpha*(Cno_2 + alpha*Cno_3))
+CLRUD0,CLdr_0,nd,,,,,,,,,False,Output of CLRUD0 function; lift contribution of rudder deflection due to alpha^0 (constant term).
+CLRUD1,CLdr_1,nd,,,,,,,,,False,Output of CLRUD1 function; lift contribution of rudder deflection due to alpha^1.
+CLRUD2,CLdr_2,nd,,,,,,,,,False,Output of CLRUD2 function; lift contribution of rudder deflection due to alpha^2.
+CLRUD3,CLdr_3,nd,,,,,,,,,False,Output of CLRUD3 function; lift contribution of rudder deflection due to alpha^3.
+CLRUD,CLdr,nd,,,,,,,,,True,Lift contribution of rudder deflection CLdr = CLdr_0 + alpha*(CLdr_1 + alpha*(CLdr_2 + alpha*CLdr_3))
+CDRUD0,CDdr_0,nd,,,,,,,,,False,Output of CDRUD0 function; drag contribution of rudder deflection due to alpha^0 (constant term).
+CDRUD1,CDdr_1,nd,,,,,,,,,False,Output of CDRUD1 function; drag contribution of rudder deflection due to alpha^1.
+CDRUD2,CDdr_2,nd,,,,,,,,,False,Output of CDRUD2 function; drag contribution of rudder deflection due to alpha^2.
+CDRUD3,CDdr_3,nd,,,,,,,,,False,Output of CDRUD3 function; drag contribution of rudder deflection due to alpha^3.
+CDRUD,CDdr,nd,,,,,,,,,True,Drag contribution of rudder deflection CDdr = CDdr_0 + alpha*(CDdr_1 + alpha*(CDdr_2 + alpha*CDdr_3))
+CMRUD0,Cmdr_0,nd,,,,,,,,,False,Output of CMRUD0 function; pitching moment contribution of rudder deflection due to alpha^0 (constant term).
+CMRUD1,Cmdr_1,nd,,,,,,,,,False,Output of CMRUD1 function; pitching moment contribution of rudder deflection due to alpha^1.
+CMRUD2,Cmdr_2,nd,,,,,,,,,False,Output of CMRUD2 function; pitching moment contribution of rudder deflection due to alpha^2.
+CMRUD3,Cmdr_3,nd,,,,,,,,,False,Output of CMRUD3 function; pitching moment contribution of rudder deflection due to alpha^3.
+CMRUD,Cmdr,nd,,,,,,,,,True,Pitching moment contribution of rudder deflection Cmdr = Cmdr_0 + alpha*(Cmdr_1 + alpha*(Cmdr_2 + alpha*Cmdr_3))
+CYRUD0,CYdr_0,nd,,,,,,,,,False,Output of CYRUD0 function; sideforce contribution of rudder deflection due to alpha^0 (constant term).
+CYRUD1,CYdr_1,nd,,,,,,,,,False,Output of CYRUD1 function; sideforce contribution of rudder deflection due to alpha^1.
+CYRUD2,CYdr_2,nd,,,,,,,,,False,Output of CYRUD2 function; sideforce contribution of rudder deflection due to alpha^2.
+CYRUD3,CYdr_3,nd,,,,,,,,,False,Output of CYRUD3 function; sideforce contribution of rudder deflection due to alpha^3.
+CYRUD,CYdr,nd,,,,,,,,,True,Sideforce contribution of rudder deflection CYdr = CYdr_0 + alpha*(CYdr_1 + alpha*(CYdr_2 + alpha*CYdr_3))
+CRRUD0,Cldr_0,nd,,,,,,,,,False,Output of CRRUD0 function; rolling moment contribution of rudder deflection due to alpha^0 (constant term).
+CRRUD1,Cldr_1,nd,,,,,,,,,False,Output of CRRUD1 function; rolling moment contribution of rudder deflection due to alpha^1.
+CRRUD2,Cldr_2,nd,,,,,,,,,False,Output of CRRUD2 function; rolling moment contribution of rudder deflection due to alpha^2.
+CRRUD3,Cldr_3,nd,,,,,,,,,False,Output of CRRUD3 function; rolling moment contribution of rudder deflection due to alpha^3.
+CRRUD,Cldr,nd,,,,,,,,,True,Rolling moment contribution of rudder deflection Cldr = Cldr_0 + alpha*(Cldr_1 + alpha*(Cldr_2 + alpha*Cldr_3))
+CNRUD0,Cndr_0,nd,,,,,,,,,False,Output of CNRUD0 function; yawing moment contribution of rudder deflection due to alpha^0 (constant term).
+CNRUD1,Cndr_1,nd,,,,,,,,,False,Output of CNRUD1 function; yawing moment contribution of rudder deflection due to alpha^1.
+CNRUD2,Cndr_2,nd,,,,,,,,,False,Output of CNRUD2 function; yawing moment contribution of rudder deflection due to alpha^2.
+CNRUD3,Cndr_3,nd,,,,,,,,,False,Output of CNRUD3 function; yawing moment contribution of rudder deflection due to alpha^3.
+CNRUD,Cndr,nd,,,,,,,,,True,Yawing moment contribution of rudder deflection Cndr = Cndr_0 + alpha*(Cndr_1 + alpha*(Cndr_2 + alpha*Cndr_3))
+CLBFLL0,CLdbfll_0,nd,,,,,,,,,False,Output of CLBFLL0 function; lift contribution of lower left body flap deflection due to alpha^0 (constant term).
+CLBFLL1,CLdbfll_1,nd,,,,,,,,,False,Output of CLBFLL1 function; lift contribution of lower left body flap deflection due to alpha^1.
+CLBFLL2,CLdbfll_2,nd,,,,,,,,,False,Output of CLBFLL2 function; lift contribution of lower left body flap deflection due to alpha^2.
+CLBFLL3,CLdbfll_3,nd,,,,,,,,,False,Output of CLBFLL3 function; lift contribution of lower left body flap deflection due to alpha^3.
+CLBFLL,CLdbfll,nd,,,,,,,,,True,Lift contribution of lower left body flap deflection CLdbfll = CLdbfll_0 + alpha*(CLdbfll_1 + alpha*(CLdbfll_2 + alpha*CLdbfll_3))
+CDBFLL0,CDdbfll_0,nd,,,,,,,,,False,Output of CDBFLL0 function; drag contribution of lower left body flap deflection due to alpha^0 (constant term).
+CDBFLL1,CDdbfll_1,nd,,,,,,,,,False,Output of CDBFLL1 function; drag contribution of lower left body flap deflection due to alpha^1.
+CDBFLL2,CDdbfll_2,nd,,,,,,,,,False,Output of CDBFLL2 function; drag contribution of lower left body flap deflection due to alpha^2.
+CDBFLL3,CDdbfll_3,nd,,,,,,,,,False,Output of CDBFLL3 function; drag contribution of lower left body flap deflection due to alpha^3.
+CDBFLL,CDdbfll,nd,,,,,,,,,True,Drag contribution of lower left body flap deflection CDdbfll = CDdbfll_0 + alpha*(CDdbfll_1 + alpha*(CDdbfll_2 + alpha*CDdbfll_3))
+CMBFLL0,Cmdbfll_0,nd,,,,,,,,,False,Output of CMBFLL0 function; pitching moment contribution of lower left body flap deflection due to alpha^0 (constant term).
+CMBFLL1,Cmdbfll_1,nd,,,,,,,,,False,Output of CMBFLL1 function; pitching moment contribution of lower left body flap deflection due to alpha^1.
+CMBFLL2,Cmdbfll_2,nd,,,,,,,,,False,Output of CMBFLL2 function; pitching moment contribution of lower left body flap deflection due to alpha^2.
+CMBFLL3,Cmdbfll_3,nd,,,,,,,,,False,Output of CMBFLL3 function; pitching moment contribution of lower left body flap deflection due to alpha^3.
+CMBFLL,Cmdbfll,nd,,,,,,,,,True,Pitching moment contribution of lower left body flap deflection Cmdbfll = Cmdbfll_0 + alpha*(Cmdbfll_1 + alpha*(Cmdbfll_2 + alpha*Cmdbfll_3))
+CYBFLL0,CYdbfll_0,nd,,,,,,,,,False,Output of CYBFLL0 function; sideforce contribution of lower left body flap deflection due to alpha^0 (constant term).
+CYBFLL1,CYdbfll_1,nd,,,,,,,,,False,Output of CYBFLL1 function; sideforce contribution of lower left body flap deflection due to alpha^1.
+CYBFLL2,CYdbfll_2,nd,,,,,,,,,False,Output of CYBFLL2 function; sideforce contribution of lower left body flap deflection due to alpha^2.
+CYBFLL3,CYdbfll_3,nd,,,,,,,,,False,Output of CYBFLL3 function; sideforce contribution of lower left body flap deflection due to alpha^3.
+CYBFLL,CYdbfll,nd,,,,,,,,,True,Sideforce contribution of lower left body flap deflection CYdbfll = CYdbfll_0 + alpha*(CYdbfll_1 + alpha*(CYdbfll_2 + alpha*CYdbfll_3))
+CRBFLL0,Cldbfll_0,nd,,,,,,,,,False,Output of CRBFLL0 function; rolling moment contribution of lower left body flap deflection due to alpha^0 (constant term).
+CRBFLL1,Cldbfll_1,nd,,,,,,,,,False,Output of CRBFLL1 function; rolling moment contribution of lower left body flap deflection due to alpha^1.
+CRBFLL2,Cldbfll_2,nd,,,,,,,,,False,Output of CRBFLL2 function; rolling moment contribution of lower left body flap deflection due to alpha^2.
+CRBFLL3,Cldbfll_3,nd,,,,,,,,,False,Output of CRBFLL3 function; rolling moment contribution of lower left body flap deflection due to alpha^3.
+CRBFLL,Cldbfll,nd,,,,,,,,,True,Rolling moment contribution of lower left body flap deflection Cldbfll = Cldbfll_0 + alpha*(Cldbfll_1 + alpha*(Cldbfll_2 + alpha*Cldbfll_3))
+CNBFLL0,Cndbfll_0,nd,,,,,,,,,False,Output of CNBFLL0 function; yawing moment contribution of lower left body flap deflection due to alpha^0 (constant term).
+CNBFLL1,Cndbfll_1,nd,,,,,,,,,False,Output of CNBFLL1 function; yawing moment contribution of lower left body flap deflection due to alpha^1.
+CNBFLL2,Cndbfll_2,nd,,,,,,,,,False,Output of CNBFLL2 function; yawing moment contribution of lower left body flap deflection due to alpha^2.
+CNBFLL3,Cndbfll_3,nd,,,,,,,,,False,Output of CNBFLL3 function; yawing moment contribution of lower left body flap deflection due to alpha^3.
+CNBFLL,Cndbfll,nd,,,,,,,,,True,Yawing moment contribution of lower left body flap deflection Cndbfll = Cndbfll_0 + alpha*(Cndbfll_1 + alpha*(Cndbfll_2 + alpha*Cndbfll_3))
+CLBFLR0,CLdbflr_0,nd,,,,,,,,,False,Output of CLBFLR0 function; lift contribution of lower right body flap deflection due to alpha^0 (constant term).
+CLBFLR1,CLdbflr_1,nd,,,,,,,,,False,Output of CLBFLR1 function; lift contribution of lower right body flap deflection due to alpha^1.
+CLBFLR2,CLdbflr_2,nd,,,,,,,,,False,Output of CLBFLR2 function; lift contribution of lower right body flap deflection due to alpha^2.
+CLBFLR3,CLdbflr_3,nd,,,,,,,,,False,Output of CLBFLR3 function; lift contribution of lower right body flap deflection due to alpha^3.
+CLBFLR,CLdbflr,nd,,,,,,,,,True,Lift contribution of lower right body flap deflection CLdbflr = CLdbflr_0 + alpha*(CLdbflr_1 + alpha*(CLdbflr_2 + alpha*CLdbflr_3))
+CDBFLR0,CDdbflr_0,nd,,,,,,,,,False,Output of CDBFLR0 function; drag contribution of lower right body flap deflection due to alpha^0 (constant term).
+CDBFLR1,CDdbflr_1,nd,,,,,,,,,False,Output of CDBFLR1 function; drag contribution of lower right body flap deflection due to alpha^1.
+CDBFLR2,CDdbflr_2,nd,,,,,,,,,False,Output of CDBFLR2 function; drag contribution of lower right body flap deflection due to alpha^2.
+CDBFLR3,CDdbflr_3,nd,,,,,,,,,False,Output of CDBFLR3 function; drag contribution of lower right body flap deflection due to alpha^3.
+CDBFLR,CDdbflr,nd,,,,,,,,,True,Drag contribution of lower right body flap deflection CDdbflr = CDdbflr_0 + alpha*(CDdbflr_1 + alpha*(CDdbflr_2 + alpha*CDdbflr_3))
+CMBFLR0,Cmdbflr_0,nd,,,,,,,,,False,Output of CMBFLR0 function; pitching moment contribution of lower right body flap deflection due to alpha^0 (constant term).
+CMBFLR1,Cmdbflr_1,nd,,,,,,,,,False,Output of CMBFLR1 function; pitching moment contribution of lower right body flap deflection due to alpha^1.
+CMBFLR2,Cmdbflr_2,nd,,,,,,,,,False,Output of CMBFLR2 function; pitching moment contribution of lower right body flap deflection due to alpha^2.
+CMBFLR3,Cmdbflr_3,nd,,,,,,,,,False,Output of CMBFLR3 function; pitching moment contribution of lower right body flap deflection due to alpha^3.
+CMBFLR,Cmdbflr,nd,,,,,,,,,True,Pitching moment contribution of lower right body flap deflection Cmdbflr = Cmdbflr_0 + alpha*(Cmdbflr_1 + alpha*(Cmdbflr_2 + alpha*Cmdbflr_3))
+CYBFLR0,CYdbflr_0,nd,,,,,,,,,False,Output of CYBFLR0 function; sideforce contribution of lower right body flap deflection due to alpha^0 (constant term).
+CYBFLR1,CYdbflr_1,nd,,,,,,,,,False,Output of CYBFLR1 function; sideforce contribution of lower right body flap deflection due to alpha^1.
+CYBFLR2,CYdbflr_2,nd,,,,,,,,,False,Output of CYBFLR2 function; sideforce contribution of lower right body flap deflection due to alpha^2.
+CYBFLR3,CYdbflr_3,nd,,,,,,,,,False,Output of CYBFLR3 function; sideforce contribution of lower right body flap deflection due to alpha^3.
+CYBFLR,CYdbflr,nd,,,,,,,,,True,Sideforce contribution of lower right body flap deflection CYdbflr = CYdbflr_0 + alpha*(CYdbflr_1 + alpha*(CYdbflr_2 + alpha*CYdbflr_3))
+CRBFLR0,Cldbflr_0,nd,,,,,,,,,False,Output of CRBFLR0 function; rolling moment contribution of lower right body flap deflection due to alpha^0 (constant term).
+CRBFLR1,Cldbflr_1,nd,,,,,,,,,False,Output of CRBFLR1 function; rolling moment contribution of lower right body flap deflection due to alpha^1.
+CRBFLR2,Cldbflr_2,nd,,,,,,,,,False,Output of CRBFLR2 function; rolling moment contribution of lower right body flap deflection due to alpha^2.
+CRBFLR3,Cldbflr_3,nd,,,,,,,,,False,Output of CRBFLR3 function; rolling moment contribution of lower right body flap deflection due to alpha^3.
+CRBFLR,Cldbflr,nd,,,,,,,,,True,Rolling moment contribution of lower right body flap deflection Cldbflr = Cldbflr_0 + alpha*(Cldbflr_1 + alpha*(Cldbflr_2 + alpha*Cldbflr_3))
+CNBFLR0,Cndbflr_0,nd,,,,,,,,,False,Output of CNBFLR0 function; yawing moment contribution of lower right body flap deflection due to alpha^0 (constant term).
+CNBFLR1,Cndbflr_1,nd,,,,,,,,,False,Output of CNBFLR1 function; yawing moment contribution of lower right body flap deflection due to alpha^1.
+CNBFLR2,Cndbflr_2,nd,,,,,,,,,False,Output of CNBFLR2 function; yawing moment contribution of lower right body flap deflection due to alpha^2.
+CNBFLR3,Cndbflr_3,nd,,,,,,,,,False,Output of CNBFLR3 function; yawing moment contribution of lower right body flap deflection due to alpha^3.
+CNBFLR,Cndbflr,nd,,,,,,,,,True,Yawing moment contribution of lower right body flap deflection Cndbflr = Cndbflr_0 + alpha*(Cndbflr_1 + alpha*(Cndbflr_2 + alpha*Cndbflr_3))
+CLBFUL0,CLdbful_0,nd,,,,,,,,,False,Output of CLBFUL0 function; lift contribution of upper left body flap deflection due to alpha^0 (constant term).
+CLBFUL1,CLdbful_1,nd,,,,,,,,,False,Output of CLBFUL1 function; lift contribution of upper left body flap deflection due to alpha^1.
+CLBFUL2,CLdbful_2,nd,,,,,,,,,False,Output of CLBFUL2 function; lift contribution of upper left body flap deflection due to alpha^2.
+CLBFUL3,CLdbful_3,nd,,,,,,,,,False,Output of CLBFUL3 function; lift contribution of upper left body flap deflection due to alpha^3.
+CLBFUL,CLdbful,nd,,,,,,,,,True,Lift contribution of upper left body flap deflection CLdbful = CLdbful_0 + alpha*(CLdbful_1 + alpha*(CLdbful_2 + alpha*CLdbful_3))
+CDBFUL0,CDdbful_0,nd,,,,,,,,,False,Output of CDBFUL0 function; drag contribution of upper left body flap deflection due to alpha^0 (constant term).
+CDBFUL1,CDdbful_1,nd,,,,,,,,,False,Output of CDBFUL1 function; drag contribution of upper left body flap deflection due to alpha^1.
+CDBFUL2,CDdbful_2,nd,,,,,,,,,False,Output of CDBFUL2 function; drag contribution of upper left body flap deflection due to alpha^2.
+CDBFUL3,CDdbful_3,nd,,,,,,,,,False,Output of CDBFUL3 function; drag contribution of upper left body flap deflection due to alpha^3.
+CDBFUL,CDdbful,nd,,,,,,,,,True,Drag contribution of upper left body flap deflection CDdbful = CDdbful_0 + alpha*(CDdbful_1 + alpha*(CDdbful_2 + alpha*CDdbful_3))
+CMBFUL0,Cmdbful_0,nd,,,,,,,,,False,Output of CMBFUL0 function; pitching moment contribution of upper left body flap deflection due to alpha^0 (constant term).
+CMBFUL1,Cmdbful_1,nd,,,,,,,,,False,Output of CMBFUL1 function; pitching moment contribution of upper left body flap deflection due to alpha^1.
+CMBFUL2,Cmdbful_2,nd,,,,,,,,,False,Output of CMBFUL2 function; pitching moment contribution of upper left body flap deflection due to alpha^2.
+CMBFUL3,Cmdbful_3,nd,,,,,,,,,False,Output of CMBFUL3 function; pitching moment contribution of upper left body flap deflection due to alpha^3.
+CMBFUL,Cmdbful,nd,,,,,,,,,True,Pitching moment contribution of upper left body flap deflection Cmdbful = Cmdbful_0 + alpha*(Cmdbful_1 + alpha*(Cmdbful_2 + alpha*Cmdbful_3))
+CYBFUL0,CYdbful_0,nd,,,,,,,,,False,Output of CYBFUL0 function; sideforce contribution of upper left body flap deflection due to alpha^0 (constant term).
+CYBFUL1,CYdbful_1,nd,,,,,,,,,False,Output of CYBFUL1 function; sideforce contribution of upper left body flap deflection due to alpha^1.
+CYBFUL2,CYdbful_2,nd,,,,,,,,,False,Output of CYBFUL2 function; sideforce contribution of upper left body flap deflection due to alpha^2.
+CYBFUL3,CYdbful_3,nd,,,,,,,,,False,Output of CYBFUL3 function; sideforce contribution of upper left body flap deflection due to alpha^3.
+CYBFUL,CYdbful,nd,,,,,,,,,True,Sideforce contribution of upper left body flap deflection CYdbful = CYdbful_0 + alpha*(CYdbful_1 + alpha*(CYdbful_2 + alpha*CYdbful_3))
+CRBFUL0,Cldbful_0,nd,,,,,,,,,False,Output of CRBFUL0 function; rolling moment contribution of upper left body flap deflection due to alpha^0 (constant term).
+CRBFUL1,Cldbful_1,nd,,,,,,,,,False,Output of CRBFUL1 function; rolling moment contribution of upper left body flap deflection due to alpha^1.
+CRBFUL2,Cldbful_2,nd,,,,,,,,,False,Output of CRBFUL2 function; rolling moment contribution of upper left body flap deflection due to alpha^2.
+CRBFUL3,Cldbful_3,nd,,,,,,,,,False,Output of CRBFUL3 function; rolling moment contribution of upper left body flap deflection due to alpha^3.
+CRBFUL,Cldbful,nd,,,,,,,,,True,Rolling moment contribution of upper left body flap deflection Cldbful = Cldbful_0 + alpha*(Cldbful_1 + alpha*(Cldbful_2 + alpha*Cldbful_3))
+CNBFUL0,Cndbful_0,nd,,,,,,,,,False,Output of CNBFUL0 function; yawing moment contribution of upper left body flap deflection due to alpha^0 (constant term).
+CNBFUL1,Cndbful_1,nd,,,,,,,,,False,Output of CNBFUL1 function; yawing moment contribution of upper left body flap deflection due to alpha^1.
+CNBFUL2,Cndbful_2,nd,,,,,,,,,False,Output of CNBFUL2 function; yawing moment contribution of upper left body flap deflection due to alpha^2.
+CNBFUL3,Cndbful_3,nd,,,,,,,,,False,Output of CNBFUL3 function; yawing moment contribution of upper left body flap deflection due to alpha^3.
+CNBFUL,Cndbful,nd,,,,,,,,,True,Yawing moment contribution of upper left body flap deflection Cndbful = Cndbful_0 + alpha*(Cndbful_1 + alpha*(Cndbful_2 + alpha*Cndbful_3))
+CLBFUR0,CLdbfur_0,nd,,,,,,,,,False,Output of CLBFUR0 function; lift contribution of upper right body flap deflection due to alpha^0 (constant term).
+CLBFUR1,CLdbfur_1,nd,,,,,,,,,False,Output of CLBFUR1 function; lift contribution of upper right body flap deflection due to alpha^1.
+CLBFUR2,CLdbfur_2,nd,,,,,,,,,False,Output of CLBFUR2 function; lift contribution of upper right body flap deflection due to alpha^2.
+CLBFUR3,CLdbfur_3,nd,,,,,,,,,False,Output of CLBFUR3 function; lift contribution of upper right body flap deflection due to alpha^3.
+CLBFUR,CLdbfur,nd,,,,,,,,,True,Lift contribution of upper right body flap deflection CLdbfur = CLdbfur_0 + alpha*(CLdbfur_1 + alpha*(CLdbfur_2 + alpha*CLdbfur_3))
+CDBFUR0,CDdbfur_0,nd,,,,,,,,,False,Output of CDBFUR0 function; drag contribution of upper right body flap deflection due to alpha^0 (constant term).
+CDBFUR1,CDdbfur_1,nd,,,,,,,,,False,Output of CDBFUR1 function; drag contribution of upper right body flap deflection due to alpha^1.
+CDBFUR2,CDdbfur_2,nd,,,,,,,,,False,Output of CDBFUR2 function; drag contribution of upper right body flap deflection due to alpha^2.
+CDBFUR3,CDdbfur_3,nd,,,,,,,,,False,Output of CDBFUR3 function; drag contribution of upper right body flap deflection due to alpha^3.
+CDBFUR,CDdbfur,nd,,,,,,,,,True,Drag contribution of upper right body flap deflection CDdbfur = CDdbfur_0 + alpha*(CDdbfur_1 + alpha*(CDdbfur_2 + alpha*CDdbfur_3))
+CMBFUR0,Cmdbfur_0,nd,,,,,,,,,False,Output of CMBFUR0 function; pitching moment contribution of upper right body flap deflection due to alpha^0 (constant term).
+CMBFUR1,Cmdbfur_1,nd,,,,,,,,,False,Output of CMBFUR1 function; pitching moment contribution of upper right body flap deflection due to alpha^1.
+CMBFUR2,Cmdbfur_2,nd,,,,,,,,,False,Output of CMBFUR2 function; pitching moment contribution of upper right body flap deflection due to alpha^2.
+CMBFUR3,Cmdbfur_3,nd,,,,,,,,,False,Output of CMBFUR3 function; pitching moment contribution of upper right body flap deflection due to alpha^3.
+CMBFUR,Cmdbfur,nd,,,,,,,,,True,Pitching moment contribution of upper right body flap deflection Cmdbfur = Cmdbfur_0 + alpha*(Cmdbfur_1 + alpha*(Cmdbfur_2 + alpha*Cmdbfur_3))
+CYBFUR0,CYdbfur_0,nd,,,,,,,,,False,Output of CYBFUR0 function; sideforce contribution of upper right body flap deflection due to alpha^0 (constant term).
+CYBFUR1,CYdbfur_1,nd,,,,,,,,,False,Output of CYBFUR1 function; sideforce contribution of upper right body flap deflection due to alpha^1.
+CYBFUR2,CYdbfur_2,nd,,,,,,,,,False,Output of CYBFUR2 function; sideforce contribution of upper right body flap deflection due to alpha^2.
+CYBFUR3,CYdbfur_3,nd,,,,,,,,,False,Output of CYBFUR3 function; sideforce contribution of upper right body flap deflection due to alpha^3.
+CYBFUR,CYdbfur,nd,,,,,,,,,True,Sideforce contribution of upper right body flap deflection CYdbfur = CYdbfur_0 + alpha*(CYdbfur_1 + alpha*(CYdbfur_2 + alpha*CYdbfur_3))
+CRBFUR0,Cldbfur_0,nd,,,,,,,,,False,Output of CRBFUR0 function; rolling moment contribution of upper right body flap deflection due to alpha^0 (constant term).
+CRBFUR1,Cldbfur_1,nd,,,,,,,,,False,Output of CRBFUR1 function; rolling moment contribution of upper right body flap deflection due to alpha^1.
+CRBFUR2,Cldbfur_2,nd,,,,,,,,,False,Output of CRBFUR2 function; rolling moment contribution of upper right body flap deflection due to alpha^2.
+CRBFUR3,Cldbfur_3,nd,,,,,,,,,False,Output of CRBFUR3 function; rolling moment contribution of upper right body flap deflection due to alpha^3.
+CRBFUR,Cldbfur,nd,,,,,,,,,True,Rolling moment contribution of upper right body flap deflection Cldbfur = Cldbfur_0 + alpha*(Cldbfur_1 + alpha*(Cldbfur_2 + alpha*Cldbfur_3))
+CNBFUR0,Cndbfur_0,nd,,,,,,,,,False,Output of CNBFUR0 function; yawing moment contribution of upper right body flap deflection due to alpha^0 (constant term).
+CNBFUR1,Cndbfur_1,nd,,,,,,,,,False,Output of CNBFUR1 function; yawing moment contribution of upper right body flap deflection due to alpha^1.
+CNBFUR2,Cndbfur_2,nd,,,,,,,,,False,Output of CNBFUR2 function; yawing moment contribution of upper right body flap deflection due to alpha^2.
+CNBFUR3,Cndbfur_3,nd,,,,,,,,,False,Output of CNBFUR3 function; yawing moment contribution of upper right body flap deflection due to alpha^3.
+CNBFUR,Cndbfur,nd,,,,,,,,,True,Yawing moment contribution of upper right body flap deflection Cndbfur = Cndbfur_0 + alpha*(Cndbfur_1 + alpha*(Cndbfur_2 + alpha*Cndbfur_3))
+CLWFL0,CLdwfl_0,nd,,,,,,,,,False,Output of CLWFL0 function; lift contribution of left wing flap deflection due to alpha^0 (constant term).
+CLWFL1,CLdwfl_1,nd,,,,,,,,,False,Output of CLWFL1 function; lift contribution of left wing flap deflection due to alpha^1.
+CLWFL2,CLdwfl_2,nd,,,,,,,,,False,Output of CLWFL2 function; lift contribution of left wing flap deflection due to alpha^2.
+CLWFL3,CLdwfl_3,nd,,,,,,,,,False,Output of CLWFL3 function; lift contribution of left wing flap deflection due to alpha^3.
+CLWFL,CLdwfl,nd,,,,,,,,,True,Lift contribution of left wing flap deflection CLdwfl = CLdwfl_0 + alpha*(CLdwfl_1 + alpha*(CLdwfl_2 + alpha*CLdwfl_3))
+CDWFL0,CDdwfl_0,nd,,,,,,,,,False,Output of CDWFL0 function; drag contribution of left wing flap deflection due to alpha^0 (constant term).
+CDWFL1,CDdwfl_1,nd,,,,,,,,,False,Output of CDWFL1 function; drag contribution of left wing flap deflection due to alpha^1.
+CDWFL2,CDdwfl_2,nd,,,,,,,,,False,Output of CDWFL2 function; drag contribution of left wing flap deflection due to alpha^2.
+CDWFL3,CDdwfl_3,nd,,,,,,,,,False,Output of CDWFL3 function; drag contribution of left wing flap deflection due to alpha^3.
+CDWFL,CDdwfl,nd,,,,,,,,,True,Drag contribution of left wing flap deflection CDdwfl = CDdwfl_0 + alpha*(CDdwfl_1 + alpha*(CDdwfl_2 + alpha*CDdwfl_3))
+CMWFL0,Cmdwfl_0,nd,,,,,,,,,False,Output of CMWFL0 function; pitching moment contribution of left wing flap deflection due to alpha^0 (constant term).
+CMWFL1,Cmdwfl_1,nd,,,,,,,,,False,Output of CMWFL1 function; pitching moment contribution of left wing flap deflection due to alpha^1.
+CMWFL2,Cmdwfl_2,nd,,,,,,,,,False,Output of CMWFL2 function; pitching moment contribution of left wing flap deflection due to alpha^2.
+CMWFL3,Cmdwfl_3,nd,,,,,,,,,False,Output of CMWFL3 function; pitching moment contribution of left wing flap deflection due to alpha^3.
+CMWFL,Cmdwfl,nd,,,,,,,,,True,Pitching moment contribution of left wing flap deflection Cmdwfl = Cmdwfl_0 + alpha*(Cmdwfl_1 + alpha*(Cmdwfl_2 + alpha*Cmdwfl_3))
+CYWFL0,CYdwfl_0,nd,,,,,,,,,False,Output of CYWFL0 function; sideforce contribution of lower left wing flap deflection due to alpha^0 (constant term).
+CYWFL1,CYdwfl_1,nd,,,,,,,,,False,Output of CYWFL1 function; sideforce contribution of lower left wing flap deflection due to alpha^1.
+CYWFL2,CYdwfl_2,nd,,,,,,,,,False,Output of CYWFL2 function; sideforce contribution of lower left wing flap deflection due to alpha^2.
+CYWFL3,CYdwfl_3,nd,,,,,,,,,False,Output of CYWFL3 function; sideforce contribution of lower left wing flap deflection due to alpha^3.
+CYWFL,CYdwfl,nd,,,,,,,,,True,Sideforce contribution of left wing flap deflection CYdwfl = CYdwfl_0 + alpha*(CYdwfl_1 + alpha*(CYdwfl_2 + alpha*CYdwfl_3))
+CRWFL0,Cldwfl_0,nd,,,,,,,,,False,Output of CRWFL0 function; rolling moment contribution of left wing flap deflection due to alpha^0 (constant term).
+CRWFL1,Cldwfl_1,nd,,,,,,,,,False,Output of CRWFL1 function; rolling moment contribution of left wing flap deflection due to alpha^1.
+CRWFL2,Cldwfl_2,nd,,,,,,,,,False,Output of CRWFL2 function; rolling moment contribution of left wing flap deflection due to alpha^2.
+CRWFL3,Cldwfl_3,nd,,,,,,,,,False,Output of CRWFL3 function; rolling moment contribution of left wing flap deflection due to alpha^3.
+CRWFL,Cldwfl,nd,,,,,,,,,True,Rolling moment contribution of left wing flap deflection Cldwfl = Cldwfl_0 + alpha*(Cldwfl_1 + alpha*(Cldwfl_2 + alpha*Cldwfl_3))
+CNWFL0,Cndwfl_0,nd,,,,,,,,,False,Output of CNWFL0 function; yawing moment contribution of left wing flap deflection due to alpha^0 (constant term).
+CNWFL1,Cndwfl_1,nd,,,,,,,,,False,Output of CNWFL1 function; yawing moment contribution of left wing flap deflection due to alpha^1.
+CNWFL2,Cndwfl_2,nd,,,,,,,,,False,Output of CNWFL2 function; yawing moment contribution of left wing flap deflection due to alpha^2.
+CNWFL3,Cndwfl_3,nd,,,,,,,,,False,Output of CNWFL3 function; yawing moment contribution of left wing flap deflection due to alpha^3.
+CNWFL,Cndwfl,nd,,,,,,,,,True,Yawing moment contribution of left wing flap deflection Cndwfl = Cndwfl_0 + alpha*(Cndwfl_1 + alpha*(Cndwfl_2 + alpha*Cndwfl_3))
+CLWFR0,CLdwfr_0,nd,,,,,,,,,False,Output of CLWFR0 function; lift contribution of right wing flap deflection due to alpha^0 (constant term).
+CLWFR1,CLdwfr_1,nd,,,,,,,,,False,Output of CLWFR1 function; lift contribution of right wing flap deflection due to alpha^1.
+CLWFR2,CLdwfr_2,nd,,,,,,,,,False,Output of CLWFR2 function; lift contribution of right wing flap deflection due to alpha^2.
+CLWFR3,CLdwfr_3,nd,,,,,,,,,False,Output of CLWFR3 function; lift contribution of right wing flap deflection due to alpha^3.
+CLWFR,CLdwfr,nd,,,,,,,,,True,Lift contribution of right wing flap deflection CLdwfr = CLdwfr_0 + alpha*(CLdwfr_1 + alpha*(CLdwfr_2 + alpha*CLdwfr_3))
+CDWFR0,CDdwfr_0,nd,,,,,,,,,False,Output of CDWFR0 function; drag contribution of right wing flap deflection due to alpha^0 (constant term).
+CDWFR1,CDdwfr_1,nd,,,,,,,,,False,Output of CDWFR1 function; drag contribution of right wing flap deflection due to alpha^1.
+CDWFR2,CDdwfr_2,nd,,,,,,,,,False,Output of CDWFR2 function; drag contribution of right wing flap deflection due to alpha^2.
+CDWFR3,CDdwfr_3,nd,,,,,,,,,False,Output of CDWFR3 function; drag contribution of right wing flap deflection due to alpha^3.
+CDWFR,CDdwfr,nd,,,,,,,,,True,Drag contribution of right wing flap deflection CDdwfr = CDdwfr_0 + alpha*(CDdwfr_1 + alpha*(CDdwfr_2 + alpha*CDdwfr_3))
+CMWFR0,Cmdwfr_0,nd,,,,,,,,,False,Output of CMWFR0 function; pitching moment contribution of right wing flap deflection due to alpha^0 (constant term).
+CMWFR1,Cmdwfr_1,nd,,,,,,,,,False,Output of CMWFR1 function; pitching moment contribution of right wing flap deflection due to alpha^1.
+CMWFR2,Cmdwfr_2,nd,,,,,,,,,False,Output of CMWFR2 function; pitching moment contribution of right wing flap deflection due to alpha^2.
+CMWFR3,Cmdwfr_3,nd,,,,,,,,,False,Output of CMWFR3 function; pitching moment contribution of right wing flap deflection due to alpha^3.
+CMWFR,Cmdwfr,nd,,,,,,,,,True,Pitching moment contribution of right wing flap deflection Cmdwfr = Cmdwfr_0 + alpha*(Cmdwfr_1 + alpha*(Cmdwfr_2 + alpha*Cmdwfr_3))
+CYWFR0,CYdwfr_0,nd,,,,,,,,,False,Output of CYWFR0 function; sideforce contribution of lower right wing flap deflection due to alpha^0 (constant term).
+CYWFR1,CYdwfr_1,nd,,,,,,,,,False,Output of CYWFR1 function; sideforce contribution of lower right wing flap deflection due to alpha^1.
+CYWFR2,CYdwfr_2,nd,,,,,,,,,False,Output of CYWFR2 function; sideforce contribution of lower right wing flap deflection due to alpha^2.
+CYWFR3,CYdwfr_3,nd,,,,,,,,,False,Output of CYWFR3 function; sideforce contribution of lower right wing flap deflection due to alpha^3.
+CYWFR,CYdwfr,nd,,,,,,,,,True,Sideforce contribution of right wing flap deflection CYdwfr = CYdwfr_0 + alpha*(CYdwfr_1 + alpha*(CYdwfr_2 + alpha*CYdwfr_3))
+CRWFR0,Cldwfr_0,nd,,,,,,,,,False,Output of CRWFR0 function; rolling moment contribution of right wing flap deflection due to alpha^0 (constant term).
+CRWFR1,Cldwfr_1,nd,,,,,,,,,False,Output of CRWFR1 function; rolling moment contribution of right wing flap deflection due to alpha^1.
+CRWFR2,Cldwfr_2,nd,,,,,,,,,False,Output of CRWFR2 function; rolling moment contribution of right wing flap deflection due to alpha^2.
+CRWFR3,Cldwfr_3,nd,,,,,,,,,False,Output of CRWFR3 function; rolling moment contribution of right wing flap deflection due to alpha^3.
+CRWFR,Cldwfr,nd,,,,,,,,,True,Rolling moment contribution of right wing flap deflection Cldwfr = Cldwfr_0 + alpha*(Cldwfr_1 + alpha*(Cldwfr_2 + alpha*Cldwfr_3))
+CNWFR0,Cndwfr_0,nd,,,,,,,,,False,Output of CNWFR0 function; yawing moment contribution of right wing flap deflection due to alpha^0 (constant term).
+CNWFR1,Cndwfr_1,nd,,,,,,,,,False,Output of CNWFR1 function; yawing moment contribution of right wing flap deflection due to alpha^1.
+CNWFR2,Cndwfr_2,nd,,,,,,,,,False,Output of CNWFR2 function; yawing moment contribution of right wing flap deflection due to alpha^2.
+CNWFR3,Cndwfr_3,nd,,,,,,,,,False,Output of CNWFR3 function; yawing moment contribution of right wing flap deflection due to alpha^3.
+CNWFR,Cndwfr,nd,,,,,,,,,True,Yawing moment contribution of right wing flap deflection Cndwfr = Cndwfr_0 + alpha*(Cndwfr_1 + alpha*(Cndwfr_2 + alpha*Cndwfr_3))
+CLLG0,CLlg_0,nd,,,,,,,,,False,Output of CLLG0 function; lift contribution of landing gear due to alpha^0 (constant term).
+CLLG1,CLlg_1,nd,,,,,,,,,False,Output of CLLG1 function; lift contribution of landing gear due to alpha^1.
+CLLG2,CLlg_2,nd,,,,,,,,,False,Output of CLLG2 function; lift contribution of landing gear due to alpha^2.
+CLLG3,CLlg_3,nd,,,,,,,,,False,Output of CLLG3 function; lift contribution of landing gear due to alpha^3.
+CLLG,CLlg,nd,,,,,,,,,True,Lift contribution due to landing gear extension CLlg = CLlg_0 + alpha*(CLlg_1 + alpha*(CLlg_2 + alpha*CLlg_3))
+CDLG0,CDlg_0,nd,,,,,,,,,False,Output of CDLG0 function; drag contribution of landing gear due to alpha^0 (constant term).
+CDLG1,CDlg_1,nd,,,,,,,,,False,Output of CDLG1 function; drag contribution of landing gear due to alpha^1.
+CDLG2,CDlg_2,nd,,,,,,,,,False,Output of CDLG2 function; drag contribution of landing gear due to alpha^2.
+CDLG3,CDlg_3,nd,,,,,,,,,False,Output of CDLG3 function; drag contribution of landing gear due to alpha^3.
+CDLG,CDlg,nd,,,,,,,,,True,Drag contribution due to landing gear extension CDlg = CDlg_0 + alpha*(CDlg_1 + alpha*(CDlg_2 + alpha*CDlg_3))
+CMLG0,Cmlg_0,nd,,,,,,,,,False,Output of CMLG0 function; pitching moment contribution of landing gear due to alpha^0 (constant term).
+CMLG1,Cmlg_1,nd,,,,,,,,,False,Output of CMLG1 function; pitching moment contribution of landing gear due to alpha^1.
+CMLG2,Cmlg_2,nd,,,,,,,,,False,Output of CMLG2 function; pitching moment contribution of landing gear due to alpha^2.
+CMLG3,Cmlg_3,nd,,,,,,,,,False,Output of CMLG3 function; pitching moment contribution of landing gear due to alpha^3.
+CMLG,Cmlg,nd,,,,,,,,,True,Pitching moment contribution due to landing gear extension Cmlg = Cmlg_0 + alpha*(Cmlg_1 + alpha*(Cmlg_2 + alpha*Cmlg_3))
+CYLG0,CYBlg_0,nd,,,,,,,,,False,Output of CYLG0 function; sideforce with sideslip contribution of landing gear due to alpha^0 (constant term).
+CYLG1,CYBlg_1,nd,,,,,,,,,False,Output of CYLG1 function; sideforce with sideslip contribution of landing gear due to alpha^1.
+CYLG2,CYBlg_2,nd,,,,,,,,,False,Output of CYLG2 function; sideforce with sideslip contribution of landing gear due to alpha^2.
+CYLG3,CYBlg_3,nd,,,,,,,,,False,Output of CYLG3 function; sideforce with sideslip contribution of landing gear due to alpha^3.
+CYLG,CYBlg,nd,,,,,,,,,True,Sideforce with sideslip contribution due to landing gear extension CYBlg = CYBlg_0 + alpha*(CYBlg_1 + alpha*(CYBlg_2 + alpha*CYBlg_3))
+CRLG0,ClBlg_0,nd,,,,,,,,,False,Output of CRLG0 function; rolling moment contribution of landing gear due to alpha^0 (constant term).
+CRLG1,ClBlg_1,nd,,,,,,,,,False,Output of CRLG1 function; rolling moment contribution of landing gear due to alpha^1.
+CRLG2,ClBlg_2,nd,,,,,,,,,False,Output of CRLG2 function; rolling moment contribution of landing gear due to alpha^2.
+CRLG3,ClBlg_3,nd,,,,,,,,,False,Output of CRLG3 function; rolling moment contribution of landing gear due to alpha^3.
+CRLG,ClBlg,nd,,,,,,,,,True,Rolling moment contribution due to landing gear extension ClBlg = ClBlg_0 + alpha*(ClBlg_1 + alpha*(ClBlg_2 + alpha*ClBlg_3))
+CNLG0,CnBlg_0,nd,,,,,,,,,False,Output of CNLG0 function; yawing moment contribution of landing gear due to alpha^0 (constant term).
+CNLG1,CnBlg_1,nd,,,,,,,,,False,Output of CNLG1 function; yawing moment contribution of landing gear due to alpha^1.
+CNLG2,CnBlg_2,nd,,,,,,,,,False,Output of CNLG2 function; yawing moment contribution of landing gear due to alpha^2.
+CNLG3,CnBlg_3,nd,,,,,,,,,False,Output of CNLG3 function; yawing moment contribution of landing gear due to alpha^3.
+CNLG,CnBlg,nd,,,,,,,,,True,Yawing Moment contribution due to landing gear extension Cnlg = Cnlg_0 + alpha*(Cnlg_1 + alpha*(Cnlg_2 + alpha*Cnlg_3))
+CLGE0,CLge_0,nd,,,,,,,,,False,Output of CLGE0 function; lift contribution of ground effects due to alpha^0 (constant term).
+CLGE1,CLge_1,nd,,,,,,,,,False,Output of CLGE1 function; lift contribution of ground effects due to alpha^1.
+CLGE2,CLge_2,nd,,,,,,,,,False,Output of CLGE2 function; lift contribution of ground effects due to alpha^2.
+CLGE3,CLge_3,nd,,,,,,,,,False,Output of CLGE3 function; lift contribution of ground effects due to alpha^3.
+CLGE,CLge,nd,,,,,,,,,True,Lift contribution due to ground effects extension CLge = CLge_0 + alpha*(CLge_1 + alpha*(CLge_2 + alpha*CLge_3))
+CDGE0,CDge_0,nd,,,,,,,,,False,Output of CDGE0 function; drag contribution of ground effects due to alpha^0 (constant term).
+CDGE1,CDge_1,nd,,,,,,,,,False,Output of CDGE1 function; drag contribution of ground effects due to alpha^1.
+CDGE2,CDge_2,nd,,,,,,,,,False,Output of CDGE2 function; drag contribution of ground effects due to alpha^2.
+CDGE3,CDge_3,nd,,,,,,,,,False,Output of CDGE3 function; drag contribution of ground effects due to alpha^3.
+CDGE,CDge,nd,,,,,,,,,True,Drag contribution due to ground effects extension CDge = CDge_0 + alpha*(CDge_1 + alpha*(CDge_2 + alpha*CDge_3))
+CMGE0,Cmge_0,nd,,,,,,,,,False,Output of CMGE0 function; pitching moment contribution of ground effects due to alpha^0 (constant term).
+CMGE1,Cmge_1,nd,,,,,,,,,False,Output of CMGE1 function; pitching moment contribution of ground effects due to alpha^1.
+CMGE2,Cmge_2,nd,,,,,,,,,False,Output of CMGE2 function; pitching moment contribution of ground effects due to alpha^2.
+CMGE3,Cmge_3,nd,,,,,,,,,False,Output of CMGE3 function; pitching moment contribution of ground effects due to alpha^3.
+CMGE,Cmge,nd,,,,,,,,,True,Pitching moment contribution due to ground effects extension Cmge = Cmge_0 + alpha*(Cmge_1 + alpha*(Cmge_2 + alpha*Cmge_3))
+CYGE0,CYBge_0,nd,,,,,,,,,False,Output of CYGE0 function; sideforce with sideslip contribution of ground effects due to alpha^0 (constant term).
+CYGE1,CYBge_1,nd,,,,,,,,,False,Output of CYGE1 function; sideforce with sideslip contribution of ground effects due to alpha^1.
+CYGE2,CYbge_2,nd,,,,,,,,,False,Output of CYGE2 function; sideforce with sideslip contribution of ground effects due to alpha^2.
+CYGE3,CYBge_3,nd,,,,,,,,,False,Output of CYGE3 function; sideforce with sideslip contribution of ground effects due to alpha^3.
+CYGE,CYBge,nd,,,,,,,,,True,Sideforce with sideslip contribution due to ground effects extension CYBge = CYBge_0 + alpha*(CYBge_1 + alpha*(CYBge_2 + alpha*CYBge_3))
+CRGE0,ClBge_0,nd,,,,,,,,,False,Output of CRGE0 function; rolling moment contribution of ground effects due to alpha^0 (constant term).
+CRGE1,ClBge_1,nd,,,,,,,,,False,Output of CRGE1 function; rolling moment contribution of ground effects due to alpha^1.
+CRGE2,ClBge_2,nd,,,,,,,,,False,Output of CRGE2 function; rolling moment contribution of ground effects due to alpha^2.
+CRGE3,ClBge_3,nd,,,,,,,,,False,Output of CRGE3 function; rolling moment contribution of ground effects due to alpha^3.
+CRGE,ClBge,nd,,,,,,,,,True,Rolling moment contribution due to ground effects extension ClBge = ClBge_0 + alpha*(ClBge_1 + alpha*(ClBge_2 + alpha*ClBge_3))
+CNGE0,CnBge_0,nd,,,,,,,,,False,Output of CNGE0 function; yawing moment contribution of ground effects due to alpha^0 (constant term).
+CNGE1,CnBge_1,nd,,,,,,,,,False,Output of CNGE1 function; yawing moment contribution of ground effects due to alpha^1.
+CNGE2,CnBge_2,nd,,,,,,,,,False,Output of CNGE2 function; yawing moment contribution of ground effects due to alpha^2.
+CNGE3,CnBge_3,nd,,,,,,,,,False,Output of CNGE3 function; yawing moment contribution of ground effects due to alpha^3.
+CNGE,CnBge,nd,,,,,,,,,True,Yawing Moment contribution due to ground effects extension CnBge = CnBge_0 + alpha*(CnBge_1 + alpha*(CnBge_2 + alpha*CnBge_3))
+sCYRUD,signed_CYrudder,nd,,,,,,,,,True,"Signed sideforce coefficient due to rudder deflection. Until this calculation, lat/dir terms due to rudder are based on absolute value of rudder deflection. Now must correct for sign of rudder deflection."
+sCRRUD,signed_Clrudder,nd,,,,,,,,,True,"Signed roll moment coefficient due to rudder deflection. Until this calculation, lat/dir terms due to rudder are based on absolute value of rudder deflection. Now must correct for sign of rudder deflection."
+sCNRUD,signed_Cnrudder,nd,,,,,,,,,True,"Signed yaw moment coefficient due to rudder deflection. Until this calculation, lat/dir terms due to rudder are based on absolute value of rudder deflection. Now must correct for sign of rudder deflection."
+CMQ,Cmq,nd,,,,,,,,,True,Pitch damping due to pitch rate Cmq = Cmq_0 + alpha*(Cmq_1 + alpha*(Cmq_2 + alpha*Cmq_3))
+CNP,Cnp,nd,,,,,,,,,True,Yaw damping due to roll rate Cnp = Cnp_0 + alpha*(Cnp_1 + alpha*(Cnp_2 + alpha*Cnp_3))
+CNR,Cnr,nd,,,,,,,,,True,Yaw damping due to yaw rate Cnr = Cnr_0 + alpha*(Cnr_1 + alpha*(Cnr_2 + alpha*Cnr_3))
+CLP,Clp,nd,,,,,,,,,True,Roll damping due to roll rate Clp = Clp_0 + alpha*(Clp_1 + alpha*(Clp_2 + alpha*Clp_3))
+CLR,Clr,nd,,,,,,,,,True,Roll damping due to roll rate Clr = Clr_0 + alpha*(Clr_1 + alpha*(Clr_2 + alpha*Clr_3))
+CL,totalCoefficientOfLift,nd,CL,,up,,,,,isOutput;isStdAIAA,True,Coefficient of lift CL = CL0 + CLBFUL + CLBFUR + CLBFLL + CLBFLR + CLWFL + CLWFR + CLRUD + CLGE + CLLG
+CD,totalCoefficientOfDrag,nd,CD,,aft,,,,,isOutput;isStdAIAA,True,Coefficient of drag CD = CD0 + CDBFUL + CDBFUR + CDBFLL + CDBFLR + CDWFL + CDWFR + CDRUD + CDGE + CDLG
+CM,aeroBodyMomentCoefficient_Pitch,nd,Cm,,anu,,,,,isOutput;isStdAIAA,True,Coefficient of pitching moment CM = CM0 + CMBFUL + CMBFUR + CMBFLL + CMBFLR + CMWFL + CMWFR + CMRUD + CMGE + CMLG + CMQ*QCO2V
+CY,aeroBodyForceCoefficient_Y,nd,CY,,rt,,,,,isOutput;isStdAIAA,True,Coefficient of sideforce CY = CYBFUL + CYBFUR + CYBFLL + CYBFLR + CYWFL + CYWFR + sCYRUD + (CYGE + CYLG + CYB)*BETA
+CN,aeroBodyMomentCoefficient_Yaw,nd,CN,,anr,,,,,isOutput;isStdAIAA,True,Coefficient of yawing moment CN = CNBFUL + CNBFUR + CNBFLL + CNBFLR + CNWFL + CNWFR + sCNRUD + (CNGE + CNLG + CNB)*BETA + CNP*PBO2V + CNR*RBO2V
+CR,aeroBodyMomentCoefficient_Roll,nd,Cl,,rwd,,,,,isOutput;isStdAIAA,True,Coefficient of rolling moment CR = CRBFUL + CRBFUR + CRBFLL + CRBFLR + CRWFL + CRWFR + sCRRUD + (CRGE + CRLG + CRB)*BETA + CLP*PBO2V + CLR*RBO2V

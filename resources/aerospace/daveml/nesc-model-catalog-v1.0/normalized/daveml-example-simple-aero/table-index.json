@@ -1,0 +1,35 @@
+{
+  "gridded": [
+    {
+      "attributes": {
+        "name": "CL table"
+      },
+      "breakpoint_ids": [],
+      "declared_id": null,
+      "description": null,
+      "function_name": "CL",
+      "inline_breakpoints": [
+        [
+          -4.0,
+          0.0,
+          4.0,
+          8.0,
+          12.0,
+          16.0
+        ]
+      ],
+      "issues": [],
+      "name": "CL table",
+      "provenance": null,
+      "shape": [
+        6
+      ],
+      "source_kind": "legacy-simple-function",
+      "supplemental_nodes": [],
+      "table_id": "function-0001-table",
+      "uncertainty": null,
+      "units": null
+    }
+  ],
+  "ungridded": []
+}

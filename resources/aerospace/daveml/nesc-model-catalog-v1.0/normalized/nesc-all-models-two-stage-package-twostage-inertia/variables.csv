@@ -1,0 +1,44 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+stagedFlag,rocketHasStaged,nd,,,,,,,,,False,"Indicates if staging has occurred, if greater than zero."
+stg1fuelUsed,stage1fuelConsumed,kg,,,,,,,,,False,"Indicates how much fuel has been expended from the first stage; used only if stagedFlag == 0. Used to linearly interpolate mass properties (CG, mass, moments of inertia) between full (0 fuel expended) and empty (all stage 1 fuel expended) reference values for each of these outputs."
+stg2fuelUsed,stage2fuelConsumed,kg,,,,,,,,,False,"Indicates how much fuel has been expended from the second stage. Used to linearly interpolate mass properties (CG, mass, moments of inertia) between full (0 fuel expended) and empty (all stage 2 fuel expended) reference values for each of these outputs. Using a value other than 0 while stagedFlag == 0 will result in undefined results."
+fullVehXref,fullVehicleMomentReferenceCenter,m,,,+AFT,,16.91879,,,,False,"Location of the moment reference center for the full (two-stage) vehicle, given in meters and measured from the nose of the vehicle; positive aft."
+stg2Xref,secondStageMomentReferenceCenter,m,,,+AFT,,4.79798,,,,False,"Location of the moment reference center for the second-stage only vehicle, given in meters and measured from the nose of the vehicle; positive aft."
+vrsStg1igniteXCG,Liftoff_XCG,m,,,,,16.91879,,,,False,
+vrsStg1burnoutXCG,S1Burnout_XCG,m,,,,,9.421642,,,,False,
+vrsStg2igniteXCG,S2Ignite_XCG,m,,,,,4.79798,,,,False,
+vrsStg2burnoutXCG,S2Burnout_XCG,m,,,,,3.947368,,,,False,
+stg1igniteMass,Liftoff_Mass,kg,,,,,314000.0,,,,False,
+stg1burnoutMass,S1Burnout_Mass,kg,,,,,134000.0,,,,False,
+stg2igniteMass,S2Ignite_Mass,kg,,,,,99000.0,,,,False,
+stg2burnoutMass,S2Burnout_Mass,kg,,,,,19000.0,,,,False,
+stg1igniteIxx,Liftoff_Ixx,kgm2,,,,,353250.0,,,,False,
+stg1burnoutIxx,S1Burnout_Ixx,kgm2,,,,,150750.0,,,,False,
+stg2igniteIxx,S2Ignite_Ixx,kgm2,,,,,111375.0,,,,False,
+stg2burnoutIxx,S2Burnout_Ixx,kgm2,,,,,21375.0,,,,False,
+stg1igniteIyy,Liftoff_Iyy,kgm2,,,,,33501637.473461,,,,False,
+stg1burnoutIyy,S1Burnout_Iyy,kgm2,,,,,10886636.572139,,,,False,
+stg2igniteIyy,S2Ignite_Iyy,kgm2,,,,,941063.762626,,,,False,
+stg2burnoutIyy,S2Burnout_Iyy,kgm2,,,,,212384.868421,,,,False,
+vrsStg1RangeOfCM_X,stage1XCGRange,m,,,,,,,,,True,Range of locations of center-of-mass of two-stage rocket prior to staging; determined by subtracting S1Burnout_XCG from Liftoff_XCG values given in REF01
+vrsStg2RangeOfCM_X,stage2XCGRange,m,,,,,,,,,True,Range of values of the center-of-mass of the second stage; determined by subtracting S2Burnout_XCG from S2Ignite_XCG values given in REF01
+stg1maxFuel,stage1FuelCapacity,kg,,,,,,,,,True,Fuel capacity of first stage; determined by subtracting S1Burnout_Mass from Liftoff_Mass values given in REF01
+stg2maxFuel,stage2FuelCapacity,kg,,,,,,,,,True,Fuel capacity of second stage; determined by subtracting S2Burnout_Mass from S2Ignite_Mass values given in REF01
+stg1IxxRange,stage1IxxRange,kgm2,,,,,,,,,True,Range of values of Ixx of first stage; determined by subtracting S1Burnout_Ixx from Liftoff_Ixx values given in REF01
+stg2IxxRange,stage2IxxRange,kgm2,,,,,,,,,True,Range of values of Ixx of second stage; determined by subtracting S2Burnout_Ixx from S2Ignite_Ixx values given in REF01
+stg1IyyRange,stage1IyyRange,kgm2,,,,,,,,,True,Range of values of Iyy and Izz of first stage; determined by subtracting S1Burnout_Iyy from Liftoff_Iyy values given in REF01
+stg2IyyRange,stage2IyyRange,kgm2,,,,,,,,,True,Range of values of Iyy and Izz of second stage; determined by subtracting S2Burnout_Iyy from S2Ignite_Iyy values given in REF01
+vrsPositionOfCM_X,vrsPositionOfCM_X,m,,,+AFT,,,,,isStdAIAA,True,"Position of the center of mass along the X-axis of the vehicle reference system (meters, positive aft). Determined by linearly interpolating either the two-stage rocket, or the just the second stage if stagedFlag > 0, between full and empty fuel states, depending on the appropriate fuel fraction value."
+stg1fuelFrac,stage1FuelRemainingFrac,frac,,,,,,0.0,1.0,isOutput,True,"Fraction of fuel remaining in stage 1, 0-1 (1 is full)"
+stg2fuelFrac,stage2FuelRemainingFrac,frac,,,,,,0.0,1.0,isOutput,True,"Fraction of fuel remaining in stage 2, 0-1 (1 is full)"
+XIXX,bodyMomentOfInertia_Roll,kgm2,,,,,,,,isOutput;isStdAIAA,True,"Rolling moment of inertia about the body X axis. Determined by linearly interpolating either the two-stage rocket, or the just the second stage if stagedFlag > 0, between full and empty fuel states, depending on the appropriate fuel fraction value."
+XIYY,bodyMomentOfInertia_Pitch,kgm2,,,,,,,,isOutput;isStdAIAA,True,"Pitching moment of inertia about the body Y axis Determined by linearly interpolating either the two-stage rocket, or the just the second stage if stagedFlag > 0, between full and empty fuel states, depending on the appropriate fuel fraction value."
+XIZZ,bodyMomentOfInertia_Yaw,kgm2,,,,,,,,isOutput;isStdAIAA,True,Yawing moment of inertia about the body Z axis. Identical to the pitching moment of inertia (XIYY).
+XIZX,bodyProductOfInertia_ZX,kgm2,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Z plane
+XIXY,bodyProductOfInertia_XY,kgm2,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Y plane
+XIYZ,bodyProductOfInertia_YZ,kgm2,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body Y-Z plane
+XMASS,totalMass,kg,,,,,,,,isOutput;isStdAIAA,True,"Total mass of vehicle Determined by linearly interpolating either the two-stage rocket, or the just the second stage if stagedFlag > 0, between full and empty fuel states, depending on the appropriate fuel fraction value."
+vrsPositionOfMrc_X,vrsPositionOfMrc,m,,,+AFT,,,,,isOutput,True,Longitudinal location of the moment reference center in meters back from the nose of the vehicle; positive aft. Value changes based on value of staged flag.
+DXCG,bodyPositionOfCmWrtMrc_X,m,,,FWD,,,,,isOutput;isStdAIAA,True,Longitudinal location of the center of mass relative to the nose of the vehicle; increasingly positive as the CM moves fwd as fuel is expended.
+DYCG,bodyPositionOfCmWrtMrc_Y,ft,,,RT,,0.0,,,isOutput;isStdAIAA,False,Longitudinal location of the center of mass relative to the centerline of the vehicle; positive if the CM is to the right of the centerline
+DZCG,bodyPositionOfCmWrtMrc_Z,ft,,,DOWN,,0.0,,,isOutput;isStdAIAA,False,Vertical location of the center of mass relative to the centerline of the vehicle; positive if the CM is below the centerline

@@ -1,7 +1,7 @@
 {
   "format": "taoryx-legacy-inbox-manifest",
   "schema_version": "1",
-  "source": "INBOX/taos_legacy_preservation_intial_work_maybe_faulty",
+  "source": "historical-legacy-preservation-archive",
   "entries": [
     {
       "path": ".DS_Store",

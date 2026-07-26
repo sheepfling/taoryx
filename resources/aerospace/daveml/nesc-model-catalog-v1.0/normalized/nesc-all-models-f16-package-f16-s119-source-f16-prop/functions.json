@@ -1,0 +1,131 @@
+[
+  {
+    "attributes": {
+      "name": "T_IDLE_fn"
+    },
+    "dependent_variable_id": "T_IDLE",
+    "description": "Idle thrust table lookup function",
+    "function_id": "function-0001",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "1.0",
+          "min": "0.0",
+          "varID": "RMACH"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 1.0,
+        "minimum_value": 0.0,
+        "variable_id": "RMACH"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "50000",
+          "min": "0.0",
+          "varID": "ALT"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 50000.0,
+        "minimum_value": 0.0,
+        "variable_id": "ALT"
+      }
+    ],
+    "issues": [],
+    "name": "T_IDLE_fn",
+    "provenance": null,
+    "table_id": "T_IDLE_table",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "T_MIL_fn"
+    },
+    "dependent_variable_id": "T_MIL",
+    "description": "Military thrust table lookup function",
+    "function_id": "function-0002",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "1.0",
+          "min": "0.0",
+          "varID": "RMACH"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 1.0,
+        "minimum_value": 0.0,
+        "variable_id": "RMACH"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "50000",
+          "min": "0.0",
+          "varID": "ALT"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 50000.0,
+        "minimum_value": 0.0,
+        "variable_id": "ALT"
+      }
+    ],
+    "issues": [],
+    "name": "T_MIL_fn",
+    "provenance": null,
+    "table_id": "T_MIL_table",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "T_MAX_fn"
+    },
+    "dependent_variable_id": "T_MAX",
+    "description": "Maximum thrust table lookup function",
+    "function_id": "function-0003",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "1.0",
+          "min": "0.0",
+          "varID": "RMACH"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 1.0,
+        "minimum_value": 0.0,
+        "variable_id": "RMACH"
+      },
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "50000",
+          "min": "0.0",
+          "varID": "ALT"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 50000.0,
+        "minimum_value": 0.0,
+        "variable_id": "ALT"
+      }
+    ],
+    "issues": [],
+    "name": "T_MAX_fn",
+    "provenance": null,
+    "table_id": "T_MAX_table",
+    "table_kind": "gridded"
+  }
+]

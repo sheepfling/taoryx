@@ -1,0 +1,666 @@
+{
+  "breakpoints": [
+    {
+      "attributes": {
+        "bpID": "ALPHA1",
+        "name": "alpha",
+        "units": "deg"
+      },
+      "breakpoint_id": "ALPHA1",
+      "description": "Alpha breakpoints for most basic aero data",
+      "issues": [],
+      "name": "alpha",
+      "units": "deg",
+      "values": [
+        -4.0,
+        0.0,
+        4.0,
+        8.0,
+        12.0,
+        16.0
+      ]
+    },
+    {
+      "attributes": {
+        "bpID": "MACH1",
+        "name": "mach",
+        "units": "nd"
+      },
+      "breakpoint_id": "MACH1",
+      "description": null,
+      "issues": [],
+      "name": "mach",
+      "units": "nd",
+      "values": [
+        0.0,
+        0.4,
+        0.8,
+        0.9,
+        0.95,
+        0.99,
+        1.0,
+        1.01,
+        1.05,
+        1.2
+      ]
+    }
+  ],
+  "check_cases": [],
+  "check_data_provenance": [],
+  "container_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "DAVEfunc.dtd"
+  },
+  "document_sha256": "988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92",
+  "document_size_bytes": 5504,
+  "functions": [
+    {
+      "attributes": {
+        "name": "Basic CL"
+      },
+      "dependent_variable_id": "CL",
+      "description": "Basic coefficient of lift table as a function of Mach and angle of attack",
+      "function_id": "function-0001",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "max",
+            "max": "0.95",
+            "min": "0.3",
+            "varID": "MACH"
+          },
+          "extrapolation": "max",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 0.95,
+          "minimum_value": 0.3,
+          "variable_id": "MACH"
+        },
+        {
+          "attributes": {
+            "extrapolate": "both",
+            "max": "15.0",
+            "min": "0.0",
+            "varID": "ALPHA"
+          },
+          "extrapolation": "both",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 15.0,
+          "minimum_value": 0.0,
+          "variable_id": "ALPHA"
+        }
+      ],
+      "issues": [],
+      "name": "Basic CL",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center",
+              "xns": "@bjax"
+            },
+            "email": null,
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "Jul-1994",
+        "description": null,
+        "document_refs": [
+          "REF01",
+          "REF02"
+        ],
+        "modification_refs": [
+          "A"
+        ],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center",
+                "xns": "@bjax"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "Jul-1994"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "functionCreationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF02"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            },
+            {
+              "attributes": {
+                "modID": "A"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "modificationRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "table_id": "gridded-table-0001",
+      "table_kind": "gridded"
+    }
+  ],
+  "gridded_tables": [
+    {
+      "attributes": {
+        "name": "CL_TABLE"
+      },
+      "breakpoint_ids": [
+        "MACH1",
+        "ALPHA1"
+      ],
+      "declared_id": null,
+      "description": null,
+      "function_name": "Basic CL",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CL_TABLE",
+      "provenance": null,
+      "shape": [
+        10,
+        6
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [
+        {
+          "attributes": {
+            "value": "95%"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "confidenceBound",
+          "text": null
+        }
+      ],
+      "table_id": "gridded-table-0001",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        0.95013,
+        0.61543,
+        0.057891,
+        0.015274,
+        0.83812,
+        0.19343,
+        0.23114,
+        0.79194,
+        0.35287,
+        0.74679,
+        0.01964,
+        0.68222,
+        0.60684,
+        0.92181,
+        0.81317,
+        0.4451,
+        0.68128,
+        0.30276,
+        0.48598,
+        0.73821,
+        0.0098613,
+        0.93181,
+        0.37948,
+        0.54167,
+        0.8913,
+        0.17627,
+        0.13889,
+        0.46599,
+        0.8318,
+        0.15087,
+        0.7621,
+        0.40571,
+        0.20277,
+        0.41865,
+        0.50281,
+        0.6979,
+        0.45647,
+        0.93547,
+        0.19872,
+        0.84622,
+        0.70947,
+        0.37837,
+        0.018504,
+        0.9169,
+        0.60379,
+        0.52515,
+        0.42889,
+        0.86001,
+        0.82141,
+        0.41027,
+        0.27219,
+        0.20265,
+        0.30462,
+        0.85366,
+        0.4447,
+        0.89365,
+        0.19881,
+        0.67214,
+        0.18965,
+        0.59356
+      ]
+    }
+  ],
+  "header": {
+    "attributes": {},
+    "authors": [
+      {
+        "attributes": {
+          "email": "e.b.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "e.b.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2002-03-01",
+    "description": "Coefficient of lift (non-dimensional) - single two-dimensional table. Example file for DAVE function table format. This example is more complex.",
+    "file_version": "$Revision: 108 $",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2002-03-01",
+          "modID": "A",
+          "refID": "REF03"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "name": "Hildrup, Bruce L.",
+              "org": "SAID Patuxent River"
+            },
+            "email": null,
+            "name": "Hildrup, Bruce L.",
+            "organization": "SAID Patuxent River"
+          }
+        ],
+        "date": "2002-03-01",
+        "description": "Reversed sign on drag term for better performance!",
+        "modification_id": "A"
+      },
+      {
+        "attributes": {
+          "date": "2006-11-16",
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2006-11-16",
+        "description": "Renamed from .xml to .dml; changed to conform to DAVEfunc.dtd 1.9: added 'date' to modification record, renamed docID attribute in documentRefs to refID; corrected date formats to ISO; added fileVersion element with Revision keyword.",
+        "modification_id": "B"
+      },
+      {
+        "attributes": {
+          "date": "2010-05-07",
+          "modID": "C"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-05-07",
+        "description": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change; changed no dimension abbreviation from ND to nd per draft 2 AIAA S-119 document. Added declaration of xlink namespace.",
+        "modification_id": "C"
+      }
+    ],
+    "name": null,
+    "raw": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "email": "e.b.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2002-03-01"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileCreationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "$Revision: 108 $"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Coefficient of lift (non-dimensional) - single two-dimensional table. Example file for DAVE function table format. This example is more complex."
+        },
+        {
+          "attributes": {
+            "accession": "NASA TM-4302",
+            "author": "Raney, David L.",
+            "date": "1992-07-31",
+            "refID": "REF01",
+            "title": "F-19A Basic Aerodynamics Model"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "accession": "NASA TM-4303",
+            "author": "Buggati, Richard W.",
+            "date": "1993-07-31",
+            "href": "http://dcb.larc.nasa.gov/models/tm4303.pdf",
+            "refID": "REF02",
+            "title": "F-19A Rotary Aerodynamics Model"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "accession": "Vol. 45, Number 12",
+            "author": "Aviation Leak & Space Tautology",
+            "date": "1993-07-03",
+            "refID": "REF03",
+            "title": "F-19A Falling Short on Design Performance Numbers"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2002-03-01",
+            "modID": "A",
+            "refID": "REF03"
+          },
+          "children": [
+            {
+              "attributes": {
+                "name": "Hildrup, Bruce L.",
+                "org": "SAID Patuxent River"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "1087 Exploration Parkway Ste 201 Lexington Park, MD 20654"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Reversed sign on drag term for better performance!"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-16",
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "MS308 NASA Hampton VA 23681 USA"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Renamed from .xml to .dml; changed to conform to DAVEfunc.dtd 1.9: added 'date' to modification record, renamed docID attribute in documentRefs to refID; corrected date formats to ISO; added fileVersion element with Revision keyword."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-05-07",
+            "modID": "C"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change; changed no dimension abbreviation from ND to nd per draft 2 AIAA S-119 document. Added declaration of xlink namespace."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "NASA TM-4302",
+          "author": "Raney, David L.",
+          "date": "1992-07-31",
+          "refID": "REF01",
+          "title": "F-19A Basic Aerodynamics Model"
+        },
+        "description": null,
+        "ref_id": "REF01"
+      },
+      {
+        "attributes": {
+          "accession": "NASA TM-4303",
+          "author": "Buggati, Richard W.",
+          "date": "1993-07-31",
+          "href": "http://dcb.larc.nasa.gov/models/tm4303.pdf",
+          "refID": "REF02",
+          "title": "F-19A Rotary Aerodynamics Model"
+        },
+        "description": null,
+        "ref_id": "REF02"
+      },
+      {
+        "attributes": {
+          "accession": "Vol. 45, Number 12",
+          "author": "Aviation Leak & Space Tautology",
+          "date": "1993-07-03",
+          "refID": "REF03",
+          "title": "F-19A Falling Short on Design Performance Numbers"
+        },
+        "description": null,
+        "ref_id": "REF03"
+      }
+    ]
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/twoD_table.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "name": "alpha",
+        "symbol": "#x3B1",
+        "units": "deg",
+        "varID": "ALPHA"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Instantaneous true angle-of-attack, in degrees",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "alpha",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": "#x3B1",
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "ALPHA"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "Mach",
+        "symbol": "M",
+        "units": "ND",
+        "varID": "MACH"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "Mach",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": "M",
+      "uncertainty": null,
+      "units": "ND",
+      "variable_id": "MACH"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "CL",
+        "symbol": "CL",
+        "units": "nd",
+        "varID": "CL"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Coefficient of lift based on alpha and mach.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "CL",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": "CL",
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "CL"
+    }
+  ]
+}

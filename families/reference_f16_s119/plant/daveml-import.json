@@ -1,6 +1,6 @@
 {
   "catalog_id": "taoryx-daveml-nesc-model-catalog-v1.0",
-  "catalog_root": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+  "catalog_root": "resources/aerospace/daveml/nesc-model-catalog-v1.0",
   "claims": [
     "qualified F-16 source package is bound to the Taoryx rigid-body load contract",
     "package DAVE-ML source members complete the canonical structural and numeric cycle"
@@ -21,7 +21,7 @@
       "quaternion_order": "wxyz"
     },
     "model_id": "f16-s119-reference",
-    "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/f16-s119/f16-s119-reference-v0.7.txair",
+    "path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/f16-s119/f16-s119-reference-v0.7.txair",
     "reference_geometry": {
       "area_m2": 27.870912,
       "mean_aerodynamic_chord_m": 3.450336,

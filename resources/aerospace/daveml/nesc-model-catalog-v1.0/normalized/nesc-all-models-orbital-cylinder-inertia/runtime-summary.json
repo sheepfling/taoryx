@@ -1,0 +1,21 @@
+{
+  "calculation_count": 0,
+  "declared_outputs": [
+    "XIXX",
+    "XIYY",
+    "XIZZ",
+    "XIZX",
+    "XIXY",
+    "XIYZ",
+    "XMASS",
+    "DXCG",
+    "DYCG",
+    "DZCG"
+  ],
+  "document_sha256": "9d38ac1e32ec5552d41e587bea7c12a9534ebf88abc951e9f0a3ec660c04818d",
+  "function_count": 0,
+  "model_name": "Example orbital cylinder inertia model",
+  "required_inputs": [],
+  "topological_order": [],
+  "variable_count": 10
+}

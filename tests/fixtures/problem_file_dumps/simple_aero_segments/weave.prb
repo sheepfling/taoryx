@@ -1,6 +1,6 @@
 (simple_aero-weave)
 
-# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/weave.yaml
+# Synthetic TAOS translation of tests/fixtures/simple_aero_v1/weave.yaml
 # Simple Aero family: weave
 # Start controls: weave_end_range_to_go_km
 # Stop controls: min_time_to_go_s

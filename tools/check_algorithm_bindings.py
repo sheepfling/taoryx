@@ -16,10 +16,6 @@ def audit(catalog_path: Path = CATALOG, bindings_path: Path = BINDINGS) -> tuple
     """Return catalog count and IDs missing from the implementation ledger."""
 
     if not catalog_path.exists():
-        inbox_catalog = ROOT / "INBOX" / "taos-algorithm-catalog-v1" / "catalog" / "algorithms.json"
-        if inbox_catalog.exists():
-            catalog_path = inbox_catalog
-    if not catalog_path.exists():
         raise FileNotFoundError(f"authoritative catalog is missing: {catalog_path}")
     payload = json.loads(catalog_path.read_text(encoding="utf-8"))
     catalog_ids = {item["id"] for item in payload["algorithms"]}

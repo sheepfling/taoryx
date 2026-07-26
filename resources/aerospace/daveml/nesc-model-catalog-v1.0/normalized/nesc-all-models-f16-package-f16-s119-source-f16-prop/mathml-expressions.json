@@ -1,0 +1,308 @@
+[
+  {
+    "calculation": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "plus",
+                          "text": null
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "T_IDLE"
+                        },
+                        {
+                          "attributes": {},
+                          "children": [
+                            {
+                              "attributes": {},
+                              "children": [],
+                              "namespace": "http://www.w3.org/1998/Math/MathML",
+                              "tag": "divide",
+                              "text": null
+                            },
+                            {
+                              "attributes": {},
+                              "children": [
+                                {
+                                  "attributes": {},
+                                  "children": [],
+                                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                                  "tag": "times",
+                                  "text": null
+                                },
+                                {
+                                  "attributes": {},
+                                  "children": [],
+                                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                                  "tag": "ci",
+                                  "text": "PWR"
+                                },
+                                {
+                                  "attributes": {},
+                                  "children": [
+                                    {
+                                      "attributes": {},
+                                      "children": [],
+                                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                                      "tag": "minus",
+                                      "text": null
+                                    },
+                                    {
+                                      "attributes": {},
+                                      "children": [],
+                                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                                      "tag": "ci",
+                                      "text": "T_MIL"
+                                    },
+                                    {
+                                      "attributes": {},
+                                      "children": [],
+                                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                                      "tag": "ci",
+                                      "text": "T_IDLE"
+                                    }
+                                  ],
+                                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                                  "tag": "apply",
+                                  "text": null
+                                }
+                              ],
+                              "namespace": "http://www.w3.org/1998/Math/MathML",
+                              "tag": "apply",
+                              "text": null
+                            },
+                            {
+                              "attributes": {},
+                              "children": [],
+                              "namespace": "http://www.w3.org/1998/Math/MathML",
+                              "tag": "ci",
+                              "text": "MIL_PWR"
+                            }
+                          ],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "apply",
+                          "text": null
+                        }
+                      ],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "apply",
+                      "text": null
+                    },
+                    {
+                      "attributes": {},
+                      "children": [
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "lt",
+                          "text": null
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "PWR"
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "MIL_PWR"
+                        }
+                      ],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "apply",
+                      "text": null
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "piece",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "plus",
+                          "text": null
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "T_MIL"
+                        },
+                        {
+                          "attributes": {},
+                          "children": [
+                            {
+                              "attributes": {},
+                              "children": [],
+                              "namespace": "http://www.w3.org/1998/Math/MathML",
+                              "tag": "divide",
+                              "text": null
+                            },
+                            {
+                              "attributes": {},
+                              "children": [
+                                {
+                                  "attributes": {},
+                                  "children": [],
+                                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                                  "tag": "times",
+                                  "text": null
+                                },
+                                {
+                                  "attributes": {},
+                                  "children": [
+                                    {
+                                      "attributes": {},
+                                      "children": [],
+                                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                                      "tag": "minus",
+                                      "text": null
+                                    },
+                                    {
+                                      "attributes": {},
+                                      "children": [],
+                                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                                      "tag": "ci",
+                                      "text": "PWR"
+                                    },
+                                    {
+                                      "attributes": {},
+                                      "children": [],
+                                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                                      "tag": "ci",
+                                      "text": "MIL_PWR"
+                                    }
+                                  ],
+                                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                                  "tag": "apply",
+                                  "text": null
+                                },
+                                {
+                                  "attributes": {},
+                                  "children": [
+                                    {
+                                      "attributes": {},
+                                      "children": [],
+                                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                                      "tag": "minus",
+                                      "text": null
+                                    },
+                                    {
+                                      "attributes": {},
+                                      "children": [],
+                                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                                      "tag": "ci",
+                                      "text": "T_MAX"
+                                    },
+                                    {
+                                      "attributes": {},
+                                      "children": [],
+                                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                                      "tag": "ci",
+                                      "text": "T_MIL"
+                                    }
+                                  ],
+                                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                                  "tag": "apply",
+                                  "text": null
+                                }
+                              ],
+                              "namespace": "http://www.w3.org/1998/Math/MathML",
+                              "tag": "apply",
+                              "text": null
+                            },
+                            {
+                              "attributes": {},
+                              "children": [
+                                {
+                                  "attributes": {},
+                                  "children": [],
+                                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                                  "tag": "minus",
+                                  "text": null
+                                },
+                                {
+                                  "attributes": {},
+                                  "children": [],
+                                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                                  "tag": "cn",
+                                  "text": "100.0"
+                                },
+                                {
+                                  "attributes": {},
+                                  "children": [],
+                                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                                  "tag": "ci",
+                                  "text": "MIL_PWR"
+                                }
+                              ],
+                              "namespace": "http://www.w3.org/1998/Math/MathML",
+                              "tag": "apply",
+                              "text": null
+                            }
+                          ],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "apply",
+                          "text": null
+                        }
+                      ],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "apply",
+                      "text": null
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "otherwise",
+                  "text": null
+                }
+              ],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "piecewise",
+              "text": null
+            }
+          ],
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "tag": "apply",
+          "text": null
+        }
+      ],
+      "namespace": "http://www.w3.org/1998/Math/MathML",
+      "tag": "math",
+      "text": null
+    },
+    "variable_id": "FEX"
+  }
+]

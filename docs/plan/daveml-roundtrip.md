@@ -156,7 +156,7 @@ workflow and claim boundary, while the registry records current rung status.
 The target is a repeatable cycle, not a one-time converter:
 
 ```text
-INBOX source + catalog
+canonical source + catalog
         |
         v
 verify acquisition and hashes
@@ -185,7 +185,8 @@ fresh import -> structural diff -> numeric replay diff
 
 ### Phase 1: Intake And Source Lock
 
-Build the source inventory from `INBOX/taoryx-daveml-nesc-model-catalog-v1.0`
+Build the source inventory from
+`resources/aerospace/daveml/nesc-model-catalog-v1.0`
 without moving or editing source bytes. For every document and qualified
 package, record:
 
@@ -315,7 +316,7 @@ later family must not weaken the acceptance status of an earlier family.
 
 The initial round-trip tranche is complete when:
 
-- the INBOX catalog and all selected source/package hashes are verified;
+- the canonical catalog and all selected source/package hashes are verified;
 - the three qualified packages build or load as `.txcollection` and replay;
 - the canonical IR is deterministic and source-anchored;
 - the seven conformance fixtures round-trip structurally and numerically;
@@ -337,7 +338,7 @@ The catalog-wide source/package cycle is executable:
 
 ```text
 python tools/canonical_daveml_roundtrip.py \
-  --catalog-root INBOX/taoryx-daveml-nesc-model-catalog-v1.0 \
+  --catalog-root resources/aerospace/daveml/nesc-model-catalog-v1.0 \
   --output-dir build/daveml-full-cycle
 ```
 

@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CATALOG_ROOT = Path(
     os.environ.get(
         "TAORYX_DAVEML_CATALOG_ROOT",
-        ROOT / "INBOX/taoryx-daveml-nesc-model-catalog-v1.0",
+        ROOT / "resources/aerospace/daveml/nesc-model-catalog-v1.0",
     )
 )
 

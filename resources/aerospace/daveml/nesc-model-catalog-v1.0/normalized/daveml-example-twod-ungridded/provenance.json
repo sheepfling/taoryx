@@ -1,0 +1,254 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "DAVEfunc.dtd"
+  },
+  "document_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
+  "header": {
+    "attributes": {},
+    "authors": [
+      {
+        "attributes": {
+          "email": "prgrant@utias.utoronto.ca",
+          "name": "Peter Grant",
+          "org": "University of Toronto"
+        },
+        "email": "prgrant@utias.utoronto.ca",
+        "name": "Peter Grant",
+        "organization": "University of Toronto"
+      }
+    ],
+    "creation_date": "2006-11-01",
+    "description": "This is CL basic data for Boeing 747-100 for 3 flap settings and a range of angles of attack. It comes from NASA CR 114494 page 2.0-7. This is only a small subset of the data created for testing the 2D ungridded tabular data in DAVE-ML. It was created by Peter Grant from the University of Toronto Novemember 1, 2006.",
+    "file_version": "$Revision: 1.0$",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2006-11-01",
+          "modID": "A",
+          "refID": "PRG1"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "prgrant@utias.utoronto.ca",
+              "name": "Peter Grant",
+              "org": "University of Toronto"
+            },
+            "email": "prgrant@utias.utoronto.ca",
+            "name": "Peter Grant",
+            "organization": "University of Toronto"
+          }
+        ],
+        "date": "2006-11-01",
+        "description": "Revision 1.0: Initial checkin.",
+        "modification_id": "A"
+      },
+      {
+        "attributes": {
+          "date": "2006-11-17",
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "e.b.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "e.b.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2006-11-17",
+        "description": "Rearranged slightly to conform to DTD 1.9.",
+        "modification_id": "B"
+      },
+      {
+        "attributes": {
+          "date": "2010-05-07",
+          "modID": "C"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-05-07",
+        "description": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change; changed no dimension abbreviation from ND to nd per draft 2 AIAA S-119 document.",
+        "modification_id": "C"
+      }
+    ],
+    "name": null,
+    "raw": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "email": "prgrant@utias.utoronto.ca",
+            "name": "Peter Grant",
+            "org": "University of Toronto"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-01"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileCreationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "$Revision: 1.0$"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "This is CL basic data for Boeing 747-100 for 3 flap settings and a range of angles of attack. It comes from NASA CR 114494 page 2.0-7. This is only a small subset of the data created for testing the 2D ungridded tabular data in DAVE-ML. It was created by Peter Grant from the University of Toronto Novemember 1, 2006."
+        },
+        {
+          "attributes": {
+            "accession": "NASA CR-114494",
+            "author": "C.R. Hanke and D.R. Nordwall",
+            "date": "1970-09-01",
+            "refID": "PRG1",
+            "title": "The Simulation of a Jumbo Jet Transport Aircraft Volume II Modeling data"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-01",
+            "modID": "A",
+            "refID": "PRG1"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "prgrant@utias.utoronto.ca",
+                "name": "Peter Grant",
+                "org": "University of Toronto"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Revision 1.0: Initial checkin."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-17",
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "e.b.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Rearranged slightly to conform to DTD 1.9."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-05-07",
+            "modID": "C"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change; changed no dimension abbreviation from ND to nd per draft 2 AIAA S-119 document."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "NASA CR-114494",
+          "author": "C.R. Hanke and D.R. Nordwall",
+          "date": "1970-09-01",
+          "refID": "PRG1",
+          "title": "The Simulation of a Jumbo Jet Transport Aircraft Volume II Modeling data"
+        },
+        "description": null,
+        "ref_id": "PRG1"
+      }
+    ]
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/twoD_ungridded.dml"
+}

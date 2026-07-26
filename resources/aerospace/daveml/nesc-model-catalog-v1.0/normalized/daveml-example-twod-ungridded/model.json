@@ -1,0 +1,889 @@
+{
+  "breakpoints": [],
+  "check_cases": [
+    {
+      "attributes": {
+        "name": "case 1"
+      },
+      "inputs": [],
+      "internal_values": [],
+      "issues": [
+        "Check case 'case 1' input signal has no varID, signalName, or signalID.",
+        "Check case 'case 1' input signal has no varID, signalName, or signalID.",
+        "Check case 'case 1' output signal has no varID, signalName, or signalID.",
+        "Check case 'case 1' has no valid outputs."
+      ],
+      "name": "case 1",
+      "outputs": [],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "case 2"
+      },
+      "inputs": [],
+      "internal_values": [],
+      "issues": [
+        "Check case 'case 2' input signal has no varID, signalName, or signalID.",
+        "Check case 'case 2' input signal has no varID, signalName, or signalID.",
+        "Check case 'case 2' output signal has no varID, signalName, or signalID.",
+        "Check case 'case 2' has no valid outputs."
+      ],
+      "name": "case 2",
+      "outputs": [],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "case 3"
+      },
+      "inputs": [],
+      "internal_values": [],
+      "issues": [
+        "Check case 'case 3' input signal has no varID, signalName, or signalID.",
+        "Check case 'case 3' input signal has no varID, signalName, or signalID.",
+        "Check case 'case 3' output signal has no varID, signalName, or signalID.",
+        "Check case 'case 3' has no valid outputs."
+      ],
+      "name": "case 3",
+      "outputs": [],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "case 4"
+      },
+      "inputs": [],
+      "internal_values": [],
+      "issues": [
+        "Check case 'case 4' input signal has no varID, signalName, or signalID.",
+        "Check case 'case 4' input signal has no varID, signalName, or signalID.",
+        "Check case 'case 4' output signal has no varID, signalName, or signalID.",
+        "Check case 'case 4' has no valid outputs."
+      ],
+      "name": "case 4",
+      "outputs": [],
+      "reference_id": null
+    }
+  ],
+  "check_data_provenance": [],
+  "container_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "DAVEfunc.dtd"
+  },
+  "document_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
+  "document_size_bytes": 10135,
+  "functions": [
+    {
+      "attributes": {
+        "name": "CLBASIC_func"
+      },
+      "dependent_variable_id": "CLBASIC",
+      "description": null,
+      "function_id": "function-0001",
+      "independent_variables": [
+        {
+          "attributes": {
+            "varID": "flapdef"
+          },
+          "extrapolation": null,
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": null,
+          "minimum_value": null,
+          "variable_id": "flapdef"
+        },
+        {
+          "attributes": {
+            "varID": "AOAdwp"
+          },
+          "extrapolation": null,
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": null,
+          "minimum_value": null,
+          "variable_id": "AOAdwp"
+        }
+      ],
+      "issues": [
+        "Function 'function-0001' references unknown gridded table ' CLBAlfaFlap_Table'."
+      ],
+      "name": "CLBASIC_func",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "name": "Peter Grant",
+              "org": "UTIAS"
+            },
+            "email": null,
+            "name": "Peter Grant",
+            "organization": "UTIAS"
+          }
+        ],
+        "creation_date": "2006-11-01",
+        "description": null,
+        "document_refs": [
+          "PRG1"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "name": "Peter Grant",
+                "org": "UTIAS"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2006-11-01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "functionCreationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "PRG1"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "table_id": "CLBAlfaFlap_Table",
+      "table_kind": "gridded"
+    }
+  ],
+  "gridded_tables": [],
+  "header": {
+    "attributes": {},
+    "authors": [
+      {
+        "attributes": {
+          "email": "prgrant@utias.utoronto.ca",
+          "name": "Peter Grant",
+          "org": "University of Toronto"
+        },
+        "email": "prgrant@utias.utoronto.ca",
+        "name": "Peter Grant",
+        "organization": "University of Toronto"
+      }
+    ],
+    "creation_date": "2006-11-01",
+    "description": "This is CL basic data for Boeing 747-100 for 3 flap settings and a range of angles of attack. It comes from NASA CR 114494 page 2.0-7. This is only a small subset of the data created for testing the 2D ungridded tabular data in DAVE-ML. It was created by Peter Grant from the University of Toronto Novemember 1, 2006.",
+    "file_version": "$Revision: 1.0$",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2006-11-01",
+          "modID": "A",
+          "refID": "PRG1"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "prgrant@utias.utoronto.ca",
+              "name": "Peter Grant",
+              "org": "University of Toronto"
+            },
+            "email": "prgrant@utias.utoronto.ca",
+            "name": "Peter Grant",
+            "organization": "University of Toronto"
+          }
+        ],
+        "date": "2006-11-01",
+        "description": "Revision 1.0: Initial checkin.",
+        "modification_id": "A"
+      },
+      {
+        "attributes": {
+          "date": "2006-11-17",
+          "modID": "B"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "e.b.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "e.b.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2006-11-17",
+        "description": "Rearranged slightly to conform to DTD 1.9.",
+        "modification_id": "B"
+      },
+      {
+        "attributes": {
+          "date": "2010-05-07",
+          "modID": "C"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2010-05-07",
+        "description": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change; changed no dimension abbreviation from ND to nd per draft 2 AIAA S-119 document.",
+        "modification_id": "C"
+      }
+    ],
+    "name": null,
+    "raw": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "email": "prgrant@utias.utoronto.ca",
+            "name": "Peter Grant",
+            "org": "University of Toronto"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-01"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileCreationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "$Revision: 1.0$"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "This is CL basic data for Boeing 747-100 for 3 flap settings and a range of angles of attack. It comes from NASA CR 114494 page 2.0-7. This is only a small subset of the data created for testing the 2D ungridded tabular data in DAVE-ML. It was created by Peter Grant from the University of Toronto Novemember 1, 2006."
+        },
+        {
+          "attributes": {
+            "accession": "NASA CR-114494",
+            "author": "C.R. Hanke and D.R. Nordwall",
+            "date": "1970-09-01",
+            "refID": "PRG1",
+            "title": "The Simulation of a Jumbo Jet Transport Aircraft Volume II Modeling data"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-01",
+            "modID": "A",
+            "refID": "PRG1"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "prgrant@utias.utoronto.ca",
+                "name": "Peter Grant",
+                "org": "University of Toronto"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Revision 1.0: Initial checkin."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2006-11-17",
+            "modID": "B"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "e.b.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Rearranged slightly to conform to DTD 1.9."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2010-05-07",
+            "modID": "C"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Corrected PUBLIC ID and added default namespace per DTD 2.0RC3 change; changed no dimension abbreviation from ND to nd per draft 2 AIAA S-119 document."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "NASA CR-114494",
+          "author": "C.R. Hanke and D.R. Nordwall",
+          "date": "1970-09-01",
+          "refID": "PRG1",
+          "title": "The Simulation of a Jumbo Jet Transport Aircraft Volume II Modeling data"
+        },
+        "description": null,
+        "ref_id": "PRG1"
+      }
+    ]
+  },
+  "issues": [
+    "Function 'function-0001' references unknown gridded table ' CLBAlfaFlap_Table'.",
+    "Check case 'case 1' input signal has no varID, signalName, or signalID.",
+    "Check case 'case 1' output signal has no varID, signalName, or signalID.",
+    "Check case 'case 1' has no valid outputs.",
+    "Check case 'case 2' input signal has no varID, signalName, or signalID.",
+    "Check case 'case 2' output signal has no varID, signalName, or signalID.",
+    "Check case 'case 2' has no valid outputs.",
+    "Check case 'case 3' input signal has no varID, signalName, or signalID.",
+    "Check case 'case 3' output signal has no varID, signalName, or signalID.",
+    "Check case 'case 3' has no valid outputs.",
+    "Check case 'case 4' input signal has no varID, signalName, or signalID.",
+    "Check case 'case 4' output signal has no varID, signalName, or signalID.",
+    "Check case 'case 4' has no valid outputs."
+  ],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/twoD_ungridded.dml",
+  "ungridded_tables": [
+    {
+      "attributes": {
+        "name": "CLBASIC as function of flap angle and angle of   attack",
+        "units": "nd",
+        "utID": "CLBAlfaFlap_Table"
+      },
+      "declared_id": "CLBAlfaFlap_Table",
+      "description": "CL basic as a function of flap angle and angle of attack. Note the alpha used in this table is with respect to the wing design plane (in degrees). Flap is in degrees as well.",
+      "function_name": null,
+      "independent_dimension_count": 2,
+      "issues": [],
+      "name": "CLBASIC as function of flap angle and angle of   attack",
+      "points": [
+        {
+          "attributes": {},
+          "dependent_value": -0.44,
+          "independent_values": [
+            1.0,
+            -5.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.95,
+          "independent_values": [
+            1.0,
+            10.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.12,
+          "independent_values": [
+            1.0,
+            12.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.26,
+          "independent_values": [
+            1.0,
+            14.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.32,
+          "independent_values": [
+            1.0,
+            15.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.41,
+          "independent_values": [
+            1.0,
+            17.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.55,
+          "independent_values": [
+            5.0,
+            -5.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.03,
+          "independent_values": [
+            5.0,
+            0.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 0.5,
+          "independent_values": [
+            5.0,
+            5.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.02,
+          "independent_values": [
+            5.0,
+            10.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.23,
+          "independent_values": [
+            5.0,
+            12.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.44,
+          "independent_values": [
+            5.0,
+            14.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.63,
+          "independent_values": [
+            5.0,
+            16.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.7,
+          "independent_values": [
+            5.0,
+            17.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.75,
+          "independent_values": [
+            5.0,
+            18.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": -0.4,
+          "independent_values": [
+            10.0,
+            -5.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.57,
+          "independent_values": [
+            10.0,
+            14.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.66,
+          "independent_values": [
+            10.0,
+            15.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.75,
+          "independent_values": [
+            10.0,
+            16.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.8,
+          "independent_values": [
+            10.0,
+            17.0
+          ],
+          "modification_id": null
+        },
+        {
+          "attributes": {},
+          "dependent_value": 1.84,
+          "independent_values": [
+            10.0,
+            18.0
+          ],
+          "modification_id": null
+        }
+      ],
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "name": "Peter Grant",
+              "org": "UTIAS"
+            },
+            "email": null,
+            "name": "Peter Grant",
+            "organization": "UTIAS"
+          }
+        ],
+        "creation_date": "2006-11-01",
+        "description": null,
+        "document_refs": [
+          "PRG1"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "name": "Peter Grant",
+                "org": "UTIAS"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2006-11-01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "functionCreationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "PRG1"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "CLBAlfaFlap_Table",
+      "uncertainty": {
+        "attributes": {
+          "effect": "percentage"
+        },
+        "children": [
+          {
+            "attributes": {
+              "numSigmas": "3"
+            },
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://daveml.org/2010/DAVEML",
+                "tag": "bounds",
+                "text": "15"
+              }
+            ],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "normalPDF",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "uncertainty",
+        "text": null
+      },
+      "units": "nd"
+    }
+  ],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "name": "Angle of attack",
+        "units": "deg",
+        "varID": "angleOfAttack_d"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": null,
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "Angle of attack",
+      "provenance": null,
+      "roles": [
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "angleOfAttack_d"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "2.0",
+        "name": "Offset angle attack of wing relative to body axis",
+        "sign": "+ANU",
+        "units": "deg",
+        "varID": "alpha0"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Offset of design plane of wing relative to body axis",
+      "initial_value": 2.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "Offset angle attack of wing relative to body axis",
+      "provenance": null,
+      "roles": [],
+      "sign": "+ANU",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "alpha0"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "Trailing_Edge_Flap_Deflection",
+        "units": "deg",
+        "varID": "flapdef"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Trailing edge flap deflection in degrees +DOWN",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "Trailing_Edge_Flap_Deflection",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "flapdef"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "Angle of Attach DWP",
+        "units": "deg",
+        "varID": "AOAdwp"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://daveml.org/2010/DAVEML",
+                "tag": "plus",
+                "text": null
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://daveml.org/2010/DAVEML",
+                "tag": "ci",
+                "text": "angleOfAttack_d"
+              },
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://daveml.org/2010/DAVEML",
+                "tag": "ci",
+                "text": "alpha0"
+              }
+            ],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Angle of attack of design wing plane in degrees +ANU",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "Angle of Attach DWP",
+      "provenance": null,
+      "roles": [],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "deg",
+      "variable_id": "AOAdwp"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "coefficient of lift due to flaps and angle of attack",
+        "sign": "+UP",
+        "units": "nondimensional",
+        "varID": "CLBASIC"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Calculate the 747-100 basic lift coefficient. This only includes effects for flaps and angle of attack. This is only a small subset of actual aircraft data.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "coefficient of lift due to flaps and angle of attack",
+      "provenance": null,
+      "roles": [
+        "isOutput"
+      ],
+      "sign": "+UP",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nondimensional",
+      "variable_id": "CLBASIC"
+    }
+  ]
+}

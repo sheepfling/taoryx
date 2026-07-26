@@ -1,0 +1,260 @@
+{
+  "gridded": [
+    {
+      "attributes": {
+        "gtID": "T_IDLE_table",
+        "name": "T_IDLE table"
+      },
+      "breakpoint_ids": [
+        "MACH_PTS",
+        "ALT_PTS"
+      ],
+      "declared_id": "T_IDLE_table",
+      "description": "Idle thrust table",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "T_IDLE table",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2012-08-07",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2012-08-07"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "shape": [
+        6,
+        6
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "T_IDLE_table",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "T_MIL_table",
+        "name": "T_MIL table"
+      },
+      "breakpoint_ids": [
+        "MACH_PTS",
+        "ALT_PTS"
+      ],
+      "declared_id": "T_MIL_table",
+      "description": "Military thrust table",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "T_MIL table",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2012-08-07",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2012-08-07"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "shape": [
+        6,
+        6
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "T_MIL_table",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "T_MAX_table",
+        "name": "T_MAX table"
+      },
+      "breakpoint_ids": [
+        "MACH_PTS",
+        "ALT_PTS"
+      ],
+      "declared_id": "T_MAX_table",
+      "description": "Idle thrust table",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "T_MAX table",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2012-08-07",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2012-08-07"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "shape": [
+        6,
+        6
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "T_MAX_table",
+      "uncertainty": null,
+      "units": null
+    }
+  ],
+  "ungridded": []
+}

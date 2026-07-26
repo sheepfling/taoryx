@@ -1,0 +1,107 @@
+{
+  "gridded": [],
+  "ungridded": [
+    {
+      "attributes": {
+        "name": "CLBASIC as function of flap angle and angle of   attack",
+        "units": "nd",
+        "utID": "CLBAlfaFlap_Table"
+      },
+      "declared_id": "CLBAlfaFlap_Table",
+      "description": "CL basic as a function of flap angle and angle of attack. Note the alpha used in this table is with respect to the wing design plane (in degrees). Flap is in degrees as well.",
+      "function_name": null,
+      "independent_dimension_count": 2,
+      "issues": [],
+      "name": "CLBASIC as function of flap angle and angle of   attack",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "name": "Peter Grant",
+              "org": "UTIAS"
+            },
+            "email": null,
+            "name": "Peter Grant",
+            "organization": "UTIAS"
+          }
+        ],
+        "creation_date": "2006-11-01",
+        "description": null,
+        "document_refs": [
+          "PRG1"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "name": "Peter Grant",
+                "org": "UTIAS"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2006-11-01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "functionCreationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "PRG1"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "CLBAlfaFlap_Table",
+      "uncertainty": {
+        "attributes": {
+          "effect": "percentage"
+        },
+        "children": [
+          {
+            "attributes": {
+              "numSigmas": "3"
+            },
+            "children": [
+              {
+                "attributes": {},
+                "children": [],
+                "namespace": "http://daveml.org/2010/DAVEML",
+                "tag": "bounds",
+                "text": "15"
+              }
+            ],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "normalPDF",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "uncertainty",
+        "text": null
+      },
+      "units": "nd"
+    }
+  ]
+}

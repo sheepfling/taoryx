@@ -1,0 +1,3 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+alpdeg,alpha,deg,,,,,,,,,False,
+cl,CL,,,,,,,,,,False,

@@ -1,0 +1,13 @@
+breakpoint_id,name,units,index,value,issues
+ALT_PTS,Alt points,ft,0,0.0,
+ALT_PTS,Alt points,ft,1,10000.0,
+ALT_PTS,Alt points,ft,2,20000.0,
+ALT_PTS,Alt points,ft,3,30000.0,
+ALT_PTS,Alt points,ft,4,40000.0,
+ALT_PTS,Alt points,ft,5,50000.0,
+MACH_PTS,Mach points,nd,0,0.0,
+MACH_PTS,Mach points,nd,1,0.2,
+MACH_PTS,Mach points,nd,2,0.4,
+MACH_PTS,Mach points,nd,3,0.6,
+MACH_PTS,Mach points,nd,4,0.8,
+MACH_PTS,Mach points,nd,5,1.0,

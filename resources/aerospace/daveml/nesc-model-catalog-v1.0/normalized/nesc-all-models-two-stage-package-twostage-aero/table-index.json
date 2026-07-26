@@ -1,0 +1,125 @@
+{
+  "gridded": [
+    {
+      "attributes": {
+        "gtID": "CL_table_def",
+        "name": "CL_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "CL_table_def",
+      "description": null,
+      "function_name": "LiftCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CL_table",
+      "provenance": null,
+      "shape": [
+        11
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CL_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "CD_table_def",
+        "name": "CD_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA1"
+      ],
+      "declared_id": "CD_table_def",
+      "description": null,
+      "function_name": "DragCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CD_table",
+      "provenance": null,
+      "shape": [
+        11
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CD_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "CY_table_def",
+        "name": "CYtable"
+      },
+      "breakpoint_ids": [
+        "BETA1"
+      ],
+      "declared_id": "CY_table_def",
+      "description": null,
+      "function_name": "SideforceCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "CYtable",
+      "provenance": null,
+      "shape": [
+        11
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "CY_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Cm_table_def",
+        "name": "Cm_table"
+      },
+      "breakpoint_ids": [
+        "ALPHA2"
+      ],
+      "declared_id": "Cm_table_def",
+      "description": null,
+      "function_name": "PitchingMomentCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cm_table",
+      "provenance": null,
+      "shape": [
+        3
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cm_table_def",
+      "uncertainty": null,
+      "units": null
+    },
+    {
+      "attributes": {
+        "gtID": "Cn_table_def",
+        "name": "Cn_table"
+      },
+      "breakpoint_ids": [
+        "BETA2"
+      ],
+      "declared_id": "Cn_table_def",
+      "description": null,
+      "function_name": "YawingMomentCoefficient_fcn",
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "Cn_table",
+      "provenance": null,
+      "shape": [
+        3
+      ],
+      "source_kind": "inline-function",
+      "supplemental_nodes": [],
+      "table_id": "Cn_table_def",
+      "uncertainty": null,
+      "units": null
+    }
+  ],
+  "ungridded": []
+}
