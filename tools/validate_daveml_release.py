@@ -62,6 +62,7 @@ def main() -> int:
         "verification/daveml_catalog_roundtrip.json",
         "verification/daveml_official_checkdata.json",
         "verification/daveml_official_conformance.json",
+        "build/daveml-release-catalog/canonical/export-manifest.json",
         "verification/daveml_f16_linearization_evidence.json",
         "verification/daveml_f16_tuning_evidence.json",
         "verification/daveml_f16_scenario_evidence.json",

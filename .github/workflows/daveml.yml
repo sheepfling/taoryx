@@ -35,4 +35,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: daveml-release-evidence
-          path: verification/daveml_*.json
+          path: |
+            verification/daveml_*.json
+            build/daveml-release-catalog/canonical/export-manifest.json
