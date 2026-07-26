@@ -8,12 +8,14 @@ import pytest
 from taoryx.contracts import Frame, FrameVector3, Vector3
 from taoryx.language import GrammarProfile, parse_problem_file
 from taoryx.modes import Quaternion
+from taoryx.racetrack_timing import estimate_racetrack_timing
 from taoryx.rigid_body import RigidBody6DofState
 from taoryx.runtime.lowering import (
     _runtime_coordinated_turn_enabled,
     _runtime_figure_eight_pitch_angle,
     _runtime_figure_eight_waypoint_position,
     _runtime_rectangle_bank_angle,
+    _runtime_rectangle_waypoint_position,
     _runtime_route_tracking_geometry,
     _runtime_route_velocity,
 )
@@ -30,12 +32,29 @@ ROUTE = {
     "figure-eight-bank-deg": "12.0",
 }
 
+RACETRACK = {
+    "mode": "racetrack",
+    "start-latitude-deg": "0.0",
+    "start-longitude-deg": "0.0",
+    "racetrack-length-m": "1400.0",
+    "racetrack-turn-radius-m": "250.0",
+    "racetrack-speed-mps": "20.0",
+    "racetrack-low-altitude-m": "178.0",
+    "racetrack-high-altitude-m": "218.0",
+    "racetrack-climb-rate-mps": "2.0",
+    "racetrack-descent-rate-mps": "2.0",
+    "duration-s": "218.5398163397",
+    "racetrack-left-bank-deg": "12.0",
+    "racetrack-right-bank-deg": "-12.0",
+}
+
 
 @pytest.mark.parametrize(
     "path",
     [
         Path("examples/mission_families/slower_b747/SV01_figure_eight_route_6dof.prb"),
         Path("examples/mission_families/slower_x8/SV03_figure_eight_route_6dof.prb"),
+        Path("examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_6dof.prb"),
         Path("examples/mission_families/slower_hummingbird/SV05_figure_eight_route_6dof.prb"),
     ],
 )
@@ -124,6 +143,8 @@ def test_figure_eight_terminal_route_preserves_declared_course_and_speed() -> No
         **ROUTE,
         "terminal-capture": "true",
         "terminal-start-s": "100.0",
+        "terminal-recovery-mode": "gate",
+        "terminal-intercept-distance-m": "0.0",
         "terminal-target-altitude-m": "100.0",
         "terminal-speed-mps": "20.0",
         "terminal-heading-deg": "90.0",
@@ -165,4 +186,36 @@ def test_coordinated_turn_switch_is_shared_by_route_shapes() -> None:
     assert _runtime_coordinated_turn_enabled({"figure-eight-coordinated-turn": "true"}, ROUTE)
     assert _runtime_coordinated_turn_enabled({"rectangle-coordinated-turn": "true"}, {**ROUTE, "mode": "rectangle"})
     assert not _runtime_coordinated_turn_enabled({}, ROUTE)
+    ####
+
+
+def test_racetrack_timing_keeps_vertical_phases_inside_straights() -> None:
+    estimate = estimate_racetrack_timing(
+        straight_length_m=1400.0,
+        turn_radius_m=250.0,
+        speed_m_s=20.0,
+        altitude_delta_m=40.0,
+        climb_rate_m_s=2.0,
+        descent_rate_m_s=2.0,
+    )
+
+    assert estimate.straight_time_s == pytest.approx(70.0)
+    assert estimate.turn_time_s == pytest.approx(math.pi * 12.5)
+    assert estimate.total_time_s == pytest.approx(2.0 * 70.0 + 2.0 * math.pi * 12.5)
+    assert sum(estimate.phase_durations()) == pytest.approx(estimate.total_time_s)
+    ####
+
+
+def test_racetrack_reference_closes_and_reverses_turn_bank() -> None:
+    start = _runtime_rectangle_waypoint_position(RACETRACK, _state(0.0))
+    finish = _runtime_rectangle_waypoint_position(RACETRACK, _state(218.5398163397))
+    left_bank = _runtime_rectangle_bank_angle(RACETRACK, _state(90.0))
+    right_bank = _runtime_rectangle_bank_angle(RACETRACK, _state(205.0))
+    velocity = _runtime_route_velocity(RACETRACK, {}, _state(25.0), 0.0)
+
+    assert start is not None and finish is not None
+    assert (finish - start).norm() < 1.0e-6
+    assert left_bank is not None and right_bank is not None
+    assert left_bank > 0.0 and right_bank < 0.0
+    assert velocity is not None and all(math.isfinite(value) for value in (velocity.x, velocity.y, velocity.z))
     ####

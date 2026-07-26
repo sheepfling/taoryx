@@ -9,6 +9,7 @@ import json
 import math
 import shutil
 import zipfile
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,7 @@ import yaml
 
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.mission_objectives import ControllerTransition, TruthObjectiveSpec, evaluate_truth_objectives
+from taoryx.racetrack_timing import estimate_racetrack_timing
 from taoryx.runtime.runner import run_files
 from taoryx.visualization import render_run_artifact_plots
 
@@ -147,6 +149,12 @@ def _diagnostic_controller_transitions(mission: dict[str, Any], rows: tuple[dict
     transitions: list[ControllerTransition] = []
     previous_leg = 0
     for row in rows:
+        # A smooth route phase is a guidance reference, not a controller
+        # transition. Only discrete waypoint-leg telemetry is eligible for
+        # this diagnostic adapter; otherwise an early phase change would be
+        # mistaken for a claimed truth capture and invalidate the mission.
+        if "route_leg_index" not in row:
+            continue
         leg = int(float(row.get("route_leg_index", 0.0)))
         if leg <= previous_leg or leg > len(objective_ids):
             continue
@@ -466,15 +474,18 @@ def build(output: Path, mission_id: str) -> Path:
     controller_transitions = _diagnostic_controller_transitions(mission, rows)
     objective_specs = tuple(TruthObjectiveSpec(**item) for item in mission["objectives"])
     terminal = dict(mission["terminal"])
+    terminal_objective_type = str(terminal.get("objective_type", "terminal_state_gate"))
     objective_specs += (
         TruthObjectiveSpec(
             id="terminal-contract",
-            objective_type="terminal_state_gate",
+            objective_type=terminal_objective_type,
             target=dict(terminal["target"]),
             tolerance=dict(terminal["tolerance"]),
             dwell_s=float(terminal["dwell_s"]),
             window_start_s=terminal.get("window_start_s"),
             window_end_s=terminal.get("window_end_s"),
+            gate_normal=None if terminal.get("gate_normal") is None else tuple(terminal["gate_normal"]),
+            crossing_direction=int(terminal.get("crossing_direction", 1)),
         ),
     )
     truth_events, truth_event_times = _truth_events(mission, rows)
@@ -493,6 +504,10 @@ def build(output: Path, mission_id: str) -> Path:
         hard_gates_passed=hard_gates_passed,
     )
     mission_pass = bool(truth_evaluation["mission_pass"])
+    timing_estimate = None
+    if "timing_estimate" in mission:
+        timing_estimate = asdict(estimate_racetrack_timing(**mission["timing_estimate"]))
+        _write_json(packet / "preflight_timing_estimate.json", timing_estimate)
     summary = {
         "schema_version": 1,
         "mission_id": mission_id,
@@ -514,6 +529,7 @@ def build(output: Path, mission_id: str) -> Path:
         "numerical_valid": numerical_valid,
         "envelope_report": envelope_report,
         "truth_evaluation": truth_evaluation,
+        "preflight_timing_estimate": timing_estimate,
         "run": {
             "exit_code": report.exit_code,
             "completed": [result.completed for result in report.results],

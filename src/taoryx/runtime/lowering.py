@@ -1828,7 +1828,7 @@ def _lower_rigid_body_case(
         body_rate_damping = float(guidance_attributes.get("body-rate-damping-nm-s-per-rad", "0.0"))
         if body_rate_damping > 0.0:
             thrust_moment = thrust_moment + state.body_rate.scaled(-body_rate_damping)
-        if route_attributes.get("mode", "").casefold() in {"rectangle", "figure-eight", "figure8"} and coordinated_turn_enabled and attitude_lqr is None:
+        if route_attributes.get("mode", "").casefold() in {"rectangle", "racetrack", "figure-eight", "figure8"} and coordinated_turn_enabled and attitude_lqr is None:
             heading_error, bank_error = _runtime_rectangle_turn_errors(route_attributes, state, route_velocity or Vector3(1.0, 0.0, 0.0))
             turn_command = coordinated_turn_controller.command(heading_error, bank_error, state.body_rate)
             thrust_moment = thrust_moment + turn_command.moment_body
@@ -1974,6 +1974,14 @@ def _lower_rigid_body_case(
             result["route_pitch_command_deg"] = math.degrees(route_pitch)
             result["route_pitch_achieved_deg"] = result["local_pitch_deg"]
             result["route_pitch_tracking_error_deg"] = result["route_pitch_command_deg"] - result["route_pitch_achieved_deg"]
+        elif route_attributes.get("mode", "").casefold() == "racetrack":
+            local = _runtime_racetrack_local_reference(route_attributes, state.time)
+            if local is not None:
+                _, _, _, _, _, vertical_rate, _ = local
+                speed = max(abs(float(route_attributes.get("racetrack-speed-mps", "1.0"))), 1.0e-6)
+                result["route_pitch_command_deg"] = math.degrees(math.atan2(vertical_rate, speed))
+                result["route_pitch_achieved_deg"] = result["local_pitch_deg"]
+                result["route_pitch_tracking_error_deg"] = result["route_pitch_command_deg"] - result["route_pitch_achieved_deg"]
         for name in (
             "rate_lqr_request_moment_x_nm",
             "rate_lqr_request_moment_y_nm",
@@ -2496,7 +2504,7 @@ def _runtime_route_velocity(
     thrust, moments, gravity, mass flow, and any active aerodynamic loads.
     """
 
-    if route_attributes.get("mode", "").casefold() in {"rectangle", "figure-eight", "figure8"}:
+    if route_attributes.get("mode", "").casefold() in {"rectangle", "racetrack", "figure-eight", "figure8"}:
         return _runtime_rectangle_route_velocity(route_attributes, state, earth_omega)
     if route_attributes.get("mode", "").casefold() != "great-circle":
         return None
@@ -2619,6 +2627,8 @@ def _runtime_rectangle_route_velocity(
     mode = route_attributes.get("mode", "").casefold()
     if mode in {"figure-eight", "figure8"}:
         return _runtime_figure_eight_route_velocity(route_attributes, state, earth_omega)
+    if mode == "racetrack":
+        return _runtime_racetrack_route_velocity(route_attributes, state, earth_omega)
     if mode != "rectangle" or any(name not in route_attributes for name in required):
         return None
     latitude = math.radians(float(route_attributes["start-latitude-deg"]))
@@ -2680,6 +2690,155 @@ def _runtime_rectangle_route_velocity(
 ####
 
 
+def _runtime_racetrack_phase_profile(
+    route_attributes: Mapping[str, str],
+) -> tuple[tuple[float, ...], float, float, float, float, float, float] | None:
+    """Return cumulative phase ends and the derived racetrack parameters."""
+
+    required = (
+        "start-latitude-deg",
+        "start-longitude-deg",
+        "racetrack-length-m",
+        "racetrack-turn-radius-m",
+        "racetrack-speed-mps",
+        "racetrack-low-altitude-m",
+        "racetrack-high-altitude-m",
+        "racetrack-climb-rate-mps",
+        "racetrack-descent-rate-mps",
+    )
+    if route_attributes.get("mode", "").casefold() != "racetrack" or any(
+        name not in route_attributes for name in required
+    ):
+        return None
+    length = max(float(route_attributes["racetrack-length-m"]), 1.0)
+    turn_radius = max(float(route_attributes["racetrack-turn-radius-m"]), 1.0)
+    speed = max(abs(float(route_attributes["racetrack-speed-mps"])), 1.0e-6)
+    low_altitude = float(route_attributes["racetrack-low-altitude-m"])
+    high_altitude = float(route_attributes["racetrack-high-altitude-m"])
+    altitude_delta = high_altitude - low_altitude
+    climb_rate = max(abs(float(route_attributes["racetrack-climb-rate-mps"])), 1.0e-6)
+    descent_rate = max(abs(float(route_attributes["racetrack-descent-rate-mps"])), 1.0e-6)
+    straight_time = length / speed
+    turn_time = math.pi * turn_radius / speed
+    climb_time = min(straight_time, max(0.0, altitude_delta / climb_rate))
+    descent_time = min(straight_time, max(0.0, altitude_delta / descent_rate))
+    outbound_level_time = max(0.0, straight_time - climb_time)
+    inbound_level_time = max(0.0, straight_time - descent_time)
+    durations = (
+        climb_time,
+        outbound_level_time,
+        turn_time,
+        descent_time,
+        inbound_level_time,
+        turn_time,
+    )
+    total = sum(durations)
+    declared_duration = route_attributes.get("duration-s")
+    if declared_duration is not None:
+        total = max(float(declared_duration), total)
+    cumulative: list[float] = []
+    elapsed = 0.0
+    for duration in durations:
+        elapsed += duration
+        cumulative.append(elapsed)
+    if total > cumulative[-1] and cumulative:
+        cumulative[-1] = total
+    return tuple(cumulative), length, turn_radius, speed, low_altitude, high_altitude, total
+    ####
+
+
+def _runtime_racetrack_local_reference(
+    route_attributes: Mapping[str, str],
+    state_time: float,
+) -> tuple[float, float, float, float, float, float, int] | None:
+    """Return local east/north position, tangent, vertical rate, and phase."""
+
+    profile = _runtime_racetrack_phase_profile(route_attributes)
+    if profile is None:
+        return None
+    cumulative, length, turn_radius, speed, low_altitude, high_altitude, total = profile
+    if state_time > total:
+        # The route closes at the gate, then continues a short distance along
+        # the finish course so an independent fly-by evaluator can observe an
+        # actual crossing rather than a sample exactly on the plane.
+        return 0.0, 0.0, low_altitude, 1.0, 0.0, 0.0, 6
+    durations = (
+        cumulative[0],
+        cumulative[1] - cumulative[0],
+        cumulative[2] - cumulative[1],
+        cumulative[3] - cumulative[2],
+        cumulative[4] - cumulative[3],
+        cumulative[5] - cumulative[4],
+    )
+    phase = min(5, max(0, next((index for index, end in enumerate(cumulative) if state_time < end), 5)))
+    phase_start = 0.0 if phase == 0 else cumulative[phase - 1]
+    local_time = max(0.0, min(state_time, total) - phase_start)
+    climb_time = durations[0]
+    descent_time = durations[3]
+    climb_distance = speed * climb_time
+    descent_distance = speed * descent_time
+    delta_altitude = high_altitude - low_altitude
+    if phase == 0:
+        x, y = speed * local_time, 0.0
+        tangent_x, tangent_y, vertical_rate = 1.0, 0.0, delta_altitude / max(climb_time, 1.0e-6)
+        altitude = low_altitude + delta_altitude * local_time / max(climb_time, 1.0e-6)
+    elif phase == 1:
+        x, y = climb_distance + speed * local_time, 0.0
+        tangent_x, tangent_y, vertical_rate, altitude = 1.0, 0.0, 0.0, high_altitude
+    elif phase == 2:
+        theta = -math.pi / 2.0 + math.pi * local_time / max(durations[2], 1.0e-6)
+        x, y = length + turn_radius * math.cos(theta), turn_radius + turn_radius * math.sin(theta)
+        tangent_x, tangent_y, vertical_rate, altitude = -math.sin(theta), math.cos(theta), 0.0, high_altitude
+    elif phase == 3:
+        x, y = length - speed * local_time, 2.0 * turn_radius
+        tangent_x, tangent_y, vertical_rate = -1.0, 0.0, -delta_altitude / max(descent_time, 1.0e-6)
+        altitude = high_altitude - delta_altitude * local_time / max(descent_time, 1.0e-6)
+    elif phase == 4:
+        x, y = length - descent_distance - speed * local_time, 2.0 * turn_radius
+        tangent_x, tangent_y, vertical_rate, altitude = -1.0, 0.0, 0.0, low_altitude
+    else:
+        theta = math.pi / 2.0 + math.pi * local_time / max(durations[5], 1.0e-6)
+        x, y = turn_radius * math.cos(theta), turn_radius + turn_radius * math.sin(theta)
+        tangent_x, tangent_y, vertical_rate, altitude = -math.sin(theta), math.cos(theta), 0.0, low_altitude
+    return x, y, altitude, tangent_x, tangent_y, vertical_rate, phase
+    ####
+
+
+def _runtime_racetrack_route_velocity(
+    route_attributes: Mapping[str, str],
+    state: RigidBody6DofState,
+    earth_omega: float,
+) -> Vector3 | None:
+    """Resolve the reusable climb/turn/descent racetrack into ECIC velocity."""
+
+    local = _runtime_racetrack_local_reference(route_attributes, state.time)
+    if local is None:
+        return None
+    x, y, altitude, tangent_x, tangent_y, vertical_rate, _ = local
+    latitude = math.radians(float(route_attributes["start-latitude-deg"]))
+    longitude = math.radians(float(route_attributes["start-longitude-deg"]))
+    radius = 6_378_137.0
+    radial = Vector3(math.cos(latitude) * math.cos(longitude), math.cos(latitude) * math.sin(longitude), math.sin(latitude))
+    east = Vector3(-math.sin(longitude), math.cos(longitude), 0.0)
+    north = Vector3(-math.sin(latitude) * math.cos(longitude), -math.sin(latitude) * math.sin(longitude), math.cos(latitude))
+    desired_position = radial.scaled(radius + altitude) + east.scaled(x) + north.scaled(y)
+    speed = max(abs(float(route_attributes["racetrack-speed-mps"])), 1.0e-6)
+    tangent = east.scaled(tangent_x * speed) + north.scaled(tangent_y * speed) + radial.scaled(vertical_rate)
+    altitude_error = altitude - (state.position.vector.norm() - radius)
+    altitude_gain = max(0.0, float(route_attributes.get("racetrack-altitude-capture-gain-per-s", "0.0")))
+    altitude_limit = max(0.0, float(route_attributes.get("racetrack-altitude-capture-max-mps", "0.0")))
+    if altitude_gain > 0.0 and altitude_limit > 0.0:
+        altitude_correction = max(-altitude_limit, min(altitude_limit, altitude_gain * altitude_error))
+        tangent = tangent + radial.scaled(altitude_correction)
+    correction_gain = max(0.0, float(route_attributes.get("position-capture-gain", "0.0")))
+    correction = limit_vector_norm(
+        (desired_position - state.position.vector).scaled(correction_gain),
+        max(float(route_attributes.get("position-capture-max-correction-mps", str(max(speed * 0.25, 1.0)))), 0.0),
+    )
+    return tangent + correction + Vector3(0.0, 0.0, earth_omega).cross(state.position.vector)
+    ####
+
+
 def _runtime_rectangle_waypoint_position(
     route_attributes: Mapping[str, str],
     state: RigidBody6DofState,
@@ -2689,6 +2848,17 @@ def _runtime_rectangle_waypoint_position(
     required = ("start-latitude-deg", "start-longitude-deg", "duration-s", "rectangle-length-m", "rectangle-width-m")
     if route_attributes.get("mode", "").casefold() in {"figure-eight", "figure8"}:
         return _runtime_figure_eight_waypoint_position(route_attributes, state)
+    if route_attributes.get("mode", "").casefold() == "racetrack":
+        local = _runtime_racetrack_local_reference(route_attributes, state.time)
+        if local is None:
+            return None
+        x, y, altitude, _, _, _, _ = local
+        latitude = math.radians(float(route_attributes["start-latitude-deg"]))
+        longitude = math.radians(float(route_attributes["start-longitude-deg"]))
+        radial = Vector3(math.cos(latitude) * math.cos(longitude), math.cos(latitude) * math.sin(longitude), math.sin(latitude))
+        east = Vector3(-math.sin(longitude), math.cos(longitude), 0.0)
+        north = Vector3(-math.sin(latitude) * math.cos(longitude), -math.sin(latitude) * math.sin(longitude), math.cos(latitude))
+        return radial.scaled(6_378_137.0 + altitude) + east.scaled(x) + north.scaled(y)
     if route_attributes.get("mode", "").casefold() != "rectangle" or any(name not in route_attributes for name in required):
         return None
     latitude = math.radians(float(route_attributes["start-latitude-deg"]))
@@ -2882,7 +3052,32 @@ def _runtime_figure_eight_route_velocity(
             north_now.scaled(terminal_speed * math.cos(terminal_heading))
             + east_now.scaled(terminal_speed * math.sin(terminal_heading))
         )
-        desired_velocity = terminal_course + horizontal_error.scaled(capture_gain) - horizontal_velocity.scaled(damping)
+        terminal_recovery_mode = route_attributes.get("terminal-recovery-mode", "point").casefold()
+        if terminal_recovery_mode in {"gate", "line", "fly-by", "fly_by"}:
+            lateral_now = radial_now.cross(terminal_course.scaled(1.0 / max(terminal_speed, 1.0e-12)))
+            lateral_error = horizontal_error.dot(lateral_now)
+            lateral_velocity = horizontal_velocity.dot(lateral_now)
+            lateral_gain = max(0.0, float(route_attributes.get("terminal-cross-track-gain", str(capture_gain))))
+            lateral_damping = max(0.0, float(route_attributes.get("terminal-cross-track-damping", str(damping))))
+            intercept_distance = max(0.0, float(route_attributes.get("terminal-intercept-distance-m", "0.0")))
+            intercept_capture = max(0.0, float(route_attributes.get("terminal-intercept-capture-m", "100.0")))
+            intercept_point = desired_position - terminal_course.scaled(intercept_distance / max(terminal_speed, 1.0e-12))
+            intercept_error = intercept_point - state.position.vector
+            intercept_horizontal_error = intercept_error - radial_now.scaled(intercept_error.dot(radial_now))
+            if intercept_horizontal_error.norm() > intercept_capture:
+                # First align with a point behind the gate.  This is a finite
+                # intercept stage, not an attractor at the terminal itself.
+                desired_velocity = terminal_course + intercept_horizontal_error.scaled(capture_gain) - horizontal_velocity.scaled(damping)
+            else:
+                # Once aligned, a fixed-wing terminal is a gate crossing, not
+                # a hover-like point capture. Correct only cross-track error
+                # while preserving the declared forward course; attracting the
+                # full position vector creates an orbit/limit cycle.
+                desired_velocity = terminal_course + lateral_now.scaled(
+                    -lateral_gain * lateral_error - lateral_damping * lateral_velocity
+                )
+        else:
+            desired_velocity = terminal_course + horizontal_error.scaled(capture_gain) - horizontal_velocity.scaled(damping)
         altitude_error = terminal_altitude - (state.position.vector.norm() - 6_378_137.0)
         desired_velocity = desired_velocity + radial_now.scaled(
             float(route_attributes.get("terminal-altitude-gain", "0.8")) * altitude_error
@@ -2936,6 +3131,15 @@ def _runtime_rectangle_bank_angle(
         theta = 2.0 * math.pi * max(0.0, min(duration, state.time)) / duration
         scheduled = math.radians(float(route_attributes.get("figure-eight-bank-deg", "20.0"))) * math.sin(theta)
         maximum = abs(float(route_attributes.get("route-max-bank-deg", route_attributes.get("figure-eight-bank-deg", "20.0"))))
+    elif route_attributes.get("mode", "").casefold() == "racetrack":
+        local = _runtime_racetrack_local_reference(route_attributes, state.time)
+        if local is None:
+            return None
+        phase = local[-1]
+        left_bank = math.radians(float(route_attributes.get("racetrack-left-bank-deg", "12.0")))
+        right_bank = math.radians(float(route_attributes.get("racetrack-right-bank-deg", "-12.0")))
+        scheduled = left_bank if phase == 2 else right_bank if phase == 5 else 0.0
+        maximum = abs(float(route_attributes.get("route-max-bank-deg", str(max(abs(math.degrees(left_bank)), abs(math.degrees(right_bank)))))))
     else:
         if route_attributes.get("mode", "").casefold() != "rectangle" or "rectangle-bank-deg" not in route_attributes:
             return None
@@ -2975,9 +3179,11 @@ def _runtime_coordinated_turn_enabled(
     """Resolve the shared coordinated-turn switch for smooth and polygonal routes."""
 
     route_mode = route_attributes.get("mode", "").casefold()
-    names = ("rectangle-coordinated-turn", "figure-eight-coordinated-turn")
+    names: tuple[str, ...] = ("rectangle-coordinated-turn", "racetrack-coordinated-turn", "figure-eight-coordinated-turn")
     if route_mode in {"figure-eight", "figure8"}:
         names = ("figure-eight-coordinated-turn", "rectangle-coordinated-turn")
+    elif route_mode == "racetrack":
+        names = ("racetrack-coordinated-turn", "rectangle-coordinated-turn")
     return any(guidance_attributes.get(name, "false").casefold() in {"1", "true", "yes"} for name in names)
 ####
 
@@ -3176,17 +3382,21 @@ def _rigid_body_position_observables(
             result.update(route_geometry)
     route_target = _runtime_rectangle_waypoint_position(route_attributes, state)
     if route_target is not None:
-        duration = max(float(route_attributes.get("duration-s", "1.0")), 1.0)
         route_mode = route_attributes.get("mode", "").casefold()
-        phase_index = float(min(3, max(0, int(state.time / (duration / 4.0)))))
+        if route_mode == "racetrack":
+            local = _runtime_racetrack_local_reference(route_attributes, state.time)
+            phase_index = float(local[-1]) if local is not None else 0.0
+        else:
+            duration = max(float(route_attributes.get("duration-s", "1.0")), 1.0)
+            phase_index = float(min(3, max(0, int(state.time / (duration / 4.0)))))
         if route_mode == "rectangle":
             result["route_leg_index"] = phase_index
-        elif route_mode in {"figure-eight", "figure8"}:
+        elif route_mode in {"racetrack", "figure-eight", "figure8"}:
             # A smooth figure-eight has no physical waypoint corners.  Keep
             # its lobe/phase transitions distinct from square-course legs.
             result["route_phase_index"] = phase_index
         result["route_target_error_m"] = (route_target - state.position.vector).norm()
-        if route_attributes.get("mode", "").casefold() in {"rectangle", "figure-eight", "figure8"}:
+        if route_attributes.get("mode", "").casefold() in {"rectangle", "racetrack", "figure-eight", "figure8"}:
             result.update(_runtime_route_tracking_geometry(route_attributes, route_target, state, earth_omega))
         corners = _runtime_rectangle_corner_positions(route_attributes)
         if corners is not None:

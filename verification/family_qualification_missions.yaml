@@ -170,3 +170,75 @@ missions:
       - id: pitch-negative-response
         objective_type: event
         event_id: pitch-negative-response
+  - id: x8-racetrack-altitude-turns-v1
+    family: skywalker_x8
+    display_name: Skywalker X8 racetrack climb, level, opposite-turn, descent, and start/finish gate
+    evidence_level: nominal_case_pass_overall_qualification_pending
+    claim: The source-bounded X8 rigid-body surrogate follows a reusable racetrack reference with isolated outbound climb, high-altitude level flight, left turn, inbound descent, low-altitude level flight, opposite right turn, and an oriented start/finish crossing under the existing attitude/LQR controller seam.
+    nonclaims:
+      - source-validated controller or actuator fidelity
+      - flight-test or manufacturer fidelity
+      - wind robustness
+      - takeoff, landing, or runway operations
+    problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_6dof.prb
+    timing_estimate:
+      straight_length_m: 1400.0
+      turn_radius_m: 250.0
+      speed_m_s: 17.9
+      altitude_delta_m: 23.0
+      climb_rate_m_s: 1.5
+      descent_rate_m_s: 0.5
+    tables:
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
+    max_steps: 14000
+    envelope:
+      - {channel: speed_m_s, minimum: 2.0, maximum: 27.0}
+      - {channel: aero_alpha_deg, minimum: 0.0, maximum: 12.0}
+      - {channel: aero_sideslip_deg, minimum: -5.0, maximum: 5.0}
+    truth_events:
+      - {id: left-turn-bank, channel: route_bank_command_deg, predicate: at_least, threshold: 10.0, window_start_s: 80.0, window_end_s: 125.0}
+      - {id: right-turn-bank, channel: route_bank_command_deg, predicate: at_most, threshold: -10.0, window_start_s: 205.0, window_end_s: 240.0}
+    terminal:
+      required: true
+      objective_type: fly_by_gate
+      dwell_s: 0.0
+      window_start_s: 220.0
+      window_end_s: 270.0
+      target: {north_m: 0.0, east_m: 0.0, altitude_m: 195.0, speed_m_s: 17.9}
+      tolerance: {corridor_m: 120.0, altitude_m: 15.0, speed_m_s: 4.0}
+      gate_normal: [0.0, 1.0, 0.0]
+      crossing_direction: 1
+    objectives:
+      - id: high-altitude-level-gate
+        objective_type: fly_by_gate
+        target: {north_m: 0.0, east_m: 1000.0, altitude_m: 218.0, speed_m_s: 17.9}
+        tolerance: {corridor_m: 220.0, altitude_m: 15.0, speed_m_s: 4.0}
+        gate_normal: [0.0, 1.0, 0.0]
+        crossing_direction: 1
+        window_start_s: 45.0
+        window_end_s: 75.0
+      - id: left-turn-bank
+        objective_type: event
+        event_id: left-turn-bank
+      - id: left-turn-exit-gate
+        objective_type: fly_by_gate
+        target: {north_m: 500.0, east_m: 1400.0, altitude_m: 218.0, speed_m_s: 17.9}
+        tolerance: {corridor_m: 220.0, altitude_m: 15.0, speed_m_s: 4.0}
+        gate_normal: [0.0, -1.0, 0.0]
+        crossing_direction: 1
+        window_start_s: 105.0
+        window_end_s: 135.0
+      - id: low-altitude-level-gate
+        objective_type: fly_by_gate
+        target: {north_m: 500.0, east_m: 500.0, altitude_m: 195.0, speed_m_s: 17.9}
+        tolerance: {corridor_m: 220.0, altitude_m: 15.0, speed_m_s: 4.0}
+        gate_normal: [0.0, -1.0, 0.0]
+        crossing_direction: 1
+        window_start_s: 135.0
+        window_end_s: 175.0
+      - id: right-turn-bank
+        objective_type: event
+        event_id: right-turn-bank
