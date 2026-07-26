@@ -14,7 +14,7 @@
     "verification/daveml_hl20_scenario_evidence.json": "f8f60cb946e24d7180ef25fabcf3ec4503b11e4bf5581496ec021c180cc022be",
     "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f",
     "verification/daveml_nesc_replay_evidence.json": "12bdd48ea012586295d230618c068def183a0a558bcd530aaaaad62bdd2f5a7b",
-    "verification/daveml_official_checkdata.json": "ef4265c3b5965243323a0cb2ec6cc0cf9de771b34251bd66b81fda14ffe79063",
+    "verification/daveml_official_checkdata.json": "7cc0cc1850f8b14d1eace3970bdd4a0a9deb273c50fe3bceccdd509eadf8dced",
     "verification/daveml_official_conformance.json": "deaa6f110a305d0ad555434f4e4c04aa2773d73847324b3e605f816c150de169"
   },
   "claim_boundary": "bounded source integration release gate; not flight qualification",
@@ -129,7 +129,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "\": \"unsupported\"\n        },\n        {\n          \"absolute_error\": null,\n          \"absolute_tolerance\": 0.0001,\n          \"actual\": null,\n          \"case_id\": \"case 4\",\n          \"expected\": 1.0072,\n          \"output_id\": \"CLBASIC\",\n          \"reason\": \"griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved\",\n          \"relative_error\": null,\n          \"status\": \"unsupported\"\n        }\n      ],\n      \"document\": \"twoD_ungridded.dml\",\n      \"failed\": 0,\n      \"passed\": 0,\n      \"unsupported\": 4\n    }\n  ],\n  \"limitations\": [\n    \"Direct point functions, nested MathML calculations, and regular gridded tables are evaluated.\",\n    \"Regular-grid queries follow NASA DAVEtools endpoint-clamp behavior outside breakpoint bounds.\",\n    \"Unsupported graph forms remain explicit quarantined results.\",\n    \"Documents without checkData are represented with check_count zero.\"\n  ],\n  \"schema_version\": \"taoryx.daveml-checkdata/v1\",\n  \"status\": \"verified_with_quarantine\"\n}\n"
+      "stdout_tail": "       \"case_id\": \"case 4\",\n          \"expected\": 1.0072,\n          \"output_id\": \"CLBASIC\",\n          \"reason\": \"griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved\",\n          \"relative_error\": null,\n          \"status\": \"unsupported\"\n        }\n      ],\n      \"document\": \"twoD_ungridded.dml\",\n      \"failed\": 0,\n      \"passed\": 0,\n      \"unsupported\": 4,\n      \"vector_check_count\": 0,\n      \"vector_checks\": [],\n      \"vector_failed\": 0,\n      \"vector_passed\": 0,\n      \"vector_unsupported\": 0\n    }\n  ],\n  \"limitations\": [\n    \"Direct point functions, nested MathML calculations, and regular gridded tables are evaluated.\",\n    \"Regular-grid queries follow NASA DAVEtools endpoint-clamp behavior outside breakpoint bounds.\",\n    \"Unsupported graph forms remain explicit quarantined results.\",\n    \"Documents without checkData are represented with check_count zero.\"\n  ],\n  \"schema_version\": \"taoryx.daveml-checkdata/v1\",\n  \"status\": \"verified_with_quarantine\"\n}\n"
     },
     {
       "command": [
