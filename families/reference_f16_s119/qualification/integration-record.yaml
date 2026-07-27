@@ -38,6 +38,6 @@ nonclaims:
   - production F-16 training or operational fidelity
   - actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone
 open_questions:
-  - bind actuator dynamics and controller overlays as separate non-DAVE-ML records
-  - qualify reductions generated from this parent plant in a separate reduction tranche
-next_gate: qualify_separate_overlays_and_reductions
+  - qualify the reference-first-order actuator overlay with command, rate, latency, and saturation evidence
+  - qualify reductions generated from this parent plant against matched parent histories
+next_gate: alpha3_overlay_and_reduction_equivalence

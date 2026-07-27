@@ -1,0 +1,57 @@
+{
+  "claim_boundary": "overlay contracts are downstream Taoryx artifacts, not DAVE-ML source content",
+  "overlays": [
+    {
+      "artifact": "families/reference_f16_s119/actuators/ideal-direct.yaml",
+      "artifact_sha256": "011b4061a8533b990f39304529b5bcae97dda24dc633321fd75382a8e8743249",
+      "authority": "downstream_taoryx_overlay",
+      "family_id": "reference_f16_s119",
+      "kind": "actuator",
+      "overlay_id": "f16-ideal-direct-v1",
+      "source_parent": "families/reference_f16_s119/family.yaml",
+      "status": "verified_parent_regression_only"
+    },
+    {
+      "artifact": "families/reference_f16_s119/actuators/reference-first-order-v1.yaml",
+      "artifact_sha256": "9fed347d8325aabfe99e6bc7cf90471ddc6f4266c2291645335995a0c72a04a2",
+      "authority": "downstream_taoryx_overlay",
+      "family_id": "reference_f16_s119",
+      "kind": "actuator",
+      "overlay_id": "f16-reference-first-order-v1",
+      "source_parent": "families/reference_f16_s119/family.yaml",
+      "status": "contract_ready"
+    },
+    {
+      "artifact": "families/reference_hl20_mod_k/actuators/ideal-direct.yaml",
+      "artifact_sha256": "d9793be7bc210d0020b47043ea2c8e36d3e09eefa812daa49a0a1900c7f963ec",
+      "authority": "downstream_taoryx_overlay",
+      "family_id": "reference_hl20_mod_k",
+      "kind": "actuator",
+      "overlay_id": "hl20-ideal-direct-v1",
+      "source_parent": "families/reference_hl20_mod_k/family.yaml",
+      "status": "verified_parent_regression_only"
+    },
+    {
+      "artifact": "families/reference_hl20_mod_k/actuators/reference-first-order-v1.yaml",
+      "artifact_sha256": "5972b2348bdb28b2e36bbc81f44e7d01352a8629d2d1ac889d4d71ad9bf7556c",
+      "authority": "downstream_taoryx_overlay",
+      "family_id": "reference_hl20_mod_k",
+      "kind": "actuator",
+      "overlay_id": "hl20-reference-first-order-v1",
+      "source_parent": "families/reference_hl20_mod_k/family.yaml",
+      "status": "contract_ready"
+    },
+    {
+      "artifact": "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml",
+      "artifact_sha256": "e0e64c66d9da2b36e3e2f1f20cfd36d48cf77a6221eac3a790c1071f540463ba",
+      "authority": "downstream_taoryx_overlay",
+      "family_id": "reference_hl20_mod_k",
+      "kind": "allocation",
+      "overlay_id": "hl20-logical-surface-allocation-v1",
+      "source_parent": "families/reference_hl20_mod_k/family.yaml",
+      "status": "contract_ready"
+    }
+  ],
+  "schema_version": "taoryx.daveml-alpha3-overlay-evidence/v1",
+  "status": "verified"
+}

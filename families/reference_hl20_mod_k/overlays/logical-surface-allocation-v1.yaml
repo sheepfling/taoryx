@@ -1,0 +1,22 @@
+schema_version: 1
+kind: taoryx.reference-allocation-overlay/v1
+family: reference_hl20_mod_k
+overlay_id: hl20-logical-surface-allocation-v1
+qualification_class: synthetic
+status: contract_ready
+parent:
+  manifest: families/reference_hl20_mod_k/family.yaml
+  package_sha256: 443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63
+authority: taoryx_overlay_only
+logical_commands: [roll, pitch, yaw, symmetric_lift, energy_drag]
+physical_outputs: [upper_left_body_flap, lower_left_body_flap, upper_right_body_flap, lower_right_body_flap, left_wing_flap, right_wing_flap, rudder]
+mapping:
+  roll: [left_wing_flap, right_wing_flap]
+  pitch: [upper_left_body_flap, lower_left_body_flap, upper_right_body_flap, lower_right_body_flap]
+  yaw: [rudder]
+  symmetric_lift: [upper_left_body_flap, lower_left_body_flap, upper_right_body_flap, lower_right_body_flap, left_wing_flap, right_wing_flap]
+  energy_drag: [left_wing_flap, right_wing_flap]
+qualification:
+  required_evidence: [mapping_matrix, sign_probe, saturation_report, direct_surface_regression]
+  evidence_artifact: verification/daveml_alpha3_overlay_evidence.json
+nonclaims: [source_declared_allocator, controller_qualification, actuator_source_fidelity, landing_validation]

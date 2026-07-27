@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
+from typing import Any
 
 from .daveml_compatibility import DAVEMLCompatibilityOverlay
 
@@ -697,6 +698,8 @@ def _ungridded(query: list[float], table: ET.Element, *, policy: str = "strict_u
     normalized = (coordinates - origin) / scales if policy == "janus_delaunay_linear_qhull_v1" else coordinates
     normalized_query = (query_array - origin) / scales if policy == "janus_delaunay_linear_qhull_v1" else query_array
     triangulation = Delaunay(normalized, qhull_options="Qbb Qc Qz Q12")
+    weights: Any
+    vertices: Any
     if policy == "janus_delaunay_linear_qhull_v1":
         candidates: list[tuple[tuple[int, ...], int, object]] = []
         for candidate, transform in enumerate(triangulation.transform):

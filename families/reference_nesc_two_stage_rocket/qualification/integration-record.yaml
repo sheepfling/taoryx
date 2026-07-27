@@ -36,6 +36,7 @@ nonclaims:
   - independent full participating-simulation trajectory equivalence
   - reduced-order fidelity before a separate reduction qualification
 open_questions:
-  - compare the full scenario history against the participating-simulation family
-  - qualify 3-DOF and pseudo-6DOF reductions from this parent plant in a separate reduction tranche
-next_gate: qualify_reduced_order_rocket_and_full_trajectory_comparison
+  - compare the full scenario history against an independent participating-simulation family when one is available
+  - qualify 3-DOF and pseudo-6DOF reductions from this parent plant against staging checkpoints
+  - keep synthetic deployment children in separate lineage and qualification records
+next_gate: alpha3_full_trajectory_and_reduction_equivalence

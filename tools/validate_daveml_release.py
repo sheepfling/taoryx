@@ -64,6 +64,8 @@ def main() -> int:
         [python, "tools/validate_a320_pseudo6dof_runtime.py"],
         [python, "-m", "taoryx.runtime.cli", "daveml", "composite-smoke", "--family", "a320_openap_jsbsim_pseudo6dof", "--output", "verification/daveml_a320_pseudo6dof_integration.json"],
         [python, "tools/validate_daveml_operating_points.py"],
+        [python, "tools/build_daveml_alpha3_evidence.py"],
+        [python, "tools/validate_daveml_alpha3_completion.py"],
     ]
     runs = tuple(run(command) for command in commands)
     artifacts = (
@@ -93,6 +95,10 @@ def main() -> int:
         "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
         "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json",
         "verification/daveml_a320_pseudo6dof_integration.json",
+        "verification/daveml_alpha3_completion.json",
+        "verification/daveml_alpha3_overlay_evidence.json",
+        "verification/daveml_alpha3_reduction_evidence.json",
+        "verification/daveml_alpha3_deployment_evidence.json",
     )
     report = {
         "schema_version": "taoryx.daveml-release-gate/v1",
