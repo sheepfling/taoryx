@@ -7,6 +7,54 @@ synthetic demonstration into one claim
 **Claim boundary:** source-bounded research integration; not flight
 qualification, manufacturer validation, or historical TAOS compatibility
 
+## Pinned Plan
+
+This is the pinned remaining-work plan for the current DAVE-ML tranche. The
+catalog round trip, canonical export, fresh-process release gate, family
+readiness records, and runtime replay for the currently promoted corpus are
+complete. The remaining work is qualification depth and explicit disposition,
+not another broad importer rewrite.
+
+### Priority 1: Promote the Existing Executable Families
+
+1. **F-16:** add multipoint operating evidence, then qualify controller,
+   actuator, mission, and reduced-order overlays independently.
+2. **HL-20:** add wider energy-glide and attitude-response evidence; keep the
+   unpowered source boundary and do not infer controller authority from it.
+3. **NESC two-stage:** complete an independent full-trajectory comparison,
+   preserve staging history, and keep any deployment child as a separate
+   lineage artifact.
+4. **A320:** maintain the derived-exact OpenAP and surrogate-composite
+   OpenAP-plus-JSBSim lanes; compare them at matched operating points without
+   presenting either as an authoritative Airbus 6-DOF source.
+
+### Priority 2: Qualify Reductions and Demonstrations
+
+For every promoted 3-DOF or pseudo-6-DOF reduction, record the immutable
+parent, omitted physics, operating-point bounds, comparison window, metrics,
+pass/fail rule, and known nonclaims. Finish the synthetic NESC deployment
+witness only as a demonstration of parent/child lineage and passive
+aero-ballistic behavior; it is not source-equivalence evidence.
+
+### Deferred Until Triggered by Authoritative Input
+
+- Expand the six source-only catalog families into executable packages,
+  beginning with atmospheric spheroid/brick cases and then orbital packages.
+- Implement typed vector table-function semantics.
+- Revisit the quarantined official 2-D ungridded interpolation case only when
+  a valid authoritative fixture or an explicit legacy triangulation policy is
+  available.
+- Acquire and qualify an authoritative Airbus 6-DOF source package.
+
+### Pinned Exit Conditions
+
+The tranche is complete when the applicable F-16, HL-20, NESC, and A320 lanes
+pass A3-1 through A3-7; each non-applicable or unavailable lane has an
+explicit machine-readable disposition; reduction and deployment artifacts
+carry lineage and nonclaims; and the deterministic release report, focused
+tests, CI job, and catalog registries agree. The known semantic gaps remain
+documented rather than silently waived.
+
 ## Completion Strategy
 
 The Alpha 3 completion work is split into five independently auditable lanes:
