@@ -110,7 +110,7 @@ layers:
   staging: {version: instantaneous-dry-mass-transition-v1, evidence: source_checked_acceptance}
   environment: {version: US1976-upper-continuation-v1, evidence: package_declared}
   controllers: {version: not-applicable-open-loop-v1, evidence: not_applicable_no_declared_controls}
-  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
+  reductions: {version: alpha3-reduction-contract-v1, evidence: verification/daveml_alpha3_reduction_evidence.json}
   trim: {version: not-applicable-open-loop-v1, evidence: not_applicable_no_declared_controls}
   linearization: {version: not-applicable, evidence: not_applicable_current_rocket_contract}
   tuning: {version: not-applicable, evidence: not_applicable_current_open_loop_contract}
@@ -128,4 +128,4 @@ nonclaims:
   - independent full participating-simulation trajectory equivalence
   - perigee performance beyond the package's retained acceptance boundary
   - actuator, guidance, or launch-pad contact behavior not present in the package
-next_gate: qualify_reduced_order_rocket_and_full_trajectory_comparison
+next_gate: alpha3_full_trajectory_and_reduction_equivalence

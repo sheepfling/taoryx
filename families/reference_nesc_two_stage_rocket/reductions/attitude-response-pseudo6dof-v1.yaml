@@ -1,0 +1,18 @@
+schema_version: 1
+kind: taoryx.reference-reduction-contract/v1
+family: reference_nesc_two_stage_rocket
+reduction_id: nesc-attitude-response-pseudo6dof-v1
+qualification_class: surrogate_composite
+status: equivalence_pending
+parent:
+  family_id: reference_nesc_two_stage_rocket
+  fidelity: rigid_body_6dof
+  manifest: families/reference_nesc_two_stage_rocket/family.yaml
+  source_package_sha256: 204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e
+preserves: [variable_mass_translation, quaternion_kinematics, staging_events, scheduled_attitude_response]
+omits: [full_moment_balance, actuator_dynamics, guidance]
+comparison:
+  required_evidence: [stage_event_times, attitude_history, body_rate_history, bounded_response_error]
+  pass_rule: response_model_must_be_compared_against_parent_and_open_loop_claims_retained
+  evidence_artifact: verification/daveml_alpha3_reduction_evidence.json
+nonclaims: [participating_simulation_equivalence, active_guidance, source_exact_controller]

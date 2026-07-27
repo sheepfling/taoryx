@@ -30,7 +30,11 @@ def project_python() -> str:
 
 def run(command: list[str]) -> None:
     print("+", " ".join(command))
-    subprocess.run(command, cwd=ROOT, check=True)
+    environment = dict(os.environ)
+    source_path = str(ROOT / "src")
+    existing_path = environment.get("PYTHONPATH")
+    environment["PYTHONPATH"] = source_path if not existing_path else os.pathsep.join((source_path, existing_path))
+    subprocess.run(command, cwd=ROOT, env=environment, check=True)
     ####
 ####
 
@@ -77,13 +81,13 @@ def typecheck() -> None:
 
 
 def test() -> None:
-    run([project_python(), "-m", "pytest", "-m", "not slow and not artifact and not simple_aero"])
+    run([project_python(), "-m", "pytest", "-m", "not slow and not artifact and not simple_aero", "--basetemp", ".pytest-fast"])
     ####
 
 
 def test_all() -> None:
     """Run every pytest category, including opt-in and artifact tests."""
-    run([project_python(), "-m", "pytest", "-m", ""])
+    run([project_python(), "-m", "pytest", "-m", "", "--basetemp", ".pytest-all"])
     ####
 
 
@@ -460,14 +464,14 @@ def manual_corpus() -> None:
 
 def e2e() -> None:
     """Validate the bounded application-level corpus without a TAOS executable."""
-    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime and not slow and not artifact and not simple_aero"])
+    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime and not slow and not artifact and not simple_aero", "--basetemp", ".pytest-e2e"])
     run([project_python(), "-m", "tools.build_e2e_documented_coverage"])
     ####
 
 
 def e2e_all() -> None:
     """Validate every application-level case, including opt-in categories."""
-    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime"])
+    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime", "--basetemp", ".pytest-e2e-all"])
     run([project_python(), "-m", "tools.build_e2e_documented_coverage"])
     ####
 
@@ -722,6 +726,14 @@ def daveml_operating_points() -> None:
     ####
 
 
+def daveml_alpha3_completion() -> None:
+    """Build and validate the Alpha 3 DAVE-ML completion evidence."""
+
+    run(tool_script("build_daveml_alpha3_evidence.py"))
+    run(tool_script("validate_daveml_alpha3_completion.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -844,6 +856,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-showcase": daveml_showcase,
     "daveml-operational-contracts": daveml_operational_contracts,
     "daveml-operating-points": daveml_operating_points,
+    "daveml-alpha3-completion": daveml_alpha3_completion,
     "handoff": handoff,
     "check": check,
     "all": check,

@@ -17,7 +17,7 @@ families:
     objectives: source_channel_smoke_verified
     scenarios: source_channel_smoke_verified
     runtime: runtime_replay_qualification_passed
-    next_gate: source_channel_operating_point_expansion
+    next_gate: alpha3_overlay_and_reduction_equivalence
   - id: reference_hl20_mod_k
     manifest: families/reference_hl20_mod_k/family.yaml
     source_import: verified
@@ -32,7 +32,7 @@ families:
     objectives: source_glide_trim_smoke_verified
     scenarios: source_glide_trim_smoke_verified
     runtime: runtime_replay_qualification_passed
-    next_gate: controller_direction_and_reduced_dynamics
+    next_gate: alpha3_allocator_and_reduction_equivalence
   - id: reference_nesc_two_stage_rocket
     manifest: families/reference_nesc_two_stage_rocket/family.yaml
     source_import: verified
@@ -47,7 +47,7 @@ families:
     objectives: trajectory_checkpoint_objectives_verified
     scenarios: scenario17_runtime_replay
     runtime: runtime_replay_qualification_passed
-    next_gate: reduced_order_and_full_trajectory_comparison
+    next_gate: alpha3_full_trajectory_and_reduction_equivalence
 gates:
   source_hashes: required
   family_binding: required

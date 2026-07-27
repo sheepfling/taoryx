@@ -20,7 +20,7 @@ families:
         kind: source_file
         relative_path: qualified-models/f16-s119/F16_aero_mod_k_normalized.dml
         sha256: 272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764
-    next_gate: qualify_separate_overlays_and_reductions
+    next_gate: alpha3_overlay_and_reduction_equivalence
     reductions: [attitude_response_p6dof, point_mass_3dof]
   - id: reference_hl20_mod_k
     status: runtime_replay_qualification_passed
@@ -36,7 +36,7 @@ families:
         kind: source_file
         relative_path: qualified-models/hl20-mod-k/source/aerodynamics.dml
         sha256: b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec
-    next_gate: qualify_separate_overlays_and_reductions
+    next_gate: alpha3_allocator_and_reduction_equivalence
     reductions: [attitude_response_p6dof, point_mass_3dof]
   - id: reference_nesc_two_stage_rocket
     status: runtime_replay_qualification_passed
@@ -52,7 +52,7 @@ families:
         kind: source_file
         relative_path: source/nesc/twostage_aero.normalized.dml
         sha256: d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6
-    next_gate: qualify_reduced_order_rocket_and_full_trajectory_comparison
+    next_gate: alpha3_full_trajectory_and_reduction_equivalence
     reductions: [attitude_response_p6dof, point_mass_3dof]
   - id: reference_a320
     status: blocked_missing_source

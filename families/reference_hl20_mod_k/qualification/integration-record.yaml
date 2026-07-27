@@ -46,6 +46,6 @@ nonclaims:
   - landing gear, ground contact, flare, tire friction, or touchdown behavior
   - generic hypersonic-glider or operational spacecraft performance
 open_questions:
-  - bind seven-surface actuator and logical-allocation overlays as separate non-DAVE-ML records
-  - qualify reductions generated from this parent plant in a separate reduction tranche
-next_gate: qualify_separate_overlays_and_reductions
+  - qualify the logical surface allocator as a Taoryx overlay; do not claim it is source-declared
+  - qualify reductions generated from this parent plant without introducing controller claims
+next_gate: alpha3_allocator_and_reduction_equivalence

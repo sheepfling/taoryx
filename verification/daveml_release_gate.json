@@ -6,6 +6,10 @@
     "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json": "3255c0007a9d4af208e97c3f1f82bbaa16d3bbd6544f5e835fbf452a4088e271",
     "verification/daveml_a320_openap_integration.json": "8b4c458881d566fb9bcee28312fd554b4507fb33de0a6a199a989829c9e95bec",
     "verification/daveml_a320_pseudo6dof_integration.json": "4f528b844b268f0388429f040195f769528a9810b3a74ed5493abd617e1e46da",
+    "verification/daveml_alpha3_completion.json": "d8ce639333b21e1fa0528596148d1a342e37ce37d54ec77fabab3a65a5c64702",
+    "verification/daveml_alpha3_deployment_evidence.json": "47ad06e34d619e14ba14b996c858fd834d46ffd4f4698e2a20012837de4a3b50",
+    "verification/daveml_alpha3_overlay_evidence.json": "9c36ac27ad6ba8aa8f73e88b2ff2dbe25db67fc497368d5dd45a71bc3eb0c0d1",
+    "verification/daveml_alpha3_reduction_evidence.json": "be7678dee087bd3d528d2639a302492733c5930d2fd4ef6b92e634ae41342814",
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
     "verification/daveml_catalog_roundtrip.json": "cdc6442701a4cc8e34bd0d2df32449c6097f82d2faf71478d5e1775d5691c95d",
     "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",
@@ -24,8 +28,8 @@
     "verification/daveml_nesc_replay_evidence.json": "18bb853ebca4690ceda25039ca1dffdaef71cb3812e41fe97fb0dc7e1c964eeb",
     "verification/daveml_official_checkdata.json": "3cf04390e89031ebdf572e7f8a9b016edb3131ff78ce3c37bc601f720f1c32ca",
     "verification/daveml_official_conformance.json": "deaa6f110a305d0ad555434f4e4c04aa2773d73847324b3e605f816c150de169",
-    "verification/daveml_operating_point_catalog.json": "6c49e6f2d4f197088f35d811ef0a5a965766d3ce5ce60c1d33040e0a8c657de5",
-    "verification/daveml_operational_contracts.json": "67607d5dfee63426080e7a8ca9b1deb06a4bc04755b374277ac95b0be5a14bd1"
+    "verification/daveml_operating_point_catalog.json": "fbedbcb301391fb5e784aa162a5495429410b274ac8a68cd0fd3845de42b471f",
+    "verification/daveml_operational_contracts.json": "a0375e95090bff8750f991f0db65c2ac67fa200e2c2f0c7885510c869a218751"
   },
   "claim_boundary": "bounded source integration release gate; not flight qualification",
   "runs": [
@@ -316,7 +320,25 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "lse\"\n      ],\n      \"family_id\": \"a320_openap_jsbsim_pseudo6dof\",\n      \"non_applicable_reason\": null,\n      \"nonclaims\": [\n        \"manufacturer_truth\",\n        \"source_exact_6dof\",\n        \"Airbus_validation\",\n        \"flight_qualification\"\n      ],\n      \"operating_point\": {\n        \"altitude_m\": 11000.0,\n        \"flap_angle_deg\": 0.0,\n        \"mach\": 0.78,\n        \"mass_kg\": 60000.0,\n        \"vertical_speed_mps\": 0.0\n      },\n      \"point_id\": \"a320-pseudo6dof-cruise-mach078\",\n      \"point_type\": \"pseudo_6dof_composite_performance\",\n      \"qualification_class\": \"surrogate_composite\",\n      \"residual\": {\n        \"metric\": \"result.performance.pitch_moment_nm\",\n        \"tolerance\": 1e-09,\n        \"unit\": \"N-m\"\n      },\n      \"status\": \"verified\"\n    }\n  ],\n  \"family_count\": 5,\n  \"operational_contracts_sha256\": \"67607d5dfee63426080e7a8ca9b1deb06a4bc04755b374277ac95b0be5a14bd1\",\n  \"report_type\": \"taoryx.daveml-operating-point-catalog/v1\",\n  \"schema_version\": 1,\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "lse\"\n      ],\n      \"family_id\": \"a320_openap_jsbsim_pseudo6dof\",\n      \"non_applicable_reason\": null,\n      \"nonclaims\": [\n        \"manufacturer_truth\",\n        \"source_exact_6dof\",\n        \"Airbus_validation\",\n        \"flight_qualification\"\n      ],\n      \"operating_point\": {\n        \"altitude_m\": 11000.0,\n        \"flap_angle_deg\": 0.0,\n        \"mach\": 0.78,\n        \"mass_kg\": 60000.0,\n        \"vertical_speed_mps\": 0.0\n      },\n      \"point_id\": \"a320-pseudo6dof-cruise-mach078\",\n      \"point_type\": \"pseudo_6dof_composite_performance\",\n      \"qualification_class\": \"surrogate_composite\",\n      \"residual\": {\n        \"metric\": \"result.performance.pitch_moment_nm\",\n        \"tolerance\": 1e-09,\n        \"unit\": \"N-m\"\n      },\n      \"status\": \"verified\"\n    }\n  ],\n  \"family_count\": 5,\n  \"operational_contracts_sha256\": \"a0375e95090bff8750f991f0db65c2ac67fa200e2c2f0c7885510c869a218751\",\n  \"report_type\": \"taoryx.daveml-operating-point-catalog/v1\",\n  \"schema_version\": 1,\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/build_daveml_alpha3_evidence.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"status\": \"verified\",\n  \"reports\": [\n    \"verification\\\\daveml_alpha3_overlay_evidence.json\",\n    \"verification\\\\daveml_alpha3_reduction_evidence.json\",\n    \"verification\\\\daveml_alpha3_deployment_evidence.json\"\n  ]\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_alpha3_completion.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "reference_f16_s119\",\n      \"id\": \"f16-point-mass-3dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_f16_s119\",\n      \"id\": \"f16-attitude-response-pseudo6dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"id\": \"hl20-energy-glide-3dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"id\": \"hl20-attitude-response-pseudo6dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"id\": \"nesc-performance-3dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"id\": \"nesc-attitude-response-pseudo6dof-v1\",\n      \"status\": \"equivalence_pending\"\n    }\n  ],\n  \"registry\": \"verification/daveml_alpha3_completion.yaml\",\n  \"schema_version\": \"taoryx.daveml-alpha3-completion-report/v1\",\n  \"status\": \"verified_with_known_gaps\"\n}\n"
     }
   ],
   "schema_version": "taoryx.daveml-release-gate/v1",

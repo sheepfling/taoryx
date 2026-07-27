@@ -171,7 +171,7 @@
     }
   ],
   "family_count": 5,
-  "operational_contracts_sha256": "67607d5dfee63426080e7a8ca9b1deb06a4bc04755b374277ac95b0be5a14bd1",
+  "operational_contracts_sha256": "a0375e95090bff8750f991f0db65c2ac67fa200e2c2f0c7885510c869a218751",
   "report_type": "taoryx.daveml-operating-point-catalog/v1",
   "schema_version": 1,
   "status": "verified"

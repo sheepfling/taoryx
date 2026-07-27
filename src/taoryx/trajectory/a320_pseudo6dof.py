@@ -10,9 +10,13 @@ import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 from zipfile import ZipFile
 
 from .a320_openap import CORPUS_RELATIVE_PATH, CORPUS_SHA256, A320OpenAPModel, A320OpenAPOperatingPoint, A320OpenAPResult
+
+if TYPE_CHECKING:
+    from ..trim import TrimResult
 
 JSBSIM_PREFIX = "taoryx-aerospace-data-corpus-v1.1/source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/"
 RATE_DAMPING_PER_S = 10.0
@@ -120,7 +124,11 @@ class A320Pseudo6DOFModel:
         self.coefficients = dict(coefficients)
         self.quantities = dict(quantities)
         self.package_sha256 = openap.package_sha256
-        self.source_inertia = tuple(quantities[name] for name in ("ixx", "iyy", "izz"))
+        self.source_inertia: tuple[float, float, float] = (
+            float(quantities["ixx"]),
+            float(quantities["iyy"]),
+            float(quantities["izz"]),
+        )
         self.source_empty_mass_kg = quantities["emptywt"]
         self.reference_area_m2 = quantities["wingarea"]
         self.reference_span_m = quantities["wingspan"]
@@ -286,7 +294,7 @@ class A320Pseudo6DOFModel:
         }
         ####
 
-    def trim_pseudo6dof(self, point: A320OpenAPOperatingPoint):
+    def trim_pseudo6dof(self, point: A320OpenAPOperatingPoint) -> TrimResult:
         """Solve the bounded reduced-order pseudo-6DOF equilibrium trim."""
 
         from taoryx.trim import TrimSpec, solve_trim
@@ -392,7 +400,11 @@ class A320Pseudo6DOFModel:
         if not math.isfinite(mass_kg) or mass_kg <= 0.0:
             raise ValueError("A320 pseudo-6DOF mass must be positive and finite")
         scale = mass_kg / self.source_empty_mass_kg
-        return tuple(value * scale for value in self.source_inertia)
+        return (
+            self.source_inertia[0] * scale,
+            self.source_inertia[1] * scale,
+            self.source_inertia[2] * scale,
+        )
         ####
 
 
@@ -436,7 +448,10 @@ def _expression_value(expression: Mapping[str, object]) -> float:
     def visit(node: Mapping[str, object]) -> None:
         if node.get("tag") == "value" and node.get("text") is not None:
             values.append(float(str(node["text"])))
-        for child in node.get("children", ()) if isinstance(node.get("children", ()), list) else ():
+        children = node.get("children", ())
+        if not isinstance(children, list):
+            children = []
+        for child in children:
             if isinstance(child, Mapping):
                 visit(child)
 

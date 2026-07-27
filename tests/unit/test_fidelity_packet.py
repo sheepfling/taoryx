@@ -12,6 +12,8 @@ import pytest
 
 from tools import build_fidelity_ladder_packet as packet
 
+pytestmark = pytest.mark.slow
+
 
 def test_telemetry_rollup_includes_margin_saturation_and_control_rate_metrics() -> None:
     """The packet scorer retains trajectory-quality telemetry beyond final error."""

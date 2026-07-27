@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 import xml.etree.ElementTree as ET
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
 
@@ -572,9 +573,12 @@ def _typed_projection(
     """Build typed records from the source-anchored semantic tree."""
 
     nodes = tuple(_walk_nodes(root))
+    raw_functions = semantic.get("functions", [])
+    if not isinstance(raw_functions, list):
+        raw_functions = []
     function_entries = {
         str(entry.get("source_path")): entry
-        for entry in semantic.get("functions", [])
+        for entry in raw_functions
         if isinstance(entry, dict)
     }
     variables: list[DAVEMLVariableRecord] = []
@@ -717,28 +721,28 @@ def _typed_projection(
 
     opaque = []
     for path in opaque_paths:
-        node = _node_at_path(root, path)
-        opaque.append(DAVEMLOpaqueFeatureRecord(path, str(node.get("tag", "#unknown")) if node else "#unknown"))
+        opaque_node = _node_at_path(root, path)
+        opaque.append(DAVEMLOpaqueFeatureRecord(path, str(opaque_node.get("tag", "#unknown")) if opaque_node else "#unknown"))
     root_attributes = root.get("attributes", {})
     component_id = str(root_attributes.get("name", "")).strip() if isinstance(root_attributes, dict) else ""
-    input_ids = []
-    output_ids = []
+    root_input_ids: list[str] = []
+    root_output_ids: list[str] = []
     for node in nodes:
         if str(node.get("tag", "")) not in {"variableDef", "variable"}:
             continue
-        identifier = _node_identifier(node)
+        identifier = _node_identifier(node) or ""
         if not identifier:
             continue
         if _has_descendant_tag(node, "isInput"):
-            input_ids.append(identifier)
+            root_input_ids.append(identifier)
         if _has_descendant_tag(node, "isOutput"):
-            output_ids.append(identifier)
+            root_output_ids.append(identifier)
     components = (
         DAVEMLComponentRecord(
             "/0",
             component_id or None,
-            tuple(dict.fromkeys(input_ids)),
-            tuple(dict.fromkeys(output_ids)),
+            tuple(dict.fromkeys(root_input_ids)),
+            tuple(dict.fromkeys(root_output_ids)),
         ),
     )
     return DAVEMLTypedSemantic(
@@ -753,7 +757,7 @@ def _typed_projection(
     )
 
 
-def _walk_nodes(node: dict[str, object]):
+def _walk_nodes(node: dict[str, object]) -> Iterator[dict[str, object]]:
     """Yield one IR node and all descendants in source order."""
 
     yield node
