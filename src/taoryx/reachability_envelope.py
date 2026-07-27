@@ -808,7 +808,18 @@ def _launch_state(vehicle: RocketGlideVehicle, command: LaunchCommand, fidelity:
         "mass_kg": vehicle.initial_mass_kg,
         "phase": "boost",
     }
-    if fidelity in {ReachabilityFidelity.PSEUDO_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF}:
+    if fidelity is ReachabilityFidelity.RIGID_BODY_6DOF:
+        native = RigidBody6DofState(
+            0.0,
+            FrameVector3(ContractVector3(*common["position_m"]), Frame.ECIC),
+            FrameVector3(ContractVector3(*velocity), Frame.ECIC),
+            _euler_quaternion((command.bank_rad, -command.elevation_rad, command.azimuth_rad)),
+            ContractVector3(0.0, 0.0, 0.0),
+            vehicle.initial_mass_kg,
+            vehicle.booster_propellant_mass_kg if vehicle.has_booster else vehicle.propellant_mass_kg,
+        )
+        return RigidBody6DofReachabilityState(native, "boost")
+    if fidelity is ReachabilityFidelity.PSEUDO_6DOF:
         return Pseudo6DofState(
             **cast(Any, common),
             attitude_rad=(0.0, 0.0, 0.0),
@@ -931,7 +942,7 @@ def _rk4_step(
     fidelity: ReachabilityFidelity,
 ) -> State:
     if isinstance(state, RigidBody6DofReachabilityState):
-        raise TypeError("reduced RK4 step cannot integrate a rigid-body reachability state")
+        return _rigid_parent_rk4_step(vehicle, command, state, step_size_s)
     reduced_state = state
     first = _derivative(vehicle, command, reduced_state, fidelity)
     second_state = cast(PointMass3DofState, _state_with_delta(reduced_state, first, 0.5 * step_size_s))
@@ -1103,6 +1114,99 @@ def _rigid_body_model(vehicle: RocketGlideVehicle, body: DetachedBodyDefinition)
         gravity=lambda _state: ContractVector3(0.0, 0.0, -vehicle.gravity_m_s2),
         dry_mass=body.mass_kg,
     )
+
+
+def _rigid_parent_model(vehicle: RocketGlideVehicle, command: LaunchCommand) -> RigidBody6DofModel:
+    """Build the reduced rigid-body model for the retained rocket/glider parent."""
+
+    inertia = ContractVector3(
+        0.40 * vehicle.release_mass_kg * 3.0**2,
+        0.25 * vehicle.release_mass_kg * 8.607552**2,
+        0.25 * vehicle.release_mass_kg * 8.607552**2,
+    )
+
+    def force_moment(native: RigidBody6DofState) -> RigidBodyForceMoment:
+        velocity = native.attitude.conjugate().rotate(native.velocity.vector)
+        speed = velocity.norm()
+        density = _atmosphere(vehicle, native.position.vector.z)
+        dynamic_pressure = 0.5 * density * speed**2
+        drag_body = velocity.scaled(-dynamic_pressure * vehicle.reference_area_m2 * vehicle.drag_coefficient / max(speed, 1.0e-12))
+        phase = vehicle.phase_at(native.time)
+        lift_ecic = (
+            _lift_direction(
+                (native.velocity.vector.x, native.velocity.vector.y, native.velocity.vector.z),
+                command.bank_rad,
+            )
+            if phase == "glide"
+            else (0.0, 0.0, 0.0)
+        )
+        lift_body = native.attitude.conjugate().rotate(
+            ContractVector3(
+                dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient * lift_ecic[0],
+                dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient * lift_ecic[1],
+                dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient * lift_ecic[2],
+            )
+        )
+        thrust_body = ContractVector3(vehicle.booster_thrust_n, 0.0, 0.0) if phase == "boost" else ContractVector3(0.0, 0.0, 0.0)
+        aero_force = drag_body + lift_body
+        return RigidBodyForceMoment(
+            aero_force + thrust_body,
+            ContractVector3(0.0, 0.0, 0.0),
+            propellant_mass_rate=(vehicle.booster_propellant_mass_kg / vehicle.booster_burn_time_s if phase == "boost" else 0.0),
+            aero_force_body=aero_force,
+            propulsion_force_body=thrust_body,
+        )
+
+    return RigidBody6DofModel(
+        inertia=inertia,
+        force_moment=force_moment,
+        gravity=lambda _state: ContractVector3(0.0, 0.0, -vehicle.gravity_m_s2),
+        dry_mass=vehicle.release_mass_kg,
+    )
+
+
+def _rigid_parent_rk4_step(
+    vehicle: RocketGlideVehicle,
+    command: LaunchCommand,
+    state: RigidBody6DofReachabilityState,
+    step_size_s: float,
+) -> RigidBody6DofReachabilityState:
+    """Advance the retained parent through the native rigid-body equations."""
+
+    if step_size_s > 0.05:
+        current = state
+        remaining = step_size_s
+        while remaining > 1.0e-12:
+            substep = min(0.05, remaining)
+            current = _rigid_parent_rk4_step(vehicle, command, current, substep)
+            remaining -= substep
+        return current
+    model = _rigid_parent_model(vehicle, command)
+    values = state.native.to_values()
+
+    def derivative(time: float, current: tuple[float, ...]) -> tuple[float, ...]:
+        return model.derivative(RigidBody6DofState.from_values(time, current))
+
+    first = derivative(state.time_s, values)
+    second_values = tuple(value + 0.5 * step_size_s * slope for value, slope in zip(values, first, strict=True))
+    second = derivative(state.time_s + 0.5 * step_size_s, second_values)
+    third_values = tuple(value + 0.5 * step_size_s * slope for value, slope in zip(values, second, strict=True))
+    third = derivative(state.time_s + 0.5 * step_size_s, third_values)
+    fourth_values = tuple(value + step_size_s * slope for value, slope in zip(values, third, strict=True))
+    fourth = derivative(state.time_s + step_size_s, fourth_values)
+    integrated = list(
+        value + step_size_s * (first_value + 2.0 * second_value + 2.0 * third_value + fourth_value) / 6.0
+        for value, first_value, second_value, third_value, fourth_value in zip(values, first, second, third, fourth, strict=True)
+    )
+    if vehicle.has_booster:
+        if state.time_s < vehicle.booster_burn_time_s <= state.time_s + step_size_s:
+            integrated[13] = vehicle.burnout_mass_kg
+            integrated[14] = 0.0
+        if state.time_s < vehicle.booster_release_time_s <= state.time_s + step_size_s:
+            integrated[13] = vehicle.release_mass_kg
+            integrated[14] = 0.0
+    next_state = RigidBody6DofState.from_values(state.time_s + step_size_s, integrated)
+    return RigidBody6DofReachabilityState(next_state, vehicle.phase_at(next_state.time))
 
 
 def _rigid_body_rk4_step(vehicle: RocketGlideVehicle, state: RigidBody6DofReachabilityState, step_size_s: float) -> RigidBody6DofReachabilityState:
@@ -1348,7 +1452,12 @@ def _body_telemetry(vehicle: RocketGlideVehicle, body: DetachedBodyDefinition, s
     ####
 
 
-def _parent_telemetry(vehicle: RocketGlideVehicle, state: State, termination: EnvelopeTermination | None = None) -> dict[str, object]:
+def _parent_telemetry(
+    vehicle: RocketGlideVehicle,
+    state: State,
+    termination: EnvelopeTermination | None = None,
+    command: LaunchCommand | None = None,
+) -> dict[str, object]:
     """Record accepted parent aero observables for the envelope artifact."""
 
     speed = _norm(state.velocity_m_s)
@@ -1367,6 +1476,11 @@ def _parent_telemetry(vehicle: RocketGlideVehicle, state: State, termination: En
     if isinstance(state, Pseudo6DofState):
         payload["attitude_rad"] = list(state.attitude_rad)
         payload["attitude_rate_rad_s"] = list(state.attitude_rate_rad_s)
+    elif isinstance(state, RigidBody6DofReachabilityState):
+        attitude = state.native.attitude
+        payload["attitude_quaternion"] = [attitude.w, attitude.x, attitude.y, attitude.z]
+        payload["attitude_rate_rad_s"] = [state.native.body_rate.x, state.native.body_rate.y, state.native.body_rate.z]
+        payload.update(_rigid_parent_model(vehicle, command or LaunchCommand(0.0, 0.0)).observables(state.native))
     return payload
     ####
 
@@ -1491,7 +1605,7 @@ def simulate_rocket_glide(
         if not all(math.isfinite(value) for value in (*state.position_m, *state.velocity_m_s, state.mass_kg)):
             termination = EnvelopeTermination.INVALID
             break
-    parent_telemetry = [_parent_telemetry(vehicle, accepted) for accepted in states]
+    parent_telemetry = [_parent_telemetry(vehicle, accepted, command=command) for accepted in states]
     if parent_telemetry:
         parent_telemetry[-1]["termination"] = termination.value
     return TrajectoryResult(

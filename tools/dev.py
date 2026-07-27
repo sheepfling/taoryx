@@ -189,6 +189,19 @@ def showcase_california_hawaii() -> None:
     ####
 
 
+def showcase_hl20_low_fidelity() -> None:
+    """Run the low-fidelity HL-20 rocket-release and glide witness."""
+    run(
+        [
+            project_python(),
+            str(ROOT / "examples/showcases/hl20_california_to_hawaii/run_low_fidelity.py"),
+            "--output-dir",
+            "artifacts/showcases/hl20_california_to_hawaii/low_fidelity",
+        ]
+    )
+    ####
+
+
 def dof_matrix() -> None:
     """Generate machine-readable 3-DOF/6-DOF robustness evidence."""
     run([project_python(), str(TOOLS / "run_dof_matrix.py")])
@@ -799,6 +812,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-x15-catalog": test_x15_catalog,
     "test-views": test_views,
     "showcase-california-hawaii": showcase_california_hawaii,
+    "showcase-hl20-low-fidelity": showcase_hl20_low_fidelity,
     "dof-matrix": dof_matrix,
     "robustness-matrix": robustness_matrix,
     "verification-artifacts": verification_artifacts,

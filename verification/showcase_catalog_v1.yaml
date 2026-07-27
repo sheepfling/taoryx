@@ -47,6 +47,10 @@ families:
   - id: glide_vehicle
     archetypes: [lifting_body, hypersonic_glider]
     current_bindings: [x15]
+  - id: hypersonic_lifting_body_research
+    archetypes: [powered_research_aircraft, unpowered_lifting_body, entry_glider]
+    current_bindings: [x15, reference_hl20_mod_k]
+    qualification_boundary: shared_comparison_family_not_shared_dynamics
   - id: multirotor
     archetypes: [quadcopter, fleet_drone]
     current_bindings: [hummingbird]
