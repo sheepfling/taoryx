@@ -38,6 +38,8 @@ records:
     next_gate: closed_loop_waypoint_and_disturbance_mission
   - id: x15
     family: rocket_plane
+    family_group: hypersonic_lifting_body_research
+    subtype: powered_hypersonic_research_aircraft_with_unpowered_glide
     maturity: M3
     evidence_strength: vehicle_specific_public_research_surrogate
     status: operable_source_bounded_segments
@@ -50,6 +52,8 @@ records:
     next_gate: actuators_and_controller_replay
   - id: reference_hl20_mod_k
     family: source_reference_anchor
+    family_group: hypersonic_lifting_body_research
+    subtype: unpowered_hypersonic_lifting_body_entry_glider
     maturity: M2
     evidence_strength: source_checked_static
     status: package_replay_pending

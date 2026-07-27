@@ -1,0 +1,72 @@
+schema_version: 1
+id: hl20_california_to_hawaii_comparison
+title: HL-20 California-to-Hawaii entry and glide comparison contract
+status: low_fidelity_executable
+family_group: hypersonic_lifting_body_research
+vehicle_id: reference_hl20_mod_k
+qualification: source_grounded_reference_plus_synthetic_route_assumptions
+claim_boundary:
+  source_exact_vehicle: true
+  source_exact_route: false
+  controller_claims: false
+  landing_or_arrival_claims: false
+  engineering_validity: false
+  purpose: commensurate_telemetry_and_phase_comparison
+route:
+  kind: synthetic_great_circle
+  start: {latitude_deg: 34.7, longitude_deg: -120.6}
+  target: {latitude_deg: 21.31, longitude_deg: -157.86}
+  target_tolerance_km: null
+vehicle:
+  model: reference_hl20_mod_k
+  propulsion: none
+  mass_binding: separate_fixed_binding_v1
+  runtime_profile: hl20.rigid_body_6dof.v1
+  control_mode: direct_surface_or_open_loop_only
+  source_envelope: {mach: [0.3, 4.0], altitude_m: [-1000.0, 20000.0]}
+phases:
+  - id: initial_condition
+    qualification: planned
+  - id: energy_entry
+    qualification: planned
+  - id: hypersonic_glide
+    qualification: planned
+  - id: terminal_termination
+    qualification: planned
+comparison_channels:
+  - time_s
+  - altitude_m
+  - mach
+  - dynamic_pressure_pa
+  - latitude_deg
+  - longitude_deg
+  - range_to_target_m
+  - flight_path_angle_deg
+  - bank_angle_deg
+  - angle_of_attack_deg
+  - mass_kg
+nonclaims:
+  - This is not a NASA trajectory reconstruction.
+  - This does not establish California-to-Hawaii range or arrival capability.
+  - No controller, guidance, thermal, landing, or terminal ProNav claim is made.
+next_implementation_gate: promote_to_pseudo6dof_release_and_glide
+launch_composition:
+  status: low_fidelity_executable
+  parent:
+    id: generic-staged-booster-v1
+    role: launch_parent
+    qualification: synthetic
+    propulsion_claim: scenario_assumption_only
+  release_event:
+    id: hl20-release-v1
+    mechanism: timed_or_altitude_boundary
+    child_initialization: inherit_position_velocity_attitude_and_rates
+    lineage_required: true
+  child:
+    id: reference_hl20_mod_k
+    role: unpowered_entry_glider
+    propulsion: none
+  fidelity_ladder:
+    - {id: boost_release_3dof, status: verified_witness}
+    - {id: boost_release_pseudo6dof, status: verified_witness}
+    - {id: boost_release_rigid6dof, status: verified_witness}
