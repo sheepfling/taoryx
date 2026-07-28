@@ -1,6 +1,6 @@
 # TAORYX Alpha 2 execution goal
 
-**Status:** Complete — `A2-CLOSEOUT-PASS`  
+**Status:** Core complete; showcase evidence closeout recorded — `A2-SHOWCASE-PACKS-PASS`
 **Release boundary:** Existing proof families only  
 **Primary backlog:** [`taoryx-alpha-2-backlog.md`](taoryx-alpha-2-backlog.md)
 
@@ -14,11 +14,31 @@ retain immutable provenance; distinguish requested from achieved controls and
 resources; and report validity, qualification, feasibility, outcome, closure,
 convergence, and claim boundaries explicitly.
 
-The four families must each have a reproducible, family-appropriate flagship
-mission at the fidelities they actually support. Three-DOF, pseudo-6-DOF, and
+The established Alpha 2 release families retain their existing fidelity
+claims. The final showcase closeout additionally packages the requested X8
+physical racetrack, B747 transport evidence, Hummingbird pad-to-pad mission,
+and synthetic X8-plus-boosters CA-HI case. Three-DOF, pseudo-6-DOF, and
 rigid-body 6-DOF results are separate claims: unsupported or non-comparable
 tiers remain diagnostic or blocked rather than being promoted by a composite
 score.
+
+## Showcase closeout extension
+
+The canonical four-pack status is recorded in
+[`verification/alpha2_showcase_catalog.yaml`](../../verification/alpha2_showcase_catalog.yaml)
+and regenerated with:
+
+```text
+PYTHONPATH=.:src python3 tools/build_cahi_showcase_packet.py --output artifacts/showcases/alpha2
+PYTHONPATH=.:src python3 tools/build_alpha2_showcase_catalog.py --output artifacts/showcases/alpha2/final-catalog-v1
+```
+
+`A2-SHOWCASE-PACKS-PASS` means that all four requested packs and composites
+exist, are reproducible, and state their evidence boundaries. It does not mean
+that every pack is family-qualified. The X8 and Hummingbird nominal objective
+tables pass; the B747 packet remains a bounded multi-case evidence packet; and
+the CA-HI endpoint is deliberately recorded as an independent nominal failure
+until its endpoint contract is redesigned and passed.
 
 ## Exit gates
 
@@ -66,13 +86,15 @@ Those are Alpha 3 or later work. Alpha 2 may retain their interface probes,
 research intake records, and maturity entries so that they stress the
 contracts without blocking this release.
 
-## Honest completion signal
+## Honest completion signals
 
-The release signal is `A2-CLOSEOUT-PASS`, and it is valid only when the exit
-gates above and the machine-readable required-item list in
+The core release signal is `A2-CLOSEOUT-PASS`, and it is valid only when the
+exit gates above and the machine-readable required-item list in
 `verification/alpha2_post_release_backlog.yaml` agree. A passing local plant,
 bounded trajectory, or weighted score alone is not an Alpha 2 completion
-signal.
+signal. The showcase-extension signal is `A2-SHOWCASE-PACKS-PASS`; it requires
+the four-pack catalog and composite, but preserves `qualification_pending` or
+`evidence_only` statuses rather than upgrading them to family qualification.
 
 ## Closeout evidence
 

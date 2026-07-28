@@ -15,12 +15,15 @@ The native guided rigid-body work is staged separately in
 The composition, resolved-scenario, artifact, and visualization sequence is
 tracked in
 [`../plan/composable-scenario-runtime.md`](../plan/composable-scenario-runtime.md).
-The progressive point-mass, kinematic bridge, and rigid-body fidelity ladder is
-described in
+The progressive point-mass, kinematic bridge, and two rigid-body control-
+realization tiers are described in
 [`dynamics-fidelity-ladder.md`](dynamics-fidelity-ladder.md).
 The controller, trim, guidance, regulator, allocator, and fidelity mapping
 contract is described in
 [`controller-stack.md`](controller-stack.md).
+The explicit force, moment, actuator, propulsion, resource, and claim-boundary
+inventory is described in
+[`vehicle-realizations.md`](vehicle-realizations.md).
 The accepted-state, force-evaluation, and sensor timing boundary is defined in
 [`eom-timing-contract.md`](eom-timing-contract.md).
 The language/implementation contract for pre/post truth around events is

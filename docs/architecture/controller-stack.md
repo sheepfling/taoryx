@@ -236,12 +236,14 @@ The allocator reports requested values, achieved values, saturation, rate
 limiting, residual, and lost authority. These are separate from the truth
 state and must be visible in qualification artifacts.
 
-Important current boundary: the X8 racetrack fixture declares and runs an
-attitude LQR with a direct canonical moment demand. Its elevon tables and
-control values remain in the aerodynamic plant, but that fixture does not yet
-prove that an LQR moment is allocated through a physically identified elevon
-allocator. That is a future surface-authority qualification, not something
-the current racetrack result should imply.
+Important current boundary: the X8 direct-moment racetrack is retained as an
+explicit baseline, while the active racetrack fixture now opts into a bounded
+local elevon-table inversion. The active fixture is an allocator candidate,
+not yet a qualified full flight-control system: it exposes travel and a
+bounded deflection offset from the stored base, but not a time-normalized
+actuator-rate model. If it
+leaves the declared beta table envelope, it must fail closed rather than gain
+authority through a hidden direct yaw moment.
 
 ### Level 5 — Plant and equations of motion
 
@@ -310,7 +312,7 @@ or rotor-resolved controller.
 
 ## 4. A concrete X8 racetrack walk-through
 
-The current X8 showcase is best understood as this chain:
+The X8 showcase now has two deliberately comparable realizations:
 
 ```text
 initial source-bounded state
@@ -320,7 +322,8 @@ initial source-bounded state
     → desired route direction + scheduled bank
     → attitude error and body-rate error
     → generic runtime attitude LQR
-    → direct canonical moment demand
+    → either direct canonical moment demand (baseline)
+      or bounded local elevon inversion (candidate)
     → rigid-body aerodynamic/propulsive plant
     → quaternion/body-rate and translational EOM
     → truth-based altitude, bank, turn, and terminal-gate evaluation
@@ -331,12 +334,13 @@ guidance reference. The objective evaluator independently checks the truth
 trajectory at the high-altitude gate, left-turn bank, left-turn exit, low-
 altitude gate, right-turn bank, and start/finish gate.
 
-The run therefore currently proves a nominal source-bounded rigid-body
-trajectory under a reusable LQR direct-moment control seam. It does not yet
-prove:
+The direct baseline proves a nominal source-bounded rigid-body trajectory under
+a reusable LQR direct-moment control seam. The surface candidate tests whether
+the same demand can be realized through the declared X8 elevon tables. Neither
+run by itself proves:
 
 - a source-validated LQR gain;
-- physical elevon allocation and actuator dynamics;
+- time-normalized physical elevon actuator dynamics;
 - wind robustness;
 - family-wide controller qualification;
 - 3DOF/pseudo-6DOF reduction parity for the same exact scenario.
@@ -515,10 +519,17 @@ M_b &= M_{aero}(\alpha,\beta,p,q,r,\delta)
 \end{aligned}
 \]
 
-The current fixture's \(M_{cmd}\) is applied through the direct canonical
-moment path. Its collective and differential elevon values also participate
-in the coefficient-table plant and hold logic, but there is not yet a
-constrained solve of the form
+The direct baseline applies \(M_{cmd}\) through the canonical generalized
+moment path. The current default LQR plant bridge uses rigid-body inertia for
+its moment input matrix; it does not yet include the X8 aerodynamic
+stiffness/damping derivatives in the attitude design. Consequently, a
+stable LQR pole set does not guarantee that the direct moment will overcome
+the source aerodynamic load at a commanded bank. The direct case must remain
+an integration baseline until a plant-aware linearization or bounded
+closed-loop tuning study closes that gap.
+
+The surface candidate instead uses a bounded local solve of the
+form
 
 \[
 \delta_{elevon}^{*}
@@ -526,9 +537,11 @@ constrained solve of the form
 \left\|M_{aero}(\delta)-M_{cmd}\right\|_{W}^{2}
 \]
 
-with physical elevon rate, travel, and allocation residual evidence. That
-equation is the next surface-authority implementation, not a claim of the
-current racetrack run.
+with the source elevon tables. Its allocation residual and saturation state are
+logged, but the current maximum-delta setting bounds deflection relative to the
+stored base rather than implementing a time-normalized actuator rate. The
+direct and surface cases are separate evidence classes and must not be
+collapsed into one claim.
 
 The objective evaluator independently checks the resulting truth history:
 

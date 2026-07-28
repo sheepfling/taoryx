@@ -20,6 +20,13 @@
       "navigation": "NED",
       "quaternion_order": "wxyz"
     },
+    "aerodynamic_convention": {
+      "source_force_frame": "body_axes_frd",
+      "force_channels": ["cx", "cy", "cz"],
+      "drag_representation": "body_axis_cx_no_direct_wind_axis_cd_output",
+      "coefficient_semantics": "total_coefficients_from_source_function_graph",
+      "baseline_rule": "do_not_apply_fixed_wing_static_control_subtraction"
+    },
     "model_id": "f16-s119-reference",
     "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/f16-s119/f16-s119-reference-v0.7.txair",
     "reference_geometry": {

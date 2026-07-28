@@ -1,0 +1,21 @@
+(slower-b747-sv01-racetrack-altitude-turns-6dof)
+*title B747 transport-scaled powered racetrack direct-moment rigid-body realization
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=0
+*runtime status vehicle reference-area=510.96672 reference-length=8.324088 dry-mass-kg=288756.9 nominal-mass-kg=288756.9 inertia-x=24675886.7 inertia-y=44877574.1 inertia-z=67384152.0 envelope-min-forward-speed=20 envelope-max-mach=0.9 envelope-max-alpha-deg=4 envelope-max-beta-deg=5 direct-wrench-table-query-max-beta-deg=6.875493 aero-alpha-reference-deg=3.1
+*runtime control elevator-deg vehicle=1 default=0.3861602391 lower=-10 upper=10
+*runtime status target latitude-deg=0.0 longitude-deg=0.0 altitude-m=500.0
+*runtime status route mode=racetrack start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=654.5780264679122 racetrack-length-m=24000 racetrack-turn-radius-m=8300 racetrack-speed-mps=153 racetrack-low-altitude-m=500 racetrack-high-altitude-m=620 racetrack-climb-rate-mps=1.5 racetrack-descent-rate-mps=1.2 racetrack-left-bank-deg=-14 racetrack-right-bank-deg=14 racetrack-coordinated-turn=false racetrack-altitude-capture-gain-per-s=1 racetrack-altitude-capture-max-mps=10 position-capture-gain=0.01 position-capture-max-correction-mps=50
+*runtime status guidance propnav-gain=0.0 attitude-gain=50000000.0 rate-damping=100000000.0 fixed-wing-direct-control-law=local-bank-pitch-pd direct-bank-gain-nm-per-rad=4000000 direct-bank-rate-damping-nm-s-per-rad=3000000 direct-pitch-gain-nm-per-rad=5000000 direct-pitch-rate-damping-nm-s-per-rad=3000000 direct-alpha-gain-nm-per-rad=50000000 direct-beta-gain=0.0 direct-beta-rate-damping-nm-s-per-rad=0.0 direct-beta-force-gain-n-per-rad=100000000 direct-beta-force-damping-n-s-per-m=100000 direct-wrench-cancel-source-moment=true direct-wrench-cancel-source-axes=xyz direct-wrench-cancel-source-side-force=true max-sideslip-deg=4.0 sideslip-gain=0.0 sideslip-rate-damping=0.0 alpha-hold-gain-deg-per-deg=-0.2 alpha-hold-target-deg=3.1 fixed-wing-alpha-command-deg=3.1 fixed-wing-beta-command-deg=0.0 fixed-wing-control-authority=direct-moment maximum-moment=100000000
+*runtime status actuator maximum-moment=100000000 maximum-body-rate-deg-s=30
+*runtime status thermal policy=none
+*trajectory 1 b747 start on 1
+  *initial ecic x=6378637.0 y=0.0 z=0.0 xdt=0.0 ydt=153.0096 zdt=0.0 qw=0.5115355557 qx=-0.5115355557 qy=-0.4881919451 qz=0.4881919451 time=0.0 mass=288756.9 propellant_mass=0.0
+  *segment 1 racetrack-altitude-turns
+    *integ dtprnt=0.2 dt=0.01
+    *prop thrust=179539.8975191153 mdot=0
+    *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
+    *fly propnav=4
+  *when time>664.5780264679122 stop
+*end

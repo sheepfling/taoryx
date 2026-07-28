@@ -26,6 +26,20 @@ from .contracts import (
 from .daveml_import import load_daveml_family_import
 
 
+class ReferenceAeroConvention(BaseModel):
+    """Explicit source convention for aerodynamic force and drag channels."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    source_force_frame: str = Field(min_length=1)
+    force_channels: str = Field(min_length=1)
+    drag_representation: str = Field(min_length=1)
+    coefficient_semantics: str = Field(min_length=1)
+    baseline_rule: str = Field(min_length=1)
+    provenance_note: str = Field(min_length=1)
+####
+
+
 class ReferenceSourceLock(BaseModel):
     """Immutable source and package identity for a reference family."""
 
@@ -37,6 +51,7 @@ class ReferenceSourceLock(BaseModel):
     package_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     aerodynamic_source: str = Field(min_length=1)
     aerodynamics_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    aerodynamic_convention: ReferenceAeroConvention
     corpus_archive: str = Field(min_length=1)
     corpus_archive_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     availability: str = Field(min_length=1)

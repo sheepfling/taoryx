@@ -7,6 +7,7 @@
     "b747_jt9d_thrust.tbl",
     "b747_nominal_elevator_6axis.tbl",
     "b747_nominal_static_6axis.tbl",
+    "b747_nominal_static_6axis_direct_wrench.tbl",
     "hummingbird_cmx.tbl",
     "hummingbird_cmy.tbl",
     "hummingbird_cmz.tbl",
@@ -44,6 +45,7 @@
   },
   "omissions": [
     "B747 aileron and rudder control grids remain source CSV; the condition-3 elevator deck is generated for the golden trim case.",
+    "The bounded direct-wrench B747 table is a Taoryx-derived local beta extension and is not source-envelope qualification.",
     "GTM remains a pointer-only alternate because its binary aero database was not supplied."
   ]
 }

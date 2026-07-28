@@ -46,6 +46,19 @@ class DAVEMLImportDocument(BaseModel):
     checkdata_unsupported: int = Field(default=0, ge=0)
 
 
+class DAVEMLAerodynamicConvention(BaseModel):
+    """Explicit source convention carried alongside a DAVE-ML package."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    source_force_frame: str = Field(min_length=1)
+    force_channels: tuple[str, ...] = Field(min_length=1)
+    drag_representation: str = Field(min_length=1)
+    coefficient_semantics: str = Field(min_length=1)
+    baseline_rule: str = Field(min_length=1)
+####
+
+
 class DAVEMLImportPackage(BaseModel):
     """Identity and source-member inventory for one imported package."""
 
@@ -58,6 +71,7 @@ class DAVEMLImportPackage(BaseModel):
     schema_version: str = Field(min_length=1)
     fidelity: str = Field(min_length=1)
     frames: dict[str, str] = Field(default_factory=dict)
+    aerodynamic_convention: DAVEMLAerodynamicConvention
     reference_geometry: dict[str, float] = Field(default_factory=dict)
     validity_envelope: dict[str, float] = Field(default_factory=dict)
     runtime_members: tuple[str, ...] = ()
@@ -634,6 +648,9 @@ def build_daveml_family_import(
             schema_version=str(manifest.get("schema_version", "")),
             fidelity=str(manifest.get("fidelity", "")),
             frames=_string_mapping(manifest.get("frames", {})),
+            aerodynamic_convention=DAVEMLAerodynamicConvention.model_validate(
+                manifest.get("aerodynamic_convention", {})
+            ),
             reference_geometry=_number_mapping(manifest.get("reference_geometry", {})),
             validity_envelope=_number_mapping(manifest.get("validity_envelope", {})),
             runtime_members=tuple(

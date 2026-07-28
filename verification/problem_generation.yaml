@@ -27,6 +27,11 @@ profiles:
   x8_canonical:
     vehicle: skywalker_x8
     definition_line: |
+      # X8 control tables contain absolute total coefficients at throttle=0.44;
+      # the static table is zero-throttle, so zero-control values differ.
+      # Subtract the common static term before adding each control contribution;
+      # do not simplify or remove terms.
+      # Composition: static + (collective - static) + (differential - static).
       *define x8-cx
         x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
       *define x8-cy
@@ -48,6 +53,11 @@ profiles:
       *runtime control collective-elevon-deg vehicle=1 default=-2.147887654393667 lower=-20 upper=20
       *runtime control differential-elevon-deg vehicle=1 default=-3.9378035933567617 lower=-20 upper=20
     definition_line: |
+      # X8 control tables contain absolute total coefficients at throttle=0.44;
+      # the static table is zero-throttle, so zero-control values differ.
+      # Subtract the common static term before adding each control contribution;
+      # do not simplify or remove terms.
+      # Composition: static + (collective - static) + (differential - static).
       *define x8-cx
         x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
       *define x8-cy
@@ -94,6 +104,11 @@ profiles:
     propulsion_line: '    *prop thrust=(thrust) mdot=0'
     aero_line: '    *aero cx=x8-cx cy=x8-cy cz=x8-cz cmx=x8-cmx cmy=x8-cmy cmz=x8-cmz'
     definition_line: |
+      # X8 control tables contain absolute total coefficients at throttle=0.44;
+      # the static table is zero-throttle, so zero-control values differ.
+      # Subtract the common static term before adding each control contribution;
+      # do not simplify or remove terms.
+      # Composition: static + (collective - static) + (differential - static).
       *define x8-cx
         x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
       *define x8-cy

@@ -16,6 +16,13 @@ tables:
     axes: [alpha, beta]
     coefficients: [cx, cy, cz, cmx, cmy, cmz]
     envelope: reference-flight-condition-3-only
+  - path: b747_nominal_static_6axis_direct_wrench.tbl
+    vehicle: b747
+    family: aerodynamic-static-six-axis-bounded-direct-wrench
+    status: taoryx-derived-bounded-local-beta-extension
+    axes: [alpha, beta]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: estimated-local-extension-beta-plus-or-minus-0.12-rad
   - path: b747_nominal_elevator_6axis.tbl
     vehicle: b747
     family: aerodynamic-elevator-six-axis

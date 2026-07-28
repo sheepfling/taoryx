@@ -11,6 +11,15 @@ source:
   package_sha256: 443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63
   aerodynamic_source: qualified-models/hl20-mod-k/source/aerodynamics.dml
   aerodynamics_sha256: b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec
+  aerodynamic_convention:
+    source_force_frame: body_axes_frd
+    force_channels: cl_cd_cy_and_body_moments
+    drag_representation: direct_wind_axis_cd_and_cl_source_outputs
+    coefficient_semantics: polynomial_total_buildup_from_source_terms
+    baseline_rule: do_not_apply_static_control_subtraction_to_source_terms
+    provenance_note: >-
+      The pinned HL-20 DAVE-ML source explicitly defines CL and CD and builds
+      them from alpha, rate, and control contributions; preserve that graph.
   corpus_archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
   corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
   availability: local_corpus_input_verified

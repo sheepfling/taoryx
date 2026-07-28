@@ -11,6 +11,15 @@ source:
   package_sha256: 204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e
   aerodynamic_source: source/nesc/twostage_aero.normalized.dml
   aerodynamics_sha256: d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6
+  aerodynamic_convention:
+    source_force_frame: wind_axis_with_body_frame_runtime_binding
+    force_channels: cl_cd_cy_and_body_moments
+    drag_representation: direct_wind_axis_cd_source_output
+    coefficient_semantics: total_coefficients_from_angle_of_attack_table
+    baseline_rule: do_not_apply_static_control_subtraction
+    provenance_note: >-
+      The normalized NESC DAVE-ML source exposes CL, CD, and CY directly as
+      total angle-dependent outputs; retain the source convention at import.
   corpus_archive: INBOX/taoryx-daveml-nesc-model-catalog-v1.0/raw/nesc/official/All_models.zip
   corpus_archive_sha256: 2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9
   availability: local_catalog_input_verified

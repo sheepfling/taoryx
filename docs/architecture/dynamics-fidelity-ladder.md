@@ -1,8 +1,10 @@
 # Dynamics fidelity ladder
 
-TAORYX exposes three deliberately different levels of vehicle dynamics. The
-levels share environment, table, propulsion, mass, and guidance contracts so a
-vehicle can be developed progressively without duplicating its problem file.
+TAORYX exposes three equations-of-motion modes and four evidence tiers.  The
+first three tiers are dynamics reductions; the fourth is a control-realization
+split inside the rigid-body mode.  All tiers share environment, table,
+propulsion, mass, guidance, and telemetry contracts so a vehicle can be
+developed progressively without duplicating its mission contract.
 
 ## Modes
 
@@ -10,12 +12,31 @@ vehicle can be developed progressively without duplicating its problem file.
 | --- | --- | --- | --- |
 | `point-mass` | Force-integrated 3-DOF | Implicit/prescribed by the point-mass equations | Not integrated |
 | `kinematic-6dof` | Force-integrated translation | Controller-prescribed quaternion/body-rate sidecar | Not integrated |
-| `rigid-body-6dof` | Force-integrated translation | Quaternion and body rates from Newton–Euler equations | Fully integrated |
+| `rigid-body-6dof` — direct/induced wrench | Force-integrated translation | Quaternion and body rates from Newton–Euler equations | Fully integrated; controller may add a declared generalized force/moment |
+| `rigid-body-6dof` — surface allocated | Force-integrated translation | Quaternion and body rates from Newton–Euler equations | Fully integrated; declared surfaces/rotors/thrusters are solved and applied |
 
-The first and third modes are the primary reduction endpoints. The middle mode
-is a bridge for model development: it exercises the same translational plant
-and aerodynamic queries while attitude is supplied by a simple declared
-controller instead of being produced by moments.
+The runtime has three mode keywords, but a rigid-body run is not automatically
+a physical-actuator run.  The direct/induced-wrench tier integrates the rigid
+body while a controller supplies a generalized wrench or uses source-induced
+loads.  The surface-allocated tier adds an explicit bounded map from control
+demand through declared effectors and actuator limits.  A direct moment is not
+allowed to carry a surface-allocation claim.
+
+The kinematic mode is a bridge for model development: it exercises the same
+translational plant and aerodynamic queries while attitude is supplied by a
+simple declared response law instead of being produced by moments.
+
+The four stable showcase names are:
+
+```text
+point_mass_3dof
+pseudo_6dof_kinematic_bridge
+rigid_body_6dof_direct_wrench
+rigid_body_6dof_surface_allocated
+```
+
+The last two share the `rigid-body-6dof` parser/runtime mode but have different
+claim boundaries, telemetry, and qualification requirements.
 
 ## Kinematic bridge syntax
 
@@ -46,10 +67,14 @@ estimate inertia response, or claim rigid-body stability.
    atmosphere, propulsion, and table queries.
 2. Use `kinematic-6dof` with the same inputs to verify attitude-dependent force
    transforms, prescribed bank/pitch/yaw profiles, and controller timing.
-3. Move to `rigid-body-6dof` and replace the bridge declaration with actual
-   control surfaces, moments, inertia, actuator dynamics, and body-rate loops.
-4. Compare the three histories over the same initial condition and declared
-   maneuver. Differences should be attributed to a named fidelity change.
+3. Move to `rigid-body-6dof` with a direct/induced-wrench controller to verify
+   coupled translation/rotation and source-load closure without claiming
+   physical effector allocation.
+4. Replace the direct-wrench path with declared control surfaces, rotors,
+   thrusters, or wheels and a bounded allocator before claiming the
+   surface-allocated tier.
+5. Compare histories over the same initial condition and declared maneuver.
+   Differences should be attributed to the named tier change.
 
 The bridge is therefore a diagnostic and development mode, not evidence that a
 vehicle has passed full 6-DOF verification.

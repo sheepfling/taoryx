@@ -12,6 +12,7 @@ import csv
 import hashlib
 import json
 import math
+from itertools import product
 from pathlib import Path
 from typing import Any
 
@@ -366,4 +367,74 @@ def test_x8_zero_control_table_reproduces_source_grid() -> None:
             assert prepared is not None
             actual = interpolate_nd(prepared, query)
             assert actual == pytest.approx(float(row[name.upper()]), abs=2.0e-10)
+    ####
+
+
+@pytest.mark.parametrize(
+    ("static_name", "control_name"),
+    (
+        ("b747_nominal_static_6axis.tbl", "b747_nominal_elevator_6axis.tbl"),
+    ),
+)
+def test_fixed_wing_control_decks_include_zero_control_baseline(static_name: str, control_name: str) -> None:
+    """Guard the metadata claim that fixed-wing control decks are absolute."""
+
+    static_tables = _runtime_tables(BUNDLE / "tables" / static_name)
+    control_tables = _runtime_tables(BUNDLE / "tables" / control_name)
+    assert set(static_tables) == set(control_tables)
+    for name, static_table in static_tables.items():
+        control_table = control_tables[name]
+        assert static_table is not None
+        assert control_table is not None
+        assert control_table.dimension == static_table.dimension + 1
+        for query in product(*static_table.axes):
+            expected = interpolate_nd(static_table, query)
+            actual = interpolate_nd(control_table, (*query, 0.0))
+            assert actual == pytest.approx(expected, abs=2.0e-10)
+    ####
+
+
+def test_x8_control_decks_share_their_fixed_reference_baseline() -> None:
+    """Document X8's absolute control decks and distinct throttle reference."""
+
+    collective = _runtime_tables(BUNDLE / "tables/skywalker_x8_collective_elevon_6axis.tbl")
+    differential = _runtime_tables(BUNDLE / "tables/skywalker_x8_differential_elevon_6axis.tbl")
+    static = _runtime_tables(BUNDLE / "tables/skywalker_x8_static_6axis.tbl")
+    assert set(collective) == set(differential) == set(static)
+    for name, collective_table in collective.items():
+        differential_table = differential[name]
+        static_table = static[name]
+        assert collective_table is not None
+        assert differential_table is not None
+        assert static_table is not None
+        for query in product(*static_table.axes):
+            collective_zero = interpolate_nd(collective_table, (*query, 0.0))
+            differential_zero = interpolate_nd(differential_table, (*query, 0.0))
+            assert collective_zero == pytest.approx(differential_zero, abs=2.0e-10)
+    ####
+
+
+@pytest.mark.parametrize(
+    "control_name",
+    (
+        "x15_symmetric_stabilator_6axis.tbl",
+        "x15_differential_stabilator_6axis.tbl",
+        "x15_rudder_6axis.tbl",
+    ),
+)
+def test_x15_control_decks_include_zero_control_baseline(control_name: str) -> None:
+    """Guard the X-15 absolute-deck convention used by future compositions."""
+
+    static_tables = _runtime_tables(ROOT / "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl")
+    control_tables = _runtime_tables(ROOT / "tests/fixtures/x15_coherent_6dof_public_research_v1/tables" / control_name)
+    assert set(static_tables) == set(control_tables)
+    for name, static_table in static_tables.items():
+        control_table = control_tables[name]
+        assert static_table is not None
+        assert control_table is not None
+        assert control_table.dimension == static_table.dimension + 1
+        for query in product(*static_table.axes):
+            expected = interpolate_nd(static_table, query)
+            actual = interpolate_nd(control_table, (*query, 0.0))
+            assert actual == pytest.approx(expected, abs=2.0e-10)
     ####

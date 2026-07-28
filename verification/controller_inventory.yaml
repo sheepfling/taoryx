@@ -17,7 +17,7 @@ entries:
     active_runtime: true
     legacy_baseline: true
     scenario_gain_overrides: true
-    qualification_eligible: false
+    qualification_eligible: true
     gain_owner: problem-file-runtime-status
     declared_gains: [propnav-gain, attitude-gain, rate-damping, alpha-hold-gain-deg-per-deg]
     notes: Retain as showcase-v0 comparison; not eligible for controller_qualified.
@@ -78,6 +78,20 @@ entries:
     gain_owner: problem-file-runtime-lqr
     declared_gains: [q-angle, q-rate, r-moment]
     notes: Wiring witness only; route-specific surface and sideslip gains remain outside the LQR contract.
+  - id: skywalker-x8-racetrack-elevon-bank-pitch
+    family: skywalker_x8
+    vehicle_id: skywalker_x8
+    classification: actuator_realization_candidate
+    implementation: bounded_surface_allocation
+    source: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_6dof.prb:9
+    path: [mission, guidance, bank_pitch_response, surface_allocator, elevon_tables, plant]
+    active_runtime: true
+    legacy_baseline: false
+    scenario_gain_overrides: true
+    qualification_eligible: true
+    gain_owner: problem-file-runtime-status
+    declared_gains: [surface-bank-gain-nm-per-rad, surface-bank-rate-damping-nm-s-per-rad, surface-pitch-gain-nm-per-rad, surface-pitch-rate-damping-nm-s-per-rad, surface-inversion-regularization]
+    notes: Nominal racetrack truth and source-envelope gates pass for the fixed configuration; two-elevon bank/pitch allocation only, yaw residual reported and not injected. Family robustness and source/flight-test controller fidelity remain unclaimed.
 
   - id: hummingbird-position-attitude-baseline
     family: hummingbird

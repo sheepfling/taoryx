@@ -20,6 +20,7 @@
   *segment 1 canonical-hover
     *integ dtprnt=0.1 dt=0.005
 
+    # Aero channel names cx/cy/cz are source body-wrench adapters, not CD/CL; no fixed-wing baseline subtraction is intended.
     *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
 
 

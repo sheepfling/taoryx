@@ -1457,6 +1457,26 @@ def _lower_rigid_body_case(
         control_values["_rotor_guidance_moment_x"] = 0.0
         control_values["_rotor_guidance_moment_y"] = 0.0
         control_values["_rotor_guidance_moment_z"] = 0.0
+        # Keep the direct-moment contract explicit.  These channels are
+        # reset for every derivative evaluation because the RK4 stages share
+        # the runtime control dictionary; stale controller requests must not
+        # be mistaken for an applied command at a later accepted state.
+        control_values["direct_moment_active"] = 0.0
+        control_values["direct_moment_source_cancellation_active"] = 0.0
+        control_values["direct_local_alpha_error_deg"] = 0.0
+        control_values["direct_local_beta_error_deg"] = 0.0
+        control_values["direct_local_heading_error_deg"] = 0.0
+        control_values["direct_force_source_side_cancellation_active"] = 0.0
+        control_values["direct_force_source_side_n"] = 0.0
+        control_values["direct_force_beta_error_deg"] = 0.0
+        control_values["direct_force_beta_correction_n"] = 0.0
+        control_values["direct_force_beta_damping_n"] = 0.0
+        for axis in ("x", "y", "z"):
+            control_values[f"direct_moment_source_moment_{axis}_nm"] = 0.0
+        for axis in ("x", "y", "z"):
+            control_values[f"direct_moment_controller_request_{axis}_nm"] = 0.0
+            control_values[f"direct_moment_commanded_{axis}_nm"] = 0.0
+            control_values[f"direct_moment_applied_{axis}_nm"] = 0.0
         if ground_contact_segment is not None and active_segment["number"] == ground_contact_segment:
             # The contact segment is deliberately a small, explicit static-pad
             # model.  It cancels gravity with a normal reaction and damps any
@@ -1588,17 +1608,45 @@ def _lower_rigid_body_case(
         if route_velocity is not None and not rotorcraft_guidance:
             route_direction = route_velocity.scaled(1.0 / max(route_velocity.norm(), 1.0e-12))
             coordinated_turn = _runtime_coordinated_turn_enabled(guidance_attributes, route_attributes)
+            fixed_wing_surface_law = guidance_attributes.get(
+                "fixed-wing-surface-control-law",
+                "",
+            ).casefold()
             rectangle_bank = (
                 _runtime_rectangle_bank_angle(route_attributes, state)
-                if attitude_lqr is not None or not coordinated_turn
+                if attitude_lqr is not None or not coordinated_turn or fixed_wing_surface_law in {"bank-pitch-pd", "bank_pitch_pd"}
                 else None
             )
+            desired_body_x_ecic = route_direction
+            fixed_wing_alpha = _runtime_fixed_wing_alpha_command_rad(guidance_attributes)
+            fixed_wing_beta = _runtime_fixed_wing_beta_command_rad(guidance_attributes)
+            if abs(fixed_wing_alpha) > 0.0 or abs(fixed_wing_beta) > 0.0:
+                radial = state.position.vector.scaled(1.0 / max(state.position.vector.norm(), 1.0e-12))
+                horizontal_route = route_direction - radial.scaled(route_direction.dot(radial))
+                horizontal_route = horizontal_route.scaled(1.0 / max(horizontal_route.norm(), 1.0e-12))
+                lateral_route = radial.cross(horizontal_route)
+                lateral_route = lateral_route.scaled(1.0 / max(lateral_route.norm(), 1.0e-12))
+                body_heading = horizontal_route.scaled(math.cos(fixed_wing_beta)) + lateral_route.scaled(math.sin(fixed_wing_beta))
+                body_heading = body_heading.scaled(1.0 / max(body_heading.norm(), 1.0e-12))
+                flight_path_angle = math.asin(max(-1.0, min(1.0, route_direction.dot(radial))))
+                body_pitch = flight_path_angle + fixed_wing_alpha
+                desired_body_x_ecic = body_heading.scaled(math.cos(body_pitch)) + radial.scaled(math.sin(body_pitch))
+                desired_body_x_ecic = desired_body_x_ecic.scaled(1.0 / max(desired_body_x_ecic.norm(), 1.0e-12))
             if rectangle_bank is not None:
                 radial = state.position.vector.scaled(1.0 / max(state.position.vector.norm(), 1.0e-12))
-                desired_body_x_ecic = route_direction
                 lateral_ecic = radial.cross(desired_body_x_ecic)
                 lateral_ecic = lateral_ecic.scaled(1.0 / max(lateral_ecic.norm(), 1.0e-12))
-                desired_body_z_ecic = radial.scaled(-math.cos(rectangle_bank)) - lateral_ecic.scaled(math.sin(rectangle_bank))
+                down_perpendicular = Vector3(0.0, 0.0, 0.0) - radial
+                down_perpendicular = down_perpendicular - desired_body_x_ecic.scaled(
+                    down_perpendicular.dot(desired_body_x_ecic)
+                )
+                down_perpendicular = down_perpendicular.scaled(1.0 / max(down_perpendicular.norm(), 1.0e-12))
+                # ``local_roll_deg`` uses the local NED body-axis convention
+                # below (body +Y toward local down is positive roll).  The
+                # previous subtraction generated the opposite-sign local
+                # roll target, which made a direct-moment racetrack request
+                # a positive bank and then report/track a negative bank.
+                desired_body_z_ecic = down_perpendicular.scaled(math.cos(rectangle_bank)) + lateral_ecic.scaled(math.sin(rectangle_bank))
                 desired_body_y_ecic = desired_body_z_ecic.cross(desired_body_x_ecic)
                 desired_body_axes = (
                     state.attitude.conjugate().rotate(desired_body_x_ecic),
@@ -1611,7 +1659,7 @@ def _lower_rigid_body_case(
                     Vector3(0.0, 0.0, 0.0),
                 ).scaled(0.5)
             else:
-                desired_body = state.attitude.conjugate().rotate(route_direction)
+                desired_body = state.attitude.conjugate().rotate(desired_body_x_ecic)
                 attitude_error = Vector3(1.0, 0.0, 0.0).cross(desired_body)
             route_attitude_error = attitude_error
             maximum_sideslip_text = guidance_attributes.get("max-sideslip-deg")
@@ -1646,16 +1694,112 @@ def _lower_rigid_body_case(
                 # vehicle actuator.
                 thrust_moment = Vector3(0.0, 0.0, 0.0)
             elif attitude_lqr is None:
-                controller = bounded_attitude_moment(
-                    attitude_error,
-                    state.body_rate,
-                    attitude_gain=attitude_gain,
-                    rate_damping=rate_damping,
-                    maximum_moment=maximum_moment,
-                    maximum_body_rate=maximum_body_rate,
-                )
-                thrust_moment = controller.moment_body
-                controller_saturated["value"] = controller.saturated
+                direct_control_law = guidance_attributes.get("fixed-wing-direct-control-law", "").casefold()
+                if direct_control_law in {"local-bank-pitch-pd", "local_bank_pitch_pd"} and rectangle_bank is not None:
+                    # A transport's source-table aerodynamic roll moment can
+                    # be of the same order as the direct-wrench request.  A
+                    # generic three-axis attitude cross-product controller can
+                    # therefore settle with the wrong local bank sign even
+                    # though its global attitude error is small.  This opt-in
+                    # direct-wrench law closes the declared local bank and
+                    # pitch channels explicitly, while retaining the generic
+                    # controller for heading/yaw and all other vehicles.
+                    local_attitude = _rigid_body_local_attitude_observables(state, attitude_earth)
+                    actual_bank = math.radians(local_attitude["local_roll_deg"])
+                    actual_pitch = math.radians(local_attitude["local_pitch_deg"])
+                    radial = state.position.vector.scaled(1.0 / max(state.position.vector.norm(), 1.0e-12))
+                    flight_path_angle = math.asin(max(-1.0, min(1.0, route_direction.dot(radial))))
+                    desired_pitch = flight_path_angle + fixed_wing_alpha
+                    bank_error = rectangle_bank - actual_bank
+                    pitch_error = desired_pitch - actual_pitch
+                    bank_gain = float(guidance_attributes.get("direct-bank-gain-nm-per-rad", str(attitude_gain)))
+                    bank_rate_damping = float(
+                        guidance_attributes.get("direct-bank-rate-damping-nm-s-per-rad", str(rate_damping))
+                    )
+                    pitch_gain = float(guidance_attributes.get("direct-pitch-gain-nm-per-rad", str(attitude_gain)))
+                    pitch_rate_damping = float(
+                        guidance_attributes.get("direct-pitch-rate-damping-nm-s-per-rad", str(rate_damping))
+                    )
+                    alpha_error = 0.0
+                    alpha_gain = float(guidance_attributes.get("direct-alpha-gain-nm-per-rad", "0.0"))
+                    if alpha_gain != 0.0 and aerodynamic_model is not None:
+                        air_velocity_body = aerodynamic_model.air_velocity_body(state)
+                        actual_alpha = math.atan2(
+                            air_velocity_body.z,
+                            max(abs(air_velocity_body.x), 1.0e-12),
+                        )
+                        alpha_error = fixed_wing_alpha - actual_alpha
+                    beta_error = 0.0
+                    beta_gain = float(guidance_attributes.get("direct-beta-gain-nm-per-rad", "0.0"))
+                    beta_rate_damping = float(
+                        guidance_attributes.get("direct-beta-rate-damping-nm-s-per-rad", "0.0")
+                    )
+                    if beta_gain != 0.0 and aerodynamic_model is not None:
+                        air_velocity_body = aerodynamic_model.air_velocity_body(state)
+                        actual_beta = math.atan2(
+                            air_velocity_body.y,
+                            max(math.hypot(air_velocity_body.x, air_velocity_body.z), 1.0e-12),
+                        )
+                        beta_error = fixed_wing_beta - actual_beta
+                    heading_error = 0.0
+                    heading_gain = float(guidance_attributes.get("direct-heading-gain-nm-per-rad", "0.0"))
+                    heading_rate_damping = float(
+                        guidance_attributes.get("direct-heading-rate-damping-nm-s-per-rad", "0.0")
+                    )
+                    if heading_gain != 0.0 and route_velocity is not None:
+                        heading_error, _ = _runtime_rectangle_turn_errors(
+                            route_attributes,
+                            state,
+                            route_velocity,
+                        )
+                    yaw_controller = bounded_attitude_moment(
+                        attitude_error,
+                        state.body_rate,
+                        attitude_gain=attitude_gain,
+                        rate_damping=rate_damping,
+                        maximum_moment=maximum_moment,
+                        maximum_body_rate=maximum_body_rate,
+                    )
+                    yaw_moment = yaw_controller.moment_body.z
+                    if heading_gain != 0.0:
+                        yaw_moment = heading_gain * heading_error - heading_rate_damping * state.body_rate.z
+                    if beta_gain != 0.0:
+                        yaw_moment += beta_gain * beta_error - beta_rate_damping * state.body_rate.z
+                    requested_moment = Vector3(
+                        bank_gain * bank_error - bank_rate_damping * state.body_rate.x,
+                        pitch_gain * pitch_error
+                        + alpha_gain * alpha_error
+                        - pitch_rate_damping * state.body_rate.y,
+                        yaw_moment,
+                    )
+                    thrust_moment = (
+                        limit_vector_norm(requested_moment, maximum_moment)
+                        if maximum_moment is not None
+                        else requested_moment
+                    )
+                    controller_saturated["value"] = yaw_controller.saturated or thrust_moment != requested_moment
+                    control_values["direct_local_bank_error_deg"] = math.degrees(bank_error)
+                    control_values["direct_local_pitch_error_deg"] = math.degrees(pitch_error)
+                    control_values["direct_local_bank_command_deg"] = math.degrees(rectangle_bank)
+                    control_values["direct_local_pitch_command_deg"] = math.degrees(desired_pitch)
+                    control_values["direct_local_alpha_error_deg"] = math.degrees(alpha_error)
+                    control_values["direct_local_beta_error_deg"] = math.degrees(beta_error)
+                    control_values["direct_local_heading_error_deg"] = math.degrees(heading_error)
+                else:
+                    controller = bounded_attitude_moment(
+                        attitude_error,
+                        state.body_rate,
+                        attitude_gain=attitude_gain,
+                        rate_damping=rate_damping,
+                        maximum_moment=maximum_moment,
+                        maximum_body_rate=maximum_body_rate,
+                    )
+                    thrust_moment = controller.moment_body
+                    controller_saturated["value"] = controller.saturated
+                control_values["direct_moment_active"] = 1.0
+                for axis, value in zip(("x", "y", "z"), (thrust_moment.x, thrust_moment.y, thrust_moment.z), strict=True):
+                    control_values[f"direct_moment_controller_request_{axis}_nm"] = value
+                    control_values[f"direct_moment_commanded_{axis}_nm"] = value
             else:
                 current_inertia = inertia_provider(state)
                 lqr_command = attitude_lqr.command({
@@ -1673,10 +1817,14 @@ def _lower_rigid_body_case(
                     controller_saturated["value"] = True
                 else:
                     thrust_moment = Vector3(
-                    lqr_command.controls["moment-x"],
-                    lqr_command.controls["moment-y"],
-                    lqr_command.controls["moment-z"],
-                )
+                        lqr_command.controls["moment-x"],
+                        lqr_command.controls["moment-y"],
+                        lqr_command.controls["moment-z"],
+                    )
+                control_values["direct_moment_active"] = 1.0
+                for axis, name in zip(("x", "y", "z"), ("moment-x", "moment-y", "moment-z"), strict=True):
+                    control_values[f"direct_moment_controller_request_{axis}_nm"] = float(lqr_command.unsaturated[name])
+                    control_values[f"direct_moment_commanded_{axis}_nm"] = float(getattr(thrust_moment, axis))
                 controller_saturated["value"] = bool(lqr_command.saturated)
             if thrust_vector.norm() > 0.0:
                 # Route guidance commands the attitude; propulsion remains a
@@ -1765,15 +1913,81 @@ def _lower_rigid_body_case(
             and route_velocity is not None
             and isinstance(aerodynamic_model, TableAerodynamicModel)
         ):
-            inversion_controller = bounded_attitude_moment(
-                route_attitude_error,
-                state.body_rate,
-                attitude_gain=float(guidance_attributes.get("attitude-gain", "10000.0")),
-                rate_damping=float(guidance_attributes.get("rate-damping", "2000.0")),
-                maximum_moment=maximum_moment,
-                maximum_body_rate=maximum_body_rate,
-            )
-            inversion_target = inversion_controller.moment_body
+            fixed_wing_surface_law = guidance_attributes.get(
+                "fixed-wing-surface-control-law",
+                "",
+            ).casefold()
+            if fixed_wing_surface_law in {"bank-pitch-pd", "bank_pitch_pd"}:
+                radial = state.position.vector.scaled(1.0 / max(state.position.vector.norm(), 1.0e-12))
+                flight_path_angle = math.asin(
+                    max(-1.0, min(1.0, route_velocity.dot(radial) / max(route_velocity.norm(), 1.0e-12)))
+                )
+                desired_pitch = flight_path_angle + fixed_wing_alpha
+                attitude_observables = _rigid_body_local_attitude_observables(
+                    state,
+                    attitude_earth,
+                )
+                desired_bank = _runtime_rectangle_bank_angle(route_attributes, state) or 0.0
+                bank_error = desired_bank - math.radians(float(attitude_observables["local_roll_deg"]))
+                pitch_error = desired_pitch - math.radians(float(attitude_observables["local_pitch_deg"]))
+                bank_gain = float(guidance_attributes.get("surface-bank-gain-nm-per-rad", "0.25"))
+                bank_damping = float(guidance_attributes.get("surface-bank-rate-damping-nm-s-per-rad", "0.08"))
+                pitch_gain = float(guidance_attributes.get("surface-pitch-gain-nm-per-rad", "0.25"))
+                pitch_damping = float(guidance_attributes.get("surface-pitch-rate-damping-nm-s-per-rad", "0.08"))
+                inversion_target = Vector3(
+                    bank_gain * bank_error - bank_damping * state.body_rate.x,
+                    pitch_gain * pitch_error - pitch_damping * state.body_rate.y,
+                    0.0,
+                )
+                control_values["fixed_wing_surface_bank_error_deg"] = math.degrees(bank_error)
+                control_values["fixed_wing_surface_pitch_error_deg"] = math.degrees(pitch_error)
+            elif attitude_lqr is not None:
+                current_inertia = inertia_provider(state)
+                lqr_command = attitude_lqr.command(
+                    {
+                    "attitude-error-x": -route_attitude_error.x,
+                    "attitude-error-y": -route_attitude_error.y,
+                    "attitude-error-z": -route_attitude_error.z,
+                        "wx": state.body_rate.x,
+                        "wy": state.body_rate.y,
+                        "wz": state.body_rate.z,
+                    },
+                    mass_kg=state.mass,
+                    inertia=(current_inertia.x, current_inertia.y, current_inertia.z),
+                )
+                inversion_target = Vector3(
+                    lqr_command.controls["moment-x"],
+                    lqr_command.controls["moment-y"],
+                    lqr_command.controls["moment-z"],
+                )
+                controller_saturated["value"] = controller_saturated["value"] or bool(lqr_command.saturated)
+            else:
+                inversion_controller = bounded_attitude_moment(
+                    route_attitude_error,
+                    state.body_rate,
+                    attitude_gain=float(guidance_attributes.get("attitude-gain", "10000.0")),
+                    rate_damping=float(guidance_attributes.get("rate-damping", "2000.0")),
+                    maximum_moment=maximum_moment,
+                    maximum_body_rate=maximum_body_rate,
+                )
+                inversion_target = inversion_controller.moment_body
+                controller_saturated["value"] = controller_saturated["value"] or inversion_controller.saturated
+            if coordinated_turn_enabled:
+                heading_error, bank_error = _runtime_rectangle_turn_errors(
+                    route_attributes,
+                    state,
+                    route_velocity,
+                )
+                turn_command = coordinated_turn_controller.command(
+                    heading_error,
+                    bank_error,
+                    state.body_rate,
+                )
+                # A surface-authority realization must allocate the turn
+                # demand through the declared effectors.  It must not append
+                # this command later as an unobservable direct moment.
+                inversion_target = inversion_target + turn_command.moment_body
+                controller_saturated["value"] = controller_saturated["value"] or turn_command.saturated
             sideslip_gain = float(guidance_attributes.get("sideslip-gain", "0.0"))
             sideslip_rate_damping = float(guidance_attributes.get("sideslip-rate-damping", "0.0"))
             if abs(sideslip_gain) > 0.0:
@@ -1826,13 +2040,93 @@ def _lower_rigid_body_case(
             sideslip_moment = -sideslip_gain * sideslip_angle - sideslip_rate_damping * state.body_rate.z
             thrust_moment = thrust_moment + Vector3(0.0, 0.0, sideslip_moment)
         body_rate_damping = float(guidance_attributes.get("body-rate-damping-nm-s-per-rad", "0.0"))
-        if body_rate_damping > 0.0:
+        if body_rate_damping > 0.0 and surface_authority not in {"surfaces", "control-surfaces", "aero-surfaces"}:
+            # Generalized damping is a direct-moment convenience only for
+            # direct-authority realizations.  Surface-authority vehicles must
+            # place any declared roll/pitch damping in their surface demand so
+            # the aero tables, not propulsion, produce the actual moment.
             thrust_moment = thrust_moment + state.body_rate.scaled(-body_rate_damping)
-        if route_attributes.get("mode", "").casefold() in {"rectangle", "racetrack", "figure-eight", "figure8"} and coordinated_turn_enabled and attitude_lqr is None:
+        if (
+            route_attributes.get("mode", "").casefold() in {"rectangle", "racetrack", "figure-eight", "figure8"}
+            and coordinated_turn_enabled
+            and attitude_lqr is None
+            and surface_authority not in {"surfaces", "control-surfaces", "aero-surfaces"}
+        ):
             heading_error, bank_error = _runtime_rectangle_turn_errors(route_attributes, state, route_velocity or Vector3(1.0, 0.0, 0.0))
             turn_command = coordinated_turn_controller.command(heading_error, bank_error, state.body_rate)
             thrust_moment = thrust_moment + turn_command.moment_body
             controller_saturated["value"] = controller_saturated["value"] or turn_command.saturated
+        if control_values.get("direct_moment_active", 0.0) > 0.5:
+            # A direct-wrench realization may either add its requested body
+            # moment to the source aerodynamic moment, or explicitly request
+            # the *total* moment after cancelling that source contribution.
+            # The latter is useful for source-table plants whose uncontrolled
+            # dimensional moments are larger than the reduced controller
+            # request.  It remains an abstract direct-wrench model: no
+            # physical surface or control allocation is implied.
+            direct_moment_commanded = thrust_moment
+            source_moment = Vector3(0.0, 0.0, 0.0)
+            cancel_source_moment = guidance_attributes.get(
+                "direct-wrench-cancel-source-moment",
+                "false",
+            ).casefold() in {"1", "true", "yes"}
+            cancel_axes = set(
+                guidance_attributes.get(
+                    "direct-wrench-cancel-source-axes",
+                    "xyz" if cancel_source_moment else "",
+                ).casefold()
+            )
+            cancel_source_side_force = guidance_attributes.get(
+                "direct-wrench-cancel-source-side-force",
+                "false",
+            ).casefold() in {"1", "true", "yes"}
+            if (cancel_source_moment or cancel_source_side_force) and aerodynamic_model is not None:
+                source_aero = aerodynamic_model.evaluate(state)
+                source_moment = source_aero.moment_body_nm
+                cancelled_source_moment = Vector3(
+                    source_moment.x if "x" in cancel_axes else 0.0,
+                    source_moment.y if "y" in cancel_axes else 0.0,
+                    source_moment.z if "z" in cancel_axes else 0.0,
+                )
+                thrust_moment = thrust_moment - cancelled_source_moment
+                if cancel_source_moment:
+                    control_values["direct_moment_source_cancellation_active"] = 1.0
+                if cancel_source_side_force:
+                    beta_force_gain = float(
+                        guidance_attributes.get("direct-beta-force-gain-n-per-rad", "0.0")
+                    )
+                    beta_force_damping = float(
+                        guidance_attributes.get("direct-beta-force-damping-n-s-per-m", "0.0")
+                    )
+                    beta_error = 0.0
+                    beta_force_correction = 0.0
+                    beta_force_damping_term = 0.0
+                    if beta_force_gain != 0.0:
+                        beta_error = _runtime_fixed_wing_beta_command_rad(guidance_attributes) - source_aero.sideslip_rad
+                        lateral_speed_m_s = aerodynamic_model.air_velocity_body(state).y
+                        beta_force_damping_term = -beta_force_damping * lateral_speed_m_s
+                        beta_force_correction = beta_force_gain * beta_error + beta_force_damping_term
+                    thrust_vector = Vector3(
+                        thrust_vector.x,
+                        thrust_vector.y - source_aero.force_body_n.y + beta_force_correction,
+                        thrust_vector.z,
+                    )
+                    control_values["direct_force_source_side_cancellation_active"] = 1.0
+                    control_values["direct_force_source_side_n"] = source_aero.force_body_n.y
+                    control_values["direct_force_beta_error_deg"] = math.degrees(beta_error)
+                    control_values["direct_force_beta_correction_n"] = beta_force_correction
+                    control_values["direct_force_beta_damping_n"] = beta_force_damping_term
+            control_values["direct_moment_source_moment_x_nm"] = source_moment.x
+            control_values["direct_moment_source_moment_y_nm"] = source_moment.y
+            control_values["direct_moment_source_moment_z_nm"] = source_moment.z
+            for axis, value in zip(
+                ("x", "y", "z"),
+                (direct_moment_commanded.x, direct_moment_commanded.y, direct_moment_commanded.z),
+                strict=True,
+            ):
+                control_values[f"direct_moment_commanded_{axis}_nm"] = value
+            for axis, value in zip(("x", "y", "z"), (thrust_moment.x, thrust_moment.y, thrust_moment.z), strict=True):
+                control_values[f"direct_moment_applied_{axis}_nm"] = value
         propulsion = RigidBodyForceMoment(
             thrust_vector,
             thrust_moment,
@@ -1959,6 +2253,17 @@ def _lower_rigid_body_case(
         result.setdefault("relrng[2]", 0.0)
         result.setdefault("relvel[2]", 0.0)
         result.update(_rigid_body_local_attitude_observables(state, attitude_earth))
+        if route_attributes.get("mode", "").casefold() in {"rectangle", "racetrack", "figure-eight", "figure8"}:
+            result["route_alpha_command_deg"] = math.degrees(
+                _runtime_fixed_wing_alpha_command_rad(guidance_attributes)
+            )
+            result["route_beta_command_deg"] = math.degrees(
+                _runtime_fixed_wing_beta_command_rad(guidance_attributes)
+            )
+            result["route_beta_tracking_error_deg"] = result["route_beta_command_deg"] - result.get(
+                "aero_sideslip_deg",
+                0.0,
+            )
         rectangle_bank = _runtime_rectangle_bank_angle(route_attributes, state)
         if rectangle_bank is not None:
             result["route_bank_command_deg"] = math.degrees(rectangle_bank)
@@ -1971,7 +2276,10 @@ def _lower_rigid_body_case(
             duration = max(float(route_attributes.get("duration-s", "1.0")), 1.0)
             theta = 2.0 * math.pi * max(0.0, min(duration, state.time)) / duration
             route_pitch = _runtime_figure_eight_pitch_angle(route_attributes, theta)
-            result["route_pitch_command_deg"] = math.degrees(route_pitch)
+            result["route_flight_path_command_deg"] = math.degrees(route_pitch)
+            result["route_pitch_command_deg"] = math.degrees(route_pitch) + math.degrees(
+                _runtime_fixed_wing_alpha_command_rad(guidance_attributes)
+            )
             result["route_pitch_achieved_deg"] = result["local_pitch_deg"]
             result["route_pitch_tracking_error_deg"] = result["route_pitch_command_deg"] - result["route_pitch_achieved_deg"]
         elif route_attributes.get("mode", "").casefold() == "racetrack":
@@ -1979,10 +2287,35 @@ def _lower_rigid_body_case(
             if local is not None:
                 _, _, _, _, _, vertical_rate, _ = local
                 speed = max(abs(float(route_attributes.get("racetrack-speed-mps", "1.0"))), 1.0e-6)
-                result["route_pitch_command_deg"] = math.degrees(math.atan2(vertical_rate, speed))
+                result["route_flight_path_command_deg"] = math.degrees(math.atan2(vertical_rate, speed))
+                result["route_pitch_command_deg"] = result["route_flight_path_command_deg"] + math.degrees(
+                    _runtime_fixed_wing_alpha_command_rad(guidance_attributes)
+                )
                 result["route_pitch_achieved_deg"] = result["local_pitch_deg"]
                 result["route_pitch_tracking_error_deg"] = result["route_pitch_command_deg"] - result["route_pitch_achieved_deg"]
         for name in (
+            "direct_moment_active",
+            "direct_moment_controller_request_x_nm",
+            "direct_moment_controller_request_y_nm",
+            "direct_moment_controller_request_z_nm",
+            "direct_moment_commanded_x_nm",
+            "direct_moment_commanded_y_nm",
+            "direct_moment_commanded_z_nm",
+            "direct_moment_applied_x_nm",
+            "direct_moment_applied_y_nm",
+            "direct_moment_applied_z_nm",
+            "direct_moment_source_cancellation_active",
+            "direct_moment_source_moment_x_nm",
+            "direct_moment_source_moment_y_nm",
+            "direct_moment_source_moment_z_nm",
+            "direct_local_alpha_error_deg",
+            "direct_local_beta_error_deg",
+            "direct_local_heading_error_deg",
+            "direct_force_source_side_cancellation_active",
+            "direct_force_source_side_n",
+            "direct_force_beta_error_deg",
+            "direct_force_beta_correction_n",
+            "direct_force_beta_damping_n",
             "rate_lqr_request_moment_x_nm",
             "rate_lqr_request_moment_y_nm",
             "rate_lqr_request_moment_z_nm",
@@ -1993,6 +2326,29 @@ def _lower_rigid_body_case(
             "rotorcraft_yaw_error_deg",
             "rotorcraft_yaw_moment_nm",
             "rotorcraft_yaw_control_active",
+            "surface_allocation_requested_moment_x_nm",
+            "surface_allocation_requested_moment_y_nm",
+            "surface_allocation_requested_moment_z_nm",
+            "surface_allocation_linearized_achieved_moment_x_nm",
+            "surface_allocation_linearized_achieved_moment_y_nm",
+            "surface_allocation_linearized_achieved_moment_z_nm",
+            "surface_allocation_residual_nm",
+            "surface_allocation_saturated",
+            "surface_allocation_rate_limited",
+            "surface_allocation_delta_limit_deg",
+            "surface_allocation_active_surface_count",
+            "surface_allocation_collective_elevon_commanded_deg",
+            "surface_allocation_collective_elevon_achieved_deg",
+            "surface_allocation_differential_elevon_commanded_deg",
+            "surface_allocation_differential_elevon_achieved_deg",
+            "fixed_wing_surface_bank_error_deg",
+            "fixed_wing_surface_pitch_error_deg",
+            "surface_allocation_symmetric_stabilator_commanded_deg",
+            "surface_allocation_symmetric_stabilator_achieved_deg",
+            "surface_allocation_differential_stabilator_commanded_deg",
+            "surface_allocation_differential_stabilator_achieved_deg",
+            "surface_allocation_rudder_commanded_deg",
+            "surface_allocation_rudder_achieved_deg",
         ):
             if name in control_values:
                 result[name] = float(control_values[name])
@@ -2035,6 +2391,42 @@ def _lower_rigid_body_case(
         )
         propulsion_force = total_force_body - aero_force_body
         control_moment = total_moment_body - aero_moment_body
+        if result.get("surface_allocation_active_surface_count", 0.0) > 0.0:
+            requested_surface_moment = Vector3(
+                float(result.get("surface_allocation_requested_moment_x_nm", 0.0)),
+                float(result.get("surface_allocation_requested_moment_y_nm", 0.0)),
+                float(result.get("surface_allocation_requested_moment_z_nm", 0.0)),
+            )
+            actual_surface_error = aero_moment_body - requested_surface_moment
+            result.update(
+                {
+                    "surface_allocation_actual_moment_error_x_nm": actual_surface_error.x,
+                    "surface_allocation_actual_moment_error_y_nm": actual_surface_error.y,
+                    "surface_allocation_actual_moment_error_z_nm": actual_surface_error.z,
+                    "surface_allocation_actual_residual_nm": actual_surface_error.norm(),
+                }
+            )
+        if result.get("direct_moment_active", 0.0) > 0.5:
+            direct_aero = aero_moment_body
+            direct_propulsion = Vector3(
+                float(result.get("propulsion_moment_body_x_nm", control_moment.x)),
+                float(result.get("propulsion_moment_body_y_nm", control_moment.y)),
+                float(result.get("propulsion_moment_body_z_nm", control_moment.z)),
+            )
+            result.update(
+                {
+                    "direct_moment_aero_x_nm": direct_aero.x,
+                    "direct_moment_aero_y_nm": direct_aero.y,
+                    "direct_moment_aero_z_nm": direct_aero.z,
+                    "direct_moment_propulsion_x_nm": direct_propulsion.x,
+                    "direct_moment_propulsion_y_nm": direct_propulsion.y,
+                    "direct_moment_propulsion_z_nm": direct_propulsion.z,
+                    "direct_moment_total_x_nm": total_moment_body.x,
+                    "direct_moment_total_y_nm": total_moment_body.y,
+                    "direct_moment_total_z_nm": total_moment_body.z,
+                    "direct_moment_cancellation_residual_nm": total_moment_body.norm(),
+                }
+            )
         result.update(
             {
                 "mass_kg": state.mass,
@@ -2419,9 +2811,10 @@ def _runtime_point_mass_route_commands(
     """
 
     mode = route_attributes.get("mode", "").casefold()
-    if mode not in {"great-circle", "rectangle"} or not {"lat", "long", "alt", "vel"}.issubset(values):
+    if mode not in {"great-circle", "rectangle", "racetrack"} or not {"lat", "long", "alt", "vel"}.issubset(values):
         return {}
     duration = max(float(route_attributes.get("duration-s", "1.0")), 1.0)
+    current_time = float(values.get("time", 0.0))
     latitude = math.radians(float(values["lat"]))
     longitude = math.radians(float(values["long"]))
     current_altitude_m = float(values["alt"]) * 0.3048
@@ -2435,6 +2828,47 @@ def _runtime_point_mass_route_commands(
         delta_east = (target_longitude - longitude) * 6_378_137.0 * math.cos(latitude)
         delta_north = (target_latitude - latitude) * 6_378_137.0
         target_altitude_m = float(target_attributes.get("altitude-m", str(current_altitude_m)))
+    elif mode == "racetrack":
+        local = _runtime_racetrack_local_reference(route_attributes, current_time)
+        if local is None:
+            return {}
+        east_offset, north_offset, target_altitude_m, tangent_east, tangent_north, vertical_rate_mps, _phase = local
+        altitude_rate_mps = vertical_rate_mps
+        start_latitude = math.radians(float(route_attributes.get("start-latitude-deg", "0.0")))
+        start_longitude = math.radians(float(route_attributes.get("start-longitude-deg", "0.0")))
+        radius = 6_378_137.0 + float(route_attributes.get("racetrack-low-altitude-m", "0.0"))
+        east = (longitude - start_longitude) * radius * math.cos(start_latitude)
+        north = (latitude - start_latitude) * radius
+        delta_east = east_offset - east
+        delta_north = north_offset - north
+        speed_mps = abs(float(route_attributes.get("racetrack-speed-mps", "0.0")))
+        if speed_mps <= 0.0:
+            return {}
+        capture_gain = max(0.0, float(route_attributes.get("position-capture-gain", "0.0")))
+        correction_east = delta_east * capture_gain
+        correction_north = delta_north * capture_gain
+        correction_limit = max(
+            0.0,
+            float(route_attributes.get("position-capture-max-correction-mps", str(max(speed_mps * 0.25, 1.0)))),
+        )
+        correction_norm = math.hypot(correction_east, correction_north)
+        if correction_norm > correction_limit > 0.0:
+            correction_scale = correction_limit / correction_norm
+            correction_east *= correction_scale
+            correction_north *= correction_scale
+        commanded_east = tangent_east * speed_mps + correction_east
+        commanded_north = tangent_north * speed_mps + correction_north
+        commanded_horizontal_speed = max(math.hypot(commanded_east, commanded_north), 1.0e-12)
+        delta_altitude = target_altitude_m - current_altitude_m
+        altitude_gain = max(0.0, float(route_attributes.get("racetrack-altitude-capture-gain-per-s", "0.0")))
+        altitude_limit = max(0.0, float(route_attributes.get("racetrack-altitude-capture-max-mps", "0.0")))
+        altitude_correction = max(-altitude_limit, min(altitude_limit, altitude_gain * delta_altitude))
+        altitude_rate_mps += altitude_correction
+        return {
+            "_command_vel": speed_mps / 0.3048,
+            "_command_psi": math.degrees(math.atan2(commanded_east, commanded_north)),
+            "_command_gamgd": math.degrees(math.atan2(altitude_rate_mps, commanded_horizontal_speed)),
+        }
     else:
         required = ("rectangle-length-m", "rectangle-width-m", "duration-s")
         if any(name not in route_attributes for name in required):
@@ -2458,7 +2892,6 @@ def _runtime_point_mass_route_commands(
         delta_east = target_east - east
         delta_north = target_north - north
     distance = math.hypot(delta_east, delta_north)
-    current_time = float(values.get("time", 0.0))
     altitude_profile = route_attributes.get("altitude-profile", "linear-target").casefold()
     if altitude_profile == "mission":
         powered_end = float(route_attributes.get("powered-end-s", "360.0"))
@@ -3132,6 +3565,14 @@ def _runtime_rectangle_bank_angle(
         scheduled = math.radians(float(route_attributes.get("figure-eight-bank-deg", "20.0"))) * math.sin(theta)
         maximum = abs(float(route_attributes.get("route-max-bank-deg", route_attributes.get("figure-eight-bank-deg", "20.0"))))
     elif route_attributes.get("mode", "").casefold() == "racetrack":
+        profile = _runtime_racetrack_phase_profile(route_attributes)
+        if profile is not None and state.time >= profile[-1]:
+            # The finish course is a terminal-evaluation reference.  Do not
+            # continue steering bank after the declared racetrack duration;
+            # otherwise a heading-capture correction can drive a finished
+            # course back toward a table boundary before the stop condition
+            # is observed.
+            return None
         local = _runtime_racetrack_local_reference(route_attributes, state.time)
         if local is None:
             return None
@@ -3162,12 +3603,19 @@ def _runtime_rectangle_bank_angle(
         scheduled = -math.radians(float(route_attributes["rectangle-bank-deg"])) * strength
         maximum = abs(float(route_attributes.get("route-max-bank-deg", route_attributes["rectangle-bank-deg"])))
 
+    route_target = None
     feedback_gain = float(route_attributes.get("route-cross-track-bank-gain-deg-per-m", "0.0"))
-    if feedback_gain != 0.0:
+    heading_feedback_gain = float(route_attributes.get("route-heading-bank-gain-deg-per-deg", "0.0"))
+    if feedback_gain != 0.0 or heading_feedback_gain != 0.0:
         route_target = _runtime_rectangle_waypoint_position(route_attributes, state)
         if route_target is not None:
             geometry = _runtime_route_tracking_geometry(route_attributes, route_target, state, earth_omega)
             scheduled += math.radians(feedback_gain * geometry.get("route_cross_track_error_m", 0.0))
+            heading_correction_deg = heading_feedback_gain * geometry.get("route_heading_error_deg", 0.0)
+            heading_correction_limit_deg = abs(float(route_attributes.get("route-heading-bank-max-deg", "0.0")))
+            if heading_correction_limit_deg > 0.0:
+                heading_correction_deg = max(-heading_correction_limit_deg, min(heading_correction_limit_deg, heading_correction_deg))
+            scheduled += math.radians(heading_correction_deg)
     return max(-math.radians(maximum), min(math.radians(maximum), scheduled))
 ####
 
@@ -3186,6 +3634,28 @@ def _runtime_coordinated_turn_enabled(
         names = ("racetrack-coordinated-turn", "rectangle-coordinated-turn")
     return any(guidance_attributes.get(name, "false").casefold() in {"1", "true", "yes"} for name in names)
 ####
+
+
+def _runtime_fixed_wing_alpha_command_rad(guidance_attributes: Mapping[str, str]) -> float:
+    """Return an explicit fixed-wing body-axis angle-of-attack command.
+
+    A route tangent is a flight-path direction, not the aircraft body-X
+    direction.  Airbreathers normally trim at a non-zero angle of attack, so
+    the route attitude reference must add that declared alpha before the
+    surface allocator is asked to produce a moment.  The default remains zero
+    to preserve the point-mass/kinematic route contract for models that do not
+    declare a fixed-wing alpha realization.
+    """
+
+    return math.radians(float(guidance_attributes.get("fixed-wing-alpha-command-deg", "0.0")))
+    ####
+
+
+def _runtime_fixed_wing_beta_command_rad(guidance_attributes: Mapping[str, str]) -> float:
+    """Return an explicit fixed-wing trim sideslip command in radians."""
+
+    return math.radians(float(guidance_attributes.get("fixed-wing-beta-command-deg", "0.0")))
+    ####
 
 
 def _runtime_rectangle_turn_errors(
@@ -3567,6 +4037,26 @@ def _rigid_body_aerodynamic_model(
 
     def controls(state: RigidBody6DofState) -> dict[str, float]:
         values = dict(control_values)
+
+        def apply_surface_allocation_override() -> None:
+            """Apply a probe or achieved surface command after hold laws."""
+
+            for degree_name, radian_name in (
+                ("collective-elevon-deg", "collective_elevon"),
+                ("differential-elevon-deg", "differential_elevon"),
+                ("symmetric-stabilator-deg", "symmetric_stabilator"),
+                ("differential-stabilator-deg", "differential_stabilator"),
+                ("rudder-deg", "rudder"),
+            ):
+                override_name = f"_surface-allocation-override-{degree_name}"
+                if override_name not in control_values:
+                    continue
+                override = float(control_values[override_name])
+                values[degree_name] = override
+                values[radian_name] = math.radians(override)
+            ####
+        ####
+
         # The grammar-facing controls are degree-labelled, while coefficient
         # tables use the canonical radian ``alpha``/``bank`` axes. Keep both
         # names in the query context rather than making table data guess.
@@ -3864,9 +4354,11 @@ def _rigid_body_aerodynamic_model(
             for block in segment_blocks.get(active_segment_number, ())
         )
         if target_position is None or navigation_gain <= 0.0 or not (active_segment_guidance or _runtime_pure_propnav_active(route_attributes, state.time)):
+            apply_surface_allocation_override()
             return values
         target_ecic = _runtime_target_position(target_attributes, earth, EarthRotationAdapter(earth), state.time)
         if target_ecic is None:
+            apply_surface_allocation_override()
             return values
         demand = cast(Vector3, _runtime_propnav_command(state, target_attributes, navigation_gain, earth_mu, earth_omega)["demand"])
         allocation = allocate_alpha_bank(
@@ -3904,6 +4396,7 @@ def _rigid_body_aerodynamic_model(
             values["fin_pitch"] = values["alpha"] / max(energy_alpha_limit, 1.0e-12)
             values["energy_speed_mps"] = airspeed
             values["energy_alpha_deg"] = values["alpha-deg"]
+        apply_surface_allocation_override()
         return values
     ####
 
@@ -7164,8 +7657,10 @@ def _apply_surface_control_inversion(
     This is a generic local allocator for table-backed fixed-wing surfaces.
     It uses the vehicle's actual coefficient deck at the current state, so
     control signs and authority are never duplicated in a vehicle-specific
-    controller. The allocation is deliberately local and bounded; it is not a
-    substitute for a published flight-control law.
+    controller. The allocation is deliberately local and bounded; the current
+    maximum-delta setting limits deflection relative to the stored base and is
+    not a time-normalized actuator-rate model. It is not a substitute for a
+    published flight-control law.
     """
 
     candidates = (
@@ -7178,12 +7673,41 @@ def _apply_surface_control_inversion(
     active = tuple(candidate for candidate in candidates if candidate[0] in control_values)
     if not active:
         return False
+    update_period = max(0.0, float(guidance_attributes.get("surface-inversion-update-s", "0.0")))
+    last_update = control_values.get("_surface-allocation-last-time")
+    elapsed_since_update = (
+        None
+        if last_update is None
+        else max(0.0, state.time - float(last_update))
+    )
+    if (
+        update_period > 0.0
+        and last_update is not None
+        and state.time > float(last_update)
+        and state.time - float(last_update) < update_period
+    ):
+        return bool(control_values.get("surface_allocation_saturated", 0.0))
+    control_values["_surface-allocation-last-time"] = state.time
+    raw_values = {
+        degree_name: float(control_values[degree_name])
+        for degree_name, _, _, _ in active
+    }
+    for degree_name, _, _, _ in active:
+        control_values.pop(f"_surface-allocation-override-{degree_name}", None)
+    controller_values = (
+        dict(aerodynamic_model.control_provider(state))
+        if aerodynamic_model.control_provider is not None
+        else {}
+    )
     base_values: dict[str, float] = {}
     for degree_name, radian_name, _, _ in active:
-        base_name = f"_surface-inversion-base-{degree_name}"
-        base_values[degree_name] = float(control_values.setdefault(base_name, control_values[degree_name]))
-        control_values[degree_name] = base_values[degree_name]
-        control_values[radian_name] = math.radians(base_values[degree_name])
+        # Allocate around the command after the shared hold laws.  Keep the
+        # raw semantic command separate so the hold law is not cumulatively
+        # applied on later allocator cycles.
+        base_values[degree_name] = float(controller_values.get(degree_name, raw_values[degree_name]))
+        control_values[degree_name] = raw_values[degree_name]
+        control_values[radian_name] = math.radians(raw_values[degree_name])
+        control_values[f"_surface-allocation-override-{degree_name}"] = base_values[degree_name]
     ####
 
     baseline = aerodynamic_model.evaluate(state).moment_body_nm
@@ -7192,11 +7716,11 @@ def _apply_surface_control_inversion(
         raise ValueError("surface-inversion-step-deg must be positive")
     columns: list[tuple[float, float, float]] = []
     for degree_name, radian_name, _, _ in active:
-        control_values[radian_name] = math.radians(base_values[degree_name]) + step_radians
+        control_values[f"_surface-allocation-override-{degree_name}"] = base_values[degree_name] + math.degrees(step_radians)
         plus = aerodynamic_model.evaluate(state).moment_body_nm
-        control_values[radian_name] = math.radians(base_values[degree_name]) - step_radians
+        control_values[f"_surface-allocation-override-{degree_name}"] = base_values[degree_name] - math.degrees(step_radians)
         minus = aerodynamic_model.evaluate(state).moment_body_nm
-        control_values[radian_name] = math.radians(base_values[degree_name])
+        control_values[f"_surface-allocation-override-{degree_name}"] = base_values[degree_name]
         columns.append(
             (
                 (plus.x - minus.x) / (2.0 * step_radians),
@@ -7211,32 +7735,80 @@ def _apply_surface_control_inversion(
         target_moment.y - baseline.y,
         target_moment.z - baseline.z,
     )
+    axis_weights = (
+        max(0.0, float(guidance_attributes.get("surface-inversion-axis-weight-x", "1.0"))),
+        max(0.0, float(guidance_attributes.get("surface-inversion-axis-weight-y", "1.0"))),
+        max(0.0, float(guidance_attributes.get("surface-inversion-axis-weight-z", "1.0"))),
+    )
     regularization = max(0.0, float(guidance_attributes.get("surface-inversion-regularization", "0.01")))
     normal = [
         [
-            sum(columns[row][component] * columns[other][component] for component in range(3))
+            sum(
+                axis_weights[component] ** 2
+                * columns[row][component]
+                * columns[other][component]
+                for component in range(3)
+            )
             for other in range(len(columns))
         ]
         for row in range(len(columns))
     ]
     rhs = [
-        sum(columns[index][component] * residual[component] for component in range(3))
+        sum(
+            axis_weights[component] ** 2
+            * columns[index][component]
+            * residual[component]
+            for component in range(3)
+        )
         for index in range(len(columns))
     ]
     for index in range(len(columns)):
         normal[index][index] += regularization
     delta = _solve_surface_normal_equations(normal, rhs)
     maximum_delta = abs(float(guidance_attributes.get("surface-inversion-max-delta-deg", "5.0")))
+    rate_limit_text = guidance_attributes.get("surface-inversion-rate-deg-s")
+    rate_limited = False
+    if rate_limit_text is not None and elapsed_since_update is not None:
+        rate_limit = max(0.0, float(rate_limit_text))
+        rate_delta = rate_limit * elapsed_since_update
+        rate_limited = rate_delta < maximum_delta
+        maximum_delta = min(maximum_delta, rate_delta)
     saturated = False
+    applied_deltas: list[float] = []
     for index, (degree_name, radian_name, minimum_name, maximum_name) in enumerate(active):
-        requested = base_values[degree_name] + math.degrees(delta[index])
-        requested = max(base_values[degree_name] - maximum_delta, min(base_values[degree_name] + maximum_delta, requested))
+        raw_requested = base_values[degree_name] + math.degrees(delta[index])
+        requested = max(base_values[degree_name] - maximum_delta, min(base_values[degree_name] + maximum_delta, raw_requested))
+        saturated = saturated or not math.isclose(requested, raw_requested, rel_tol=0.0, abs_tol=1.0e-12)
         lower = float(guidance_attributes.get(minimum_name, "-20.0"))
         upper = float(guidance_attributes.get(maximum_name, "20.0"))
         bounded = min(upper, max(lower, requested))
         saturated = saturated or not math.isclose(bounded, requested, rel_tol=0.0, abs_tol=1.0e-12)
-        control_values[degree_name] = bounded
-        control_values[radian_name] = math.radians(bounded)
+        control_values[degree_name] = raw_values[degree_name]
+        control_values[radian_name] = math.radians(raw_values[degree_name])
+        control_values[f"_surface-allocation-override-{degree_name}"] = bounded
+        surface_name = degree_name.removesuffix("-deg").replace("-", "_")
+        control_values[f"surface_allocation_{surface_name}_commanded_deg"] = raw_requested
+        control_values[f"surface_allocation_{surface_name}_achieved_deg"] = bounded
+        applied_deltas.append(math.radians(bounded - base_values[degree_name]))
+    linearized_achieved = tuple(
+        baseline_component
+        + sum(columns[index][component] * applied_deltas[index] for index in range(len(active)))
+        for component, baseline_component in enumerate((baseline.x, baseline.y, baseline.z))
+    )
+    control_values["surface_allocation_requested_moment_x_nm"] = target_moment.x
+    control_values["surface_allocation_requested_moment_y_nm"] = target_moment.y
+    control_values["surface_allocation_requested_moment_z_nm"] = target_moment.z
+    control_values["surface_allocation_linearized_achieved_moment_x_nm"] = linearized_achieved[0]
+    control_values["surface_allocation_linearized_achieved_moment_y_nm"] = linearized_achieved[1]
+    control_values["surface_allocation_linearized_achieved_moment_z_nm"] = linearized_achieved[2]
+    requested_components = (target_moment.x, target_moment.y, target_moment.z)
+    control_values["surface_allocation_residual_nm"] = math.sqrt(
+        sum((target - achieved) ** 2 for target, achieved in zip(requested_components, linearized_achieved, strict=True))
+    )
+    control_values["surface_allocation_saturated"] = 1.0 if saturated else 0.0
+    control_values["surface_allocation_rate_limited"] = 1.0 if rate_limited else 0.0
+    control_values["surface_allocation_delta_limit_deg"] = maximum_delta
+    control_values["surface_allocation_active_surface_count"] = float(len(active))
     return saturated
     ####
 

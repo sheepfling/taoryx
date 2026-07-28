@@ -8,6 +8,14 @@ vehicles:
     display_name: Boeing 747-100 research surrogate
     family_id: powered_fixed_wing
     mode: rigid-body-6dof
+    realization:
+      force_source: coefficient_table
+      moment_source: direct_moment
+      actuator_realization: source_direct_control
+      propulsion_model: table_thrust
+      resource_model: fixed_mass
+      claim: source-bounded rigid-body trajectory
+      nonclaims: [physical actuator dynamics, fuel depletion]
     trajectory_vehicle: b747
     earth_model: wgs-84
     earth_omega_rad_s: 0.0
@@ -29,6 +37,25 @@ vehicles:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+    aero_convention:
+      force_frame: body_axes_x_forward_y_right_z_down
+      force_channels: cx_cy_cz
+      drag_note: >-
+        cx and cz are body-axis force coefficients, not wind-axis drag/lift
+        coefficients.  Do not label cx or cz as CD; derive wind-axis drag only
+        through the documented body-to-wind transformation.
+      table_semantics: absolute_coefficients
+      control_table_rule: >-
+        The elevator deck includes the nominal zero-elevator baseline.  Use it
+        as an absolute control-conditioned deck; do not add it to the static
+        deck unless an explicit delta composition is introduced.
+      source_note: >-
+        Static and elevator tables are transcodes of the jet_b747 source grids;
+        source provenance is recorded in each table header and the source
+        differential tests.
+      problem_comment: >-
+        Aero channels are body-axis cx/cy/cz (not direct CD/CL); B747 control
+        tables are absolute source-grid values, including zero-control baseline.
     source:
       status: public-research-surrogate
       bundle: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
@@ -38,6 +65,14 @@ vehicles:
     display_name: Skywalker X8 research surrogate
     family_id: powered_fixed_wing
     mode: rigid-body-6dof
+    realization:
+      force_source: coefficient_table
+      moment_source: aerodynamic_tables_or_direct_moment_by_fixture
+      actuator_realization: surface_allocator_candidate_or_direct_moment_baseline
+      propulsion_model: table_thrust
+      resource_model: fixed_mass
+      claim: source-bounded X8 response; bounded elevon allocation only in the declared candidate fixture
+      nonclaims: [full flight-control-law fidelity, time-normalized actuator dynamics, fuel depletion]
     trajectory_vehicle: x8
     earth_model: wgs-84
     earth_omega_rad_s: 0.0
@@ -64,6 +99,40 @@ vehicles:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_propeller_ct.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_propeller_cq.tbl
+    coefficient_composition:
+      table_semantics: absolute_coefficients_at_fixed_control_grid_reference_condition
+      baseline_table: skywalker_x8_static_6axis.tbl
+      runtime_rule: >-
+        Add the static table once, then add each absolute control-table
+        contribution after subtracting the common static term.  Control tables
+        are not increments, and their zero-control value is not equal to the
+        static table because the source control grids use throttle=0.44 while
+        the static grid uses throttle=0.0.
+      formula: static + (collective - static) + (differential - static)
+      ingestion_check: >-
+        At zero collective/differential deflection, the two control tables must
+        agree with each other at their shared fixed reference condition.  Do
+        not require equality with the static table: the source grids have
+        different throttle reference conditions.  If a replacement table has
+        increment semantics, stop before changing the runtime composition.
+    aero_convention:
+      force_frame: body_axes_x_forward_y_right_z_down
+      force_channels: cx_cy_cz
+      drag_note: >-
+        cx and cz are body-axis force coefficients, not wind-axis drag/lift
+        coefficients.  Do not label cx or cz as CD; derive wind-axis drag only
+        through the documented body-to-wind transformation.
+      source_note: >-
+        Static, collective-elevon, and differential-elevon decks are transcodes
+        of the named public-research source grids.  The static grid is
+        throttle=0.0; control grids are throttle=0.44 and their source CSVs
+        also expose delta_* columns, while the checked-in .tbl files export
+        total cx/cy/cz/cmx/cmy/cmz channels.  Provenance is recorded in each
+        table header and the source differential tests.
+      problem_comment: >-
+        Aero channels are body-axis cx/cy/cz (not direct CD/CL); X8 control
+        decks are absolute total values at throttle=0.44, distinct from the
+        zero-throttle static deck, and are composed by the explicit formula.
     source:
       status: public-research-surrogate
       bundle: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
@@ -73,6 +142,14 @@ vehicles:
     display_name: AscTec Hummingbird research surrogate
     family_id: multirotor_direct_wrench
     mode: rigid-body-6dof
+    realization:
+      force_source: dimensional_wrench_table
+      moment_source: dimensional_wrench_table_plus_rotor_reaction_torque
+      actuator_realization: rotor_allocator
+      propulsion_model: rotor_thrust_model
+      resource_model: fixed_mass
+      claim: source-wrench plant with bounded quad-X rotor command allocation
+      nonclaims: [blade-resolved aerodynamics, dynamic inflow, drivetrain transients, battery depletion]
     trajectory_vehicle: hummingbird
     earth_model: wgs-84
     earth_omega_rad_s: 0.0
@@ -102,6 +179,23 @@ vehicles:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmz.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_static.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_rotor_reaction_torque.tbl
+    aero_convention:
+      force_frame: source_body_wrench_frame_z_up
+      force_channels: cx_cy_cz
+      drag_note: >-
+        These channels are adapter names for source body-wrench components,
+        not aerodynamic force coefficients and not direct CD/CL values.  No
+        wind-axis drag coefficient is represented by the Hummingbird tables.
+      table_semantics: absolute_source_wrench_channels
+      control_table_rule: >-
+        Use the rotor-speed-conditioned source wrench channels as provided; do
+        not apply fixed-wing static/control baseline subtraction.
+      source_note: >-
+        Hummingbird tables transcode common_speed_wrench_grid.csv and preserve
+        source body-wrench components through the source-z-up runtime adapter.
+      problem_comment: >-
+        Aero channel names cx/cy/cz are source body-wrench adapters, not CD/CL;
+        no fixed-wing baseline subtraction is intended.
     source:
       status: public-research-surrogate
       bundle: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1
@@ -111,6 +205,14 @@ vehicles:
     display_name: North American X-15 research surrogate
     family_id: rocket_plane
     mode: rigid-body-6dof
+    realization:
+      force_source: coefficient_table
+      moment_source: aerodynamic_tables
+      actuator_realization: source_direct_control_or_surface_path_by_fixture
+      propulsion_model: table_thrust_and_mass_flow_in_staged_cases
+      resource_model: propellant_mass_flow_in_staged_cases
+      claim: source-bounded X-15 aero/propulsion response in declared cases
+      nonclaims: [complete actuator transients, landing dynamics, universal full-envelope fidelity]
     trajectory_vehicle: x15
     earth_model: wgs-84
     earth_omega_rad_s: 7.2921151467e-5
@@ -132,6 +234,25 @@ vehicles:
     table_bindings:
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
+    aero_convention:
+      force_frame: body_axes_x_forward_y_right_z_down
+      force_channels: cx_cy_cz
+      drag_note: >-
+        cx and cz are body-axis force coefficients, not wind-axis drag/lift
+        coefficients.  Do not label cx or cz as CD; derive wind-axis drag only
+        through the documented body-to-wind transformation.
+      table_semantics: absolute_coefficients
+      control_table_rule: >-
+        Stabilator and rudder decks are absolute control-conditioned source-grid
+        values and include their zero-control baseline; do not add them to the
+        static deck without first forming explicit deltas.
+      source_note: >-
+        X-15 tables are transcodes of the named public-research source grids;
+        provenance is recorded in each table header and source differential
+        tests.
+      problem_comment: >-
+        Aero channels are body-axis cx/cy/cz (not direct CD/CL); X-15 control
+        decks are absolute source-grid values including zero-control baseline.
     source:
       status: public-research-surrogate
       bundle: tests/fixtures/x15_coherent_6dof_public_research_v1

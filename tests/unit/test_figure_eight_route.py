@@ -14,6 +14,7 @@ from taoryx.runtime.lowering import (
     _runtime_coordinated_turn_enabled,
     _runtime_figure_eight_pitch_angle,
     _runtime_figure_eight_waypoint_position,
+    _runtime_point_mass_route_commands,
     _runtime_rectangle_bank_angle,
     _runtime_rectangle_waypoint_position,
     _runtime_route_tracking_geometry,
@@ -218,4 +219,34 @@ def test_racetrack_reference_closes_and_reverses_turn_bank() -> None:
     assert left_bank is not None and right_bank is not None
     assert left_bank > 0.0 and right_bank < 0.0
     assert velocity is not None and all(math.isfinite(value) for value in (velocity.x, velocity.y, velocity.z))
+    ####
+
+
+def test_point_mass_racetrack_commands_share_the_rigid_body_phase_reference() -> None:
+    route = {
+        "mode": "racetrack",
+        "start-latitude-deg": "0.0",
+        "start-longitude-deg": "0.0",
+        "duration-s": "165.9662752399384",
+        "racetrack-length-m": "700.0",
+        "racetrack-turn-radius-m": "250.0",
+        "racetrack-speed-mps": "17.9",
+        "racetrack-low-altitude-m": "178.0",
+        "racetrack-high-altitude-m": "188.0",
+        "racetrack-climb-rate-mps": "0.5",
+        "racetrack-descent-rate-mps": "0.3",
+        "racetrack-altitude-capture-gain-per-s": "0.1",
+        "racetrack-altitude-capture-max-mps": "2.0",
+        "position-capture-gain": "0.01",
+        "position-capture-max-correction-mps": "2.0",
+    }
+    command = _runtime_point_mass_route_commands(
+        route,
+        {},
+        {"lat": 0.0, "long": 0.0, "alt": 178.0 / 0.3048, "vel": 17.9 / 0.3048, "time": 0.0},
+    )
+
+    assert command["_command_vel"] == pytest.approx(17.9 / 0.3048)
+    assert command["_command_psi"] == pytest.approx(90.0)
+    assert command["_command_gamgd"] > 0.0
     ####

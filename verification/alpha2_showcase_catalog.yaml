@@ -1,0 +1,59 @@
+schema_version: 1
+id: taoryx_alpha2_showcase_catalog_v1
+title: Alpha 2 final showcase evidence catalog
+status: honest_nominal_evidence_complete_family_qualification_pending
+claim_boundary: >-
+  The catalog is complete when each requested showcase has a reproducible
+  packet, independent truth evaluation, visible controls/resources/envelope
+  evidence, and explicit claim boundaries. A nominal packet is not promoted to
+  family qualification unless every required objective and terminal contract
+  passes.
+showcases:
+  - id: x8-racetrack-altitude-turns-v1
+    family: skywalker_x8
+    fidelity: rigid_body_6dof
+    realization: bounded_elevon_allocation_bank_pitch_pd
+    packet: artifacts/showcases/alpha2/final-catalog-v1/packs/x8-racetrack-altitude-turns-v1
+    nominal_status: nominal_case_pass_overall_qualification_pending
+    objective_status: pass
+    claim: >-
+      Physical elevon-allocation racetrack nominal case with truth-based climb,
+      level, bilateral-turn, descent, and start/finish objectives.
+    nonclaims: [source-validated controller law, wind robustness, manufacturer fidelity, landing dynamics]
+  - id: b747-transport-evidence-v1
+    family: b747
+    fidelity: rigid_body_6dof_and_point_mass_reductions
+    realization: source_table_elevator_and_declared_route_probes
+    packet: artifacts/showcases/alpha2/final-catalog-v1/packs/b747-evidence
+    supporting_template_packet: artifacts/showcases/alpha2/final-catalog-v1/packs/b747-transport-scaled-racetrack
+    supporting_template_binding: b747-transport-scaled
+    nominal_status: nominal_integration_evidence_family_qualification_pending
+    objective_status: partial
+    claim: >-
+      Source-bounded B747 trim, descent/recovery, approach/go-around,
+      route-controller, point-mass reduction, closure, and source-differential
+      evidence are reproducible in one packet.
+    nonclaims: [complete transport lifecycle, global flight envelope, runway operations, fuel-range qualification]
+  - id: hummingbird-pad-to-pad-altitude-yaw-v2
+    family: hummingbird
+    fidelity: rigid_body_6dof
+    realization: source_wrench_tables_and_static_pad_contact
+    packet: artifacts/showcases/alpha2/final-catalog-v1/packs/hummingbird-pad-to-pad-altitude-yaw-v2
+    nominal_status: nominal_case_pass_overall_qualification_pending
+    objective_status: pass
+    claim: >-
+      The source-bounded Hummingbird surrogate executes altitude-gated
+      perimeter, yaw, touchdown/contact, and post-contact settle objectives
+      under independent truth evaluation.
+    nonclaims: [landing gear, tire dynamics, ground effect, gust recovery, family-wide multirotor qualification]
+  - id: cahi-x8-plus-boosters-v1
+    family: synthetic_x8_plus_boosters
+    fidelity: rigid_body_6dof
+    realization: staged_thrust_aero_tables_and_native_terminal_guidance
+    packet: artifacts/showcases/alpha2/final-catalog-v1/packs/cahi-x8-plus-boosters-v1
+    nominal_status: evidence_only_nominal_endpoint_failure
+    objective_status: fail_terminal_endpoint
+    claim: >-
+      The synthetic CA-HI case executes staged powered flight, coast, glide,
+      terminal guidance activation, mass flow, and equation closure.
+    nonclaims: [successful California-to-Hawaii endpoint, real X8 or booster fidelity, thermal/aeroballistic validation, historical TAOS compatibility]

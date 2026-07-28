@@ -21,6 +21,13 @@
       "navigation": "NED",
       "quaternion_order": "wxyz"
     },
+    "aerodynamic_convention": {
+      "source_force_frame": "wind_axis_with_body_frame_runtime_binding",
+      "force_channels": ["cl", "cd", "cy"],
+      "drag_representation": "direct_wind_axis_cd_source_output",
+      "coefficient_semantics": "total_coefficients_from_angle_of_attack_table",
+      "baseline_rule": "do_not_apply_static_control_subtraction"
+    },
     "model_id": "nasa-nesc-two-stage-rocket-scenario17",
     "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
     "reference_geometry": {

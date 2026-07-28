@@ -19,6 +19,7 @@
   *segment 1 canonical-research-flight
     *integ dtprnt=0.01 dt=0.001
     *prop thrust=(x15-thrust) mdot=(x15-mdot)
+    # Aero channels are body-axis cx/cy/cz (not direct CD/CL); X-15 control decks are absolute source-grid values including zero-control baseline.
     *aero cx=(cx) cy=(cy) cz=(cz) cmx=(cmx) cmy=(cmy) cmz=(cmz)
 
     *file x15.dat time mass

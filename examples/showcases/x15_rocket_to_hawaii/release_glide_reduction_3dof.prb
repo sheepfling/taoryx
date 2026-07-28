@@ -21,6 +21,7 @@
   *segment 1 release-glide
     *integ dtprnt=0.025 dt=0.0125
     *prop thrust=0 mdot=0
+    # Aero channels are body-axis cx/cy/cz (not direct CD/CL); X-15 control decks are absolute source-grid values including zero-control baseline.
     *aero cx=(cx) cy=(cy) cz=(cz) sref=18.580608
     *fly alpha=0.0
 

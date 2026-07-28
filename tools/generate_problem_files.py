@@ -44,6 +44,7 @@ def _values(catalog: dict[str, Any], scenario: dict[str, Any]) -> dict[str, str]
         "vehicle_runtime": vehicle_runtime,
         "control_lines": controls,
         "actuator_runtime": actuator,
+        "aero_comment": "# Aerodynamic channels use the vehicle metadata convention; inspect the bound table headers before interpreting force or drag terms.",
     }
     values.update({key: str(value) for key, value in profile.items() if key != "vehicle"})
     values.update({key: str(value) for key, value in scenario.items() if key not in {"output", "profile"}})
@@ -65,6 +66,10 @@ def _values(catalog: dict[str, Any], scenario: dict[str, Any]) -> dict[str, str]
     if "file_line" not in values:
         values["file_line"] = ""
     values["problem_id"] = str(scenario["id"])
+    convention = vehicle.get("aero_convention", {})
+    problem_comment = str(convention.get("problem_comment", "")).strip()
+    if problem_comment:
+        values["aero_comment"] = "\n".join(f"    # {line}" for line in problem_comment.splitlines())
     return values
 ####
 

@@ -20,6 +20,13 @@
       "navigation": "NED",
       "quaternion_order": "wxyz"
     },
+    "aerodynamic_convention": {
+      "source_force_frame": "body_axes_frd_with_wind_axis_cl_cd_source_outputs",
+      "force_channels": ["cl", "cd", "cy"],
+      "drag_representation": "direct_wind_axis_cd_source_output",
+      "coefficient_semantics": "polynomial_total_buildup_from_source_terms",
+      "baseline_rule": "do_not_apply_static_control_subtraction_to_source_terms"
+    },
     "model_id": "hl20-mod-k-unpowered-6dof",
     "path": "INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/hl20-mod-k/hl20-mod-k-unpowered-v0.10.txair",
     "reference_geometry": {

@@ -44,3 +44,50 @@ them by deterministic source-qualified aliases such as `cx-static`,
 `cx-collective`, and `cx-differential`. This keeps the `.prb` language surface
 ordinary while making table-family provenance visible and preventing silent
 last-table-wins behavior.
+
+## Racetrack control-realization comparison
+
+`SV03_racetrack_altitude_turns_direct_moment_6dof.prb` is the explicit legacy
+baseline:
+
+```text
+racetrack guidance → attitude LQR → direct canonical body moment → plant
+```
+
+It is useful as a trajectory/controller integration witness, but it is not an
+elevon-allocation qualification.
+
+`SV03_racetrack_altitude_turns_6dof.prb` is the physical-realization candidate:
+
+```text
+racetrack guidance → bank/pitch response law → bounded local elevon inversion → aero tables → plant
+```
+
+The candidate uses only the controlled roll/pitch subspace of the collective and
+differential elevon pair, bounded travel, and a bounded deflection offset from
+the source trim. It reports requested versus local-linearized achieved moment,
+actual aero moment, actual allocation residual, and saturation state. The X8
+has no independently declared yaw effector in this case; coupled yaw/sideslip
+response remains in the plant and is an explicit residual rather than a
+direct-moment bypass. The local linearization is allocator evidence, not a
+full manufacturer actuator model.
+
+The direct baseline is plotted with a different signal contract. Its raw
+controller request, limited command, final injected moment, aerodynamic load,
+and total moment are separate telemetry channels. The route bank and pitch
+channels are desired attitude references, not body-moment commands. A
+near-zero total moment in the direct baseline means that the injected
+generalized moment is cancelling the aerodynamic load; it does not mean that
+the elevons achieved that load. The default direct LQR design currently uses
+the rigid-body inertia bridge rather than a source-aerodynamic
+stiffness/damping linearization, so a large bank-reference tracking error can
+be a real plant/controller limitation. The direct case remains an integration
+baseline until that plant-aware design is closed.
+The current nominal packet passes all six independent truth objectives and the
+declared source envelope, including the oriented terminal crossing at 169.58 s.
+This is a fixed-configuration nominal result, not a family, robustness,
+flight-test, or manufacturer-controller qualification. The closed racetrack
+uses the same signed physical turn curvature for both semicircular return
+lobes; an explicit opposite-bank-direction exercise remains separate.
+The tables must not be widened and a direct yaw moment must not be reintroduced
+to make this candidate pass.

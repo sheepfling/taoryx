@@ -7,6 +7,7 @@ import csv
 import hashlib
 import json
 import math
+import re
 import shutil
 import zipfile
 from dataclasses import asdict
@@ -17,12 +18,14 @@ import yaml
 
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.mission_objectives import ControllerTransition, TruthObjectiveSpec, evaluate_truth_objectives
+from taoryx.racetrack_template import load_racetrack_template_catalog
 from taoryx.racetrack_timing import estimate_racetrack_timing
 from taoryx.runtime.runner import run_files
 from taoryx.visualization import render_run_artifact_plots
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "verification/family_qualification_missions.yaml"
+RACETRACK_CONFIG = ROOT / "verification/racetrack_templates.yaml"
 
 
 def _sha256(path: Path) -> str:
@@ -42,15 +45,35 @@ def _local_rows(states: tuple[Any, ...]) -> tuple[dict[str, object], ...]:
 
     if not states:
         return ()
-    first = states[0].named
-    lat0 = float(first.get("latitude_deg", 0.0))
-    lon0 = float(first.get("longitude_deg", 0.0))
+    first = dict(states[0].named)
+    lat0 = float(first.get("latitude_deg", first.get("lat", 0.0)))
+    lon0 = float(first.get("longitude_deg", first.get("long", 0.0)))
     scale_east = 111_320.0 * math.cos(math.radians(lat0))
     rows: list[dict[str, object]] = []
     for state in states:
         named = dict(state.named)
-        latitude = float(named.get("latitude_deg", lat0))
-        longitude = float(named.get("longitude_deg", lon0))
+        latitude = float(named.get("latitude_deg", named.get("lat", lat0)))
+        longitude = float(named.get("longitude_deg", named.get("long", lon0)))
+        # Point-mass historical scalars use feet and feet/second internally;
+        # rigid-body adapters already publish canonical SI channels. Resolve
+        # both at this evidence boundary so one truth evaluator can serve the
+        # same racetrack template at multiple fidelities.
+        altitude_m = named.get("altitude_m")
+        if altitude_m is None and "alt" in named:
+            altitude_m = float(named["alt"]) * 0.3048
+        speed_m_s = named.get("speed_m_s")
+        if speed_m_s is None and "vel" in named:
+            speed_m_s = abs(float(named["vel"])) * 0.3048
+        named.setdefault("latitude_deg", latitude)
+        named.setdefault("longitude_deg", longitude)
+        if altitude_m is not None:
+            named.setdefault("altitude_m", float(altitude_m))
+        if speed_m_s is not None:
+            named.setdefault("speed_m_s", float(speed_m_s))
+        if "flight_path_angle_deg" not in named and "gama" in named:
+            named["flight_path_angle_deg"] = float(named["gama"])
+        if "heading_deg" not in named and "psi" in named:
+            named["heading_deg"] = float(named["psi"])
         row: dict[str, object] = {
             **named,
             "time_s": float(state.time),
@@ -90,9 +113,64 @@ def _write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _resolve_racetrack_objective(
+    item: dict[str, Any],
+    resolved_racetrack: Any | None,
+) -> dict[str, Any]:
+    """Resolve a mission objective's shared racetrack gate reference.
+
+    Mission YAML owns acceptance tolerances and timing windows.  The common
+    template owns the phase-boundary coordinates, altitude targets, speed, and
+    oriented gate normals.  Keeping those concerns separate prevents X8 and
+    B747 realizations from drifting apart while still allowing vehicle-specific
+    tolerances and windows.
+    """
+
+    resolved = dict(item)
+    gate_id = resolved.pop("racetrack_gate_id", None)
+    if gate_id is None:
+        return resolved
+    if resolved_racetrack is None:
+        raise ValueError(f"objective {item.get('id', '<unknown>')!r} references a racetrack gate without a binding")
+    gate = next((candidate for candidate in resolved_racetrack.gates if candidate.id == gate_id), None)
+    if gate is None:
+        raise ValueError(f"unknown racetrack gate {gate_id!r} in objective {item.get('id', '<unknown>')!r}")
+    resolved["target"] = gate.target(resolved_racetrack.speed_m_s)
+    resolved["gate_normal"] = gate.gate_normal()
+    return resolved
+
+
+def _validate_racetrack_problem_binding(problem: Path, resolved_racetrack: Any) -> None:
+    """Reject a problem file whose runtime route differs from its binding."""
+
+    text = problem.read_text(encoding="utf-8")
+    route_lines = tuple(
+        line
+        for line in text.splitlines()
+        if line.lstrip().startswith("*runtime status route ")
+    )
+    if len(route_lines) != 1:
+        raise ValueError(f"{problem} must contain exactly one *runtime status route declaration")
+    route_text = route_lines[0]
+    for key, expected in resolved_racetrack.route_attributes().items():
+        match = re.search(rf"(?:^|\s){re.escape(key)}=([^\s]+)", route_text)
+        if match is None:
+            raise ValueError(f"{problem} is missing racetrack route attribute {key!r}")
+        actual = match.group(1)
+        if key == "mode":
+            if actual != expected:
+                raise ValueError(f"{problem} has {key}={actual!r}; expected {expected!r}")
+        elif not math.isclose(float(actual), float(expected), rel_tol=1.0e-9, abs_tol=1.0e-9):
+            raise ValueError(f"{problem} has {key}={actual}; expected {expected}")
+    ####
+
+
 def _render_mission_sequence(packet: Path, truth_evaluation: dict[str, object], mission: dict[str, Any]) -> None:
     """Render a sequence-diagram page comparing controller and truth timing."""
 
+    import matplotlib
+
+    matplotlib.use("Agg", force=True)
     import matplotlib.pyplot as plt
 
     results = list(truth_evaluation["results"])
@@ -136,8 +214,10 @@ def _render_mission_sequence(packet: Path, truth_evaluation: dict[str, object], 
         if row_index < len(results_by_row) - 1:
             last_center = centers[len(row_results) - 1]
             axis.annotate("next row", xy=(0.5, 0.10), xytext=(last_center, 0.28), ha="center", fontsize=7, color="#64748b", arrowprops={"arrowstyle": "->", "color": "#64748b", "linewidth": 1.0})
+    realization = mission.get("realization", {})
+    realization_label = f"{realization.get('actuator_realization', 'undeclared')} / {realization.get('moment_source', 'undeclared')}"
     figure.suptitle(f"{mission['display_name']} — mission sequence and independent truth adjudication", fontsize=18, fontweight="bold")
-    figure.text(0.01, 0.015, "Controller transitions are diagnostic. Only the truth result determines physical objective completion. Green = pass; red = fail or unsatisfied.", fontsize=9, color="#334155")
+    figure.text(0.01, 0.015, f"Control realization: {realization_label}. Controller transitions are diagnostic. Only the truth result determines physical objective completion. Green = pass; red = fail or unsatisfied.", fontsize=9, color="#334155")
     figure.savefig(packet / "mission_sequence.png", dpi=180, bbox_inches="tight", pad_inches=0.25)
     plt.close(figure)
 
@@ -210,7 +290,13 @@ def _render_board(
 ) -> None:
     """Render a qualification board from the same truth results as the JSON."""
 
+    import matplotlib
+
+    matplotlib.use("Agg", force=True)
     import matplotlib.pyplot as plt
+
+    realization = mission.get("realization", {})
+    realization_label = f"{realization.get('actuator_realization', 'undeclared')} / {realization.get('moment_source', 'undeclared')}"
 
     stride = max(1, len(rows) // 5000)
     plot_rows = rows[::stride]
@@ -285,6 +371,12 @@ def _render_board(
         f"{index} {str(results_by_id.get(str(objective['id']), {}).get('status', 'blocked')).upper()}"
         for index, objective in enumerate(mission.get("objectives", ()), start=1)
     )
+    objective_ids = {str(objective["id"]) for objective in mission.get("objectives", ())}
+    maneuver_description = (
+        "altitude-gated lobe crossings, bilateral bank reversal, and pitch reversal"
+        if any("pitch" in objective_id for objective_id in objective_ids)
+        else "isolated climb/descent gates, bilateral turn-bank reversal, and terminal crossing"
+    )
     axes[0, 0].text(
         0.01,
         0.98,
@@ -299,9 +391,9 @@ def _render_board(
     axes[0, 0].text(
         0.01,
         0.02,
-        "Mission: figure-eight route with altitude-gated lobe crossings, bilateral bank reversal, and pitch reversal\n"
+        f"Mission: {maneuver_description}\n"
         "Purpose: exercise fixed-wing fly-by geometry, altitude/speed management, and response observability\n"
-        "Expected difficulty: MEDIUM | Dashed segments = oriented vertical gate-plane footprints; open circles = truth crossings",
+        "Dashed segments = oriented gate-plane footprints; open circles = truth crossings",
         transform=axes[0, 0].transAxes,
         va="bottom",
         ha="left",
@@ -334,6 +426,8 @@ def _render_board(
             bbox={"facecolor": "#fff7ed", "edgecolor": "#dc2626", "alpha": 0.92, "pad": 3.0},
         )
     axes[0, 1].plot(times, [float(row.get("altitude_m", math.nan)) for row in plot_rows], color="#2563eb", label="altitude truth")
+    speed_axis = axes[0, 1].twinx()
+    speed_axis.plot(times, [float(row.get("speed_m_s", math.nan)) for row in plot_rows], color="#7c3aed", label="speed truth")
     altitude_targets: dict[float, list[str]] = {}
     for objective in mission.get("objectives", ()):
         target_altitude = objective.get("target", {}).get("altitude_m")
@@ -359,48 +453,137 @@ def _render_board(
                 fontsize=6,
                 color=marker_color,
             )
-    axes[0, 1].set_title("Altitude truth and explicit altitude gates")
+    axes[0, 1].set_title("Altitude and speed truth with explicit altitude gates")
     axes[0, 1].set_xlabel("time (s)")
     axes[0, 1].set_ylabel("altitude (m)")
+    speed_axis.set_ylabel("speed (m/s)", color="#7c3aed")
+    speed_axis.tick_params(axis="y", labelcolor="#7c3aed")
     axes[0, 1].grid(True, color="#cbd5e1")
-    axes[0, 1].legend(fontsize="small")
-    axes[1, 0].plot(times, [float(row.get("speed_m_s", math.nan)) for row in plot_rows], color="#7c3aed")
-    axes[1, 0].set_title("Speed truth")
+    altitude_handles, altitude_labels = axes[0, 1].get_legend_handles_labels()
+    speed_handles, speed_labels = speed_axis.get_legend_handles_labels()
+    axes[0, 1].legend(altitude_handles + speed_handles, altitude_labels + speed_labels, fontsize="small", loc="best")
+
+    direct_moment_plotted = any("direct_moment_active" in row and float(row.get("direct_moment_active", 0.0)) > 0.5 for row in plot_rows)
+    if direct_moment_plotted:
+        # A direct-moment realization does not have physical surface
+        # commands.  Plot the actual control seam instead of comparing a
+        # route attitude reference with a body-moment command as if they
+        # were the same quantity.
+        moment_axes = (
+            ("x", "roll", "#2563eb"),
+            ("y", "pitch", "#dc2626"),
+            ("z", "yaw", "#16a34a"),
+        )
+        for axis, label, color in moment_axes:
+            for suffix, linestyle, line_label in (
+                ("controller_request", ":", "controller request"),
+                ("commanded", "-", "limited command"),
+                ("applied", "-.", "applied direct moment"),
+            ):
+                name = f"direct_moment_{suffix}_{axis}_nm"
+                if any(name in row for row in plot_rows):
+                    axes[1, 0].plot(
+                        times,
+                        [float(row.get(name, math.nan)) for row in plot_rows],
+                        color=color,
+                        linestyle=linestyle,
+                        label=f"{label} {line_label}",
+                    )
+        for suffix, linestyle, color, label in (
+            ("aero", "--", "#64748b", "aerodynamic load"),
+            ("total", ":", "#111827", "total moment"),
+        ):
+            for axis, axis_label, _axis_color in moment_axes:
+                name = f"direct_moment_{suffix}_{axis}_nm"
+                if any(name in row for row in plot_rows):
+                    axes[1, 0].plot(
+                        times,
+                        [float(row.get(name, math.nan)) for row in plot_rows],
+                        color=color,
+                        linestyle=linestyle,
+                        alpha=0.55,
+                        label=f"{axis_label} {label}",
+                    )
+        axes[1, 0].set_title("Direct moment realization — request, injection, aero load, total")
+        axes[1, 0].set_ylabel("body moment (N m)")
+        axes[1, 0].text(
+            0.01,
+            0.98,
+            "This is a direct body-moment path; no surface allocation is claimed.",
+            transform=axes[1, 0].transAxes,
+            va="top",
+            fontsize=6,
+            color="#991b1b",
+            bbox={"facecolor": "#fff7ed", "edgecolor": "#fecaca", "alpha": 0.9, "pad": 2.0},
+        )
+        axes[1, 0].legend(fontsize="xx-small", loc="best", ncol=2)
+    else:
+        allocation_pairs = (
+            ("surface_allocation_collective_elevon_commanded_deg", "surface_allocation_collective_elevon_achieved_deg", "collective elevon", "#0891b2"),
+            ("surface_allocation_differential_elevon_commanded_deg", "surface_allocation_differential_elevon_achieved_deg", "differential elevon", "#16a34a"),
+            ("surface_allocation_symmetric_stabilator_commanded_deg", "surface_allocation_symmetric_stabilator_achieved_deg", "symmetric stabilator", "#ea580c"),
+            ("surface_allocation_differential_stabilator_commanded_deg", "surface_allocation_differential_stabilator_achieved_deg", "differential stabilator", "#9333ea"),
+            ("surface_allocation_rudder_commanded_deg", "surface_allocation_rudder_achieved_deg", "rudder", "#dc2626"),
+        )
+        allocation_plotted = False
+        for commanded_name, achieved_name, label, color in allocation_pairs:
+            if any(commanded_name in row or achieved_name in row for row in plot_rows):
+                if any(commanded_name in row for row in plot_rows):
+                    axes[1, 0].plot(times, [float(row.get(commanded_name, math.nan)) for row in plot_rows], color=color, linestyle=":", label=f"{label} commanded")
+                if any(achieved_name in row for row in plot_rows):
+                    axes[1, 0].plot(times, [float(row.get(achieved_name, math.nan)) for row in plot_rows], color=color, linestyle="-", label=f"{label} achieved")
+                allocation_plotted = True
+        residual_names = (
+            ("surface_allocation_actual_residual_nm", "actual aero residual", "-"),
+            ("surface_allocation_residual_nm", "linearized residual", "--"),
+        )
+        residual_axis = None
+        for residual_name, residual_label, linestyle in residual_names:
+            if any(residual_name in row for row in plot_rows):
+                if residual_axis is None:
+                    residual_axis = axes[1, 0].twinx()
+                    residual_axis.set_ylabel("moment residual (N m)", color="#111827")
+                    residual_axis.tick_params(axis="y", labelcolor="#111827")
+                residual_axis.plot(times, [float(row.get(residual_name, math.nan)) for row in plot_rows], color="#111827", linestyle=linestyle, label=residual_label)
+                allocation_plotted = True
+        axes[1, 0].set_title("Physical surface allocation and residual")
+        axes[1, 0].set_ylabel("surface deflection (deg)")
+        if not allocation_plotted:
+            axes[1, 0].text(0.5, 0.5, "not applicable in this run:\ndirect canonical moment realization", ha="center", va="center", transform=axes[1, 0].transAxes, color="#991b1b", fontsize=10, bbox={"facecolor": "#fff7ed", "edgecolor": "#fecaca"})
+        else:
+            axes[1, 0].legend(fontsize="small", loc="best")
     axes[1, 0].set_xlabel("time (s)")
-    axes[1, 0].set_ylabel("speed (m/s)")
     axes[1, 0].grid(True, color="#cbd5e1")
     for name, color in (("local_roll_deg", "#2563eb"), ("local_pitch_deg", "#dc2626"), ("local_heading_deg", "#16a34a")):
         values = [float(row.get(name, math.nan)) for row in plot_rows]
         axes[1, 1].plot(times, values, label=name.removesuffix("_deg"), color=color)
-    axes[1, 1].set_title("Attitude truth — bank and pitch reversal")
+    axes[1, 1].set_title(
+        "Attitude truth — bank and pitch reversal"
+        if any("pitch" in objective_id for objective_id in objective_ids)
+        else "Attitude truth — bank and heading reversal"
+    )
     axes[1, 1].set_xlabel("time (s)")
     axes[1, 1].set_ylabel("deg")
     axes[1, 1].grid(True, color="#cbd5e1")
     axes[1, 1].legend(fontsize="small")
     actuator_channels = (
-        ("route_bank_command_deg", "bank command", "#7c3aed"),
-        ("route_bank_achieved_deg", "bank achieved", "#ea580c"),
-        ("route_pitch_command_deg", "pitch command", "#0891b2"),
-        ("route_pitch_achieved_deg", "pitch achieved", "#0f766e"),
-        ("collective-elevon-deg", "collective elevon", "#0891b2"),
-        ("differential-elevon-deg", "differential elevon", "#16a34a"),
+        ("route_bank_command_deg", "bank command", "#7c3aed", ":"),
+        ("route_bank_achieved_deg", "bank achieved", "#7c3aed", "-"),
+        ("route_pitch_command_deg", "pitch command", "#0891b2", ":"),
+        ("route_pitch_achieved_deg", "pitch achieved", "#0891b2", "-"),
     )
-    plotted = False
-    for name, label, color in actuator_channels:
+    for name, label, color, linestyle in actuator_channels:
         if any(name in row for row in plot_rows):
-            axes[2, 0].plot(times, [float(row.get(name, math.nan)) for row in plot_rows], label=label, color=color)
-            plotted = True
-    if not plotted and any("rotor-speed" in row for row in plot_rows):
-        axes[2, 0].plot(times, [float(row.get("rotor-speed", math.nan)) for row in plot_rows], color="#ea580c", label="rotor speed")
-    axes[2, 0].set_title("Commands and achieved control — response diagnostic")
+            axes[2, 0].plot(times, [float(row.get(name, math.nan)) for row in plot_rows], label=label, color=color, linestyle=linestyle)
+    axes[2, 0].set_title("Guidance commands versus achieved attitude response")
     axes[2, 0].set_xlabel("time (s)")
     axes[2, 0].grid(True, color="#cbd5e1")
     axes[2, 0].legend(fontsize="small")
     axes[2, 0].text(
         0.99,
         0.98,
-        "Achieved bank/pitch = truth attitude; elevons = modeled effectors.\n"
-        "Spikes are retained as diagnostic evidence; physical allocation/control qualification is not claimed.",
+        "Same color = command/achieved pair; dotted = commanded, solid = achieved.\n"
+        "Physical allocation is shown only when the run declares a surface allocator.",
         transform=axes[2, 0].transAxes,
         va="top",
         ha="right",
@@ -408,7 +591,7 @@ def _render_board(
         color="#7f1d1d",
         bbox={"facecolor": "white", "edgecolor": "#fecaca", "alpha": 0.90, "pad": 3.0},
     )
-    for axis in (axes[0, 1], axes[1, 0], axes[1, 1], axes[2, 0]):
+    for axis in (axes[0, 1], speed_axis, axes[1, 0], axes[1, 1], axes[2, 0]):
         for objective_id, event_time in objective_times:
             axis.axvline(event_time, color="#b91c1c", linestyle="--", linewidth=0.7, alpha=0.35)
             if axis is axes[1, 0]:
@@ -444,8 +627,9 @@ def _render_board(
     figure.text(
         0.01,
         0.005,
-        "CLAIM: nominal figure-eight path, oriented altitude-gate crossings, and truth-observable bank/pitch reversals. "
-        "NONCLAIMS: source-validated controller/actuator fidelity, robustness, and terminal closure. "
+        f"CONTROL REALIZATION: {realization_label}. "
+        f"CLAIM: {mission['claim']} "
+        "NONCLAIMS: source-validated controller/actuator fidelity, robustness, and any unsupported terminal behavior. "
         "Truth objective status is independent of controller transitions.",
         fontsize=8,
         color="#334155",
@@ -464,16 +648,32 @@ def build(output: Path, mission_id: str) -> Path:
     inputs.mkdir(parents=True, exist_ok=True)
     problem = ROOT / mission["problem"]
     tables = tuple(ROOT / path for path in mission["tables"])
+    resolved_racetrack = None
+    if "racetrack_binding" in mission:
+        racetrack_catalog = load_racetrack_template_catalog(RACETRACK_CONFIG)
+        resolved_racetrack = racetrack_catalog.get(str(mission["racetrack_binding"]))
+        _validate_racetrack_problem_binding(problem, resolved_racetrack)
     shutil.copy2(problem, inputs / problem.name)
     for table in tables:
         shutil.copy2(table, inputs / table.name)
-    report = run_files(problem, tables, output_dir=run_dir, max_steps=int(mission["max_steps"]), integrator="rk4", profile=GrammarProfile.TAORYX)
+    report = run_files(
+        problem,
+        tables,
+        output_dir=run_dir,
+        max_steps=int(mission["max_steps"]),
+        integrator=str(mission.get("integrator", "rk4")),
+        profile=GrammarProfile.TAORYX,
+    )
     states = tuple(next(iter(report.results[0].states.values()), ())) if report.results else ()
     rows = _local_rows(states)
     _write_csv(packet / "truth_telemetry.csv", rows)
     controller_transitions = _diagnostic_controller_transitions(mission, rows)
-    objective_specs = tuple(TruthObjectiveSpec(**item) for item in mission["objectives"])
+    objective_specs = tuple(
+        TruthObjectiveSpec(**_resolve_racetrack_objective(item, resolved_racetrack))
+        for item in mission["objectives"]
+    )
     terminal = dict(mission["terminal"])
+    terminal = _resolve_racetrack_objective(terminal, resolved_racetrack)
     terminal_objective_type = str(terminal.get("objective_type", "terminal_state_gate"))
     objective_specs += (
         TruthObjectiveSpec(
@@ -505,8 +705,35 @@ def build(output: Path, mission_id: str) -> Path:
     )
     mission_pass = bool(truth_evaluation["mission_pass"])
     timing_estimate = None
-    if "timing_estimate" in mission:
+    if resolved_racetrack is not None:
+        timing_estimate = asdict(resolved_racetrack.timing)
+        _write_json(
+            packet / "resolved_racetrack.json",
+            {
+                "schema_version": 1,
+                "template_id": resolved_racetrack.template_id,
+                "binding_id": resolved_racetrack.binding_id,
+                "vehicle_id": resolved_racetrack.vehicle_id,
+                "fidelity": resolved_racetrack.fidelity,
+                "source_realization": resolved_racetrack.source_realization,
+                "binding_status": resolved_racetrack.status,
+                "route_attributes": resolved_racetrack.route_attributes(),
+                "timing": resolved_racetrack.timing_manifest(),
+                "phase_windows": [asdict(window) for window in resolved_racetrack.phase_windows],
+                "gates": [
+                    {
+                        "id": gate.id,
+                        "phase": gate.phase,
+                        "target": gate.target(resolved_racetrack.speed_m_s),
+                        "gate_normal": gate.gate_normal(),
+                    }
+                    for gate in resolved_racetrack.gates
+                ],
+            },
+        )
+    elif "timing_estimate" in mission:
         timing_estimate = asdict(estimate_racetrack_timing(**mission["timing_estimate"]))
+    if timing_estimate is not None:
         _write_json(packet / "preflight_timing_estimate.json", timing_estimate)
     summary = {
         "schema_version": 1,
@@ -516,13 +743,19 @@ def build(output: Path, mission_id: str) -> Path:
         "claim": mission["claim"],
         "nonclaims": mission["nonclaims"],
         "evidence_level": mission["evidence_level"],
+        "fidelity_tier": None if resolved_racetrack is None else resolved_racetrack.fidelity,
+        "realization": mission.get("realization", {}),
         "status": (
             "nominal_case_pass_overall_qualification_pending"
             if mission_pass
             else (
-                "nominal_objective_pass_terminal_pending"
-                if truth_evaluation["required_passed"]
-                else "integration_pass_qualification_pending"
+                "integration_failure_qualification_blocked"
+                if not numerical_valid
+                else (
+                    "nominal_objective_failure_qualification_pending"
+                    if truth_evaluation["required_passed"] < truth_evaluation["required_objectives"]
+                    else "nominal_objective_pass_terminal_pending"
+                )
             )
         ),
         "mission_pass": mission_pass,
@@ -616,6 +849,8 @@ def build(output: Path, mission_id: str) -> Path:
         "schema_version": 1,
         "claim_boundary": catalog["claim_boundary"],
         "mission_id": mission_id,
+        "fidelity_tier": None if resolved_racetrack is None else resolved_racetrack.fidelity,
+        "realization": mission.get("realization", {}),
         "summary": "summary.json",
         "truth_telemetry": "truth_telemetry.csv",
         "files": {},

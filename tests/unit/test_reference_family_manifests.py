@@ -60,6 +60,23 @@ def test_reference_family_source_locks_match_existing_intake_records() -> None:
     ####
 
 
+def test_daveml_aerodynamic_conventions_are_explicit_per_source_model() -> None:
+    """Prevent body-axis and wind-axis drag conventions from being conflated."""
+
+    expected = {
+        "reference_f16_s119": ("body_axes_frd", "body_axis_cx; no_direct_wind_axis_cd_output"),
+        "reference_hl20_mod_k": ("body_axes_frd", "direct_wind_axis_cd_and_cl_source_outputs"),
+        "reference_nesc_two_stage_rocket": ("wind_axis_with_body_frame_runtime_binding", "direct_wind_axis_cd_source_output"),
+    }
+    for family_id, (frame, drag_representation) in expected.items():
+        payload = yaml.safe_load((ROOT / "families" / family_id / "family.yaml").read_text(encoding="utf-8"))
+        convention = payload["source"]["aerodynamic_convention"]
+        assert convention["source_force_frame"] == frame
+        assert convention["drag_representation"] == drag_representation
+        assert convention["baseline_rule"].startswith("do_not_apply")
+    ####
+
+
 def test_reference_family_plant_metadata_matches_verified_package_manifests() -> None:
     """Geometry, quaternion order, and envelope are part of the library shape."""
 

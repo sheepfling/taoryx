@@ -12,6 +12,11 @@
 
 *runtime status actuator maximum-moment=20 maximum-body-rate-deg-s=360
 *runtime status thermal policy=none
+# X8 control tables contain absolute total coefficients at throttle=0.44;
+# the static table is zero-throttle, so zero-control values differ.
+# Subtract the common static term before adding each control contribution;
+# do not simplify or remove terms.
+# Composition: static + (collective - static) + (differential - static).
 *define x8-cx
   x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
 *define x8-cy
@@ -30,6 +35,7 @@
   *segment 1 canonical-plant-anchor
     *integ dtprnt=0.05 dt=0.005
 
+    # Aero channels are body-axis cx/cy/cz (not direct CD/CL); X8 control decks are absolute total values at throttle=0.44, distinct from the zero-throttle static deck, and are composed by the explicit formula.
     *aero cx=x8-cx cy=x8-cy cz=x8-cz cmx=x8-cmx cmy=x8-cmy cmz=x8-cmz
 
 

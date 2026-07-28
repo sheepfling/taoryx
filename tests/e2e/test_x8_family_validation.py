@@ -20,6 +20,8 @@ SOURCE_TRIM_HOLD = ROOT / "examples/mission_families/slower_x8/SV03_source_trim_
 ROUTE = ROOT / "examples/mission_families/slower_x8/SV03_long_rectangle_route_6dof.prb"
 FIGURE_EIGHT = ROOT / "examples/mission_families/slower_x8/SV03_figure_eight_route_6dof.prb"
 FIGURE_EIGHT_LQR = ROOT / "examples/mission_families/slower_x8/SV03_figure_eight_altitude_reversal_6dof.prb"
+RACETRACK_SURFACES = ROOT / "examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_6dof.prb"
+RACETRACK_DIRECT_MOMENT = ROOT / "examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_direct_moment_6dof.prb"
 WAYPOINT = ROOT / "examples/mission_families/slower_x8/SV03_basic_waypoint_altitude_6dof.prb"
 APPROACH = ROOT / "examples/mission_families/slower_x8/SV03_approach_go_around_6dof.prb"
 TABLE_ROOT = ROOT / "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables"
@@ -325,7 +327,65 @@ def test_x8_surface_authority_fails_closed_at_source_envelope(tmp_path: Path) ->
     messages = tuple(item.message for item in report.diagnostics)
     assert any("outside its declared envelope" in message for message in messages), messages
     assert not any("non-finite" in message.lower() for message in messages), messages
-####
+    ####
+
+
+def test_x8_racetrack_allocates_bank_pitch_through_elevons(tmp_path: Path) -> None:
+    """The reusable racetrack uses aero tables for the controlled axes.
+
+    The X8 has two declared elevon channels, so the test deliberately checks
+    the physical allocation seam rather than expecting an independently
+    achievable three-axis moment.  Any coupled yaw residual must remain in
+    the aerodynamic plant and be visible in the telemetry.
+    """
+
+    report = run_files(
+        RACETRACK_SURFACES,
+        TABLES,
+        output_dir=tmp_path / "racetrack-surfaces",
+        max_steps=2_500,
+        integrator="rk4",
+        profile=GrammarProfile.TAORYX,
+    )
+    assert report.results
+    history = tuple({"time_s": state.time, **dict(state.named)} for state in report.results[0].states["1"])
+    assert history[-1]["time_s"] == pytest.approx(50.0, abs=1.0e-10)
+    assert {int(sample["surface_allocation_active_surface_count"]) for sample in history} == {2}
+    assert max(abs(sample["propulsion_moment_body_z_nm"]) for sample in history) < 1.0e-12
+    assert max(abs(sample["aero_moment_body_z_nm"]) for sample in history) > 1.0e-4
+    assert max(abs(sample["surface_allocation_requested_moment_x_nm"]) for sample in history) > 1.0e-4
+    assert all(math.isfinite(sample["surface_allocation_residual_nm"]) for sample in history)
+    assert max(sample["altitude_m"] for sample in history) < 205.0
+    assert max(abs(sample["aero_sideslip_deg"]) for sample in history) < 5.0
+    ####
+
+
+def test_x8_direct_moment_packet_separates_controller_and_load_channels(tmp_path: Path) -> None:
+    """The direct baseline must expose moments, not masquerade as surfaces."""
+
+    report = run_files(
+        RACETRACK_DIRECT_MOMENT,
+        TABLES,
+        output_dir=tmp_path / "racetrack-direct-moment",
+        max_steps=1_000,
+        integrator="rk4",
+        profile=GrammarProfile.TAORYX,
+    )
+    assert report.results
+    history = tuple({"time_s": state.time, **dict(state.named)} for state in report.results[0].states["1"])
+    assert history[-1]["time_s"] == pytest.approx(20.0, abs=1.0e-10)
+    assert {int(sample["direct_moment_active"]) for sample in history} == {1}
+    assert max(abs(sample["direct_moment_controller_request_x_nm"]) for sample in history) > 1.0e-4
+    assert all(math.isfinite(sample["direct_moment_cancellation_residual_nm"]) for sample in history)
+    assert all(
+        abs(sample["direct_moment_total_x_nm"] - sample["direct_moment_aero_x_nm"] - sample["direct_moment_propulsion_x_nm"]) < 1.0e-10
+        for sample in history
+    )
+    assert all(
+        sample["route_pitch_command_deg"] - sample["route_flight_path_command_deg"] == pytest.approx(7.8095001441, abs=1.0e-8)
+        for sample in history
+    )
+    ####
 
 
 def test_x8_long_rectangle_route_accepts_fixed_crosswind_disturbance(tmp_path: Path) -> None:

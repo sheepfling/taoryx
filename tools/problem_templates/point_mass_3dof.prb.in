@@ -21,6 +21,7 @@
   *segment 1 {{segment_name}}
     *integ dtprnt={{dtprnt}} dt={{dt}}
 {{propulsion_line}}
+{{aero_comment}}
 {{aero_line}}
 {{fly_line}}
 {{file_line}}

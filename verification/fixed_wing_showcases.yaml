@@ -5,6 +5,13 @@ claim_boundary: >-
   convention demonstrations, not flight qualification or global-envelope
   validation.
 showcases:
+  - id: b747-transport-scaled-racetrack
+    family: b747
+    shape: racetrack
+    template: verification/racetrack_templates.yaml#powered_fixed_wing_racetrack_v1
+    binding: b747-transport-scaled
+    problem: examples/mission_families/slower_b747/SV01_racetrack_altitude_turns_3dof.prb
+    evidence: transport-scale route, isolated climb/descent, opposite-curvature turns, and terminal gate in point-mass 3DOF
   - id: b747-square-waypoint
     family: b747
     shape: square

@@ -11,6 +11,15 @@ source:
   package_sha256: eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c
   aerodynamic_source: qualified-models/f16-s119/F16_aero_mod_k_normalized.dml
   aerodynamics_sha256: 272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764
+  aerodynamic_convention:
+    source_force_frame: body_axes_frd
+    force_channels: cx_cy_cz
+    drag_representation: body_axis_cx; no_direct_wind_axis_cd_output
+    coefficient_semantics: total_coefficients_from_source_function_graph
+    baseline_rule: do_not_apply_fixed_wing_static_control_subtraction
+    provenance_note: >-
+      Source DAVE-ML definitions and the pinned F-16 source package are the
+      authority; runtime bindings preserve the source body-axis signs.
   corpus_archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
   corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
   availability: local_corpus_input_verified
