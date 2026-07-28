@@ -29,6 +29,18 @@ tables:
     axes: [alpha, beta, elevator]
     coefficients: [cx, cy, cz, cmx, cmy, cmz]
     envelope: reference-flight-condition-3-only
+  - path: b747_nominal_aileron_6axis.tbl
+    vehicle: b747
+    family: aerodynamic-aileron-six-axis
+    axes: [alpha, beta, aileron]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: reference-flight-condition-3-only
+  - path: b747_nominal_rudder_6axis.tbl
+    vehicle: b747
+    family: aerodynamic-rudder-six-axis
+    axes: [alpha, beta, rudder]
+    coefficients: [cx, cy, cz, cmx, cmy, cmz]
+    envelope: reference-flight-condition-3-only
   - path: b747_jt9d_thrust.tbl
     vehicle: b747
     family: propulsion

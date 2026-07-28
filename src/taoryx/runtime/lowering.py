@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from taoryx.aerodynamics import maximum_lift_to_drag
 from taoryx.attitude import EulerAngles, euler_angles_to_body_basis
 from taoryx.contracts import Angle, Basis3, EarthModel, Frame, FrameVector3, Latitude, Longitude, Quantity, Unit, Vector3
+from taoryx.control_allocation import EffectorEffectiveness, EffectorLimits, allocate_and_advance_wrench
 from taoryx.controller_realization import ClosedLoopPole, ControllerChannel, ControllerImplementation, ControllerRealization, ControllerRole
 from taoryx.coordinates import geocentric_unit_vectors, geodetic_unit_vectors
 from taoryx.dynamics import ConstraintMode, apply_rail_constraint
@@ -1511,11 +1512,25 @@ def _lower_rigid_body_case(
         thrust_vector = Vector3(0.0, 0.0, 0.0)
         mass_rate = 0.0
         current_segment = segments[active_segment["number"]]
+        # A table-backed engine deck may be scheduled by Mach and airspeed in
+        # addition to altitude and throttle.  Build that query from the same
+        # air-data model used by the aerodynamic loads instead of silently
+        # substituting inertial speed or requiring a hand-written constant
+        # thrust.  Retain the sampled result below so propulsion and aero use
+        # one accepted truth-state air-data evaluation for this force commit.
+        aero_sample = (
+            aerodynamic_model.evaluate(state)
+            if aerodynamic_model is not None and any(isinstance(block, AeroBlock) for block in current_segment.blocks)
+            else None
+        )
         propulsion_query = {
             "time": state.time,
             "mass": state.mass,
             "altitude_m": max(state.position.vector.norm() - 6_378_137.0, 0.0),
-            "velocity_m_s": state.velocity.vector.norm(),
+            "velocity_m_s": aero_sample.airspeed_m_s if aero_sample is not None else state.velocity.vector.norm(),
+            "airspeed_m_s": aero_sample.airspeed_m_s if aero_sample is not None else state.velocity.vector.norm(),
+            "mach": aero_sample.mach if aero_sample is not None else 0.0,
+            "speed_of_sound_m_s": aero_sample.speed_of_sound_m_s if aero_sample is not None else 0.0,
             "throttle": control_values.get("throttle", 1.0),
         }
         for block in current_segment.blocks:
@@ -2137,7 +2152,7 @@ def _lower_rigid_body_case(
         )
         if aerodynamic_model is None or not any(isinstance(block, AeroBlock) for block in current_segment.blocks):
             return propulsion
-        aero = aerodynamic_model.evaluate(state)
+        aero = aero_sample if aero_sample is not None else aerodynamic_model.evaluate(state)
         heat_rate_coefficient = max(0.0, float(thermal_attributes.get("heat-rate-coefficient", "0.002")))
         return RigidBodyForceMoment(
             propulsion.force_body + aero.force_body_n,
@@ -2332,23 +2347,44 @@ def _lower_rigid_body_case(
             "surface_allocation_linearized_achieved_moment_x_nm",
             "surface_allocation_linearized_achieved_moment_y_nm",
             "surface_allocation_linearized_achieved_moment_z_nm",
+            "surface_allocation_actual_achieved_moment_x_nm",
+            "surface_allocation_actual_achieved_moment_y_nm",
+            "surface_allocation_actual_achieved_moment_z_nm",
             "surface_allocation_residual_nm",
+            "surface_allocation_controlled_residual_nm",
+            "surface_allocation_actual_residual_nm",
+            "surface_allocation_actual_controlled_residual_nm",
             "surface_allocation_saturated",
             "surface_allocation_rate_limited",
             "surface_allocation_delta_limit_deg",
             "surface_allocation_active_surface_count",
+            "surface_allocation_controlled_axis_count",
+            "surface_allocation_uncontrolled_axis_count",
+            "surface_allocation_effectiveness_rank",
+            "surface_allocation_status_code",
             "surface_allocation_collective_elevon_commanded_deg",
             "surface_allocation_collective_elevon_achieved_deg",
+            "surface_allocation_collective_elevon_rate_deg_s",
             "surface_allocation_differential_elevon_commanded_deg",
             "surface_allocation_differential_elevon_achieved_deg",
+            "surface_allocation_differential_elevon_rate_deg_s",
+            "surface_allocation_elevator_commanded_deg",
+            "surface_allocation_elevator_achieved_deg",
+            "surface_allocation_elevator_rate_deg_s",
+            "surface_allocation_aileron_commanded_deg",
+            "surface_allocation_aileron_achieved_deg",
+            "surface_allocation_aileron_rate_deg_s",
             "fixed_wing_surface_bank_error_deg",
             "fixed_wing_surface_pitch_error_deg",
             "surface_allocation_symmetric_stabilator_commanded_deg",
             "surface_allocation_symmetric_stabilator_achieved_deg",
+            "surface_allocation_symmetric_stabilator_rate_deg_s",
             "surface_allocation_differential_stabilator_commanded_deg",
             "surface_allocation_differential_stabilator_achieved_deg",
+            "surface_allocation_differential_stabilator_rate_deg_s",
             "surface_allocation_rudder_commanded_deg",
             "surface_allocation_rudder_achieved_deg",
+            "surface_allocation_rudder_rate_deg_s",
         ):
             if name in control_values:
                 result[name] = float(control_values[name])
@@ -4042,6 +4078,8 @@ def _rigid_body_aerodynamic_model(
             """Apply a probe or achieved surface command after hold laws."""
 
             for degree_name, radian_name in (
+                ("elevator-deg", "elevator"),
+                ("aileron-deg", "aileron"),
                 ("collective-elevon-deg", "collective_elevon"),
                 ("differential-elevon-deg", "differential_elevon"),
                 ("symmetric-stabilator-deg", "symmetric_stabilator"),
@@ -4072,6 +4110,7 @@ def _rigid_body_aerodynamic_model(
         values.setdefault("symmetric_stabilator", math.radians(values.get("symmetric-stabilator-deg", 0.0)))
         values.setdefault("differential_stabilator", math.radians(values.get("differential-stabilator-deg", 0.0)))
         values.setdefault("elevator", math.radians(values.get("elevator-deg", 0.0)))
+        values.setdefault("aileron", math.radians(values.get("aileron-deg", 0.0)))
         values.setdefault("rudder", math.radians(values.get("rudder-deg", 0.0)))
         values.setdefault("collective_elevon", math.radians(values.get("collective-elevon-deg", 0.0)))
         values.setdefault("differential_elevon", math.radians(values.get("differential-elevon-deg", 0.0)))
@@ -5085,11 +5124,18 @@ def _build_attitude_lqr(
             fallback_controller_id=attributes.get("fallback-controller"),
             scenario_overrides_allowed=attributes.get("allow-scenario-gain-override", "false").casefold() == "true",
             claim_status="design",
+            evidence_tier="T0_structural",
+            # The runtime's default B is an inertia/direct-moment bridge.
+            # A later table allocator may realize its request through surfaces,
+            # but that does not retroactively make this LQR plant-derived.
+            control_realization_path="direct_wrench_screen",
             provenance={
                 "problem": problem.name,
                 "profile": profile_id or "inline",
                 "update": attributes.get("update", "initial"),
                 "controller": controller_name,
+                "screen_only": "true",
+                "b_matrix_source": "declared-table" if b_table_supplied else "inertia-direct-moment-bridge",
             },
         )
         return LqrController(result, lower=limits, upper=uppers, robustness=robustness, realization=realization)
@@ -5279,12 +5325,36 @@ def _runtime_rotor_allocation(vehicle_attributes: Mapping[str, str]) -> QuadRoto
 
     if vehicle_attributes.get("rotor-allocation", "").casefold() not in {"quad-x", "quadrotor-x"}:
         return None
+    force_model = vehicle_attributes.get("rotor-force-model", "common-speed-table").casefold()
+    individual_source = force_model in {"individual-rotor-source", "individual-rotor-source-v1"}
+    if force_model not in {"common-speed-table", "individual-rotor-source", "individual-rotor-source-v1"}:
+        raise ValueError(f"unsupported rotor-force-model {force_model!r}")
+
+    def source_value(name: str) -> float | None:
+        if not individual_source:
+            return None
+        value = vehicle_attributes.get(name)
+        if value is None:
+            raise ValueError(f"individual-rotor source model requires vehicle attribute {name!r}")
+        return float(value)
+
+    frame_drag_x = source_value("rotor-frame-drag-x-coefficient")
+    frame_drag_y = source_value("rotor-frame-drag-y-coefficient")
+    frame_drag_z = source_value("rotor-frame-drag-z-coefficient")
     return QuadRotorAllocation(
         arm_m=float(vehicle_attributes.get("rotor-arm-m", "0.17")),
         thrust_coefficient_n_per_rad_s2=float(vehicle_attributes.get("rotor-thrust-coefficient", "5.57e-6")),
         reaction_torque_coefficient_nm_per_rad_s2=float(vehicle_attributes.get("rotor-reaction-torque-coefficient", "1.36e-7")),
         minimum_speed_rad_s=float(vehicle_attributes.get("rotor-speed-min", "0.0")),
         maximum_speed_rad_s=float(vehicle_attributes.get("rotor-speed-max", "1500.0")),
+        rotor_drag_xy_coefficient_n_s_per_m=source_value("rotor-drag-xy-coefficient"),
+        rotor_drag_z_coefficient_n_s_per_m=source_value("rotor-drag-z-coefficient"),
+        translational_lift_coefficient_n_s2_per_m2=source_value("rotor-translational-lift-coefficient"),
+        frame_drag_coefficients_n_s2_per_m2=(
+            None
+            if frame_drag_x is None or frame_drag_y is None or frame_drag_z is None
+            else Vector3(frame_drag_x, frame_drag_y, frame_drag_z)
+        ),
     )
     ####
 
@@ -7613,38 +7683,6 @@ def _strict_table_evaluators(
     }
 
 
-def _solve_surface_normal_equations(
-    matrix: Sequence[Sequence[float]],
-    vector: Sequence[float],
-) -> tuple[float, ...]:
-    """Solve a small regularized normal system for surface allocation."""
-
-    size = len(matrix)
-    augmented = [
-        [float(value) for value in row] + [float(vector[index])]
-        for index, row in enumerate(matrix)
-    ]
-    for column in range(size):
-        pivot = max(range(column, size), key=lambda index: abs(augmented[index][column]))
-        if abs(augmented[pivot][column]) <= 1.0e-14:
-            return (0.0,) * size
-        augmented[column], augmented[pivot] = augmented[pivot], augmented[column]
-        scale = augmented[column][column]
-        augmented[column] = [value / scale for value in augmented[column]]
-        for row in range(size):
-            if row == column:
-                continue
-            factor = augmented[row][column]
-            augmented[row] = [
-                left - factor * right
-                for left, right in zip(augmented[row], augmented[column], strict=True)
-            ]
-        ####
-    ####
-    return tuple(augmented[index][-1] for index in range(size))
-    ####
-
-
 def _apply_surface_control_inversion(
     aerodynamic_model: TableAerodynamicModel,
     state: RigidBody6DofState,
@@ -7652,18 +7690,18 @@ def _apply_surface_control_inversion(
     target_moment: Vector3,
     guidance_attributes: Mapping[str, str],
 ) -> bool:
-    """Map a bounded moment demand through source aerodynamic derivatives.
+    """Allocate a moment request through bounded physical table coordinates.
 
-    This is a generic local allocator for table-backed fixed-wing surfaces.
-    It uses the vehicle's actual coefficient deck at the current state, so
-    control signs and authority are never duplicated in a vehicle-specific
-    controller. The allocation is deliberately local and bounded; the current
-    maximum-delta setting limits deflection relative to the stored base and is
-    not a time-normalized actuator-rate model. It is not a substitute for a
-    published flight-control law.
+    The controller supplies a generalized moment request.  This function
+    differentiates the active source tables, solves the common constrained
+    allocator, advances declared actuator state, and evaluates the resulting
+    nonlinear aerodynamic moment.  It therefore never appends a direct body
+    moment merely because the requested wrench was infeasible.
     """
 
     candidates = (
+        ("elevator-deg", "elevator", "elevator-min-deg", "elevator-max-deg"),
+        ("aileron-deg", "aileron", "aileron-min-deg", "aileron-max-deg"),
         ("collective-elevon-deg", "collective_elevon", "collective-elevon-min-deg", "collective-elevon-max-deg"),
         ("differential-elevon-deg", "differential_elevon", "differential-elevon-min-deg", "differential-elevon-max-deg"),
         ("symmetric-stabilator-deg", "symmetric_stabilator", "symmetric-stabilator-min-deg", "symmetric-stabilator-max-deg"),
@@ -7711,104 +7749,157 @@ def _apply_surface_control_inversion(
     ####
 
     baseline = aerodynamic_model.evaluate(state).moment_body_nm
-    step_radians = math.radians(abs(float(guidance_attributes.get("surface-inversion-step-deg", "1.0"))))
-    if step_radians <= 0.0:
+    step_degrees = abs(float(guidance_attributes.get("surface-inversion-step-deg", "1.0")))
+    if step_degrees <= 0.0:
         raise ValueError("surface-inversion-step-deg must be positive")
     columns: list[tuple[float, float, float]] = []
     for degree_name, radian_name, _, _ in active:
-        control_values[f"_surface-allocation-override-{degree_name}"] = base_values[degree_name] + math.degrees(step_radians)
+        control_values[f"_surface-allocation-override-{degree_name}"] = base_values[degree_name] + step_degrees
         plus = aerodynamic_model.evaluate(state).moment_body_nm
-        control_values[f"_surface-allocation-override-{degree_name}"] = base_values[degree_name] - math.degrees(step_radians)
+        control_values[f"_surface-allocation-override-{degree_name}"] = base_values[degree_name] - step_degrees
         minus = aerodynamic_model.evaluate(state).moment_body_nm
         control_values[f"_surface-allocation-override-{degree_name}"] = base_values[degree_name]
         columns.append(
             (
-                (plus.x - minus.x) / (2.0 * step_radians),
-                (plus.y - minus.y) / (2.0 * step_radians),
-                (plus.z - minus.z) / (2.0 * step_radians),
+                (plus.x - minus.x) / (2.0 * step_degrees),
+                (plus.y - minus.y) / (2.0 * step_degrees),
+                (plus.z - minus.z) / (2.0 * step_degrees),
             )
         )
     ####
 
-    residual = (
-        target_moment.x - baseline.x,
-        target_moment.y - baseline.y,
-        target_moment.z - baseline.z,
-    )
     axis_weights = (
         max(0.0, float(guidance_attributes.get("surface-inversion-axis-weight-x", "1.0"))),
         max(0.0, float(guidance_attributes.get("surface-inversion-axis-weight-y", "1.0"))),
         max(0.0, float(guidance_attributes.get("surface-inversion-axis-weight-z", "1.0"))),
     )
-    regularization = max(0.0, float(guidance_attributes.get("surface-inversion-regularization", "0.01")))
-    normal = [
-        [
-            sum(
-                axis_weights[component] ** 2
-                * columns[row][component]
-                * columns[other][component]
-                for component in range(3)
-            )
-            for other in range(len(columns))
-        ]
-        for row in range(len(columns))
-    ]
-    rhs = [
-        sum(
-            axis_weights[component] ** 2
-            * columns[index][component]
-            * residual[component]
-            for component in range(3)
-        )
-        for index in range(len(columns))
-    ]
-    for index in range(len(columns)):
-        normal[index][index] += regularization
-    delta = _solve_surface_normal_equations(normal, rhs)
     maximum_delta = abs(float(guidance_attributes.get("surface-inversion-max-delta-deg", "5.0")))
     rate_limit_text = guidance_attributes.get("surface-inversion-rate-deg-s")
-    rate_limited = False
-    if rate_limit_text is not None and elapsed_since_update is not None:
-        rate_limit = max(0.0, float(rate_limit_text))
-        rate_delta = rate_limit * elapsed_since_update
-        rate_limited = rate_delta < maximum_delta
-        maximum_delta = min(maximum_delta, rate_delta)
-    saturated = False
-    applied_deltas: list[float] = []
-    for index, (degree_name, radian_name, minimum_name, maximum_name) in enumerate(active):
-        raw_requested = base_values[degree_name] + math.degrees(delta[index])
-        requested = max(base_values[degree_name] - maximum_delta, min(base_values[degree_name] + maximum_delta, raw_requested))
-        saturated = saturated or not math.isclose(requested, raw_requested, rel_tol=0.0, abs_tol=1.0e-12)
-        lower = float(guidance_attributes.get(minimum_name, "-20.0"))
-        upper = float(guidance_attributes.get(maximum_name, "20.0"))
-        bounded = min(upper, max(lower, requested))
-        saturated = saturated or not math.isclose(bounded, requested, rel_tol=0.0, abs_tol=1.0e-12)
+    rate_limit = None if rate_limit_text is None else max(0.0, float(rate_limit_text))
+    response_time = max(0.0, float(guidance_attributes.get("surface-inversion-time-constant-s", "0.0")))
+    effectors: dict[str, EffectorLimits] = {}
+    previous_effectors: dict[str, float] = {}
+    for degree_name, _, minimum_name, maximum_name in active:
+        lower = max(float(guidance_attributes.get(minimum_name, "-20.0")), base_values[degree_name] - maximum_delta)
+        upper = min(float(guidance_attributes.get(maximum_name, "20.0")), base_values[degree_name] + maximum_delta)
+        if lower > upper:
+            raise ValueError(f"surface allocation has empty bounds for {degree_name!r}")
+        # A zero configured rate is a declared frozen actuator, not an
+        # implicit unlimited actuator.  Positive rates are enforced between
+        # committed controller updates; absent data remains an explicit ideal
+        # response assumption.
+        available = rate_limit is None or rate_limit > 0.0
+        effectors[degree_name] = EffectorLimits(
+            degree_name,
+            lower,
+            upper,
+            "deg",
+            rate_limit_per_s=rate_limit if available else None,
+            time_constant_s=response_time,
+            available=available,
+        )
+        surface_name = degree_name.removesuffix("-deg").replace("-", "_")
+        previous_effectors[degree_name] = float(
+            control_values.get(
+                f"surface_allocation_{surface_name}_achieved_deg",
+                base_values[degree_name],
+            )
+        )
+    effectiveness = EffectorEffectiveness(
+        wrench_names=("moment_x_nm", "moment_y_nm", "moment_z_nm"),
+        effector_names=tuple(effectors),
+        matrix=tuple(tuple(column[axis] for column in columns) for axis in range(3)),
+        reference_wrench={
+            "moment_x_nm": baseline.x,
+            "moment_y_nm": baseline.y,
+            "moment_z_nm": baseline.z,
+        },
+        reference_effectors=base_values,
+        source="centered-table-aerodynamic-difference",
+    )
+    allocation = allocate_and_advance_wrench(
+        effectiveness,
+        effectors,
+        {
+            "moment_x_nm": target_moment.x,
+            "moment_y_nm": target_moment.y,
+            "moment_z_nm": target_moment.z,
+        },
+        previous_effectors,
+        0.0 if elapsed_since_update is None else elapsed_since_update,
+        preferred_effectors=base_values,
+        wrench_weights={
+            "moment_x_nm": axis_weights[0],
+            "moment_y_nm": axis_weights[1],
+            "moment_z_nm": axis_weights[2],
+        },
+        # The legacy regularizer was expressed against a radian-coordinate
+        # Jacobian.  Convert it to the degree-coordinate matrix passed to the
+        # common allocator so existing scenario values retain their meaning.
+        regularization=max(0.0, float(guidance_attributes.get("surface-inversion-regularization", "0.01")))
+        * math.radians(1.0) ** 2,
+        feasibility_tolerance=max(
+            1.0e-12,
+            float(guidance_attributes.get("surface-inversion-feasibility-tolerance-nm", "1.0e-6")),
+        ),
+    )
+    for degree_name, radian_name, _, _ in active:
+        actual = allocation.actuator.actual_positions[degree_name]
         control_values[degree_name] = raw_values[degree_name]
         control_values[radian_name] = math.radians(raw_values[degree_name])
-        control_values[f"_surface-allocation-override-{degree_name}"] = bounded
+        control_values[f"_surface-allocation-override-{degree_name}"] = actual
         surface_name = degree_name.removesuffix("-deg").replace("-", "_")
-        control_values[f"surface_allocation_{surface_name}_commanded_deg"] = raw_requested
-        control_values[f"surface_allocation_{surface_name}_achieved_deg"] = bounded
-        applied_deltas.append(math.radians(bounded - base_values[degree_name]))
-    linearized_achieved = tuple(
-        baseline_component
-        + sum(columns[index][component] * applied_deltas[index] for index in range(len(active)))
-        for component, baseline_component in enumerate((baseline.x, baseline.y, baseline.z))
-    )
+        control_values[f"surface_allocation_{surface_name}_commanded_deg"] = allocation.actuator.commanded_positions[degree_name]
+        control_values[f"surface_allocation_{surface_name}_achieved_deg"] = actual
+        control_values[f"surface_allocation_{surface_name}_rate_deg_s"] = allocation.actuator.rates_per_s[degree_name]
+    actual_moment = aerodynamic_model.evaluate(state).moment_body_nm
+    linearized_achieved = allocation.allocation.predicted_wrench
+    actual_residual = {
+        "moment_x_nm": target_moment.x - actual_moment.x,
+        "moment_y_nm": target_moment.y - actual_moment.y,
+        "moment_z_nm": target_moment.z - actual_moment.z,
+    }
     control_values["surface_allocation_requested_moment_x_nm"] = target_moment.x
     control_values["surface_allocation_requested_moment_y_nm"] = target_moment.y
     control_values["surface_allocation_requested_moment_z_nm"] = target_moment.z
-    control_values["surface_allocation_linearized_achieved_moment_x_nm"] = linearized_achieved[0]
-    control_values["surface_allocation_linearized_achieved_moment_y_nm"] = linearized_achieved[1]
-    control_values["surface_allocation_linearized_achieved_moment_z_nm"] = linearized_achieved[2]
-    requested_components = (target_moment.x, target_moment.y, target_moment.z)
-    control_values["surface_allocation_residual_nm"] = math.sqrt(
-        sum((target - achieved) ** 2 for target, achieved in zip(requested_components, linearized_achieved, strict=True))
+    control_values["surface_allocation_linearized_achieved_moment_x_nm"] = linearized_achieved["moment_x_nm"]
+    control_values["surface_allocation_linearized_achieved_moment_y_nm"] = linearized_achieved["moment_y_nm"]
+    control_values["surface_allocation_linearized_achieved_moment_z_nm"] = linearized_achieved["moment_z_nm"]
+    control_values["surface_allocation_actual_achieved_moment_x_nm"] = actual_moment.x
+    control_values["surface_allocation_actual_achieved_moment_y_nm"] = actual_moment.y
+    control_values["surface_allocation_actual_achieved_moment_z_nm"] = actual_moment.z
+    control_values["surface_allocation_residual_nm"] = allocation.allocation.residual_norm
+    control_values["surface_allocation_controlled_residual_nm"] = allocation.allocation.controlled_residual_norm
+    control_values["surface_allocation_actual_residual_nm"] = math.sqrt(sum(value * value for value in actual_residual.values()))
+    control_values["surface_allocation_actual_controlled_residual_nm"] = math.sqrt(
+        sum(actual_residual[name] * actual_residual[name] for name in allocation.allocation.controlled_wrench_axes)
+    )
+    status_codes = {
+        "feasible": 0.0,
+        "feasible_near_limit": 1.0,
+        "partially_achievable": 2.0,
+        "infeasible": 3.0,
+        "numerically_singular": 4.0,
+        "solver_failure": 5.0,
+    }
+    saturated = (
+        allocation.allocation.status != "feasible"
+        or bool(allocation.allocation.position_saturated)
+        or bool(allocation.allocation.rate_limited)
+        or bool(allocation.actuator.position_saturated)
+        or bool(allocation.actuator.rate_limited)
+        or bool(allocation.actuator.unavailable_effectors)
     )
     control_values["surface_allocation_saturated"] = 1.0 if saturated else 0.0
-    control_values["surface_allocation_rate_limited"] = 1.0 if rate_limited else 0.0
+    control_values["surface_allocation_rate_limited"] = 1.0 if (
+        allocation.allocation.rate_limited or allocation.actuator.rate_limited
+    ) else 0.0
     control_values["surface_allocation_delta_limit_deg"] = maximum_delta
     control_values["surface_allocation_active_surface_count"] = float(len(active))
+    control_values["surface_allocation_controlled_axis_count"] = float(len(allocation.allocation.controlled_wrench_axes))
+    control_values["surface_allocation_uncontrolled_axis_count"] = float(len(allocation.allocation.uncontrolled_wrench_axes))
+    control_values["surface_allocation_effectiveness_rank"] = float(allocation.allocation.effectiveness_rank)
+    control_values["surface_allocation_status_code"] = status_codes[allocation.allocation.status]
     return saturated
     ####
 
@@ -8962,6 +9053,7 @@ def _segment_guidance_interval(segment: Segment | None, parameters: Mapping[str,
 
 def _write_outputs(index: int, result: ExecutionResult, document: LoweredDocument, destination: Path, problem_index: int = 0) -> None:
     root = Path(destination)
+    root.mkdir(parents=True, exist_ok=True)
     trajectory_output_files = tuple(item for item in document.output_files if item[2] is not None and item[3] == problem_index)
     problem_output_files = tuple(item for item in document.output_files if item[2] is None and item[3] == problem_index)
     if document.print_scopes:

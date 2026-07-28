@@ -31,6 +31,9 @@ def test_slower_bundle_source_validation_and_catalog_are_present() -> None:
 def test_slower_bundle_source_row_counts_are_stable() -> None:
     expected = {
         "jet_b747/aero/static_six_axis_grid.csv": 650,
+        "jet_b747/aero/aileron_grid.csv": 3250,
+        "jet_b747/aero/elevator_grid.csv": 3250,
+        "jet_b747/aero/rudder_grid.csv": 3250,
         "jet_b747/propulsion/jt9d_installed_thrust_map.csv": 150,
         "cruise_class_uav_skywalker_x8/aero/static_airframe_grid.csv": 840,
         "cruise_class_uav_skywalker_x8/aero/rate_effects_grid.csv": 360,
@@ -86,7 +89,7 @@ def test_slower_generated_tables_render_catalog_plots(artifact_dir: Path) -> Non
             generated.append(plot_path)
         ####
     ####
-    assert len(generated) == 60
+    assert len(generated) == 79
     assert all(path.stat().st_size > 1000 for path in generated)
     (output / "manifest.txt").write_text("\n".join(path.name for path in generated), encoding="utf-8")
     ####

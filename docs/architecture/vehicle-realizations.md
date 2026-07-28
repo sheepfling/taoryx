@@ -166,10 +166,10 @@ This is the current implementation truth, not a target architecture.
 
 | Family / vehicle | 3DOF realization | Pseudo-6DOF status | Current rigid-body realization | Propulsion and resources | Honest control claim |
 | --- | --- | --- | --- | --- | --- |
-| B747 research surrogate | Body-axis coefficient tables plus prescribed thrust; fixed mass in the common short cases | Current transport-scale racetrack bridge | Nominal transport-scale racetrack direct-wrench witness passes the four truth gates and declared nominal envelope; physical surface allocation remains unavailable | Table/prescribed thrust; showcase uses `mdot=0` and fixed mass | Source-table loads plus direct total-wrench bank/pitch PD and explicit beta force hold; do not claim actuator-dynamics, surface allocation, source-envelope, or fuel-burn qualification |
-| Skywalker X8 | Body-axis coefficient tables plus thrust proxy; fixed mass and `mdot=0` | Current racetrack bridge | Current racetrack has both a direct-wrench diagnostic and a bounded local surface-inversion candidate using collective/differential elevon tables | Thrust table/proxy; fixed 3.364 kg mass and no fuel depletion in current racetrack | The surface tier can claim only bounded local elevon-table allocation; it is not a fully identified flight-control system |
-| Hummingbird | Reduced thrust-vector/force route model; no attitude/effectors claim | Planned named response-law reduction | Dimensional source-wrench tables in `source-z-up`, plus quad-X rotor mixing, rotor thrust limits, reaction torque, and bounded attitude/collective/yaw control | Rotor thrust model; current examples use fixed 0.5 kg and `propellant_mass=0`; no battery ledger | Direct source-wrench plant with physical quad-X command allocation; not blade-, inflow-, or drivetrain-resolved |
-| X-15 research surrogate | Coefficient-table aero plus XLR99 thrust and mass-flow expression in the staged 3DOF mission | Planned / reduction work | Source aerodynamic/control tables; surface-authority examples use stabilator/rudder table controls | `x15-thrust` and `x15-mdot` are coupled in the rocket mission; mass/propellant depletion is represented there | Source-table control realization in declared cases; do not generalize one mission to full actuator or landing fidelity |
+| B747 research surrogate | Body-axis coefficient tables plus installed JT9D thrust table; fixed mass in the local proof and common short cases | Current transport-scale racetrack bridge | Two separate paths: a T0 direct-wrench racetrack screen, and a T5 NASA CR-2144 condition-3 local source-table proof using elevator, aileron, rudder, and throttle trim plus bounded aerodynamic-surface allocation | Installed thrust map receives truth-state Mach/altitude/throttle; `mdot=0`, fixed mass, no fuel-flow or spool model | Only the condition-3 local artifact may claim source-table surface allocation and nonlinear recovery. Source deflection bounds are active, but servo response is explicitly ideal-declared because no source rate/lag deck is present. Do not claim scheduling, takeoff/landing, high-lift, engine-out, or transport-envelope qualification. |
+| Skywalker X8 | Body-axis coefficient tables plus thrust proxy; fixed mass and `mdot=0` | Current racetrack bridge | Current racetrack has both a direct-wrench diagnostic and a bounded source-table-coordinate allocation candidate using collective/differential elevon tables; its scenario explicitly declares ideal actuator response | Thrust table/proxy; fixed 3.364 kg mass and no fuel depletion in current racetrack | The racetrack can claim only ideal-response table-coordinate allocation. A separate local evidence artifact activates the source rate/lag contract. Neither result is a hardware-ready left/right-elevon or fully identified flight-control claim because the public differential sign mapping remains unresolved. |
+| Hummingbird | Reduced thrust-vector/force route model; no attitude/effectors claim | Planned named response-law reduction | Two declared paths: legacy common-speed direct-wrench table plus quad-X differential mixer, and a local source-individual-rotor hover path with all four motor speeds, thrust, rotor/frame drag, force arms, reaction torque, and 5 ms motor lag | Rotor thrust model; current examples use fixed 0.5 kg and `propellant_mass=0`; no battery ledger | The individual-rotor local hover artifact is T5 for attitude/rate recovery only. The mission/waypoint screen remains lower evidence until that motor path is used end-to-end; neither path is blade-, inflow-, drivetrain-, or battery-resolved. |
+| X-15 research surrogate | Coefficient-table aero plus XLR99 thrust and mass-flow expression in the staged 3DOF mission | Planned / reduction work | Source aerodynamic/control-coordinate tables exist for symmetric/differential stabilator and rudder, but current physical-LQR promotion is blocked before T1 trim | `x15-thrust` and `x15-mdot` are coupled in the rocket mission as a time-indexed full-thrust history; it is not a throttle map | The direct-wrench screen is T0 only. Both source-bounded release-glide and frozen full-thrust trim attempts fail; no actual-effector LQR, RCS blend, left/right stabilator allocation, throttle allocation, or actuator-rate/phase-margin claim is permitted. |
 | F-16 S-119 reference | Family reduction exists in the catalog, but the current audited source family is rigid-body oriented | Planned | Source DAVE-ML force/moment graph with direct controls; fixed mass and steady propulsion in current contract | Steady propulsion; fuel evolution and actuator dynamics are omitted from the current family contract | Source-direct control response; not actuator/SAS/fuel-transient qualification |
 | UH-1H / UH-60A scheduled rotorcraft baseline | Scheduled translational/heading model | Scheduled pseudo-6DOF derivative deck | Published local derivative matrices and trim interpolation; no blade-resolved rotor/inflow/drivetrain states in the current runnable baseline | Estimated power curves; no authoritative fuel-flow deck | Scheduled derivative response near documented operating points; not full nonlinear rotorcraft fidelity |
 | R44 / XV-15 / V-22-class planning families | Planned | Planned | Planning backlog; not yet audited in the common runtime inventory | Family-specific resource/transition contracts still to be implemented | Do not use as current qualification evidence |
@@ -194,25 +194,43 @@ route-heading-bank-max-deg=1.0
 ```
 
 At the current state, the runtime evaluates the source aero model at a small
-positive and negative perturbation for each declared active surface. This
-forms a local moment Jacobian:
+positive and negative perturbation for each declared active table coordinate.
+This forms a local moment Jacobian:
 
 \[
 G_{:,j}\nobreak\approx
 \frac{M_{aero}(\delta_j+h)-M_{aero}(\delta_j-h)}{2h}.
 \]
 
-The bounded local solve is:
+The shared bounded local solve is:
 
 \[
-\Delta\delta^* =
-  (G^T G + \lambda I)^{-1}G^T(M_{cmd}-M_0),
+u^* = \arg\min_u
+\left\|W_w\left(G(u-u_0) - (M_{cmd}-M_0)\right)\right\|_2^2
++ \lambda\left\|W_u(u-u_{pref})\right\|_2^2,
 \]
 
-followed by a bounded deflection offset from the stored base and absolute travel limits. The X8
-candidate has two active controls: collective elevon and differential elevon.
-The actual table queries, not a hidden direct moment, determine the resulting
-aerodynamic moment in the plant.
+subject to absolute travel limits and the reachable interval implied by
+declared rate limits and the committed sample interval. Actuator states then
+advance through an explicitly declared first-order response. The X8 candidate
+has two active **source table coordinates**, collective elevon and differential
+elevon. The actual table queries, not a hidden direct moment, determine the
+resulting aerodynamic moment in the plant.
+
+The current public bundle provides a 120 deg/s limit and a 0.05 s
+implementation response constant for both table coordinates. It also says
+that the physical left/right differential sign mapping must be reconciled
+before a hardware connection. Therefore the runtime may report
+`table-coordinate allocation` but must not label those outputs as resolved
+left/right elevon commands.
+
+The reusable racetrack deliberately declares
+`surface-control-response=ideal-declared`: it exercises the bounded
+table-coordinate allocation and actual aerodynamic table evaluation, but it
+does **not** claim the source rate/lag behavior. The separate local
+`validate_x8_physical_lqr.py` evidence case activates the 120 deg/s and
+0.05 s values. Keeping those two cases distinct prevents a route-integration
+result from inheriting actuator-dynamics evidence it did not exercise.
 
 The active racetrack uses a named `bank_pitch_pd` surface law. It forms a
 virtual roll/pitch demand from the scheduled bank and fixed-wing alpha/flight-
@@ -226,22 +244,45 @@ The runtime records:
 ```text
 surface_allocation_requested_moment_*_nm
 surface_allocation_linearized_achieved_moment_*_nm
+surface_allocation_actual_achieved_moment_*_nm
 surface_allocation_residual_nm
+surface_allocation_controlled_residual_nm
+surface_allocation_actual_residual_nm
+surface_allocation_actual_controlled_residual_nm
 surface_allocation_saturated
 surface_allocation_active_surface_count
 surface_allocation_rate_limited
 surface_allocation_delta_limit_deg
+surface_allocation_effectiveness_rank
+surface_allocation_status_code
+surface_allocation_*_commanded_deg
+surface_allocation_*_achieved_deg
+surface_allocation_*_rate_deg_s
 fixed_wing_surface_bank_error_deg
 fixed_wing_surface_pitch_error_deg
 ```
 
-The achieved moment here is explicitly a local linearized prediction used for
-allocator diagnostics. The actual aerodynamic moment remains the independent
-plant output and must be compared against it in the qualification artifact.
-When `surface-inversion-rate-deg-s` is declared, the maximum deflection change
-is also limited by elapsed time since the previous allocation update. This is
-an actuator-rate contract, not a claim that the underlying source deck
-contains identified actuator dynamics.
+`surface_allocation_linearized_achieved_moment_*_nm` is a local Jacobian
+prediction used for allocator diagnostics. The `actual_achieved` and
+`actual_residual` channels are a second nonlinear table evaluation after the
+declared actuator update—ideal in the racetrack, rate/lag limited in the
+separate local evidence case. The raw residual includes the intentionally
+uncontrolled yaw axis; the controlled residual contains only axes whose
+positive allocation weight was declared. This prevents a two-elevon flying
+wing from silently passing an impossible independent-yaw command.
+
+The focused local evidence tool is:
+
+```bash
+PYTHONPATH=src python3 tools/validate_x8_physical_lqr.py
+```
+
+It records source-table-coordinate trim, two-step derivative provenance, the
+roll/pitch wrench projection, LQR poles, requested-versus-achieved moments,
+actuator position/rate/lag, and nonlinear recovery. Its promotion is held at
+the linear-controller tier until the physical left/right sign mapping is
+source-resolved; the nonlinear table-coordinate result is retained as explicit
+evidence rather than discarded or mislabeled.
 
 The direct comparison case is
 `SV03_racetrack_altitude_turns_direct_moment_6dof.prb`. It is retained so
@@ -249,7 +290,7 @@ plots can distinguish:
 
 ```text
 direct baseline: attitude LQR → canonical body moment → rigid-body EOM
-surface candidate: bank/pitch response law → local elevon solve → aero tables → EOM
+table-coordinate candidate: bank/pitch response law → bounded local source-coordinate solve → aero tables → EOM
 ```
 
 The direct baseline's command channels are separate from the high-level route
@@ -274,7 +315,7 @@ also expected in the old hold-style case: the injected generalized moment is
 deliberately cancelling the aerodynamic moment. That is cancellation evidence,
 not proof that the vehicle's surfaces produced the response.
 
-For the surface candidate, the finite-difference allocator reports both the
+For the table-coordinate candidate, the finite-difference allocator reports both the
 local prediction and the result after the actual aero-table query:
 
 ```text
@@ -331,9 +372,15 @@ qualification only when the packet contains all of the following:
 - timestep, batch/step, and negative-control tests;
 - an exact nonclaim for missing dynamics.
 
-The X8 surface candidate is now at the allocator-wiring stage. Hummingbird is
-at the quad-X command-allocation stage. Neither should be described as having
-more actuator fidelity than these contracts support.
+The X8 source-table-coordinate candidate is now T3 because the public
+left/right physical elevon sign mapping is unresolved. Hummingbird has a T5
+individual-rotor hover attitude/rate artifact, but its mission and landing
+screens remain lower evidence until the same motor state and allocation
+telemetry are wired into those end-to-end scenarios. X-15 presently remains
+at T0 structural evidence: its source-control tables are useful data, but are
+not a substitute for an actual-effectors trim, a throttle map, or a thin-air
+RCS allocator. None should be described as having more actuator fidelity than
+these contracts support.
 
 ## 8. Required manifest fields
 

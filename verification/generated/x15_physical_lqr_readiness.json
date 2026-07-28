@@ -1,0 +1,248 @@
+{
+  "claim": {
+    "constrained_allocator_attempted": false,
+    "direct_body_moment_injection": false,
+    "earned_controller_evidence_tier": "T0_structural",
+    "nonclaims": [
+      "No actual-effector X-15 LQR, allocator, or nonlinear physical-controller recovery result is claimed.",
+      "No direct body force or moment is injected by either trim probe or this readiness evaluation.",
+      "The XLR99 history is not treated as a throttle command, engine map, or reusable powered trim model.",
+      "No low-dynamic-pressure RCS blend is represented because the source package lacks RCS geometry and impulse data.",
+      "Source stabilator coordinates are not claimed as reconciled left/right mechanical surface commands."
+    ],
+    "nonlinear_controller_validation_attempted": false,
+    "physical_lqr_synthesis_attempted": false,
+    "proves": "The source X-15 aerodynamic control-coordinate tables, declared travel bounds, and actuator-model gaps have been inventoried; independent unpowered-release and frozen full-thrust trim attempts are retained as prerequisite evidence rather than being replaced by a direct-wrench controller."
+  },
+  "evidence_tiers": {
+    "T0_structural": "passed",
+    "T1_trimmed": "blocked",
+    "T2_linearized": "not_attempted_until_T1",
+    "T3_linearly_controlled": "not_attempted_until_T2",
+    "T4_physically_allocated": "not_attempted_until_T3",
+    "T5_nonlinearly_validated": "not_attempted_until_T4",
+    "T6_envelope_validated": "not_attempted_until_T5"
+  },
+  "promotion_gate": {
+    "blockers": [
+      "no_source_bounded_x15_trim_operating_point",
+      "xlr99_deck_is_time_indexed_full_thrust_not_a_throttle_map",
+      "stabilator_coordinate_to_left_right_gearing_unresolved",
+      "rcs_geometry_and_impulse_unavailable",
+      "hard_rate_limits_missing_for_differential_stabilator_and_rudder"
+    ],
+    "frozen_full_thrust_trim_passed": false,
+    "passed": false,
+    "release_glide_trim_passed": false,
+    "required_for_T1": "At least one actual-effectors source-bounded trim must satisfy its declared residual contract."
+  },
+  "provenance": {
+    "generated_trim_reports": {
+      "artifacts/golden_plants/x15_powered_full_thrust_trim_report.json": "234cf66b2816127129853b23f35a455734fb2a9ac1e393af35acac14f62f8dda",
+      "artifacts/golden_plants/x15_release_glide_trim_report.json": "f7319f86bf14f7dff527ead660abe9fb190f70ec03de8f1ec2090acf622d7d66"
+    },
+    "source_assets": {
+      "tests/fixtures/x15_coherent_6dof_public_research_v1/controls/actuator_limits.csv": "956d2d83d6c94fb9917f2f85a3620e6e3a7ab1474d69d2e21fa3074785767036",
+      "tests/fixtures/x15_coherent_6dof_public_research_v1/controls/control_coordinate_mapping.csv": "8081ff1218182bef3f5b39fdb56bf903ea2894772c549832c21dfc1d053c16d2",
+      "tests/fixtures/x15_coherent_6dof_public_research_v1/controls/unavailable_items.csv": "99a99ef81368c87ab2082e1098d649f725eabca003a2789bccdd4cce7efb998e",
+      "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl": "65149b98a81e11743ced5b2d48421ed7d83a7f8ab0cf83b720261cd7cdacd13a"
+    }
+  },
+  "reproduction": "PYTHONPATH=src python3 tools/validate_x15_physical_lqr.py",
+  "required_before_physical_lqr": [
+    "A source-bounded or explicitly labelled engineering-specified trim/reference operating point that passes T1.",
+    "A propulsion command contract if powered trim or throttle allocation is to be claimed.",
+    "Resolved physical left/right stabilator sign and gearing if hardware-surface allocation is to be claimed.",
+    "RCS locations, thrust/impulse, tank/resource, and allocator data before low-authority blending is claimed.",
+    "Hard actuator rate and delay assumptions for differential stabilator and rudder before phase-margin claims.",
+    "A scheduled set of validated operating points before any boost-to-glide or authority-transition claim."
+  ],
+  "schema": "taoryx.x15-physical-lqr-readiness/v1alpha1",
+  "source_control_contract": {
+    "actuator_limits": [
+      {
+        "C1_per_s": "600.0",
+        "control": "symmetric_stabilator",
+        "derived_time_constant_s": "0.0016666667",
+        "dynamic_model": "first_order_lag_C1_over_s_plus_C1",
+        "fidelity": "DIRECT_TRANSCRIPTION_PLUS_FILTER_DEFINITION",
+        "hard_rate_limit_deg_s": "",
+        "maximum_deg": "34.9504255",
+        "maximum_rad": "0.61",
+        "minimum_deg": "-14.89690267",
+        "minimum_rad": "-0.26",
+        "pure_delay_s": "",
+        "source_id": "JSBSIM_X15_XML_AND_FGFILTER",
+        "source_property": "fcs/elevator-pos-rad"
+      },
+      {
+        "C1_per_s": "",
+        "control": "differential_stabilator",
+        "derived_time_constant_s": "",
+        "dynamic_model": "algebraic_clip_in_source_model",
+        "fidelity": "DIRECT_TRANSCRIPTION",
+        "hard_rate_limit_deg_s": "",
+        "maximum_deg": "20.05352283",
+        "maximum_rad": "0.35",
+        "minimum_deg": "-20.05352283",
+        "minimum_rad": "-0.35",
+        "pure_delay_s": "",
+        "source_id": "JSBSIM_X15_XML",
+        "source_property": "fcs/left-aileron-pos-rad"
+      },
+      {
+        "C1_per_s": "",
+        "control": "rudder",
+        "derived_time_constant_s": "",
+        "dynamic_model": "algebraic_clip_in_source_model",
+        "fidelity": "DIRECT_TRANSCRIPTION",
+        "hard_rate_limit_deg_s": "",
+        "maximum_deg": "29.79380535",
+        "maximum_rad": "0.52",
+        "minimum_deg": "-29.79380535",
+        "minimum_rad": "-0.52",
+        "pure_delay_s": "",
+        "source_id": "JSBSIM_X15_XML",
+        "source_property": "fcs/rudder-pos-rad"
+      }
+    ],
+    "control_coordinate_mapping": [
+      {
+        "left_right_mapping": "left=de+da; right=de-da",
+        "mapping_status": "DERIVED_COORDINATE_MAPPING_VERIFY_PHYSICAL_SIGN_AND_GEARING",
+        "package_coordinate": "symmetric_stabilator_deg",
+        "primary_effect": "pitch and lift",
+        "source_property": "fcs/elevator-pos-rad"
+      },
+      {
+        "left_right_mapping": "left=de+da; right=de-da",
+        "mapping_status": "DERIVED_COORDINATE_MAPPING_VERIFY_PHYSICAL_SIGN_AND_GEARING",
+        "package_coordinate": "differential_stabilator_deg",
+        "primary_effect": "roll with side-force and yaw cross-coupling",
+        "source_property": "fcs/left-aileron-pos-rad"
+      },
+      {
+        "left_right_mapping": "single source coordinate",
+        "mapping_status": "SOURCE_NATIVE_COORDINATE",
+        "package_coordinate": "rudder_deg",
+        "primary_effect": "yaw with side-force and roll cross-coupling",
+        "source_property": "fcs/rudder-pos-rad"
+      }
+    ],
+    "propulsion": {
+      "classification": "time_indexed_full_thrust_and_mass_flow_history",
+      "not_a_throttle_map": true,
+      "source_asset": "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl"
+    },
+    "unavailable_items": [
+      {
+        "effect": "must be supplied before actuator-authority claims",
+        "item": "hard_actuator_rate_limits",
+        "status": "not supplied by source model"
+      },
+      {
+        "effect": "must be supplied before phase-margin claims",
+        "item": "pure_transport_delays",
+        "status": "not supplied by source model"
+      },
+      {
+        "effect": "no delta-dot aerodynamic increments",
+        "item": "control_rate_aerodynamic_derivatives",
+        "status": "not supplied"
+      },
+      {
+        "effect": "do not map Shuttle/HGV body-flap coefficients into this deck",
+        "item": "body_flap",
+        "status": "not present on baseline X-15 aerodynamic model"
+      },
+      {
+        "effect": "thin-air attitude control is not represented",
+        "item": "reaction_control_thruster geometry and impulse",
+        "status": "RCS tank exists but thruster model is absent"
+      }
+    ]
+  },
+  "status": "blocked_before_T1_trim",
+  "trim_attempts": {
+    "frozen_full_thrust_t0": {
+      "controls": {
+        "differential_stabilator_deg": -2.0349215357872503,
+        "rudder_deg": 2.6753335427362575,
+        "symmetric_stabilator_deg": 11.409329660885232
+      },
+      "provenance": {
+        "source_problem": "examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb",
+        "source_problem_sha256": "5b8491c5611cd29bf30bce30d645e56228a02f7236c36598216b07556de1d3f7",
+        "tables": {
+          "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl": "81fcdeceed3a43cfa05005bf9bca9e1366adfaae720fd0ed8f58b35a16cf3fdf",
+          "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl": "cbf76d217b106c3ff3caf80d194e8716c45b57b824882f99eeee4f4cfab802e8",
+          "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl": "7bdaaacd68659a1c4c0a7344942c53877388f56e235e640718a81d961b551003",
+          "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl": "7fa8ad9617e05e2281e96021ecfebab4a062003a540d06f5fee6f3e8c6ee1a74",
+          "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl": "65149b98a81e11743ced5b2d48421ed7d83a7f8ab0cf83b720261cd7cdacd13a"
+        }
+      },
+      "residual_norm_l2": 151681.81115603802,
+      "residual_normalized": {
+        "body_x_force_n": 105469.65616217977,
+        "body_y_force_n": 7129.689575716038,
+        "body_z_force_n": -41535.62500288899,
+        "pitch_moment_nm": 99170.3810904755,
+        "roll_moment_nm": -4688.352701051047,
+        "yaw_moment_nm": 15834.699558288783
+      },
+      "solver": {
+        "evaluation_path": "loaded-program-in-memory",
+        "message": "`ftol` termination condition is satisfied.",
+        "nfev": 27,
+        "status": 2,
+        "success": false,
+        "tables_rebound_per_evaluation": false
+      },
+      "state": {
+        "pitch_offset_deg": -2.9999999999999996,
+        "speed_scale": 1.0999999999999999,
+        "yaw_offset_deg": -4.3195800768839
+      },
+      "status": "blocked"
+    },
+    "unpowered_release_glide": {
+      "controls": {
+        "differential_stabilator_deg": -1.186114484017279,
+        "rudder_deg": 4.025844745519139,
+        "symmetric_stabilator_deg": 9.031846066688447
+      },
+      "provenance": {
+        "problem": "examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb",
+        "problem_sha256": "5b8491c5611cd29bf30bce30d645e56228a02f7236c36598216b07556de1d3f7",
+        "runtime_tables": {
+          "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_differential_stabilator_6axis.tbl": "81fcdeceed3a43cfa05005bf9bca9e1366adfaae720fd0ed8f58b35a16cf3fdf",
+          "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_rudder_6axis.tbl": "cbf76d217b106c3ff3caf80d194e8716c45b57b824882f99eeee4f4cfab802e8",
+          "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl": "7bdaaacd68659a1c4c0a7344942c53877388f56e235e640718a81d961b551003",
+          "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl": "7fa8ad9617e05e2281e96021ecfebab4a062003a540d06f5fee6f3e8c6ee1a74"
+        }
+      },
+      "residual_norm_l2": 0.41795601117032044,
+      "residual_normalized": {
+        "force_velocity_cross_y": -0.3263225211978086,
+        "force_velocity_cross_z": -0.0008370065220446193,
+        "pitch_moment": 0.2611430019070365,
+        "roll_moment": -0.00060018515015222,
+        "yaw_moment": 0.0020276058196592845
+      },
+      "solver": {
+        "evaluation_path": "loaded-program-in-memory",
+        "message": "`ftol` termination condition is satisfied.",
+        "nfev": 10,
+        "status": 2,
+        "success": false,
+        "tables_rebound_per_evaluation": false
+      },
+      "state": {
+        "pitch_offset_deg": -2.9999999999999996,
+        "yaw_offset_deg": -4.38286717358886
+      },
+      "status": "blocked"
+    }
+  },
+  "vehicle": "x15"
+}

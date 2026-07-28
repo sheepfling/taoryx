@@ -32,9 +32,28 @@ entries:
     active_runtime: false
     legacy_baseline: false
     scenario_gain_overrides: false
-    qualification_eligible: true
+    qualification_eligible: false
     gain_owner: controller_design_catalog
-    notes: Candidate source-anchor local design; requires plant authority and schedule qualification.
+    notes: Direct-wrench screen only; physical B747 surface authority is separately recorded below.
+  - id: b747-condition3-physical-surface-lqr
+    family: b747
+    vehicle_id: b747
+    classification: primary_regulator
+    implementation: physical_wrench_lqr
+    source: verification/generated/b747_condition3_physical_surface_lqr.json
+    path: [trim, nonlinear_linearization, generic_profile_tuning, constrained_surface_allocator, ideal_declared_actuator, source_table_plant]
+    design_id: b747-condition3-surface-wrench-lqr
+    active_runtime: false
+    legacy_baseline: false
+    scenario_gain_overrides: false
+    qualification_eligible: true
+    gain_owner: generated-local-evidence-artifact
+    declared_gains: [b747-condition3-profile-sweep-q-v1, b747-condition3-profile-sweep-r-v1]
+    notes: >-
+      T5 local condition-3 surface validation through actual source-table
+      elevator, aileron, rudder, and throttle controls. It remains inactive
+      in mission runtime and does not claim source servo dynamics, scheduling,
+      low-speed/high-lift configuration, fuel-flow, or engine-out behavior.
 
   - id: skywalker-x8-route-guidance-baseline
     family: skywalker_x8
@@ -64,6 +83,25 @@ entries:
     qualification_eligible: true
     gain_owner: controller_design_catalog
     notes: Must resolve bank/pitch sign and frame conventions before route migration.
+  - id: skywalker-x8-source-table-coordinate-physical-lqr
+    family: skywalker_x8
+    vehicle_id: skywalker_x8
+    classification: primary_regulator
+    implementation: lqr
+    source: verification/controller_designs.yaml:x8-source-table-coordinate-wrench-lqr
+    path: [trim, nonlinear_linearization, lqr, bounded_table_coordinate_allocation, actuator, nonlinear_plant]
+    design_id: x8-source-table-coordinate-wrench-lqr
+    active_runtime: false
+    legacy_baseline: false
+    scenario_gain_overrides: false
+    qualification_eligible: false
+    gain_owner: controller_design_catalog
+    notes: >-
+      Local source-trim table-coordinate recovery proof with bounded
+      collective/differential actuators, source rate/lag limits, and
+      requested-versus-achieved wrench telemetry. It remains ineligible for
+      physical-elevon qualification until the public left/right differential
+      sign mapping is reconciled.
   - id: skywalker-x8-figure-eight-attitude-lqr-witness
     family: skywalker_x8
     vehicle_id: skywalker_x8
@@ -118,9 +156,32 @@ entries:
     active_runtime: true
     legacy_baseline: false
     scenario_gain_overrides: false
-    qualification_eligible: true
+    qualification_eligible: false
     gain_owner: controller_design_catalog
-    notes: First vertical-lift migration witness at examples/mission_families/slower_hummingbird/SV05_rate_lqr_hover_6dof.prb; motor-speed allocation remains subordinate to the rate loop.
+    notes: >-
+      Direct-wrench rate-loop screen at examples/mission_families/slower_hummingbird/SV05_rate_lqr_hover_6dof.prb.
+      The legacy runtime bridge does not advance the documented motor lag or
+      record requested-versus-achieved nonlinear wrench evidence, so it is not
+      independently eligible for physical-controller qualification.
+  - id: hummingbird-individual-rotor-hover-physical-lqr
+    family: hummingbird
+    vehicle_id: hummingbird
+    classification: primary_regulator
+    implementation: physical_wrench_lqr
+    source: verification/generated/hummingbird_individual_rotor_physical_lqr.json
+    path: [trim, nonlinear_linearization, lqr, constrained_allocator, motor_lag, individual_rotor_source_plant]
+    design_id: hummingbird-individual-rotor-hover-wrench-lqr
+    active_runtime: false
+    legacy_baseline: false
+    scenario_gain_overrides: false
+    qualification_eligible: true
+    gain_owner: generated-local-evidence-artifact
+    declared_gains: [hummingbird-source-hover-attitude-rate-q-v1, hummingbird-source-hover-attitude-rate-r-v1]
+    notes: >-
+      T5 local hover validation through four physical motor-speed commands.
+      It is deliberately inactive in the mission runtime until the same
+      actuator state and evidence stream are wired into a full waypoint and
+      landing controller.
 
   - id: x15-phase-guidance-baseline
     family: x15
@@ -147,6 +208,26 @@ entries:
     active_runtime: false
     legacy_baseline: false
     scenario_gain_overrides: false
-    qualification_eligible: true
+    qualification_eligible: false
     gain_owner: controller_design_catalog
-    notes: Local release/glide design; regime scheduling and stage lineage remain separate gates.
+    notes: >-
+      Direct-wrench screen only. Physical promotion is blocked before T1 trim:
+      both source-bounded release-glide and frozen full-thrust trim attempts
+      fail, the XLR99 deck is not a throttle map, and source RCS geometry/
+      impulse and stabilator left/right gearing are unavailable.
+  - id: x15-physical-lqr-readiness
+    family: x15
+    vehicle_id: x15
+    classification: primary_regulator
+    implementation: physical_lqr_readiness_gate
+    source: verification/generated/x15_physical_lqr_readiness.json
+    path: [source_control_contract, trim_gate, linearization_gate, allocation_gate, nonlinear_validation_gate]
+    active_runtime: false
+    legacy_baseline: false
+    scenario_gain_overrides: false
+    qualification_eligible: false
+    gain_owner: generated-readiness-artifact
+    notes: >-
+      Explicit blocked-before-T1 record. It intentionally has no LQR gain,
+      allocator solution, or direct-wrench fallback; it prevents source
+      control coordinates from being presented as physical-controller proof.

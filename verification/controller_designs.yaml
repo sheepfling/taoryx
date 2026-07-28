@@ -24,7 +24,42 @@ designs:
     state_scale_id: b747-standard-state-scales-v1
     control_scale_id: b747-standard-control-scales-v1
     scenario_overrides_allowed: false
-    notes: Local source-anchor design; no global B747 envelope claim.
+    evidence_tier: T0_structural
+    control_realization_path: direct_wrench_screen
+    screen_only: true
+    notes: >-
+      Direct-wrench stabilizability screen; no physical B747 surface
+      allocation or nonlinear aircraft-controller qualification is claimed.
+  - id: b747-condition3-surface-wrench-lqr
+    method: lqr
+    trim: b747-condition3-source-table-surface-trim-v1
+    allocator: b747-condition3-bounded-surface-allocation
+    states: [roll_error_rad, pitch_error_rad, yaw_error_rad, u_m_s, v_m_s, w_m_s, p_rad_s, q_rad_s, r_rad_s]
+    controls: [moment_x_nm, moment_y_nm, moment_z_nm]
+    role: local_regulator
+    implementation_version: physical-wrench-lqr-v1
+    fidelity: rigid_body_6dof
+    state_units: [rad, rad, rad, m/s, m/s, m/s, rad/s, rad/s, rad/s]
+    state_frames: [source-local-body, source-local-body, source-local-body, body, body, body, body, body, body]
+    control_units: [N*m, N*m, N*m]
+    control_frames: [body, body, body]
+    plant_source: b747-condition3-source-table-runtime-plant
+    linearization_source: verification/generated/b747_condition3_physical_surface_lqr.json
+    q_id: b747-condition3-profile-sweep-q-v1
+    r_id: b747-condition3-profile-sweep-r-v1
+    state_scale_id: b747-condition3-local-state-scales-v1
+    control_scale_id: b747-condition3-surface-authority-wrench-scales-v1
+    scenario_overrides_allowed: false
+    evidence_tier: T5_nonlinearly_validated
+    control_realization_path: nonlinear_effector_validation
+    screen_only: false
+    notes: >-
+      One NASA CR-2144 condition-3 source-table operating point. The local
+      nonlinear path trims through elevator, aileron, rudder, and installed
+      JT9D throttle; it allocates requested body moments through the three
+      bounded aerodynamic surface coordinates. Surface rate/lag behavior is
+      explicitly ideal-declared because the source package supplies no servo
+      deck. This is not gain-scheduled or mission-envelope evidence.
   - id: x8-local-lqr
     method: lqr
     trim: x8-powered-trim-v1
@@ -45,7 +80,41 @@ designs:
     state_scale_id: x8-standard-state-scales-v1
     control_scale_id: x8-standard-control-scales-v1
     scenario_overrides_allowed: false
-    notes: Local flight-identified design; retain source envelope limits.
+    evidence_tier: T0_structural
+    control_realization_path: direct_wrench_screen
+    screen_only: true
+    notes: >-
+      Direct-wrench stabilizability screen. The X8 elevon table candidate is
+      a separate physical-allocation workstream and is not implied here.
+  - id: x8-source-table-coordinate-wrench-lqr
+    method: lqr
+    trim: x8-source-table-coordinate-trim-v1
+    allocator: x8-source-table-coordinate-bounded-allocation
+    states: [roll_error_rad, pitch_error_rad, p_rad_s, q_rad_s]
+    controls: [moment_x_nm, moment_y_nm]
+    role: local_regulator
+    implementation_version: physical-wrench-lqr-v1
+    fidelity: rigid_body_6dof
+    state_units: [rad, rad, rad/s, rad/s]
+    state_frames: [source-local-body, source-local-body, body, body]
+    control_units: [N*m, N*m]
+    control_frames: [body, body]
+    plant_source: skywalker-x8-table-coordinate-runtime-plant
+    linearization_source: verification/generated/x8_table_coordinate_physical_lqr.json
+    q_id: x8-source-table-coordinate-roll-pitch-q-v1
+    r_id: x8-source-table-coordinate-roll-pitch-r-v1
+    state_scale_id: x8-source-table-coordinate-state-scales-v1
+    control_scale_id: x8-source-table-coordinate-wrench-scales-v1
+    scenario_overrides_allowed: false
+    evidence_tier: T3_linearly_controlled
+    control_realization_path: constrained_effector_allocation
+    screen_only: false
+    notes: >-
+      One source-trim local controller derived from the table-backed nonlinear
+      plant and realized by bounded collective/differential source-table
+      coordinates. The public source leaves the physical left/right elevon
+      differential sign mapping unresolved, so the controller remains T3 even
+      though its nonlinear table-coordinate recovery artifact is retained.
   - id: hummingbird-rate-lqr
     method: lqr
     trim: hummingbird-hover-v1
@@ -66,7 +135,42 @@ designs:
     state_scale_id: hummingbird-standard-state-scales-v1
     control_scale_id: hummingbird-standard-control-scales-v1
     scenario_overrides_allowed: false
-    notes: Rate-loop design around equal-rotor hover; position control is separate.
+    evidence_tier: T0_structural
+    control_realization_path: unconstrained_effector_allocation
+    screen_only: true
+    notes: >-
+      Hover rotor-rate bridge screen; it does not yet include validated motor
+      dynamics, requested-versus-achieved wrench evidence, or full nonlinear
+      position-control qualification.
+  - id: hummingbird-individual-rotor-hover-wrench-lqr
+    method: lqr
+    trim: hummingbird-individual-rotor-hover-trim-v1
+    allocator: hummingbird-individual-rotor-bounded-allocation
+    states: [roll_error_rad, pitch_error_rad, yaw_error_rad, p_rad_s, q_rad_s, r_rad_s]
+    controls: [moment_x_nm, moment_y_nm, moment_z_nm]
+    role: local_regulator
+    implementation_version: physical-wrench-lqr-v1
+    fidelity: rigid_body_6dof
+    state_units: [rad, rad, rad, rad/s, rad/s, rad/s]
+    state_frames: [source-local-body, source-local-body, source-local-body, body, body, body]
+    control_units: [N*m, N*m, N*m]
+    control_frames: [body, body, body]
+    plant_source: hummingbird-individual-rotor-source-runtime-plant
+    linearization_source: verification/generated/hummingbird_individual_rotor_physical_lqr.json
+    q_id: hummingbird-source-hover-attitude-rate-q-v1
+    r_id: hummingbird-source-hover-attitude-rate-r-v1
+    state_scale_id: hummingbird-source-hover-state-scales-v1
+    control_scale_id: hummingbird-source-hover-wrench-scales-v1
+    scenario_overrides_allowed: false
+    evidence_tier: T5_nonlinearly_validated
+    control_realization_path: nonlinear_effector_validation
+    screen_only: false
+    notes: >-
+      One source-derived hover operating point. The local nonlinear path uses
+      four documented RotorPy motor-speed controls, individual rotor thrust,
+      drag, force arms, reaction torque, and a 0.005 s motor lag. It does not
+      claim position/waypoint control, landing contact, battery behavior, or
+      envelope scheduling.
   - id: x15-bank-lqr
     method: lqr
     trim: x15-release-glide-v1
@@ -87,4 +191,12 @@ designs:
     state_scale_id: x15-standard-state-scales-v1
     control_scale_id: x15-standard-control-scales-v1
     scenario_overrides_allowed: false
-    notes: Local unpowered-glide design; not a terminal-guidance claim.
+    evidence_tier: T0_structural
+    control_realization_path: direct_wrench_screen
+    screen_only: true
+    notes: >-
+      Direct-wrench stabilizability screen; no source-scheduled X-15 effector
+      realization, authority-transition, or terminal-guidance claim. The
+      source-bounded release-glide and frozen full-thrust trim attempts both
+      fail, so a physical LQR is explicitly blocked before T1 trim; do not
+      use this screen as a fallback allocation or moment-injection bridge.

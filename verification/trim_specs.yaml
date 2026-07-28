@@ -60,12 +60,20 @@ entries:
     operating_point: {altitude_m: 21000.0, true_airspeed_m_s: 1300.0, powered: false, condition: release-glide}
     provenance: {source: x15-coherent-6dof-public-research-v1, geometry: verification/vehicle_models.yaml}
     solver: {multi_start: 3, seed: 1515, perturbation_fraction: 0.05, max_nfev: 500, residual_tolerance: 1.0e-9}
-    state_names: [alpha_deg]
+    state_names: [pitch_offset_deg, yaw_offset_deg]
     control_names: [symmetric_stabilator_deg, differential_stabilator_deg, rudder_deg]
     residual_names: [force_velocity_cross_y, force_velocity_cross_z, roll_moment, pitch_moment, yaw_moment]
-    state_initial: {alpha_deg: 0.0}
-    state_lower: {alpha_deg: -5.0}
-    state_upper: {alpha_deg: 25.0}
+    state_initial: {pitch_offset_deg: 0.0, yaw_offset_deg: 0.0}
+    # Keep finite-difference/solver probes inside the source alpha/beta grid;
+    # broader movement belongs to an explicit envelope/trajectory study.
+    state_lower: {pitch_offset_deg: -3.0, yaw_offset_deg: -5.0}
+    state_upper: {pitch_offset_deg: 5.0, yaw_offset_deg: 5.0}
     control_initial: {symmetric_stabilator_deg: 0.0, differential_stabilator_deg: 0.0, rudder_deg: 2.0}
     residual_scales: {force_velocity_cross_y: 1.0, force_velocity_cross_z: 1.0, roll_moment: 1.0, pitch_moment: 1.0, yaw_moment: 1.0}
-    notes: Source-backed unpowered-glide trim; force is required to align with the body velocity vector while body moments vanish. Axial drag/gravity force is intentionally permitted.
+    notes: >-
+      Source-backed unpowered-glide directional-trim attempt. The solver varies
+      body-local pitch/yaw attitude offsets plus source table controls; force
+      is required to align with the body velocity vector while body moments
+      vanish. Axial drag/gravity force is intentionally permitted. This is not
+      a static force equilibrium and must remain blocked if the source deck
+      cannot satisfy all five residuals within its declared domain.

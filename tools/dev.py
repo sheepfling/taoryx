@@ -162,6 +162,7 @@ def test_views() -> None:
     print("  check-vehicles verify vehicle-family contracts and table bindings")
     print("  onboard-vehicles diagnose the complete new-vehicle metadata path")
     print("  fidelity-readiness check declared data for all four fidelity tiers")
+    print("  reference-tuning verify the four-family generic controller-design report")
     print("  compile-segments compile external segment catalogs into native .prb products")
     print("  audit-vehicles verify scoped problem files match registry provenance")
     print("  vehicles   run the complete vehicle registry, generation, and provenance check")
@@ -414,6 +415,12 @@ def fidelity_readiness() -> None:
 def check_fidelity_parity_contracts() -> None:
     """Verify shared four-family reduction-parity metadata and hashes."""
     run([project_python(), str(TOOLS / "generate_fidelity_parity_contracts.py"), "--check"])
+    ####
+
+
+def check_reference_tuning() -> None:
+    """Verify the four-family generic tuning report is reproducible."""
+    run([project_python(), str(TOOLS / "tune_reference_aircraft.py"), "--check"])
     ####
 
 
@@ -777,6 +784,7 @@ def check() -> None:
     check_vehicle_models()
     onboard_vehicles()
     check_fidelity_parity_contracts()
+    check_reference_tuning()
     compile_segments()
     audit_vehicle_provenance()
     check_problem_files()
@@ -842,6 +850,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "check-vehicles": check_vehicle_models,
     "onboard-vehicles": onboard_vehicles,
     "fidelity-readiness": fidelity_readiness,
+    "reference-tuning": check_reference_tuning,
     "check-parity": check_fidelity_parity_contracts,
     "run-parity": run_fidelity_parity,
     "compile-segments": compile_segments,

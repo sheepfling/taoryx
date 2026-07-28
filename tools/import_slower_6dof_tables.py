@@ -49,6 +49,8 @@ def _write_grid(
     filters: tuple[Callable[[dict[str, str]], bool], ...] = (),
     value_columns: tuple[tuple[str, str], ...] = tuple((name, name.upper()) for name in COEFFICIENTS),
     comment: str,
+    extra_comments: tuple[str, ...] = (),
+    trailing_blank_line: bool = True,
 ) -> None:
     rows = [row for row in _read(source) if all(predicate(row) for predicate in filters)]
     if not rows:
@@ -66,6 +68,7 @@ def _write_grid(
         raise ValueError(f"{source}: filtered rows do not form a complete regular grid")
     axis_names = tuple(name for name, _ in axes)
     text = f"# Derived from {source.relative_to(FIXTURE)}; {comment}\n"
+    text += "".join(f"# {line}\n" for line in extra_comments)
     for table_name, column in value_columns:
         values = [float(indexed[point][column]) for point in points]
         text += f"({table_name})\ntable {table_name}({','.join(axis_names)}) no-extrap\n"
@@ -73,7 +76,8 @@ def _write_grid(
             text += f"{name}={','.join(_number(value) for value in values_for_axis)}\n"
         text += f"{table_name}={','.join(_number(value) for value in values)}\n\n"
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(text, encoding="utf-8")
+    terminator = "\n\n" if trailing_blank_line else "\n"
+    destination.write_text(text.rstrip("\n") + terminator, encoding="utf-8")
     ####
 
 
@@ -109,6 +113,10 @@ def main() -> None:
             lambda row: row["mach"] == "0.45",
         ),
         comment="nominal configuration at reference flight condition 3; alpha is offset from trim and angular axes are radians",
+        extra_comments=(
+            "Convention: cx/cy/cz are absolute body-axis force coefficients (x-forward, y-right, z-down); cx/cz are not wind-axis CD/CL.",
+        ),
+        trailing_blank_line=False,
     )
     _write_grid(
         b747 / "propulsion/jt9d_installed_thrust_map.csv",
@@ -131,18 +139,48 @@ def main() -> None:
             lambda row: row["mach"] == "0.45",
         ),
         comment="nominal condition-3 elevator control derivative deck; alpha is offset from trim and angular axes are radians",
+        extra_comments=(
+            "Convention: values are absolute control-conditioned coefficients, including the zero-elevator baseline; use directly or form (elevator - static) deltas, never add both absolute decks.",
+        ),
+        trailing_blank_line=False,
     )
+    for control_name in ("aileron", "rudder"):
+        _write_grid(
+            b747 / "aero" / f"{control_name}_grid.csv",
+            TABLES / f"b747_nominal_{control_name}_6axis.tbl",
+            axes=(
+                ("alpha", "alpha_offset_from_reference_deg"),
+                ("beta", "beta_deg"),
+                (control_name, f"{control_name}_deg"),
+            ),
+            filters=(
+                lambda row: row["configuration"] == "nominal",
+                lambda row: row["reference_fc_id"] == "3",
+                lambda row: row["mach"] == "0.45",
+            ),
+            comment=f"nominal condition-3 {control_name} control derivative deck; alpha is offset from trim and angular axes are radians",
+            trailing_blank_line=False,
+        )
     _write_grid(
         x8 / "aero/static_airframe_grid.csv",
         TABLES / "skywalker_x8_static_6axis.tbl",
         axes=(("velocity_m_s", "velocity_m_s"), ("altitude_m", "altitude_m"), ("alpha", "alpha_deg"), ("beta", "beta_deg")),
         value_columns=tuple((name, name.upper()) for name in COEFFICIENTS),
         comment="zero-control, zero-throttle flight-test identified grid; angular axes are radians",
+        extra_comments=(
+            "Composition contract: this is the zero-throttle baseline. X8 control decks are absolute total coefficients at their separate throttle=0.44 reference condition, so their zero-control values are not expected to equal this table.",
+        ),
+        trailing_blank_line=False,
     )
     for control_name, source_name, axis_name, axis_column in (
         ("collective_elevon", "collective_elevon_grid.csv", "collective_elevon", "collective_elevon_deg"),
         ("differential_elevon", "differential_elevon_grid.csv", "differential_elevon", "differential_elevon_deg"),
     ):
+        composition_axis_name = "collective" if control_name == "collective_elevon" else "differential"
+        composition_comment = (
+            "Composition contract: values are absolute total coefficients at the control-grid throttle=0.44 reference condition, "
+            f"not deltas; runtime uses ({composition_axis_name} table - static table) within the documented composition."
+        )
         _write_grid(
             x8 / "aero" / source_name,
             TABLES / f"skywalker_x8_{control_name}_6axis.tbl",
@@ -155,6 +193,8 @@ def main() -> None:
             ),
             value_columns=tuple((name, name.upper()) for name in COEFFICIENTS),
             comment=f"{control_name} source grid; angular axes are radians",
+            extra_comments=(composition_comment,),
+            trailing_blank_line=False,
         )
     for rate_name, rate_column in (("p", "p_hat"), ("q", "q_hat"), ("r", "r_hat")):
         _write_grid(
@@ -203,6 +243,14 @@ def main() -> None:
             axes=wrench_axes,
             value_columns=((output_name, source_column),),
             comment=f"common-speed wrench component {output_name}; body rates are fixed at zero",
+            extra_comments=(
+                {
+                    "cx": "Convention: cx is an adapter channel for source body-wrench FX, not an aerodynamic or wind-axis drag coefficient.",
+                    "cy": "Convention: cy is an adapter channel for source body-wrench FY, not an aerodynamic side-force coefficient convention.",
+                    "cz": "Convention: cz is an adapter channel for source body-wrench FZ, not an aerodynamic normal-force or wind-axis lift/drag coefficient.",
+                }.get(output_name, ""),
+            ) if output_name in {"cx", "cy", "cz"} else (),
+            trailing_blank_line=output_name not in {"cx", "cy", "cz"},
         )
     _write_one_dimensional(
         hummingbird / "propulsion/rotor_static_map.csv",
@@ -218,19 +266,21 @@ def main() -> None:
         values=(("output", "single_rotor_reaction_torque_Nm_magnitude"),),
         comment="single-rotor reaction torque magnitude",
     )
+    notional_first_cut = ("b747_notional_fuel_flow.tbl",)
     metadata = {
         "dataset_name": "slower_airbreathing_and_multirotor_6dof_bundle_v1",
         "source_bundle_sha256": "17ee0ca897e3ee44d4dd68deb6eb6c4922fef9ef87de46fb032124596b39b911",
         "fidelity": "vehicle-specific public research surrogates; not flight-qualified",
         "source_preserved": True,
-        "generated": sorted(path.name for path in TABLES.glob("*.tbl")),
+        "generated": sorted(path.name for path in TABLES.glob("*.tbl") if path.name not in notional_first_cut),
+        "taoryx_notional_first_cut": list(notional_first_cut),
         "models": {
             "b747": {"family": "subsonic-four-engine-jet", "source": "jet_b747"},
             "skywalker_x8": {"family": "fixed-wing-uav", "source": "cruise_class_uav_skywalker_x8"},
             "hummingbird": {"family": "multirotor", "source": "quadcopter_hummingbird"},
         },
         "omissions": [
-            "B747 aileron and rudder control grids remain source CSV; the condition-3 elevator deck is generated for the golden trim case.",
+            "The bounded direct-wrench B747 table is a Taoryx-derived local beta extension and is not source-envelope qualification.",
             "GTM remains a pointer-only alternate because its binary aero database was not supplied.",
         ],
     }

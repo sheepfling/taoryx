@@ -79,6 +79,14 @@ from .controller_registry import (
 )
 from .family_debug_rendering import FamilyDebugRenderReport, render_family_debug_artifacts
 from .family_debugging import DebugFamily, FamilyDebugPlan, build_family_debug_plan, family_profile
+from .generic_tuning import (
+    GenericLqrCandidate,
+    GenericLqrProfile,
+    GenericLqrReport,
+    TrimToTuneResult,
+    trim_linearize_and_tune,
+    tune_lqr_profiles,
+)
 from .mission_objectives import (
     ControllerTransition,
     TruthObjectiveResult,
@@ -88,6 +96,15 @@ from .mission_objectives import (
 from .modes import DynamicsMode, Kinematic6DofState, Quaternion
 from .objectives import ObjectiveResult, ObjectiveSpec, score_objective, score_objectives
 from .outputs import DynamicsKind, EventRecord, RunArtifact, SegmentSpan, TelemetryChannel, VehicleKind, VehicleTelemetry, build_run_artifact
+from .physical_lqr import (
+    PhysicalWrenchLqrDesign,
+    PhysicalWrenchLqrSample,
+    PhysicalWrenchLqrValidation,
+    WrenchLinearizationProjection,
+    design_physical_wrench_lqr,
+    project_linearization_to_wrench,
+    validate_nonlinear_wrench_lqr,
+)
 from .reachability_catalog import (
     ReachabilityCatalog,
     ReachabilityCommonObject,
@@ -270,6 +287,23 @@ __all__ = ["__version__", "AutoTuneCandidate", "AutoTuneLimits", "AutoTuneReport
 __all__ += ["TrimGate", "TrimGateResult", "TrimProcedure", "TrimProcedureResult", "solve_trim_continuation", "solve_trim_procedure", "objective_report_to_evaluation"]
 __all__ += ["showcase", "ArtifactFile", "EvidenceBoardSpec", "FailureCode", "FidelityShowcaseRealization", "FamilyShowcaseTemplate", "MissionSegmentSpec", "ShowcaseRunArtifact", "StartContract", "TerminalContract", "VehicleShowcaseBinding"]
 __all__ += ["ControllerTransition", "TruthObjectiveResult", "TruthObjectiveSpec", "evaluate_truth_objectives"]
+__all__ += [
+    "GenericLqrCandidate",
+    "GenericLqrProfile",
+    "GenericLqrReport",
+    "TrimToTuneResult",
+    "trim_linearize_and_tune",
+    "tune_lqr_profiles",
+]
+__all__ += [
+    "PhysicalWrenchLqrDesign",
+    "PhysicalWrenchLqrSample",
+    "PhysicalWrenchLqrValidation",
+    "WrenchLinearizationProjection",
+    "design_physical_wrench_lqr",
+    "project_linearization_to_wrench",
+    "validate_nonlinear_wrench_lqr",
+]
 __all__ += [
     "AllocationResult",
     "ClosedLoopPole",

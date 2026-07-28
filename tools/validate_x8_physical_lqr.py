@@ -1,0 +1,279 @@
+#!/usr/bin/env python3
+"""Build the local X8 table-coordinate physical-LQR evidence artifact.
+
+This is intentionally a single source-trim operating-point proof.  It does
+not claim that the source collective/differential table coordinates have been
+resolved into hardware left/right elevon signs; see the artifact nonclaim.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+from pathlib import Path
+from typing import Any
+
+from taoryx.contracts import Vector3
+from taoryx.control_allocation import EffectorLimits
+from taoryx.language.grammar_contracts import GrammarProfile
+from taoryx.physical_lqr import (
+    design_physical_wrench_lqr,
+    project_linearization_to_wrench,
+    validate_nonlinear_wrench_lqr,
+)
+from taoryx.runtime.program import LoadedProgram
+from taoryx.runtime_control_adapter import local_rigid_body_plant_from_vehicle
+
+ROOT = Path(__file__).resolve().parents[1]
+PROBLEM = ROOT / "examples/generated/vehicles/skywalker_x8_table_coordinate_trim_6dof.prb"
+TABLE_ROOT = ROOT / "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables"
+TABLES = tuple(
+    TABLE_ROOT / name
+    for name in (
+        "skywalker_x8_static_6axis.tbl",
+        "skywalker_x8_collective_elevon_6axis.tbl",
+        "skywalker_x8_differential_elevon_6axis.tbl",
+        "skywalker_x8_thrust.tbl",
+    )
+)
+ACTUATOR_LIMITS = TABLE_ROOT.parent / "cruise_class_uav_skywalker_x8/controls/actuator_limits.csv"
+CONTROL_MAPPING_STATUS = TABLE_ROOT.parent / "cruise_class_uav_skywalker_x8/controls/control_mapping_status.csv"
+
+
+def build_plant():
+    """Build the table-backed source-trim local plant with declared actuator limits."""
+
+    program = LoadedProgram.load(PROBLEM, TABLES, profile=GrammarProfile.TAORYX)
+    return local_rigid_body_plant_from_vehicle(
+        "skywalker-x8-table-coordinate-plant",
+        "source-trim-local-v1",
+        program.case().vehicles["1"],
+        inertia_kg_m2=Vector3(0.325, 0.140, 0.400),
+        reference_length_m=0.36,
+        effector_limits={
+            "collective-elevon-deg": EffectorLimits(
+                "collective-elevon-deg",
+                -20.0,
+                20.0,
+                "deg",
+                rate_limit_per_s=120.0,
+                time_constant_s=0.05,
+            ),
+            "differential-elevon-deg": EffectorLimits(
+                "differential-elevon-deg",
+                -20.0,
+                20.0,
+                "deg",
+                rate_limit_per_s=120.0,
+                time_constant_s=0.05,
+            ),
+            "throttle": EffectorLimits(
+                "throttle",
+                0.0,
+                1.0,
+                "fraction",
+                time_constant_s=0.2,
+            ),
+        },
+        effectiveness_steps={
+            "collective-elevon-deg": 0.1,
+            "differential-elevon-deg": 0.1,
+            "throttle": 0.005,
+        },
+        allocation_wrench_weights={
+            "moment_x_nm": 1.0,
+            "moment_y_nm": 1.0,
+            "moment_z_nm": 0.0,
+        },
+    )
+    ####
+
+
+def build_artifact() -> dict[str, Any]:
+    """Build one deterministic trim, derivative, allocation, and recovery packet."""
+
+    plant = build_plant()
+    trim = plant.trim(plant.source_local_state, plant.source_effectors)
+    if not trim.success:
+        raise RuntimeError(f"source table-coordinate trim did not converge: {trim.as_dict()}")
+    linearization = plant.linearize(
+        trim,
+        {
+            "state_step": 1.0e-4,
+            "control_step": 1.0e-3,
+            "comparison_factor": 0.5,
+            "maximum_relative_difference": 0.10,
+            "comparison_absolute_floor": 1.0e-8,
+        },
+    )
+    effectiveness = plant.effectiveness(trim.state, trim.controls)
+    projection = project_linearization_to_wrench(
+        linearization,
+        effectiveness,
+        state_names=("roll_error_rad", "pitch_error_rad", "p_rad_s", "q_rad_s"),
+        wrench_names=("moment_x_nm", "moment_y_nm"),
+        effector_names=("differential-elevon-deg", "collective-elevon-deg"),
+    )
+    design = design_physical_wrench_lqr(
+        "skywalker-x8-source-trim-roll-pitch-wrench-lqr-v1",
+        projection,
+        q_diagonal=(16.0, 16.0, 3.0, 3.0),
+        r_diagonal=(1.0, 1.0),
+        state_scales=(math.radians(10.0), math.radians(10.0), math.radians(45.0), math.radians(45.0)),
+        wrench_scales=(0.20, 0.20),
+    )
+    initial_state = dict(trim.state)
+    initial_state.update(
+        {
+            "roll_error_rad": math.radians(5.0),
+            "pitch_error_rad": math.radians(-3.0),
+            "p_rad_s": math.radians(4.0),
+            "q_rad_s": math.radians(-3.0),
+        }
+    )
+    validation = validate_nonlinear_wrench_lqr(
+        plant,
+        trim,
+        design,
+        initial_state=initial_state,
+        duration_s=8.0,
+        dt_s=0.01,
+    )
+    acceptance = {
+        "derivative_maximum_relative_difference": 0.10,
+        "final_feedback_error_fraction_of_initial": 0.05,
+        "final_controlled_actual_residual_nm": 0.005,
+        "maximum_saturation_fraction": 0.05,
+        "maximum_continuous_saturation_duration_s": 0.25,
+        "disallowed_allocation_statuses": ["infeasible", "numerically_singular", "solver_failure"],
+    }
+    final_error_fraction = validation.final_feedback_error_norm / max(validation.initial_feedback_error_norm, 1.0e-12)
+    disallowed_statuses = set(acceptance["disallowed_allocation_statuses"])
+    completed = (
+        linearization.provenance.derivative_consistent
+        and final_error_fraction <= acceptance["final_feedback_error_fraction_of_initial"]
+        and validation.final_controlled_actual_residual <= acceptance["final_controlled_actual_residual_nm"]
+        and validation.saturation_fraction <= acceptance["maximum_saturation_fraction"]
+        and validation.maximum_continuous_saturation_duration_s <= acceptance["maximum_continuous_saturation_duration_s"]
+        and not (set(validation.allocation_statuses) & disallowed_statuses)
+        and all(
+            math.isfinite(value)
+            for value in validation.final_state.values()
+        )
+    )
+    return {
+        "schema": "taoryx.x8-table-coordinate-physical-lqr/v1alpha1",
+        "vehicle": "skywalker_x8",
+        "operating_condition": {
+            "source_problem": str(PROBLEM.relative_to(ROOT)),
+            "tables": [str(path.relative_to(ROOT)) for path in TABLES],
+            "fidelity": "rigid_body_6dof",
+            "physical_control_coordinate": "source-table collective/differential elevon coordinates",
+        },
+        "provenance": {
+            "assets": [
+                {"path": str(path.relative_to(ROOT)), "sha256": _sha256(path)}
+                for path in (PROBLEM, *TABLES, ACTUATOR_LIMITS, CONTROL_MAPPING_STATUS)
+            ],
+        },
+        "actuator_contract": {
+            name: {
+                "lower": limits.lower,
+                "upper": limits.upper,
+                "unit": limits.unit,
+                "rate_limit_per_s": limits.rate_limit_per_s,
+                "time_constant_s": limits.time_constant_s,
+                "available": limits.available,
+            }
+            for name, limits in plant.effector_limits.items()
+        },
+        "claim": {
+            "status": "local_nonlinear_table_coordinate_validation" if completed else "local_validation_failed",
+            "proves": (
+                "At the declared source-trim point, a nonlinear table-backed X8 local plant is trimmed, "
+                "linearized, controlled through roll/pitch wrench demands, allocated through bounded source-table "
+                "elevon coordinates with declared lag/rate limits, and evaluated again by the nonlinear plant."
+            ),
+            "nonclaims": [
+                "The public package does not resolve the physical left/right elevon differential sign mapping; this is not a hardware-ready left/right allocation claim.",
+                "This is one local operating point, not a gain-scheduled or envelope-wide controller qualification.",
+                "Yaw is declared unallocated because the flying-wing table coordinate pair does not provide independent yaw-moment authority.",
+                "The current short case has fixed mass and does not qualify battery discharge or endurance.",
+            ],
+            "earned_controller_evidence_tier": "T3_linearly_controlled",
+            "nonlinear_table_coordinate_evidence": "passed" if completed else "failed",
+            "promotion_blocker": "physical_left_right_elevon_sign_mapping_unresolved",
+            "physical_allocation_evidence": "table_coordinate_candidate_unpromoted_pending_left_right_mapping",
+            "direct_body_moment_injection": False,
+        },
+        "acceptance": {
+            **acceptance,
+            "observed_final_feedback_error_fraction": final_error_fraction,
+        },
+        "trim": trim.as_dict(),
+        "linearization": {
+            "state_names": list(linearization.primary.state_names),
+            "control_names": list(linearization.primary.control_names),
+            "a_matrix": linearization.primary.a_matrix.tolist(),
+            "b_matrix": linearization.primary.b_matrix.tolist(),
+            "comparison_a_matrix": linearization.comparison.a_matrix.tolist(),
+            "comparison_b_matrix": linearization.comparison.b_matrix.tolist(),
+            "provenance": {
+                "nonlinear_plant_id": linearization.provenance.nonlinear_plant_id,
+                "nonlinear_plant_revision": linearization.provenance.nonlinear_plant_revision,
+                "method": linearization.provenance.method,
+                "state_step": linearization.provenance.state_step,
+                "control_step": linearization.provenance.control_step,
+                "comparison_state_step": linearization.provenance.comparison_state_step,
+                "comparison_control_step": linearization.provenance.comparison_control_step,
+                "maximum_relative_difference": linearization.provenance.maximum_relative_difference,
+                "maximum_absolute_difference": linearization.provenance.maximum_absolute_difference,
+                "comparison_absolute_floor": linearization.provenance.comparison_absolute_floor,
+                "derivative_consistent": linearization.provenance.derivative_consistent,
+                "state_units": dict(linearization.provenance.state_units),
+                "control_units": dict(linearization.provenance.control_units),
+            },
+        },
+        "effectiveness": {
+            "wrench_names": list(effectiveness.wrench_names),
+            "effector_names": list(effectiveness.effector_names),
+            "matrix": [list(row) for row in effectiveness.matrix],
+            "reference_wrench": dict(effectiveness.reference_wrench),
+            "reference_effectors": dict(effectiveness.reference_effectors),
+            "source": effectiveness.source,
+        },
+        "nonlinear_validation": validation.as_dict(),
+        "reproduction": "PYTHONPATH=src python3 tools/validate_x8_physical_lqr.py",
+    }
+    ####
+
+
+def _sha256(path: Path) -> str:
+    """Return the immutable SHA-256 of one declared source asset."""
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+    ####
+
+
+def main() -> int:
+    """Write the artifact, preserving a deterministic JSON representation."""
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=ROOT / "verification/generated/x8_table_coordinate_physical_lqr.json",
+    )
+    arguments = parser.parse_args()
+    artifact = build_artifact()
+    arguments.output.parent.mkdir(parents=True, exist_ok=True)
+    arguments.output.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(arguments.output)
+    return 0
+    ####
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

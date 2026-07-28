@@ -10,7 +10,7 @@
 *units/fmt lat deg f.3
 *units/fmt gama deg f.3
 *units/fmt psi deg f.3
-*runtime status vehicle reference-area=18.580608 reference-length=3.130296 dry-mass-kg=9000.0 nominal-mass-kg=14641.0545 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024
+*runtime status vehicle reference-area=18.580608 reference-length=3.130296 dry-mass-kg=9000.0 nominal-mass-kg=14641.0545 inertia-x=4948.7355 inertia-y=129114.2666 inertia-z=131825.9024 envelope-max-mach=6.7 envelope-max-alpha-deg=10 envelope-max-beta-deg=10
 
 
 

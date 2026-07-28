@@ -1,5 +1,5 @@
 (slower-x8-sv03-racetrack-altitude-turns-direct-moment-6dof)
-*title Skywalker X8 powered racetrack direct-moment baseline
+*title Skywalker X8 powered racetrack direct-wrench screen-only baseline
 *mode rigid-body-6dof
 *atmos standard
 *earth wgs-84 omega=0

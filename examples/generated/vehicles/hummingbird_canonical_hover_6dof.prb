@@ -12,7 +12,7 @@
 
 
 
-*runtime status actuator maximum-moment=1 maximum-body-rate-deg-s=720
+*runtime status actuator maximum-moment=1 maximum-body-rate-deg-s=720 dynamics={'model': 'first_order_motor_lag', 'time_constant_s': 0.005, 'speed_limits_rad_s': [0, 1500], 'source': 'tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/VALIDITY.md'}
 *runtime status thermal policy=none
 
 *trajectory 1 hummingbird start on 1

@@ -280,6 +280,34 @@ def test_preflight_rejects_qualified_realization_with_allowed_overrides() -> Non
     assert any(issue.code == "qualified-controller-override" for issue in report.issues)
 
 
+def test_direct_wrench_screen_cannot_claim_physical_effector_evidence() -> None:
+    realization = _controller().realization
+    assert realization is not None
+    payload = realization.model_dump()
+    payload.update(
+        evidence_tier="T4_physically_allocated",
+        control_realization_path="direct_wrench_screen",
+    )
+
+    with pytest.raises(ValueError, match="cannot claim evidence beyond"):
+        realization.__class__(**payload)
+    ####
+
+
+def test_nonlinear_evidence_requires_a_nonlinear_control_path() -> None:
+    realization = _controller().realization
+    assert realization is not None
+    payload = realization.model_dump()
+    payload.update(
+        evidence_tier="T5_nonlinearly_validated",
+        control_realization_path="constrained_effector_allocation",
+    )
+
+    with pytest.raises(ValueError, match="requires nonlinear physical-effector validation"):
+        realization.__class__(**payload)
+    ####
+
+
 @pytest.mark.parametrize("implementation", ("rslqr", "gain_scheduled_lqr", "gain_scheduled_rslqr"))
 def test_lqr_family_realizations_require_the_same_closed_loop_path(implementation: str) -> None:
     realization = _controller().realization

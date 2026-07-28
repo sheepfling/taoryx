@@ -103,6 +103,8 @@ def test_golden_plant_run_accepts_explicitly_unavailable_low_speed_air_data() ->
             "aero_airspeed_m_s": 0.0,
             "aero_alpha_deg": float("nan"),
             "aero_sideslip_deg": float("nan"),
+            "alpha": float("nan"),
+            "beta": float("nan"),
             "qw": 1.0,
             "qx": 0.0,
             "qy": 0.0,

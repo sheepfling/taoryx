@@ -1036,6 +1036,50 @@ class DirectWrenchTableModel:
         source_velocity_z = -air_velocity_body.z if self.source_z_up else air_velocity_body.z
         controls = self.control_provider(state) if self.control_provider else {}
         rotor_commands = _rotor_commands_from_controls(controls, self.rotor_allocation)
+        allocation = self.rotor_allocation
+        # A common-speed direct-load table is a valid reduced source model,
+        # but it cannot by itself prove individual motor realization.  When a
+        # vehicle explicitly supplies the complete individual-rotor source
+        # equations, evaluate those equations before touching the common-speed
+        # tables.  This makes the four actual rotor commands the only source
+        # of thrust and body moment in that fidelity path.
+        if rotor_commands is not None and allocation is not None and allocation.individual_rotor_source_available:
+            source_velocity = Vector3(air_velocity_body.x, air_velocity_body.y, source_velocity_z)
+            source_rate = (
+                Vector3(-state.body_rate.x, -state.body_rate.y, state.body_rate.z)
+                if self.source_z_up
+                else state.body_rate
+            )
+            source_force, source_moment = allocation.source_force_moment(
+                rotor_commands,
+                source_velocity,
+                source_rate,
+            )
+            force = Vector3(source_force.x, source_force.y, -source_force.z) if self.source_z_up else source_force
+            moment = Vector3(-source_moment.x, -source_moment.y, source_moment.z) if self.source_z_up else source_moment
+            query_values = {
+                "rotor_force_model_individual": 1.0,
+                "velocity_x": air_velocity_body.x,
+                "velocity_y": air_velocity_body.y,
+                "velocity_z": source_velocity_z,
+                **{name: value for name, value in controls.items() if name.startswith("rotor-")},
+            }
+            return AerodynamicOutput(
+                force,
+                moment,
+                sample.density,
+                0.5 * sample.density * airspeed * airspeed,
+                speed_of_sound,
+                airspeed,
+                mach,
+                alpha,
+                beta,
+                query_values,
+                {},
+                {},
+                self.model_uncertainty_fraction,
+                self.source_quality,
+            )
         rotor_speed = rotor_commands.rms_speed_rad_s if rotor_commands is not None else controls.get("rotor_speed", 469.124102661955)
         query = AeroQueryContext.from_air_data(
             mach,
@@ -1053,7 +1097,6 @@ class DirectWrenchTableModel:
         force = self.loads.context_force_provider()(query)
         moments = self.loads.context_moment_provider()
         moment = moments(query) if moments is not None else Vector3(0.0, 0.0, 0.0)
-        allocation = self.rotor_allocation
         if rotor_commands is not None and allocation is not None:
             moment = moment + allocation.differential_moment_source(rotor_commands)
         if self.source_z_up:

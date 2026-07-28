@@ -27,6 +27,12 @@ inventory is described in
 The tiered data intake contract and machine-readable readiness checklist is
 described in
 [`fidelity-data-requirements.md`](fidelity-data-requirements.md).
+The reusable trim, true-derivative linearization, and dimension-matched LQR
+tuning pipeline is described in
+[`generic-controller-tuning.md`](generic-controller-tuning.md).
+The promotion path from a direct-wrench LQR screen to bounded physical
+effectors and nonlinear validation is described in
+[`physically-realizable-lqr-control.md`](physically-realizable-lqr-control.md).
 The accepted-state, force-evaluation, and sensor timing boundary is defined in
 [`eom-timing-contract.md`](eom-timing-contract.md).
 The language/implementation contract for pre/post truth around events is

@@ -1,0 +1,35 @@
+schema_version: 1
+id: taoryx_reference_aircraft_tuning_bindings_v1
+claim_boundary: >-
+  Standardized local controller-design screens for the four reference aircraft.
+  Runtime-inertia and rotor-allocation bridges are not source-backed aircraft
+  linearizations and do not constitute flight-control qualification.
+families:
+  b747:
+    trim_spec: b747-condition3-trim-v1
+    linearization_mode: runtime_inertia_attitude_bridge
+    control_realization: direct_wrench_screen
+    evidence_tier: T0_structural
+    source_linearization_status: blocked
+    gap: source-trim state-derivative Jacobian and physical surface allocator required
+  skywalker_x8:
+    trim_spec: x8-powered-trim-v1
+    linearization_mode: runtime_inertia_attitude_bridge
+    control_realization: direct_wrench_screen
+    evidence_tier: T0_structural
+    source_linearization_status: blocked
+    gap: source-trim A/B model and elevon allocator must replace the direct-wrench screen
+  hummingbird:
+    trim_spec: hummingbird-hover-v1
+    linearization_mode: quad_x_rotor_rate_bridge
+    control_realization: individual_rotor_allocation_screen
+    evidence_tier: T0_structural
+    source_linearization_status: estimated
+    gap: source-backed rotor-rate damping and full attitude/position plant derivatives required
+  x15:
+    trim_spec: x15-release-glide-v1
+    linearization_mode: runtime_inertia_attitude_bridge
+    control_realization: direct_wrench_screen
+    evidence_tier: T0_structural
+    source_linearization_status: blocked
+    gap: source-trim aerodynamic derivative schedule and actuator realization required

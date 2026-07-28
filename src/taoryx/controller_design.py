@@ -14,7 +14,15 @@ from typing import Literal, cast
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from .controller_realization import ClosedLoopPole, ControllerChannel, ControllerFidelity, ControllerRealization, ControllerRole
+from .controller_realization import (
+    ClosedLoopPole,
+    ControllerChannel,
+    ControllerControlPath,
+    ControllerEvidenceTier,
+    ControllerFidelity,
+    ControllerRealization,
+    ControllerRole,
+)
 from .runtime.lqr import LqrController, solve_continuous_lqr
 from .trim import TrimResult
 
@@ -59,6 +67,9 @@ class ControllerDesignSpec(BaseModel):
     control_scale_id: str = "unspecified"
     fallback_controller_id: str | None = None
     scenario_overrides_allowed: bool = False
+    evidence_tier: ControllerEvidenceTier = "T0_structural"
+    control_realization_path: ControllerControlPath = "unspecified"
+    screen_only: bool = False
     notes: str = ""
 
     @model_validator(mode="after")
@@ -77,6 +88,16 @@ class ControllerDesignSpec(BaseModel):
         ):
             if values and len(values) != expected:
                 raise ValueError(f"controller design {self.id!r} {label} must match its channel count")
+        if self.control_realization_path in {"direct_wrench_screen", "unconstrained_effector_allocation"} and not self.screen_only:
+            raise ValueError(
+                f"controller design {self.id!r} must mark {self.control_realization_path!r} as screen_only"
+            )
+        if self.screen_only and self.evidence_tier in {
+            "T4_physically_allocated",
+            "T5_nonlinearly_validated",
+            "T6_envelope_validated",
+        }:
+            raise ValueError("screen_only controller designs cannot claim physical-effector evidence")
         return self
         ####
     ####
@@ -212,6 +233,12 @@ def _build_lqr_realization(design: ControllerDesignSpec, trim: TrimResult, resul
         fallback_controller_id=design.fallback_controller_id,
         scenario_overrides_allowed=design.scenario_overrides_allowed,
         claim_status="design",
-        provenance={"trim": design.trim, "notes": design.notes},
+        evidence_tier=design.evidence_tier,
+        control_realization_path=design.control_realization_path,
+        provenance={
+            "trim": design.trim,
+            "notes": design.notes,
+            "screen_only": str(design.screen_only).lower(),
+        },
     )
     ####

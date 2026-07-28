@@ -69,8 +69,10 @@ def test_x15_trim_report_preserves_source_backed_glide_diagnostic() -> None:
     import json
 
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    assert report["status"] == "pass"
-    assert report["diagnostic"]["source_only_preserved"] is False
+    assert report["status"] == "blocked"
+    assert report["diagnostic"]["source_only_preserved"] is True
     assert report["diagnostic"]["source_release_is_equilibrium_claim"] is False
     assert report["solver"]["tables_rebound_per_evaluation"] is False
+    assert report["residual_norm_l2"] > 1.0e-3
+    assert "force_velocity_cross_y" in report["residual_normalized"]
     ####

@@ -377,7 +377,7 @@
       "inputs": {
         "bridge_source_problem": {
           "path": "examples/showcases/x15_rocket_to_hawaii/release_glide_reduction_3dof.prb",
-          "sha256": "ec7f7d1ec7ba6afbdaebd9b6693859bddb5b35f7e192aba9c207c4e9c074334a"
+          "sha256": "8c384f87604bf8940cb44305fb63d2dba503a59688aaa36215504dfd3c0baf39"
         },
         "constrained_rigid_problem": {
           "path": "examples/showcases/x15_rocket_to_hawaii/release_glide_parity_6dof.prb",
@@ -385,7 +385,7 @@
         },
         "point_mass_problem": {
           "path": "examples/showcases/x15_rocket_to_hawaii/release_glide_reduction_3dof.prb",
-          "sha256": "ec7f7d1ec7ba6afbdaebd9b6693859bddb5b35f7e192aba9c207c4e9c074334a"
+          "sha256": "8c384f87604bf8940cb44305fb63d2dba503a59688aaa36215504dfd3c0baf39"
         }
       },
       "parity_tolerances": {

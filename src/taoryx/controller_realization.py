@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections.abc import Mapping, Sequence
 from typing import Any, Literal
 
@@ -44,6 +45,33 @@ ControllerImplementation = Literal[
 ControllerFidelity = Literal["point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"]
 InterpolationMethod = Literal["nearest", "linear", "cubic", "hold"]
 ControllerQualificationStatus = Literal["design", "wiring_verified", "local_stability_verified", "qualified"]
+ControllerEvidenceTier = Literal[
+    "T0_structural",
+    "T1_trimmed",
+    "T2_linearized",
+    "T3_linearly_controlled",
+    "T4_physically_allocated",
+    "T5_nonlinearly_validated",
+    "T6_envelope_validated",
+]
+ControllerControlPath = Literal[
+    "unspecified",
+    "direct_wrench_screen",
+    "unconstrained_effector_allocation",
+    "constrained_effector_allocation",
+    "nonlinear_effector_validation",
+    "scheduled_nonlinear_validation",
+]
+
+_EVIDENCE_TIER_ORDER: dict[ControllerEvidenceTier, int] = {
+    "T0_structural": 0,
+    "T1_trimmed": 1,
+    "T2_linearized": 2,
+    "T3_linearly_controlled": 3,
+    "T4_physically_allocated": 4,
+    "T5_nonlinearly_validated": 5,
+    "T6_envelope_validated": 6,
+}
 
 
 class ControllerChannel(BaseModel):
@@ -122,6 +150,8 @@ class ControllerProvenance(BaseModel):
     auxiliary_loops: tuple[str, ...] = ()
     scenario_gain_overrides: bool = False
     qualification_status: ControllerQualificationStatus = "design"
+    evidence_tier: ControllerEvidenceTier = "T0_structural"
+    control_realization_path: ControllerControlPath = "unspecified"
 
     @model_validator(mode="after")
     def validate_hashes_and_claim(self) -> ControllerProvenance:
@@ -130,6 +160,7 @@ class ControllerProvenance(BaseModel):
                 raise ValueError(f"controller provenance matrix hash {name!r} must be a lowercase SHA-256 digest")
         if self.qualification_status == "qualified" and self.scenario_gain_overrides:
             raise ValueError("qualified controller provenance cannot contain scenario gain overrides")
+        _validate_evidence_path(self.evidence_tier, self.control_realization_path)
         return self
         ####
     ####
@@ -194,17 +225,52 @@ class AllocationResult(BaseModel):
     allocated: dict[str, float] = Field(default_factory=dict)
     achieved: dict[str, float] = Field(default_factory=dict)
     residual: dict[str, float] = Field(default_factory=dict)
+    wrench_weights: dict[str, float] = Field(default_factory=dict)
+    controlled_wrench_axes: tuple[str, ...] = ()
+    uncontrolled_wrench_axes: tuple[str, ...] = ()
     saturated_channels: tuple[str, ...] = ()
     rate_limited_channels: tuple[str, ...] = ()
+    allocation_status: str = "unspecified"
+    commanded_effectors: dict[str, float] = Field(default_factory=dict)
+    actual_effectors: dict[str, float] = Field(default_factory=dict)
+    effector_rates: dict[str, float] = Field(default_factory=dict)
+    actual_residual: dict[str, float] = Field(default_factory=dict)
+    effectiveness_matrix: tuple[tuple[float, ...], ...] = ()
+    effectiveness_rank: int | None = Field(default=None, ge=0)
+    allocator_iterations: int | None = Field(default=None, ge=0)
+    solver_message: str = ""
 
     @model_validator(mode="after")
     def validate_values(self) -> AllocationResult:
-        for label, values in (("requested", self.requested), ("allocated", self.allocated), ("achieved", self.achieved), ("residual", self.residual)):
+        for label, values in (
+            ("requested", self.requested),
+            ("allocated", self.allocated),
+            ("achieved", self.achieved),
+            ("residual", self.residual),
+            ("commanded effectors", self.commanded_effectors),
+            ("actual effectors", self.actual_effectors),
+            ("effector rates", self.effector_rates),
+            ("actual residual", self.actual_residual),
+        ):
             _validate_finite_mapping(values, f"allocation {label}")
-        if set(self.saturated_channels) - set(self.achieved):
-            raise ValueError("allocation saturation channels must identify achieved values")
-        if set(self.rate_limited_channels) - set(self.achieved):
-            raise ValueError("allocation rate-limit channels must identify achieved values")
+        if any(not math.isfinite(float(value)) for row in self.effectiveness_matrix for value in row):
+            raise ValueError("allocation effectiveness matrix must contain only finite values")
+        _validate_finite_mapping(self.wrench_weights, "allocation wrench weights")
+        if any(value < 0.0 for value in self.wrench_weights.values()):
+            raise ValueError("allocation wrench weights must be nonnegative")
+        wrench_axes = set(self.requested) | set(self.allocated) | set(self.achieved) | set(self.residual)
+        if set(self.controlled_wrench_axes) & set(self.uncontrolled_wrench_axes):
+            raise ValueError("allocation controlled and uncontrolled wrench axes must be disjoint")
+        if set(self.controlled_wrench_axes) - wrench_axes:
+            raise ValueError("controlled wrench axes must identify allocation wrench values")
+        if set(self.uncontrolled_wrench_axes) - wrench_axes:
+            raise ValueError("uncontrolled wrench axes must identify allocation wrench values")
+        effector_channels = set(self.commanded_effectors) | set(self.actual_effectors) | set(self.effector_rates)
+        allowed_limit_channels = wrench_axes | effector_channels
+        if set(self.saturated_channels) - allowed_limit_channels:
+            raise ValueError("allocation saturation channels must identify wrench or effector values")
+        if set(self.rate_limited_channels) - allowed_limit_channels:
+            raise ValueError("allocation rate-limit channels must identify wrench or effector values")
         return self
         ####
     ####
@@ -286,6 +352,8 @@ class ControllerRealization(BaseModel):
     fallback_controller_id: str | None = None
     scenario_overrides_allowed: bool = False
     claim_status: ControllerQualificationStatus = "design"
+    evidence_tier: ControllerEvidenceTier = "T0_structural"
+    control_realization_path: ControllerControlPath = "unspecified"
     provenance: dict[str, str] = Field(default_factory=dict)
     scenario_gain_overrides: tuple[str, ...] = ()
 
@@ -320,6 +388,7 @@ class ControllerRealization(BaseModel):
             raise ValueError("qualified controller realizations cannot allow or record scenario gain overrides")
         if self.closed_loop_poles and self.closed_loop_max_real_pole is None:
             raise ValueError("closed_loop_max_real_pole is required when poles are recorded")
+        _validate_evidence_path(self.evidence_tier, self.control_realization_path)
         for name, bounds in self.reference_bounds.items():
             if bounds[0] > bounds[1]:
                 raise ValueError(f"reference bound {name!r} lower bound exceeds upper bound")
@@ -470,10 +539,36 @@ def _validate_ordered_channels(channels: Sequence[ControllerChannel], kind: str)
 def _validate_finite_mapping(values: Mapping[str, float], label: str) -> None:
     """Reject NaN/Inf values in machine-readable runtime channels."""
 
-    import math
-
     if any(not math.isfinite(float(value)) for value in values.values()):
         raise ValueError(f"{label} must contain only finite values")
+    ####
+
+
+def _validate_evidence_path(
+    evidence_tier: ControllerEvidenceTier,
+    control_realization_path: ControllerControlPath,
+) -> None:
+    """Prevent a controller evidence record from claiming a higher tier.
+
+    Direct wrench and unconstrained matrix-inversion paths remain useful
+    stabilizability screens, but they cannot promote a vehicle to physically
+    allocated evidence.  Promotion is monotonic and must identify the path
+    that actually produced the plant loads.
+    """
+
+    level = _EVIDENCE_TIER_ORDER[evidence_tier]
+    if control_realization_path in {"direct_wrench_screen", "unconstrained_effector_allocation"} and level > 3:
+        raise ValueError(f"{control_realization_path} cannot claim evidence beyond T3_linearly_controlled")
+    if level >= 4 and control_realization_path not in {
+        "constrained_effector_allocation",
+        "nonlinear_effector_validation",
+        "scheduled_nonlinear_validation",
+    }:
+        raise ValueError("T4+ evidence requires constrained physical effector allocation")
+    if level >= 5 and control_realization_path not in {"nonlinear_effector_validation", "scheduled_nonlinear_validation"}:
+        raise ValueError("T5+ evidence requires nonlinear physical-effector validation")
+    if level >= 6 and control_realization_path != "scheduled_nonlinear_validation":
+        raise ValueError("T6 evidence requires scheduled nonlinear validation")
     ####
 
 
@@ -481,6 +576,8 @@ __all__ = [
     "ClosedLoopPole",
     "ControllerChannel",
     "ControllerFidelity",
+    "ControllerControlPath",
+    "ControllerEvidenceTier",
     "ControllerImplementation",
     "ControllerPreflightIssue",
     "ControllerPreflightReport",

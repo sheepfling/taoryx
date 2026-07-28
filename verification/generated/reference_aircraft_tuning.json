@@ -1,0 +1,968 @@
+{
+  "claim_boundary": "Standardized local controller-design screens for the four reference aircraft. Runtime-inertia and rotor-allocation bridges are not source-backed aircraft linearizations and do not constitute flight-control qualification.",
+  "families": {
+    "b747": {
+      "control_realization": "direct_wrench_screen",
+      "evidence_tier": "T0_structural",
+      "gap": "source-trim state-derivative Jacobian and physical surface allocator required",
+      "linearization_mode": "runtime_inertia_attitude_bridge",
+      "plant_backed_linearization": false,
+      "qualification_status": "screen_only",
+      "report": {
+        "best_profile_id": "b747-gentle",
+        "candidates": [
+          {
+            "closed_loop_eigenvalues": [
+              -1.5657193553210167,
+              -5.232296354493756,
+              [
+                -1.581138830084189,
+                0.7071067811865464
+              ],
+              [
+                -1.581138830084189,
+                -0.7071067811865464
+              ],
+              -2.1705474877555524,
+              -2.075297474160089
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment-x",
+              "moment-y",
+              "moment-z"
+            ],
+            "control_scales": [
+              42338711.37831559,
+              42338711.37831559,
+              42338711.37831559
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "0983769c372c95260d9b529e27c7d35d5b728461e224bdef93aa377acee24479",
+              "k": "2197398e4ed2c23fbabc24f40ca400416912b9dc4eca6cfb85a9b18ad656477a",
+              "q": "ba53c003ec160e168b3e486bcbb646e7e1a2a083ad8f53a32fd1bca7676474b8",
+              "r": "9e7cf194cf25f6ad5b94878fdae08c572be06259a20441065247dd3984b6d671"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -1.5657193553210167
+            },
+            "profile_id": "b747-gentle",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                0.25,
+                0.25,
+                0.25,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                4.0,
+                4.0,
+                4.0
+              ]
+            }
+          },
+          {
+            "closed_loop_eigenvalues": [
+              -3.1314387106420334,
+              -10.46459270898749,
+              [
+                -3.1622776601683844,
+                1.414213562373089
+              ],
+              [
+                -3.1622776601683844,
+                -1.414213562373089
+              ],
+              -4.341094975511084,
+              -4.150594948320194
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment-x",
+              "moment-y",
+              "moment-z"
+            ],
+            "control_scales": [
+              42338711.37831559,
+              42338711.37831559,
+              42338711.37831559
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "0983769c372c95260d9b529e27c7d35d5b728461e224bdef93aa377acee24479",
+              "k": "be005f0ee1d03b75232c2de6ed2ebb3ce88b7de7f92725098b79f3d1a849f03d",
+              "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+              "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -3.1314387106420334
+            },
+            "profile_id": "b747-standard",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                1.0,
+                1.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "closed_loop_eigenvalues": [
+              -6.058528074273852,
+              -43.27022048695,
+              -6.583005244258363,
+              -14.583005244258372,
+              -23.20736996324922,
+              -6.211174089633647
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment-x",
+              "moment-y",
+              "moment-z"
+            ],
+            "control_scales": [
+              42338711.37831559,
+              42338711.37831559,
+              42338711.37831559
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "0983769c372c95260d9b529e27c7d35d5b728461e224bdef93aa377acee24479",
+              "k": "db2054de4116e276896e804e951620a8ad9625cee5fb007431f24e93d3e580ef",
+              "q": "44a85bd25b3cc5ac4485ceb50182fb5d7620650d931fd5047d8864abdcfb54da",
+              "r": "939833d7a42c35bb6f78dc992fed907e7f195ac36fddf15db3a6a5bd6468b3c6"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -6.058528074273852
+            },
+            "profile_id": "b747-aggressive",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                4.0,
+                4.0,
+                4.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                0.0625,
+                0.0625,
+                0.0625
+              ]
+            }
+          }
+        ],
+        "design_source": "runtime_inertia_attitude_bridge",
+        "status": "safe",
+        "vehicle_id": "b747"
+      },
+      "source_linearization_status": "blocked",
+      "trim_spec": "b747-condition3-trim-v1",
+      "tuning_stage": "generic_lqr_screen"
+    },
+    "hummingbird": {
+      "control_realization": "individual_rotor_allocation_screen",
+      "evidence_tier": "T0_structural",
+      "gap": "source-backed rotor-rate damping and full attitude/position plant derivatives required",
+      "linearization_mode": "quad_x_rotor_rate_bridge",
+      "plant_backed_linearization": false,
+      "qualification_status": "screen_only",
+      "report": {
+        "best_profile_id": "hummingbird-gentle",
+        "candidates": [
+          {
+            "closed_loop_eigenvalues": [
+              -2.8665961621827023,
+              -80.69151415887181,
+              -80.03286822311898,
+              -7.941790335465959,
+              -3.0715903304612793,
+              -2.8666260584957906
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "rotor-1-speed",
+              "rotor-2-speed",
+              "rotor-3-speed",
+              "rotor-4-speed"
+            ],
+            "control_scales": [
+              469.124102661955,
+              469.124102661955,
+              469.124102661955,
+              469.124102661955
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "1162a8719d174066089ef2e4188992c90a64c5a4a78bd3e15c4fb13703d6cc9e",
+              "k": "a4ec49a29affbcef380c4ae802ff3a38b7aaa2aea585fb387b5c386d9a81c769",
+              "q": "ba53c003ec160e168b3e486bcbb646e7e1a2a083ad8f53a32fd1bca7676474b8",
+              "r": "3b26902f81c2a2b577fa1dc329a8ca36db305082f1dec4e4f404ed79b701ee06"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -2.8665961621827023
+            },
+            "profile_id": "hummingbird-gentle",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.17453292519943295,
+              0.17453292519943295,
+              0.17453292519943295,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "status": "safe",
+            "vehicle_id": "hummingbird",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                0.25,
+                0.25,
+                0.25,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                4.0,
+                4.0,
+                4.0,
+                4.0
+              ]
+            }
+          },
+          {
+            "closed_loop_eigenvalues": [
+              -5.7331923243654614,
+              -161.3830283177436,
+              -160.06573644623782,
+              -15.88358067093196,
+              -5.733252116991577,
+              -6.143180660922552
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "rotor-1-speed",
+              "rotor-2-speed",
+              "rotor-3-speed",
+              "rotor-4-speed"
+            ],
+            "control_scales": [
+              469.124102661955,
+              469.124102661955,
+              469.124102661955,
+              469.124102661955
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "1162a8719d174066089ef2e4188992c90a64c5a4a78bd3e15c4fb13703d6cc9e",
+              "k": "4502854aa558ccca69368f208fbd51226a92276905ea1e64aef019b8dfd01552",
+              "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+              "r": "658294101da7cb3de76e17a85322361cc3a749a39c87411a85d3421c76b84665"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -5.7331923243654614
+            },
+            "profile_id": "hummingbird-standard",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.17453292519943295,
+              0.17453292519943295,
+              0.17453292519943295,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "status": "safe",
+            "vehicle_id": "hummingbird",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "closed_loop_eigenvalues": [
+              -11.460960098676765,
+              -645.8376479931615,
+              -640.5710017892185,
+              -67.12059550926053,
+              -11.460989895264644,
+              -11.629897483899411
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "rotor-1-speed",
+              "rotor-2-speed",
+              "rotor-3-speed",
+              "rotor-4-speed"
+            ],
+            "control_scales": [
+              469.124102661955,
+              469.124102661955,
+              469.124102661955,
+              469.124102661955
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "1162a8719d174066089ef2e4188992c90a64c5a4a78bd3e15c4fb13703d6cc9e",
+              "k": "0b75fa2f37c76eb30bf7de9a45e96444e62a8cd49ae444dc327537655fbea902",
+              "q": "44a85bd25b3cc5ac4485ceb50182fb5d7620650d931fd5047d8864abdcfb54da",
+              "r": "1771a19321425888afc1155290fd159027683a3d53b17a5e18705daef2dd0d0d"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -11.460960098676765
+            },
+            "profile_id": "hummingbird-aggressive",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.17453292519943295,
+              0.17453292519943295,
+              0.17453292519943295,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "status": "safe",
+            "vehicle_id": "hummingbird",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                4.0,
+                4.0,
+                4.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                0.0625,
+                0.0625,
+                0.0625,
+                0.0625
+              ]
+            }
+          }
+        ],
+        "design_source": "quad_x_rotor_rate_bridge",
+        "status": "safe",
+        "vehicle_id": "hummingbird"
+      },
+      "source_linearization_status": "estimated",
+      "trim_spec": "hummingbird-hover-v1",
+      "tuning_stage": "generic_lqr_screen"
+    },
+    "skywalker_x8": {
+      "control_realization": "direct_wrench_screen",
+      "evidence_tier": "T0_structural",
+      "gap": "source-trim A/B model and elevon allocator must replace the direct-wrench screen",
+      "linearization_mode": "runtime_inertia_attitude_bridge",
+      "plant_backed_linearization": false,
+      "qualification_status": "screen_only",
+      "report": {
+        "best_profile_id": "skywalker_x8-gentle",
+        "candidates": [
+          {
+            "closed_loop_eigenvalues": [
+              -4.868725856686744,
+              -28.668954437399748,
+              -4.906993815013106,
+              -23.111867280690724,
+              -67.33408522396772,
+              -4.812242860041101
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment-x",
+              "moment-y",
+              "moment-z"
+            ],
+            "control_scales": [
+              11.876245416,
+              11.876245416,
+              11.876245416
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "9529a9e7acbe5e435d1701604a90a773f56d31dc099936661030655b017bb325",
+              "k": "31e20b73a79a4e28c9a4026c4d91f8c4ebf8ebe9bcaf01376ec8316b3a9d22aa",
+              "q": "ba53c003ec160e168b3e486bcbb646e7e1a2a083ad8f53a32fd1bca7676474b8",
+              "r": "9e7cf194cf25f6ad5b94878fdae08c572be06259a20441065247dd3984b6d671"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -4.812242860041101
+            },
+            "profile_id": "skywalker_x8-gentle",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.065449846949775,
+              0.065449846949775,
+              0.065449846949775,
+              0.6283185307179586,
+              0.6283185307179586,
+              0.6283185307179586
+            ],
+            "status": "safe",
+            "vehicle_id": "skywalker_x8",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                0.25,
+                0.25,
+                0.25,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                4.0,
+                4.0,
+                4.0
+              ]
+            }
+          },
+          {
+            "closed_loop_eigenvalues": [
+              -57.33790887479947,
+              -9.737451713373503,
+              -9.624485720082227,
+              -134.66817044793555,
+              -9.813987630026212,
+              -46.22373456138145
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment-x",
+              "moment-y",
+              "moment-z"
+            ],
+            "control_scales": [
+              11.876245416,
+              11.876245416,
+              11.876245416
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "9529a9e7acbe5e435d1701604a90a773f56d31dc099936661030655b017bb325",
+              "k": "ad6bde7134a90f3ad69325fc956c24b167e6ecb8f8f677eb4cfff08c0c029d6e",
+              "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+              "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -9.624485720082227
+            },
+            "profile_id": "skywalker_x8-standard",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.065449846949775,
+              0.065449846949775,
+              0.065449846949775,
+              0.6283185307179586,
+              0.6283185307179586,
+              0.6283185307179586
+            ],
+            "status": "safe",
+            "vehicle_id": "skywalker_x8",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                1.0,
+                1.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "closed_loop_eigenvalues": [
+              -19.266183822265987,
+              -231.83630932407584,
+              -19.300888074094047,
+              -188.02830520856455,
+              -539.7047735380472,
+              -19.21216112177851
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment-x",
+              "moment-y",
+              "moment-z"
+            ],
+            "control_scales": [
+              11.876245416,
+              11.876245416,
+              11.876245416
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "9529a9e7acbe5e435d1701604a90a773f56d31dc099936661030655b017bb325",
+              "k": "0899e2fc6dfdf9e0a52a703f412603bfe9dc936672ce242ff8c20f8876cadf7a",
+              "q": "44a85bd25b3cc5ac4485ceb50182fb5d7620650d931fd5047d8864abdcfb54da",
+              "r": "939833d7a42c35bb6f78dc992fed907e7f195ac36fddf15db3a6a5bd6468b3c6"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -19.21216112177851
+            },
+            "profile_id": "skywalker_x8-aggressive",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.065449846949775,
+              0.065449846949775,
+              0.065449846949775,
+              0.6283185307179586,
+              0.6283185307179586,
+              0.6283185307179586
+            ],
+            "status": "safe",
+            "vehicle_id": "skywalker_x8",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                4.0,
+                4.0,
+                4.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                0.0625,
+                0.0625,
+                0.0625
+              ]
+            }
+          }
+        ],
+        "design_source": "runtime_inertia_attitude_bridge",
+        "status": "safe",
+        "vehicle_id": "skywalker_x8"
+      },
+      "source_linearization_status": "blocked",
+      "trim_spec": "x8-powered-trim-v1",
+      "tuning_stage": "generic_lqr_screen"
+    },
+    "x15": {
+      "control_realization": "direct_wrench_screen",
+      "evidence_tier": "T0_structural",
+      "gap": "source-trim aerodynamic derivative schedule and actuator realization required",
+      "linearization_mode": "runtime_inertia_attitude_bridge",
+      "plant_backed_linearization": false,
+      "qualification_status": "screen_only",
+      "report": {
+        "best_profile_id": "x15-gentle",
+        "candidates": [
+          {
+            "closed_loop_eigenvalues": [
+              -3.8296253097064366,
+              -53.138781915362024,
+              [
+                -2.223147419528004,
+                1.6904126649091635
+              ],
+              [
+                -2.223147419528004,
+                -1.6904126649091635
+              ],
+              [
+                -2.1953857597732043,
+                1.6792017848415255
+              ],
+              [
+                -2.1953857597732043,
+                -1.6792017848415255
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment-x",
+              "moment-y",
+              "moment-z"
+            ],
+            "control_scales": [
+              527303.6096,
+              527303.6096,
+              527303.6096
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "870845504172a89e60619ffde728f534ce74e72bc58675d8ff8a982fb70421f2",
+              "k": "dfd4d514f5c3d0913f3a1cc031754fc8bc561d7fc3c1881bd64b07ec365c4ee5",
+              "q": "ba53c003ec160e168b3e486bcbb646e7e1a2a083ad8f53a32fd1bca7676474b8",
+              "r": "9e7cf194cf25f6ad5b94878fdae08c572be06259a20441065247dd3984b6d671"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -2.1953857597732043
+            },
+            "profile_id": "x15-gentle",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.13089969389925,
+              0.13089969389925,
+              0.13089969389925,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "status": "safe",
+            "vehicle_id": "x15",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                0.25,
+                0.25,
+                0.25,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                4.0,
+                4.0,
+                4.0
+              ]
+            }
+          },
+          {
+            "closed_loop_eigenvalues": [
+              -7.659250619412887,
+              -106.27756383072409,
+              [
+                -4.446294839056005,
+                3.380825329818333
+              ],
+              [
+                -4.446294839056005,
+                -3.380825329818333
+              ],
+              [
+                -4.390771519546407,
+                3.358403569683053
+              ],
+              [
+                -4.390771519546407,
+                -3.358403569683053
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment-x",
+              "moment-y",
+              "moment-z"
+            ],
+            "control_scales": [
+              527303.6096,
+              527303.6096,
+              527303.6096
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "870845504172a89e60619ffde728f534ce74e72bc58675d8ff8a982fb70421f2",
+              "k": "d78ac45599537ea2a078b2a1643e9c0a697643039c3a5ef7dc916eab1fbf4e4b",
+              "q": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+              "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -4.390771519546407
+            },
+            "profile_id": "x15-standard",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.13089969389925,
+              0.13089969389925,
+              0.13089969389925,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "status": "safe",
+            "vehicle_id": "x15",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                1.0,
+                1.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "closed_loop_eigenvalues": [
+              -15.288713960435928,
+              -425.93850533492497,
+              [
+                -13.646647804310007,
+                7.630923685562507
+              ],
+              [
+                -13.646647804310007,
+                -7.630923685562507
+              ],
+              [
+                -13.838877624534017,
+                7.6211290335245065
+              ],
+              [
+                -13.838877624534017,
+                -7.6211290335245065
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment-x",
+              "moment-y",
+              "moment-z"
+            ],
+            "control_scales": [
+              527303.6096,
+              527303.6096,
+              527303.6096
+            ],
+            "matrix_sha256": {
+              "a": "e4b272e8e4d25ad1b6cac87f3736bff8bf63bd5a4d7ad23276a54d6ebecbaa2c",
+              "b": "870845504172a89e60619ffde728f534ce74e72bc58675d8ff8a982fb70421f2",
+              "k": "03117ec75a71d56b4acee7e5697c1f83d88b9b4f15c8e97d98e259b3c96a89ab",
+              "q": "44a85bd25b3cc5ac4485ceb50182fb5d7620650d931fd5047d8864abdcfb54da",
+              "r": "939833d7a42c35bb6f78dc992fed907e7f195ac36fddf15db3a6a5bd6468b3c6"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -13.646647804310007
+            },
+            "profile_id": "x15-aggressive",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll-error",
+              "pitch-error",
+              "yaw-error",
+              "p",
+              "q",
+              "r"
+            ],
+            "state_scales": [
+              0.13089969389925,
+              0.13089969389925,
+              0.13089969389925,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "status": "safe",
+            "vehicle_id": "x15",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                4.0,
+                4.0,
+                4.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                0.0625,
+                0.0625,
+                0.0625
+              ]
+            }
+          }
+        ],
+        "design_source": "runtime_inertia_attitude_bridge",
+        "status": "safe",
+        "vehicle_id": "x15"
+      },
+      "source_linearization_status": "blocked",
+      "trim_spec": "x15-release-glide-v1",
+      "tuning_stage": "generic_lqr_screen"
+    }
+  },
+  "id": "taoryx_reference_aircraft_tuning_bindings_v1",
+  "schema_version": 1
+}

@@ -8,6 +8,7 @@ import math
 import re
 import tempfile
 from pathlib import Path
+from typing import Any
 
 from taoryx.contracts import Vector3
 from taoryx.language.grammar_contracts import GrammarProfile
@@ -32,8 +33,10 @@ def _sha256(path: Path) -> str:
 
 
 def _candidate(source: str, state: dict[str, float], controls: dict[str, float]) -> str:
+    """Freeze source guidance while exposing only declared trim coordinates."""
+
+    del state
     updated = source
-    updated = re.sub(r"(\*fly alpha=)[0-9.eE+-]+", rf"\g<1>{state['alpha_deg']:.16g}", updated, count=1)
     for name, value in controls.items():
         updated, count = re.subn(
             rf"(\*runtime control {re.escape(name.replace('_', '-'))}\b[^\n]*?\bdefault=)[0-9.eE+-]+",
@@ -58,18 +61,56 @@ def _state_at_alpha(base: RuntimeState, base_alpha_deg: float, alpha_deg: float)
     the same air-data calculation used by the rigid-body plant.
     """
 
-    delta = math.radians(alpha_deg - base_alpha_deg)
+    return _state_at_orientation_offsets(base, alpha_deg - base_alpha_deg, 0.0)
+    ####
+
+
+def _state_at_orientation_offsets(
+    base: RuntimeState,
+    pitch_offset_deg: float,
+    yaw_offset_deg: float,
+) -> RuntimeState:
+    """Apply bounded local body pitch/yaw offsets to a source attitude.
+
+    The source deck's aerodynamic coordinates are functions of the complete
+    body-to-airflow relationship.  Solving directly in body-local offsets
+    avoids falsely identifying a yaw offset with an exact beta change while
+    still letting the table evaluator report the resulting physical alpha and
+    beta values.
+    """
+
+    pitch = math.radians(pitch_offset_deg)
+    yaw = math.radians(yaw_offset_deg)
     current = Quaternion(
         float(base.named["qw"]),
         float(base.named["qx"]),
         float(base.named["qy"]),
         float(base.named["qz"]),
     )
-    perturbation = Quaternion(math.cos(delta / 2.0), 0.0, math.sin(delta / 2.0), 0.0)
-    attitude = current.multiply(perturbation).normalized()
+    pitch_rotation = Quaternion(math.cos(pitch / 2.0), 0.0, math.sin(pitch / 2.0), 0.0)
+    yaw_rotation = Quaternion(math.cos(yaw / 2.0), 0.0, 0.0, math.sin(yaw / 2.0))
+    attitude = current.multiply(pitch_rotation).multiply(yaw_rotation).normalized()
     values = list(base.values)
     for name, value in zip(("qw", "qx", "qy", "qz"), (attitude.w, attitude.x, attitude.y, attitude.z), strict=True):
         values[base.value_names.index(name)] = value
+    return base.with_values(values)
+    ####
+
+
+def _steady_glide_seed(base: RuntimeState) -> RuntimeState:
+    """Remove source-release angular rates for a local steady-glide trim.
+
+    The archived source release snapshot has nonzero body rates.  It remains
+    useful as a released-flight initial condition, but a local equilibrium
+    used for derivative and LQR evidence must not silently call that rotating
+    state a trim.  This derived seed preserves the source position, velocity,
+    mass, and attitude, while declaring zero body rates before the solver
+    finds the compatible alpha and source-control coordinates.
+    """
+
+    values = list(base.values)
+    for name in ("wx", "wy", "wz"):
+        values[base.value_names.index(name)] = 0.0
     return base.with_values(values)
     ####
 
@@ -79,12 +120,14 @@ def _residual(
     control_values: dict[str, float],
     vehicle: RuntimeVehicle,
     base_state: RuntimeState,
-    base_alpha_deg: float,
 ) -> dict[str, float]:
     """Evaluate one cached source-bound plant residual in memory."""
 
-    alpha_deg = float(state_values["alpha_deg"])
-    candidate_state = _state_at_alpha(base_state, base_alpha_deg, alpha_deg)
+    candidate_state = _state_at_orientation_offsets(
+        base_state,
+        float(state_values["pitch_offset_deg"]),
+        float(state_values["yaw_offset_deg"]),
+    )
     vehicle.state = candidate_state
     vehicle.history[0] = candidate_state
     for name, value in control_values.items():
@@ -95,6 +138,7 @@ def _residual(
         # retain the degree command as well so diagnostics and source-facing
         # controls remain auditable.
         vehicle.control_values[degree_name.removesuffix("-deg")] = math.radians(numeric_value)
+        vehicle.control_values[degree_name.removesuffix("-deg").replace("-", "_")] = math.radians(numeric_value)
     # Keep the candidate namespace coherent for both the generic runtime
     # evaluator and the rigid-body aerodynamic control provider.
     candidate_named = {**candidate_state.named, **vehicle.control_values}
@@ -125,9 +169,9 @@ def _residual(
     )
     velocity_body = current.conjugate().rotate(
         Vector3(
-            float(candidate_state.named.get("xdt", candidate_state.named.get("xdot", candidate_state.named.get("xdot_ecic", 0.0)))),
-            float(candidate_state.named.get("ydt", candidate_state.named.get("ydot", candidate_state.named.get("ydot_ecic", 0.0)))),
-            float(candidate_state.named.get("zdt", candidate_state.named.get("zdot", candidate_state.named.get("zdot_ecic", 0.0)))),
+            float(candidate_state.named.get("vx", candidate_state.named.get("xdt", candidate_state.named.get("xdot", candidate_state.named.get("xdot_ecic", 0.0))))),
+            float(candidate_state.named.get("vy", candidate_state.named.get("ydt", candidate_state.named.get("ydot", candidate_state.named.get("ydot_ecic", 0.0))))),
+            float(candidate_state.named.get("vz", candidate_state.named.get("zdt", candidate_state.named.get("zdot", candidate_state.named.get("zdot_ecic", 0.0))))),
         )
     )
     total_force = Vector3(
@@ -147,8 +191,14 @@ def _residual(
     ####
 
 
-def main() -> None:
-    """Solve and write the X-15 source-trim report."""
+def build_report() -> dict[str, Any]:
+    """Solve one source-bounded X-15 release-glide trim attempt.
+
+    A failed residual is an expected, useful result: the release snapshot is
+    not permitted to become a trim merely because it is convenient for a
+    controller experiment.  Callers can therefore use this report as a
+    promotion gate before attempting linearization or LQR synthesis.
+    """
 
     with tempfile.TemporaryDirectory(prefix="taoryx-x15-trim-") as directory:
         work = Path(directory)
@@ -166,13 +216,12 @@ def main() -> None:
         vehicle = program.case().vehicles["1"]
         if vehicle.environment_evaluator is None:
             raise RuntimeError("X-15 source candidate did not produce a runtime evaluator")
-        base_state = vehicle.state
-        base_observables = vehicle.environment_evaluator(base_state.named)
-        base_alpha_deg = float(base_observables["aero_alpha_deg"])
+        source_release_state = vehicle.state
+        base_state = _steady_glide_seed(source_release_state)
         result = solve_trim(
             spec,
-            lambda state, controls: _residual(dict(state), dict(controls), vehicle, base_state, base_alpha_deg),
-            max_nfev=100,
+            lambda state, controls: _residual(dict(state), dict(controls), vehicle, base_state),
+            max_nfev=500,
             residual_tolerance=1.0e-10,
             acceptance_tolerance=1.0e-3,
         )
@@ -198,12 +247,21 @@ def main() -> None:
                 if not result.success
                 else "bounded glide residual solve satisfied force-velocity alignment and zero-moment equilibrium"
             ),
-            "state_bound_hit": bool(
-                result.state.get("alpha_deg") == result.spec.state_lower.get("alpha_deg")
-                if result.spec.state_lower
-                else False
-            ),
+            "state_bound_hit": {
+                name: bool(result.state.get(name) == result.spec.state_lower.get(name))
+                or bool(result.state.get(name) == result.spec.state_upper.get(name))
+                for name in result.spec.state_names
+            },
             "source_release_is_equilibrium_claim": False,
+            "source_release_body_rate_rad_s": {
+                name: float(source_release_state.named[name])
+                for name in ("wx", "wy", "wz")
+            },
+            "steady_glide_seed_body_rate_rad_s": {"wx": 0.0, "wy": 0.0, "wz": 0.0},
+            "steady_glide_seed_transform": (
+                "The source release snapshot retains its position, inertial velocity, mass, and attitude; "
+                "its nonzero body rates are set to zero before solving a local steady-glide equilibrium."
+            ),
         },
         "provenance": {
             "problem": str(PROBLEM.relative_to(ROOT)),
@@ -219,9 +277,23 @@ def main() -> None:
             "tables_rebound_per_evaluation": False,
         },
     }
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(OUTPUT)
+    return payload
+    ####
+
+
+def write_report(output: Path = OUTPUT) -> Path:
+    """Write the deterministic release-glide trim diagnostic."""
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(build_report(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return output
+    ####
+
+
+def main() -> None:
+    """Solve and write the X-15 source-trim report."""
+
+    print(write_report())
     ####
 
 

@@ -11,11 +11,17 @@ vehicles:
     realization:
       force_source: coefficient_table
       moment_source: direct_moment
-      actuator_realization: source_direct_control
+      actuator_realization: bounded_surface_allocator_candidate
       propulsion_model: table_thrust
       resource_model: fixed_mass
-      claim: source-bounded rigid-body trajectory
+      claim: source-bounded rigid-body trajectory with a local surface-allocation candidate
       nonclaims: [physical actuator dynamics, fuel depletion]
+    allocation:
+      model: bounded_local_table_inversion
+      controls: [elevator-deg, aileron-deg, rudder-deg]
+      derivative_step_deg: 1.0
+      source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/jet_b747/controls/actuator_limits.csv
+      qualification_status: candidate_not_runtime_qualified
     trajectory_vehicle: b747
     earth_model: wgs-84
     earth_omega_rad_s: 0.0
@@ -36,6 +42,8 @@ vehicles:
     table_bindings:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_aileron_6axis.tbl
+      - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_rudder_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
     aero_convention:
       force_frame: body_axes_x_forward_y_right_z_down
@@ -46,13 +54,14 @@ vehicles:
         through the documented body-to-wind transformation.
       table_semantics: absolute_coefficients
       control_table_rule: >-
-        The elevator deck includes the nominal zero-elevator baseline.  Use it
-        as an absolute control-conditioned deck; do not add it to the static
-        deck unless an explicit delta composition is introduced.
+        The elevator, aileron, and rudder decks include their nominal
+        zero-control baselines.  Use each as an absolute control-conditioned
+        deck; do not add any of them to the static deck unless an explicit
+        delta composition is introduced.
       source_note: >-
-        Static and elevator tables are transcodes of the jet_b747 source grids;
-        source provenance is recorded in each table header and the source
-        differential tests.
+        Static, elevator, aileron, and rudder tables are transcodes of the
+        jet_b747 source grids; source provenance is recorded in each table
+        header and the source differential tests.
       problem_comment: >-
         Aero channels are body-axis cx/cy/cz (not direct CD/CL); B747 control
         tables are absolute source-grid values, including zero-control baseline.
@@ -68,11 +77,17 @@ vehicles:
     realization:
       force_source: coefficient_table
       moment_source: aerodynamic_tables_or_direct_moment_by_fixture
-      actuator_realization: surface_allocator_candidate_or_direct_moment_baseline
+      actuator_realization: source_table_coordinate_allocator_candidate_or_direct_wrench_screen
       propulsion_model: table_thrust
       resource_model: fixed_mass
-      claim: source-bounded X8 response; bounded elevon allocation only in the declared candidate fixture
-      nonclaims: [full flight-control-law fidelity, time-normalized actuator dynamics, fuel depletion]
+      claim: source-bounded X8 response; bounded collective/differential source-table-coordinate allocation only in declared candidate fixtures
+      nonclaims: [resolved hardware left/right elevon mapping, full flight-control-law fidelity, fuel depletion]
+    allocation:
+      model: bounded_local_table_coordinate_inversion
+      controls: [collective-elevon-deg, differential-elevon-deg]
+      derivative_step_deg: 1.0
+      source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/cruise_class_uav_skywalker_x8/controls/actuator_limits.csv
+      qualification_status: local_table_coordinate_candidate_pending_left_right_sign_mapping
     trajectory_vehicle: x8
     earth_model: wgs-84
     earth_omega_rad_s: 0.0
@@ -89,6 +104,20 @@ vehicles:
       - {name: collective-elevon-deg, default: -2.1478876544, lower: -20, upper: 20}
       - {name: differential-elevon-deg, default: -3.9378035934, lower: -20, upper: 20}
     actuator: {maximum_moment: 20, maximum_body_rate_deg_s: 360}
+    actuator_dynamics:
+      collective_elevon:
+        travel_deg: [-20, 20]
+        rate_limit_deg_s: 120
+        time_constant_s: 0.05
+        source_class: PUBLISHED_LIMITS_WITH_IMPLEMENTATION_APPROXIMATION
+      differential_elevon:
+        travel_deg: [-20, 20]
+        rate_limit_deg_s: 120
+        time_constant_s: 0.05
+        source_class: PUBLISHED_LIMITS_WITH_IMPLEMENTATION_APPROXIMATION
+      throttle:
+        time_constant_s: 0.2
+        source_class: IMPLEMENTATION_APPROXIMATION
     table_bindings:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl
@@ -118,6 +147,7 @@ vehicles:
     aero_convention:
       force_frame: body_axes_x_forward_y_right_z_down
       force_channels: cx_cy_cz
+      table_semantics: absolute_coefficients_at_fixed_control_grid_reference_condition
       drag_note: >-
         cx and cz are body-axis force coefficients, not wind-axis drag/lift
         coefficients.  Do not label cx or cz as CD; derive wind-axis drag only
@@ -156,6 +186,23 @@ vehicles:
     body_frame: source-z-up-adapted-to-taoryx
     aero_load_mode: direct-wrench
     aero_wrench_frame: source-z-up
+    rotor_geometry:
+      arrangement: quad-x
+      rotor_count: 4
+      positions_file: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/geometry_mass/rotor_positions.csv
+      position_reference: center_of_mass
+      axis_frame: source-z-up
+      spin_direction_field: yaw_torque_direction
+      source_id: ROTORPY_HUMMINGBIRD
+    rotor_allocator:
+      model: bounded_quad_x
+      matrix_file: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/controls/control_allocation_matrix.csv
+      input_units: individual_rotor_thrust_N
+      source_id: ROTORPY_HUMMINGBIRD_AND_MULTIROTOR_DYNAMICS
+    allocation:
+      model: quad_x
+      wrench_frame: source-z-up
+      matrix_file: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/controls/control_allocation_matrix.csv
     reference_area_m2: 1.0
     reference_length_m: 0.34
     dry_mass_kg: 0.5
@@ -169,7 +216,14 @@ vehicles:
       - {name: rotor-2-speed, default: 468.7244338633868, lower: 0, upper: 1500}
       - {name: rotor-3-speed, default: 468.7244338633868, lower: 0, upper: 1500}
       - {name: rotor-4-speed, default: 468.7244338633868, lower: 0, upper: 1500}
-    actuator: {maximum_moment: 1, maximum_body_rate_deg_s: 720}
+    actuator:
+      maximum_moment: 1
+      maximum_body_rate_deg_s: 720
+      dynamics:
+        model: first_order_motor_lag
+        time_constant_s: 0.005
+        speed_limits_rad_s: [0, 1500]
+        source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/VALIDITY.md
     table_bindings:
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl
       - tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl
@@ -208,11 +262,18 @@ vehicles:
     realization:
       force_source: coefficient_table
       moment_source: aerodynamic_tables
-      actuator_realization: source_direct_control_or_surface_path_by_fixture
-      propulsion_model: table_thrust_and_mass_flow_in_staged_cases
+      actuator_realization: source_aerodynamic_control_coordinates_not_promoted_to_physical_lqr
+      propulsion_model: time_indexed_full_thrust_and_mass_flow_history_in_staged_cases
       resource_model: propellant_mass_flow_in_staged_cases
       claim: source-bounded X-15 aero/propulsion response in declared cases
-      nonclaims: [complete actuator transients, landing dynamics, universal full-envelope fidelity]
+      nonclaims:
+        - complete actuator transients
+        - landing dynamics
+        - universal full-envelope fidelity
+        - actual-effector LQR until a source-bounded trim passes
+        - throttle allocation from the XLR99 time history
+        - low-dynamic-pressure RCS blending
+        - resolved left/right stabilator mechanical allocation
     trajectory_vehicle: x15
     earth_model: wgs-84
     earth_omega_rad_s: 7.2921151467e-5
@@ -224,13 +285,33 @@ vehicles:
     dry_mass_kg: 9000.0
     nominal_mass_kg: 14641.0545
     inertia_kg_m2: {x: 4948.7355, y: 129114.2666, z: 131825.9024}
-    envelope: {}
+    envelope:
+      domain_scope: recommended_research_use
+      min_mach: 0.3
+      max_mach: 6.7
+      max_alpha_deg: 10
+      max_beta_deg: 10
+      max_altitude_m: 24384
     controls:
-      - {name: throttle, default: 1.0, lower: 0.4, upper: 1.0}
+      - {name: throttle, default: 1.0, lower: 0.4, upper: 1.0, source_status: grammar_command_only_not_xlr99_map}
       - {name: symmetric-stabilator-deg, default: 0.0, lower: -14.9, upper: 34.9}
       - {name: differential-stabilator-deg, default: 0.0, lower: -20.05, upper: 20.05}
       - {name: rudder-deg, default: 2.0, lower: -29.79, upper: 29.79}
-    actuator: {}
+    response_limits:
+      max_body_rate_deg_s: 3600
+      source_case: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+    direct_wrench_authority:
+      frame: body_axes_x_forward_y_right_z_down
+      mode: bounded_direct_moment_injection
+      maximum_moment_nm: 250000
+      source_case: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+      qualification_status: integration_baseline_only
+    actuator:
+      maximum_moment: 250000
+      maximum_body_rate_deg_s: 3600
+      source_case: examples/showcases/x15_rocket_to_hawaii/source_trim_hold_6dof.prb
+      qualification_status: direct_wrench_screen_only
+      physical_lqr_readiness: blocked_before_T1_trim
     table_bindings:
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_symmetric_stabilator_6axis.tbl
       - tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_xlr99_thrust_mdot.tbl
@@ -250,6 +331,14 @@ vehicles:
         X-15 tables are transcodes of the named public-research source grids;
         provenance is recorded in each table header and source differential
         tests.
+      physical_control_note: >-
+        The fixture exposes symmetric/differential stabilator and rudder
+        source coordinates, but neither the unpowered release-glide nor the
+        frozen full-thrust source condition passes the declared trim contract.
+        The XLR99 deck is time-indexed full thrust rather than a throttle map,
+        stabilator hardware sign/gearing remains unresolved, and no RCS
+        geometry/impulse data are present. Physical LQR promotion is therefore
+        blocked before T1; direct body moments remain screen-only evidence.
       problem_comment: >-
         Aero channels are body-axis cx/cy/cz (not direct CD/CL); X-15 control
         decks are absolute source-grid values including zero-control baseline.

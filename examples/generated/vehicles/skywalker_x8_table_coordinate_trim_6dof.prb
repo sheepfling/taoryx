@@ -1,0 +1,38 @@
+(skywalker-x8-table-coordinate-trim-anchor-6dof)
+*title Skywalker X8 source-trim table-coordinate control anchor
+*mode rigid-body-6dof
+*atmos standard
+*earth wgs-84 omega=0
+*runtime status vehicle reference-area=0.75 reference-length=0.36 dry-mass-kg=3.364 nominal-mass-kg=3.364 inertia-x=0.325 inertia-y=0.140 inertia-z=0.400 envelope-min-forward-speed=2 envelope-max-speed=27 envelope-max-alpha-deg=12 envelope-max-beta-deg=5
+# The following controls are the source table-query coordinates.  The public
+# package does not yet resolve their hardware left/right elevon sign mapping.
+# This anchor deliberately contains no direct-wrench, body-moment, or hold-law
+# bridge.
+*runtime control throttle vehicle=1 default=0.5773431905510489 lower=0 upper=1
+*runtime control collective-elevon-deg vehicle=1 default=-2.147887654393667 lower=-20 upper=20
+*runtime control differential-elevon-deg vehicle=1 default=-3.9378035933567617 lower=-20 upper=20
+*runtime status actuator allocation=local-table-effectiveness actuator-response=first-order-0.05-s rate-limit=120-deg-s control-coordinate=collective-differential source-class=published-limits-with-implementation-approximation
+*runtime status thermal policy=none
+# X8 control decks are absolute coefficients at a fixed source throttle
+# reference.  Compose the static deck once and subtract it from each control
+# deck before adding the two physical elevon contributions.
+*define x8-cx
+  x8-cx=(cx-static)+(cx-collective)-(cx-static)+(cx-differential)-(cx-static);
+*define x8-cy
+  x8-cy=(cy-static)+(cy-collective)-(cy-static)+(cy-differential)-(cy-static);
+*define x8-cz
+  x8-cz=(cz-static)+(cz-collective)-(cz-static)+(cz-differential)-(cz-static);
+*define x8-cmx
+  x8-cmx=(cmx-static)+(cmx-collective)-(cmx-static)+(cmx-differential)-(cmx-static);
+*define x8-cmy
+  x8-cmy=(cmy-static)+(cmy-collective)-(cmy-static)+(cmy-differential)-(cmy-static);
+*define x8-cmz
+  x8-cmz=(cmz-static)+(cmz-collective)-(cmz-static)+(cmz-differential)-(cmz-static);
+*trajectory 1 x8 start on 1
+  *initial ecic x=6378315.0 y=0.0 z=0.0 xdt=0.0 ydt=17.9 zdt=0.0 qw=0.5328883197426527 qx=-0.5328883197426527 qy=-0.4647903168976871 qz=0.4647903168976871 time=0.0 mass=3.364 propellant_mass=0.0
+  *segment 1 source-trim-table-coordinates
+    *integ dtprnt=0.05 dt=0.005
+    *prop thrust=(thrust) mdot=0
+    *aero cx=x8-cx cy=x8-cy cz=x8-cz cmx=x8-cmx cmy=x8-cmy cmz=x8-cmz
+    *when time>0.005 stop
+*end
