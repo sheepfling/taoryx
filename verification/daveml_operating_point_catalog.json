@@ -1,6 +1,6 @@
 {
   "catalog": "verification/daveml_operating_point_catalog.yaml",
-  "catalog_sha256": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+  "catalog_sha256": "161a2ea2a69ed7c5a134539b53b850ff3643a9726b18644f13e71da6a44ccfd2",
   "claim_boundary": "certified source-bounded operating points; not flight qualification",
   "families": [
     {
@@ -171,7 +171,7 @@
     }
   ],
   "family_count": 5,
-  "operational_contracts_sha256": "a0375e95090bff8750f991f0db65c2ac67fa200e2c2f0c7885510c869a218751",
+  "operational_contracts_sha256": "54c2b3560368af499fd203d4d8448035550eb2b400962e679374ebc89a19154b",
   "report_type": "taoryx.daveml-operating-point-catalog/v1",
   "schema_version": 1,
   "status": "verified"

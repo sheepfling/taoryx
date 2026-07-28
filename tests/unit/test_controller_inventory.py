@@ -14,7 +14,7 @@ def test_controller_inventory_covers_active_four_family_paths_and_designs() -> N
     report = audit()
 
     assert report["status"] == "pass"
-    assert report["active_entry_count"] == 6
+    assert report["active_entry_count"] == 7
     assert report["baseline_entry_count"] == 4
     assert report["missing_design_inventory"] == []
 

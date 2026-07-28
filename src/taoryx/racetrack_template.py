@@ -243,7 +243,7 @@ def resolve_racetrack_binding(template_id: str, binding_id: str, values: dict[st
     if fidelity_value not in RACETRACK_FIDELITIES:
         allowed = ", ".join(RACETRACK_FIDELITIES)
         raise ValueError(f"racetrack binding {binding_id!r} has unsupported fidelity {fidelity_value!r}; expected one of {allowed}")
-    fidelity = fidelity_value
+    fidelity: RacetrackFidelity = fidelity_value
     low_altitude = float(values["low_altitude_m"])
     high_altitude = float(values["high_altitude_m"])
     if high_altitude < low_altitude:

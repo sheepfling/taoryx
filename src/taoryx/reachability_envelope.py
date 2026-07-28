@@ -801,9 +801,10 @@ class _Derivative:
 def _launch_state(vehicle: RocketGlideVehicle, command: LaunchCommand, fidelity: ReachabilityFidelity) -> State:
     direction = command.launch_direction
     velocity = _scale(direction, vehicle.initial_speed_m_s)
+    position: Vector3 = (0.0, 0.0, vehicle.initial_altitude_m)
     common = {
         "time_s": 0.0,
-        "position_m": (0.0, 0.0, vehicle.initial_altitude_m),
+        "position_m": position,
         "velocity_m_s": velocity,
         "mass_kg": vehicle.initial_mass_kg,
         "phase": "boost",
@@ -811,7 +812,7 @@ def _launch_state(vehicle: RocketGlideVehicle, command: LaunchCommand, fidelity:
     if fidelity is ReachabilityFidelity.RIGID_BODY_6DOF:
         native = RigidBody6DofState(
             0.0,
-            FrameVector3(ContractVector3(*common["position_m"]), Frame.ECIC),
+            FrameVector3(ContractVector3(*position), Frame.ECIC),
             FrameVector3(ContractVector3(*velocity), Frame.ECIC),
             _euler_quaternion((command.bank_rad, -command.elevation_rad, command.azimuth_rad)),
             ContractVector3(0.0, 0.0, 0.0),

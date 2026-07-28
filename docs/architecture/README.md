@@ -24,6 +24,9 @@ contract is described in
 The explicit force, moment, actuator, propulsion, resource, and claim-boundary
 inventory is described in
 [`vehicle-realizations.md`](vehicle-realizations.md).
+The tiered data intake contract and machine-readable readiness checklist is
+described in
+[`fidelity-data-requirements.md`](fidelity-data-requirements.md).
 The accepted-state, force-evaluation, and sensor timing boundary is defined in
 [`eom-timing-contract.md`](eom-timing-contract.md).
 The language/implementation contract for pre/post truth around events is
