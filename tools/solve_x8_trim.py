@@ -10,8 +10,14 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import tempfile
 from pathlib import Path
+
+try:
+    from tools.rotating_earth_trim import rotating_fixture_source
+except ModuleNotFoundError:
+    from rotating_earth_trim import rotating_fixture_source
 
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.runtime.runner import run_files
@@ -50,9 +56,9 @@ def _quaternion_for_alpha(alpha_rad: float) -> tuple[float, float, float, float]
     ####
 
 
-def _problem(alpha_deg: float, throttle: float, collective_deg: float, differential_deg: float) -> str:
+def _problem(alpha_deg: float, throttle: float, collective_deg: float, differential_deg: float, earth_omega_rad_s: float) -> str:
     qw, qx, qy, qz = _quaternion_for_alpha(math.radians(alpha_deg))
-    return f"""(x8-powered-trim-candidate)
+    problem = f"""(x8-powered-trim-candidate)
 *title Skywalker X8 powered static-deck trim candidate
 *mode rigid-body-6dof
 *atmos standard
@@ -84,16 +90,17 @@ def _problem(alpha_deg: float, throttle: float, collective_deg: float, different
     *when time>0.005 stop
 *end
 """
+    return rotating_fixture_source(problem, earth_omega_rad_s)
     ####
 
 
-def _residual(state_values: dict[str, float], control_values: dict[str, float], work: Path) -> dict[str, float]:
+def _residual(state_values: dict[str, float], control_values: dict[str, float], work: Path, earth_omega_rad_s: float) -> dict[str, float]:
     alpha_deg = state_values["alpha_deg"]
     throttle = control_values["throttle"]
     collective_deg = control_values["collective_elevon_deg"]
     differential_deg = control_values["differential_elevon_deg"]
     problem = work / "candidate.prb"
-    problem.write_text(_problem(alpha_deg, throttle, collective_deg, differential_deg), encoding="utf-8")
+    problem.write_text(_problem(alpha_deg, throttle, collective_deg, differential_deg, earth_omega_rad_s), encoding="utf-8")
     report = run_files(
         problem,
         (STATIC_TABLE, COLLECTIVE_TABLE, DIFFERENTIAL_TABLE, THRUST_TABLE),
@@ -120,12 +127,13 @@ def _residual(state_values: dict[str, float], control_values: dict[str, float], 
 def main() -> None:
     """Solve and write the X8 powered trim evidence report."""
 
+    earth_omega_rad_s = float(os.environ.get("TAORYX_TRIM_EARTH_OMEGA", "0.0"))
     with tempfile.TemporaryDirectory(prefix="taoryx-x8-trim-") as directory:
         work = Path(directory)
         spec = load_trim_catalog(ROOT / "verification/trim_specs.yaml").get("x8-powered-trim-v1").to_spec()
         result = solve_trim(
             spec,
-            lambda state, controls: _residual(dict(state), dict(controls), work),
+            lambda state, controls: _residual(dict(state), dict(controls), work, earth_omega_rad_s),
             max_nfev=100,
             residual_tolerance=1.0e-11,
             acceptance_tolerance=1.0e-3,
@@ -134,11 +142,14 @@ def main() -> None:
         residual = result.residuals
     payload = {
         "vehicle": "skywalker-x8",
+        "earth_omega_rad_s": earth_omega_rad_s,
+        "operating_point_mode": "zero_rate_source_parity" if earth_omega_rad_s == 0.0 else "rotating_earth_representative",
         "source_anchor": "flight-identified published trim neighborhood",
         "claim": "powered trim using composed static, collective, and differential six-axis decks plus simplified thrust",
         "control_decks": "static, collective-elevon, and differential-elevon increments composed at the source-table boundary",
         "parameters": {"alpha_deg": parameters[0], "throttle": parameters[1], "collective_elevon_deg": parameters[2], "differential_elevon_deg": parameters[3]},
         "residual_normalized": {"body_x": residual["body_x_force"], "body_z": residual["body_z_force"], "moment_x": residual["roll_moment"], "moment_y": residual["pitch_moment"], "moment_z": residual["yaw_moment"]},
+        "trim_diagnostics": [diagnostic.as_dict() for diagnostic in result.diagnostics],
         "residual_norm_l2": math.sqrt(sum(value * value for value in residual.values())),
         "acceptance_gate": {
             "translation_norm_lt": 0.01,
@@ -152,9 +163,10 @@ def main() -> None:
         },
         "solver": {"success": result.success, "status": result.status, "message": result.message, "nfev": result.iterations},
     }
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(OUTPUT)
+    output = Path(os.environ.get("TAORYX_TRIM_OUTPUT", str(OUTPUT)))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(output)
     ####
 
 

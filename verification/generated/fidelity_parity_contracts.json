@@ -40,15 +40,15 @@
       "inputs": {
         "bridge_source_problem": {
           "path": "examples\\mission_families\\slower_b747\\SV01_powered_trim_reduction_3dof.prb",
-          "sha256": "954fa53ec58ad17d58d7240b977230f109fd18daef3fd51a776a63454aa18ac9"
+          "sha256": "371a8f0212d16c28284a2bc388568faae1eb4fcd0aae763cfe58900cfc738578"
         },
         "constrained_rigid_problem": {
           "path": "examples\\mission_families\\slower_b747\\SV01_powered_trim_parity_6dof.prb",
-          "sha256": "6eb6035299a7bdd7b41f00cd60ee4f16be680ef5b8db6f95e61c04f20312e84a"
+          "sha256": "e1dd6636e9246641b3cc1ee7f329329dd153dac4531bf30fb7cf695acfd1b55d"
         },
         "point_mass_problem": {
           "path": "examples\\mission_families\\slower_b747\\SV01_powered_trim_reduction_3dof.prb",
-          "sha256": "954fa53ec58ad17d58d7240b977230f109fd18daef3fd51a776a63454aa18ac9"
+          "sha256": "371a8f0212d16c28284a2bc388568faae1eb4fcd0aae763cfe58900cfc738578"
         }
       },
       "parity_tolerances": {
@@ -66,7 +66,7 @@
       "source_tables": [
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_elevator_6axis.tbl",
-          "sha256": "52bfafa2eee81c79eab6d48517a376ea2899d0832fb6eb26f789235810943f80"
+          "sha256": "c649e1861f3394f43a4ec4f42992fb9f73590033af8f97779a8e0100ae00bd0e"
         },
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl",
@@ -144,15 +144,15 @@
       "inputs": {
         "bridge_source_problem": {
           "path": "examples\\mission_families\\slower_x8\\SV03_powered_trim_reduction_3dof.prb",
-          "sha256": "f7fa89651c62dd0b297452aa2c15b158e9c915739c2516d85cfc380cfb8ad67d"
+          "sha256": "7116a41447942232498ecfb8660815db003ea9cf5e16ecc51eb70f62edf23d05"
         },
         "constrained_rigid_problem": {
           "path": "examples\\mission_families\\slower_x8\\SV03_powered_trim_parity_6dof.prb",
-          "sha256": "693ee3ad5915cd845dd40dbe1abfc42bb92fe042d2be443f9701204fc13c66c5"
+          "sha256": "c63633671c662b671534cf73236e0a1db9b19920d9e450bba913f23fadbe9b61"
         },
         "point_mass_problem": {
           "path": "examples\\mission_families\\slower_x8\\SV03_powered_trim_reduction_3dof.prb",
-          "sha256": "f7fa89651c62dd0b297452aa2c15b158e9c915739c2516d85cfc380cfb8ad67d"
+          "sha256": "7116a41447942232498ecfb8660815db003ea9cf5e16ecc51eb70f62edf23d05"
         }
       },
       "parity_tolerances": {
@@ -170,15 +170,15 @@
       "source_tables": [
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl",
-          "sha256": "eca2d49d05b9b2bf83e4d1245d707f2b1eed0d80a8cb39859120bda5551b5941"
+          "sha256": "0c1e7de7b97e089fdfd521504e9f929424c62b8a4d22250ea4644bfff9d33489"
         },
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl",
-          "sha256": "aaa190fa3e3019126874608307c1171d2b45815ed7f961219b3cd47138dc72bd"
+          "sha256": "08ea35245d9bf359053191bfec2fc25ebc0ac2ee4f349b8a2121995620558b1b"
         },
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl",
-          "sha256": "000b5d697c8ae3620f9307a705a223ec2b00ba126862900ad7a03320d06f8587"
+          "sha256": "cb3dd2e0c9f461384b4e1311953737fa624f0d406b1100818905523e2865d07c"
         },
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl",
@@ -253,15 +253,15 @@
       "inputs": {
         "bridge_source_problem": {
           "path": "examples\\mission_families\\slower_hummingbird\\SV05_hover_reduction_3dof.prb",
-          "sha256": "33871a13f2f887aae3989d949a20edcbe72e9c3b8d10ff367bcc338661b68e12"
+          "sha256": "6b8b8468996ac85aafbb4305aa414a9f0d26c64b781a1718a96868b17faceb4c"
         },
         "constrained_rigid_problem": {
           "path": "examples\\mission_families\\slower_hummingbird\\SV05_hover_parity_6dof.prb",
-          "sha256": "6cd41112b2d4e8933fe1357c7722995244d89e5494e68afd7fafa1d7e59c76e6"
+          "sha256": "ad1bb0e729c37c8adb8a4f49fc173d28c671e68a84514082fb2f5426c154bf13"
         },
         "point_mass_problem": {
           "path": "examples\\mission_families\\slower_hummingbird\\SV05_hover_reduction_3dof.prb",
-          "sha256": "33871a13f2f887aae3989d949a20edcbe72e9c3b8d10ff367bcc338661b68e12"
+          "sha256": "6b8b8468996ac85aafbb4305aa414a9f0d26c64b781a1718a96868b17faceb4c"
         }
       },
       "parity_tolerances": {
@@ -278,15 +278,15 @@
       "source_tables": [
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cx.tbl",
-          "sha256": "522cf49dc2693aeacfbb674e749f4e75481b067c43ce9b6942d1e8ab194ec921"
+          "sha256": "8d1aa0979300a586b95e45f03102fc079984b2bb1826ab389377d15eb88335f4"
         },
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cy.tbl",
-          "sha256": "cee92d2d96e7fb5b9218fc64aafad2be53c8e40a2f4c96b8ea3483729aaa754c"
+          "sha256": "ab53a02d0f781e390a651a3bcaf751b9def26031d52788a2432bd68dff978362"
         },
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cz.tbl",
-          "sha256": "48adb061e5c6fa1dd3508512def3528575f0854c28579b28ccc948974539ea99"
+          "sha256": "c7c8a4f7e6f2a25b31fb111a1baadfc7f4029812e28cdcfd3d4a14256d6fcebc"
         },
         {
           "path": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/hummingbird_cmx.tbl",
@@ -377,15 +377,15 @@
       "inputs": {
         "bridge_source_problem": {
           "path": "examples\\showcases\\x15_rocket_to_hawaii\\release_glide_reduction_3dof.prb",
-          "sha256": "e6b628d41e9cd10f98bdd0bcf0e20ffe06285297f7337c4ff1ac68723d4d23d7"
+          "sha256": "06658aa57e8b2042374ff96a963a81fa30f96b3ce9d6401b01807c158ac852cf"
         },
         "constrained_rigid_problem": {
           "path": "examples\\showcases\\x15_rocket_to_hawaii\\release_glide_parity_6dof.prb",
-          "sha256": "1523379d1a1c4b3ddb99b5cbe0f9545c2ec4f5524b802833f6a0b295e680427e"
+          "sha256": "fbcd37e8a81d412e638c3c05805e20505e45bff816cebf0e1a7a65ba618b18af"
         },
         "point_mass_problem": {
           "path": "examples\\showcases\\x15_rocket_to_hawaii\\release_glide_reduction_3dof.prb",
-          "sha256": "e6b628d41e9cd10f98bdd0bcf0e20ffe06285297f7337c4ff1ac68723d4d23d7"
+          "sha256": "06658aa57e8b2042374ff96a963a81fa30f96b3ce9d6401b01807c158ac852cf"
         }
       },
       "parity_tolerances": {
@@ -402,7 +402,7 @@
       "source_tables": [
         {
           "path": "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl",
-          "sha256": "be8577f53b0bb4b20f5c67527631a95109f554c5d016f8f0429d36c88f6d5cb9"
+          "sha256": "ec0fd2dd065a3643b00c2bd78ceee4afabeaf8b5fad6ec37067a1f0eaabe15cd"
         }
       ],
       "state_mapping": {

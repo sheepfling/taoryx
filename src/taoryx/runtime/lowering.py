@@ -85,7 +85,7 @@ from taoryx.language.models import (
     WhenBlock,
     WindBlock,
 )
-from taoryx.modes import DynamicsMode, Kinematic6DofState, Quaternion
+from taoryx.modes import DynamicsMode, FidelitySetupError, Kinematic6DofState, Quaternion
 from taoryx.numeric import DifferenceMode
 from taoryx.optimization import build_optimization_problem, redistribute_control_history
 from taoryx.output_catalog import output_channel_spec
@@ -123,6 +123,7 @@ from .optimization_runtime import resolve_optimize_block
 from .rigid_body import bounded_attitude_moment, rigid_body_vehicle
 from .summaries import evaluate_summary
 from .surveys import generate_survey_cases
+from .truth import KinematicTruthProvider, TranslationTruthProvider
 from .units import format_number, from_internal, selected_setting, to_internal
 
 _TABLE_EVALUATOR_CACHE: dict[int, tuple[Mapping[str, RuntimeTable], dict[str, Callable[[Mapping[str, float]], float]]]] = {}
@@ -1207,6 +1208,13 @@ def _lower_case(
                 "qz": 0.0,
             }
             initial_state = RuntimeState(initial_state.time, initial_state.values, initial_state.frame, initial_named, initial_state.value_names, initial_state.segment_endpoints)
+        dynamics_mode = _dynamics_mode(problem)
+        base_truth_provider = TranslationTruthProvider(
+            earth_mu,
+            earth_omega,
+            length_scale_to_m=0.3048 if point_mass_si_contract else 1.0,
+        )
+        truth_provider = KinematicTruthProvider(base_truth_provider) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else base_truth_provider
         vehicle = RuntimeVehicle(
             str(trajectory.number),
             initial_state,
@@ -1229,11 +1237,12 @@ def _lower_case(
             environment_evaluator=vehicle_environment,
             event_handlers=event_handlers,
             activation_handler=activation_handler,
-            dynamics_mode=_dynamics_mode(problem),
-            body_rate_provider=_build_kinematic_body_rate_provider(problem) if _dynamics_mode(problem) is DynamicsMode.KINEMATIC_6DOF else None,
+            dynamics_mode=dynamics_mode,
+            body_rate_provider=_build_kinematic_body_rate_provider(problem) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None,
             publish_derived_rates=publish_derived_rates,
-            kinematic_state=_kinematic_state(initial_state) if _dynamics_mode(problem) is DynamicsMode.KINEMATIC_6DOF else None,
+            kinematic_state=_kinematic_state(initial_state) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None,
             stall_detector=stall_detector,
+            truth_provider=truth_provider,
         )
         vehicle_ref.append(vehicle)
         initial_named = dict(vehicle.state.named)
@@ -1296,6 +1305,7 @@ def _lower_case(
     runtime.metadata["parameters"] = dict(parameters)
     runtime.metadata["tables"] = tables
     _register_sensor_clock_metadata(runtime)
+    runtime.metadata["runtime_model_bindings"] = _runtime_model_bindings(problem)
     runtime.metadata["coupled_trajectories"] = any(
         isinstance(block, RadarBlock)
         for block in problem.blocks
@@ -1327,11 +1337,21 @@ def _lower_rigid_body_case(
     earth_mu, _, _, _ = _earth_parameters(problem, parameters)
     earth_mu = _rigid_body_gravitational_parameter(problem, earth_mu)
     if not problem.trajectories:
-        raise ValueError("rigid-body mode requires at least one trajectory")
+        raise FidelitySetupError(
+            "missing-trajectory",
+            "rigid-body mode requires at least one trajectory",
+            "add a *trajectory block with an initial state and at least one segment",
+            field="trajectory",
+        )
     trajectory = problem.trajectories[0]
     initial = next((block for block in trajectory.blocks if isinstance(block, InitialBlock)), None)
     if initial is None:
-        raise ValueError("rigid-body mode requires an initial block")
+        raise FidelitySetupError(
+            "missing-initial-state",
+            "rigid-body mode requires an initial block",
+            "add an ECIC or geodetic *initial declaration containing position, velocity, and mass",
+            field="initial",
+        )
     _, _, named, start_time = _initial_values(initial, parameters, tables, unit_settings)
     if initial.coordinate_system == "geodetic":
         # The point-mass normalizer uses the historical spherical radius. The
@@ -1357,7 +1377,12 @@ def _lower_rigid_body_case(
     required = ("x", "y", "z", "xdt", "ydt", "zdt", "mass")
     missing = tuple(name for name in required if name not in named)
     if missing:
-        raise ValueError(f"rigid-body initial state is missing: {', '.join(missing)}")
+        raise FidelitySetupError(
+            "missing-rigid-state-channel",
+            f"rigid-body initial state is missing: {', '.join(missing)}",
+            "declare x, y, z, xdt, ydt, zdt, and mass, or use a supported geodetic initial form",
+            field="initial",
+        )
     body_rate = Vector3(named.get("wx", 0.0), named.get("wy", 0.0), named.get("wz", 0.0))
     initial_state = RigidBody6DofState(
         start_time,
@@ -1377,7 +1402,12 @@ def _lower_rigid_body_case(
     )
     segments = {item.number: item for item in trajectory.segments}
     if not segments:
-        raise ValueError("rigid-body mode requires at least one segment")
+        raise FidelitySetupError(
+            "missing-segment",
+            "rigid-body mode requires at least one segment",
+            "add a *segment block with an integration step and stop/transition condition",
+            field="segment",
+        )
     active_segment = {"number": trajectory.start_segment}
     control_values = _runtime_control_values(problem, str(trajectory.number))
     vehicle_attributes = _runtime_attributes(problem, "vehicle")
@@ -1404,6 +1434,9 @@ def _lower_rigid_body_case(
         initial_mass_kg=named["mass"],
         controller_name="rate",
     )
+    def controller_state_provider() -> object | None:
+        return getattr(vehicle, "controller_state", None)
+
     segment = segments[trajectory.start_segment]
     step = _segment_step_size(segment, parameters, 0.01)
     earth_omega = _earth_parameters(problem, parameters)[1]
@@ -1436,6 +1469,7 @@ def _lower_rigid_body_case(
         rotor_allocation=rotor_allocation,
         rate_controller=rate_lqr,
         inertia_provider=inertia_provider,
+        controller_state_provider=controller_state_provider,
     )
     controller_saturated = {"value": False}
     ground_contact_mode = vehicle_attributes.get("ground-contact-mode", "none").casefold()
@@ -1454,6 +1488,7 @@ def _lower_rigid_body_case(
         maximum_moment=float(actuator_attributes["maximum-moment"]) if "maximum-moment" in actuator_attributes else None,
     )
     def force_moment(state: RigidBody6DofState) -> RigidBodyForceMoment:
+        plant_state = state
         control_values["_rotor_guidance_moment_x"] = 0.0
         control_values["_rotor_guidance_moment_y"] = 0.0
         control_values["_rotor_guidance_moment_z"] = 0.0
@@ -1495,6 +1530,9 @@ def _lower_rigid_body_case(
                 propulsion_force_body=contact_force_body,
                 propulsion_moment_body=contact_moment,
             )
+        selected = None if controller_state_provider is None else controller_state_provider()
+        if isinstance(selected, RigidBody6DofState):
+            state = selected
         airspeed_target_text = guidance_attributes.get("airspeed-hold-target-mps")
         airspeed_gain_text = guidance_attributes.get("airspeed-hold-gain-throttle-per-mps")
         if airspeed_target_text is not None and airspeed_gain_text is not None:
@@ -1511,11 +1549,14 @@ def _lower_rigid_body_case(
         thrust_vector = Vector3(0.0, 0.0, 0.0)
         mass_rate = 0.0
         current_segment = segments[active_segment["number"]]
+        propulsion_speed_mps = aerodynamic_model.air_velocity_body(state).norm() if aerodynamic_model is not None else state.velocity.vector.norm()
         propulsion_query = {
             "time": state.time,
             "mass": state.mass,
             "altitude_m": max(state.position.vector.norm() - 6_378_137.0, 0.0),
-            "velocity_m_s": state.velocity.vector.norm(),
+            # Propulsion maps are calibrated against vehicle airspeed, not
+            # inertial transport speed introduced by a rotating Earth.
+            "velocity_m_s": propulsion_speed_mps,
             "throttle": control_values.get("throttle", 1.0),
         }
         for block in current_segment.blocks:
@@ -2137,7 +2178,7 @@ def _lower_rigid_body_case(
         )
         if aerodynamic_model is None or not any(isinstance(block, AeroBlock) for block in current_segment.blocks):
             return propulsion
-        aero = aerodynamic_model.evaluate(state)
+        aero = aerodynamic_model.evaluate(plant_state)
         heat_rate_coefficient = max(0.0, float(thermal_attributes.get("heat-rate-coefficient", "0.002")))
         return RigidBodyForceMoment(
             propulsion.force_body + aero.force_body_n,
@@ -2640,6 +2681,7 @@ def _lower_rigid_body_case(
     runtime.metadata["telemetry"] = dict(_runtime_attributes(problem, "telemetry"))
     runtime.metadata["controls"] = dict(control_values)
     _register_sensor_clock_metadata(runtime)
+    runtime.metadata["runtime_model_bindings"] = _runtime_model_bindings(problem)
     runtime.metadata["native_pipeline"] = {
         "integration_frame": "ecic",
         "environment_frame": "ecfc",
@@ -3954,6 +3996,7 @@ def _rigid_body_aerodynamic_model(
     rotor_allocation: QuadRotorAllocation | None = None,
     rate_controller: GainScheduledLqrController | None = None,
     inertia_provider: Callable[[RigidBody6DofState], Vector3] | None = None,
+    controller_state_provider: Callable[[], object | None] | None = None,
 ) -> TableAerodynamicModel | DirectWrenchTableModel | None:
     """Build the explicit TAORYX table-aero bridge for rigid-body cases.
 
@@ -4036,6 +4079,9 @@ def _rigid_body_aerodynamic_model(
     }
 
     def controls(state: RigidBody6DofState) -> dict[str, float]:
+        selected = None if controller_state_provider is None else controller_state_provider()
+        if isinstance(selected, RigidBody6DofState):
+            state = selected
         values = dict(control_values)
 
         def apply_surface_allocation_override() -> None:
@@ -4707,7 +4753,12 @@ def _build_kinematic_body_rate_provider(problem: Problem) -> Callable[[RuntimeSt
     attributes = _runtime_attributes(problem, "attitude")
     mode = attributes.get("mode", "prescribed").casefold()
     if mode not in {"prescribed", "lag", "rate"}:
-        raise ValueError("kinematic attitude mode must be prescribed, lag, or rate")
+        raise FidelitySetupError(
+            "invalid-kinematic-attitude-mode",
+            "kinematic attitude mode must be prescribed, lag, or rate",
+            "set mode=prescribed, mode=lag, or mode=rate on the attitude runtime status",
+            field="attitude.mode",
+        )
     target = Vector3(
         math.radians(float(attributes.get("roll-deg", "0.0"))),
         math.radians(float(attributes.get("pitch-deg", "0.0"))),
@@ -4721,9 +4772,19 @@ def _build_kinematic_body_rate_provider(problem: Problem) -> Callable[[RuntimeSt
     lag_s = float(attributes.get("lag-s", "0.25"))
     maximum_rate = math.radians(float(attributes.get("max-rate-deg-s", "360.0")))
     if lag_s <= 0.0 or not math.isfinite(lag_s):
-        raise ValueError("kinematic attitude lag-s must be positive and finite")
+        raise FidelitySetupError(
+            "invalid-kinematic-lag",
+            "kinematic attitude lag-s must be positive and finite",
+            "set lag-s to a positive time constant in seconds; it is used only for prescribed/lag modes",
+            field="attitude.lag-s",
+        )
     if maximum_rate <= 0.0 or not math.isfinite(maximum_rate):
-        raise ValueError("kinematic attitude max-rate-deg-s must be positive and finite")
+        raise FidelitySetupError(
+            "invalid-kinematic-rate-limit",
+            "kinematic attitude max-rate-deg-s must be positive and finite",
+            "set max-rate-deg-s to a positive finite angular-rate limit",
+            field="attitude.max-rate-deg-s",
+        )
 
     def provider(state: RuntimeState) -> Vector3:
         if mode == "rate":
@@ -4829,6 +4890,22 @@ def _register_sensor_clock_metadata(runtime: RuntimeProblem) -> None:
         else "none"
     )
     ####
+
+
+def _runtime_model_bindings(problem: Problem) -> list[dict[str, object]]:
+    """Expose declarative observation/navigation/feedback references."""
+
+    return [
+        {
+            "declaration": block.declaration,
+            "name": block.name,
+            "attributes": dict(block.attributes),
+        }
+        for block in problem.blocks
+        if isinstance(block, RuntimeBlock)
+        and block.declaration in {"observation", "navigation", "feedback"}
+        and block.name is not None
+    ]
 
 
 def _runtime_inertia_provider(
@@ -8124,7 +8201,13 @@ def _kinematic_state(state: RuntimeState) -> Kinematic6DofState:
 
     required = ("x", "y", "z", "xdt", "ydt", "zdt")
     if not all(name in state.named for name in required):
-        raise ValueError("kinematic-6dof mode requires x, y, z, xdt, ydt, and zdt state variables")
+        missing = tuple(name for name in required if name not in state.named)
+        raise FidelitySetupError(
+            "missing-kinematic-state-channel",
+            f"kinematic-6dof mode requires x, y, z, xdt, ydt, and zdt state variables; missing: {', '.join(missing)}",
+            "declare all ECFC position and velocity channels in the initial state",
+            field="initial",
+        )
     return Kinematic6DofState(
         time=state.time,
         position=FrameVector3(Vector3(*(state.named[name] for name in ("x", "y", "z"))), Frame.ECFC),
@@ -8751,6 +8834,7 @@ def _restrict_optimization_problem(
         required_truth_times=problem.required_truth_times,
         sensor_clocks=problem.sensor_clocks,
         transition_history=list(problem.transition_history),
+        sensor_bus=problem.sensor_bus,
     )
 ####
 

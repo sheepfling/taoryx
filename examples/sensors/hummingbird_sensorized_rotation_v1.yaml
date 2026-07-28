@@ -1,0 +1,17 @@
+schema_version: 1
+scenario_id: hummingbird_sensorized_rotation_v1
+sensor:
+  name: gyro
+  vehicle: "1"
+  provider: ideal-gyroscope
+  cadence_s: 0.01
+  sample: instantaneous
+  delivery_s: 0.002
+  truth: boundary
+  rate_policy: split
+earth:
+  rate_mode: source
+truth:
+  mode: rotation-only
+estimators:
+  - attitude-dead-reckoning

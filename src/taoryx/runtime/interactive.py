@@ -26,6 +26,8 @@ from .engine import integrate_active_vehicles
 if TYPE_CHECKING:
     from taoryx.outputs import RunArtifact
 
+    from .sensor_scenario import SensorScenarioRuntime
+
 
 class InteractiveStatus(StrEnum):
     CREATED = "created"
@@ -259,6 +261,7 @@ class InteractiveSession:
     event_specs: tuple[EventSpec, ...] = ()
     output_subscriptions: tuple[OutputSubscription, ...] = ()
     event_history: list[RuntimeEvent] = field(default_factory=list)
+    sensor_runtime: SensorScenarioRuntime | None = field(default=None, init=False, repr=False)
     _last_commands: dict[str, float] = field(init=False, repr=False)
     _fired_events: set[tuple[str, str]] = field(init=False, repr=False)
 
@@ -297,6 +300,8 @@ class InteractiveSession:
 
             vehicle.derivative = commanded
         ####
+        if self.problem.sensor_bus is not None:
+            self.problem.sensor_bus.initialize(self.problem)
     ####
 
     @property
@@ -349,7 +354,10 @@ class InteractiveSession:
         applied = self._normalize_commands(requested_commands, duration)
         self.status = InteractiveStatus.RUNNING
         try:
+            previous_states = {vehicle.name: vehicle.state for vehicle in self.problem.active_vehicles()}
             integrate_active_vehicles(self.problem, duration)
+            if self.problem.sensor_bus is not None:
+                self.problem.sensor_bus.accepted_step(self.problem, previous_states)
             events: list[str] = []
             for vehicle in self.problem.active_vehicles():
                 for event in vehicle.events:
@@ -422,6 +430,16 @@ class InteractiveSession:
         self.status = InteractiveStatus.PAUSED
         ####
 
+    def attach_sensor_scenario(self, spec: object) -> SensorScenarioRuntime:
+        """Attach a provider-neutral sensor sidecar to accepted interactive steps."""
+
+        from .sensor_scenario import SensorScenarioSpec, attach_sensor_scenario
+
+        selected = spec if isinstance(spec, SensorScenarioSpec) else SensorScenarioSpec.from_file(cast(str | Path, spec))
+        self.sensor_runtime = attach_sensor_scenario(self.problem, selected)
+        return self.sensor_runtime
+    ####
+
     def resume(self) -> None:
         if self.status is not InteractiveStatus.PAUSED:
             raise RuntimeError(f"cannot resume an interactive session in {self.status.value} state")
@@ -475,6 +493,7 @@ class InteractiveSession:
             vehicles=vehicles,
             commands=[{"duration": frame.duration, "commands": dict(frame.commands)} for frame in self.command_history],
             events=[event.as_dict() for event in self.event_history],
+            sensor_execution={} if self.sensor_runtime is None else self.sensor_runtime.artifact(),
             visualization={
                 "source": "InteractiveSession",
                 "controls": [
@@ -626,6 +645,11 @@ def _interactive_problem_payload(problem: RuntimeProblem) -> dict[str, object]:
         "metadata": _json_safe(problem.metadata),
         "event_history": _json_safe(problem.event_history),
         "transition_history": [item.to_metadata() for item in problem.transition_history],
+        "sensor_bus": None if problem.sensor_bus is None else problem.sensor_bus.to_metadata(),
+        "sensor_rebind": {
+            "required": problem.sensor_bus is not None,
+            "reason": "external sensor providers and estimator subscribers are intentionally not serialized",
+        },
         "vehicles": {
             name: {
                 "state": _state_payload(vehicle.state),
@@ -669,6 +693,14 @@ def _restore_interactive_problem(problem: RuntimeProblem, payload: Mapping[str, 
         _transition_pair_from_payload(cast(Mapping[str, object], item))
         for item in cast(Sequence[object], payload.get("transition_history", ()))
     ]
+    if payload.get("sensor_bus") is not None:
+        problem.metadata["checkpoint_sensor_rebind"] = payload.get(
+            "sensor_rebind",
+            {
+                "required": True,
+                "reason": "external sensor providers and estimator subscribers are intentionally not serialized",
+            },
+        )
     for name, raw in saved_vehicles.items():
         vehicle_payload = cast(Mapping[str, object], raw)
         vehicle = problem.vehicles[name]

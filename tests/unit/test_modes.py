@@ -4,7 +4,7 @@ import pytest
 
 from taoryx.contracts import Frame, FrameVector3, Vector3
 from taoryx.language.problem_parser import parse_problem_text
-from taoryx.modes import DynamicsMode, Kinematic6DofState, Quaternion
+from taoryx.modes import DynamicsMode, FidelitySetupError, Kinematic6DofState, Quaternion
 from taoryx.runtime.common import RuntimeProblem, RuntimeState, RuntimeVehicle
 from taoryx.runtime.engine import compute_trajectories, integrate_active_vehicles
 from taoryx.runtime.lowering import _dynamics_mode, _unsupported_features, lower_problem_document
@@ -162,11 +162,35 @@ def test_zero_body_rate_preserves_attitude() -> None:
 
 
 def test_kinematic_state_requires_ecfc_vectors() -> None:
-    with pytest.raises(ValueError, match="must use ECFC"):
+    with pytest.raises(FidelitySetupError, match=r"\[fidelity:kinematic-frame-mismatch\].*Fix:"):
         Kinematic6DofState(
             0.0,
             FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.BODY),
             FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECFC),
+        )
+
+
+def test_runtime_kinematic_mode_reports_missing_sidecar() -> None:
+    with pytest.raises(FidelitySetupError, match=r"\[fidelity:missing-kinematic-sidecar\].*Fix:"):
+        RuntimeVehicle(
+            "demo",
+            RuntimeState(0.0, (0.0,), named={"time": 0.0}),
+            dynamics_mode=DynamicsMode.KINEMATIC_6DOF,
+        )
+
+
+def test_runtime_kinematic_mode_rejects_sidecar_on_other_tiers() -> None:
+    sidecar = Kinematic6DofState(
+        0.0,
+        FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECFC),
+        FrameVector3(Vector3(0.0, 0.0, 0.0), Frame.ECFC),
+    )
+    with pytest.raises(FidelitySetupError, match=r"\[fidelity:unexpected-kinematic-sidecar\].*Fix:"):
+        RuntimeVehicle(
+            "demo",
+            RuntimeState(0.0, (0.0,), named={"time": 0.0}),
+            dynamics_mode=DynamicsMode.POINT_MASS,
+            kinematic_state=sidecar,
         )
 
 

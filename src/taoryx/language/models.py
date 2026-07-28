@@ -125,7 +125,7 @@ class RuntimeBlock(BlockBase):
     """TAORYX extension declaring runtime inputs, observations, clocks, or events."""
 
     keyword: Literal["runtime"] = "runtime"
-    declaration: Literal["parameter", "control", "status", "event", "output", "lqr", "sensor"] | None = None
+    declaration: Literal["parameter", "control", "status", "event", "output", "lqr", "sensor", "observation", "navigation", "feedback"] | None = None
     name: str | None = None
     attributes: dict[str, str] = Field(default_factory=dict)
     ####

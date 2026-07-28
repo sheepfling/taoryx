@@ -83,13 +83,13 @@ The EOM publishes physical truth, not sensor-specific truth:
 @dataclass(frozen=True, slots=True)
 class TruthPoint:
     time_s: float
-    R_world_from_body: FloatArray
-    position_world_m: FloatArray
-    velocity_world_mps: FloatArray
-    acceleration_world_mps2: FloatArray
+    R_eci_from_body: FloatArray
+    position_eci_m: FloatArray
+    velocity_eci_mps: FloatArray
+    acceleration_eci_mps2: FloatArray
     angular_rate_body_radps: FloatArray
     angular_acceleration_body_radps2: FloatArray
-    gravity_world_mps2: FloatArray
+    gravity_eci_mps2: FloatArray
 ```
 
 ```python
@@ -135,25 +135,172 @@ random streams. An external IMU or sensor package owns its error physics.
 
 ## IMU adapter rules
 
-The IMU truth adapter converts generic rigid-body truth into the exact external
-library convention. It must document `R_world_from_body`, gravity treatment,
-sensor mounting transform, lever arm, and interval convention. For a start-of-
-interval body-frame contract it may derive:
+The IMU truth adapter converts ECI rigid-body truth into the exact external
+library convention. The external package calls this generic input frame
+"world"; Taoryx supplies ECI and does not silently substitute ECEF or a local
+navigation frame. The adapter must document `R_eci_from_body`, gravity
+treatment, sensor mounting transform, lever arm, and interval convention. For a
+start-of-interval body-frame contract it may derive:
 
 ```text
-R_delta,k = R_WB(t[k-1])^T R_WB(t[k])
+R_delta,k = R_EB(t[k-1])^T R_EB(t[k])
 delta_theta_k = log(R_delta,k)
-delta_v_k^B[k-1] ≈ R_WB(t[k-1])^T (v_no_g^W(t[k]) - v_no_g^W(t[k-1]))
+delta_v_k^B[k-1] ≈ R_EB(t[k-1])^T (v_no_g^E(t[k]) - v_no_g^E(t[k-1]))
 ```
 
 Required invariants:
 
-- exactly one `imu.step()` per IMU sampling event;
+- exactly one `ImuModel.measure()` per IMU sampling event;
 - strictly chronological calls;
 - explicit invalid/initial history behavior on the first call;
 - mounting and gravity conventions applied before the external model;
 - persistent bias/random-walk state;
 - independent reproducible RNG streams per sensor.
+
+### Initial External Binding: `imu-error-model`
+
+The first external implementation is `imu-error-model==0.1.3`, installed by
+Taoryx's optional `sensors` extra. It is intentionally not a core runtime
+dependency. Its public `ImuModel` satisfies the adapter shape:
+
+```text
+reset()
+measure(timestamp, velocity_without_gravity_eci,
+        orientation_eci_from_body, temperature_celsius=None)
+    -> ImuOutput(delta_v, delta_theta, start_time, end_time, temperature)
+```
+
+The binding is compatible with the current contract because the package:
+
+- consumes ECI velocity with gravity excluded, passed through the package's
+  generic world-frame argument;
+- consumes a proper `R_eci_from_body` matrix, passed through the package's
+  generic world-frame argument;
+- computes interval increments from strictly chronological calls;
+- emits increments in the body frame at the interval start; and
+- owns stochastic, bias, misalignment, thermal, clipping, and quantization
+  effects without calculating dynamics, gravity, or navigation.
+
+The Taoryx adapter owns the following decisions and evidence:
+
+- derive ECI gravity-excluded velocity from the committed truth snapshot rather
+  than from solver stages or post-hoc interpolation;
+- retain ECI position, velocity, and attitude as the source truth so a body
+  fixed to Earth produces the expected Earth-rotation gyro increment;
+- apply the declared sensor mounting transform and lever-arm correction before
+  calling the external model, or explicitly record them as unsupported;
+- map the package's first zero-length baseline result to an explicit invalid or
+  initialization packet rather than delivering a false zero measurement;
+- wrap `ImuOutput` in `MeasurementPacket`, preserving sampled and available
+  times, validity, interval bounds, body-frame payload, and configuration
+  provenance; and
+- inject one persistent model instance and one reproducible RNG stream per
+  sensor, resetting only at a declared run boundary.
+
+For the current free-flight tranche, the explicit gravity-excluded ECI
+velocity is sufficient. Ground contact, pad restraint, wheel/track reaction,
+and other support-force states are deliberately deferred; when those are
+added, the truth contract must expose the support acceleration or force rather
+than infer it from a zero velocity derivative.
+
+The adapter proof uses a committed rigid-body truth sequence with known
+translation and rotation, verifies increment/frame/unit conventions, checks
+first-sample behavior and strict chronology, and feeds the resulting
+measurement packets into a deliberately small navigation consumer.
+Perfect-navigation mode remains a separate, explicit comparison.
+
+The initial adapter, ideal comparison adapter, dead-reckoning example, and
+15-state MEKF example are implemented in `taoryx.sensors` and
+`taoryx.navigation`. They are research examples, not flight-qualified
+estimators. The runtime now exposes its
+committed `TruthPoint`/`TruthSegment` payloads through
+`RuntimeVehicle.truth_provider` and delivers packets through the deterministic
+`SensorBus` in batch and interactive execution. Scenario sidecars, packet-only
+estimators, deterministic drops, timeout manifests, source hashes, and
+checkpoint rebind metadata are covered by
+[`sensor-scenario-integration.md`](sensor-scenario-integration.md); neither
+path bypasses the accepted-truth bus.
+
+Channel-selective orientation work is also explicit. `rotation-only` uses a
+body-frame angular-rate packet and an attitude-only dead-reckoner, so a
+three-axis table can exercise gyro orientation without requiring translational
+excitation. `hybrid-6dof` combines that rotational source with simulated or
+substituted ECI translation for full-IMU tests. The artifact records whether
+translation is used, unavailable, accepted, synthesized, or externally
+substituted; it does not silently treat a table's lack of translation as zero
+vehicle acceleration.
+
+The sidecar boundary is typed rather than mode-string-only. Provider, truth,
+and attitude-policy definitions use Pydantic discriminated unions and are
+normalized into JSON metadata before runtime attachment. Adapter and attitude
+implementations are selected through registry-backed factories behind small
+interfaces. This keeps vehicle-specific policies, such as distinct quadcopter
+and tilt-rotor forward-axis rules, separate from generic scheduling, packet,
+and navigation contracts; unsupported variants or missing state channels fail
+closed.
+
+The external profile corpus is deliberately not copied into the vehicle
+library. `resources/sensors/imu_profiles/catalog.json` pins both the upstream
+repository commit and the required package version and labels its hardware
+estimates as notional. A sidecar may select a repository file with
+`ImuErrorModelAdapter.from_profile(...)` or a packaged profile with
+`package:hardware_estimates/hg9900.yaml`; both paths record the source, model
+name, declared sample period, metadata, and output-scale conversion in run
+provenance. Package `0.1.3` also supplies a versioned `snapshot()` / `restore()`
+checkpoint protocol. Taoryx delegates that state and checkpoints the
+post-sensor observation stages as one JSON-compatible payload.
+
+## Observation models and controller feedback
+
+Sensor error physics and controller feedback are separate contracts. The base
+IMU model produces a timestamped packet first; an optional typed observation
+pipeline then applies ordered scale/misalignment, bias, Gaussian noise,
+quantization, and dropout stages. Each stage returns a new packet, so committed
+plant truth and the upstream model's internal state are not modified. The
+sidecar form is:
+
+```yaml
+observation:
+  stages:
+    - kind: scale-misalignment
+      accelerometer_matrix: [[1.0, 0.001, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+    - kind: bias
+      gyroscope_bias_radps: [0.00001, 0.0, 0.0]
+    - kind: dropout
+      every_n: 20
+```
+
+Navigation feedback is explicit and is available only after packet delivery:
+
+```yaml
+feedback:
+  source: mekf             # plant-truth, dead-reckoning, or mekf
+  availability: delivered
+  stale_policy: hold       # hold or fail
+  max_age_s: 0.05          # required with stale_policy=fail
+```
+
+Before the first delivered estimate, the controller uses its ordinary plant
+state as an explicit startup fallback. With `source: mekf`, only the
+controller observation is replaced; mass, propellant, thermal channels, and
+the integration history remain plant truth. A `fail` stale policy fails closed
+when no estimate has arrived or the last delivered estimate exceeds
+`max_age_s`. Artifacts include the selected source, delivery timestamp,
+startup fallback, checkpoint support, and a `plant_truth_immutable` marker.
+
+The Hummingbird HG1700 sidecar demonstrates a higher-fidelity IMU with MEKF
+controller feedback. The X8 HG9900 sidecar demonstrates the same packaged
+profile/checkpoint path with MEKF recorded in parallel but plant-truth
+controller feedback because the supplied X8 aerodynamic table is evidence
+bounded at approximately +/-5 degrees beta and +/-12 degrees alpha. Raw
+estimator-driven X8 control is intentionally retained as a diagnostic case:
+it can exceed that declared table envelope under realistic sensor drift and
+must report a validity failure rather than silently extrapolating.
+
+The scenario-level integration sequence for Hummingbird and Skywalker X8 is
+defined in [`sensor-scenario-integration.md`](sensor-scenario-integration.md).
+It deliberately makes Hummingbird hover the diagnostic first case and X8 the
+second free-flight/glide case.
 
 ## Focal-plane, seeker, and other sensor pipelines
 
@@ -237,5 +384,13 @@ latency are measurement paths.
 | S5 — Estimator isolation | Guidance/control cannot consume truth unless explicit perfect-information mode is selected. |
 | S6 — Focal-plane pipeline | Ideal projection, detector/electronics effects, processing, and latency are separately inspectable. |
 | S7 — Research-ready | IMU, air-data, seeker, and estimator closed-loop examples produce truth, measurement, estimate, command, and applied-control provenance. |
+
+Current implementation status: S0 through S5 are exercised by the sensor
+contract, adapter, batch-bus, interactive-bus, observation-pipeline, and
+feedback tests. S5 is demonstrated at
+the navigation consumer boundary: estimators receive packets only, while the
+runtime truth provider is used solely by the sensor/artifact path. The runtime
+IMU/navigation example exercises the S7 artifact shape for an IMU pipeline.
+Guidance integration, S6, and broader S7 sensor families remain future work.
 
 ####

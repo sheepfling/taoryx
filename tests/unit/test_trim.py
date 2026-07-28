@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 
 from taoryx.trim import (
+    TrimConfigurationError,
+    TrimEvaluationError,
     TrimGate,
     TrimProcedure,
     TrimSpec,
@@ -93,6 +95,82 @@ def test_trim_rejects_duplicate_state_and_control_names() -> None:
         raise AssertionError("duplicate trim names should be rejected")
 
 
+def test_trim_configuration_error_identifies_field_and_repair() -> None:
+    with pytest.raises(TrimConfigurationError) as raised:
+        TrimSpec(
+            state_names=("x",),
+            control_names=("x",),
+            residual_names=("force",),
+            state_initial={"x": 0.0},
+            control_initial={"x": 0.0},
+        )
+
+    assert raised.value.diagnostic.code == "duplicate-variable-name"
+    assert raised.value.diagnostic.field == "state_names/control_names"
+    assert "Fix:" in str(raised.value)
+
+
+def test_trim_reports_bound_and_residual_diagnostics() -> None:
+    spec = TrimSpec(
+        state_names=("x",),
+        control_names=(),
+        residual_names=("force",),
+        state_initial={"x": 0.0},
+        control_initial={},
+        state_lower={"x": 0.0},
+        state_upper={"x": 1.0},
+    )
+
+    result = solve_trim(spec, lambda state, controls: {"force": state["x"] - 2.0})
+    codes = {diagnostic.code for diagnostic in result.diagnostics}
+
+    assert result.success is False
+    assert "solution-at-bound" in codes
+    assert "residual-above-tolerance" in codes
+    assert result.as_dict()["diagnostics"]
+
+
+def test_trim_evaluation_error_identifies_nonfinite_residual() -> None:
+    with pytest.raises(TrimEvaluationError) as raised:
+        solve_trim(_spec(), lambda state, controls: {"force": np.nan, "moment": 0.0})
+
+    assert raised.value.diagnostic.code == "nonfinite-residual"
+    assert raised.value.diagnostic.field == "force"
+
+
+def test_trim_configuration_error_identifies_non_numeric_initial_value() -> None:
+    with pytest.raises(TrimConfigurationError) as raised:
+        TrimSpec(
+            state_names=("x",),
+            control_names=(),
+            residual_names=("force",),
+            state_initial={"x": "not-a-number"},
+            control_initial={},
+        )
+
+    assert raised.value.diagnostic.code == "non-numeric-initial-value"
+    assert raised.value.diagnostic.field == "x"
+    assert "Fix:" in str(raised.value)
+
+
+def test_dynamics_linearization_rejects_force_mapping_as_state_derivative() -> None:
+    spec = TrimSpec(
+        state_names=("x",),
+        control_names=(),
+        residual_names=("force",),
+        state_initial={"x": 0.0},
+        control_initial={},
+    )
+    trim = solve_trim(spec, lambda state, controls: {"force": state["x"]})
+
+    with pytest.raises(TrimEvaluationError, match=r"\[trim:missing-state-derivative\].*Fix:"):
+        finite_difference_dynamics_linearization(
+            spec,
+            lambda state, controls: {"force": state["x"]},
+            trim,
+        )
+
+
 def _procedure() -> TrimProcedure:
     return TrimProcedure(
         id="demo-procedure-v1",
@@ -137,6 +215,7 @@ def test_trim_procedure_classifies_unavailable_gate_and_bad_adapter() -> None:
     )
     assert invalid.status == "adapter_invalid"
     assert invalid.failure_reason
+    assert invalid.diagnostics[0].code == "missing-residual"
 
 
 def test_trim_continuation_warm_starts_declared_operating_points() -> None:

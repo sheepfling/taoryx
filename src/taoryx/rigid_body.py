@@ -12,7 +12,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 from .contracts import Frame, FrameVector3, Vector3
-from .modes import Quaternion
+from .modes import FidelitySetupError, Quaternion
 
 RIGID_BODY_STATE_NAMES = (
     "x",
@@ -51,15 +51,40 @@ class RigidBody6DofState:
 
     def __post_init__(self) -> None:
         if self.position.frame is not Frame.ECIC or self.velocity.frame is not Frame.ECIC:
-            raise ValueError("rigid-body position and velocity must use ECIC")
+            raise FidelitySetupError(
+                "rigid-frame-mismatch",
+                "rigid-body position and velocity must use ECIC",
+                "convert the inertial state to ECIC before constructing the rigid-body state",
+                field="position/velocity",
+            )
         if not math.isfinite(self.time):
-            raise ValueError("rigid-body time must be finite")
+            raise FidelitySetupError(
+                "rigid-time-nonfinite",
+                "rigid-body time must be finite",
+                "provide a finite integration time in seconds",
+                field="time",
+            )
         if not math.isfinite(self.mass) or self.mass <= 0.0:
-            raise ValueError("rigid-body mass must be positive and finite")
+            raise FidelitySetupError(
+                "invalid-mass",
+                "rigid-body mass must be positive and finite",
+                "declare total mass in kilograms and keep it positive at every stage boundary",
+                field="mass",
+            )
         if not math.isfinite(self.propellant_mass) or self.propellant_mass < 0.0 or self.propellant_mass > self.mass:
-            raise ValueError("rigid-body propellant mass must be finite and within total mass")
+            raise FidelitySetupError(
+                "invalid-propellant-mass",
+                "rigid-body propellant mass must be finite and within total mass",
+                "set propellant mass to a value in [0, total mass] and update it at stage or cutoff events",
+                field="propellant_mass",
+            )
         if not all(math.isfinite(value) and value >= 0.0 for value in (self.heat_load, self.peak_heat_rate)):
-            raise ValueError("rigid-body thermal state must be finite and nonnegative")
+            raise FidelitySetupError(
+                "invalid-thermal-state",
+                "rigid-body thermal state must be finite and nonnegative",
+                "initialize heat load and peak heat rate in nonnegative SI units",
+                field="heat_load/peak_heat_rate",
+            )
         ####
 
     def to_values(self) -> tuple[float, ...]:
@@ -91,7 +116,12 @@ class RigidBody6DofState:
         """Unpack a runtime vector and normalize the integrated quaternion."""
 
         if len(values) != len(RIGID_BODY_STATE_NAMES):
-            raise ValueError(f"rigid-body state requires {len(RIGID_BODY_STATE_NAMES)} values")
+            raise FidelitySetupError(
+                "rigid-state-length-mismatch",
+                f"rigid-body state requires {len(RIGID_BODY_STATE_NAMES)} values, received {len(values)}",
+                "provide position, velocity, quaternion, body-rate, mass, propellant, and thermal channels in RIGID_BODY_STATE_NAMES order",
+                field="state",
+            )
         return cls(
             time,
             FrameVector3(Vector3(*values[0:3]), Frame.ECIC),
@@ -131,11 +161,26 @@ class RigidBodyForceMoment:
         }
         for name, vector in vectors.items():
             if vector is not None and not all(math.isfinite(value) for value in (vector.x, vector.y, vector.z)):
-                raise ValueError(f"rigid-body {name} components must be finite")
+                raise FidelitySetupError(
+                    "nonfinite-load",
+                    f"rigid-body {name} components must be finite",
+                    "return finite body-frame force and moment components from the load pipeline",
+                    field=name,
+                )
         if self.propellant_mass_rate < 0.0 or not math.isfinite(self.propellant_mass_rate):
-            raise ValueError("propellant mass rate must be finite and nonnegative")
+            raise FidelitySetupError(
+                "invalid-propellant-rate",
+                "propellant mass rate must be finite and nonnegative",
+                "return a nonnegative kg/s consumption rate; do not encode mass ejection as a negative rate",
+                field="propellant_mass_rate",
+            )
         if self.heat_rate < 0.0 or not math.isfinite(self.heat_rate):
-            raise ValueError("heat rate must be finite and nonnegative")
+            raise FidelitySetupError(
+                "invalid-heat-rate",
+                "heat rate must be finite and nonnegative",
+                "return a nonnegative SI heat-rate observable from the load pipeline",
+                field="heat_rate",
+            )
         ####
     ####
 
@@ -188,10 +233,20 @@ class RigidBody6DofModel:
     inertia_provider: InertiaProvider | None = None
 
     def __post_init__(self) -> None:
-        if min(self.inertia.x, self.inertia.y, self.inertia.z) <= 0.0:
-            raise ValueError("all principal moments of inertia must be positive")
-        if self.dry_mass is not None and self.dry_mass <= 0.0:
-            raise ValueError("dry mass must be positive")
+        if not all(math.isfinite(value) and value > 0.0 for value in (self.inertia.x, self.inertia.y, self.inertia.z)):
+            raise FidelitySetupError(
+                "invalid-inertia",
+                "all principal moments of inertia must be positive",
+                "supply source-backed principal inertia in kg m^2 about the declared center of gravity",
+                field="inertia",
+            )
+        if self.dry_mass is not None and (not math.isfinite(self.dry_mass) or self.dry_mass <= 0.0):
+            raise FidelitySetupError(
+                "invalid-dry-mass",
+                "dry mass must be positive and finite",
+                "set dry mass in kilograms below the initial total mass",
+                field="dry_mass",
+            )
         ####
 
     def inertia_at(self, state: RigidBody6DofState) -> Vector3:
@@ -199,7 +254,12 @@ class RigidBody6DofModel:
 
         inertia = self.inertia_provider(state) if self.inertia_provider is not None else self.inertia
         if not all(math.isfinite(value) and value > 0.0 for value in (inertia.x, inertia.y, inertia.z)):
-            raise ValueError("runtime inertia provider returned non-positive or non-finite values")
+            raise FidelitySetupError(
+                "runtime-inertia-invalid",
+                "runtime inertia provider returned non-positive or non-finite values",
+                "validate the mass-property schedule and keep every inertia endpoint positive and finite",
+                field="inertia_provider",
+            )
         return inertia
         ####
 
@@ -378,6 +438,9 @@ class RigidBody6DofModel:
             "acceleration_ecic_x_m_s2": acceleration.x,
             "acceleration_ecic_y_m_s2": acceleration.y,
             "acceleration_ecic_z_m_s2": acceleration.z,
+            "angular_acceleration_body_x_rad_s2": angular_acceleration.x,
+            "angular_acceleration_body_y_rad_s2": angular_acceleration.y,
+            "angular_acceleration_body_z_rad_s2": angular_acceleration.z,
             "propellant_mass_rate_kg_s": load.propellant_mass_rate,
             "inertia_x_kg_m2": inertia.x,
             "inertia_y_kg_m2": inertia.y,

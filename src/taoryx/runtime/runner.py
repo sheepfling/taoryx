@@ -2,18 +2,21 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
 from taoryx.language.diagnostics import Diagnostic, Severity, SourceLocation
+from taoryx.language.expressions import NumberExpression
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.language.ingest import FileKind, ingest_file
-from taoryx.language.models import ProblemDocument, TableDocument
+from taoryx.language.models import Assignment, EarthBlock, ProblemDocument, TableDocument
 from taoryx.outputs import RunArtifact, build_run_artifact
 
 from .engine import ExecutionResult
 from .lowering import execute_lowered, lower_problem_document, problem_unit_settings
+from .sensor_scenario import SensorScenarioRuntime, SensorScenarioSpec, attach_sensor_scenario, render_sensor_scenario_plots
 from .table_binding import bind_runtime_tables
 
 
@@ -64,8 +67,13 @@ def run_files(
     integrator: str | None = None,
     seed: int | None = None,
     profile: GrammarProfile | str = GrammarProfile.TAOS96,
+    sensor_spec: str | Path | SensorScenarioSpec | None = None,
 ) -> RunReport:
-    """Ingest, lower, execute, and write products for one `.prb` file."""
+    """Ingest, lower, execute, and write products for one `.prb` file.
+
+    ``sensor_spec`` is an explicit optional sidecar binding. Omitting it keeps
+    the historical clock-only and unsensorized execution path unchanged.
+    """
 
     problem = Path(problem_path)
     destination = Path(output_dir)
@@ -112,9 +120,30 @@ def run_files(
     if any(item.severity is Severity.ERROR for item in diagnostics):
         return RunReport(str(problem), tuple(map(str, table_paths)), 0, (), tuple(diagnostics), ())
     try:
-        unit_settings, _ = problem_unit_settings(problem_document)
+        resolved_sensor_spec: SensorScenarioSpec | None
+        if sensor_spec is None:
+            resolved_sensor_spec = None
+        elif isinstance(sensor_spec, SensorScenarioSpec):
+            resolved_sensor_spec = sensor_spec
+        else:
+            resolved_sensor_spec = SensorScenarioSpec.from_file(sensor_spec)
+        lowered_document = _apply_sensor_earth_rate(problem_document, resolved_sensor_spec)
+        unit_settings, _ = problem_unit_settings(lowered_document)
         available_tables, tables = bind_runtime_tables(table_documents, unit_settings)
-        lowered = lower_problem_document(problem_document, tables, seed=seed)
+        lowered = lower_problem_document(lowered_document, tables, seed=seed)
+        sensor_runtimes: list[SensorScenarioRuntime | None] = []
+        if resolved_sensor_spec is not None:
+            for case in lowered.cases:
+                attached_runtime = attach_sensor_scenario(case.problem, resolved_sensor_spec)
+                attached_runtime.source_inputs = _sensor_source_inputs(problem, table_paths, resolved_sensor_spec)
+                case.problem.metadata["sensor_scenario"] = {
+                    "scenario_id": resolved_sensor_spec.scenario_id,
+                    "source_inputs": dict(attached_runtime.source_inputs),
+                }
+                sensor_runtimes.append(attached_runtime)
+        else:
+            sensor_runtimes = [None for _ in lowered.cases]
+        sensor_outputs: list[str] = []
         unsafe_output = _unsafe_output_path(lowered, destination)
         if unsafe_output is not None:
             diagnostics.append(_error(problem, "unsafe-output-path", unsafe_output))
@@ -133,6 +162,10 @@ def run_files(
                     f"{len(incomplete)} case(s) reached the runtime step limit ({max_steps}) before completion",
                 )
             )
+        for case, runtime, result in zip(lowered.cases, sensor_runtimes, results, strict=True):
+            if runtime is not None:
+                runtime.finalize(completed=result.completed, stop_reason=result.stop_reason, max_steps=max_steps)
+                sensor_outputs.extend(str(path) for path in runtime.write_artifacts(destination, case.index))
     except (KeyError, OSError, RuntimeError, TypeError, ValueError) as error:
         diagnostics.append(_error(problem, "runtime-execution-failed", str(error)))
         case_count = len(lowered.cases) if "lowered" in locals() else 0
@@ -148,16 +181,31 @@ def run_files(
         diagnostics.append(_error(destination, "output-discovery-failed", str(error)))
         return RunReport(str(problem), tuple(map(str, table_paths)), len(lowered.cases), results, tuple(diagnostics), ())
     ####
-    artifacts = tuple(
-        build_run_artifact(
+    artifact_values: list[RunArtifact] = []
+    for index, (case, result) in enumerate(zip(lowered.cases, results, strict=True)):
+        base_artifact = build_run_artifact(
             str(problem),
             case.problem,
             result,
             vehicle_kinds={vehicle_id: vehicle.vehicle_kind for vehicle_id, vehicle in case.problem.vehicles.items()},
             events=case.problem.event_history,
         )
-        for case, result in zip(lowered.cases, results, strict=True)
-    )
+        runtime = sensor_runtimes[index]
+        if runtime is None:
+            artifact_values.append(base_artifact)
+            continue
+        execution = runtime.artifact()
+        plot_directory = destination / "sensor" / f"case-{case.index}" / "plots"
+        plot_manifest = render_sensor_scenario_plots(base_artifact, execution, plot_directory)
+        runtime.plot_manifest = {
+            "manifest_path": "plots/plot-manifest.json",
+            "plots": plot_manifest.get("plots", []),
+        }
+        runtime.write_manifest(destination, case.index)
+        sensor_outputs.extend(str(path) for path in sorted(plot_directory.iterdir()) if path.is_file())
+        artifact_values.append(base_artifact.model_copy(update={"sensor_execution": runtime.artifact()}))
+    outputs = outputs + tuple(sorted(set(sensor_outputs)))
+    artifacts = tuple(artifact_values)
     metadata = tuple(
         {
             key: value
@@ -177,6 +225,9 @@ def run_files(
                 "lqr_by_role",
                 "controller_realization",
                 "controller_realizations",
+                "sensor_execution",
+                "sensor_scenario",
+                "runtime_model_bindings",
             }
         }
         for case in lowered.cases
@@ -192,6 +243,57 @@ def _error(path: str | Path, code: str, message: str) -> Diagnostic:
 
 def _warning(path: str | Path, code: str, message: str) -> Diagnostic:
     return Diagnostic(severity=Severity.WARNING, code=code, message=message, location=SourceLocation(path=str(path), line=1))
+
+
+def _sensor_artifact(runtime: SensorScenarioRuntime | None) -> dict[str, object]:
+    return {} if runtime is None else runtime.artifact()
+
+
+def _sensor_source_inputs(problem: Path, table_paths: tuple[str | Path, ...], spec: SensorScenarioSpec) -> dict[str, object]:
+    profile = spec.profile_path
+    packaged_profile = None
+    if spec.profile_name is not None:
+        packaged_profile = {
+            "package": f"{spec.profile_category}/{spec.profile_name}",
+            "package_name": "imu-error-model",
+            "package_version": "0.1.3",
+        }
+    return {
+        "problem": {"path": str(problem.resolve()), "sha256": _file_sha256(problem)},
+        "tables": [{"path": str(Path(path).resolve()), "sha256": _file_sha256(Path(path))} for path in table_paths],
+        "sidecar": None if spec.source_path is None else {"path": str(spec.source_path), "sha256": _file_sha256(spec.source_path)},
+        "profile": packaged_profile if packaged_profile is not None else None if profile is None else {"path": str(profile), "sha256": _file_sha256(profile)},
+    }
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _apply_sensor_earth_rate(document: ProblemDocument, spec: SensorScenarioSpec | None) -> ProblemDocument:
+    """Apply only an explicit sensor-side Earth-rate override to a copy."""
+
+    if spec is None or spec.earth_rate_mode == "source":
+        return document
+    omega = 7.2921151467e-5 if spec.earth_rate_mode == "nominal" else spec.earth_omega_rad_s
+    if omega is None:
+        raise ValueError("sensor Earth-rate override did not resolve to a finite value")
+    copied = document.model_copy(deep=True)
+    for problem in copied.problems:
+        for block in problem.blocks:
+            if not isinstance(block, EarthBlock):
+                continue
+            assignment = Assignment(name="omega", value=NumberExpression(value=omega), location=block.location)
+            existing = next((index for index, item in enumerate(block.assignments) if item.name.casefold() == "omega"), None)
+            if existing is None:
+                block.assignments.append(assignment)
+            else:
+                block.assignments[existing] = assignment
+    return copied
 
 
 def _runtime_diagnostics(diagnostics: tuple[Diagnostic, ...]) -> tuple[Diagnostic, ...]:

@@ -134,12 +134,15 @@ class LqrController:
     upper: Mapping[str, float] = field(default_factory=dict)
     robustness: LqrRobustnessReport | None = None
     realization: ControllerRealization | None = None
+    state_adapter: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None
 
     def command(self, state: Mapping[str, float]) -> LqrCommand:
         """Return ``u_trim - K(x - x_trim)`` with optional saturation."""
 
         import numpy as np
 
+        if self.state_adapter is not None:
+            state = self.state_adapter(state)
         missing = [name for name in self.result.state_names if name not in state]
         if missing:
             raise KeyError(f"LQR state is missing: {', '.join(missing)}")

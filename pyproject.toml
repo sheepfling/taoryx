@@ -22,6 +22,10 @@ taoryx = "taoryx.runtime.cli:main"
 taoryx-validate = "taoryx.language.cli:main"
 
 [project.optional-dependencies]
+sensors = [
+  "imu-error-model==0.1.3",
+  "numpy>=2.0",
+]
 dev = [
   "build>=1.2",
   "matplotlib>=3.9",

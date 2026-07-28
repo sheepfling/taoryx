@@ -8,6 +8,10 @@ configure, compose, control, run, and evaluate without editing model
 implementation. A single successful example trajectory is evidence of
 execution, not qualification.
 
+For the concrete equation-tier and trim workflow, use
+[Trim And Fidelity Walkthrough](trim-and-fidelity-walkthrough.md) before
+adding controller or mission evidence.
+
 ## The readiness claim
 
 The target release label is **M5 — Qualified / Pickup-Ready**:

@@ -129,7 +129,7 @@ zero-duration interval.
 
 ## Current implementation status
 
-The current runtime has the correct partial shape:
+The current runtime has the accepted-truth shape:
 
 - `InteractiveSession.step` gives controllers the state at the beginning of
   the step before calling the EOM;
@@ -139,23 +139,26 @@ The current runtime has the correct partial shape:
 
 The runtime now records immutable pre/post transition truth pairs in addition
 to accepted vehicle history. The clock contract constrains accepted boundaries
-and exposes timing metadata. The remaining work is to make the full
-`TruthPoint`/`TruthSegment` sensor payload first-class and to prevent
-`observe_vehicle` from recomputing authoritative measurements on demand. That
-is still required for authoritative IMU timing with adaptive integration,
-actuator states, lever arms, or multi-rate sensors.
+and exposes timing metadata. `RuntimeVehicle.truth_provider` projects each
+accepted state into a `TruthPoint`, and `SensorBus` owns model calls, interval
+accumulation, delivery latency, validity, drops, and estimator subscribers in
+both batch and interactive execution. Sensor models never receive solver-stage
+states or post-step interpolations. Remaining gaps are adaptive/rejected-step
+coverage, richer actuator/support-force truth, and checkpoint factories that
+can reconstruct external sensor and estimator instances from provenance.
 
 ## Required Alpha 3 implementation gates
 
-1. Preserve immutable committed truth points at every accepted boundary and
-   both sides of every segment transition.
-2. Return accepted truth segments from the EOM transition.
-3. Tag load evaluations with state time, achieved-control time, and step phase.
-4. Add a scheduler that creates explicit sensor boundaries.
-5. Implement IMU ideal measurements before error/noise models.
-6. Test instantaneous and interval IMUs across RK4, adaptive, and rejected
-   steps.
-7. Prove batch, stepped, and sensorized replay use identical committed truth.
+1. [x] Preserve immutable committed truth points at every accepted boundary
+   and both sides of every segment transition.
+2. [x] Return accepted truth segments to the sensor bus.
+3. [ ] Tag all load evaluations with state time, achieved-control time, and
+   step phase.
+4. [x] Add a scheduler that creates explicit sensor boundaries.
+5. [x] Implement IMU ideal/error-model measurements before navigation use.
+6. [ ] Test instantaneous and interval IMUs across adaptive and rejected
+   steps; fixed-step batch and interactive paths are covered.
+7. [x] Prove batch and stepped sensor runs use identical accepted truth.
 
 The acceptance condition is not merely that an IMU plot looks smooth. It is
 that every measurement can be traced to a committed truth boundary or an

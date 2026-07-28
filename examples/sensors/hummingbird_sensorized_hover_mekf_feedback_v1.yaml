@@ -1,0 +1,21 @@
+schema_version: 1
+scenario_id: hummingbird_sensorized_hover_mekf_feedback_v1
+sensor:
+  name: imu
+  vehicle: "1"
+  cadence_s: 0.01
+  sample: instantaneous
+  truth: boundary
+  rate_policy: split
+  delivery_s: 0.002
+  provider: imu-error-model
+  profile: package:hardware_estimates/hg1700ag58.yaml
+  seed: 41
+earth:
+  rate_mode: source
+navigation:
+  estimator: mekf
+feedback:
+  source: mekf
+  availability: delivered
+  stale_policy: hold

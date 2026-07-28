@@ -122,6 +122,7 @@ class LoadedProgram:
                     for trajectory in problem.trajectories
                 ],
             })
+        sensor_bus = self.case().sensor_bus
         return {
             "problem_path": self.problem_path,
             "table_paths": list(self.table_paths),
@@ -142,6 +143,7 @@ class LoadedProgram:
             "parameters": self.inspect_parameters(),
             "lqr": self.inspect_lqr(),
             "sensors": self.inspect_sensors(),
+            "sensor_bus": None if sensor_bus is None else sensor_bus.to_metadata(),
             "transition_history": [item.to_metadata() for item in self.case().transition_history],
             "vehicles": [
                 {
@@ -236,6 +238,7 @@ class LoadedProgram:
             "parameters": parameters,
             "event_history": list(problem.event_history),
             "transition_history": [item.to_metadata() for item in problem.transition_history],
+            "sensor_bus": None if problem.sensor_bus is None else problem.sensor_bus.to_metadata(),
             "vehicles": {
                 name: {
                     "time": vehicle.state.time,
@@ -347,6 +350,21 @@ class LoadedProgram:
             )
     ####
 
+    def attach_sensor_scenario(self, spec: object, *, index: int = 0) -> object:
+        """Rebind a provider and packet-only estimators after loading a checkpoint."""
+
+        from .sensor_scenario import SensorScenarioSpec, attach_sensor_scenario
+
+        selected = spec if isinstance(spec, SensorScenarioSpec) else SensorScenarioSpec.from_file(cast(str | Path, spec))
+        runtime = attach_sensor_scenario(self.case(index), selected)
+        self.case(index).metadata["sensor_rebind"] = {
+            "required": False,
+            "scenario_id": selected.scenario_id,
+            "status": "rebound",
+        }
+        return runtime
+    ####
+
     def save_checkpoint(self, path: str | Path, *, index: int = 0) -> Path:
         """Persist source, lowered-case identity, and live emulator state.
 
@@ -376,6 +394,11 @@ class LoadedProgram:
                 "metadata": _json_safe({key: value for key, value in problem.metadata.items() if key != "tables"}),
                 "event_history": _json_safe(problem.event_history),
                 "transition_history": [item.to_metadata() for item in problem.transition_history],
+                "sensor_bus": None if problem.sensor_bus is None else problem.sensor_bus.to_metadata(),
+                "sensor_rebind": {
+                    "required": problem.sensor_bus is not None,
+                    "reason": "external sensor providers and estimator subscribers are intentionally not serialized",
+                },
                 "vehicles": {
                     name: {
                         "state": _state_payload(vehicle.state),
@@ -448,6 +471,15 @@ class LoadedProgram:
             for item in saved.get("transition_history", ())
             if isinstance(item, Mapping)
         ]
+        if saved.get("sensor_bus") is not None:
+            case.metadata["checkpoint_sensor_bus"] = saved["sensor_bus"]
+            case.metadata["checkpoint_sensor_rebind"] = saved.get(
+                "sensor_rebind",
+                {
+                    "required": True,
+                    "reason": "external sensor providers and estimator subscribers are intentionally not serialized",
+                },
+            )
         for name, vehicle_payload in saved["vehicles"].items():
             vehicle = case.vehicles[name]
             vehicle.state = _state_from_payload(vehicle_payload["state"], vehicle.state.frame)

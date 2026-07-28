@@ -46,19 +46,19 @@
         {
           "id": "f16-point-mass-3dof-v1",
           "path": "families/reference_f16_s119/reductions/point-mass-3dof-v1.yaml",
-          "sha256": "85b7ae84c17aac65fb2e28f21b471ceff403ccc3b19a3eb52e5b8cfb2100864f",
+          "sha256": "1f3dfd4a541b39ae03860d93d9748339388f815c74a6205f0fff9757fe9fb08c",
           "status": "equivalence_pending"
         },
         {
           "id": "f16-attitude-response-pseudo6dof-v1",
           "path": "families/reference_f16_s119/reductions/attitude-response-pseudo6dof-v1.yaml",
-          "sha256": "1f501734b04d1609f1b771edb730086ad36dbabdaf8f6d541e4000edd8a46f2f",
+          "sha256": "cd26a4a6dd368fb36869f9ffdd23fe6885b09f779b61a1013105782bf0b2b335",
           "status": "equivalence_pending"
         }
       ],
       "source_parent": {
         "path": "families/reference_f16_s119/family.yaml",
-        "sha256": "f3145ff47b5f6d4a7020cb9c80cb2df13f25f5cb81b847cf6c2a3c125b9505c0"
+        "sha256": "5e2727fc2992c8e3d36cff65c95275fdbb2bb9d0c7f384bdf72ae80b20cbeb31"
       },
       "status": "verified"
     },
@@ -104,7 +104,7 @@
           "id": "hl20-logical-surface-allocation-v1",
           "kind": "allocation",
           "path": "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml",
-          "sha256": "e0e64c66d9da2b36e3e2f1f20cfd36d48cf77a6221eac3a790c1071f540463ba",
+          "sha256": "959feaaa9fbea85b0623abbc68157ed01fd4c44b22a1173693804f818956fe9c",
           "status": "contract_ready"
         }
       ],
@@ -113,19 +113,19 @@
         {
           "id": "hl20-energy-glide-3dof-v1",
           "path": "families/reference_hl20_mod_k/reductions/energy-glide-3dof-v1.yaml",
-          "sha256": "c198a45d10a901081b245139985ac40426d2eb6440344fffed9ca66c4fd8b7d5",
+          "sha256": "53b118e3cb303e43a8bd01b2f69912c89879c708f181bbfa1764e38881ba0b49",
           "status": "equivalence_pending"
         },
         {
           "id": "hl20-attitude-response-pseudo6dof-v1",
           "path": "families/reference_hl20_mod_k/reductions/attitude-response-pseudo6dof-v1.yaml",
-          "sha256": "f415d71871ba98ec484e403f4b62574d84f862ca16ab682c6bf66346cdba048b",
+          "sha256": "318786da2e23908bdc14ca6d18cb2fd96ad9c397b0c89b0b769293325c873353",
           "status": "equivalence_pending"
         }
       ],
       "source_parent": {
         "path": "families/reference_hl20_mod_k/family.yaml",
-        "sha256": "2a805fb6f4ffe87c6915c2491525d400370dc67db6288af4d1ab75d1872da5cd"
+        "sha256": "bf79d2c2b558796f46b289df6023428d99c92aec69717da514ca17305a31bbfa"
       },
       "status": "verified"
     },
@@ -134,7 +134,7 @@
         "artifact": "families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml",
         "child_qualification_class": "synthetic",
         "path": "families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml",
-        "sha256": "9b066a2fb9f678d6f727cc0516ce844bd5ff5a4123aaeb9f0f339056a743d416",
+        "sha256": "181811319d0d6e9782103ae53f3f6ae298366543507cbe2fb687d03c58e4314f",
         "status": "verified_witness"
       },
       "evidence": [
@@ -160,19 +160,19 @@
         {
           "id": "nesc-performance-3dof-v1",
           "path": "families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml",
-          "sha256": "62c945252f0578fc2dd4c9adab3fb085bd39d28437efc27584004dc0f0372aeb",
+          "sha256": "573ee97c9077369f15c88b0eb39ebcf53181de2fb946986e0c971ba2ebaa107f",
           "status": "equivalence_pending"
         },
         {
           "id": "nesc-attitude-response-pseudo6dof-v1",
           "path": "families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml",
-          "sha256": "45b323dbc5ae2ad67ee17b7fcab24315325174559dd0aead51944137b2039e7d",
+          "sha256": "d2d9acaff7ea37d4546d01ba0492a98c54f8577433041dbdba5c568cc63187d3",
           "status": "equivalence_pending"
         }
       ],
       "source_parent": {
         "path": "families/reference_nesc_two_stage_rocket/family.yaml",
-        "sha256": "e15af2270631c822284b1db722a6765eb20ae745141f2b6e415a7526764ddd27"
+        "sha256": "ee1c4b02e3e9c84840e588f03ffd4180cf9730faecb51547db7fb1adac0aa3a8"
       },
       "status": "verified"
     },

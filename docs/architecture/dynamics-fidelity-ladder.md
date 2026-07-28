@@ -6,6 +6,9 @@ split inside the rigid-body mode.  All tiers share environment, table,
 propulsion, mass, guidance, and telemetry contracts so a vehicle can be
 developed progressively without duplicating its mission contract.
 
+For the operator-facing setup, trim declaration, commands, and failure
+diagnostics, follow [Trim And Fidelity Walkthrough](../plan/trim-and-fidelity-walkthrough.md).
+
 ## Modes
 
 | Mode | Translation | Attitude | Moments/inertia |

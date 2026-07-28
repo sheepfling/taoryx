@@ -116,6 +116,7 @@ class TrimCatalogEntry(BaseModel):
             control_upper=self.control_upper,
             residual_scales=self.residual_scales,
             x_scale=self.x_scale,
+            operating_point=self.operating_point,
         )
         ####
 

@@ -1,0 +1,17 @@
+schema_version: 1
+scenario_id: x8_sensorized_powered_v1
+sensor:
+  name: imu
+  vehicle: "1"
+  cadence_s: 0.01
+  sample: instantaneous
+  delivery_s: 0.002
+  truth: boundary
+  rate_policy: split
+  profile: ../../tests/fixtures/imu_profiles/taoryx_demo.yaml
+  seed: 43
+earth:
+  rate_mode: source
+estimators:
+  - dead-reckoning
+  - mekf

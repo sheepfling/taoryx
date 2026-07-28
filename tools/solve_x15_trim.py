@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import re
 import tempfile
 from pathlib import Path
@@ -178,12 +179,15 @@ def main() -> None:
         )
     payload = {
         "vehicle": "x15",
+        "earth_omega_rad_s": 7.2921151467e-5,
+        "operating_point_mode": "rotating_earth_representative",
         "source_anchor": "source-trimmed release glide",
         "claim": "local source-trim candidate through the common trim solver and cached rigid-body glide residual adapter",
         "status": "pass" if result.success else "blocked",
         "state": dict(result.state),
         "controls": dict(result.controls),
         "residual_normalized": dict(result.residuals),
+        "trim_diagnostics": [diagnostic.as_dict() for diagnostic in result.diagnostics],
         "residual_norm_l2": math.sqrt(sum(value * value for value in result.residuals.values())),
         "acceptance_gate": {
             "force_velocity_cross_norm_lt": 1.0e-3,
@@ -219,9 +223,10 @@ def main() -> None:
             "tables_rebound_per_evaluation": False,
         },
     }
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(OUTPUT)
+    output = Path(os.environ.get("TAORYX_TRIM_OUTPUT", str(OUTPUT)))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(output)
     ####
 
 

@@ -4,9 +4,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import tempfile
 from pathlib import Path
+
+try:
+    from tools.rotating_earth_trim import rotating_fixture_source
+except ModuleNotFoundError:
+    from rotating_earth_trim import rotating_fixture_source
 
 from taoryx.language.grammar_contracts import GrammarProfile
 from taoryx.runtime.runner import run_files
@@ -25,19 +31,20 @@ def _sha256(path: Path) -> str:
     ####
 
 
-def _candidate(source: str, rotor_speed: float) -> str:
-    return re.sub(
+def _candidate(source: str, rotor_speed: float, earth_omega_rad_s: float) -> str:
+    updated = re.sub(
         r"(\*runtime control rotor-speed vehicle=1 default=)[0-9.eE+-]+",
         rf"\g<1>{rotor_speed:.16g}",
         source,
     )
+    return rotating_fixture_source(updated, earth_omega_rad_s)
     ####
 
 
-def _residual(state_values: dict[str, float], control_values: dict[str, float], work: Path) -> dict[str, float]:
+def _residual(state_values: dict[str, float], control_values: dict[str, float], work: Path, earth_omega_rad_s: float) -> dict[str, float]:
     rotor_speed = control_values["equal_rotor_speed_rad_s"]
     problem = work / "candidate.prb"
-    problem.write_text(_candidate(PROBLEM.read_text(encoding="utf-8"), rotor_speed), encoding="utf-8")
+    problem.write_text(_candidate(PROBLEM.read_text(encoding="utf-8"), rotor_speed, earth_omega_rad_s), encoding="utf-8")
     report = run_files(problem, TABLES, output_dir=work / "run", max_steps=2, integrator="rk4", profile=GrammarProfile.TAORYX)
     if not report.results:
         raise RuntimeError([(item.code, item.message) for item in report.diagnostics])
@@ -55,18 +62,22 @@ def _residual(state_values: dict[str, float], control_values: dict[str, float], 
 def main() -> None:
     """Solve and write the Hummingbird hover trim evidence report."""
 
+    earth_omega_rad_s = float(os.environ.get("TAORYX_TRIM_EARTH_OMEGA", "0.0"))
     with tempfile.TemporaryDirectory(prefix="taoryx-hummingbird-trim-") as directory:
         work = Path(directory)
         spec = load_trim_catalog(ROOT / "verification/trim_specs.yaml").get("hummingbird-hover-v1").to_spec()
-        result = solve_trim(spec, lambda state, controls: _residual(dict(state), dict(controls), work), max_nfev=50, residual_tolerance=1.0e-12)
+        result = solve_trim(spec, lambda state, controls: _residual(dict(state), dict(controls), work, earth_omega_rad_s), max_nfev=50, residual_tolerance=1.0e-12)
         rotor_speed = result.controls["equal_rotor_speed_rad_s"]
         residual = result.residuals
     payload = {
         "vehicle": "asctec-hummingbird",
+        "earth_omega_rad_s": earth_omega_rad_s,
+        "operating_point_mode": "zero_rate_source_parity" if earth_omega_rad_s == 0.0 else "rotating_earth_representative",
         "source_anchor": "RotorPy-derived equal-rotor hover",
         "claim": "open-loop hover trim using the native direct-wrench plant",
         "parameters": {"equal_rotor_speed_rad_s": rotor_speed},
         "residual_normalized": {"body_x": residual["body_x_force"], "body_z": residual["body_z_force"], "moment_z": residual["yaw_moment"]},
+        "trim_diagnostics": [diagnostic.as_dict() for diagnostic in result.diagnostics],
         "residual_norm_l2": sum(value * value for value in residual.values()) ** 0.5,
         "acceptance_gate": {
             "translation_norm_lt": 0.01,
@@ -80,9 +91,10 @@ def main() -> None:
         },
         "solver": {"success": result.success, "status": result.status, "message": result.message, "nfev": result.iterations},
     }
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(OUTPUT)
+    output = Path(os.environ.get("TAORYX_TRIM_OUTPUT", str(OUTPUT)))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(output)
     ####
 
 

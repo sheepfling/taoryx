@@ -9,6 +9,17 @@ from enum import StrEnum
 from .contracts import Frame, FrameVector3, Vector3
 
 
+class FidelitySetupError(ValueError):
+    """Actionable equation-tier setup failure."""
+
+    def __init__(self, code: str, message: str, action: str, *, field: str | None = None) -> None:
+        self.code = code
+        self.field = field
+        self.action = action
+        location = f" field={field!r}" if field is not None else ""
+        super().__init__(f"[fidelity:{code}]{location} {message} Fix: {action}")
+
+
 class DynamicsMode(StrEnum):
     """Supported and planned trajectory dynamics modes."""
 
@@ -100,9 +111,19 @@ class Kinematic6DofState:
 
     def __post_init__(self) -> None:
         if self.position.frame is not Frame.ECFC or self.velocity.frame is not Frame.ECFC:
-            raise ValueError("kinematic 6-DOF position and velocity must use ECFC")
+            raise FidelitySetupError(
+                "kinematic-frame-mismatch",
+                "kinematic 6-DOF position and velocity must use ECFC",
+                "convert the local state to the declared ECFC frame before constructing the sidecar",
+                field="position/velocity",
+            )
         if not math.isfinite(self.time):
-            raise ValueError("kinematic 6-DOF time must be finite")
+            raise FidelitySetupError(
+                "kinematic-time-nonfinite",
+                "kinematic 6-DOF time must be finite",
+                "provide a finite integration time in seconds",
+                field="time",
+            )
         ####
 
     def with_attitude_rate(self, body_rate: Vector3, step_size: float) -> Kinematic6DofState:

@@ -3,8 +3,8 @@ registry: taoryx-daveml-alpha3-completion/v1
 claim_boundary: source-bounded research integration; not flight qualification
 source_policy:
   canonical_root: resources/aerospace/daveml
-  temporary_roots: [INBOX, /tmp/taoryx-aerospace-data-corpus-v1.1]
-  temporary_roots_are_provenance_invalid: true
+  prohibited_source_locations: [workspace_temp, system_temp]
+  prohibited_source_locations_are_provenance_invalid: true
 qualification_classes: [reference_exact, derived_exact, surrogate_composite, synthetic]
 families:
   - id: reference_f16_s119
