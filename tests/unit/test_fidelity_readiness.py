@@ -60,4 +60,4 @@ def test_ordered_blocker_is_the_first_blocked_tier() -> None:
     blocker = MODULE._ordered_blocker(reports)
 
     assert blocker is not None
-    assert blocker.tier == "pseudo_6dof_kinematic_bridge"
+    assert blocker.tier == "rigid_body_6dof_surface_allocated"
