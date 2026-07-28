@@ -15,7 +15,7 @@
       "family_id": "reference_f16_s119",
       "manifest": "families/reference_f16_s119/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "f3145ff47b5f6d4a7020cb9c80cb2df13f25f5cb81b847cf6c2a3c125b9505c0",
+      "manifest_sha256": "434b7d649d23dd483cd202c7a982b4ed8167b2dc2effd777c6591fe6e130eb73",
       "nonclaim_count": 3,
       "qualification_class": "reference_exact",
       "status": "verified"
@@ -32,7 +32,7 @@
       "family_id": "reference_hl20_mod_k",
       "manifest": "families/reference_hl20_mod_k/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "2a805fb6f4ffe87c6915c2491525d400370dc67db6288af4d1ab75d1872da5cd",
+      "manifest_sha256": "25e2bbb4139d1ab49611ddb9003c72c59b336ebe1e691fb070b957e4121b7a28",
       "nonclaim_count": 4,
       "qualification_class": "reference_exact",
       "status": "verified"
@@ -49,7 +49,7 @@
       "family_id": "reference_nesc_two_stage_rocket",
       "manifest": "families/reference_nesc_two_stage_rocket/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "e15af2270631c822284b1db722a6765eb20ae745141f2b6e415a7526764ddd27",
+      "manifest_sha256": "04e7dc15f4c4ace67a1d5cb477010f96d905ed79a9423372b01955caa5a0f7a2",
       "nonclaim_count": 4,
       "qualification_class": "reference_exact",
       "status": "verified"
@@ -66,7 +66,7 @@
       "family_id": "a320_openap_3dof",
       "manifest": "families/a320_openap_3dof/collection-manifest.json",
       "manifest_kind": "collection",
-      "manifest_sha256": "5ab346f462d2e3bcb3ecd6992c34cef2bfb2e90c56237b4026c6de8d46982200",
+      "manifest_sha256": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
       "nonclaim_count": 4,
       "qualification_class": "derived_exact",
       "status": "verified"
@@ -83,7 +83,7 @@
       "family_id": "a320_openap_jsbsim_pseudo6dof",
       "manifest": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
       "manifest_kind": "collection",
-      "manifest_sha256": "6573d827ba06e451c31dae876151954ca9f4bbba4e241496491b9f1d03af43c4",
+      "manifest_sha256": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
       "nonclaim_count": 4,
       "qualification_class": "surrogate_composite",
       "status": "verified"

@@ -299,7 +299,13 @@ def build_board(board: dict[str, Any], output_root: Path) -> dict[str, Any]:
         run_artifacts.append(run.model_dump(mode="json"))
     manifest = {**core, "artifact_contract_hash": contract_hash, "manifest_hash_basis": "canonical core without generated hashes", "run_artifacts": run_artifacts, "object_lineage": lineage.model_dump(mode="json") if lineage is not None else None}
     (destination / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return {"board_id": board["id"], "family_id": board["family_id"], "status": "verified", "artifact_contract_hash": contract_hash, "path": str(destination.resolve().relative_to(ROOT))}
+    try:
+        display_path = str(destination.resolve().relative_to(ROOT))
+    except ValueError:
+        # Test and consumer callers may intentionally build into a temporary
+        # directory outside the repository. Keep the report portable there.
+        display_path = str(destination.resolve())
+    return {"board_id": board["id"], "family_id": board["family_id"], "status": "verified", "artifact_contract_hash": contract_hash, "path": display_path}
 
 
 def build(catalog_path: str | Path = DEFAULT_CATALOG, output_root: str | Path = DEFAULT_OUTPUT) -> dict[str, Any]:

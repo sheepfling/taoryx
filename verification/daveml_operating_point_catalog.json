@@ -6,7 +6,7 @@
     {
       "applicability": "required",
       "evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
-      "evidence_sha256": "400da9183034b3f5fd83c4ebcc63ceede5ae7de1729483e8352d99fca803dbf8",
+      "evidence_sha256": "e9a2866f07cdbbf93e82f7334ffb24f77f78071795b51cbda993076a28996759",
       "evidence_status": "verified",
       "expansion_axes": [
         "geometric_altitude_m",
@@ -38,7 +38,7 @@
     {
       "applicability": "required",
       "evidence": "verification/daveml_hl20_trim_evidence.json",
-      "evidence_sha256": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f",
+      "evidence_sha256": "17a3e515a2874475b8fa057b13ec2f321b50f55a77beba80e3e236ab8ff01407",
       "evidence_status": "verified",
       "expansion_axes": [
         "mach",
@@ -70,7 +70,7 @@
     {
       "applicability": "not_applicable",
       "evidence": "verification/daveml_nesc_objectives_evidence.json",
-      "evidence_sha256": "9f35f2ebf2ea07dd695bd09800640dd833f0634220b05d23dcaa35f80adfb0e2",
+      "evidence_sha256": "43425d423961937f8d3f6ab12630c6e3df36ab9331f88ca35e8e139ac5318a20",
       "evidence_status": "pass",
       "expansion_axes": [
         "time_s",
@@ -101,7 +101,7 @@
     {
       "applicability": "required",
       "evidence": "verification/daveml_a320_openap_integration.json",
-      "evidence_sha256": "8b4c458881d566fb9bcee28312fd554b4507fb33de0a6a199a989829c9e95bec",
+      "evidence_sha256": "0fc54c2a92fe2798e75edef807d589c843e69b6cb5a49f3c20f3cf93a09d26af",
       "evidence_status": "verified",
       "expansion_axes": [
         "altitude_m",
@@ -136,7 +136,7 @@
     {
       "applicability": "required",
       "evidence": "verification/daveml_a320_pseudo6dof_integration.json",
-      "evidence_sha256": "4f528b844b268f0388429f040195f769528a9810b3a74ed5493abd617e1e46da",
+      "evidence_sha256": "067231a147c0c470f93b4d8d4bc077cbbe23568709531b50a29bcaab9465e166",
       "evidence_status": "verified",
       "expansion_axes": [
         "altitude_m",
@@ -171,7 +171,7 @@
     }
   ],
   "family_count": 5,
-  "operational_contracts_sha256": "a0375e95090bff8750f991f0db65c2ac67fa200e2c2f0c7885510c869a218751",
+  "operational_contracts_sha256": "5a888b705fd6cf0677ba8f72d07ef090a30ea1b75f95ee2857519585b342275c",
   "report_type": "taoryx.daveml-operating-point-catalog/v1",
   "schema_version": 1,
   "status": "verified"

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 
 import pytest
@@ -74,6 +75,10 @@ def test_pseudo_six_dof_adds_filtered_attitude_state() -> None:
 
 
 def test_serial_and_spawned_envelopes_preserve_sample_order() -> None:
+    try:
+        os.sysconf("SC_SEM_NSEMS_MAX")
+    except (OSError, PermissionError, ValueError):
+        pytest.skip("spawned process pools are unavailable in this sandbox")
     vehicle = RocketGlideVehicle()
     commands = _commands()
     serial = run_reachability_envelope(vehicle, commands, horizon_s=2.0, step_size_s=0.25, workers=1)
