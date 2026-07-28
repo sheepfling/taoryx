@@ -12,6 +12,7 @@ from taoryx.modes import DynamicsMode
 from taoryx.rigid_body import RIGID_BODY_STATE_NAMES, RigidBody6DofModel, RigidBody6DofState, RigidBodyForceMoment, ThermalLimits
 
 from .common import RuntimeState, RuntimeVehicle
+from .truth import rigid_body_truth_provider
 
 
 class FlightPhase(StrEnum):
@@ -191,5 +192,6 @@ def rigid_body_vehicle(
         integrator=integrator,
         dynamics_mode=DynamicsMode.RIGID_BODY_6DOF,
         environment_evaluator=observables,
+        truth_provider=rigid_body_truth_provider(model),
     )
     ####

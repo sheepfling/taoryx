@@ -118,6 +118,7 @@ class RunArtifact(BaseModel):
     commands: list[dict[str, object]] = Field(default_factory=list)
     termination: dict[str, object] = Field(default_factory=dict)
     events: list[dict[str, object]] = Field(default_factory=list)
+    sensor_execution: dict[str, object] = Field(default_factory=dict)
     visualization: dict[str, object] = Field(default_factory=dict)
 
     def write_json(self, path: str | Path) -> Path:
@@ -226,6 +227,7 @@ class RunArtifact(BaseModel):
                 (run_id, "commands", json.dumps(self.commands, sort_keys=True)),
                 (run_id, "termination", json.dumps(self.termination, sort_keys=True)),
                 (run_id, "events", json.dumps(self.events, sort_keys=True)),
+                (run_id, "sensor_execution", json.dumps(self.sensor_execution, sort_keys=True)),
                 (run_id, "visualization", json.dumps(self.visualization, sort_keys=True)),
             ],
         )

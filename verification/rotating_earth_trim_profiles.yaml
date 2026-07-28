@@ -1,0 +1,33 @@
+schema_version: 1
+id: taoryx_rotating_earth_trim_profiles_v1
+earth:
+  omega_rad_s: 7.2921151467e-05
+  integration_frame: ECIC
+  environment_frame: ECFC
+  trim_variables_frame: local-air-relative
+  latitude_policy: representative anchors plus continuation checks, not one manual trim per latitude
+profiles:
+  - vehicle: b747
+    solver: tools/solve_b747_trim.py
+    latitude_deg: 0.0
+    longitude_deg: 0.0
+    altitude_m: 100.0
+    local_airspeed_mps: 153.0
+  - vehicle: skywalker_x8
+    solver: tools/solve_x8_trim.py
+    latitude_deg: 0.0
+    longitude_deg: 0.0
+    altitude_m: 178.0
+    local_airspeed_mps: 17.9
+  - vehicle: hummingbird
+    solver: tools/solve_hummingbird_trim.py
+    latitude_deg: 0.0
+    longitude_deg: 0.0
+    altitude_m: 2.0
+    local_airspeed_mps: 0.0
+  - vehicle: x15
+    solver: tools/solve_x15_trim.py
+    latitude_deg: 34.3068454669
+    longitude_deg: -118.843064716
+    altitude_m: 21500.0
+    local_airspeed_mps: 1300.0

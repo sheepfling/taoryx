@@ -8,13 +8,16 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .contracts import Vector3
+from .hl20_showcase import render_hl20_ca_hi_showcase_composites
 from .reachability_envelope import (
     LaunchCommand,
     ReachabilityEnvelope,
     ReachabilityFidelity,
     RocketGlideVehicle,
+    TerminalCriteria,
     run_reachability_envelope,
 )
+from .reachability_visualization import render_reachability_plot_bundle
 from .vehicle import DetachedBodyDefinition
 
 HL20_REFERENCE_AREA_M2 = 26.612075808
@@ -37,6 +40,7 @@ HL20_FIDELITIES = (
     ReachabilityFidelity.POINT_MASS_3DOF,
     ReachabilityFidelity.PSEUDO_6DOF,
     ReachabilityFidelity.RIGID_BODY_6DOF,
+    ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED,
 )
 
 
@@ -86,13 +90,18 @@ def hl20_release_commands() -> tuple[LaunchCommand, ...]:
     ####
 
 
-def hl20_low_fidelity_provenance() -> dict[str, object]:
+def hl20_low_fidelity_provenance(
+    fidelity: ReachabilityFidelity = ReachabilityFidelity.POINT_MASS_3DOF,
+) -> dict[str, object]:
     """Describe the source boundary and synthetic launch-parent assumptions."""
+
+    if fidelity not in HL20_FIDELITIES:
+        raise ValueError(f"unsupported HL-20 fidelity: {fidelity}")
 
     return {
         "family_group": "hypersonic_lifting_body_research",
         "family_id": "reference_hl20_mod_k",
-        "scenario_id": "hl20-rocket-release-3dof-v1",
+        "scenario_id": f"hl20-rocket-release-{fidelity.value}-v1",
         "qualification": "synthetic_booster_source_bound_glide_child",
         "source_package_sha256": HL20_PACKAGE_SHA256,
         "aerodynamics_sha256": HL20_AERODYNAMICS_SHA256,
@@ -105,7 +114,7 @@ def hl20_low_fidelity_provenance() -> dict[str, object]:
         "controller_claim": False,
         "route_claim": False,
         "source_exact_trajectory": False,
-        "fidelity": "point_mass_3dof",
+        "fidelity": fidelity.value,
         "release_event_id": "hl20-release-v1",
         "release_time_s": 25.0,
         "source_envelope": {"mach": [0.3, 4.0], "altitude_m": [-1000.0, 20_000.0]},
@@ -120,6 +129,7 @@ def run_hl20_release(
     step_size_s: float = 0.5,
     horizon_s: float = 120.0,
     spawn_children: bool = True,
+    criteria: TerminalCriteria | None = None,
 ) -> ReachabilityEnvelope:
     """Run one fidelity tier of the HL-20 rocket-release envelope."""
 
@@ -133,9 +143,10 @@ def run_hl20_release(
         step_size_s=step_size_s,
         horizon_s=horizon_s,
         workers=1,
-        study_id="hl20_rocket_release_3dof_v1",
-        provenance=hl20_low_fidelity_provenance(),
+        study_id=f"hl20_rocket_release_{fidelity.value}_v1",
+        provenance=hl20_low_fidelity_provenance(fidelity),
         spawn_children=spawn_children,
+        criteria=criteria or TerminalCriteria(require_ground_contact=True),
     )
     ####
 
@@ -166,7 +177,7 @@ def run_hl20_fidelity_ladder(
     horizon_s: float = 120.0,
     spawn_children: bool = True,
 ) -> tuple[ReachabilityEnvelope, ...]:
-    """Run all three HL-20 rocket-release fidelity tiers over one search grid."""
+    """Run all four HL-20 rocket-release fidelity tiers over one search grid."""
 
     return tuple(
         run_hl20_release(
@@ -230,8 +241,9 @@ def write_hl20_fidelity_bundle(
     step_size_s: float = 0.5,
     horizon_s: float = 120.0,
     spawn_children: bool = True,
+    dpi: int = 140,
 ) -> dict[str, object]:
-    """Write all three HL-20 tiers and one comparison manifest."""
+    """Write all four HL-20 tiers and one comparison manifest."""
 
     destination = Path(directory)
     destination.mkdir(parents=True, exist_ok=True)
@@ -246,6 +258,18 @@ def write_hl20_fidelity_bundle(
         artifact_path = destination / f"{envelope.fidelity.value}.json"
         envelope.write_json(artifact_path)
         artifacts.append(artifact_path.name)
+    plot_report = render_reachability_plot_bundle(
+        envelopes[0],
+        destination / "plots",
+        comparison_sources=envelopes[1:],
+        dpi=dpi,
+    )
+    showcase_report = render_hl20_ca_hi_showcase_composites(
+        envelopes,
+        destination / "composites",
+        source_artifacts=tuple(destination / artifact for artifact in artifacts),
+        dpi=dpi,
+    )
     manifest_path = destination / "bundle-manifest.json"
     manifest_path.write_text(
         json.dumps(
@@ -255,8 +279,27 @@ def write_hl20_fidelity_bundle(
                 "family_group": "hypersonic_lifting_body_research",
                 "fidelity_profiles": [fidelity.value for fidelity in HL20_FIDELITIES],
                 "artifacts": artifacts,
-                "claim_boundary": "three fidelity synthetic booster comparison with source-bound HL-20 geometry and fixed mass",
+                "claim_boundary": "four fidelity synthetic booster comparison with source-bound HL-20 geometry and fixed mass",
+                "tier_contracts": {
+                    "point_mass_3dof": "translation and resource baseline",
+                    "pseudo_6dof": "synthesized attitude response bridge",
+                    "rigid_body_6dof": "native rigid-body diagnostic with direct loads",
+                    "rigid_body_6dof_surface_allocated": "bounded synthetic logical seven-surface overlay",
+                },
+                "surface_allocation_claim": "logical overlay only; not source-declared actuator dynamics or controller qualification",
+                "plots": [path.name for path in plot_report.plot_paths],
+                "plot_manifest": str(plot_report.manifest_path.relative_to(destination)),
+                "showcase": {
+                    "composites": [path.relative_to(destination).as_posix() for path in showcase_report.composite_paths],
+                    "data_artifacts": [path.relative_to(destination).as_posix() for path in showcase_report.data_paths],
+                    "summary": showcase_report.summary_path.relative_to(destination).as_posix(),
+                    "manifest": showcase_report.manifest_path.relative_to(destination).as_posix(),
+                },
                 "provenance": hl20_low_fidelity_provenance(),
+                "provenance_by_fidelity": {
+                    fidelity.value: hl20_low_fidelity_provenance(fidelity)
+                    for fidelity in HL20_FIDELITIES
+                },
             },
             indent=2,
             sort_keys=True,
@@ -264,7 +307,13 @@ def write_hl20_fidelity_bundle(
         + "\n",
         encoding="utf-8",
     )
-    return {"envelopes": envelopes, "manifest_path": manifest_path, "artifact_paths": tuple(destination / name for name in artifacts)}
+    return {
+        "envelopes": envelopes,
+        "manifest_path": manifest_path,
+        "artifact_paths": tuple(destination / name for name in artifacts),
+        "plot_report": plot_report,
+        "showcase_report": showcase_report,
+    }
     ####
 
 

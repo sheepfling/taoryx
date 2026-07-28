@@ -99,6 +99,7 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--max-steps", type=int, default=100000)
     run.add_argument("--seed", type=int, help="base seed for *random sampling")
     run.add_argument("--profile", choices=tuple(profile.value for profile in GrammarProfile), default=GrammarProfile.TAOS96.value)
+    run.add_argument("--sensor-spec", type=Path, help="provider-neutral sensor scenario sidecar")
     run.add_argument(
         "--integrator",
         choices=tuple(item.value for item in available_integrators()),
@@ -275,6 +276,7 @@ def main(argv: list[str] | None = None) -> int:
         integrator=arguments.integrator,
         seed=arguments.seed,
         profile=arguments.profile,
+        sensor_spec=arguments.sensor_spec,
     )
     if arguments.report:
         try:

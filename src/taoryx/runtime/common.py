@@ -5,14 +5,19 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping, Sequence
 from copy import copy, deepcopy
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from taoryx.contracts import Frame, Vector3
 from taoryx.language.expressions import ExpressionType
-from taoryx.modes import DynamicsMode, Kinematic6DofState
+from taoryx.modes import DynamicsMode, FidelitySetupError, Kinematic6DofState
 from taoryx.outputs import VehicleKind
+from taoryx.sensors import TruthPoint
 from taoryx.state import PointMassRates, PointMassState
 
 from .sensor_clock import SensorClockSpec
+
+if TYPE_CHECKING:
+    from .sensor_bus import SensorBus
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +94,7 @@ PointMassDerivative = Callable[[PointMassState], PointMassRates]
 BodyRateProvider = Callable[[RuntimeState], Vector3]
 StallDetector = Callable[[RuntimeState], bool]
 SpawnProvider = Callable[[RuntimeState], Sequence["SpawnRequest"]]
+TruthProvider = Callable[[RuntimeState], TruthPoint]
 
 
 @dataclass(frozen=True, slots=True)
@@ -192,6 +198,8 @@ class RuntimeVehicle:
     model_id: str | None = None
     parent_model_id: str | None = None
     spawn_provider: SpawnProvider | None = None
+    truth_provider: TruthProvider | None = None
+    controller_state: object | None = None
     fired_events: set[str] = field(default_factory=set)
 
     def __post_init__(self) -> None:
@@ -207,9 +215,19 @@ class RuntimeVehicle:
             named = {**self.state.named, **self.control_values}
             self.state = RuntimeState(self.state.time, self.state.values, self.state.frame, named, self.state.value_names, self.state.segment_endpoints)
         if self.dynamics_mode is DynamicsMode.KINEMATIC_6DOF and self.kinematic_state is None:
-            raise ValueError("kinematic-6dof vehicles require a kinematic state sidecar")
+            raise FidelitySetupError(
+                "missing-kinematic-sidecar",
+                "kinematic-6dof vehicles require a kinematic state sidecar",
+                "construct Kinematic6DofState from the initial ECFC translation and attach it to RuntimeVehicle",
+                field="kinematic_state",
+            )
         if self.dynamics_mode is not DynamicsMode.KINEMATIC_6DOF and self.kinematic_state is not None:
-            raise ValueError("kinematic state sidecars require kinematic-6dof mode")
+            raise FidelitySetupError(
+                "unexpected-kinematic-sidecar",
+                "kinematic state sidecars require kinematic-6dof mode",
+                "select kinematic-6dof or remove the sidecar for point-mass and rigid-body modes",
+                field="dynamics_mode/kinematic_state",
+            )
         if not self.history:
             self.history.append(self.state)
         ####
@@ -255,6 +273,8 @@ class RuntimeProblem:
     required_truth_times: tuple[float, ...] = ()
     sensor_clocks: tuple[SensorClockSpec, ...] = ()
     transition_history: list[TransitionTruthPair] = field(default_factory=list)
+    sensor_bus: "SensorBus | None" = None
+    feedback_guard: Callable[[float], None] | None = None
 
     def active_vehicles(self) -> tuple[RuntimeVehicle, ...]:
         return tuple(vehicle for vehicle in self.vehicles.values() if vehicle.active)
@@ -356,6 +376,8 @@ class RuntimeProblem:
             self.required_truth_times,
             self.sensor_clocks,
             deepcopy(self.transition_history),
+            deepcopy(self.sensor_bus),
+            self.feedback_guard,
         )
         cloned.metadata["cloned_at_time"] = float(time)
         return cloned

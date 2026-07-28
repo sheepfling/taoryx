@@ -30,11 +30,7 @@ def project_python() -> str:
 
 def run(command: list[str]) -> None:
     print("+", " ".join(command))
-    environment = dict(os.environ)
-    source_path = str(ROOT / "src")
-    existing_path = environment.get("PYTHONPATH")
-    environment["PYTHONPATH"] = source_path if not existing_path else os.pathsep.join((source_path, existing_path))
-    subprocess.run(command, cwd=ROOT, env=environment, check=True)
+    subprocess.run(command, cwd=ROOT, check=True)
     ####
 ####
 
@@ -45,7 +41,10 @@ def python_tool(script: str, *args: str) -> list[str]:
 
 
 def tool_script(script: str, *args: str) -> list[str]:
-    return [project_python(), str(TOOLS / script), *args]
+    """Build a module invocation for a tool in the repository package."""
+
+    module = Path(script).stem
+    return [project_python(), "-m", f"tools.{module}", *args]
 ####
 
 
@@ -192,7 +191,7 @@ def showcase_california_hawaii() -> None:
 
 
 def showcase_hl20_low_fidelity() -> None:
-    """Run the low-fidelity HL-20 rocket-release and glide witness."""
+    """Run the HL-20 four-tier release witness and its showcase composites."""
     run(
         [
             project_python(),
@@ -204,15 +203,29 @@ def showcase_hl20_low_fidelity() -> None:
     ####
 
 
+def showcase_hl20_composites() -> None:
+    """Render the reproducible HL-20 boost/glide and spent-stage boards."""
+
+    showcase_hl20_low_fidelity()
+    ####
+
+
+def qualify_hl20() -> None:
+    """Regenerate the HL-20 bundle and qualify it through HL20-G6."""
+
+    run(tool_script("validate_hl20_qualification.py"))
+    ####
+
+
 def dof_matrix() -> None:
     """Generate machine-readable 3-DOF/6-DOF robustness evidence."""
-    run([project_python(), str(TOOLS / "run_dof_matrix.py")])
+    run(tool_script("run_dof_matrix.py"))
     ####
 
 
 def robustness_matrix() -> None:
     """Run the bounded paired vehicle verification matrix and write reports."""
-    run([project_python(), str(TOOLS / "run_robustness_matrix.py")])
+    run(tool_script("run_robustness_matrix.py"))
     ####
 
 
@@ -224,20 +237,14 @@ def verification_artifacts() -> None:
     # The matrix report may deliberately contain envelope rejections.  Keep
     # producing the remaining artifacts so those classified smoke-test
     # outcomes do not prevent the overview bundle from being inspected.
-    print("+", project_python(), TOOLS / "run_robustness_matrix.py", "--plots")
-    matrix_result = subprocess.run(
-        [project_python(), str(TOOLS / "run_robustness_matrix.py"), "--plots"],
-        cwd=ROOT,
-        check=False,
-    )
+    matrix_command = tool_script("run_robustness_matrix.py", "--plots")
+    print("+", " ".join(matrix_command))
+    matrix_result = subprocess.run(matrix_command, cwd=ROOT, check=False)
     if matrix_result.returncode:
         print(f"robustness matrix retained classified failures (exit {matrix_result.returncode}); continuing artifact generation")
-    print("+", project_python(), TOOLS / "run_dof_matrix.py", "--plots")
-    dof_result = subprocess.run(
-        [project_python(), str(TOOLS / "run_dof_matrix.py"), "--plots"],
-        cwd=ROOT,
-        check=False,
-    )
+    dof_command = tool_script("run_dof_matrix.py", "--plots")
+    print("+", " ".join(dof_command))
+    dof_result = subprocess.run(dof_command, cwd=ROOT, check=False)
     if dof_result.returncode:
         print(f"DOF matrix retained classified failures (exit {dof_result.returncode}); continuing artifact generation")
     showcase_result = subprocess.run(
@@ -252,24 +259,24 @@ def verification_artifacts() -> None:
     )
     if showcase_result.returncode:
         print(f"CA-HI showcase retained its reported status (exit {showcase_result.returncode}); continuing artifact generation")
-    run([project_python(), str(TOOLS / "render_showcase_composites.py")])
+    run(tool_script("render_showcase_composites.py"))
     ####
 
 
 def showcase_composites() -> None:
     """Render nominal paired trajectory composites for the slower vehicles."""
-    run([project_python(), str(TOOLS / "render_showcase_composites.py")])
+    run(tool_script("render_showcase_composites.py"))
 
 
 def b747_x8_evidence() -> None:
     """Build the clean B747/X8 source-bound evidence packet."""
-    run([project_python(), str(TOOLS / "build_b747_x8_evidence_packet.py")])
+    run(tool_script("build_b747_x8_evidence_packet.py"))
     ####
 
 
 def fidelity_packet() -> None:
     """Build the all-family 3-DOF/kinematic/6-DOF evidence packet."""
-    run([project_python(), str(TOOLS / "build_fidelity_ladder_packet.py")])
+    run(tool_script("build_fidelity_ladder_packet.py"))
     ####
 
 
@@ -288,10 +295,10 @@ def audit_fidelity() -> None:
     if not packets:
         raise FileNotFoundError("no all-family fidelity packet found; run `python tools/dev.py fidelity-packet` first")
     packet = packets[-1]
-    run([project_python(), str(TOOLS / "audit_fidelity_packet.py"), str(packet)])
+    run(tool_script("audit_fidelity_packet.py", str(packet)))
     reproduction_dir = ROOT / "artifacts" / "verification" / "fidelity_reproducibility"
     reproductions = sorted(reproduction_dir.glob("clean-snapshot-*.zip"), key=lambda path: path.stat().st_mtime)
-    command = [project_python(), str(TOOLS / "audit_fidelity_milestones.py"), str(packet)]
+    command = tool_script("audit_fidelity_milestones.py", str(packet))
     if reproductions:
         command.extend(["--reproduced-from", str(reproductions[-1])])
     command.append("--json")
@@ -303,10 +310,8 @@ def audit_alpha1() -> None:
     """Write the current Alpha 1 release-gate status report."""
     run(
         [
-            project_python(),
-            str(TOOLS / "audit_alpha1_release.py"),
-            "--output",
-            "artifacts/verification/alpha1/alpha1-status.json",
+            *tool_script("audit_alpha1_release.py"),
+            "--output", "artifacts/verification/alpha1/alpha1-status.json",
         ]
     )
     ####
@@ -314,7 +319,7 @@ def audit_alpha1() -> None:
 
 def alpha1_feature_matrix() -> None:
     """Generate the bounded Alpha 1 language feature matrix."""
-    run([project_python(), str(TOOLS / "build_alpha1_feature_matrix.py")])
+    run(tool_script("build_alpha1_feature_matrix.py"))
     ####
 
 
@@ -322,10 +327,8 @@ def alpha1_manual_examples() -> None:
     """Execute and classify the four Alpha 1 manual-example families."""
     run(
         [
-            project_python(),
-            str(TOOLS / "run_alpha1_manual_examples.py"),
-            "--output",
-            "artifacts/verification/alpha1/manual_examples/report.json",
+            *tool_script("run_alpha1_manual_examples.py"),
+            "--output", "artifacts/verification/alpha1/manual_examples/report.json",
         ],
     )
     ####
@@ -335,8 +338,7 @@ def alpha1_composition_case() -> None:
     """Resolve and execute the generic Alpha 1 composition proof case."""
     run(
         [
-            project_python(),
-            str(TOOLS / "run_alpha1_composition_case.py"),
+            *tool_script("run_alpha1_composition_case.py"),
             "--case",
             "verification/alpha1_composition_case.yaml",
             "--report",
@@ -348,7 +350,7 @@ def alpha1_composition_case() -> None:
 
 def alpha1_packet() -> None:
     """Build the self-contained, path-sanitized Alpha 1 evidence packet."""
-    run([project_python(), str(TOOLS / "build_alpha1_packet.py")])
+    run(tool_script("build_alpha1_packet.py"))
     ####
 
 
@@ -372,49 +374,49 @@ def alpha2_release() -> None:
 
 def maneuver_matrix() -> None:
     """Run bound native vehicle maneuvers and write classified evidence."""
-    run([project_python(), str(TOOLS / "run_maneuver_matrix.py"), "--plots"])
+    run(tool_script("run_maneuver_matrix.py", "--plots"))
     ####
 
 
 def import_slower_tables() -> None:
     """Regenerate slower-vehicle research decks from source CSV files."""
-    run([project_python(), str(TOOLS / "import_slower_6dof_tables.py")])
+    run(tool_script("import_slower_6dof_tables.py"))
     ####
 
 
 def generate_problem_files() -> None:
     """Generate native problem files from the tracked scenario catalog."""
-    run([project_python(), str(TOOLS / "generate_problem_files.py")])
+    run(tool_script("generate_problem_files.py"))
     ####
 
 
 def check_problem_files() -> None:
     """Verify metadata-driven problem files are current."""
-    run([project_python(), str(TOOLS / "generate_problem_files.py"), "--check"])
+    run(tool_script("generate_problem_files.py", "--check"))
     ####
 
 
 def check_vehicle_models() -> None:
     """Verify vehicle-family membership, fields, and table bindings."""
-    run([project_python(), str(TOOLS / "generate_problem_files.py"), "--check-models"])
+    run(tool_script("generate_problem_files.py", "--check-models"))
     ####
 
 
 def onboard_vehicles() -> None:
     """Diagnose every registered vehicle's metadata and source-contract hooks."""
-    run([project_python(), str(TOOLS / "validate_vehicle_onboarding.py"), "--vehicle", "all"])
+    run(tool_script("validate_vehicle_onboarding.py", "--vehicle", "all"))
     ####
 
 
 def fidelity_readiness() -> None:
     """Check declared data readiness for every registered fidelity tier."""
-    run([project_python(), str(TOOLS / "validate_fidelity_readiness.py"), "--vehicle", "all"])
+    run(tool_script("validate_fidelity_readiness.py", "--vehicle", "all"))
     ####
 
 
 def check_fidelity_parity_contracts() -> None:
     """Verify shared four-family reduction-parity metadata and hashes."""
-    run([project_python(), str(TOOLS / "generate_fidelity_parity_contracts.py"), "--check"])
+    run(tool_script("generate_fidelity_parity_contracts.py", "--check"))
     ####
 
 
@@ -426,44 +428,44 @@ def check_reference_tuning() -> None:
 
 def compile_segments() -> None:
     """Compile the external segmentation catalog into native problem files."""
-    run([project_python(), str(TOOLS / "compile_segments.py")])
+    run(tool_script("compile_segments.py"))
     ####
 
 
 def lint_segments() -> None:
     """Lint the external segment catalog without writing products."""
-    run([project_python(), str(TOOLS / "compile_segments.py"), "lint"])
+    run(tool_script("compile_segments.py", "lint"))
     ####
 
 
 def run_segments() -> None:
     """Build and dispatch catalog scenarios through the standard runtime."""
-    run([project_python(), str(TOOLS / "compile_segments.py"), "run"])
+    run(tool_script("compile_segments.py", "run"))
     ####
 
 
 def trim_vehicles() -> None:
     """Solve the current source-backed family trims through one utility."""
     for script in ("solve_b747_trim.py", "solve_x8_trim.py", "solve_hummingbird_trim.py"):
-        run([project_python(), str(TOOLS / script)])
+        run(tool_script(script))
     ####
 
 
 def control_directions() -> None:
     """Run the configured signed control-direction probes."""
-    run([project_python(), str(TOOLS / "audit_control_directions.py")])
+    run(tool_script("audit_control_directions.py"))
     ####
 
 
 def run_fidelity_parity() -> None:
     """Execute candidate shared parity windows and classify blockers."""
-    run([project_python(), str(TOOLS / "run_fidelity_parity.py")])
+    run(tool_script("run_fidelity_parity.py"))
     ####
 
 
 def audit_vehicle_provenance() -> None:
     """Audit vehicle problem headers against the canonical model registry."""
-    run([project_python(), str(TOOLS / "audit_vehicle_provenance.py")])
+    run(tool_script("audit_vehicle_provenance.py"))
     ####
 
 
@@ -478,14 +480,14 @@ def vehicle_check() -> None:
 
 def grammar() -> None:
     run([project_python(), "-m", "pytest", "tests/parser"])
-    run([project_python(), str(TOOLS / "check_taos_fixtures.py")])
+    run(tool_script("check_taos_fixtures.py"))
     manual_corpus()
 ####
 
 
 def manual_corpus() -> None:
     """Verify the tracked manual corpus and its parser evidence."""
-    run([project_python(), str(TOOLS / "check_manual_snippet_corpus.py")])
+    run(tool_script("check_manual_snippet_corpus.py"))
 ####
 
 
@@ -584,8 +586,7 @@ def equation_audit() -> None:
     source_pdf = os.environ.get("SOURCE_PDF", "TAOS_manual_1995.pdf")
     run(
         [
-            project_python(),
-            str(TOOLS / "audit_equation_provenance.py"),
+            *tool_script("audit_equation_provenance.py"),
             "--source-pdf",
             source_pdf,
             "--render-source-pages",
@@ -828,6 +829,8 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-views": test_views,
     "showcase-california-hawaii": showcase_california_hawaii,
     "showcase-hl20-low-fidelity": showcase_hl20_low_fidelity,
+    "showcase-hl20-composites": showcase_hl20_composites,
+    "qualify-hl20": qualify_hl20,
     "dof-matrix": dof_matrix,
     "robustness-matrix": robustness_matrix,
     "verification-artifacts": verification_artifacts,

@@ -1,0 +1,21 @@
+schema_version: 1
+scenario_id: x8_sensorized_powered_hg9900_v1
+sensor:
+  name: imu
+  vehicle: "1"
+  cadence_s: 0.01
+  sample: instantaneous
+  truth: boundary
+  rate_policy: split
+  delivery_s: 0.002
+  provider: imu-error-model
+  profile: package:hardware_estimates/hg9900.yaml
+  seed: 43
+earth:
+  rate_mode: source
+navigation:
+  estimator: mekf
+feedback:
+  source: plant-truth
+  availability: delivered
+  stale_policy: hold

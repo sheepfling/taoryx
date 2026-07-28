@@ -77,7 +77,7 @@ def test_pseudo_six_dof_adds_filtered_attitude_state() -> None:
 def test_serial_and_spawned_envelopes_preserve_sample_order() -> None:
     try:
         os.sysconf("SC_SEM_NSEMS_MAX")
-    except (OSError, PermissionError, ValueError):
+    except (AttributeError, OSError, PermissionError, ValueError):
         pytest.skip("spawned process pools are unavailable in this sandbox")
     vehicle = RocketGlideVehicle()
     commands = _commands()

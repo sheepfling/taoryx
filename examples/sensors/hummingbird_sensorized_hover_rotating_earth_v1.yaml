@@ -1,0 +1,17 @@
+schema_version: 1
+scenario_id: hummingbird_sensorized_hover_rotating_earth_v1
+sensor:
+  name: imu
+  vehicle: "1"
+  cadence_s: 0.01
+  sample: instantaneous
+  delivery_s: 0.002
+  truth: boundary
+  rate_policy: split
+  profile: ../../tests/fixtures/imu_profiles/taoryx_demo.yaml
+  seed: 41
+earth:
+  rate_mode: nominal
+estimators:
+  - dead-reckoning
+  - mekf

@@ -1,0 +1,17 @@
+schema_version: 1
+scenario_id: hummingbird_sensorized_translation_v1
+sensor:
+  name: accelerometer
+  vehicle: "1"
+  provider: translation-acceleration
+  cadence_s: 0.002
+  sample: instantaneous
+  delivery_s: 0.001
+  truth: boundary
+  rate_policy: split
+earth:
+  rate_mode: source
+truth:
+  mode: translation-only
+estimators:
+  - translation-dead-reckoning

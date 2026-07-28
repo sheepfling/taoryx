@@ -54,7 +54,7 @@ def main() -> int:
         run([python, "-m", "pip", "install", "--no-build-isolation", "--no-deps", "-e", "."])
     ####
     print(f"\nBootstrap complete. Activate with: source {VENV}/bin/activate")
-    print("Then run: python tools/dev.py doctor && python tools/dev.py test")
+    print("Then run: python -m tools.dev doctor && python -m tools.dev test")
     return 0
 
 

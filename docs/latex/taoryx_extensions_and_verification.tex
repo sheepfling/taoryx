@@ -470,6 +470,104 @@ field, and repair hint. A vehicle reaches \texttt{ready} before it can be
 considered for a plant-golden claim. A source-only trim remains a warning or
 block until its residual adapter exists.
 
+\section{Sensors, accepted truth, and scenario sidecars}
+\label{sec:sensor-scenarios}
+
+Sensor execution is a runtime composition, not a vehicle-language dependency.
+The problem file supplies only a provider-neutral accepted-truth clock when a
+clock declaration is needed. The model provider, profile, random seed,
+mounting, estimator, drop policy, and artifact policy are kept in a YAML
+sidecar. The first committed examples are:
+
+\begin{itemize}
+  \item \pathcode{examples/sensors/hummingbird_sensorized_hover_v1.yaml},
+    a rigid-body hover diagnostic;
+  \item \pathcode{examples/sensors/hummingbird_sensorized_hover_ideal_v1.yaml},
+    an explicitly selected perfect-information comparison; and
+  \item \pathcode{examples/sensors/x8_sensorized_powered_v1.yaml},
+    a short powered Skywalker X8 gate.
+  \item \pathcode{examples/sensors/hummingbird_sensorized_rotation_v1.yaml},
+    a gyro-only rotational qualification path.
+\end{itemize}
+
+The causal path is
+
+\begin{center}
+accepted rigid-body state $\rightarrow$ \texttt{TruthPoint}
+$\rightarrow$ \texttt{SensorBus} $\rightarrow$ timestamped packet
+$\rightarrow$ packet-only DR or MEKF.
+\end{center}
+
+Only accepted boundaries are sensor-visible; solver stages and rejected trial
+states are excluded. The rigid-body truth projection records position and
+velocity, ECI-from-body attitude, body rate, gravity, accepted acceleration,
+and angular acceleration. For the free-flight tranche, the adapter constructs
+the external package's gravity-excluded velocity from accepted acceleration
+minus gravity when that quantity is available. Pad, contact, wheel, and other
+support-force semantics are not inferred from zero velocity and remain outside
+this tranche.
+
+Lower-fidelity vehicles use explicit, separate truth contracts rather than
+inventing missing six-degree-of-freedom state. A 	exttt{translation-only}
+scenario publishes ECI specific-force increments and uses a translation
+dead-reckoner; orientation, body rate, and gyro channels are unavailable. A
+	exttt{pseudo-6dof} scenario is a declared kinematic projection for comparison
+work: the body $x$ axis follows ECI velocity above a configured speed
+threshold, controller bank is applied when available, and the low-speed frame
+holds its previous orientation or uses a deterministic nadir frame. Parallel
+transport preserves the frame through vertical or pole crossings, and the
+reported body rate is explicitly derived from successive projected attitudes.
+The resulting artifact records the mode, policy, channel availability, and
+limitations, so a MEKF result for this case is a comparison against synthesized
+attitude rather than rigid-body truth.
+
+The same channel split supports SWIL/HWIL table work. A
+\texttt{hybrid-6dof} composition may keep translation from the simulated or
+substituted ECI state while an injected rotational truth source supplies the
+three-axis table's ECI-from-body attitude and body angular rate. The sources
+are timestamp-checked at accepted boundaries and recorded independently in the
+artifact. This permits a real IMU to be rotationally excited without falsely
+claiming that the table supplied translational excitation; the future hardware
+adapter is responsible for feeding measured or commanded table rotation into
+the explicit callback seam.
+
+For rotational qualification without translational excitation,
+\texttt{rotation-only} uses an angular-rate packet and an attitude-only
+dead-reckoner. Its artifact marks translation as unused, not unavailable by
+accident, and keeps the ECI-from-body orientation and body-rate frame explicit.
+
+The sidecar definitions are normalized through Pydantic discriminated unions
+for providers, truth modes, and attitude policies. Runtime adapter and
+attitude implementations are selected through registry-backed factories behind
+small interfaces, rather than through an expanding collection of hard-coded
+mode branches. The first vehicle-specific policy is \texttt{rotorcraft}: its
+required \texttt{vehicle\_type} distinguishes \texttt{quadcopter} from
+\texttt{tilt-rotor}, and its \texttt{forward\_source} explicitly selects
+velocity or body-axis authority. Body-axis projection requires quaternion
+channels and fails closed when those channels are absent.
+
+Each sensorized run emits a standard \texttt{RunArtifact} plus a sidecar
+manifest, packet JSONL, estimator JSONL, source/profile hashes, invalid,
+dropped, delivered, and queued counts, timeout state, and deterministic
+measurement/estimator hashes. The Matplotlib bundle includes packet cadence and
+latency, validity, flown trajectory, truth-versus-estimate position and error,
+attitude-rate evidence, and phase boundaries. The command-line entrypoint is:
+
+\begin{lstlisting}[language=bash]
+taoryx run problem.prb table-a.tbl table-b.tbl \\
+  --profile taoryx --sensor-spec examples/sensors/x8_sensorized_powered_v1.yaml \\
+  --output-dir artifacts/sensor-scenarios/x8
+\end{lstlisting}
+
+The Hummingbird and X8 family fixtures currently declare \texttt{omega=0} and
+their aerodynamic tables are bounded around that source baseline. The sidecar
+therefore records \texttt{earth.rate\_mode=source} for authoritative evidence.
+Nominal or explicit Earth-rate overrides operate on an in-memory source copy
+and fail closed if the unchanged table envelope cannot support the requested
+physics; they never rewrite the family fixture. This boundary prevents an
+apparently successful sensor plot from claiming a physically supported
+Earth-rotating vehicle state when the table coverage does not provide one.
+
 \section{Trim, local derivatives, and the controller architecture}
 \label{sec:controllers}
 

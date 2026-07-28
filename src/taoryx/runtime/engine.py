@@ -201,6 +201,8 @@ def compute_trajectories(
     for vehicle in problem.active_vehicles():
         vehicle.state = _refresh_runtime_state(vehicle, vehicle.state)
         vehicle.history[0] = vehicle.state
+    if problem.sensor_bus is not None:
+        problem.sensor_bus.initialize(problem)
     for _ in range(max_steps):
         activate_dependent_vehicles(problem)
         if stop_when is not None and stop_when(problem):
@@ -230,6 +232,8 @@ def compute_trajectories(
         step = get_next_time_step(problem, min(vehicle.step_size for vehicle in active))
         if step <= 1e-15:
             return ExecutionResult(_histories(problem), False, "boundary_stall")
+        if problem.feedback_guard is not None:
+            problem.feedback_guard(max(vehicle.state.time for vehicle in active))
         previous = {vehicle.name: vehicle.state for vehicle in active}
         integrate_active_vehicles(problem, step)
         crossings_by_vehicle = {
@@ -265,10 +269,14 @@ def compute_trajectories(
                 )
                 for vehicle in active
             }
+            if problem.sensor_bus is not None:
+                problem.sensor_bus.accepted_step(problem, previous)
             if _apply_event_crossings(problem, active, applicable_crossings):
                 if _has_pending_activation(problem):
                     return ExecutionResult(_histories(problem), False, "dependency_unresolved")
                 return ExecutionResult(_histories(problem), True, "stop_condition")
+        elif problem.sensor_bus is not None:
+            problem.sensor_bus.accepted_step(problem, previous)
         ####
         activate_dependent_vehicles(problem)
         if any(vehicle.stop_when is not None and vehicle.stop_when(vehicle.state) for vehicle in active):
@@ -407,6 +415,13 @@ def _apply_event_crossings(
                     "post_truth": post_truth.to_metadata(),
                 }
             )
+            if problem.sensor_bus is not None:
+                problem.sensor_bus.handle_transition(
+                    problem,
+                    vehicle,
+                    state=vehicle.state,
+                    state_discontinuity=state_discontinuity,
+                )
             if not vehicle.active:
                 break
     return not any(vehicle.active for vehicle in active)

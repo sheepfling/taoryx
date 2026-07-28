@@ -72,3 +72,20 @@ def test_sensor_language_lowers_to_runtime_clock_metadata() -> None:
     assert case.metadata["sensor_execution"].startswith("clock-only")
     assert case.metadata["sensor_clocks"] == [case.sensor_clocks[0].to_metadata()]
     assert get_next_time_step(case, 0.1) == pytest.approx(0.01)
+
+
+def test_observation_navigation_and_feedback_bindings_are_typed_metadata() -> None:
+    source = """\
+(sensor-model-bindings)
+*runtime observation imu-errors model=compose profile=hg9900
+*runtime navigation nav estimator=mekf
+*runtime feedback flight source=mekf availability=delivered stale-policy=fail max-age-s=0.05
+*end
+"""
+    document = parse_problem_text(source, profile=GrammarProfile.TAORYX)
+
+    assert not [item for item in document.diagnostics if item.severity.value == "error"]
+    bindings = [block for block in document.problems[0].blocks if isinstance(block, RuntimeBlock)]
+    assert [block.declaration for block in bindings] == ["observation", "navigation", "feedback"]
+    assert bindings[0].attributes["profile"] == "hg9900"
+    assert bindings[2].attributes["max-age-s"] == "0.05"

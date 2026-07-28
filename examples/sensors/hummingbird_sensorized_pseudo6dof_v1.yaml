@@ -1,0 +1,26 @@
+schema_version: 1
+scenario_id: hummingbird_sensorized_pseudo6dof_v1
+sensor:
+  name: imu
+  vehicle: "1"
+  provider: ideal
+  cadence_s: 0.002
+  sample: instantaneous
+  delivery_s: 0.001
+  truth: boundary
+  rate_policy: split
+earth:
+  rate_mode: source
+truth:
+  mode: pseudo-6dof
+  orientation:
+    alignment: velocity
+    speed_threshold_mps: 1.0
+    bank_source: controller
+    bank_default_rad: 0.0
+    yaw_source: controller-then-heading
+    zero_speed_policy: hold-then-initial-frame
+    pole_crossing_policy: parallel-transport
+estimators:
+  - dead-reckoning
+  - mekf

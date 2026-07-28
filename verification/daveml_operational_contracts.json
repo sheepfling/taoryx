@@ -32,7 +32,7 @@
       "family_id": "reference_hl20_mod_k",
       "manifest": "families/reference_hl20_mod_k/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "25e2bbb4139d1ab49611ddb9003c72c59b336ebe1e691fb070b957e4121b7a28",
+      "manifest_sha256": "94f09c30cd313438d3280fae9a4223b649c0cf7bfb23ce4908ecd253e84602fc",
       "nonclaim_count": 4,
       "qualification_class": "reference_exact",
       "status": "verified"
@@ -49,7 +49,7 @@
       "family_id": "reference_nesc_two_stage_rocket",
       "manifest": "families/reference_nesc_two_stage_rocket/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "04e7dc15f4c4ace67a1d5cb477010f96d905ed79a9423372b01955caa5a0f7a2",
+      "manifest_sha256": "5879ac5da527b2f75ad4cdd1718b81c08d0c9cde4f575396882178fb20385f02",
       "nonclaim_count": 4,
       "qualification_class": "reference_exact",
       "status": "verified"

@@ -2213,6 +2213,45 @@ def _validate_runtime_sensor(
     ####
 
 
+def _validate_runtime_model_binding(
+    declaration: str,
+    name: str | None,
+    attributes: dict[str, str],
+    path: str,
+    line: int,
+    diagnostics: list[Diagnostic],
+) -> None:
+    """Validate provider-neutral observation, navigation, and feedback references."""
+
+    if name is None:
+        return
+    required = {"observation": "model", "navigation": "estimator", "feedback": "source"}[declaration]
+    if required not in attributes:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="missing-runtime-binding-attribute",
+                message=f"Runtime {declaration} {name!r} requires {required}=.",
+                location=_location(path, line),
+            )
+        )
+    allowed = {
+        "model", "profile", "seed", "input", "estimator", "source", "availability",
+        "stale-policy", "max-age-s", "latency-s",
+    }
+    unknown = sorted(set(attributes) - allowed)
+    for attribute in unknown:
+        diagnostics.append(
+            Diagnostic(
+                severity=Severity.ERROR,
+                code="unsupported-runtime-binding-attribute",
+                message=f"Runtime {declaration} attribute {attribute!r} is not supported.",
+                location=_location(path, line),
+            )
+        )
+    ####
+
+
 def _make_block(
     keyword: str,
     header: str,
@@ -2317,14 +2356,14 @@ def _make_block(
     if keyword == "runtime":
         fields = _free_fields(header)
         declaration = fields[0].casefold() if fields else None
-        if declaration not in {"parameter", "control", "status", "event", "output", "lqr", "sensor"}:
+        if declaration not in {"parameter", "control", "status", "event", "output", "lqr", "sensor", "observation", "navigation", "feedback"}:
             diagnostics.append(Diagnostic(severity=Severity.ERROR, code="invalid-runtime-declaration", message="Expected '*runtime parameter|control|status|event|output|lqr|sensor ...'.", location=_location(path, line)))
         else:
             extra["declaration"] = declaration
             extra["name"] = fields[1] if len(fields) > 1 and "=" not in fields[1] else None
             attributes = {match.group("name").casefold(): match.group("value").strip("\"'") for match in _RUNTIME_ATTRIBUTE_RE.finditer(header)}
             extra["attributes"] = attributes
-            if declaration in {"parameter", "control", "status", "event", "lqr", "sensor"} and extra["name"] is None:
+            if declaration in {"parameter", "control", "status", "event", "lqr", "sensor", "observation", "navigation", "feedback"} and extra["name"] is None:
                 diagnostics.append(Diagnostic(severity=Severity.ERROR, code="missing-runtime-name", message=f"Runtime {declaration} declarations require a name.", location=_location(path, line)))
             if declaration == "lqr":
                 if not attributes.get("states"):
@@ -2335,6 +2374,8 @@ def _make_block(
                     diagnostics.append(Diagnostic(severity=Severity.ERROR, code="unsupported-lqr-method", message="TAORYX currently supports only method=continuous for runtime lqr.", location=_location(path, line)))
             if declaration == "sensor":
                 _validate_runtime_sensor(extra["name"], attributes, path, line, diagnostics)
+            elif declaration in {"observation", "navigation", "feedback"}:
+                _validate_runtime_model_binding(declaration, extra["name"], attributes, path, line, diagnostics)
     elif keyword in {"atmos", "earth"}:
         extra["model"] = words[0] if words else None
         if keyword == "atmos":

@@ -40,9 +40,9 @@ kept out of the long-term source tree.
 Set up the local Python environment first:
 
 ```bash
-python tools/dev.py bootstrap
+python -m tools.dev bootstrap
 source .venv/bin/activate
-python tools/dev.py doctor
+python -m tools.dev doctor
 ```
 
 If you already have a working environment, the portable runner will use `.venv`
@@ -53,21 +53,21 @@ automatically when it exists.
 Audit the equation provenance registry:
 
 ```bash
-python tools/dev.py equation-audit
+python -m tools.dev equation-audit
 ```
 
 Run the main validation gates:
 
 ```bash
-python tools/dev.py check
+python -m tools.dev check
 python -m pytest
 ```
 
 Validate the grammar and manual-backed parser corpus:
 
 ```bash
-python tools/dev.py grammar
-python tools/dev.py test-grammar
+python -m tools.dev grammar
+python -m tools.dev test-grammar
 taoryx-validate examples/chapter04/ballistic-reentry.prb
 ```
 
@@ -82,22 +82,22 @@ Run the Simple Aero corpus tests when you want the problem/segment/trajectory
 fixtures:
 
 ```bash
-python tools/dev.py test-simple_aero
+python -m tools.dev test-simple_aero
 ```
 
 Rebuild the reconstructed manual when you need the published PDF or want to
 refresh the page-normalized source build:
 
 ```bash
-python tools/dev.py manual
+python -m tools.dev manual
 ```
 
 For the complete junior-friendly documentation PDF workflow, diagnose tools
 first and then rebuild all historical and successor PDFs:
 
 ```bash
-python tools/dev.py docs-doctor
-python tools/dev.py all-pdfs
+python -m tools.dev docs-doctor
+python -m tools.dev all-pdfs
 ```
 
 Individual PDF targets and outputs are listed in [docs/BUILDING.md](docs/BUILDING.md).

@@ -86,6 +86,22 @@ solvers. X-15 remains source-trimmed until its independent plant residual is
 formalized. Direction contracts intentionally fail when a source sign is not
 yet declared; they do not infer a sign from controller success.
 
+Rotating-Earth regeneration is available through the shared operating-point
+context rather than a manually duplicated controller catalog:
+
+```bash
+python tools/regenerate_rotating_earth_trims.py
+```
+
+The resulting packet records the nominal Earth rate and hashes for the B747,
+Skywalker X8, Hummingbird, and X-15 trim reports. Controller gains continue to
+be tied to local trim channels; Earth-rate transport is supplied by the common
+frame/navigation layer. `EarthRelativeVelocityStateAdapter` can be attached to
+an LQR factory when runtime telemetry is ECIC: it converts explicitly named
+position/velocity channels to ECFC Earth-relative values before the unchanged
+local controller state reaches the gain. This is an adapter policy, not a
+second gain set or a vehicle-specific controller branch.
+
 ## Runtime integration
 
 `InteractiveSession` accepts a `segment_controllers` mapping keyed by runtime

@@ -21,7 +21,7 @@ from taoryx import (
     assess_thermal_limits,
 )
 from taoryx.contracts import EarthModel, Frame, FrameVector3, Quantity, Unit, Vector3
-from taoryx.modes import DynamicsMode, Quaternion
+from taoryx.modes import DynamicsMode, FidelitySetupError, Quaternion
 from taoryx.rigid_body_frames import EarthRotationAdapter
 from taoryx.runtime import (
     EnvironmentSample,
@@ -62,6 +62,19 @@ def test_rigid_body_state_round_trips_and_normalizes_attitude() -> None:
     assert restored.mass == pytest.approx(state.mass)
     assert restored.attitude == state.attitude
     ####
+
+
+def test_rigid_body_state_setup_error_identifies_channel_and_repair() -> None:
+    with pytest.raises(FidelitySetupError, match=r"\[fidelity:rigid-state-length-mismatch\].*Fix:"):
+        RigidBody6DofState.from_values(0.0, (0.0,))
+
+
+def test_rigid_body_model_reports_invalid_inertia() -> None:
+    with pytest.raises(FidelitySetupError, match=r"\[fidelity:invalid-inertia\].*Fix:"):
+        RigidBody6DofModel(
+            inertia=Vector3(0.0, 1.0, 1.0),
+            force_moment=lambda state: RigidBodyForceMoment(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0)),
+        )
 
 
 def test_rigid_body_force_and_moment_produce_independent_translation_and_rotation() -> None:

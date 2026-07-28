@@ -1,0 +1,16 @@
+schema_version: 1
+scenario_id: hummingbird_sensorized_hover_ideal_v1
+provider: ideal
+sensor:
+  name: imu
+  vehicle: "1"
+  cadence_s: 0.01
+  sample: instantaneous
+  delivery_s: 0.0
+  truth: boundary
+  rate_policy: split
+earth:
+  rate_mode: source
+estimators:
+  - dead-reckoning
+  - mekf

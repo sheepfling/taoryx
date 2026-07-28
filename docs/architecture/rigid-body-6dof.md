@@ -45,6 +45,15 @@ a point fixed to the rotating Earth has zero ECFC air-relative velocity when
 wind is zero. The historical point-mass kernel remains ECFC and continues to
 use its documented rotating-frame terms; this extension does not change it.
 
+Trim and controller adapters should use the shared `EarthOperatingPoint`
+context rather than baking Earth transport into vehicle-specific gains. Local
+trim variables remain atmosphere-relative; the context maps them to ECIC by
+adding the location-dependent `omega x r` transport and records latitude,
+longitude, altitude, and Earth rate in the resulting artifact. This avoids a
+manual trim copy for every latitude while preserving zero-rate source-parity
+fixtures as explicitly non-rotating baselines. Propulsion maps with a
+velocity axis use the same air-relative speed as aerodynamic tables.
+
 The `.prb` lowering path currently remains historical point-mass/kinematic
 syntax. A rigid-body `.prb` extension must be added to the language contract
 and lowering tests before a new directive is introduced. The California–Hawaii

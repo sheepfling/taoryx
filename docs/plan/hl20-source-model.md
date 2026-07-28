@@ -213,3 +213,69 @@ baseline**. It intentionally does not claim:
 
 Those are additive fidelity layers. They should remain separately sourced and
 versioned rather than being inferred from the aerodynamic database.
+
+## Four-tier release/glide example
+
+The runnable HL-20 release example is now exercised through the shared
+four-tier workflow:
+
+```text
+point_mass_3dof
+    -> pseudo_6dof
+    -> rigid_body_6dof
+    -> rigid_body_6dof_surface_allocated
+```
+
+Run it from the repository root:
+
+```text
+python -m tools.dev showcase-hl20-composites
+```
+
+The bundle contains one artifact per tier, deployment lineage, trajectory and
+capability plots, and a manifest that keeps the following claims separate:
+
+- T0 is a synthetic booster plus source-bound fixed-mass glide baseline;
+- T1 is a synthesized attitude-response bridge;
+- T2 is a native rigid-body diagnostic using direct reduced loads;
+- T3 is a bounded synthetic logical seven-surface allocator overlay.
+
+The T3 overlay records requested/achieved logical surface channels, saturation,
+and residual telemetry. It does not promote the source package to source-
+declared actuator dynamics, controller qualification, or landing validation.
+
+The same command also emits a `composites/` evidence pack. It contains one
+four-tier boost/coast/glide board, one search-space and terminal-capability
+comparison board, and one parent-to-passive-cylinder deployment/tumble board.
+`showcase-summary.json` and the adjacent CSV exports preserve the exact input
+search space, phase outcomes, classifications, terminal disposition, parent
+telemetry, detached-body telemetry, and logical surface allocation that appear
+on the boards. The pack remains a synthetic local release witness, not a
+California-to-Hawaii route or arrival claim.
+
+## HL-20 qualification gates
+
+The four-tier release witness has an executable, artifact-level qualification
+ladder. Run it from the repository root with:
+
+```text
+python -m tools.dev qualify-hl20
+```
+
+The contract is
+`examples/showcases/hl20_california_to_hawaii/quality_gates.yaml`; the report
+is `verification/hl20_ca_hi_qualification.json`.
+
+| Gate | Exit condition |
+| --- | --- |
+| HL20-G0 | Source, assumption, fidelity, artifact hashes, and shared search-space bindings are self-describing and consistent. |
+| HL20-G1 | Boost, coast, glide, burnout, release, and committed event ordering are explicit and monotonic. |
+| HL20-G2 | The 3DOF translation/resource baseline is finite, bounded, replayable, and terminally classified. |
+| HL20-G3 | The pseudo-6DOF bridge carries aligned attitude/rate telemetry without claiming native rotation. |
+| HL20-G4 | Native rigid 6DOF carries normalized attitude, force/rotation residuals, and observable passive cylinder tumble. |
+| HL20-G5 | The seven-surface allocation is bounded, residual-checked, and proven not to alter reduced parent dynamics. |
+| HL20-G6 | Cylinder deployment lineage, mass/impulse closure, child telemetry, terminal semantics, and timeout handling pass. |
+
+This ladder qualifies the local synthetic integration and its evidence format.
+It does not claim a historical HL-20 trajectory, source actuator dynamics,
+guidance, thermal protection, landing, or California-to-Hawaii arrival.

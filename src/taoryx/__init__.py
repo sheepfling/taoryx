@@ -87,13 +87,24 @@ from .generic_tuning import (
     trim_linearize_and_tune,
     tune_lqr_profiles,
 )
+from .imu_profile_comparison import ImuProfileComparison, compare_imu_profiles
 from .mission_objectives import (
     ControllerTransition,
     TruthObjectiveResult,
     TruthObjectiveSpec,
     evaluate_truth_objectives,
 )
-from .modes import DynamicsMode, Kinematic6DofState, Quaternion
+from .modes import DynamicsMode, FidelitySetupError, Kinematic6DofState, Quaternion
+from .navigation import (
+    AttitudeNavigationState,
+    AttitudeOnlyNavigator,
+    DeadReckoningNavigator,
+    MekfNoise,
+    MultiplicativeEkf,
+    NavigationState,
+    TranslationNavigationState,
+    TranslationOnlyNavigator,
+)
 from .objectives import ObjectiveResult, ObjectiveSpec, score_objective, score_objectives
 from .outputs import DynamicsKind, EventRecord, RunArtifact, SegmentSpan, TelemetryChannel, VehicleKind, VehicleTelemetry, build_run_artifact
 from .physical_lqr import (
@@ -158,7 +169,7 @@ from .rigid_body import (
     ThermalLimits,
     assess_thermal_limits,
 )
-from .rigid_body_frames import EarthRotationAdapter
+from .rigid_body_frames import EarthOperatingPoint, EarthRelativeVelocityStateAdapter, EarthRotationAdapter
 from .rotorcraft import QuadRotorAllocation, RotorCommandSet
 from .scenario import (
     ControlContract,
@@ -181,6 +192,18 @@ from .segmentation import (
     TransitionEventSpec,
     TransitionPolicy,
     transition_audit,
+)
+from .sensors import (
+    AccelerationIncrement,
+    GyroIncrement,
+    IdealGyroscopeAdapter,
+    IdealImuAdapter,
+    ImuErrorModelAdapter,
+    ImuIncrement,
+    MeasurementPacket,
+    TranslationAccelerationAdapter,
+    TruthPoint,
+    TruthSegment,
 )
 from .showcase import (
     ArtifactFile,
@@ -209,6 +232,9 @@ from .table_explorer import (
 from .trajectory.evaluation import objective_report_to_evaluation
 from .trim import (
     DynamicsLinearization,
+    TrimConfigurationError,
+    TrimDiagnostic,
+    TrimEvaluationError,
     TrimGate,
     TrimGateResult,
     TrimProcedure,
@@ -325,4 +351,33 @@ __all__ += [
     "GuidanceReference",
     "default_controller_backend_registry",
     "preflight_controller_realization",
+]
+__all__ += ["ImuProfileComparison", "compare_imu_profiles"]
+__all__ += [
+    "EarthOperatingPoint",
+    "EarthRelativeVelocityStateAdapter",
+    "FidelitySetupError",
+    "TrimConfigurationError",
+    "TrimDiagnostic",
+    "TrimEvaluationError",
+]
+__all__ += [
+    "AttitudeNavigationState",
+    "AttitudeOnlyNavigator",
+    "DeadReckoningNavigator",
+    "TranslationNavigationState",
+    "TranslationOnlyNavigator",
+    "AccelerationIncrement",
+    "GyroIncrement",
+    "IdealGyroscopeAdapter",
+    "IdealImuAdapter",
+    "ImuErrorModelAdapter",
+    "ImuIncrement",
+    "MeasurementPacket",
+    "MekfNoise",
+    "MultiplicativeEkf",
+    "NavigationState",
+    "TruthPoint",
+    "TruthSegment",
+    "TranslationAccelerationAdapter",
 ]

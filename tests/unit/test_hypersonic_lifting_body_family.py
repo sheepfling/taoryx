@@ -9,6 +9,7 @@ from taoryx.hl20_reachability import (
     run_hl20_low_fidelity_release,
     write_hl20_low_fidelity_bundle,
 )
+from taoryx.reachability_envelope import ReachabilityFidelity
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -24,7 +25,12 @@ def test_x15_and_hl20_share_a_comparison_family_without_shared_claims() -> None:
     assert family["claim_boundary"]["shared_dynamics"] is False
     assert family["comparison_contract"]["source_evidence"] is False
     ladder = family["rocket_composition"]["fidelity_ladder"]
-    assert [item["runtime_fidelity"] for item in ladder] == ["point_mass_3dof", "pseudo_6dof", "rigid_body_6dof"]
+    assert [item["runtime_fidelity"] for item in ladder] == [
+        "point_mass_3dof",
+        "pseudo_6dof",
+        "rigid_body_6dof",
+        "rigid_body_6dof_surface_allocated",
+    ]
     ####
 
 
@@ -32,16 +38,20 @@ def test_hl20_ca_hi_contract_has_no_controller_or_arrival_claim() -> None:
     contract = yaml.safe_load(
         (ROOT / "examples/showcases/hl20_california_to_hawaii/showcase.yaml").read_text(encoding="utf-8")
     )
-    assert contract["status"] == "low_fidelity_executable"
+    assert contract["status"] == "four_fidelity_executable"
     assert contract["claim_boundary"]["controller_claims"] is False
     assert contract["claim_boundary"]["source_exact_route"] is False
     assert "landing" in " ".join(contract["nonclaims"])
+    assert contract["launch_composition"]["status"] == "four_fidelity_executable"
     assert contract["launch_composition"]["release_event"]["lineage_required"] is True
     assert [item["id"] for item in contract["launch_composition"]["fidelity_ladder"]] == [
         "boost_release_3dof",
         "boost_release_pseudo6dof",
         "boost_release_rigid6dof",
+        "boost_release_rigid6dof_surface_allocated",
     ]
+    assert contract["showcase_composites"]["status"] == "executable"
+    assert "spent-booster" in " ".join(contract["showcase_composites"]["artifacts"])
     ####
 
 
@@ -65,10 +75,12 @@ def test_hl20_low_fidelity_bundle_is_self_describing(tmp_path: Path) -> None:
     ####
 
 
-def test_hl20_fidelity_ladder_runs_all_three_tiers() -> None:
+def test_hl20_fidelity_ladder_runs_all_four_tiers() -> None:
     envelopes = run_hl20_fidelity_ladder(horizon_s=30.0, step_size_s=0.5)
     assert tuple(envelope.fidelity for envelope in envelopes) == HL20_FIDELITIES
     assert all(envelope.samples for envelope in envelopes)
+    assert all(dict(envelope.provenance)["fidelity"] == envelope.fidelity.value for envelope in envelopes)
+    assert all(envelope.study_id.endswith(f"{envelope.fidelity.value}_v1") for envelope in envelopes)
     assert all(sample.trajectory.deployment_events for envelope in envelopes for sample in envelope.samples)
     assert all(
         sample.trajectory.states[0].__class__.__name__ == ("PointMass3DofState" if envelope.fidelity.value == "point_mass_3dof" else "Pseudo6DofState" if envelope.fidelity.value == "pseudo_6dof" else "RigidBody6DofReachabilityState")
@@ -78,4 +90,53 @@ def test_hl20_fidelity_ladder_runs_all_three_tiers() -> None:
     rigid = envelopes[2]
     assert rigid.samples[0].trajectory.states[0].__class__.__name__ == "RigidBody6DofReachabilityState"
     assert all("attitude_quaternion" in state for sample in rigid.samples for state in sample.trajectory.telemetry)
+    surface = envelopes[3]
+    assert surface.fidelity is ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED
+    assert all(float(row["surface_allocation_active"]) == 1.0 for sample in surface.samples for row in sample.trajectory.telemetry)
+    assert all(float(row["surface_allocation_residual_deg"]) == 0.0 for sample in surface.samples for row in sample.trajectory.telemetry)
+
+
+def test_hl20_four_tier_bundle_includes_comparison_plots(tmp_path: Path) -> None:
+    from taoryx.hl20_reachability import write_hl20_fidelity_bundle
+
+    bundle = write_hl20_fidelity_bundle(tmp_path, horizon_s=5.0, step_size_s=0.5, dpi=80)
+    manifest = yaml.safe_load(Path(bundle["manifest_path"]).read_text(encoding="utf-8"))
+
+    assert len(bundle["artifact_paths"]) == 4
+    assert len(manifest["plots"]) == 4
+    assert (tmp_path / manifest["plot_manifest"]).is_file()
+    assert len(manifest["showcase"]["composites"]) == 3
+    assert (tmp_path / manifest["showcase"]["summary"]).is_file()
+    assert (tmp_path / manifest["showcase"]["manifest"]).is_file()
+    ####
+
+
+def test_hl20_showcase_composites_capture_stage_and_cylinder_evidence(tmp_path: Path) -> None:
+    from taoryx.hl20_reachability import write_hl20_fidelity_bundle
+
+    bundle = write_hl20_fidelity_bundle(tmp_path, horizon_s=30.0, step_size_s=0.5, dpi=80)
+    report = bundle["showcase_report"]
+    summary = yaml.safe_load(report.summary_path.read_text(encoding="utf-8"))
+    manifest = yaml.safe_load(report.manifest_path.read_text(encoding="utf-8"))
+
+    assert [path.name for path in report.composite_paths] == [
+        "hl20-ca-hi-flight-composite.png",
+        "hl20-ca-hi-envelope-comparison.png",
+        "hl20-ca-hi-spent-booster-composite.png",
+    ]
+    assert all(path.is_file() and path.stat().st_size > 0 for path in report.composite_paths)
+    assert summary["execution"]["all_tiers_share_search_space"] is True
+    assert len(summary["tiers"]) == 4
+    point_objectives = {item["id"]: item for item in summary["tiers"][0]["phase_objectives"]}
+    rigid_objectives = {item["id"]: item for item in summary["tiers"][2]["phase_objectives"]}
+    assert point_objectives["release"]["status"] == "achieved"
+    assert "center-of-mass" in point_objectives["spent_cylinder"]["detail"]
+    assert "native rigid-body passive tumble" in rigid_objectives["spent_cylinder"]["detail"]
+    assert {path.name for path in report.data_paths} == {
+        "candidate-summary.csv",
+        "parent-telemetry-all-tiers.csv",
+        "spent-booster-telemetry.csv",
+        "surface-allocation.csv",
+    }
+    assert all(record["path"].startswith("../") for record in manifest["source_artifacts"])
     ####

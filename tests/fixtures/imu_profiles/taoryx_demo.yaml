@@ -1,0 +1,26 @@
+schema_version: 1
+model_name: TaoryxDemoIMU
+sample_period_s: 0.1
+metadata:
+  family: taoryx-demo
+  vendor: Taoryx
+  grade: research
+  revision: v1
+  source_date: "2026-07-26"
+  sources:
+    - url: "https://github.com/sheepfling/imu-error-model"
+      date: "2026-07-26"
+  tags: [synthetic, test, non-authoritative]
+  active: true
+accelerometer:
+  output_scale: 10.0
+  white_noise_density: 0.0
+  turn_on_bias_std: 0.0
+  bias_std: 0.0
+  apply_clipping: false
+gyroscope:
+  output_scale: 20.0
+  white_noise_density: 0.0
+  turn_on_bias_std: 0.0
+  bias_std: 0.0
+  apply_clipping: false

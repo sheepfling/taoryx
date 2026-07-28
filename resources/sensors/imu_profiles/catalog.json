@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "catalog_id": "taoryx.imu-profile-source.v1",
+  "source_repository": "https://github.com/sheepfling/imu-error-model",
+  "source_commit": "a06ba154d275b43395a5e39a866fafe02efabd8c",
+  "package_name": "imu-error-model",
+  "package_version": "0.1.3",
+  "source_path": "examples/imu_profiles/hardware_estimates",
+  "authority": "notional_example_only",
+  "usage_rule": "Profiles require explicit selection and provenance in run artifacts; they are not vendor specifications or flight qualification data.",
+  "profiles": [
+    "ADIS16470",
+    "hg1700ag58",
+    "hg1700ag59",
+    "hg1700ag60",
+    "hg1700ag61",
+    "hg1700ag71",
+    "hg5700aa01",
+    "hg5700ba01",
+    "hg5700ca01",
+    "hg9900",
+    "human",
+    "ICM-42688-P",
+    "iphone_like",
+    "sbg_pulse_40"
+  ]
+}

@@ -7,7 +7,7 @@ for LQR.  Other methods can be added without changing vehicle problem files.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Literal, cast
 
@@ -151,6 +151,7 @@ def build_lqr_controller(
     *,
     lower: Mapping[str, float] | None = None,
     upper: Mapping[str, float] | None = None,
+    state_adapter: Callable[[Mapping[str, float]], Mapping[str, float]] | None = None,
 ) -> LqrController:
     """Build an LQR controller from a solved, named plant trim.
 
@@ -181,6 +182,7 @@ def build_lqr_controller(
         lower=lower or {},
         upper=upper or {},
         realization=realization,
+        state_adapter=state_adapter,
     )
     ####
 
@@ -216,7 +218,7 @@ def _build_lqr_realization(design: ControllerDesignSpec, trim: TrimResult, resul
         inputs=inputs,
         plant_source=design.plant_source,
         linearization_source=design.linearization_source,
-        operating_point={"trim": design.trim},
+        operating_point={"trim": design.trim, **dict(trim.spec.operating_point)},
         state_scale_id=design.state_scale_id,
         control_scale_id=design.control_scale_id,
         q_id=design.q_id,

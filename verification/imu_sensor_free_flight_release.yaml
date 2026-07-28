@@ -1,0 +1,142 @@
+schema_version: 1
+id: taoryx_imu_sensor_free_flight_release_v1
+status: verified_free_flight_tranche
+purpose: >-
+  Canonical, reproducible evidence inventory for the initial IMU and navigation
+  integration. Generated runtime artifacts are intentionally kept outside the
+  source tree under artifacts/ and are recreated by the commands below.
+source_profile:
+  deterministic_fixture: tests/fixtures/imu_profiles/taoryx_demo.yaml
+  upstream_catalog: resources/sensors/imu_profiles/catalog.json
+  upstream_repository: https://github.com/sheepfling/imu-error-model
+  upstream_commit: a06ba154d275b43395a5e39a866fafe02efabd8c
+  upstream_authority: notional_example_only
+  comparison_command: >-
+    python tools/compare_imu_profiles.py --output
+    artifacts/imu_navigation/profile_comparison_hg1700ag58.json
+baseline_policy:
+  earth_rate: source
+  rule: >-
+    Do not widen or mutate omega=0 aerodynamic tables to make nominal Earth-rate
+    overlays pass. Such overlays must fail closed until a dedicated table and
+    initial-condition family is provided.
+  expected_overlay_command: >-
+    python examples/taoryx/sensor_scenario_runner.py
+    hummingbird-hover-rotating-earth --output-dir
+    artifacts/sensor-scenarios/hummingbird-hover-rotating-earth-v1
+scenarios:
+  - id: hummingbird-hover
+    vehicle: hummingbird
+    fidelity: rigid-body-6dof
+    source_truth: external_imu_error_model
+    command: >-
+      python examples/taoryx/sensor_scenario_runner.py hummingbird-hover
+      --output-dir artifacts/sensor-scenarios/hummingbird-hover-final
+    output:
+      directory: artifacts/sensor-scenarios/hummingbird-hover-final
+      required: [sensor/case-1/sensor-execution.json, sensor/case-1/imu-measurements.jsonl, sensor/case-1/plots/plot-manifest.json]
+      plots: 6
+    acceptance: completed true; accepted packets are continuous and provenance is recorded
+  - id: hummingbird-rate
+    vehicle: hummingbird
+    fidelity: rigid-body-6dof
+    source_truth: external_imu_error_model
+    command: >-
+      python examples/taoryx/sensor_scenario_runner.py hummingbird-rate
+      --output-dir artifacts/sensor-scenarios/cli-hummingbird-rate
+    output:
+      directory: artifacts/sensor-scenarios/cli-hummingbird-rate
+      required: [sensor/case-1/sensor-execution.json, sensor/case-1/imu-measurements.jsonl, sensor/case-1/plots/plot-manifest.json]
+      plots: 6
+    acceptance: completed true; rate-damped response has no packet discontinuity
+  - id: hummingbird-translation
+    vehicle: hummingbird
+    fidelity: point-mass-3dof
+    source_truth: acceleration_only_eci
+    command: >-
+      python examples/taoryx/sensor_scenario_runner.py hummingbird-translation
+      --output-dir artifacts/sensor-scenarios/hummingbird-translation
+    output:
+      directory: artifacts/sensor-scenarios/hummingbird-translation
+      required: [sensor/case-1/sensor-execution.json, sensor/case-1/imu-measurements.jsonl, sensor/case-1/plots/plot-manifest.json]
+      plots: 6
+    acceptance: completed true; orientation and body rate are explicitly unavailable
+  - id: hummingbird-pseudo6dof
+    vehicle: hummingbird
+    fidelity: pseudo-6dof
+    source_truth: synthesized_velocity_aligned_attitude
+    command: >-
+      python examples/taoryx/sensor_scenario_runner.py hummingbird-pseudo6dof
+      --output-dir artifacts/sensor-scenarios/hummingbird-pseudo6dof
+    output:
+      directory: artifacts/sensor-scenarios/hummingbird-pseudo6dof
+      required: [sensor/case-1/sensor-execution.json, sensor/case-1/imu-measurements.jsonl, sensor/case-1/plots/plot-manifest.json]
+      plots: 6
+    acceptance: completed true; DR and MEKF are labeled comparison evidence
+  - id: hummingbird-rotation
+    vehicle: hummingbird
+    fidelity: rotation_only
+    source_truth: physical_body_rotation
+    command: >-
+      python examples/taoryx/sensor_scenario_runner.py hummingbird-rotation
+      --output-dir artifacts/sensor-scenarios/hummingbird-rotation
+    output:
+      directory: artifacts/sensor-scenarios/hummingbird-rotation
+      required: [sensor/case-1/sensor-execution.json, sensor/case-1/imu-measurements.jsonl, sensor/case-1/plots/plot-manifest.json]
+      plots: 6
+    acceptance: completed true; translation is explicitly not consumed
+  - id: x8-powered
+    vehicle: skywalker_x8
+    fidelity: rigid-body-6dof
+    source_truth: external_imu_error_model
+    command: >-
+      python examples/taoryx/sensor_scenario_runner.py x8-powered
+      --output-dir artifacts/sensor-scenarios/x8-powered
+    output:
+      directory: artifacts/sensor-scenarios/x8-powered
+      required: [sensor/case-1/sensor-execution.json, sensor/case-1/imu-measurements.jsonl, sensor/case-1/plots/plot-manifest.json]
+      plots: 6
+    acceptance: completed true; powered source-trim 6-DOF gate remains green
+  - id: rotating-earth-transport
+    vehicle: kinematic_transport_fixture
+    fidelity: transport_only
+    source_truth: nominal_earth_rate_eci
+    command: >-
+      python examples/taoryx/rotating_earth_sensor_demo.py --output-dir
+      artifacts/sensor-scenarios/rotating-earth-sensor-v1
+    output:
+      directory: artifacts/sensor-scenarios/rotating-earth-sensor-v1
+      required: [rotating-earth-report.json, rotating-earth-sensor.png]
+      plots: 1
+    acceptance: completed true; nominal Earth rate is present in ECI packets
+  - id: rotational-replay
+    vehicle: hybrid_translation_fixture
+    fidelity: hybrid-6dof
+    source_truth: timestamped_external_rotation
+    command: >-
+      python examples/taoryx/rotational_truth_replay_demo.py --replay
+      examples/sensors/rotational_truth_replay_v1.jsonl --output-dir
+      artifacts/sensor-scenarios/rotational-truth-replay-v1
+    output:
+      directory: artifacts/sensor-scenarios/rotational-truth-replay-v1
+      required: [replay-report.json, rotational-request-log.jsonl]
+      plots: 0
+    acceptance: completed true; replay requests are timestamp validated and logged
+  - id: profile-comparison
+    vehicle: deterministic_eci_truth_fixture
+    fidelity: sensor_model_comparison
+    source_truth: deterministic_eci_truth
+    command: >-
+      python tools/compare_imu_profiles.py --output
+      artifacts/imu_navigation/profile_comparison_hg1700ag58.json
+    output:
+      directory: artifacts/imu_navigation
+      required: [profile_comparison_hg1700ag58.json]
+      plots: 0
+    acceptance: catalog commit matches; both profiles produce valid packet metrics
+known_limitations:
+  - Pad, touchdown, wheel, track, and support-force/contact semantics are deferred.
+  - Translation-only packets do not claim a physical body frame or gyro measurement.
+  - Pseudo-6DOF attitude is synthesized and is not rigid-body attitude truth.
+  - The upstream hardware-estimate profiles are not vendor specifications or qualification data.
+  - Nominal Earth-rate aerodynamic vehicle evidence requires a dedicated bounded table family.
