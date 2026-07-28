@@ -67,6 +67,13 @@ fidelity_profiles:
     status: runtime_replay_qualification_passed
     data_contract: [exact_daveml_force_moment_graph, fixed_mass_properties, seven_direct_surfaces]
     omitted_physics: [propulsion, actuator_dynamics, landing_contact]
+  - profile_id: hl20.rigid_body_6dof_surface_allocated.v1
+    runtime_fidelity: rigid_body_6dof
+    equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation, logical_surface_allocation]
+    status: contract_ready
+    parent_profile: hl20.rigid_body_6dof.v1
+    data_contract: [exact_daveml_force_moment_graph, fixed_mass_properties, seven_surface_logical_allocator]
+    omitted_physics: [source_actuator_dynamics, controller_qualification, landing_contact]
 parameters:
   - {id: vehicle.source_package, kind: string, default: hl20-mod-k-unpowered-v0.10.txair}
   - {id: vehicle.body_frame, kind: string, default: FRD}

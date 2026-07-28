@@ -7,7 +7,7 @@ belong to both the equations and algorithms views.
 To print the taxonomy from the portable task runner:
 
 ```bash
-python tools/dev.py test-views
+python -m tools.dev test-views
 ```
 
 Use `pytest --markers` to inspect the registered marker descriptions directly.
@@ -30,23 +30,23 @@ Use `pytest --markers` to inspect the registered marker descriptions directly.
 The portable development runner provides the usual selections:
 
 ```bash
-python tools/dev.py test             # fast tests: excludes slow/artifact/simple_aero
-python tools/dev.py test-all         # every test category
-python tools/dev.py test-simple_aero     # only Simple Aero tests
-python tools/dev.py test-artifacts   # only artifact-producing tests
-python tools/dev.py test-slow        # only slow tests
-python tools/dev.py test-grammar     # grammar/parser view
-python tools/dev.py test-equations   # equation/provenance view
-python tools/dev.py test-algorithms  # algorithm catalog/binding view
-python tools/dev.py test-segments    # isolated segment contracts and gates
-python tools/dev.py test-plots       # plotting-only view
-python tools/dev.py test-views       # print all views and categories
-python tools/dev.py test-b747        # only B747 tests, including slow/artifact cases
-python tools/dev.py test-x8          # only Skywalker X8 tests, including slow/artifact cases
-python tools/dev.py test-hummingbird # only Hummingbird tests, including slow/artifact cases
-python tools/dev.py test-x15         # only X-15 tests, including slow/artifact cases
-python tools/dev.py test-x15-catalog # fast X-15 catalog/source/table checks
-python tools/dev.py test-x15-segments # X-15 catalog plus isolated segment gates
+python -m tools.dev test             # fast tests: excludes slow/artifact/simple_aero
+python -m tools.dev test-all         # every test category
+python -m tools.dev test-simple_aero     # only Simple Aero tests
+python -m tools.dev test-artifacts   # only artifact-producing tests
+python -m tools.dev test-slow        # only slow tests
+python -m tools.dev test-grammar     # grammar/parser view
+python -m tools.dev test-equations   # equation/provenance view
+python -m tools.dev test-algorithms  # algorithm catalog/binding view
+python -m tools.dev test-segments    # isolated segment contracts and gates
+python -m tools.dev test-plots       # plotting-only view
+python -m tools.dev test-views       # print all views and categories
+python -m tools.dev test-b747        # only B747 tests, including slow/artifact cases
+python -m tools.dev test-x8          # only Skywalker X8 tests, including slow/artifact cases
+python -m tools.dev test-hummingbird # only Hummingbird tests, including slow/artifact cases
+python -m tools.dev test-x15         # only X-15 tests, including slow/artifact cases
+python -m tools.dev test-x15-catalog # fast X-15 catalog/source/table checks
+python -m tools.dev test-x15-segments # X-15 catalog plus isolated segment gates
 ```
 
 The equivalent direct pytest expressions are:
@@ -76,13 +76,13 @@ family when the change is limited to one dynamics tier or one segment:
 
 | Work focus | Command | Expected cost |
 | --- | --- | --- |
-| X-15 menu/source/table traceability | `python tools/dev.py test-x15-catalog` | fast unit checks |
+| X-15 menu/source/table traceability | `python -m tools.dev test-x15-catalog` | fast unit checks |
 | X-15 3-DOF segment | `python -m pytest tests/e2e/test_glider_family_validation.py -m 'x15 and segment and dof3' -k phugoid -o addopts=''` | one focused runtime |
 | X-15 6-DOF segment | `python -m pytest tests/e2e/test_glider_family_validation.py -m 'x15 and segment and dof6' -k weave -o addopts=''` | one focused runtime |
-| All isolated X-15 gates | `python tools/dev.py test-x15-segments` | slow, but excludes route/artifact-only tests |
-| Grammar-only change | `python tools/dev.py test-grammar` | parser slice |
-| Plot/visualization change | `python tools/dev.py test-plots` | fast visualization slice |
-| Full vehicle family | `python tools/dev.py test-x15` | intentionally expensive |
+| All isolated X-15 gates | `python -m tools.dev test-x15-segments` | slow, but excludes route/artifact-only tests |
+| Grammar-only change | `python -m tools.dev test-grammar` | parser slice |
+| Plot/visualization change | `python -m tools.dev test-plots` | fast visualization slice |
+| Full vehicle family | `python -m tools.dev test-x15` | intentionally expensive |
 
 The `segment`, `dof3`, and `dof6` markers are additive views. `slow` is a cost
 label, not a reason to select every slow test. `-o addopts=''` is required for

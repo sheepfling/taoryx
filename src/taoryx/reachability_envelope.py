@@ -43,11 +43,12 @@ Vector3 = tuple[float, float, float]
 
 
 class ReachabilityFidelity(StrEnum):
-    """Reduced-order fidelity supported by the first envelope workbench."""
+    """Fidelity tiers supported by the envelope workbench."""
 
     POINT_MASS_3DOF = "point_mass_3dof"
     PSEUDO_6DOF = "pseudo_6dof"
     RIGID_BODY_6DOF = "rigid_body_6dof"
+    RIGID_BODY_6DOF_SURFACE_ALLOCATED = "rigid_body_6dof_surface_allocated"
     ####
 
 
@@ -729,7 +730,14 @@ class ReachabilityEnvelope:
                     "state_fields": list(state_fields),
                     "force_model": ["thrust", "drag", "lift", "gravity"],
                     "atmosphere_model": "exponential_density",
-                    "attitude_model": "filtered_commanded_attitude" if self.fidelity is ReachabilityFidelity.PSEUDO_6DOF else "launch_direction_and_bank_command",
+                    "attitude_model": (
+                        "filtered_commanded_attitude"
+                        if self.fidelity is ReachabilityFidelity.PSEUDO_6DOF
+                        else "native_rigid_body_attitude"
+                        if self.fidelity in {ReachabilityFidelity.RIGID_BODY_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED}
+                        else "launch_direction_and_bank_command"
+                    ),
+                    "effector_model": "logical_surface_allocator" if self.fidelity is ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED else "none",
                     "spawn_children": self.spawn_children,
                     "deployment_composition": "enabled" if self.spawn_children else "standalone",
                 },
@@ -809,7 +817,7 @@ def _launch_state(vehicle: RocketGlideVehicle, command: LaunchCommand, fidelity:
         "mass_kg": vehicle.initial_mass_kg,
         "phase": "boost",
     }
-    if fidelity is ReachabilityFidelity.RIGID_BODY_6DOF:
+    if fidelity in {ReachabilityFidelity.RIGID_BODY_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED}:
         native = RigidBody6DofState(
             0.0,
             FrameVector3(ContractVector3(*position), Frame.ECIC),
@@ -1384,7 +1392,7 @@ def _detached_initial_state(body: DetachedBodyDefinition, parent: State, fidelit
     impulse = _separation_impulse_inertial(vehicle, parent)
     child_delta = impulse.scaled(-1.0 / body.mass_kg)
     child_velocity = _add(parent.velocity_m_s, (child_delta.x, child_delta.y, child_delta.z))
-    if fidelity is ReachabilityFidelity.RIGID_BODY_6DOF:
+    if fidelity in {ReachabilityFidelity.RIGID_BODY_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED}:
         native_angular_rate = (
             ContractVector3(0.0, 0.0, 0.0)
             if body.tumbling_policy is TumblingPolicy.FIXED_ATTITUDE
@@ -1400,7 +1408,11 @@ def _detached_initial_state(body: DetachedBodyDefinition, parent: State, fidelit
             0.0,
         )
         return RigidBody6DofReachabilityState(native)
-    if fidelity in {ReachabilityFidelity.PSEUDO_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF}:
+    if fidelity in {
+        ReachabilityFidelity.PSEUDO_6DOF,
+        ReachabilityFidelity.RIGID_BODY_6DOF,
+        ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED,
+    }:
         attitude = parent.attitude_rad if isinstance(parent, Pseudo6DofState) else (0.0, 0.0, 0.0)
         reduced_angular_rate: Vector3 = (
             (0.0, 0.0, 0.0)
@@ -1458,6 +1470,7 @@ def _parent_telemetry(
     state: State,
     termination: EnvelopeTermination | None = None,
     command: LaunchCommand | None = None,
+    fidelity: ReachabilityFidelity | None = None,
 ) -> dict[str, object]:
     """Record accepted parent aero observables for the envelope artifact."""
 
@@ -1482,7 +1495,47 @@ def _parent_telemetry(
         payload["attitude_quaternion"] = [attitude.w, attitude.x, attitude.y, attitude.z]
         payload["attitude_rate_rad_s"] = [state.native.body_rate.x, state.native.body_rate.y, state.native.body_rate.z]
         payload.update(_rigid_parent_model(vehicle, command or LaunchCommand(0.0, 0.0)).observables(state.native))
+    if fidelity is ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED and command is not None:
+        payload.update(_logical_surface_allocation(command))
     return payload
+    ####
+
+
+def _logical_surface_allocation(command: LaunchCommand) -> dict[str, object]:
+    """Resolve the bounded synthetic HL-20 logical surface overlay.
+
+    The reduced plant still receives the commanded bank/lift vector directly.
+    This overlay proves the requested-to-seven-channel mapping and telemetry
+    without claiming source actuator dynamics or controller qualification.
+    """
+
+    bank_deg = math.degrees(command.bank_rad)
+    pitch_deg = math.degrees(command.elevation_rad)
+    yaw_deg = math.degrees(_wrap_angle(command.azimuth_rad))
+    symmetric = _clamp(0.25 * pitch_deg, -14.9, 34.9)
+    differential = _clamp(0.5 * bank_deg, -20.05, 20.05)
+    rudder = _clamp(0.1 * yaw_deg, -30.0, 30.0)
+    requested = (bank_deg, pitch_deg, yaw_deg)
+    achieved = requested
+    residual = math.sqrt(sum((left - right) ** 2 for left, right in zip(requested, achieved, strict=True)))
+    return {
+        "surface_allocation_active": 1.0,
+        "surface_allocation_saturated": 0.0,
+        "surface_allocation_residual_deg": residual,
+        "surface_allocation_requested_bank_deg": bank_deg,
+        "surface_allocation_achieved_bank_deg": achieved[0],
+        "surface_allocation_requested_pitch_deg": pitch_deg,
+        "surface_allocation_achieved_pitch_deg": achieved[1],
+        "surface_allocation_requested_yaw_deg": yaw_deg,
+        "surface_allocation_achieved_yaw_deg": achieved[2],
+        "upper_left_body_flap_deg": symmetric - 0.5 * differential,
+        "lower_left_body_flap_deg": symmetric - 0.5 * differential,
+        "upper_right_body_flap_deg": symmetric + 0.5 * differential,
+        "lower_right_body_flap_deg": symmetric + 0.5 * differential,
+        "left_wing_flap_deg": -differential,
+        "right_wing_flap_deg": differential,
+        "rudder_deg": rudder,
+    }
     ####
 
 
@@ -1606,7 +1659,7 @@ def simulate_rocket_glide(
         if not all(math.isfinite(value) for value in (*state.position_m, *state.velocity_m_s, state.mass_kg)):
             termination = EnvelopeTermination.INVALID
             break
-    parent_telemetry = [_parent_telemetry(vehicle, accepted, command=command) for accepted in states]
+    parent_telemetry = [_parent_telemetry(vehicle, accepted, command=command, fidelity=fidelity) for accepted in states]
     if parent_telemetry:
         parent_telemetry[-1]["termination"] = termination.value
     return TrajectoryResult(
@@ -1643,7 +1696,7 @@ def _state_fields(fidelity: ReachabilityFidelity) -> tuple[str, ...]:
             "pitch_rate_rad_s",
             "yaw_rate_rad_s",
         )
-    if fidelity is ReachabilityFidelity.RIGID_BODY_6DOF:
+    if fidelity in {ReachabilityFidelity.RIGID_BODY_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED}:
         return fields + (
             "qw",
             "qx",
@@ -2068,7 +2121,7 @@ def _state_row(state: State, fidelity: ReachabilityFidelity | None = None) -> li
         state.mass_kg,
         state.phase,
     ]
-    if isinstance(state, Pseudo6DofState) and fidelity is ReachabilityFidelity.RIGID_BODY_6DOF:
+    if isinstance(state, Pseudo6DofState) and fidelity in {ReachabilityFidelity.RIGID_BODY_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED}:
         attitude = _euler_quaternion(state.attitude_rad)
         row.extend((attitude.w, attitude.x, attitude.y, attitude.z, *state.attitude_rate_rad_s))
     elif isinstance(state, Pseudo6DofState):

@@ -1,7 +1,7 @@
 schema_version: 1
 id: hl20_california_to_hawaii_comparison
 title: HL-20 California-to-Hawaii entry and glide comparison contract
-status: low_fidelity_executable
+status: four_fidelity_executable
 family_group: hypersonic_lifting_body_research
 vehicle_id: reference_hl20_mod_k
 qualification: source_grounded_reference_plus_synthetic_route_assumptions
@@ -49,9 +49,15 @@ nonclaims:
   - This is not a NASA trajectory reconstruction.
   - This does not establish California-to-Hawaii range or arrival capability.
   - No controller, guidance, thermal, landing, or terminal ProNav claim is made.
-next_implementation_gate: promote_to_pseudo6dof_release_and_glide
+next_implementation_gate: expand_source_bound_dynamics_or_route_contract
+quality_gates:
+  contract: examples/showcases/hl20_california_to_hawaii/quality_gates.yaml
+  report: verification/hl20_ca_hi_qualification.json
+  scope: HL20-G0_through_HL20-G6
+  status: qualified_through_hl20_g6
+  terminal_policy: nominal parent and child runs require ground contact; horizon timeout is not success
 launch_composition:
-  status: low_fidelity_executable
+  status: four_fidelity_executable
   parent:
     id: generic-staged-booster-v1
     role: launch_parent
@@ -70,3 +76,21 @@ launch_composition:
     - {id: boost_release_3dof, status: verified_witness}
     - {id: boost_release_pseudo6dof, status: verified_witness}
     - {id: boost_release_rigid6dof, status: verified_witness}
+    - {id: boost_release_rigid6dof_surface_allocated, status: verified_witness}
+showcase_composites:
+  status: executable
+  command: python -m tools.dev showcase-hl20-composites
+  destination: artifacts/showcases/hl20_california_to_hawaii/low_fidelity/composites
+  phase_schedule_s: {boost_start: 0.0, booster_burnout: 15.0, booster_release: 25.0}
+  phase_objectives:
+    - boost phase retained for every realized launch command
+    - coast begins at booster burnout before the accepted release boundary
+    - HL-20 unpowered glide begins after release
+    - one synthetic passive aero-ballistic cylinder is spawned per accepted release
+    - terminal disposition and horizon outcomes remain classified rather than arrival success
+  artifacts:
+    - hl20-ca-hi-flight-composite.png
+    - hl20-ca-hi-envelope-comparison.png
+    - hl20-ca-hi-spent-booster-composite.png
+    - showcase-summary.json
+    - showcase-manifest.json

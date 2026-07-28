@@ -21,7 +21,7 @@ A typical Debian/Ubuntu installation requires TeX Live's recommended, science, p
 The portable bootstrap path is:
 
 ```bash
-python3 tools/dev.py bootstrap   # macOS/Linux
+python -m tools.dev bootstrap   # macOS/Linux
 py -3.12 tools/dev.py bootstrap  # Windows
 ```
 
@@ -50,20 +50,20 @@ artifact.
 To fetch the scan into the local cache and create the ignored root symlink:
 
 ```bash
-python3 tools/dev.py source-pdf
+python -m tools.dev source-pdf
 ```
 
 To inspect an existing environment without changing it:
 
 ```bash
-python3 tools/dev.py doctor
+python -m tools.dev doctor
 python3 scripts/doctor.py --strict
 ```
 
 For the complete PDF workflow, use the documentation-specific diagnosis:
 
 ```bash
-python3 tools/dev.py docs-doctor
+python -m tools.dev docs-doctor
 ```
 
 This checks Python packages, both LaTeX engines, `latexmk`, Pandoc, Poppler,
@@ -108,17 +108,17 @@ guaranteed performance improvement.
 The portable task runner is the authoritative interface:
 
 ```bash
-python3 tools/dev.py doctor
-python3 tools/dev.py lint
-python3 tools/dev.py typecheck
-python3 tools/dev.py test
-python3 tools/dev.py test-views
-python3 tools/dev.py manual
-python3 tools/dev.py check
+python -m tools.dev doctor
+python -m tools.dev lint
+python -m tools.dev typecheck
+python -m tools.dev test
+python -m tools.dev test-views
+python -m tools.dev manual
+python -m tools.dev check
 ```
 
 The older, source-heavy validation workflow remains available as
-`python tools/dev.py check`.
+`python -m tools.dev check`.
 
 For selective pytest runs, including the `slow`, `artifact`, and `simple_aero`
 markers, see [BUILDING_TESTS.md](BUILDING_TESTS.md).
@@ -126,10 +126,10 @@ markers, see [BUILDING_TESTS.md](BUILDING_TESTS.md).
 For the most common project entry points:
 
 ```bash
-python tools/dev.py grammar          # parser, lexer, corpus, EBNF, and manual-fixture validation
-python tools/dev.py test-simple_aero     # Simple Aero problem / segment / trajectory corpus
-python tools/dev.py test-equations   # equation catalog and provenance checks
-python tools/dev.py test-algorithms  # algorithm catalog and runtime binding checks
+python -m tools.dev grammar          # parser, lexer, corpus, EBNF, and manual-fixture validation
+python -m tools.dev test-simple_aero     # Simple Aero problem / segment / trajectory corpus
+python -m tools.dev test-equations   # equation catalog and provenance checks
+python -m tools.dev test-algorithms  # algorithm catalog and runtime binding checks
 taoryx-validate examples/chapter04/ballistic-reentry.prb
 taoryx table inspect examples/chapter03/stmi-full.tbl --html build/table.html
 ```
@@ -137,7 +137,7 @@ taoryx table inspect examples/chapter03/stmi-full.tbl --html build/table.html
 ## Rebuild the manual
 
 ```bash
-python tools/dev.py manual
+python -m tools.dev manual
 ```
 
 The normalized document is written to `build/manual.pdf`.
@@ -150,7 +150,7 @@ controller synthesis, trajectory scoring, and verification policy can evolve
 without changing the 1995 reconstruction:
 
 ```bash
-python tools/dev.py successor-guide
+python -m tools.dev successor-guide
 ```
 
 The normalized guide is written to
@@ -160,7 +160,7 @@ The normalized guide is written to
 The manual-parallel language and mathematics reference is built separately:
 
 ```bash
-python tools/dev.py language-reference
+python -m tools.dev language-reference
 ```
 
 Its normalized output is
@@ -174,19 +174,19 @@ manual's Methods, Problem Files, and Table Files coverage.
 Run the doctor first, then choose either the complete build or one target:
 
 ```bash
-python tools/dev.py docs-doctor
-python tools/dev.py all-pdfs
+python -m tools.dev docs-doctor
+python -m tools.dev all-pdfs
 ```
 
 The individual targets are:
 
 | Command | Output |
 | --- | --- |
-| `python tools/dev.py manual` | `build/manual.pdf` — frozen historical manual rebuild |
-| `python tools/dev.py successor-guide` | `output/pdf/taoryx_extensions_and_verification.pdf` |
-| `python tools/dev.py language-reference` | `output/pdf/taoryx_language_reference.pdf` |
-| `python tools/dev.py taoryx-extension-pdf` | `output/pdf/taoryx_extensions_composite.pdf` |
-| `python tools/dev.py all-pdfs` | all four outputs above |
+| `python -m tools.dev manual` | `build/manual.pdf` — frozen historical manual rebuild |
+| `python -m tools.dev successor-guide` | `output/pdf/taoryx_extensions_and_verification.pdf` |
+| `python -m tools.dev language-reference` | `output/pdf/taoryx_language_reference.pdf` |
+| `python -m tools.dev taoryx-extension-pdf` | `output/pdf/taoryx_extensions_composite.pdf` |
+| `python -m tools.dev all-pdfs` | all four outputs above |
 
 `all-pdfs` never edits the historical manual source. It rebuilds the existing
 frozen manual PDF, the separate successor LaTeX documents, and their composite.
@@ -200,7 +200,7 @@ manual-parallel language reference, and the canonical Markdown extension
 references, then normalizes the merged PDF:
 
 ```bash
-python tools/dev.py taoryx-extension-pdf
+python -m tools.dev taoryx-extension-pdf
 ```
 
 The result is written to
@@ -212,7 +212,7 @@ this composite stage as its documentation build gate.
 ## Rebuild the equation provenance registry
 
 ```bash
-python tools/dev.py equation-audit
+python -m tools.dev equation-audit
 ```
 
 This verifies all 326 numbered equations against the compiled AUX file, the TeX
@@ -227,7 +227,7 @@ sources, the 307-page source registry, and the original PDF. It regenerates:
 ## Run validation
 
 ```bash
-python tools/dev.py check
+python -m tools.dev check
 python -m pytest
 ```
 
@@ -246,7 +246,7 @@ The current wheel is also distributed under `dist/`.
 ## Create the Codex handoff bundle
 
 ```bash
-python tools/dev.py handoff
+python -m tools.dev handoff
 ```
 
 The handoff script creates a clean, checksum-manifested ZIP containing source

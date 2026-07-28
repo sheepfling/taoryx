@@ -59,7 +59,9 @@ comparison_contract:
     controllability unless a separately qualified model and mission contract
     supplies those claims.
 rocket_composition:
-  status: in_progress
+  status: qualified_through_hl20_g6
+  quality_gate_contract: examples/showcases/hl20_california_to_hawaii/quality_gates.yaml
+  quality_gate_report: verification/hl20_ca_hi_qualification.json
   parent_role: generic_or_source_grounded_booster
   child_role: vehicle_specific_release_and_glide_model
   lineage_requirements:
@@ -73,16 +75,20 @@ rocket_composition:
   fidelity_ladder:
     - id: boost_release_3dof
       runtime_fidelity: point_mass_3dof
-      qualification: planned
+      qualification: verified_witness
       evidence: release_state_and_energy_budget
     - id: boost_release_pseudo6dof
       runtime_fidelity: pseudo_6dof
-      qualification: planned
+      qualification: verified_witness
       evidence: attitude_response_and_release_alignment
     - id: boost_release_rigid6dof
       runtime_fidelity: rigid_body_6dof
-      qualification: planned
+      qualification: verified_witness
       evidence: force_moment_scaling_and_event_continuity
+    - id: boost_release_rigid6dof_surface_allocated
+      runtime_fidelity: rigid_body_6dof_surface_allocated
+      qualification: verified_witness
+      evidence: logical_surface_allocation_and_residual_telemetry
   members:
     x15:
       rocket_parent: synthetic_or_existing_booster_contract
@@ -94,4 +100,4 @@ rocket_composition:
       first_case: examples/showcases/hl20_california_to_hawaii/showcase.yaml
       low_fidelity_runner: src/taoryx/hl20_reachability.py
       low_fidelity_status: verified_witness
-      fidelity_ladder_status: all_three_executable
+      fidelity_ladder_status: all_four_executable

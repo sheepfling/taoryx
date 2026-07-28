@@ -1,4 +1,4 @@
-"""Run the low-fidelity HL-20 rocket-release showcase."""
+"""Run the four-tier HL-20 rocket-release showcase."""
 
 from __future__ import annotations
 
