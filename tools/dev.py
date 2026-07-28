@@ -157,6 +157,7 @@ def test_views() -> None:
     print("  check-problems verify generated .prb products are current")
     print("  check-vehicles verify vehicle-family contracts and table bindings")
     print("  onboard-vehicles diagnose the complete new-vehicle metadata path")
+    print("  fidelity-readiness check declared data for all four fidelity tiers")
     print("  compile-segments compile external segment catalogs into native .prb products")
     print("  audit-vehicles verify scoped problem files match registry provenance")
     print("  vehicles   run the complete vehicle registry, generation, and provenance check")
@@ -384,6 +385,12 @@ def check_vehicle_models() -> None:
 def onboard_vehicles() -> None:
     """Diagnose every registered vehicle's metadata and source-contract hooks."""
     run([project_python(), str(TOOLS / "validate_vehicle_onboarding.py"), "--vehicle", "all"])
+    ####
+
+
+def fidelity_readiness() -> None:
+    """Check declared data readiness for every registered fidelity tier."""
+    run([project_python(), str(TOOLS / "validate_fidelity_readiness.py"), "--vehicle", "all"])
     ####
 
 
@@ -765,6 +772,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "check-problems": check_problem_files,
     "check-vehicles": check_vehicle_models,
     "onboard-vehicles": onboard_vehicles,
+    "fidelity-readiness": fidelity_readiness,
     "check-parity": check_fidelity_parity_contracts,
     "run-parity": run_fidelity_parity,
     "compile-segments": compile_segments,

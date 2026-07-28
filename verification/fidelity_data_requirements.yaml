@@ -1,0 +1,152 @@
+schema_version: 1
+id: taoryx_fidelity_data_requirements_v1
+description: >-
+  Machine-readable data and evidence checklist for the four Taoryx vehicle
+  realization tiers. This catalog checks registration metadata and artifact
+  reachability only; runtime probes remain separate qualification evidence.
+
+tiers:
+  point_mass_3dof:
+    display_name: Point-mass 3DOF
+    runtime_modes: [point-mass]
+    claim_ceiling: >-
+      Center-of-mass translation, represented forces, energy, speed, altitude,
+      range, and declared resources.
+    nonclaims: [attitude dynamics, body rates, moments, individual effectors]
+    requirements:
+      - {id: identity, title: Vehicle identity and frame, kind: all_fields, paths: [display_name, family_id, body_frame], severity: required}
+      - {id: mass, title: Translational mass, kind: all_fields, paths: [nominal_mass_kg], severity: required}
+      - {id: geometry, title: Reference geometry, kind: all_fields, paths: [reference_area_m2, reference_length_m], severity: recommended}
+      - {id: force_contract, title: Force realization declared, kind: all_fields, paths: [realization.force_source], severity: required}
+      - {id: propulsion_contract, title: Propulsion realization declared, kind: all_fields, paths: [realization.propulsion_model], severity: required}
+      - {id: resource_contract, title: Resource realization declared, kind: all_fields, paths: [realization.resource_model], severity: required}
+      - {id: controls, title: Semantic control inputs, kind: non_empty_list, path: controls, severity: required}
+      - {id: source_provenance, title: Source or model provenance, kind: all_fields, paths: [source.status, source.bundle, source.model_path], severity: required}
+      - {id: envelope, title: Declared operating envelope, kind: non_empty_mapping, path: envelope, severity: recommended}
+      - {id: tables, title: Source or analytic data bindings, kind: non_empty_list, path: table_bindings, severity: recommended}
+      - {id: table_files, title: Bound data files exist, kind: all_artifacts, path: table_bindings, severity: required}
+
+  pseudo_6dof_kinematic_bridge:
+    display_name: Named pseudo-6DOF / 3T+3K response bridge
+    inherits: [point_mass_3dof]
+    runtime_modes: [kinematic-6dof]
+    claim_ceiling: >-
+      Point-mass claims plus the explicitly named attitude, body-rate, lag,
+      limit, and saturation response law.
+    nonclaims: [physical moment balance, individual surfaces, rotors, wheels, thrusters]
+    requirements:
+      - {id: response_law, title: Named attitude response law, kind: any_fields, paths: [attitude_lqr_profile, response_law_profile, pseudo_6dof_response], severity: required}
+      - {id: attitude_limits, title: Attitude or body-rate limits, kind: any_fields, paths: [actuator.maximum_body_rate_deg_s, response_limits.max_body_rate_deg_s, response_limits], severity: required}
+      - {id: attitude_convention, title: Attitude frame convention, kind: all_fields, paths: [body_frame], severity: required}
+      - {id: initial_attitude, title: Initial attitude source, kind: any_fields, paths: [initial_condition, trim, trim_profile, attitude_lqr_profile], severity: recommended}
+      - {id: response_provenance, title: Response-law provenance, kind: any_fields, paths: [source.status, response_law_provenance, attitude_lqr_profile], severity: required}
+
+  rigid_body_6dof_direct_wrench:
+    display_name: Rigid-body 6DOF with direct or induced wrench
+    inherits: [point_mass_3dof]
+    runtime_modes: [rigid-body-6dof]
+    claim_ceiling: >-
+      Coupled translational and rotational state evolution from the declared
+      source loads and generalized forces or moments.
+    nonclaims: [physical effector allocation, actuator transients unless declared]
+    requirements:
+      - {id: rigid_mode, title: Rigid-body runtime mode, kind: value_in, path: mode, values: [rigid-body-6dof], severity: required}
+      - {id: inertia, title: Positive rigid-body inertia data, kind: all_fields, paths: [inertia_kg_m2.x, inertia_kg_m2.y, inertia_kg_m2.z], severity: required}
+      - {id: moment_contract, title: Moment realization declared, kind: all_fields, paths: [realization.moment_source], severity: required}
+      - {id: direct_authority, title: Generalized wrench authority, kind: any_fields, paths: [actuator.maximum_moment, direct_wrench_authority, wrench_authority], severity: required}
+      - {id: force_frame, title: Force and moment frame, kind: any_fields, paths: [aero_convention.force_frame, aero_wrench_frame, body_frame], severity: required}
+      - {id: rotational_envelope, title: Rotational or aerodynamic envelope, kind: non_empty_mapping, path: envelope, severity: recommended}
+      - {id: rotational_probes, title: Rotational equation probes, kind: declared_probe, probe: rigid_body_invariants, severity: recommended}
+
+  rigid_body_6dof_surface_allocated:
+    display_name: Rigid-body 6DOF with physical effector allocation
+    inherits: [rigid_body_6dof_direct_wrench]
+    runtime_modes: [rigid-body-6dof]
+    claim_ceiling: >-
+      Direct-wrench claims plus bounded allocation through declared surfaces,
+      rotors, thrusters, wheels, gimbals, or magnetic dipoles.
+    nonclaims: [unmodeled blade, inflow, plume, drivetrain, or actuator physics]
+    requirements:
+      - {id: allocator_declaration, title: Physical allocator declaration, kind: string_contains, path: realization.actuator_realization, value: allocator, severity: required}
+      - {id: effector_controls, title: Physical effector channels, kind: non_empty_list, path: controls, severity: required}
+      - {id: effector_limits, title: Effector travel or command limits, kind: controls_have_limits, path: controls, severity: required}
+      - {id: allocation_provenance, title: Allocation source or calibration, kind: any_fields, paths: [allocation, control_allocation, source.status, table_bindings], severity: required}
+      - {id: actuator_dynamics, title: Actuator rate or response data, kind: any_fields, paths: [actuator.rate_limits, actuator.time_constants, actuator.dynamics, actuator.maximum_body_rate_deg_s], severity: recommended}
+      - {id: residual_telemetry, title: Requested versus achieved effector residual, kind: declared_probe, probe: allocation_residual, severity: recommended}
+
+family_overlays:
+  powered_fixed_wing:
+    title: Powered fixed-wing overlay
+    requirements:
+      - {id: aero_convention, title: Body or wind-axis aerodynamic convention, kind: all_fields, paths: [aero_convention.force_frame, aero_convention.force_channels, aero_convention.table_semantics], severity: required}
+      - {id: propulsion_data, title: Propulsion or thrust data, kind: value_not_in, path: realization.propulsion_model, values: [none], severity: required}
+      - {id: surface_or_wrench_controls, title: Longitudinal and lateral authority, kind: controls_minimum, path: controls, minimum: 2, severity: required}
+    tiers:
+      rigid_body_6dof_surface_allocated:
+        requirements:
+          - {id: aerodynamic_control_tables, title: Control-conditioned aerodynamic data, kind: table_token_any, path: table_bindings, tokens: [elevator, elevon, aileron, rudder, stabilator, control], severity: required}
+          - {id: surface_signs, title: Surface sign and frame convention, kind: any_fields, paths: [control_direction_contract, aero_convention.control_table_rule, controls], severity: recommended}
+
+  multirotor_direct_wrench:
+    title: Multirotor overlay
+    requirements:
+      - {id: wrench_frame, title: Source wrench frame adapter, kind: all_fields, paths: [aero_load_mode, aero_wrench_frame], severity: required}
+      - {id: rotor_controls, title: Individual rotor or motor channels, kind: controls_minimum, path: controls, minimum: 4, severity: required}
+    tiers:
+      rigid_body_6dof_surface_allocated:
+        requirements:
+          - {id: rotor_tables, title: Rotor thrust and reaction-torque data, kind: table_token_all_group, path: table_bindings, token_groups: [[rotor], [reaction, torque]], severity: required}
+          - {id: rotor_geometry, title: Rotor positions, axes, and spin directions, kind: any_fields, paths: [rotor_geometry, rotor_positions, mixer], severity: required}
+          - {id: motor_limits, title: Motor or rotor limits, kind: controls_have_limits, path: controls, severity: required}
+
+  rocket_plane:
+    title: Rocket-plane and high-energy powered-aircraft overlay
+    requirements:
+      - {id: propulsion_data, title: Thrust and mass-flow data, kind: table_token_any, path: table_bindings, tokens: [thrust, mdot, mass_flow], severity: required}
+      - {id: mass_policy, title: Dry and nominal mass policy, kind: all_fields, paths: [dry_mass_kg, nominal_mass_kg], severity: required}
+    tiers:
+      rigid_body_6dof_surface_allocated:
+        requirements:
+          - {id: control_tables, title: Stabilator, rudder, gimbal, or thrust-vector data, kind: table_token_any, path: table_bindings, tokens: [stabilator, rudder, gimbal, thrust_vector], severity: required}
+
+  conventional_helicopter:
+    title: Conventional helicopter overlay
+    requirements:
+      - {id: rotor_geometry, title: Main and anti-torque rotor geometry, kind: any_fields, paths: [rotor_geometry, main_rotor, rotor_radius_m], severity: required}
+      - {id: rotor_speed, title: Rotor speed or scheduled rotor state, kind: any_fields, paths: [rotor_speed_rad_s, rotor_rpm, rotor_schedule], severity: required}
+      - {id: controls, title: Cyclic, collective, and pedal channels, kind: controls_named_any, path: controls, names: [collective, cyclic, pedal], severity: required}
+    tiers:
+      pseudo_6dof_kinematic_bridge:
+        requirements:
+          - {id: scheduled_derivatives, title: Scheduled state/control derivatives, kind: any_fields, paths: [derivative_schedule, state_derivative_matrices, source.status], severity: required}
+      rigid_body_6dof_surface_allocated:
+        requirements:
+          - {id: rotor_effectors, title: Rotor or control-effectiveness model, kind: any_fields, paths: [rotor_allocator, control_effectiveness, rotor_geometry], severity: required}
+
+  tiltrotor:
+    title: Tiltrotor and conversion VTOL overlay
+    requirements:
+      - {id: nacelle_state, title: Nacelle or rotor-tilt state, kind: any_fields, paths: [nacelle_angle_deg, nacelle_schedule, conversion_schedule], severity: required}
+      - {id: conversion_envelope, title: Conversion corridor and guards, kind: any_fields, paths: [conversion_envelope, conversion_guards, envelope], severity: required}
+      - {id: force_sharing, title: Rotor/wing force-sharing model, kind: any_fields, paths: [force_sharing, lift_fraction_schedule, conversion_schedule], severity: required}
+    tiers:
+      rigid_body_6dof_surface_allocated:
+        requirements:
+          - {id: mode_mixer, title: Mode-dependent control mixer, kind: any_fields, paths: [control_mixer, mode_mixer, conversion_schedule], severity: required}
+
+  spacecraft:
+    title: Spacecraft and orbital vehicle overlay
+    requirements:
+      - {id: epoch_frame, title: Epoch, inertial frame, and navigation frame, kind: any_fields, paths: [epoch, inertial_frame, navigation_frame, earth_model], severity: required}
+      - {id: gravity_model, title: Central-body gravity model, kind: any_fields, paths: [earth_gm_m3_s2, gravity_model, earth_model], severity: required}
+    tiers:
+      rigid_body_6dof_surface_allocated:
+        requirements:
+          - {id: spacecraft_actuator, title: Wheel, thruster, or dipole actuator data, kind: any_fields, paths: [reaction_wheels, thrusters, magnetorquers, dipole_allocator], severity: required}
+          - {id: spacecraft_resources, title: Propellant, wheel momentum, or power resource, kind: any_fields, paths: [resource_model, propellant, battery, momentum_capacity], severity: required}
+
+  ballistic_body:
+    title: Ballistic and tumbling-body overlay
+    requirements:
+      - {id: shape_aero, title: Shape, projected-area, and drag data, kind: any_fields, paths: [reference_area_m2, ballistic_coefficient, aero_convention, table_bindings], severity: required}
+      - {id: rotational_state, title: Inertia and initial rotational state, kind: all_fields, paths: [inertia_kg_m2.x, inertia_kg_m2.y, inertia_kg_m2.z], severity: required}
