@@ -1,0 +1,4 @@
+angle_deg,pitch_coefficient_at_alpha,yaw_coefficient_at_beta,roll_coefficient
+-20,0.59999999999999998,-0.59999999999999998,0
+0,0,0,0
+20,-0.59999999999999998,0.59999999999999998,0

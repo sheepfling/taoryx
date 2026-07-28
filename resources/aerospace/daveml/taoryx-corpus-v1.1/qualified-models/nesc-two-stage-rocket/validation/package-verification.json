@@ -1,0 +1,10 @@
+{
+  "artifact_count": 19,
+  "embedded_acceptance_passed": true,
+  "model_id": "nasa-nesc-two-stage-rocket-scenario17",
+  "passed": true,
+  "rerun_acceptance_passed": null,
+  "rerun_trajectory": false,
+  "source_equivalence_maximum_absolute_error": 2.7755575615628914e-17,
+  "source_equivalence_passed": true
+}

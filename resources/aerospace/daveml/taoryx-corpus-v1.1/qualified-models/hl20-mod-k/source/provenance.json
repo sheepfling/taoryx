@@ -1,0 +1,24 @@
+{
+  "breakpoint_count": 8,
+  "check_case_count": 24,
+  "document_git_blob_sha": "71e01b91e3a299a5b272c69f9a8296039aca59eb",
+  "document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+  "document_size_bytes": 1300776,
+  "exact_identity_match": true,
+  "file_version": "Mod K, 2010-12-01",
+  "function_count": 241,
+  "gridded_table_count": 169,
+  "identity": {
+    "file_version": "Mod K, 2010-12-01",
+    "git_blob_sha": "71e01b91e3a299a5b272c69f9a8296039aca59eb",
+    "raw_url": "https://raw.githubusercontent.com/DyadLang/DyadDemos/9e10c296a173403bdfc993ac626759b6e6f77b2e/HL20Demo/assets/shared/HL20_aero.dml",
+    "repository_full_name": "DyadLang/DyadDemos",
+    "repository_path": "HL20Demo/assets/shared/HL20_aero.dml",
+    "repository_ref": "9e10c296a173403bdfc993ac626759b6e6f77b2e"
+  },
+  "parser_issues": [],
+  "source_path": "/mnt/data/work-hl20/taoryx-aircraft-models-v0.10/examples/daveml/hl20/HL20_aero.dml",
+  "table_point_count": 6247,
+  "ungridded_table_count": 0,
+  "variable_count": 361
+}

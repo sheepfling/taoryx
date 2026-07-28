@@ -1,0 +1,96 @@
+{
+  "claim_boundary": "source-bounded family-library operational integration; not flight qualification",
+  "contract_registry": "verification/daveml_operational_contracts.yaml",
+  "contract_registry_sha256": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+  "families": [
+    {
+      "applicability": {
+        "linearization": "required",
+        "objectives": "required",
+        "scenarios": "required",
+        "trim": "required",
+        "tuning": "required"
+      },
+      "binding_count": 5,
+      "family_id": "reference_f16_s119",
+      "manifest": "families/reference_f16_s119/family.yaml",
+      "manifest_kind": "reference",
+      "manifest_sha256": "f3145ff47b5f6d4a7020cb9c80cb2df13f25f5cb81b847cf6c2a3c125b9505c0",
+      "nonclaim_count": 3,
+      "qualification_class": "reference_exact",
+      "status": "verified"
+    },
+    {
+      "applicability": {
+        "linearization": "required",
+        "objectives": "required",
+        "scenarios": "required",
+        "trim": "required",
+        "tuning": "not_applicable"
+      },
+      "binding_count": 4,
+      "family_id": "reference_hl20_mod_k",
+      "manifest": "families/reference_hl20_mod_k/family.yaml",
+      "manifest_kind": "reference",
+      "manifest_sha256": "2a805fb6f4ffe87c6915c2491525d400370dc67db6288af4d1ab75d1872da5cd",
+      "nonclaim_count": 4,
+      "qualification_class": "reference_exact",
+      "status": "verified"
+    },
+    {
+      "applicability": {
+        "linearization": "not_applicable",
+        "objectives": "required",
+        "scenarios": "required",
+        "trim": "not_applicable",
+        "tuning": "not_applicable"
+      },
+      "binding_count": 5,
+      "family_id": "reference_nesc_two_stage_rocket",
+      "manifest": "families/reference_nesc_two_stage_rocket/family.yaml",
+      "manifest_kind": "reference",
+      "manifest_sha256": "e15af2270631c822284b1db722a6765eb20ae745141f2b6e415a7526764ddd27",
+      "nonclaim_count": 4,
+      "qualification_class": "reference_exact",
+      "status": "verified"
+    },
+    {
+      "applicability": {
+        "linearization": "required",
+        "objectives": "required",
+        "scenarios": "required",
+        "trim": "required",
+        "tuning": "not_applicable"
+      },
+      "binding_count": 3,
+      "family_id": "a320_openap_3dof",
+      "manifest": "families/a320_openap_3dof/collection-manifest.json",
+      "manifest_kind": "collection",
+      "manifest_sha256": "5ab346f462d2e3bcb3ecd6992c34cef2bfb2e90c56237b4026c6de8d46982200",
+      "nonclaim_count": 4,
+      "qualification_class": "derived_exact",
+      "status": "verified"
+    },
+    {
+      "applicability": {
+        "linearization": "required",
+        "objectives": "required",
+        "scenarios": "required",
+        "trim": "required",
+        "tuning": "required"
+      },
+      "binding_count": 5,
+      "family_id": "a320_openap_jsbsim_pseudo6dof",
+      "manifest": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+      "manifest_kind": "collection",
+      "manifest_sha256": "6573d827ba06e451c31dae876151954ca9f4bbba4e241496491b9f1d03af43c4",
+      "nonclaim_count": 4,
+      "qualification_class": "surrogate_composite",
+      "status": "verified"
+    }
+  ],
+  "family_count": 5,
+  "report_type": "taoryx.daveml-operational-contracts/v1",
+  "schema_version": 1,
+  "status": "verified"
+}

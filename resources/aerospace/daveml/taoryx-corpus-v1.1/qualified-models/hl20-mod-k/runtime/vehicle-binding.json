@@ -1,0 +1,42 @@
+{
+  "binding_kind": "fixed_unpowered_vehicle",
+  "center_of_gravity_fraction_reference_chord": 0.555,
+  "control_interface": {
+    "generic_ControlState_binding": false,
+    "kind": "direct_surface_deflection"
+  },
+  "mass_properties": {
+    "center_of_gravity_fraction_reference_chord": 0.555,
+    "inertia_body_kg_m2": {
+      "ixx_kg_m2": 10186.272,
+      "ixy_kg_m2": 0.0,
+      "ixz_kg_m2": 0.0,
+      "iyy_kg_m2": 45557.464,
+      "iyz_kg_m2": 0.0,
+      "izz_kg_m2": 48333.264
+    },
+    "mass_kg": 8664.1
+  },
+  "moment_reference_fraction_reference_chord": 0.54,
+  "propulsion": {
+    "force_body_n": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "kind": "none",
+    "moment_body_nm": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "provenance": {
+    "git_blob_sha": "aa7854708d5cc81b96cda8561544c92e5cb35ac7",
+    "repository_full_name": "DyadLang/DyadDemos",
+    "repository_path": "HL20Demo/assets/shared/hl20_spec.md",
+    "repository_ref": "9e10c296a173403bdfc993ac626759b6e6f77b2e",
+    "source_note": "Companion engineering specification states that values were extracted from NASA TM-107580, NASA TM-4302, and the HL-20 DAVE-ML database."
+  },
+  "schema_version": "1.0"
+}

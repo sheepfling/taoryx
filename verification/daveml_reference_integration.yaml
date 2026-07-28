@@ -20,7 +20,7 @@ families:
         kind: source_file
         relative_path: qualified-models/f16-s119/F16_aero_mod_k_normalized.dml
         sha256: 272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764
-    next_gate: qualify_separate_overlays_and_reductions
+    next_gate: alpha3_overlay_and_reduction_equivalence
     reductions: [attitude_response_p6dof, point_mass_3dof]
   - id: reference_hl20_mod_k
     status: runtime_replay_qualification_passed
@@ -36,7 +36,7 @@ families:
         kind: source_file
         relative_path: qualified-models/hl20-mod-k/source/aerodynamics.dml
         sha256: b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec
-    next_gate: qualify_separate_overlays_and_reductions
+    next_gate: alpha3_allocator_and_reduction_equivalence
     reductions: [attitude_response_p6dof, point_mass_3dof]
   - id: reference_nesc_two_stage_rocket
     status: runtime_replay_qualification_passed
@@ -52,7 +52,7 @@ families:
         kind: source_file
         relative_path: source/nesc/twostage_aero.normalized.dml
         sha256: d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6
-    next_gate: qualify_reduced_order_rocket_and_full_trajectory_comparison
+    next_gate: alpha3_full_trajectory_and_reduction_equivalence
     reductions: [attitude_response_p6dof, point_mass_3dof]
   - id: reference_a320
     status: blocked_missing_source
@@ -61,6 +61,30 @@ families:
     parent_fidelity: rigid_body_6dof
     next_gate: acquire_and_hash_exact_a320_source_package
     reductions: []
+  - id: a320_openap_3dof
+    status: derived_exact_runtime_baseline_verified
+    integration_record: families/a320_openap_3dof/qualification/integration-record.yaml
+    source_kind: openap
+    parent_fidelity: point_mass_3dof
+    next_gate: build_surrogate_composite_6dof
+    expected_inputs:
+      - role: corpus_archive
+        kind: package
+        relative_path: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
+        sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+    reductions: [performance_trim, objective_and_tuning_binding]
+  - id: a320_openap_jsbsim_pseudo6dof
+    status: surrogate_composite_implementation_in_progress
+    integration_record: families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml
+    source_kind: composite_openap_jsbsim
+    parent_fidelity: pseudo_6dof
+    next_gate: verify_component_replay_and_roundtrip
+    expected_inputs:
+      - role: corpus_archive
+        kind: package
+        relative_path: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
+        sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+    reductions: [performance_trim, objective_and_tuning_binding]
 gates:
   source_integrity: required
   canonical_units_and_frames: required

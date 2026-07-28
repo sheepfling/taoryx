@@ -1,0 +1,17 @@
+{
+  "initial_conditions_workbook": {
+    "included": false,
+    "official_url": "https://nescacademy.nasa.gov/src/flightsim/Scenarios/Initial_Conditions.xlsx",
+    "status": "official-link-only"
+  },
+  "notes": [
+    "All seven NESC body/vehicle source families are bundled from the pinned NASA repository mirror.",
+    "All 19 atmospheric trajectory scenario directories are bundled.",
+    "Each of the 26 orbital scenario pages is cataloged individually in catalog/scenarios.csv and catalog/scenarios.json."
+  ],
+  "orbital_trajectory_archive": {
+    "included": false,
+    "official_url": "https://nescacademy.nasa.gov/src/flightsim/Datasets/Orbital_checkcases.zip",
+    "status": "official-link-only"
+  }
+}

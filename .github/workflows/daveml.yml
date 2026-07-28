@@ -11,11 +11,26 @@ on:
       - "tests/unit/test_daveml*.py"
       - "families/**"
       - "verification/**"
-      - "docs/plan/daveml-roundtrip.md"
+      - "docs/plan/**"
       - ".github/workflows/daveml.yml"
+  schedule:
+    - cron: "17 3 * * *"
 
 jobs:
-  release-gate:
+  fast:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - name: Run fast PR gate
+        run: python -m pytest -m "not slow and not artifact and not simple_aero and not integration and not external_oracle" --basetemp build/fast-ci-pytest -q
+
+  daveml:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,11 +41,46 @@ jobs:
         run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
       - name: Run fresh-process DaveML release gate
         run: python tools/dev.py daveml-release
+      - name: Emit DaveML completion audit
+        run: python tools/dev.py daveml-completion-audit
+      - name: Build DaveML family showcase boards
+        run: python tools/dev.py daveml-showcase
       - name: Run DaveML regression tests
-        run: python -m pytest tests/unit/test_daveml*.py --basetemp build/daveml-ci-pytest -q
+        run: python -m pytest -m daveml --basetemp build/daveml-ci-pytest -q
       - name: Publish DaveML evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: daveml-release-evidence
-          path: verification/daveml_*.json
+          path: |
+            verification/daveml_*.json
+            artifacts/showcases/daveml-families/**
+            build/daveml-release-catalog/canonical/export-manifest.json
+
+  integration:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - name: Run integration gate
+        run: python -m pytest -m integration --basetemp build/integration-ci-pytest -q
+
+  nightly:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - name: Run full suite with durations
+        run: python -m pytest --durations=50 --basetemp build/nightly-ci-pytest -q

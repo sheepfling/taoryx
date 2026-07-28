@@ -1,0 +1,21 @@
+{
+  "calculation_count": 0,
+  "declared_outputs": [
+    "XIXX",
+    "XIYY",
+    "XIZZ",
+    "XIZX",
+    "XIXY",
+    "XIYZ",
+    "XMASS",
+    "DXCG",
+    "DYCG",
+    "DZCG"
+  ],
+  "document_sha256": "c00b9047ce9fd4a8ec4185c02be3fb755bb966680c501fe5d815bed1e2c61a9c",
+  "function_count": 0,
+  "model_name": "Example cannonball inertia model",
+  "required_inputs": [],
+  "topological_order": [],
+  "variable_count": 10
+}

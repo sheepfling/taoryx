@@ -1,0 +1,1542 @@
+{
+  "$defs": {
+    "DaveMlAuthor": {
+      "additionalProperties": false,
+      "description": "One author attribution from a DAVE-ML header or provenance block.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Email"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Organization"
+        }
+      },
+      "title": "DaveMlAuthor",
+      "type": "object"
+    },
+    "DaveMlBreakpoint": {
+      "additionalProperties": false,
+      "description": "One named regular-grid breakpoint sequence.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "breakpoint_id": {
+          "minLength": 1,
+          "title": "Breakpoint Id",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "units": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Units"
+        },
+        "values": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "breakpoint_id",
+        "values"
+      ],
+      "title": "DaveMlBreakpoint",
+      "type": "object"
+    },
+    "DaveMlCheckSignal": {
+      "additionalProperties": false,
+      "description": "One input, internal value, or expected output in a static check shot.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "identifier": {
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "identifier_kind": {
+          "minLength": 1,
+          "title": "Identifier Kind",
+          "type": "string"
+        },
+        "tolerance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tolerance"
+        },
+        "units": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Units"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "identifier",
+        "identifier_kind",
+        "value"
+      ],
+      "title": "DaveMlCheckSignal",
+      "type": "object"
+    },
+    "DaveMlDoctype": {
+      "additionalProperties": false,
+      "description": "Document type declaration preserved for provenance and version inference.",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "public_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Public Id"
+        },
+        "system_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "System Id"
+        }
+      },
+      "title": "DaveMlDoctype",
+      "type": "object"
+    },
+    "DaveMlFunction": {
+      "additionalProperties": false,
+      "description": "One DAVE-ML function and its ordered interpolation contract.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "dependent_variable_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dependent Variable Id"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "function_id": {
+          "minLength": 1,
+          "title": "Function Id",
+          "type": "string"
+        },
+        "independent_variables": {
+          "items": {
+            "$ref": "#/$defs/DaveMlFunctionInput"
+          },
+          "title": "Independent Variables",
+          "type": "array"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "table_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Table Id"
+        },
+        "table_kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlTableKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "function_id",
+        "independent_variables"
+      ],
+      "title": "DaveMlFunction",
+      "type": "object"
+    },
+    "DaveMlFunctionInput": {
+      "additionalProperties": false,
+      "description": "One ordered independent variable used by a DAVE-ML function.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "extrapolation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extrapolation"
+        },
+        "inline_breakpoints": {
+          "default": [],
+          "items": {
+            "type": "number"
+          },
+          "title": "Inline Breakpoints",
+          "type": "array"
+        },
+        "interpolation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Interpolation"
+        },
+        "maximum_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Value"
+        },
+        "minimum_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum Value"
+        },
+        "variable_id": {
+          "minLength": 1,
+          "title": "Variable Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "variable_id"
+      ],
+      "title": "DaveMlFunctionInput",
+      "type": "object"
+    },
+    "DaveMlGriddedTable": {
+      "additionalProperties": false,
+      "description": "One regular multidimensional lookup table.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "breakpoint_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Breakpoint Ids",
+          "type": "array"
+        },
+        "declared_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Declared Id"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "function_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Function Name"
+        },
+        "inline_breakpoints": {
+          "default": [],
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "title": "Inline Breakpoints",
+          "type": "array"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "shape": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Shape",
+          "type": "array"
+        },
+        "source_kind": {
+          "minLength": 1,
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "supplemental_nodes": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DaveMlXmlNode"
+          },
+          "title": "Supplemental Nodes",
+          "type": "array"
+        },
+        "table_id": {
+          "minLength": 1,
+          "title": "Table Id",
+          "type": "string"
+        },
+        "uncertainty": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlXmlNode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "units": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Units"
+        },
+        "values": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "table_id",
+        "source_kind",
+        "values"
+      ],
+      "title": "DaveMlGriddedTable",
+      "type": "object"
+    },
+    "DaveMlHeader": {
+      "additionalProperties": false,
+      "description": "Top-level DAVE-ML file metadata and references.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "authors": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DaveMlAuthor"
+          },
+          "title": "Authors",
+          "type": "array"
+        },
+        "creation_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Creation Date"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "file_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File Version"
+        },
+        "modification_records": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DaveMlModificationRecord"
+          },
+          "title": "Modification Records",
+          "type": "array"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "raw": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlXmlNode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "references": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DaveMlReference"
+          },
+          "title": "References",
+          "type": "array"
+        }
+      },
+      "title": "DaveMlHeader",
+      "type": "object"
+    },
+    "DaveMlModificationRecord": {
+      "additionalProperties": false,
+      "description": "One source modification record.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "authors": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DaveMlAuthor"
+          },
+          "title": "Authors",
+          "type": "array"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "modification_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Modification Id"
+        }
+      },
+      "title": "DaveMlModificationRecord",
+      "type": "object"
+    },
+    "DaveMlProvenance": {
+      "additionalProperties": false,
+      "description": "Provenance attached to a model element.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "authors": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DaveMlAuthor"
+          },
+          "title": "Authors",
+          "type": "array"
+        },
+        "creation_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Creation Date"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "document_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Document Refs",
+          "type": "array"
+        },
+        "modification_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Modification Refs",
+          "type": "array"
+        },
+        "provenance_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance Id"
+        },
+        "provenance_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance Ref"
+        },
+        "raw": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlXmlNode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "DaveMlProvenance",
+      "type": "object"
+    },
+    "DaveMlReference": {
+      "additionalProperties": false,
+      "description": "One document or note reference retained with all source attributes.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "ref_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ref Id"
+        }
+      },
+      "title": "DaveMlReference",
+      "type": "object"
+    },
+    "DaveMlStaticShot": {
+      "additionalProperties": false,
+      "description": "One embedded static validation case.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/DaveMlCheckSignal"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "internal_values": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DaveMlCheckSignal"
+          },
+          "title": "Internal Values",
+          "type": "array"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "outputs": {
+          "items": {
+            "$ref": "#/$defs/DaveMlCheckSignal"
+          },
+          "title": "Outputs",
+          "type": "array"
+        },
+        "reference_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference Id"
+        }
+      },
+      "required": [
+        "inputs",
+        "outputs"
+      ],
+      "title": "DaveMlStaticShot",
+      "type": "object"
+    },
+    "DaveMlTableKind": {
+      "description": "Supported DAVE-ML table representations.",
+      "enum": [
+        "gridded",
+        "ungridded"
+      ],
+      "title": "DaveMlTableKind",
+      "type": "string"
+    },
+    "DaveMlUngriddedPoint": {
+      "additionalProperties": false,
+      "description": "One unstructured lookup-table point.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "dependent_value": {
+          "title": "Dependent Value",
+          "type": "number"
+        },
+        "independent_values": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Independent Values",
+          "type": "array"
+        },
+        "modification_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Modification Id"
+        }
+      },
+      "required": [
+        "independent_values",
+        "dependent_value"
+      ],
+      "title": "DaveMlUngriddedPoint",
+      "type": "object"
+    },
+    "DaveMlUngriddedTable": {
+      "additionalProperties": false,
+      "description": "One scattered-data lookup table.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "declared_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Declared Id"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "function_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Function Name"
+        },
+        "independent_dimension_count": {
+          "minimum": 0,
+          "title": "Independent Dimension Count",
+          "type": "integer"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/DaveMlUngriddedPoint"
+          },
+          "title": "Points",
+          "type": "array"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_kind": {
+          "minLength": 1,
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "supplemental_nodes": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DaveMlXmlNode"
+          },
+          "title": "Supplemental Nodes",
+          "type": "array"
+        },
+        "table_id": {
+          "minLength": 1,
+          "title": "Table Id",
+          "type": "string"
+        },
+        "uncertainty": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlXmlNode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "units": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Units"
+        }
+      },
+      "required": [
+        "table_id",
+        "source_kind",
+        "independent_dimension_count",
+        "points"
+      ],
+      "title": "DaveMlUngriddedTable",
+      "type": "object"
+    },
+    "DaveMlVariable": {
+      "additionalProperties": false,
+      "description": "One DAVE-ML variable definition.",
+      "properties": {
+        "alias": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alias"
+        },
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "axis_system": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis System"
+        },
+        "calculation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlXmlNode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "initial_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Initial Value"
+        },
+        "maximum_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Value"
+        },
+        "minimum_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum Value"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "provenance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlProvenance"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "roles": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "sign": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sign"
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Symbol"
+        },
+        "uncertainty": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DaveMlXmlNode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "units": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Units"
+        },
+        "variable_id": {
+          "minLength": 1,
+          "title": "Variable Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "variable_id"
+      ],
+      "title": "DaveMlVariable",
+      "type": "object"
+    },
+    "DaveMlXmlNode": {
+      "additionalProperties": false,
+      "description": "Namespace-aware generic XML subtree used for unsupported or MathML content.",
+      "properties": {
+        "attributes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Attributes",
+          "type": "object"
+        },
+        "children": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DaveMlXmlNode"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "namespace": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Namespace"
+        },
+        "tag": {
+          "minLength": 1,
+          "title": "Tag",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        }
+      },
+      "required": [
+        "tag"
+      ],
+      "title": "DaveMlXmlNode",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Complete source IR for one DAVE-ML document.",
+  "properties": {
+    "breakpoints": {
+      "items": {
+        "$ref": "#/$defs/DaveMlBreakpoint"
+      },
+      "title": "Breakpoints",
+      "type": "array"
+    },
+    "check_cases": {
+      "items": {
+        "$ref": "#/$defs/DaveMlStaticShot"
+      },
+      "title": "Check Cases",
+      "type": "array"
+    },
+    "check_data_provenance": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DaveMlProvenance"
+      },
+      "title": "Check Data Provenance",
+      "type": "array"
+    },
+    "container_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Container Sha256",
+      "type": "string"
+    },
+    "doctype": {
+      "$ref": "#/$defs/DaveMlDoctype"
+    },
+    "document_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Document Sha256",
+      "type": "string"
+    },
+    "document_size_bytes": {
+      "minimum": 0,
+      "title": "Document Size Bytes",
+      "type": "integer"
+    },
+    "functions": {
+      "items": {
+        "$ref": "#/$defs/DaveMlFunction"
+      },
+      "title": "Functions",
+      "type": "array"
+    },
+    "gridded_tables": {
+      "items": {
+        "$ref": "#/$defs/DaveMlGriddedTable"
+      },
+      "title": "Gridded Tables",
+      "type": "array"
+    },
+    "header": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DaveMlHeader"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "issues": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Issues",
+      "type": "array"
+    },
+    "provenance_definitions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DaveMlProvenance"
+      },
+      "title": "Provenance Definitions",
+      "type": "array"
+    },
+    "root_name": {
+      "minLength": 1,
+      "title": "Root Name",
+      "type": "string"
+    },
+    "root_namespace": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Root Namespace"
+    },
+    "source_bytes": {
+      "format": "binary",
+      "title": "Source Bytes",
+      "type": "string"
+    },
+    "source_member": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Member"
+    },
+    "source_path": {
+      "title": "Source Path",
+      "type": "string"
+    },
+    "ungridded_tables": {
+      "items": {
+        "$ref": "#/$defs/DaveMlUngriddedTable"
+      },
+      "title": "Ungridded Tables",
+      "type": "array"
+    },
+    "unsupported_top_level": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DaveMlXmlNode"
+      },
+      "title": "Unsupported Top Level",
+      "type": "array"
+    },
+    "variables": {
+      "items": {
+        "$ref": "#/$defs/DaveMlVariable"
+      },
+      "title": "Variables",
+      "type": "array"
+    }
+  },
+  "required": [
+    "source_path",
+    "container_sha256",
+    "document_sha256",
+    "document_size_bytes",
+    "root_name",
+    "doctype",
+    "variables",
+    "breakpoints",
+    "gridded_tables",
+    "ungridded_tables",
+    "functions",
+    "check_cases",
+    "source_bytes"
+  ],
+  "title": "DaveMlDocument",
+  "type": "object"
+}

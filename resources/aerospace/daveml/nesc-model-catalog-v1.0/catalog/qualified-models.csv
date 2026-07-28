@@ -1,0 +1,4 @@
+model_id,txair_path,txair_sha256,evidence_path,evidence_sha256
+f16-s119,qualified/f16-s119/f16-s119-reference-v0.7.txair,eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c,qualified/f16-s119/f16-s119-v0.7-evidence.zip,ef89e47365bf43d31c80c72c59a3bd28a0d2b3b1f76c71d7998b62e2296a17bb
+nesc-two-stage-rocket,qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair,204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e,qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9-evidence.zip,e6f096af5fe2ef7d3519eb1ca712c8f876a067f4ecaea6f91e7422f361ab65b0
+hl20-mod-k,qualified/hl20-mod-k/hl20-mod-k-unpowered-v0.10.txair,443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63,qualified/hl20-mod-k/hl20-mod-k-v0.10-evidence.zip,9ffa6829684ccfc8457b9171ac9dc0a561639af9e47b7b6711786ed6a1bfe6d3

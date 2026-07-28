@@ -1,0 +1,79 @@
+[
+  {
+    "check_case_count": 0,
+    "check_status": "no_cases",
+    "compile_status": "passed",
+    "feature_under_test": "legacy one-dimensional gridded table",
+    "fixture_id": "simple-aero",
+    "parse_status": "passed",
+    "remaining_gap": "None beyond round-trip/export qualification",
+    "source_file": "raw/daveml/examples/simple_aero.dml",
+    "taoryx_role": "import/export conformance"
+  },
+  {
+    "check_case_count": 0,
+    "check_status": "no_cases",
+    "compile_status": "passed",
+    "feature_under_test": "two-dimensional regular gridded table",
+    "fixture_id": "twod-table",
+    "parse_status": "passed",
+    "remaining_gap": "None beyond round-trip/export qualification",
+    "source_file": "raw/daveml/examples/twod_table.dml",
+    "taoryx_role": "import/export conformance"
+  },
+  {
+    "check_case_count": 4,
+    "check_status": "not_attempted",
+    "compile_status": "failed",
+    "feature_under_test": "two-dimensional partially nonorthogonal ungridded table",
+    "fixture_id": "twod-ungridded",
+    "parse_status": "passed",
+    "remaining_gap": "Implement named ungridded interpolation policy",
+    "source_file": "raw/daveml/examples/twod_ungridded.dml",
+    "taoryx_role": "import/export conformance"
+  },
+  {
+    "check_case_count": 0,
+    "check_status": "not_attempted",
+    "compile_status": "failed",
+    "feature_under_test": "three-dimensional scattered aerodynamic point cloud",
+    "fixture_id": "threed-ungridded",
+    "parse_status": "passed",
+    "remaining_gap": "Implement named ungridded interpolation policy",
+    "source_file": "raw/daveml/examples/threed_ungridded.dml",
+    "taoryx_role": "import/export conformance"
+  },
+  {
+    "check_case_count": 42,
+    "check_status": "failed",
+    "compile_status": "passed",
+    "feature_under_test": "large one-dimensional atmosphere tables and embedded check cases",
+    "fixture_id": "atmos-76",
+    "parse_status": "passed",
+    "remaining_gap": "None beyond round-trip/export qualification",
+    "source_file": "raw/daveml/examples/atmos_76.dml",
+    "taoryx_role": "import/export conformance"
+  },
+  {
+    "check_case_count": 17,
+    "check_status": "passed",
+    "compile_status": "passed",
+    "feature_under_test": "nonlinear multi-table aerodynamic model with MathML and check cases",
+    "fixture_id": "f16-aero",
+    "parse_status": "passed",
+    "remaining_gap": "None beyond round-trip/export qualification",
+    "source_file": "raw/daveml/examples/f16_aero.dml",
+    "taoryx_role": "import/export conformance"
+  },
+  {
+    "check_case_count": 24,
+    "check_status": "passed",
+    "compile_status": "passed",
+    "feature_under_test": "large shared-table polynomial buildup, controls, damping, and check cases",
+    "fixture_id": "hl20-aero",
+    "parse_status": "passed",
+    "remaining_gap": "None beyond round-trip/export qualification",
+    "source_file": "raw/daveml/examples/hl20_aero.dml",
+    "taoryx_role": "import/export conformance"
+  }
+]

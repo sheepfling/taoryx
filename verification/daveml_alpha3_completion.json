@@ -1,0 +1,269 @@
+{
+  "claim_boundary": "source-bounded research integration; not flight qualification",
+  "failures": [],
+  "families": [
+    {
+      "deployment": null,
+      "evidence": [
+        {
+          "path": "verification/daveml_f16_linearization_evidence.json",
+          "sha256": "e6ddb6b95b2b4fbf4b7d3374124a638d99796053b547de4925a6a5c4db8e2262"
+        },
+        {
+          "path": "verification/daveml_f16_tuning_evidence.json",
+          "sha256": "76748e3201c7d81b434141be090adf622d4da787ae57f25785e38c67e431b598"
+        },
+        {
+          "path": "verification/daveml_f16_scenario_evidence.json",
+          "sha256": "a048a12f685429e26ae19e35426c0207226f46e6f9fdc4d467ffcefe554d159e"
+        }
+      ],
+      "failures": [],
+      "family_id": "reference_f16_s119",
+      "nonclaims": [
+        "flight qualification",
+        "actuator source fidelity",
+        "production or training fidelity"
+      ],
+      "overlays": [
+        {
+          "id": "f16-ideal-direct-v1",
+          "kind": "actuator",
+          "path": "families/reference_f16_s119/actuators/ideal-direct.yaml",
+          "sha256": "011b4061a8533b990f39304529b5bcae97dda24dc633321fd75382a8e8743249",
+          "status": "verified_parent_regression_only"
+        },
+        {
+          "id": "f16-reference-first-order-v1",
+          "kind": "actuator",
+          "path": "families/reference_f16_s119/actuators/reference-first-order-v1.yaml",
+          "sha256": "9fed347d8325aabfe99e6bc7cf90471ddc6f4266c2291645335995a0c72a04a2",
+          "status": "contract_ready"
+        }
+      ],
+      "qualification_class": "reference_exact",
+      "reductions": [
+        {
+          "id": "f16-point-mass-3dof-v1",
+          "path": "families/reference_f16_s119/reductions/point-mass-3dof-v1.yaml",
+          "sha256": "85b7ae84c17aac65fb2e28f21b471ceff403ccc3b19a3eb52e5b8cfb2100864f",
+          "status": "equivalence_pending"
+        },
+        {
+          "id": "f16-attitude-response-pseudo6dof-v1",
+          "path": "families/reference_f16_s119/reductions/attitude-response-pseudo6dof-v1.yaml",
+          "sha256": "1f501734b04d1609f1b771edb730086ad36dbabdaf8f6d541e4000edd8a46f2f",
+          "status": "equivalence_pending"
+        }
+      ],
+      "source_parent": {
+        "path": "families/reference_f16_s119/family.yaml",
+        "sha256": "f3145ff47b5f6d4a7020cb9c80cb2df13f25f5cb81b847cf6c2a3c125b9505c0"
+      },
+      "status": "verified"
+    },
+    {
+      "deployment": null,
+      "evidence": [
+        {
+          "path": "verification/daveml_hl20_linearization_evidence.json",
+          "sha256": "858de314a1c49635547e1343f1769ba8310c4bb01a23d38557fd777e4ead8a02"
+        },
+        {
+          "path": "verification/daveml_hl20_scenario_evidence.json",
+          "sha256": "f8f60cb946e24d7180ef25fabcf3ec4503b11e4bf5581496ec021c180cc022be"
+        },
+        {
+          "path": "verification/daveml_hl20_load_evidence.json",
+          "sha256": "9651fb6c4266daa356ff7abeef0eef767a302c9a6c43efa0467605596438d0d4"
+        }
+      ],
+      "failures": [],
+      "family_id": "reference_hl20_mod_k",
+      "nonclaims": [
+        "controller qualification",
+        "actuator source fidelity",
+        "landing or ground-contact validation"
+      ],
+      "overlays": [
+        {
+          "id": "hl20-ideal-direct-v1",
+          "kind": "actuator",
+          "path": "families/reference_hl20_mod_k/actuators/ideal-direct.yaml",
+          "sha256": "d9793be7bc210d0020b47043ea2c8e36d3e09eefa812daa49a0a1900c7f963ec",
+          "status": "verified_parent_regression_only"
+        },
+        {
+          "id": "hl20-reference-first-order-v1",
+          "kind": "actuator",
+          "path": "families/reference_hl20_mod_k/actuators/reference-first-order-v1.yaml",
+          "sha256": "5972b2348bdb28b2e36bbc81f44e7d01352a8629d2d1ac889d4d71ad9bf7556c",
+          "status": "contract_ready"
+        },
+        {
+          "id": "hl20-logical-surface-allocation-v1",
+          "kind": "allocation",
+          "path": "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml",
+          "sha256": "e0e64c66d9da2b36e3e2f1f20cfd36d48cf77a6221eac3a790c1071f540463ba",
+          "status": "contract_ready"
+        }
+      ],
+      "qualification_class": "reference_exact",
+      "reductions": [
+        {
+          "id": "hl20-energy-glide-3dof-v1",
+          "path": "families/reference_hl20_mod_k/reductions/energy-glide-3dof-v1.yaml",
+          "sha256": "c198a45d10a901081b245139985ac40426d2eb6440344fffed9ca66c4fd8b7d5",
+          "status": "equivalence_pending"
+        },
+        {
+          "id": "hl20-attitude-response-pseudo6dof-v1",
+          "path": "families/reference_hl20_mod_k/reductions/attitude-response-pseudo6dof-v1.yaml",
+          "sha256": "f415d71871ba98ec484e403f4b62574d84f862ca16ab682c6bf66346cdba048b",
+          "status": "equivalence_pending"
+        }
+      ],
+      "source_parent": {
+        "path": "families/reference_hl20_mod_k/family.yaml",
+        "sha256": "2a805fb6f4ffe87c6915c2491525d400370dc67db6288af4d1ab75d1872da5cd"
+      },
+      "status": "verified"
+    },
+    {
+      "deployment": {
+        "artifact": "families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml",
+        "child_qualification_class": "synthetic",
+        "path": "families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml",
+        "sha256": "9b066a2fb9f678d6f727cc0516ce844bd5ff5a4123aaeb9f0f339056a743d416",
+        "status": "verified_witness"
+      },
+      "evidence": [
+        {
+          "path": "verification/daveml_nesc_replay_evidence.json",
+          "sha256": "18bb853ebca4690ceda25039ca1dffdaef71cb3812e41fe97fb0dc7e1c964eeb"
+        },
+        {
+          "path": "verification/daveml_nesc_objectives_evidence.json",
+          "sha256": "9f35f2ebf2ea07dd695bd09800640dd833f0634220b05d23dcaa35f80adfb0e2"
+        }
+      ],
+      "failures": [],
+      "family_id": "reference_nesc_two_stage_rocket",
+      "nonclaims": [
+        "independent participating-simulation equivalence",
+        "active child guidance",
+        "source-exact child aerodynamics"
+      ],
+      "overlays": [],
+      "qualification_class": "reference_exact",
+      "reductions": [
+        {
+          "id": "nesc-performance-3dof-v1",
+          "path": "families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml",
+          "sha256": "62c945252f0578fc2dd4c9adab3fb085bd39d28437efc27584004dc0f0372aeb",
+          "status": "equivalence_pending"
+        },
+        {
+          "id": "nesc-attitude-response-pseudo6dof-v1",
+          "path": "families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml",
+          "sha256": "45b323dbc5ae2ad67ee17b7fcab24315325174559dd0aead51944137b2039e7d",
+          "status": "equivalence_pending"
+        }
+      ],
+      "source_parent": {
+        "path": "families/reference_nesc_two_stage_rocket/family.yaml",
+        "sha256": "e15af2270631c822284b1db722a6765eb20ae745141f2b6e415a7526764ddd27"
+      },
+      "status": "verified"
+    },
+    {
+      "deployment": null,
+      "evidence": [
+        {
+          "path": "verification/daveml_a320_openap_integration.json",
+          "sha256": "8b4c458881d566fb9bcee28312fd554b4507fb33de0a6a199a989829c9e95bec"
+        }
+      ],
+      "failures": [],
+      "family_id": "a320_openap_3dof",
+      "nonclaims": [
+        "manufacturer truth",
+        "source-exact 6-DOF",
+        "Airbus validation"
+      ],
+      "overlays": [],
+      "qualification_class": "derived_exact",
+      "reductions": [],
+      "source_parent": {
+        "path": "families/a320_openap_3dof/collection-manifest.json",
+        "sha256": "5ab346f462d2e3bcb3ecd6992c34cef2bfb2e90c56237b4026c6de8d46982200"
+      },
+      "status": "verified"
+    },
+    {
+      "deployment": null,
+      "evidence": [
+        {
+          "path": "verification/daveml_a320_pseudo6dof_integration.json",
+          "sha256": "4f528b844b268f0388429f040195f769528a9810b3a74ed5493abd617e1e46da"
+        },
+        {
+          "path": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
+          "sha256": "3255c0007a9d4af208e97c3f1f82bbaa16d3bbd6544f5e835fbf452a4088e271"
+        }
+      ],
+      "failures": [],
+      "family_id": "a320_openap_jsbsim_pseudo6dof",
+      "nonclaims": [
+        "manufacturer truth",
+        "source-exact 6-DOF",
+        "Airbus validation",
+        "flight qualification"
+      ],
+      "overlays": [],
+      "qualification_class": "surrogate_composite",
+      "reductions": [],
+      "source_parent": {
+        "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+        "sha256": "6573d827ba06e451c31dae876151954ca9f4bbba4e241496491b9f1d03af43c4"
+      },
+      "status": "verified"
+    }
+  ],
+  "family_count": 5,
+  "pending_reduction_equivalence": [
+    {
+      "family_id": "reference_f16_s119",
+      "id": "f16-point-mass-3dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "family_id": "reference_f16_s119",
+      "id": "f16-attitude-response-pseudo6dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "family_id": "reference_hl20_mod_k",
+      "id": "hl20-energy-glide-3dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "family_id": "reference_hl20_mod_k",
+      "id": "hl20-attitude-response-pseudo6dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "family_id": "reference_nesc_two_stage_rocket",
+      "id": "nesc-performance-3dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "family_id": "reference_nesc_two_stage_rocket",
+      "id": "nesc-attitude-response-pseudo6dof-v1",
+      "status": "equivalence_pending"
+    }
+  ],
+  "registry": "verification/daveml_alpha3_completion.yaml",
+  "schema_version": "taoryx.daveml-alpha3-completion-report/v1",
+  "status": "verified_with_known_gaps"
+}

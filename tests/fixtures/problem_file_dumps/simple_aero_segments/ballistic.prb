@@ -1,6 +1,6 @@
 (simple_aero-ballistic)
 
-# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/ballistic.yaml
+# Synthetic TAOS translation of tests/fixtures/simple_aero_v1/ballistic.yaml
 # Simple Aero family: ballistic
 # Start controls: launch_point, aimpoint, initial_altitude_m, initial_speed_mps
 # Stop controls: coast_time_s, optimization termination

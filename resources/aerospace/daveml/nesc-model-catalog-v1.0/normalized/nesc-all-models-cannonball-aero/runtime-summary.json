@@ -1,0 +1,18 @@
+{
+  "calculation_count": 0,
+  "declared_outputs": [
+    "SWING",
+    "CL",
+    "CD",
+    "CY",
+    "Cl",
+    "Cm",
+    "Cn"
+  ],
+  "document_sha256": "baabd6eec679445cd3d5aa5d51b39ade99064c515876dfe018fae78b3eb028e5",
+  "function_count": 0,
+  "model_name": "Example cannonball aerodynamic model",
+  "required_inputs": [],
+  "topological_order": [],
+  "variable_count": 7
+}

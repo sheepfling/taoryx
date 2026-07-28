@@ -1,0 +1,442 @@
+[
+  {
+    "attributes": {
+      "name": "LiftCoefficient_fcn"
+    },
+    "dependent_variable_id": "totalCoefficientOfLift",
+    "description": "Lift coefficient table as a function of angle of attack",
+    "function_id": "function-0001",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "10.0",
+          "min": "-10.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 10.0,
+        "minimum_value": -10.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "LiftCoefficient_fcn",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2013-08-09",
+      "description": null,
+      "document_refs": [
+        "REF01"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2013-08-09"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CL_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "DragCoefficient_fcn"
+    },
+    "dependent_variable_id": "totalCoefficientOfDrag",
+    "description": "Drag coefficient table as a function of total angle of attack",
+    "function_id": "function-0002",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "10.0",
+          "min": "-10.0",
+          "varID": "alphaT"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 10.0,
+        "minimum_value": -10.0,
+        "variable_id": "alphaT"
+      }
+    ],
+    "issues": [],
+    "name": "DragCoefficient_fcn",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2013-08-09",
+      "description": null,
+      "document_refs": [
+        "REF01"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2013-08-09"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CD_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "SideforceCoefficient_fcn"
+    },
+    "dependent_variable_id": "aeroBodyForceCoefficient_Y",
+    "description": "Sideforce coefficient table as a function of angle of sideslip",
+    "function_id": "function-0003",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "10.0",
+          "min": "-10.0",
+          "varID": "beta"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 10.0,
+        "minimum_value": -10.0,
+        "variable_id": "beta"
+      }
+    ],
+    "issues": [],
+    "name": "SideforceCoefficient_fcn",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2013-08-09",
+      "description": null,
+      "document_refs": [
+        "REF01"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2013-08-09"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CY_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "PitchingMomentCoefficient_fcn"
+    },
+    "dependent_variable_id": "aeroBodyMomentCoefficient_Pitch",
+    "description": "Pitching moment coefficient table as a function of angle of attack",
+    "function_id": "function-0004",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "20.0",
+          "min": "-20.0",
+          "varID": "alpha"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 20.0,
+        "minimum_value": -20.0,
+        "variable_id": "alpha"
+      }
+    ],
+    "issues": [],
+    "name": "PitchingMomentCoefficient_fcn",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2013-08-09",
+      "description": null,
+      "document_refs": [
+        "REF01"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2013-08-09"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Cm_table_def",
+    "table_kind": "gridded"
+  },
+  {
+    "attributes": {
+      "name": "YawingMomentCoefficient_fcn"
+    },
+    "dependent_variable_id": "aeroBodyMomentCoefficient_Yaw",
+    "description": "Yawing moment coefficient table as a function of angle of sideslip",
+    "function_id": "function-0005",
+    "independent_variables": [
+      {
+        "attributes": {
+          "extrapolate": "neither",
+          "max": "20.0",
+          "min": "-20.0",
+          "varID": "beta"
+        },
+        "extrapolation": "neither",
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": 20.0,
+        "minimum_value": -20.0,
+        "variable_id": "beta"
+      }
+    ],
+    "issues": [],
+    "name": "YawingMomentCoefficient_fcn",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "email": "eric.m.queen@nasa.gov",
+            "name": "Eric Queen",
+            "org": "NASA Langley Research Center"
+          },
+          "email": "eric.m.queen@nasa.gov",
+          "name": "Eric Queen",
+          "organization": "NASA Langley Research Center"
+        }
+      ],
+      "creation_date": "2013-08-09",
+      "description": null,
+      "document_refs": [
+        "REF01"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "email": "eric.m.queen@nasa.gov",
+              "name": "Eric Queen",
+              "org": "NASA Langley Research Center"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2013-08-09"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "creationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "REF01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "Cn_table_def",
+    "table_kind": "gridded"
+  }
+]

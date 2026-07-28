@@ -206,4 +206,4 @@ commit_readiness:
     - no raw source is committed without license review
   current_known_gap:
     - many listed plans, family manifests, and verification ledgers are present in the worktree but not yet committed
-    - the aerospace corpus remains ignored under INBOX and is not self-contained in Git
+    - the promoted aerospace corpus is self-contained under resources/aerospace/daveml

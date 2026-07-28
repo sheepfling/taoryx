@@ -5,6 +5,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import subprocess
+import sys
+import tempfile
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -13,6 +17,7 @@ from taoryx.trajectory import (
     compare_daveml_ir,
     compare_daveml_numeric,
     evaluate_daveml_checkdata,
+    evaluate_daveml_vector_checkdata,
     export_daveml_ir,
     read_collection_archive,
 )
@@ -23,13 +28,14 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("artifact", type=Path, nargs="?", help="verified .txcollection or .txair archive")
-    parser.add_argument("--catalog-root", type=Path, help="INBOX DAVE-ML catalog root to cycle")
+    parser.add_argument("--catalog-root", type=Path, help="canonical DAVE-ML catalog root to cycle")
     parser.add_argument("--output-dir", type=Path, required=True, help="derived report directory")
+    parser.add_argument("--summary-output", type=Path, help="optional compact copy of the catalog report")
     arguments = parser.parse_args()
     if (arguments.artifact is None) == (arguments.catalog_root is None):
         parser.error("provide exactly one of ARTIFACT or --catalog-root")
     if arguments.catalog_root is not None:
-        return _run_catalog(arguments.catalog_root, arguments.output_dir)
+        return _run_catalog(arguments.catalog_root, arguments.output_dir, arguments.summary_output)
     if arguments.artifact.suffix.casefold() == ".txair":
         return _run_package(arguments.artifact, arguments.output_dir)
     contents = read_collection_archive(arguments.artifact)
@@ -46,11 +52,13 @@ def main() -> int:
             continue
         ir = build_daveml_ir(payload, document_id=document.document_id)
         exported = export_daveml_ir(ir)
-        fresh = build_daveml_ir(exported, document_id=document.document_id)
+        stem = Path(source_member).stem
+        fresh = _fresh_process_ir(exported, document.document_id, output, stem)
         diffs = compare_daveml_ir(ir, fresh)
         numeric_diffs = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
-        stem = Path(source_member).stem
+        vector_check_results = evaluate_daveml_vector_checkdata(payload)
+        fresh_checkdata = _fresh_process_checkdata(payload, output, stem)
         (output / "canonical" / f"{stem}.ir.json").write_bytes(ir.canonical_json())
         (output / "exported" / f"{stem}.dml").write_bytes(exported)
         for diff in diffs:
@@ -64,11 +72,15 @@ def main() -> int:
                 "source_sha256": ir.source_sha256,
                 "exported_sha256": _sha256(exported),
                 "opaque_paths": list(ir.opaque_paths),
+                "reference_summary": _reference_summary(ir),
                 "structural_diff_count": len(diffs),
                 "numeric_diff_count": len(numeric_diffs),
-                "checkdata": _checkdata_summary(check_results),
+                "fresh_process_reimport": "verified",
+                "fresh_process_checkdata": fresh_checkdata,
+                "checkdata": _checkdata_summary(check_results, vector_check_results),
             }
         )
+    _write_export_manifest(output, documents)
     report = {
         "status": "verified" if not all_diffs and not all_numeric_diffs else "failed",
         "checkdata_status": _documents_checkdata_status(documents),
@@ -85,7 +97,98 @@ def main() -> int:
     }
     (output / "roundtrip-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
-    return 0 if not all_diffs and not all_numeric_diffs else 1
+    return 0 if not all_diffs and not all_numeric_diffs and _documents_checkdata_status(documents) != "failed" else 1
+    ####
+
+
+def _write_export_manifest(output: Path, documents: list[dict[str, object]]) -> None:
+    """Write the canonical export provenance sidecar required by the plan."""
+
+    entries = []
+    for document in documents:
+        entries.append(
+            {
+                "document_id": document.get("document_id", document.get("source")),
+                "source_member": document.get("source_member", document.get("source")),
+                "source_sha256": document.get("source_sha256"),
+                "ir_sha256": document.get("ir_sha256"),
+                "exported_sha256": document.get("exported_sha256"),
+                "opaque_paths": document.get("opaque_paths", []),
+                "fresh_process_reimport": document.get("fresh_process_reimport", "not_recorded"),
+                "fresh_process_checkdata": document.get("fresh_process_checkdata", "not_recorded"),
+            }
+        )
+    manifest = {
+        "schema_version": "taoryx.daveml-export-manifest/v1",
+        "exporter": "taoryx.trajectory.daveml_semantic.export_daveml_ir",
+        "documents": sorted(entries, key=lambda item: str(item["document_id"])),
+    }
+    target = output / "canonical" / "export-manifest.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    ####
+
+
+def _fresh_process_ir(exported: bytes, document_id: str, output: Path, stem: str):
+    """Re-import exported bytes through a separate Python process."""
+
+    with tempfile.TemporaryDirectory(prefix="daveml-fresh-", dir=output) as directory:
+        directory_path = Path(directory)
+        payload_path = directory_path / f"{stem}.dml"
+        ir_path = directory_path / f"{stem}.ir.json"
+        payload_path.write_bytes(exported)
+        environment = dict(os.environ)
+        root = Path(__file__).resolve().parents[1]
+        environment["PYTHONPATH"] = str(root / "src")
+        subprocess.run(
+            [
+                sys.executable,
+                str(root / "tools" / "reimport_daveml_ir.py"),
+                str(payload_path),
+                "--document-id",
+                document_id,
+                "--output",
+                str(ir_path),
+            ],
+            cwd=root,
+            env=environment,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return build_daveml_ir(ir_path.read_bytes(), document_id=document_id)
+    ####
+
+
+def _fresh_process_checkdata(payload: bytes, output: Path, stem: str) -> str:
+    """Evaluate one document's checkData through a separate Python process."""
+
+    with tempfile.TemporaryDirectory(prefix="daveml-checkdata-", dir=output) as directory:
+        directory_path = Path(directory)
+        payload_path = directory_path / f"{stem}.dml"
+        report_path = directory_path / "checkdata.json"
+        payload_path.write_bytes(payload)
+        environment = dict(os.environ)
+        root = Path(__file__).resolve().parents[1]
+        environment["PYTHONPATH"] = str(root / "src")
+        subprocess.run(
+            [
+                sys.executable,
+                str(root / "tools" / "evaluate_daveml_checkdata.py"),
+                str(directory_path),
+                "--output",
+                str(report_path),
+            ],
+            cwd=root,
+            env=environment,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        if report.get("status") == "failed":
+            raise ValueError(f"fresh-process checkData evaluation failed for {stem}")
+        return "verified" if report.get("status") in {"verified", "verified_with_quarantine"} else "not_verified"
     ####
 
 
@@ -111,18 +214,19 @@ def _sha256(payload: bytes) -> str:
     ####
 
 
-def _checkdata_summary(results: object) -> dict[str, object]:
+def _checkdata_summary(results: object, vector_results: object = ()) -> dict[str, object]:
     """Summarize evaluator-backed checkData evidence without hiding quarantine."""
 
     values = list(results) if isinstance(results, tuple) else []
-    statuses = [str(getattr(result, "status", "unknown")) for result in values]
+    vector_values = list(vector_results) if isinstance(vector_results, tuple) else []
+    statuses = [str(getattr(result, "status", "unknown")) for result in values + vector_values]
     status = (
         "not_present"
         if not statuses
         else "failed"
         if "failed" in statuses
         else "verified_with_quarantine"
-        if "unsupported" in statuses
+        if "unsupported" in statuses or "quarantined" in statuses
         else "verified"
     )
     return {
@@ -130,8 +234,14 @@ def _checkdata_summary(results: object) -> dict[str, object]:
         "passed": statuses.count("passed"),
         "failed": statuses.count("failed"),
         "unsupported": statuses.count("unsupported"),
+        "quarantined": statuses.count("quarantined"),
         "status": status,
         "results": [result.to_dict() for result in values],
+        "vector_count": len(vector_values),
+        "vector_passed": sum(getattr(result, "status", "") == "passed" for result in vector_values),
+        "vector_failed": sum(getattr(result, "status", "") == "failed" for result in vector_values),
+        "vector_unsupported": sum(getattr(result, "status", "") == "unsupported" for result in vector_values),
+        "vector_results": [result.to_dict() for result in vector_values],
     }
     ####
 
@@ -148,6 +258,23 @@ def _documents_checkdata_status(documents: list[dict[str, object]]) -> str:
     if "verified" in statuses:
         return "verified"
     return "not_present"
+    ####
+
+
+def _reference_summary(ir: object) -> dict[str, int]:
+    """Summarize typed function-reference dispositions from one IR."""
+
+    semantic = getattr(ir, "semantic", {})
+    functions = semantic.get("functions", ()) if isinstance(semantic, dict) else ()
+    statuses: list[str] = []
+    for function in functions if isinstance(functions, list) else ():
+        if not isinstance(function, dict):
+            continue
+        references = function.get("references", ())
+        for reference in references if isinstance(references, list) else ():
+            if isinstance(reference, dict):
+                statuses.append(str(reference.get("status", "unknown")))
+    return {status: statuses.count(status) for status in sorted(set(statuses))}
     ####
 
 
@@ -168,11 +295,13 @@ def _run_package(package: Path, output: Path) -> int:
         document_id = source_member
         ir = build_daveml_ir(payload, document_id=document_id)
         exported = export_daveml_ir(ir)
-        fresh = build_daveml_ir(exported, document_id=document_id)
+        stem = Path(source_member).stem
+        fresh = _fresh_process_ir(exported, document_id, output, stem)
         structural_diffs = compare_daveml_ir(ir, fresh)
         numeric_diffs = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
-        stem = Path(source_member).stem
+        vector_check_results = evaluate_daveml_vector_checkdata(payload)
+        fresh_checkdata = _fresh_process_checkdata(payload, output, stem)
         (output / "canonical" / f"{stem}.ir.json").write_bytes(ir.canonical_json())
         (output / "exported" / f"{stem}.dml").write_bytes(exported)
         structural.extend({"document_id": document_id, **diff.to_dict()} for diff in structural_diffs)
@@ -181,11 +310,15 @@ def _run_package(package: Path, output: Path) -> int:
             "document_id": document_id,
             "source_member": source_member,
             "source_sha256": ir.source_sha256,
+            "ir_sha256": _sha256(ir.canonical_json()),
             "exported_sha256": _sha256(exported),
             "opaque_paths": list(ir.opaque_paths),
+            "reference_summary": _reference_summary(ir),
             "structural_diff_count": len(structural_diffs),
             "numeric_diff_count": len(numeric_diffs),
-            "checkdata": _checkdata_summary(check_results),
+            "fresh_process_reimport": "verified",
+            "fresh_process_checkdata": fresh_checkdata,
+            "checkdata": _checkdata_summary(check_results, vector_check_results),
         })
     manifest = _json_member(files, "manifest.json")
     report = {
@@ -206,12 +339,12 @@ def _run_package(package: Path, output: Path) -> int:
     }
     output.joinpath("roundtrip-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
-    return 0 if not structural and not numeric else 1
+    return 0 if not structural and not numeric and report["checkdata_status"] != "failed" else 1
     ####
 
 
-def _run_catalog(catalog_root: Path, output: Path) -> int:
-    """Cycle every normalized source and qualified package in an INBOX catalog."""
+def _run_catalog(catalog_root: Path, output: Path, summary_output: Path | None = None) -> int:
+    """Cycle every normalized source and qualified package in a canonical catalog."""
 
     normalized = sorted(catalog_root.glob("normalized/*/source.dml"))
     packages = sorted(catalog_root.glob("qualified/**/*.txair"))
@@ -226,10 +359,13 @@ def _run_catalog(catalog_root: Path, output: Path) -> int:
         payload = source.read_bytes()
         ir = build_daveml_ir(payload, document_id=source.relative_to(catalog_root).as_posix())
         exported = export_daveml_ir(ir)
-        fresh = build_daveml_ir(exported, document_id=ir.document_id)
+        fresh = _fresh_process_ir(exported, ir.document_id, output, target.name)
         structural = compare_daveml_ir(ir, fresh)
         numeric = compare_daveml_numeric(ir, fresh)
         check_results = evaluate_daveml_checkdata(payload)
+        vector_check_results = evaluate_daveml_vector_checkdata(payload)
+        fresh_checkdata = _fresh_process_checkdata(payload, output, target.name)
+        checkdata = _checkdata_summary(check_results, vector_check_results)
         (target.parent / f"{target.name}.ir.json").write_bytes(ir.canonical_json())
         (target.parent / f"{target.name}.dml").write_bytes(exported)
         source_reports.append(
@@ -238,9 +374,15 @@ def _run_catalog(catalog_root: Path, output: Path) -> int:
                 "source_sha256": ir.source_sha256,
                 "exported_sha256": _sha256(exported),
                 "opaque_paths": list(ir.opaque_paths),
+                "reference_summary": _reference_summary(ir),
                 "structural_diff_count": len(structural),
                 "numeric_diff_count": len(numeric),
-                "checkdata": _checkdata_summary(check_results),
+                "checkdata": checkdata,
+                "checkdata_status": checkdata["status"],
+                "checkdata_failed": checkdata["failed"],
+                "fresh_process_reimport": "verified",
+                "fresh_process_checkdata": fresh_checkdata,
+                "ir_sha256": _sha256(ir.canonical_json()),
             }
         )
     package_reports: list[dict[str, object]] = []
@@ -254,6 +396,12 @@ def _run_catalog(catalog_root: Path, output: Path) -> int:
                 "package": str(package.relative_to(catalog_root)),
                 "status": report.get("status"),
                 "checkdata_status": report.get("checkdata_status", "not_present"),
+                "checkdata_failed": sum(
+                    int(item.get("failed", 0))
+                    for item in report.get("documents", [])
+                    if isinstance(item, dict)
+                    and isinstance(item.get("checkdata"), dict)
+                ),
                 "document_count": len(report.get("documents", [])),
                 "structural_diff_count": len(report.get("structural_diff", [])),
                 "numeric_diff_count": len(report.get("numeric_diff", [])),
@@ -263,7 +411,13 @@ def _run_catalog(catalog_root: Path, output: Path) -> int:
             raise ValueError(f"canonical package round trip failed: {package}")
     report = {
         "status": "verified"
-        if all(item["structural_diff_count"] == 0 and item["numeric_diff_count"] == 0 for item in source_reports + package_reports)
+        if all(
+            item["structural_diff_count"] == 0
+            and item["numeric_diff_count"] == 0
+            and item.get("checkdata_status", "not_present") != "failed"
+            and item.get("checkdata_failed", 0) == 0
+            for item in source_reports + package_reports
+        )
         else "failed",
         "schema_version": "taoryx.daveml-roundtrip/v1",
         "catalog_root": str(catalog_root),
@@ -277,7 +431,12 @@ def _run_catalog(catalog_root: Path, output: Path) -> int:
             "Runtime replay and semantic graph equivalence remain separate evidence layers.",
         ],
     }
-    (output / "catalog-roundtrip-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    serialized = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    (output / "catalog-roundtrip-report.json").write_text(serialized, encoding="utf-8")
+    _write_export_manifest(output, source_reports)
+    if summary_output is not None:
+        summary_output.parent.mkdir(parents=True, exist_ok=True)
+        summary_output.write_text(serialized, encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0
 

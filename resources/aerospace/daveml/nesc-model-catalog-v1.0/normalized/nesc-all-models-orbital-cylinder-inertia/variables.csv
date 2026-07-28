@@ -1,0 +1,11 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+XIXX,bodyMomentOfInertia_Roll,kgm,,,,,500.0,,,isOutput;isStdAIAA,False,Rolling moment of inertia about the body X axis
+XIYY,bodyMomentOfInertia_Pitch,kgm,,,,,12250.0,,,isOutput;isStdAIAA,False,Pitching moment of inertia about the body Y axis
+XIZZ,bodyMomentOfInertia_Yaw,kgm,,,,,12250.0,,,isOutput;isStdAIAA,False,Yawing moment of inertia about the body Z axis
+XIZX,bodyProductOfInertia_ZX,kgm,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Z plane
+XIXY,bodyProductOfInertia_XY,kgm,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Y plane
+XIYZ,bodyProductOfInertia_YZ,kgm,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body Y-Z plane
+XMASS,totalMass,kg,,,,,1000.0,,,isOutput;isStdAIAA,False,Total mass of vehicle
+DXCG,bodyPositionOfCmWrtMrc_X,m,,,FWD,,6.0,,,isOutput;isStdAIAA,False,"Longitudinal location of the center of mass relative to the geometric center of the cylinder, positive if the CM is in front of the center"
+DYCG,bodyPositionOfCmWrtMrc_Y,m,,,RT,,0.0,,,isOutput;isStdAIAA,False,"Lateral location of the center of mass relative to the geometric center of the cylinder, positive if the CM is to the right of the center"
+DZCG,bodyPositionOfCmWrtMrc_Z,m,,,DOWN,,0.0,,,isOutput;isStdAIAA,False,"Vertical location of the center of mass relative to the geometric center of the cylinder, positive if the CM is below the center"

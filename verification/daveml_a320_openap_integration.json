@@ -1,0 +1,167 @@
+{
+  "family_id": "a320_openap_3dof",
+  "linearization": {
+    "a_matrix": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        -6.777915420896856e-08,
+        -0.001637670380695335,
+        -2.0921807826120043e-08,
+        0.0
+      ],
+      [
+        5.7501629085021655e-05,
+        0.10088531149032853,
+        0.0,
+        0.0
+      ],
+      [
+        -0.0017011419797086091,
+        295.06949350903255,
+        0.0,
+        0.0
+      ]
+    ],
+    "b_matrix": [
+      [
+        0.0,
+        230.15416657804377
+      ],
+      [
+        0.002358832430629644,
+        -0.0332350465950724
+      ],
+      [
+        -0.8318585932057809,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "control_names": [
+      "throttle_ratio",
+      "flight_path_angle_rad"
+    ],
+    "metadata": {
+      "claim_boundary": "point_mass_3dof; no rigid_body_moments",
+      "corpus_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+      "manufacturer_validated": "false",
+      "model_id": "a320-openap-3dof",
+      "package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+      "qualification_class": "derived_exact",
+      "source_exact": "true",
+      "upstream": "OpenAP 2.6.0"
+    },
+    "state_names": [
+      "altitude_m",
+      "mach",
+      "mass_kg",
+      "range_m"
+    ]
+  },
+  "model_id": "a320-openap-3dof",
+  "objectives": {
+    "advisory_objectives": 0,
+    "gate_score": 100.0,
+    "objectives": [
+      {
+        "actual": 11798.336616089597,
+        "error": 0.0,
+        "id": "thrust-margin",
+        "kind": "performance",
+        "message": null,
+        "normalized_error": 0.0,
+        "quality_normalized_error": null,
+        "severity": "required",
+        "slack": 1.0,
+        "source": "final",
+        "status": "pass",
+        "target": 0.0,
+        "time_s": null,
+        "tolerance": 1.0,
+        "unit": "N",
+        "weight": 1.0
+      }
+    ],
+    "quality_score": null,
+    "required_objectives": 1,
+    "required_passed": 1,
+    "scenario_contract_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+    "score": 100.0,
+    "score_kind": "gate_compliance_legacy",
+    "status": "pass",
+    "termination": {},
+    "worst_required_normalized_error": 0.0
+  },
+  "performance": {
+    "density_kg_m3": 0.363817166677243,
+    "drag_coefficient": 0.0274576458980491,
+    "drag_n": 32807.7165860874,
+    "dynamic_pressure_pa": 9635.87193700462,
+    "feasible": true,
+    "fuel_flow_at_throttle_kg_s": 0.692155083089858,
+    "fuel_flow_kg_s": 0.696755122612149,
+    "idle_thrust_n": 2844.88376745703,
+    "input": {
+      "altitude_m": 11000.0,
+      "flap_angle_deg": 0.0,
+      "landing_gear_extended": false,
+      "mach": 0.78,
+      "mass_kg": 60000.0,
+      "throttle_ratio": null,
+      "thrust_mode": "cruise",
+      "vertical_speed_mps": 0.0
+    },
+    "lift_coefficient": 0.492446688460403,
+    "lift_n": 588399.0,
+    "maximum_thrust_n": 44606.053202177,
+    "package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+    "qualification_class": "derived_exact",
+    "required_throttle_ratio": 0.7174806937690654,
+    "required_thrust_n": 32807.7165860874,
+    "thrust_margin_n": 11798.336616089597,
+    "thrust_n": 32807.7165860874,
+    "true_airspeed_mps": 230.154204937076
+  },
+  "provenance": {
+    "corpus_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+    "manufacturer_validated": "false",
+    "model_id": "a320-openap-3dof",
+    "package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+    "qualification_class": "derived_exact",
+    "source_exact": "true",
+    "upstream": "OpenAP 2.6.0"
+  },
+  "qualification_class": "derived_exact",
+  "schema_version": "taoryx.daveml-cli-smoke/v1",
+  "status": "verified",
+  "trim": {
+    "controls": {
+      "flight_path_angle_rad": 0.0,
+      "throttle_ratio": 0.7174806937690654
+    },
+    "residuals": {
+      "altitude_rate_mps": 0.0,
+      "axial_acceleration_mps2": 0.0
+    },
+    "state": {},
+    "success": true
+  },
+  "tuning": {
+    "inequality_values": [
+      0.0
+    ],
+    "objective": 0.692155083089858,
+    "parameters": [
+      0.7174806937690654
+    ],
+    "status": "converged"
+  }
+}

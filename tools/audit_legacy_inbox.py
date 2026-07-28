@@ -11,7 +11,6 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_INBOX = ROOT / "INBOX" / "taos_legacy_preservation_intial_work_maybe_faulty"
 DEFAULT_OUTPUT = ROOT / "metadata" / "legacy_inbox_manifest.json"
 GRAMMAR_REGISTRY = ROOT / "metadata" / "legacy_grammar_registry.json"
 
@@ -135,18 +134,21 @@ def verify_grammar_registry(inbox: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--inbox", type=Path, default=DEFAULT_INBOX)
+    parser.add_argument("--source", type=Path, help="optional preserved legacy source archive")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--verify-fixtures", action="store_true")
     args = parser.parse_args()
-    entries = inventory(args.inbox)
+    if args.source is None:
+        print("Legacy source archive is not present in the repository; retained manifest is authoritative.")
+        return 0
+    entries = inventory(args.source)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
         json.dumps(
             {
                 "format": "taoryx-legacy-inbox-manifest",
                 "schema_version": "1",
-                "source": str(args.inbox.relative_to(ROOT)),
+                "source": str(args.source.relative_to(ROOT)),
                 "entries": [asdict(entry) for entry in entries],
             },
             indent=2,
@@ -162,8 +164,8 @@ def main() -> int:
     for disposition, count in sorted(counts.items()):
         print(f"  {disposition}: {count}")
     if args.verify_fixtures:
-        verify_grammar_registry(args.inbox)
-        verify_fixture_round_trips(args.inbox)
+        verify_grammar_registry(args.source)
+        verify_fixture_round_trips(args.source)
     ####
     return 0
 ####

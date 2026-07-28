@@ -113,12 +113,12 @@ layers:
   mass_properties: {version: v1, evidence: source_bound_fixed}
   aerodynamics: {version: v1, evidence: source_checked_semantic_reconstruction}
   propulsion: {version: v1, evidence: source_checked_steady}
-  actuators: {version: pending, evidence: taoryx_engineering_assumption}
-  controllers: {version: pending, evidence: taoryx_reference_design}
-  reductions: {version: pending, evidence: derived_from_parent_plant}
+  actuators: {version: external-overlay-required-v1, evidence: no_source_actuator_dynamics}
+  controllers: {version: external-overlay-required-v1, evidence: no_source_controller_contract}
+  reductions: {version: alpha3-reduction-contract-v1, evidence: verification/daveml_alpha3_reduction_evidence.json}
   trim: {version: source-equilibrium-trim-v1, evidence: source_equilibrium_trim_verified}
-  linearization: {version: source-channel-dynamics-v1, evidence: source_channel_dynamics_verified}
-  tuning: {version: source-channel-reduced-lqr-v1, evidence: source_channel_reduced_lqr_verified}
+  linearization: {version: source-channel-dynamics-with-propulsion-v2, evidence: source_channel_full_dynamics_verified}
+  tuning: {version: source-channel-full-lqr-v2, evidence: source_channel_full_lqr_verified}
   objectives: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
   scenarios: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
 bindings:
@@ -133,4 +133,4 @@ claims:
 nonclaims:
   - production F-16 training or operational fidelity
   - actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone
-next_gate: qualify_separate_overlays_and_reductions
+next_gate: alpha3_overlay_and_reduction_equivalence

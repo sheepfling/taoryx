@@ -1,0 +1,18 @@
+{
+  "schema_version": "taoryx.a320-surrogate-assumptions/v1",
+  "model_id": "a320-openap-jsbsim-pseudo6dof",
+  "source_preservation": {
+    "openap": "preserved as pinned corpus source and derived_exact 3-DOF product",
+    "jsbsim": "preserved as pinned public approximation and rotational/control source"
+  },
+  "composition": [
+    "OpenAP owns translational drag, target normal force, thrust, fuel flow, and scalar mass schedule.",
+    "JSBSim owns approximate alpha mapping, side force, moments, and control structure.",
+    "Taoryx owns actuator policy, stability augmentation, and estimated CG/inertia rescaling."
+  ],
+  "boundaries": [
+    "No duplicated drag, thrust, or fuel contribution is permitted.",
+    "The model is not an upstream Airbus DAVE-ML package.",
+    "Generated DAVE-ML is canonical regenerated output, not source-preserving output."
+  ]
+}

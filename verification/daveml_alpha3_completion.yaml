@@ -1,0 +1,92 @@
+schema_version: 1
+registry: taoryx-daveml-alpha3-completion/v1
+claim_boundary: source-bounded research integration; not flight qualification
+source_policy:
+  canonical_root: resources/aerospace/daveml
+  temporary_roots: [INBOX, /tmp/taoryx-aerospace-data-corpus-v1.1]
+  temporary_roots_are_provenance_invalid: true
+qualification_classes: [reference_exact, derived_exact, surrogate_composite, synthetic]
+families:
+  - id: reference_f16_s119
+    parent_family: reference_f16_s119
+    qualification_class: reference_exact
+    source_parent: families/reference_f16_s119/family.yaml
+    operating_point_evidence: verification/daveml_f16_equilibrium_trim_evidence.json
+    overlays:
+      - id: f16-ideal-direct-v1
+        kind: actuator
+        artifact: families/reference_f16_s119/actuators/ideal-direct.yaml
+        status: verified_parent_regression_only
+      - id: f16-reference-first-order-v1
+        kind: actuator
+        artifact: families/reference_f16_s119/actuators/reference-first-order-v1.yaml
+        status: contract_ready
+    reductions:
+      - id: f16-point-mass-3dof-v1
+        artifact: families/reference_f16_s119/reductions/point-mass-3dof-v1.yaml
+        status: equivalence_pending
+      - id: f16-attitude-response-pseudo6dof-v1
+        artifact: families/reference_f16_s119/reductions/attitude-response-pseudo6dof-v1.yaml
+        status: equivalence_pending
+    evidence: [verification/daveml_f16_linearization_evidence.json, verification/daveml_f16_tuning_evidence.json, verification/daveml_f16_scenario_evidence.json]
+    nonclaims: [flight qualification, actuator source fidelity, production or training fidelity]
+  - id: reference_hl20_mod_k
+    parent_family: reference_hl20_mod_k
+    qualification_class: reference_exact
+    source_parent: families/reference_hl20_mod_k/family.yaml
+    operating_point_evidence: verification/daveml_hl20_trim_evidence.json
+    overlays:
+      - id: hl20-ideal-direct-v1
+        kind: actuator
+        artifact: families/reference_hl20_mod_k/actuators/ideal-direct.yaml
+        status: verified_parent_regression_only
+      - id: hl20-reference-first-order-v1
+        kind: actuator
+        artifact: families/reference_hl20_mod_k/actuators/reference-first-order-v1.yaml
+        status: contract_ready
+      - id: hl20-logical-surface-allocation-v1
+        kind: allocation
+        artifact: families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml
+        status: contract_ready
+    reductions:
+      - id: hl20-energy-glide-3dof-v1
+        artifact: families/reference_hl20_mod_k/reductions/energy-glide-3dof-v1.yaml
+        status: equivalence_pending
+      - id: hl20-attitude-response-pseudo6dof-v1
+        artifact: families/reference_hl20_mod_k/reductions/attitude-response-pseudo6dof-v1.yaml
+        status: equivalence_pending
+    evidence: [verification/daveml_hl20_linearization_evidence.json, verification/daveml_hl20_scenario_evidence.json, verification/daveml_hl20_load_evidence.json]
+    nonclaims: [controller qualification, actuator source fidelity, landing or ground-contact validation]
+  - id: reference_nesc_two_stage_rocket
+    parent_family: reference_nesc_two_stage_rocket
+    qualification_class: reference_exact
+    source_parent: families/reference_nesc_two_stage_rocket/family.yaml
+    trajectory_evidence: verification/daveml_nesc_replay_evidence.json
+    overlays: []
+    reductions:
+      - id: nesc-performance-3dof-v1
+        artifact: families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml
+        status: equivalence_pending
+      - id: nesc-attitude-response-pseudo6dof-v1
+        artifact: families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml
+        status: equivalence_pending
+    deployment:
+      artifact: families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml
+      status: verified_witness
+      child_qualification_class: synthetic
+    evidence: [verification/daveml_nesc_replay_evidence.json, verification/daveml_nesc_objectives_evidence.json]
+    nonclaims: [independent participating-simulation equivalence, active child guidance, source-exact child aerodynamics]
+  - id: a320_openap_3dof
+    parent_family: a320_openap_3dof
+    qualification_class: derived_exact
+    source_parent: families/a320_openap_3dof/collection-manifest.json
+    comparison_role: derived_exact_baseline
+    evidence: [verification/daveml_a320_openap_integration.json]
+    nonclaims: [manufacturer truth, source-exact 6-DOF, Airbus validation]
+  - id: a320_openap_jsbsim_pseudo6dof
+    parent_family: a320_openap_jsbsim_pseudo6dof
+    qualification_class: surrogate_composite
+    source_parent: families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json
+    comparison_role: surrogate_composite_comparator
+    evidence: [verification/daveml_a320_pseudo6dof_integration.json, families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json]
+    nonclaims: [manufacturer truth, source-exact 6-DOF, Airbus validation, flight qualification]

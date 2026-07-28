@@ -1,0 +1,14 @@
+{
+  "canonical_regenerated_export_available": true,
+  "disabled_contributions": [
+    "jsbsim.aerodynamic_drag",
+    "jsbsim.propulsion_thrust",
+    "jsbsim.fuel_flow"
+  ],
+  "dml_export_scope": "representative source-derived channel projections; complete composite runtime remains in the Taoryx binding",
+  "inertia_policy": "linear_mass_rescale_from_jsbsim_empty_mass",
+  "manufacturer_validated": false,
+  "qualification_class": "surrogate_composite",
+  "source_exact": false,
+  "source_preserving_export_available": false
+}

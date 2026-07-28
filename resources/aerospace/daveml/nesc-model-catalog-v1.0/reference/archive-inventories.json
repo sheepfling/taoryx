@@ -1,0 +1,14 @@
+[
+  {
+    "archive": "raw/nesc/official/All_models.zip",
+    "compressed_bytes": 1466405,
+    "member_count": 34,
+    "status": "ok"
+  },
+  {
+    "archive": "raw/nesc/official/Atmospheric_checkcases.zip",
+    "compressed_bytes": 24890355,
+    "member_count": 101,
+    "status": "ok"
+  }
+]

@@ -1,0 +1,11 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+XIXX,bodyMomentOfInertia_Roll,slugft2,,,,,0.00189422,,,isOutput;isStdAIAA,False,Rolling moment of inertia about the body X axis
+XIYY,bodyMomentOfInertia_Pitch,slugft2,,,,,0.006211019,,,isOutput;isStdAIAA,False,Pitching moment of inertia about the body Y axis
+XIZZ,bodyMomentOfInertia_Yaw,slugft2,,,,,0.007194665,,,isOutput;isStdAIAA,False,Yawing moment of inertia about the body Z axis
+XIZX,bodyProductOfInertia_ZX,slugft2,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Z plane
+XIXY,bodyProductOfInertia_XY,slugft2,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body X-Y plane
+XIYZ,bodyProductOfInertia_YZ,slugft2,,,,,0.0,,,isOutput;isStdAIAA,False,Cross-product of inertia in the body Y-Z plane
+XMASS,totalMass,slug,,,,,0.155404754,,,isOutput;isStdAIAA,False,Total mass of brick (5 lbm)
+DXCG,bodyPositionOfCmWrtMrc_X,ft,,,FWD,,0.0,,,isOutput;isStdAIAA,False,"Longitudinal location of the center of mass relative to the geometric center of the brick, positive if the CM is in front of the volumetric center"
+DYCG,bodyPositionOfCmWrtMrc_Y,ft,,,RT,,0.0,,,isOutput;isStdAIAA,False,"Longitudinal location of the center of mass relative to the geometric center of the brick, positive if the CM is to the right of the volumetric center"
+DZCG,bodyPositionOfCmWrtMrc_Z,ft,,,DOWN,,0.0,,,isOutput;isStdAIAA,False,"Vertical location of the center of mass relative to the geometric center of the brick, positive if the CM is below the volumetric center"

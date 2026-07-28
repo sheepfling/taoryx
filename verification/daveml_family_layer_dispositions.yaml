@@ -1,0 +1,90 @@
+schema_version: taoryx.daveml-family-layer-dispositions/v1
+claim_boundary: explicit DaveML source versus downstream family-library layer dispositions; not flight qualification
+families:
+  - family_id: reference_f16_s119
+    integration_record: families/reference_f16_s119/qualification/integration-record.yaml
+    layers:
+      actuators:
+        status: external_overlay_required
+        evidence: families/reference_f16_s119/qualification/integration-record.yaml
+        rationale: The promoted DAVE-ML plant exposes command channels, not physical actuator dynamics.
+      controllers:
+        status: external_overlay_required
+        evidence: families/reference_f16_s119/qualification/integration-record.yaml
+        rationale: Controller design is a Taoryx overlay and is not source-exact plant content.
+      mission:
+        status: external_overlay_required
+        evidence: families/reference_f16_s119/qualification/integration-record.yaml
+        rationale: Mission logic is outside the source package and requires a separate scenario contract.
+      reductions:
+        status: not_promoted
+        evidence: families/reference_f16_s119/qualification/integration-record.yaml
+        rationale: No reduced-order equivalence report has been promoted from the parent plant.
+  - family_id: reference_hl20_mod_k
+    integration_record: families/reference_hl20_mod_k/qualification/integration-record.yaml
+    layers:
+      actuators:
+        status: external_overlay_required
+        evidence: families/reference_hl20_mod_k/qualification/integration-record.yaml
+        rationale: The source provides direct surface inputs but no physical actuator dynamics.
+      allocation:
+        status: external_overlay_required
+        evidence: families/reference_hl20_mod_k/qualification/integration-record.yaml
+        rationale: Logical surface allocation is not declared by the authoritative aerodynamic source.
+      controllers:
+        status: not_applicable
+        evidence: families/reference_hl20_mod_k/qualification/integration-record.yaml
+        rationale: No controller is promoted from an uncontrolled source plant.
+      reductions:
+        status: not_promoted
+        evidence: families/reference_hl20_mod_k/qualification/integration-record.yaml
+        rationale: No reduced-order equivalence report has been promoted from the parent plant.
+  - family_id: reference_nesc_two_stage_rocket
+    integration_record: families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml
+    layers:
+      controllers:
+        status: not_applicable
+        evidence: families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml
+        rationale: The authoritative two-stage source is an open-loop trajectory package with no controls.
+      reductions:
+        status: not_promoted
+        evidence: families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml
+        rationale: Reduced-order rocket fidelity requires a separate comparison against the parent trajectory.
+  - family_id: a320_openap_3dof
+    integration_record: families/a320_openap_3dof/qualification/integration-record.yaml
+    layers:
+      trim:
+        status: verified
+        evidence: verification/daveml_a320_openap_integration.json
+        rationale: The derived-exact point-mass family has a reproducible reference trim.
+      tuning:
+        status: verified
+        evidence: verification/daveml_a320_openap_integration.json
+        rationale: The family exposes bounded performance tuning evidence.
+      objectives:
+        status: verified
+        evidence: verification/daveml_a320_openap_integration.json
+        rationale: The family exposes scored performance objectives.
+      controllers:
+        status: not_in_source_contract
+        evidence: families/a320_openap_3dof/qualification/integration-record.yaml
+        rationale: OpenAP performance data does not provide source-exact actuator or controller dynamics.
+  - family_id: a320_openap_jsbsim_pseudo6dof
+    integration_record: families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml
+    layers:
+      canonical_daveml_export:
+        status: verified
+        evidence: families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json
+        rationale: Taoryx-authored surrogate documents round-trip in a fresh process.
+      actuators:
+        status: verified
+        evidence: families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json
+        rationale: Bounded Taoryx actuator policy is explicitly part of the surrogate contract.
+      stability_augmentation:
+        status: verified
+        evidence: families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json
+        rationale: Bounded Taoryx stability augmentation is explicitly part of the surrogate contract.
+      full_rigidbody_6dof:
+        status: not_promoted
+        evidence: families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml
+        rationale: The current qualification is pseudo-6DOF and does not claim full rigid-body source equivalence.

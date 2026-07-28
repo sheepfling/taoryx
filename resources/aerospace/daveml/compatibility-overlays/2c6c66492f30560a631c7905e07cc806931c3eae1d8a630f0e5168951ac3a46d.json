@@ -1,0 +1,22 @@
+{
+  "overlay_version": "1.0",
+  "source_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
+  "repairs": [
+    {
+      "repair_id": "legacy-table-reference-kind",
+      "location": "/DAVEfunc/function/functionDefn/griddedTableRef",
+      "observed": {
+        "element": "griddedTableRef",
+        "attribute": "gtID",
+        "value": " CLBAlfaFlap_Table"
+      },
+      "replacement": {
+        "element": "ungriddedTableRef",
+        "attribute": "utID",
+        "value": "CLBAlfaFlap_Table"
+      },
+      "reason": "Referenced ID resolves uniquely to ungriddedTableDef",
+      "source_mutated": false
+    }
+  ]
+}

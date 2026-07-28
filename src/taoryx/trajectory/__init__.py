@@ -13,6 +13,8 @@ from ..controller_realization import (
     ControllerSchedule,
     preflight_controller_realization,
 )
+from .a320_openap import A320OpenAPEnvelopeError, A320OpenAPModel, A320OpenAPOperatingPoint, A320OpenAPResult
+from .a320_pseudo6dof import A320Pseudo6DOFModel, A320Pseudo6DOFOperatingPoint, A320Pseudo6DOFResult
 from .authority import ArbitrationResult, ControlArbitrator, ControlAuthorityError, ControlDecision
 from .catalog import FamilyCatalog, load_family_catalog
 from .collections import (
@@ -64,8 +66,21 @@ from .contracts import (
     VariantStatus,
 )
 from .daveml_atmosphere import DAVEMLAtmosphereBinding, load_daveml_atmosphere
+from .daveml_compatibility import (
+    DAVEMLCompatibilityOverlay,
+    load_compatibility_overlay,
+    load_compatibility_overlay_for_payload,
+    load_quarantine_for_payload,
+)
 from .daveml_dynamics import DAVEMLFixedWingDynamicsBinding
-from .daveml_evaluator import DAVEMLCheckResult, DAVEMLGraph, evaluate_daveml_checkdata, load_daveml_graph
+from .daveml_evaluator import (
+    DAVEMLCheckResult,
+    DAVEMLGraph,
+    DAVEMLVectorCheckResult,
+    evaluate_daveml_checkdata,
+    evaluate_daveml_vector_checkdata,
+    load_daveml_graph,
+)
 from .daveml_import import (
     DAVEMLCompositeTrimBinding,
     DAVEMLFamilyGraphBinding,
@@ -88,7 +103,17 @@ from .daveml_inertia import DAVEMLInertiaBinding
 from .daveml_replay import DAVEMLReplayReport, replay_reference_collection, replay_reference_package
 from .daveml_semantic import (
     DAVEMLIR,
+    DAVEMLCheckRecord,
+    DAVEMLCheckSignalRecord,
+    DAVEMLComponentRecord,
     DAVEMLDiff,
+    DAVEMLFunctionRecord,
+    DAVEMLOpaqueFeatureRecord,
+    DAVEMLReferenceRecord,
+    DAVEMLTableRecord,
+    DAVEMLTypedSemantic,
+    DAVEMLUnitRecord,
+    DAVEMLVariableRecord,
     build_daveml_ir,
     compare_daveml_ir,
     compare_daveml_numeric,
@@ -228,15 +253,38 @@ __all__ = [
     "replay_reference_collection",
     "replay_reference_package",
     "DAVEMLCheckResult",
+    "DAVEMLCompatibilityOverlay",
+    "DAVEMLVectorCheckResult",
     "DAVEMLAtmosphereBinding",
     "DAVEMLInertiaBinding",
     "DAVEMLFixedWingDynamicsBinding",
     "DAVEMLGraph",
     "evaluate_daveml_checkdata",
+    "evaluate_daveml_vector_checkdata",
     "load_daveml_graph",
+    "load_compatibility_overlay",
+    "load_compatibility_overlay_for_payload",
+    "load_quarantine_for_payload",
+    "A320OpenAPEnvelopeError",
+    "A320OpenAPModel",
+    "A320OpenAPOperatingPoint",
+    "A320OpenAPResult",
+    "A320Pseudo6DOFModel",
+    "A320Pseudo6DOFOperatingPoint",
+    "A320Pseudo6DOFResult",
     "load_daveml_atmosphere",
+    "DAVEMLCheckRecord",
+    "DAVEMLCheckSignalRecord",
+    "DAVEMLComponentRecord",
     "DAVEMLDiff",
+    "DAVEMLFunctionRecord",
     "DAVEMLIR",
+    "DAVEMLOpaqueFeatureRecord",
+    "DAVEMLReferenceRecord",
+    "DAVEMLTableRecord",
+    "DAVEMLTypedSemantic",
+    "DAVEMLUnitRecord",
+    "DAVEMLVariableRecord",
     "build_daveml_ir",
     "compare_daveml_ir",
     "compare_daveml_numeric",

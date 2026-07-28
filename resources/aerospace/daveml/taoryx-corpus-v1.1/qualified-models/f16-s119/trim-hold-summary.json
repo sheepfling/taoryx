@@ -1,0 +1,86 @@
+{
+  "actual_forward_distance_m": 862.1039400001551,
+  "duration_s": 5.0,
+  "expected_forward_distance_m": 862.10394,
+  "final_state": {
+    "altitude_m": 3051.9623999989376,
+    "angular_rate_body_rad_s": {
+      "x": 0.0,
+      "y": -5.2065924293201e-13,
+      "z": 0.0
+    },
+    "attitude_body_to_ned": {
+      "w": 0.9997312491305987,
+      "x": 0.0,
+      "y": 0.023182526000692153,
+      "z": 0.0
+    },
+    "position_ned_m": {
+      "x": 862.1039400001551,
+      "y": 0.0,
+      "z": 1.0635457379100196e-09
+    },
+    "time_s": 5.0,
+    "velocity_body_mps": {
+      "x": 172.2354599602363,
+      "y": 0.0,
+      "z": 7.992150327440059
+    }
+  },
+  "forward_distance_error_m": 1.5518253349000588e-10,
+  "initial_state": {
+    "altitude_m": 3051.9624000000003,
+    "angular_rate_body_rad_s": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "attitude_body_to_ned": {
+      "w": 0.99973124913056,
+      "x": 0.0,
+      "y": 0.023182526002362223,
+      "z": 0.0
+    },
+    "position_ned_m": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "time_s": 0.0,
+    "velocity_body_mps": {
+      "x": 172.23545996014465,
+      "y": 0.0,
+      "z": 7.992150327561883
+    }
+  },
+  "maximum_altitude_drift_m": 1.0627445590216666e-09,
+  "maximum_angular_rate_rad_s": 1.4081125926282345e-12,
+  "maximum_speed_drift_mps": 8.591882760811131e-11,
+  "passed": true,
+  "quaternion_endpoint_error": 1.6705197476095517e-12,
+  "sample_count": 501,
+  "step_s": 0.01,
+  "thresholds": {
+    "forward_distance_error_m": 1e-06,
+    "maximum_altitude_drift_m": 1e-05,
+    "maximum_angular_rate_rad_s": 1e-09,
+    "maximum_speed_drift_mps": 1e-06,
+    "quaternion_endpoint_error": 1e-09
+  },
+  "trim": {
+    "alpha_rad": 0.046369206000629846,
+    "converged": true,
+    "dynamic_pressure_pa": 13441.450740674618,
+    "elevator_control_ratio": 0.12970163035515778,
+    "elevator_trailing_edge_down_rad": -0.05659301237255313,
+    "iterations": 3,
+    "mach": 0.5250787165224478,
+    "mass_kg": 9298.643898518936,
+    "power_lever_angle_pct": 13.90408357542583,
+    "required_thrust_n": 10527.699366849421,
+    "residual_force_x_n": 1.901753421407193e-09,
+    "residual_force_z_n": -1.1408701539039612e-07,
+    "residual_pitch_moment_nm": -3.5625273023720933e-07,
+    "throttle_ratio": 0.1390408357542583
+  }
+}

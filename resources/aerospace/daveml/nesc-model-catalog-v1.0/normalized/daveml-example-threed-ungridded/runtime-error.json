@@ -1,0 +1,4 @@
+{
+  "error": "Function 'function-0001' uses ungridded table; only regular gridded functions are executable in v0.5.",
+  "error_type": "DaveMlUnsupportedFeatureError"
+}

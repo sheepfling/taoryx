@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "kind": "taoryx.external-resource/v1alpha1",
+  "resource_id": "nesc-model-catalog-v1.0",
+  "source_archive": {
+    "artifact": "taoryx-daveml-nesc-model-catalog-v1.0.zip",
+    "sha256": "692cafee006e98a9343e2055fd90a69f6a1ea7a79ec73b73afd5a6ee52c538b6"
+  },
+  "release_manifest": "release-manifest.json",
+  "source_documents": {
+    "root": "normalized",
+    "count": 22,
+    "ledger": "promoted-checksums.sha256"
+  },
+  "qualified_packages": [
+    {
+      "family": "reference_nesc_two_stage_rocket",
+      "path": "qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
+      "sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+      "evidence_path": "qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9-evidence.zip",
+      "evidence_sha256": "e6f096af5fe2ef7d3519eb1ca712c8f876a067f4ecaea6f91e7422f361ab65b0"
+    }
+  ],
+  "storage_policy": "committed_promoted_source_bundle",
+  "provenance_policy": "The source archive was an acquisition input; this directory is the canonical repository resource."
+}

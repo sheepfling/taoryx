@@ -1,8 +1,7 @@
 # Legacy inbox migration inventory
 
-The quarantined source at
-`INBOX/taos_legacy_preservation_intial_work_maybe_faulty/` is treated as
-research input, not as a second canonical implementation. The reproducible
+The quarantined legacy source archive is treated as research input, not as a
+second canonical implementation. The reproducible
 file-level inventory and SHA-256 record is generated at
 `metadata/legacy_inbox_manifest.json` by:
 

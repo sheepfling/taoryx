@@ -1,0 +1,2386 @@
+{
+  "breakpoints": [
+    {
+      "attributes": {
+        "bpID": "ALT_PTS",
+        "name": "Alt points",
+        "units": "ft"
+      },
+      "breakpoint_id": "ALT_PTS",
+      "description": "Altitude above sea level values for thrust tables",
+      "issues": [],
+      "name": "Alt points",
+      "units": "ft",
+      "values": [
+        0.0,
+        10000.0,
+        20000.0,
+        30000.0,
+        40000.0,
+        50000.0
+      ]
+    },
+    {
+      "attributes": {
+        "bpID": "MACH_PTS",
+        "name": "Mach points",
+        "units": "nd"
+      },
+      "breakpoint_id": "MACH_PTS",
+      "description": "Mach number values for thrust tables",
+      "issues": [],
+      "name": "Mach points",
+      "units": "nd",
+      "values": [
+        0.0,
+        0.2,
+        0.4,
+        0.6,
+        0.8,
+        1.0
+      ]
+    }
+  ],
+  "check_cases": [
+    {
+      "attributes": {
+        "name": "lower left corner of envelope, idle"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "powerLeverAngle",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "pct",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "altitudeMSL",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "mach",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "nd",
+          "value": 0.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "lower left corner of envelope, idle",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_X",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 1060.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Y",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Z",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Roll",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Pitch",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Yaw",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "lower left corner of envelope, mil power"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "powerLeverAngle",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "pct",
+          "value": 50.0
+        },
+        {
+          "attributes": {},
+          "identifier": "altitudeMSL",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "mach",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "nd",
+          "value": 0.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "lower left corner of envelope, mil power",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_X",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 12680.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Y",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Z",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Roll",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Pitch",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Yaw",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "lower left corner of envelope, max power"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "powerLeverAngle",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "pct",
+          "value": 100.0
+        },
+        {
+          "attributes": {},
+          "identifier": "altitudeMSL",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "mach",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "nd",
+          "value": 0.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "lower left corner of envelope, max power",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_X",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 20000.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Y",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Z",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Roll",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Pitch",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Yaw",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "lower RIGHT corner of envelope, max power"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "powerLeverAngle",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "pct",
+          "value": 100.0
+        },
+        {
+          "attributes": {},
+          "identifier": "altitudeMSL",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "mach",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "nd",
+          "value": 1.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "lower RIGHT corner of envelope, max power",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_X",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 28885.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Y",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Z",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Roll",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Pitch",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Yaw",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "upper corner of envelope, idle"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "powerLeverAngle",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "pct",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "altitudeMSL",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 50000.0
+        },
+        {
+          "attributes": {},
+          "identifier": "mach",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "nd",
+          "value": 1.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "upper corner of envelope, idle",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_X",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 700.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Y",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Z",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Roll",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Pitch",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Yaw",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "upper corner of envelope, mil power"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "powerLeverAngle",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "pct",
+          "value": 50.0
+        },
+        {
+          "attributes": {},
+          "identifier": "altitudeMSL",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 50000.0
+        },
+        {
+          "attributes": {},
+          "identifier": "mach",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "nd",
+          "value": 1.0
+        }
+      ],
+      "internal_values": [],
+      "issues": [],
+      "name": "upper corner of envelope, mil power",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_X",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 2310.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Y",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Z",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Roll",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Pitch",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Yaw",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "upper corner of envelope, max power"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "powerLeverAngle",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "pct",
+          "value": 100.0
+        },
+        {
+          "attributes": {},
+          "identifier": "altitudeMSL",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 50000.0
+        },
+        {
+          "attributes": {},
+          "identifier": "mach",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "nd",
+          "value": 1.0
+        }
+      ],
+      "internal_values": [
+        {
+          "attributes": {},
+          "identifier": "PWR",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 100.0
+        },
+        {
+          "attributes": {},
+          "identifier": "ALT",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 50000.0
+        },
+        {
+          "attributes": {},
+          "identifier": "RMACH",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 1.0
+        },
+        {
+          "attributes": {},
+          "identifier": "MIL_PWR",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 50.0
+        },
+        {
+          "attributes": {},
+          "identifier": "T_IDLE",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 700.0
+        },
+        {
+          "attributes": {},
+          "identifier": "T_MIL",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 2310.0
+        },
+        {
+          "attributes": {},
+          "identifier": "T_MAX",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 5057.0
+        },
+        {
+          "attributes": {},
+          "identifier": "FEX",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 5057.0
+        },
+        {
+          "attributes": {},
+          "identifier": "FEY",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "FEZ",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "TEL",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "TEM",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "TEN",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        }
+      ],
+      "issues": [],
+      "name": "upper corner of envelope, max power",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_X",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 5057.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Y",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Z",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Roll",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Pitch",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Yaw",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "middle of envelope, less than mil power"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "powerLeverAngle",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "pct",
+          "value": 42.3
+        },
+        {
+          "attributes": {},
+          "identifier": "altitudeMSL",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 23507.0
+        },
+        {
+          "attributes": {},
+          "identifier": "mach",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "nd",
+          "value": 0.625
+        }
+      ],
+      "internal_values": [
+        {
+          "attributes": {},
+          "identifier": "PWR",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 42.3
+        },
+        {
+          "attributes": {},
+          "identifier": "ALT",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 23507.0
+        },
+        {
+          "attributes": {},
+          "identifier": "RMACH",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.625
+        },
+        {
+          "attributes": {},
+          "identifier": "MIL_PWR",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 50.0
+        },
+        {
+          "attributes": {},
+          "identifier": "T_IDLE",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": -179.37848750000015
+        },
+        {
+          "attributes": {},
+          "identifier": "T_MIL",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 6320.299000000001
+        },
+        {
+          "attributes": {},
+          "identifier": "T_MAX",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 12450.615062500001
+        },
+        {
+          "attributes": {},
+          "identifier": "FEX",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 5319.3486669250005
+        },
+        {
+          "attributes": {},
+          "identifier": "FEY",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "FEZ",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "TEL",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "TEM",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "TEN",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        }
+      ],
+      "issues": [],
+      "name": "middle of envelope, less than mil power",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_X",
+          "identifier_kind": "signalName",
+          "tolerance": 0.001,
+          "units": "lbf",
+          "value": 5319.3491
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Y",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Z",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Roll",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Pitch",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Yaw",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        }
+      ],
+      "reference_id": null
+    },
+    {
+      "attributes": {
+        "name": "middle of envelope, greater than mil power"
+      },
+      "inputs": [
+        {
+          "attributes": {},
+          "identifier": "powerLeverAngle",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "pct",
+          "value": 88.3
+        },
+        {
+          "attributes": {},
+          "identifier": "altitudeMSL",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "ft",
+          "value": 33537.0
+        },
+        {
+          "attributes": {},
+          "identifier": "mach",
+          "identifier_kind": "signalName",
+          "tolerance": null,
+          "units": "nd",
+          "value": 0.895
+        }
+      ],
+      "internal_values": [
+        {
+          "attributes": {},
+          "identifier": "PWR",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 88.3
+        },
+        {
+          "attributes": {},
+          "identifier": "ALT",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 33537.0
+        },
+        {
+          "attributes": {},
+          "identifier": "RMACH",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.895
+        },
+        {
+          "attributes": {},
+          "identifier": "MIL_PWR",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 50.0
+        },
+        {
+          "attributes": {},
+          "identifier": "T_IDLE",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": -110.98638749999992
+        },
+        {
+          "attributes": {},
+          "identifier": "T_MIL",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 4919.699275
+        },
+        {
+          "attributes": {},
+          "identifier": "T_MAX",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 10636.6610975
+        },
+        {
+          "attributes": {},
+          "identifier": "FEX",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 9298.892031035
+        },
+        {
+          "attributes": {},
+          "identifier": "FEY",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "FEZ",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "TEL",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "TEM",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "TEN",
+          "identifier_kind": "varID",
+          "tolerance": null,
+          "units": null,
+          "value": 0.0
+        }
+      ],
+      "issues": [],
+      "name": "middle of envelope, greater than mil power",
+      "outputs": [
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_X",
+          "identifier_kind": "signalName",
+          "tolerance": 0.0006,
+          "units": "lbf",
+          "value": 9298.8926
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Y",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyForce_Z",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "lbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Roll",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Pitch",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        },
+        {
+          "attributes": {},
+          "identifier": "thrustBodyMoment_Yaw",
+          "identifier_kind": "signalName",
+          "tolerance": 1e-05,
+          "units": "ftlbf",
+          "value": 0.0
+        }
+      ],
+      "reference_id": null
+    }
+  ],
+  "check_data_provenance": [],
+  "container_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
+  "document_size_bytes": 29371,
+  "functions": [
+    {
+      "attributes": {
+        "name": "T_IDLE_fn"
+      },
+      "dependent_variable_id": "T_IDLE",
+      "description": "Idle thrust table lookup function",
+      "function_id": "function-0001",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "1.0",
+            "min": "0.0",
+            "varID": "RMACH"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 1.0,
+          "minimum_value": 0.0,
+          "variable_id": "RMACH"
+        },
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "50000",
+            "min": "0.0",
+            "varID": "ALT"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 50000.0,
+          "minimum_value": 0.0,
+          "variable_id": "ALT"
+        }
+      ],
+      "issues": [],
+      "name": "T_IDLE_fn",
+      "provenance": null,
+      "table_id": "T_IDLE_table",
+      "table_kind": "gridded"
+    },
+    {
+      "attributes": {
+        "name": "T_MIL_fn"
+      },
+      "dependent_variable_id": "T_MIL",
+      "description": "Military thrust table lookup function",
+      "function_id": "function-0002",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "1.0",
+            "min": "0.0",
+            "varID": "RMACH"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 1.0,
+          "minimum_value": 0.0,
+          "variable_id": "RMACH"
+        },
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "50000",
+            "min": "0.0",
+            "varID": "ALT"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 50000.0,
+          "minimum_value": 0.0,
+          "variable_id": "ALT"
+        }
+      ],
+      "issues": [],
+      "name": "T_MIL_fn",
+      "provenance": null,
+      "table_id": "T_MIL_table",
+      "table_kind": "gridded"
+    },
+    {
+      "attributes": {
+        "name": "T_MAX_fn"
+      },
+      "dependent_variable_id": "T_MAX",
+      "description": "Maximum thrust table lookup function",
+      "function_id": "function-0003",
+      "independent_variables": [
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "1.0",
+            "min": "0.0",
+            "varID": "RMACH"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 1.0,
+          "minimum_value": 0.0,
+          "variable_id": "RMACH"
+        },
+        {
+          "attributes": {
+            "extrapolate": "neither",
+            "max": "50000",
+            "min": "0.0",
+            "varID": "ALT"
+          },
+          "extrapolation": "neither",
+          "inline_breakpoints": [],
+          "interpolation": null,
+          "maximum_value": 50000.0,
+          "minimum_value": 0.0,
+          "variable_id": "ALT"
+        }
+      ],
+      "issues": [],
+      "name": "T_MAX_fn",
+      "provenance": null,
+      "table_id": "T_MAX_table",
+      "table_kind": "gridded"
+    }
+  ],
+  "gridded_tables": [
+    {
+      "attributes": {
+        "gtID": "T_IDLE_table",
+        "name": "T_IDLE table"
+      },
+      "breakpoint_ids": [
+        "MACH_PTS",
+        "ALT_PTS"
+      ],
+      "declared_id": "T_IDLE_table",
+      "description": "Idle thrust table",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "T_IDLE table",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2012-08-07",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2012-08-07"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "shape": [
+        6,
+        6
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "T_IDLE_table",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        1060.0,
+        670.0,
+        880.0,
+        1140.0,
+        1500.0,
+        1860.0,
+        635.0,
+        425.0,
+        690.0,
+        1010.0,
+        1330.0,
+        1700.0,
+        60.0,
+        25.0,
+        345.0,
+        755.0,
+        1130.0,
+        1525.0,
+        -1020.0,
+        -710.0,
+        -300.0,
+        350.0,
+        910.0,
+        1360.0,
+        -2700.0,
+        -1900.0,
+        -1300.0,
+        -247.0,
+        600.0,
+        1100.0,
+        -3600.0,
+        -1400.0,
+        -595.0,
+        -342.0,
+        -200.0,
+        700.0
+      ]
+    },
+    {
+      "attributes": {
+        "gtID": "T_MIL_table",
+        "name": "T_MIL table"
+      },
+      "breakpoint_ids": [
+        "MACH_PTS",
+        "ALT_PTS"
+      ],
+      "declared_id": "T_MIL_table",
+      "description": "Military thrust table",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "T_MIL table",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2012-08-07",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2012-08-07"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "shape": [
+        6,
+        6
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "T_MIL_table",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        12680.0,
+        9150.0,
+        6200.0,
+        3950.0,
+        2450.0,
+        1400.0,
+        12680.0,
+        9150.0,
+        6313.0,
+        4040.0,
+        2470.0,
+        1400.0,
+        12610.0,
+        9312.0,
+        6610.0,
+        4290.0,
+        2600.0,
+        1560.0,
+        12640.0,
+        9839.0,
+        7090.0,
+        4660.0,
+        2840.0,
+        1660.0,
+        12390.0,
+        10176.0,
+        7750.0,
+        5320.0,
+        3250.0,
+        1930.0,
+        11680.0,
+        9848.0,
+        8050.0,
+        6100.0,
+        3800.0,
+        2310.0
+      ]
+    },
+    {
+      "attributes": {
+        "gtID": "T_MAX_table",
+        "name": "T_MAX table"
+      },
+      "breakpoint_ids": [
+        "MACH_PTS",
+        "ALT_PTS"
+      ],
+      "declared_id": "T_MAX_table",
+      "description": "Idle thrust table",
+      "function_name": null,
+      "inline_breakpoints": [],
+      "issues": [],
+      "name": "T_MAX table",
+      "provenance": {
+        "attributes": {},
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "creation_date": "2012-08-07",
+        "description": null,
+        "document_refs": [
+          "REF01"
+        ],
+        "modification_refs": [],
+        "provenance_id": null,
+        "provenance_ref": null,
+        "raw": {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {
+                "date": "2012-08-07"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "creationDate",
+              "text": null
+            },
+            {
+              "attributes": {
+                "refID": "REF01"
+              },
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "documentRef",
+              "text": null
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "provenance",
+          "text": null
+        }
+      },
+      "shape": [
+        6,
+        6
+      ],
+      "source_kind": "top-level-definition",
+      "supplemental_nodes": [],
+      "table_id": "T_MAX_table",
+      "uncertainty": null,
+      "units": null,
+      "values": [
+        20000.0,
+        15000.0,
+        10800.0,
+        7000.0,
+        4000.0,
+        2500.0,
+        21420.0,
+        15700.0,
+        11225.0,
+        7323.0,
+        4435.0,
+        2600.0,
+        22700.0,
+        16860.0,
+        12250.0,
+        8154.0,
+        5000.0,
+        2835.0,
+        24240.0,
+        18910.0,
+        13760.0,
+        9285.0,
+        5700.0,
+        3215.3,
+        28070.0,
+        21075.0,
+        15975.0,
+        11115.0,
+        6860.0,
+        3950.0,
+        28885.0,
+        23319.0,
+        18300.0,
+        13484.0,
+        8642.0,
+        5057.0
+      ]
+    }
+  ],
+  "header": {
+    "attributes": {
+      "name": "F-16 propulsion model (a la Stevens & Lewis)"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2012-08-07",
+    "description": "A simple propulsion model for the F-16 Fighting Falcon, as described in Stevens & Lewis [01].",
+    "file_version": "Initial version",
+    "modification_records": [],
+    "name": "F-16 propulsion model (a la Stevens & Lewis)",
+    "raw": {
+      "attributes": {
+        "name": "F-16 propulsion model (a la Stevens & Lewis)"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2012-08-07"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Initial version"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "A simple propulsion model for the F-16 Fighting Falcon, as described in Stevens & Lewis [01]."
+        },
+        {
+          "attributes": {
+            "accession": "ISBN 0-471-37145-9",
+            "author": "Stevens, Brian L. and Lewis, Frank L.",
+            "date": "2003-01-01",
+            "refID": "REF01",
+            "title": "Aircraft control and Simulation, 2nd Edition"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "ISBN 0-471-37145-9",
+          "author": "Stevens, Brian L. and Lewis, Frank L.",
+          "date": "2003-01-01",
+          "refID": "REF01",
+          "title": "Aircraft control and Simulation, 2nd Edition"
+        },
+        "description": null,
+        "ref_id": "REF01"
+      }
+    ]
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/F16_package/F16_S119_source/F16_prop.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "powerLeverAngle",
+        "sign": "+INCR",
+        "units": "pct",
+        "varID": "PWR"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Throttle (power lever angle), 0 - 100. 50 is MIL (max dry) thrust; 100 is MAX (burner)",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "powerLeverAngle",
+      "provenance": null,
+      "roles": [
+        "isInput"
+      ],
+      "sign": "+INCR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "pct",
+      "variable_id": "PWR"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "altitudeMSL",
+        "sign": "+INCR",
+        "units": "ft",
+        "varID": "ALT"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Altitude above sea level",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "altitudeMSL",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+INCR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "ALT"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "mach",
+        "sign": "+INCR",
+        "units": "nd",
+        "varID": "RMACH"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Flight Mach number",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "mach",
+      "provenance": null,
+      "roles": [
+        "isInput",
+        "isStdAIAA"
+      ],
+      "sign": "+INCR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "RMACH"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "50.0",
+        "name": "milPwr",
+        "sign": "+INCR",
+        "units": "nd",
+        "varID": "MIL_PWR"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Power lever angle for military power - above this, we get afterburners",
+      "initial_value": 50.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "milPwr",
+      "provenance": null,
+      "roles": [],
+      "sign": "+INCR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "nd",
+      "variable_id": "MIL_PWR"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "idleThrust",
+        "sign": "+INCR",
+        "units": "lb",
+        "varID": "T_IDLE"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Idle thrust at current flight conditions with power at 0. Output of function table.",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "idleThrust",
+      "provenance": null,
+      "roles": [],
+      "sign": "+INCR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "lb",
+      "variable_id": "T_IDLE"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "militaryThrust",
+        "sign": "+INCR",
+        "units": "lb",
+        "varID": "T_MIL"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Max dry thrust at current flight conditions with power at 50. Output of function table.",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "militaryThrust",
+      "provenance": null,
+      "roles": [],
+      "sign": "+INCR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "lb",
+      "variable_id": "T_MIL"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "maxThrust",
+        "sign": "+INCR",
+        "units": "lb",
+        "varID": "T_MAX"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Max augmented thrust at current flight conditions with power at 100. Output of function table.",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "maxThrust",
+      "provenance": null,
+      "roles": [],
+      "sign": "+INCR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "lb",
+      "variable_id": "T_MAX"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "name": "thrustBodyForce_X",
+        "sign": "FWD",
+        "units": "lbf",
+        "varID": "FEX"
+      },
+      "axis_system": null,
+      "calculation": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "T_IDLE"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "divide",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [
+                                  {
+                                    "attributes": {},
+                                    "children": [],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "times",
+                                    "text": null
+                                  },
+                                  {
+                                    "attributes": {},
+                                    "children": [],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "ci",
+                                    "text": "PWR"
+                                  },
+                                  {
+                                    "attributes": {},
+                                    "children": [
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "minus",
+                                        "text": null
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "ci",
+                                        "text": "T_MIL"
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "ci",
+                                        "text": "T_IDLE"
+                                      }
+                                    ],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "apply",
+                                    "text": null
+                                  }
+                                ],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "apply",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "ci",
+                                "text": "MIL_PWR"
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      },
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "lt",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "PWR"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "MIL_PWR"
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "piece",
+                    "text": null
+                  },
+                  {
+                    "attributes": {},
+                    "children": [
+                      {
+                        "attributes": {},
+                        "children": [
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "plus",
+                            "text": null
+                          },
+                          {
+                            "attributes": {},
+                            "children": [],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "ci",
+                            "text": "T_MIL"
+                          },
+                          {
+                            "attributes": {},
+                            "children": [
+                              {
+                                "attributes": {},
+                                "children": [],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "divide",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [
+                                  {
+                                    "attributes": {},
+                                    "children": [],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "times",
+                                    "text": null
+                                  },
+                                  {
+                                    "attributes": {},
+                                    "children": [
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "minus",
+                                        "text": null
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "ci",
+                                        "text": "PWR"
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "ci",
+                                        "text": "MIL_PWR"
+                                      }
+                                    ],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "apply",
+                                    "text": null
+                                  },
+                                  {
+                                    "attributes": {},
+                                    "children": [
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "minus",
+                                        "text": null
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "ci",
+                                        "text": "T_MAX"
+                                      },
+                                      {
+                                        "attributes": {},
+                                        "children": [],
+                                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                                        "tag": "ci",
+                                        "text": "T_MIL"
+                                      }
+                                    ],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "apply",
+                                    "text": null
+                                  }
+                                ],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "apply",
+                                "text": null
+                              },
+                              {
+                                "attributes": {},
+                                "children": [
+                                  {
+                                    "attributes": {},
+                                    "children": [],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "minus",
+                                    "text": null
+                                  },
+                                  {
+                                    "attributes": {},
+                                    "children": [],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "cn",
+                                    "text": "100.0"
+                                  },
+                                  {
+                                    "attributes": {},
+                                    "children": [],
+                                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                                    "tag": "ci",
+                                    "text": "MIL_PWR"
+                                  }
+                                ],
+                                "namespace": "http://www.w3.org/1998/Math/MathML",
+                                "tag": "apply",
+                                "text": null
+                              }
+                            ],
+                            "namespace": "http://www.w3.org/1998/Math/MathML",
+                            "tag": "apply",
+                            "text": null
+                          }
+                        ],
+                        "namespace": "http://www.w3.org/1998/Math/MathML",
+                        "tag": "apply",
+                        "text": null
+                      }
+                    ],
+                    "namespace": "http://www.w3.org/1998/Math/MathML",
+                    "tag": "otherwise",
+                    "text": null
+                  }
+                ],
+                "namespace": "http://www.w3.org/1998/Math/MathML",
+                "tag": "piecewise",
+                "text": null
+              }
+            ],
+            "namespace": "http://www.w3.org/1998/Math/MathML",
+            "tag": "apply",
+            "text": null
+          }
+        ],
+        "namespace": "http://www.w3.org/1998/Math/MathML",
+        "tag": "math",
+        "text": null
+      },
+      "description": "Net steady-state thrust of the engine for given flight conditions, power lever angle, in the body X axis. If PWR below MIL_PWR, interpolate between T_IDLE and T_MIL. If PWR is above MIL_PWR, interpolate between T_MAX and T_MIL.",
+      "initial_value": null,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "thrustBodyForce_X",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "FWD",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "lbf",
+      "variable_id": "FEX"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "thrustBodyForce_Y",
+        "sign": "+RT",
+        "units": "lbf",
+        "varID": "FEY"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Net steady-state thrust of the engine for given flight conditions, power lever angle, in the body Y axis",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "thrustBodyForce_Y",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "+RT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "lbf",
+      "variable_id": "FEY"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "thrustBodyForce_Z",
+        "sign": "+DWN",
+        "units": "lbf",
+        "varID": "FEZ"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Net steady-state thrust of the engine for given flight conditions, power lever angle, in the body Z axis",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "thrustBodyForce_Z",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "+DWN",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "lbf",
+      "variable_id": "FEZ"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "thrustBodyMoment_Roll",
+        "sign": "+RWD",
+        "units": "ftlbf",
+        "varID": "TEL"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Net steady-state moment of the engine for given flight conditions, power lever angle, about the body X axis",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "thrustBodyMoment_Roll",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "+RWD",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ftlbf",
+      "variable_id": "TEL"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "thrustBodyMoment_Pitch",
+        "sign": "+ANU",
+        "units": "ftlbf",
+        "varID": "TEM"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Net steady-state moment of the engine for given flight conditions, power lever angle, about the body Y axis",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "thrustBodyMoment_Pitch",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "+ANU",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ftlbf",
+      "variable_id": "TEM"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "thrustBodyMoment_Yaw",
+        "sign": "+ANR",
+        "units": "ftlbf",
+        "varID": "TEN"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Net steady-state moment of the engine for given flight conditions, power lever angle, about the body Z axis",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "thrustBodyMoment_Yaw",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "+ANR",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ftlbf",
+      "variable_id": "TEN"
+    }
+  ]
+}

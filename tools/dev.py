@@ -30,7 +30,11 @@ def project_python() -> str:
 
 def run(command: list[str]) -> None:
     print("+", " ".join(command))
-    subprocess.run(command, cwd=ROOT, check=True)
+    environment = dict(os.environ)
+    source_path = str(ROOT / "src")
+    existing_path = environment.get("PYTHONPATH")
+    environment["PYTHONPATH"] = source_path if not existing_path else os.pathsep.join((source_path, existing_path))
+    subprocess.run(command, cwd=ROOT, env=environment, check=True)
     ####
 ####
 
@@ -77,13 +81,13 @@ def typecheck() -> None:
 
 
 def test() -> None:
-    run([project_python(), "-m", "pytest", "-m", "not slow and not artifact and not simple_aero"])
+    run([project_python(), "-m", "pytest", "-m", "not slow and not artifact and not simple_aero", "--basetemp", ".pytest-fast"])
     ####
 
 
 def test_all() -> None:
     """Run every pytest category, including opt-in and artifact tests."""
-    run([project_python(), "-m", "pytest", "-m", ""])
+    run([project_python(), "-m", "pytest", "-m", "", "--basetemp", ".pytest-all"])
     ####
 
 
@@ -181,6 +185,19 @@ def showcase_california_hawaii() -> None:
             str(ROOT / "examples/showcases/california_to_hawaii/run_showcase.py"),
             "--output-dir",
             "artifacts/showcases/california_to_hawaii",
+        ]
+    )
+    ####
+
+
+def showcase_hl20_low_fidelity() -> None:
+    """Run the low-fidelity HL-20 rocket-release and glide witness."""
+    run(
+        [
+            project_python(),
+            str(ROOT / "examples/showcases/hl20_california_to_hawaii/run_low_fidelity.py"),
+            "--output-dir",
+            "artifacts/showcases/hl20_california_to_hawaii/low_fidelity",
         ]
     )
     ####
@@ -467,14 +484,14 @@ def manual_corpus() -> None:
 
 def e2e() -> None:
     """Validate the bounded application-level corpus without a TAOS executable."""
-    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime and not slow and not artifact and not simple_aero"])
+    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime and not slow and not artifact and not simple_aero", "--basetemp", ".pytest-e2e"])
     run([project_python(), "-m", "tools.build_e2e_documented_coverage"])
     ####
 
 
 def e2e_all() -> None:
     """Validate every application-level case, including opt-in categories."""
-    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime"])
+    run([project_python(), "-m", "pytest", "tests/e2e", "-m", "not runtime", "--basetemp", ".pytest-e2e-all"])
     run([project_python(), "-m", "tools.build_e2e_documented_coverage"])
     ####
 
@@ -602,6 +619,21 @@ def daveml_readiness() -> None:
     ####
 
 
+def daveml_layer_dispositions() -> None:
+    """Validate explicit DAVE-ML family-library layer dispositions."""
+
+    run(
+        tool_script(
+            "validate_daveml_layer_dispositions.py",
+            "--registry",
+            "verification/daveml_family_layer_dispositions.yaml",
+            "--output",
+            "verification/daveml_family_layer_dispositions.json",
+        )
+    )
+    ####
+
+
 def daveml_trim() -> None:
     """Generate reproducible source-backed DaveML trim evidence."""
 
@@ -686,6 +718,42 @@ def daveml_nesc_replay() -> None:
     ####
 
 
+def daveml_completion_audit() -> None:
+    """Emit the requirement-level DaveML completion audit."""
+
+    run(tool_script("audit_daveml_completion.py"))
+    ####
+
+
+def daveml_showcase() -> None:
+    """Build the promoted DaveML family evidence-board packs."""
+
+    run(tool_script("build_daveml_showcase_composites.py"))
+    ####
+
+
+def daveml_operational_contracts() -> None:
+    """Validate the shared DaveML family operational contracts."""
+
+    run(tool_script("validate_daveml_operational_contracts.py"))
+    ####
+
+
+def daveml_operating_points() -> None:
+    """Validate the DaveML family operating-point catalog."""
+
+    run(tool_script("validate_daveml_operating_points.py"))
+    ####
+
+
+def daveml_alpha3_completion() -> None:
+    """Build and validate the Alpha 3 DAVE-ML completion evidence."""
+
+    run(tool_script("build_daveml_alpha3_evidence.py"))
+    run(tool_script("validate_daveml_alpha3_completion.py"))
+    ####
+
+
 def handoff() -> None:
     equation_audit()
     check()
@@ -751,6 +819,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "test-x15-catalog": test_x15_catalog,
     "test-views": test_views,
     "showcase-california-hawaii": showcase_california_hawaii,
+    "showcase-hl20-low-fidelity": showcase_hl20_low_fidelity,
     "dof-matrix": dof_matrix,
     "robustness-matrix": robustness_matrix,
     "verification-artifacts": verification_artifacts,
@@ -792,6 +861,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "all-pdfs": all_pdfs,
     "equation-audit": equation_audit,
     "daveml-readiness": daveml_readiness,
+    "daveml-layer-dispositions": daveml_layer_dispositions,
     "daveml-trim": daveml_trim,
     "daveml-atmosphere": daveml_atmosphere,
     "daveml-linearization": daveml_linearization,
@@ -804,6 +874,11 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-hl20-scenario": daveml_hl20_scenario,
     "daveml-collection-roundtrip": daveml_collection_roundtrip,
     "daveml-nesc-replay": daveml_nesc_replay,
+    "daveml-completion-audit": daveml_completion_audit,
+    "daveml-showcase": daveml_showcase,
+    "daveml-operational-contracts": daveml_operational_contracts,
+    "daveml-operating-points": daveml_operating_points,
+    "daveml-alpha3-completion": daveml_alpha3_completion,
     "handoff": handoff,
     "check": check,
     "all": check,

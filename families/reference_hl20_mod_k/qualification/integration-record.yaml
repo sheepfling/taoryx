@@ -31,11 +31,11 @@ library:
 layers:
   mass_properties: {version: separate-fixed-binding-v1, evidence: source_bound_fixed_separate_record}
   aerodynamics: {version: mod-k-v1, evidence: source_checked_exact_bytes}
-  actuators: {version: pending, evidence: taoryx_engineering_assumption}
-  allocation: {version: pending, evidence: taoryx_reference_design}
-  controller: {version: pending, evidence: taoryx_reference_design}
+  actuators: {version: external-overlay-required-v1, evidence: no_source_actuator_dynamics}
+  allocation: {version: external-overlay-required-v1, evidence: no_source_allocation_contract}
+  controller: {version: not-applicable-no-declared-controls-v1, evidence: not_applicable_no_declared_controls}
   mission: {version: source-glide-trim-smoke-v1, evidence: source_glide_trim_smoke_verified}
-  reductions: {version: pending, evidence: derived_from_parent_plant}
+  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
   linearization: {version: source-trim-residual-jacobian-v1, evidence: source_trim_residual_jacobian_verified}
   tuning: {version: not-applicable-no-declared-controls-v1, evidence: not_applicable_no_declared_controls}
 claims:
@@ -46,6 +46,6 @@ nonclaims:
   - landing gear, ground contact, flare, tire friction, or touchdown behavior
   - generic hypersonic-glider or operational spacecraft performance
 open_questions:
-  - bind seven-surface actuator and logical-allocation overlays separately
-  - qualify reductions generated from this parent plant
-next_gate: qualify_separate_overlays_and_reductions
+  - qualify the logical surface allocator as a Taoryx overlay; do not claim it is source-declared
+  - qualify reductions generated from this parent plant without introducing controller claims
+next_gate: alpha3_allocator_and_reduction_equivalence

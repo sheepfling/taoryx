@@ -24,7 +24,7 @@ problems:
     title: Simple Aero-like ballistic trajectory
     source_bundle: ../../simple_aero_v1/ballistic.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/ballistic.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/ballistic.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: Ballistic
@@ -61,7 +61,7 @@ problems:
     title: Simple Aero-like CBCR left turn
     source_bundle: ../../simple_aero_v1/cbcr.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/cbcr.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/cbcr.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: CBCR
@@ -102,7 +102,7 @@ problems:
     title: Simple Aero-like CBCR right turn
     source_bundle: ../../simple_aero_v1/cbcr.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/cbcr.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/cbcr.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: CBCR
@@ -143,7 +143,7 @@ problems:
     title: Simple Aero-like crossrange trajectory
     source_bundle: ../../simple_aero_v1/crossrange.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/crossrange.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/crossrange.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: Crossrange
@@ -182,7 +182,7 @@ problems:
     title: Simple Aero-like MARV trajectory
     source_bundle: ../../simple_aero_v1/marv.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/marv.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/marv.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: MARV
@@ -221,7 +221,7 @@ problems:
     title: Simple Aero-like phugoid trajectory
     source_bundle: ../../simple_aero_v1/phugoid.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/phugoid.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/phugoid.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: Phugoid
@@ -267,7 +267,7 @@ problems:
     title: Simple Aero-like range extension trajectory
     source_bundle: ../../simple_aero_v1/range_extension.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/range_extension.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/range_extension.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: RangeExtension
@@ -305,7 +305,7 @@ problems:
     title: Simple Aero-like skip trajectory
     source_bundle: ../../simple_aero_v1/skip.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/skip.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/skip.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: Skip
@@ -343,7 +343,7 @@ problems:
     title: Simple Aero-like slalom trajectory
     source_bundle: ../../simple_aero_v1/slalom.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/slalom.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/slalom.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: Slalom
@@ -385,7 +385,7 @@ problems:
     title: Simple Aero-like weave trajectory
     source_bundle: ../../simple_aero_v1/weave.yaml
     comments:
-      - "Synthetic TAOS trajectory translation of INBOX/simple_aero-snippet-v1/simple_aero/weave.yaml"
+      - "Synthetic TAOS trajectory translation of tests/fixtures/simple_aero_v1/weave.yaml"
       - "Working set: boost, coast-to-apogee, maneuver, terminal propnav"
     simple_aero_metadata:
       family: Weave

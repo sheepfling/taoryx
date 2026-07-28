@@ -113,6 +113,8 @@ def _validate_family(readiness_path: Path, entry: object) -> dict[str, Any]:
         name: str(entry[name])
         for name in ("trim", "linearization", "tuning", "objectives", "scenarios")
         if str(entry.get(name, "")).startswith(("pending", "source_package", "scenario_", "glide_", "trim_", "trajectory_"))
+        and not str(entry.get(name, "")).startswith("not_applicable_")
+        and not str(entry.get(name, "")).endswith("_verified")
     }
     return {
         "family_id": family_id,

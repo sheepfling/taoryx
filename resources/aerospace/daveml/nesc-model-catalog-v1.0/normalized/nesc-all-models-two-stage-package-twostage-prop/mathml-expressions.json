@@ -1,0 +1,392 @@
+[
+  {
+    "calculation": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "ci",
+                      "text": "stg1isp"
+                    },
+                    {
+                      "attributes": {},
+                      "children": [
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "gt",
+                          "text": null
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "stg1firing"
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "cn",
+                          "text": "0"
+                        }
+                      ],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "apply",
+                      "text": null
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "piece",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "ci",
+                      "text": "stg2isp"
+                    },
+                    {
+                      "attributes": {},
+                      "children": [
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "gt",
+                          "text": null
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "stg2firing"
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "cn",
+                          "text": "0"
+                        }
+                      ],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "apply",
+                      "text": null
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "piece",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "cn",
+                      "text": "0.001"
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "otherwise",
+                  "text": null
+                }
+              ],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "piecewise",
+              "text": null
+            }
+          ],
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "tag": "apply",
+          "text": null
+        }
+      ],
+      "namespace": "http://www.w3.org/1998/Math/MathML",
+      "tag": "math",
+      "text": null
+    },
+    "variable_id": "isp"
+  },
+  {
+    "calculation": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "ci",
+                      "text": "stg1maxThrust"
+                    },
+                    {
+                      "attributes": {},
+                      "children": [
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "gt",
+                          "text": null
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "stg1firing"
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "cn",
+                          "text": "0"
+                        }
+                      ],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "apply",
+                      "text": null
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "piece",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "ci",
+                      "text": "stg2maxThrust"
+                    },
+                    {
+                      "attributes": {},
+                      "children": [
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "gt",
+                          "text": null
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "stg2firing"
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "cn",
+                          "text": "0"
+                        }
+                      ],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "apply",
+                      "text": null
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "piece",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "cn",
+                      "text": "0."
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "otherwise",
+                  "text": null
+                }
+              ],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "piecewise",
+              "text": null
+            }
+          ],
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "tag": "apply",
+          "text": null
+        }
+      ],
+      "namespace": "http://www.w3.org/1998/Math/MathML",
+      "tag": "math",
+      "text": null
+    },
+    "variable_id": "thrust"
+  },
+  {
+    "calculation": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "divide",
+                          "text": null
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "thrust"
+                        },
+                        {
+                          "attributes": {},
+                          "children": [
+                            {
+                              "attributes": {},
+                              "children": [],
+                              "namespace": "http://www.w3.org/1998/Math/MathML",
+                              "tag": "times",
+                              "text": null
+                            },
+                            {
+                              "attributes": {},
+                              "children": [],
+                              "namespace": "http://www.w3.org/1998/Math/MathML",
+                              "tag": "ci",
+                              "text": "isp"
+                            },
+                            {
+                              "attributes": {},
+                              "children": [],
+                              "namespace": "http://www.w3.org/1998/Math/MathML",
+                              "tag": "cn",
+                              "text": "9.8066"
+                            }
+                          ],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "apply",
+                          "text": null
+                        }
+                      ],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "apply",
+                      "text": null
+                    },
+                    {
+                      "attributes": {},
+                      "children": [
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "gt",
+                          "text": null
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "ci",
+                          "text": "thrust"
+                        },
+                        {
+                          "attributes": {},
+                          "children": [],
+                          "namespace": "http://www.w3.org/1998/Math/MathML",
+                          "tag": "cn",
+                          "text": "0"
+                        }
+                      ],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "apply",
+                      "text": null
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "piece",
+                  "text": null
+                },
+                {
+                  "attributes": {},
+                  "children": [
+                    {
+                      "attributes": {},
+                      "children": [],
+                      "namespace": "http://www.w3.org/1998/Math/MathML",
+                      "tag": "cn",
+                      "text": "0."
+                    }
+                  ],
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "tag": "otherwise",
+                  "text": null
+                }
+              ],
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "tag": "piecewise",
+              "text": null
+            }
+          ],
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "tag": "apply",
+          "text": null
+        }
+      ],
+      "namespace": "http://www.w3.org/1998/Math/MathML",
+      "tag": "math",
+      "text": null
+    },
+    "variable_id": "mdot"
+  }
+]

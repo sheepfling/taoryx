@@ -5,7 +5,11 @@ from pathlib import Path
 import pytest
 
 from taoryx.trajectory.daveml_atmosphere import load_daveml_atmosphere
-from taoryx.trajectory.daveml_evaluator import evaluate_daveml_checkdata, load_daveml_graph
+from taoryx.trajectory.daveml_evaluator import (
+    evaluate_daveml_checkdata,
+    evaluate_daveml_vector_checkdata,
+    load_daveml_graph,
+)
 
 
 def test_official_atmosphere_binding_preserves_hash_and_normalizes_si() -> None:
@@ -77,7 +81,16 @@ def test_typed_graph_can_be_reused_for_named_outputs() -> None:
     values = graph.evaluate({"x": 0.5}, ("y",))
     assert graph.document_id == "fixture"
     assert graph.unit_for("y") is None
+    assert graph.dimension_for("y") is None
     assert values == {"y": 15.0}
+
+
+def test_typed_graph_exposes_source_dimension() -> None:
+    graph = load_daveml_graph(b'<DAVEfunc><variableDef varID="x" units="deg"/></DAVEfunc>')
+    assert graph.unit_for("x") == "deg"
+    assert graph.dimension_for("x") == "angle"
+    area = load_daveml_graph(b'<DAVEfunc><variableDef varID="s" units="f2"/></DAVEfunc>')
+    assert area.dimension_for("s") == "length^2"
 
 
 def test_typed_graph_evaluates_vector_constant_and_input() -> None:
@@ -87,6 +100,67 @@ def test_typed_graph_evaluates_vector_constant_and_input() -> None:
     assert graph.evaluate_vectors({"w": (4.0, 5.0)}, ("w",))["w"] == (4.0, 5.0)
     with pytest.raises(ValueError, match="no supported vector source"):
         graph.evaluate_vectors({}, ("w",))
+
+
+def test_typed_graph_evaluates_bounded_vector_calculations() -> None:
+    payload = b"""
+    <DAVEfunc>
+      <variableDef varID="a" initialValue="1 2 3"/>
+      <variableDef varID="b" initialValue="4 5 6"/>
+      <variableDef varID="scale" initialValue="2"/>
+      <variableDef varID="sum">
+        <calculation><math><apply><plus/><ci>a</ci><ci>b</ci></apply></math></calculation>
+      </variableDef>
+      <variableDef varID="scaled">
+        <calculation><math><apply><times/><ci>sum</ci><ci>scale</ci></apply></math></calculation>
+      </variableDef>
+    </DAVEfunc>
+    """
+    graph = load_daveml_graph(payload, document_id="vector-math")
+    assert graph.evaluate_vectors({}, ("sum", "scaled")) == {
+        "sum": (5.0, 7.0, 9.0),
+        "scaled": (10.0, 14.0, 18.0),
+    }
+
+
+def test_vector_checkdata_evaluates_typed_inputs_and_outputs() -> None:
+    payload = b"""
+    <DAVEfunc>
+      <variableDef varID="a" initialValue="1 2 3"/>
+      <variableDef varID="b" initialValue="4 5 6"/>
+      <variableDef varID="sum">
+        <calculation><math><apply><plus/><ci>a</ci><ci>b</ci></apply></math></calculation>
+      </variableDef>
+      <checkData><staticShot name="vector-sum">
+        <checkInputs><signal><signalID>a</signalID><signalValue>1 2 3</signalValue></signal></checkInputs>
+        <checkOutputs><signal><signalID>sum</signalID><signalValue>5 7 9</signalValue><tol>1e-9</tol></signal></checkOutputs>
+      </staticShot></checkData>
+    </DAVEfunc>
+    """
+    results = evaluate_daveml_vector_checkdata(payload)
+    assert results[0].status == "passed"
+    assert results[0].actual == (5.0, 7.0, 9.0)
+
+
+def test_vector_table_function_quarantine_has_stable_feature_code() -> None:
+    payload = b"""
+    <DAVEfunc>
+      <variableDef varID="x"/>
+      <variableDef varID="y" initialValue="0 0"/>
+      <function>
+        <independentVarRef varID="x"/><dependentVarRef varID="y"/>
+        <independentVarPts varID="x">0 1</independentVarPts>
+        <dependentVarPts varID="y">0 1</dependentVarPts>
+      </function>
+      <checkData><staticShot name="vector-table">
+        <checkInputs><signal><signalID>x</signalID><signalValue>0.5</signalValue></signal></checkInputs>
+        <checkOutputs><signal><signalID>y</signalID><signalValue>0.5 0.5</signalValue></signal></checkOutputs>
+      </staticShot></checkData>
+    </DAVEfunc>
+    """
+    results = evaluate_daveml_vector_checkdata(payload)
+    assert results[0].status == "unsupported"
+    assert results[0].reason_code == "vector_table_function_semantics"
 
 
 def test_regular_gridded_table_checkdata_is_evaluated() -> None:
@@ -139,9 +213,64 @@ def test_ungridded_official_table_mismatch_is_explicitly_reported() -> None:
     source = Path("resources/aerospace/daveml/official-conformance-v1/twoD_ungridded.dml")
     results = evaluate_daveml_checkdata(source.read_bytes())
     assert results
-    assert [result.status for result in results] == ["passed", "failed", "failed", "failed"]
-    assert all(result.actual is not None for result in results)
+    assert [result.status for result in results] == ["unsupported"] * 4
+    assert all(result.actual is None for result in results)
+    assert all("griddedTableRef" in (result.reason or "") for result in results)
+    assert all(result.reason_code == "legacy_table_reference_type_mismatch" for result in results)
     assert results[0].absolute_tolerance == 0.0005
+
+
+def test_typed_ungridded_reference_uses_declared_table_semantics() -> None:
+    payload = b"""
+    <DAVEfunc>
+      <variableDef varID="x" name="x"/>
+      <variableDef varID="z" name="z"/>
+      <variableDef varID="y" name="y"/>
+      <ungriddedTableDef utID="table">
+        <dataPoint>0 0 0</dataPoint>
+        <dataPoint>0 10 10</dataPoint>
+        <dataPoint>10 0 20</dataPoint>
+        <dataPoint>10 10 30</dataPoint>
+      </ungriddedTableDef>
+      <function>
+        <independentVarRef varID="x"/><independentVarRef varID="z"/>
+        <dependentVarRef varID="y"/>
+        <functionDefn><ungriddedTableRef utID="table"/></functionDefn>
+      </function>
+      <checkData><staticShot name="center">
+        <checkInputs>
+          <signal><signalID>x</signalID><signalValue>5</signalValue></signal>
+          <signal><signalID>z</signalID><signalValue>5</signalValue></signal>
+        </checkInputs>
+        <checkOutputs>
+          <signal><signalID>y</signalID><signalValue>15</signalValue></signal>
+        </checkOutputs>
+      </staticShot></checkData>
+    </DAVEfunc>
+    """
+    results = evaluate_daveml_checkdata(payload)
+    assert results[0].status == "passed"
+    assert results[0].actual == 15.0
+
+
+def test_ungridded_interpolation_rejects_queries_outside_convex_hull() -> None:
+    payload = b"""
+    <DAVEfunc>
+      <variableDef varID="x"/><variableDef varID="z"/><variableDef varID="y"/>
+      <ungriddedTableDef utID="table">
+        <dataPoint>0 0 0</dataPoint><dataPoint>0 10 10</dataPoint>
+        <dataPoint>10 0 20</dataPoint><dataPoint>10 10 30</dataPoint>
+      </ungriddedTableDef>
+      <function>
+        <independentVarRef varID="x"/><independentVarRef varID="z"/><dependentVarRef varID="y"/>
+        <functionDefn><ungriddedTableRef utID="table"/></functionDefn>
+      </function>
+    </DAVEfunc>
+    """
+    graph = load_daveml_graph(payload, document_id="hull")
+    assert graph.evaluate({"x": 5.0, "z": 5.0}, ("y",))["y"] == pytest.approx(15.0)
+    with pytest.raises(ValueError, match="outside the source convex hull"):
+        graph.evaluate({"x": -1.0, "z": 5.0}, ("y",))
 
 
 def test_official_atmosphere_checkdata_uses_named_variables_and_tolerances() -> None:

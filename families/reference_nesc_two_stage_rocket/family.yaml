@@ -109,12 +109,12 @@ layers:
   propulsion: {version: two-stage-constant-thrust-v1, evidence: source_checked_schedule}
   staging: {version: instantaneous-dry-mass-transition-v1, evidence: source_checked_acceptance}
   environment: {version: US1976-upper-continuation-v1, evidence: package_declared}
-  controllers: {version: pending, evidence: taoryx_reference_design}
-  reductions: {version: pending, evidence: derived_from_parent_plant}
-  trim: {version: scenario-regression-v1, evidence: scenario_regression_only}
+  controllers: {version: not-applicable-open-loop-v1, evidence: not_applicable_no_declared_controls}
+  reductions: {version: alpha3-reduction-contract-v1, evidence: verification/daveml_alpha3_reduction_evidence.json}
+  trim: {version: not-applicable-open-loop-v1, evidence: not_applicable_no_declared_controls}
   linearization: {version: not-applicable, evidence: not_applicable_current_rocket_contract}
   tuning: {version: not-applicable, evidence: not_applicable_current_open_loop_contract}
-  objectives: {version: trajectory-checkpoint-v1, evidence: trajectory_checkpoint_only}
+  objectives: {version: trajectory-checkpoint-objectives-v1, evidence: trajectory_checkpoint_objectives_verified}
   scenarios: {version: scenario17-runtime-v1, evidence: scenario17_runtime_replay}
 bindings:
   - bindings/canonical-observations.yaml
@@ -128,4 +128,4 @@ nonclaims:
   - independent full participating-simulation trajectory equivalence
   - perigee performance beyond the package's retained acceptance boundary
   - actuator, guidance, or launch-pad contact behavior not present in the package
-next_gate: qualify_reduced_order_rocket_and_full_trajectory_comparison
+next_gate: alpha3_full_trajectory_and_reduction_equivalence

@@ -1,0 +1,178 @@
+{
+  "catalog": "verification/daveml_operating_point_catalog.yaml",
+  "catalog_sha256": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+  "claim_boundary": "certified source-bounded operating points; not flight qualification",
+  "families": [
+    {
+      "applicability": "required",
+      "evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
+      "evidence_sha256": "400da9183034b3f5fd83c4ebcc63ceede5ae7de1729483e8352d99fca803dbf8",
+      "evidence_status": "verified",
+      "expansion_axes": [
+        "geometric_altitude_m",
+        "true_airspeed_m_s",
+        "load_factor"
+      ],
+      "family_id": "reference_f16_s119",
+      "non_applicable_reason": null,
+      "nonclaims": [
+        "flight_qualification",
+        "full_envelope_coverage"
+      ],
+      "operating_point": {
+        "geometric_altitude_m": 0.0,
+        "gravity_m_s2": 9.80665,
+        "mass_kg": 9298.64390029893,
+        "true_airspeed_m_s": 152.4
+      },
+      "point_id": "f16-sea-level-152mps",
+      "point_type": "force_moment_equilibrium",
+      "qualification_class": "reference_exact",
+      "residual": {
+        "metric": "max_residual",
+        "tolerance": 1e-06,
+        "unit": "mixed-force-moment"
+      },
+      "status": "verified"
+    },
+    {
+      "applicability": "required",
+      "evidence": "verification/daveml_hl20_trim_evidence.json",
+      "evidence_sha256": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f",
+      "evidence_status": "verified",
+      "expansion_axes": [
+        "mach",
+        "true_airspeed_f_s",
+        "alpha_deg"
+      ],
+      "family_id": "reference_hl20_mod_k",
+      "non_applicable_reason": null,
+      "nonclaims": [
+        "full_6dof_equilibrium",
+        "controller_design",
+        "flight_qualification"
+      ],
+      "operating_point": {
+        "alpha_deg": 6.457652069267908,
+        "mach": 1.0,
+        "true_airspeed_f_s": 100.0
+      },
+      "point_id": "hl20-mach1-pitch-trim",
+      "point_type": "pitch_channel_trim",
+      "qualification_class": "reference_exact",
+      "residual": {
+        "metric": "max_residual",
+        "tolerance": 1e-10,
+        "unit": "pitch_coefficient"
+      },
+      "status": "verified"
+    },
+    {
+      "applicability": "not_applicable",
+      "evidence": "verification/daveml_nesc_objectives_evidence.json",
+      "evidence_sha256": "9f35f2ebf2ea07dd695bd09800640dd833f0634220b05d23dcaa35f80adfb0e2",
+      "evidence_status": "pass",
+      "expansion_axes": [
+        "time_s",
+        "stage_event",
+        "trajectory_checkpoint"
+      ],
+      "family_id": "reference_nesc_two_stage_rocket",
+      "non_applicable_reason": "authoritative package is open-loop and declares no controls or equilibrium trim",
+      "nonclaims": [
+        "equilibrium_trim",
+        "controller_design",
+        "independent_full_trajectory_equivalence"
+      ],
+      "operating_point": {
+        "stage_schedule": "verified",
+        "time_s": 200.0
+      },
+      "point_id": "nesc-scenario17-t200s",
+      "point_type": "trajectory_checkpoint",
+      "qualification_class": "reference_exact",
+      "residual": {
+        "metric": "objective_gate_score",
+        "tolerance": 0.0,
+        "unit": "percent"
+      },
+      "status": "verified"
+    },
+    {
+      "applicability": "required",
+      "evidence": "verification/daveml_a320_openap_integration.json",
+      "evidence_sha256": "8b4c458881d566fb9bcee28312fd554b4507fb33de0a6a199a989829c9e95bec",
+      "evidence_status": "verified",
+      "expansion_axes": [
+        "altitude_m",
+        "mach",
+        "mass_kg",
+        "flap_angle_deg"
+      ],
+      "family_id": "a320_openap_3dof",
+      "non_applicable_reason": null,
+      "nonclaims": [
+        "manufacturer_truth",
+        "rigid_body_moment_equivalence",
+        "flight_qualification"
+      ],
+      "operating_point": {
+        "altitude_m": 11000.0,
+        "flap_angle_deg": 0.0,
+        "mach": 0.78,
+        "mass_kg": 60000.0,
+        "vertical_speed_mps": 0.0
+      },
+      "point_id": "a320-openap-cruise-mach078",
+      "point_type": "point_mass_level_performance",
+      "qualification_class": "derived_exact",
+      "residual": {
+        "metric": "trim.residuals.axial_acceleration_mps2",
+        "tolerance": 1e-10,
+        "unit": "m/s2"
+      },
+      "status": "verified"
+    },
+    {
+      "applicability": "required",
+      "evidence": "verification/daveml_a320_pseudo6dof_integration.json",
+      "evidence_sha256": "4f528b844b268f0388429f040195f769528a9810b3a74ed5493abd617e1e46da",
+      "evidence_status": "verified",
+      "expansion_axes": [
+        "altitude_m",
+        "mach",
+        "mass_kg",
+        "control_pulse"
+      ],
+      "family_id": "a320_openap_jsbsim_pseudo6dof",
+      "non_applicable_reason": null,
+      "nonclaims": [
+        "manufacturer_truth",
+        "source_exact_6dof",
+        "Airbus_validation",
+        "flight_qualification"
+      ],
+      "operating_point": {
+        "altitude_m": 11000.0,
+        "flap_angle_deg": 0.0,
+        "mach": 0.78,
+        "mass_kg": 60000.0,
+        "vertical_speed_mps": 0.0
+      },
+      "point_id": "a320-pseudo6dof-cruise-mach078",
+      "point_type": "pseudo_6dof_composite_performance",
+      "qualification_class": "surrogate_composite",
+      "residual": {
+        "metric": "result.performance.pitch_moment_nm",
+        "tolerance": 1e-09,
+        "unit": "N-m"
+      },
+      "status": "verified"
+    }
+  ],
+  "family_count": 5,
+  "operational_contracts_sha256": "a0375e95090bff8750f991f0db65c2ac67fa200e2c2f0c7885510c869a218751",
+  "report_type": "taoryx.daveml-operating-point-catalog/v1",
+  "schema_version": 1,
+  "status": "verified"
+}

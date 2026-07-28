@@ -1,0 +1,7 @@
+table_id,declared_id,name,function_name,source_kind,dimensions,shape,breakpoint_ids,flat_index,coordinates,value,issues
+function-0001-table,,CL table,CL,legacy-simple-function,1,[6],,0,[-4.0],0.0,
+function-0001-table,,CL table,CL,legacy-simple-function,1,[6],,1,[0.0],0.2,
+function-0001-table,,CL table,CL,legacy-simple-function,1,[6],,2,[4.0],0.4,
+function-0001-table,,CL table,CL,legacy-simple-function,1,[6],,3,[8.0],0.8,
+function-0001-table,,CL table,CL,legacy-simple-function,1,[6],,4,[12.0],1.0,
+function-0001-table,,CL table,CL,legacy-simple-function,1,[6],,5,[16.0],1.2,

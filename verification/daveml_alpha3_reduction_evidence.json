@@ -1,0 +1,227 @@
+{
+  "claim_boundary": "reductions are not promoted until parent comparison passes",
+  "equivalence_pending_count": 6,
+  "reduction_count": 6,
+  "reductions": [
+    {
+      "artifact": "families/reference_f16_s119/reductions/point-mass-3dof-v1.yaml",
+      "artifact_sha256": "85b7ae84c17aac65fb2e28f21b471ceff403ccc3b19a3eb52e5b8cfb2100864f",
+      "comparison": {
+        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "pass_rule": "parent_and_reduction_histories_must_be_compared_over_declared_in_envelope_window",
+        "required_evidence": [
+          "matched_initial_state",
+          "matched_force_channels",
+          "position_velocity_history",
+          "energy_residual"
+        ]
+      },
+      "family_id": "reference_f16_s119",
+      "omits": [
+        "attitude_dynamics",
+        "aerodynamic_moments",
+        "body_rates",
+        "actuator_dynamics"
+      ],
+      "parent": {
+        "family_id": "reference_f16_s119",
+        "fidelity": "rigid_body_6dof",
+        "manifest": "families/reference_f16_s119/family.yaml",
+        "source_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
+      },
+      "preserves": [
+        "atmosphere",
+        "gravity",
+        "mass_schedule",
+        "propulsion_thrust",
+        "aerodynamic_force_channels",
+        "trim_operating_point"
+      ],
+      "qualification_class": "derived_exact",
+      "reduction_id": "f16-point-mass-3dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "artifact": "families/reference_f16_s119/reductions/attitude-response-pseudo6dof-v1.yaml",
+      "artifact_sha256": "1f501734b04d1609f1b771edb730086ad36dbabdaf8f6d541e4000edd8a46f2f",
+      "comparison": {
+        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "pass_rule": "response_error_must_be_reported_against_parent_without_source_equivalence_claim",
+        "required_evidence": [
+          "matched_control_pulse",
+          "body_rate_history",
+          "attitude_history",
+          "bounded_response_error"
+        ]
+      },
+      "family_id": "reference_f16_s119",
+      "omits": [
+        "full_moment_balance",
+        "physical_actuator_states",
+        "source_controller_contract"
+      ],
+      "parent": {
+        "family_id": "reference_f16_s119",
+        "fidelity": "rigid_body_6dof",
+        "manifest": "families/reference_f16_s119/family.yaml",
+        "source_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
+      },
+      "preserves": [
+        "translation",
+        "quaternion_kinematics",
+        "scheduled_attitude_response",
+        "direct_control_channels"
+      ],
+      "qualification_class": "surrogate_composite",
+      "reduction_id": "f16-attitude-response-pseudo6dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "artifact": "families/reference_hl20_mod_k/reductions/energy-glide-3dof-v1.yaml",
+      "artifact_sha256": "c198a45d10a901081b245139985ac40426d2eb6440344fffed9ca66c4fd8b7d5",
+      "comparison": {
+        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "pass_rule": "reduction_must_match_parent_over_declared_glide_envelope",
+        "required_evidence": [
+          "matched_glide_trim",
+          "altitude_history",
+          "speed_history",
+          "energy_rate_history"
+        ]
+      },
+      "family_id": "reference_hl20_mod_k",
+      "omits": [
+        "attitude_dynamics",
+        "aerodynamic_moments",
+        "body_rates",
+        "physical_actuator_states"
+      ],
+      "parent": {
+        "family_id": "reference_hl20_mod_k",
+        "fidelity": "rigid_body_6dof",
+        "manifest": "families/reference_hl20_mod_k/family.yaml",
+        "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63"
+      },
+      "preserves": [
+        "atmosphere",
+        "gravity",
+        "mass_properties",
+        "aerodynamic_force_channels",
+        "energy_rate",
+        "glide_trim"
+      ],
+      "qualification_class": "derived_exact",
+      "reduction_id": "hl20-energy-glide-3dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "artifact": "families/reference_hl20_mod_k/reductions/attitude-response-pseudo6dof-v1.yaml",
+      "artifact_sha256": "f415d71871ba98ec484e403f4b62574d84f862ca16ab682c6bf66346cdba048b",
+      "comparison": {
+        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "pass_rule": "response_error_must_be_reported_against_parent_without_controller_claim",
+        "required_evidence": [
+          "matched_surface_pulse",
+          "body_rate_history",
+          "attitude_history",
+          "bounded_response_error"
+        ]
+      },
+      "family_id": "reference_hl20_mod_k",
+      "omits": [
+        "full_moment_balance",
+        "physical_actuator_states",
+        "source_controller_contract"
+      ],
+      "parent": {
+        "family_id": "reference_hl20_mod_k",
+        "fidelity": "rigid_body_6dof",
+        "manifest": "families/reference_hl20_mod_k/family.yaml",
+        "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63"
+      },
+      "preserves": [
+        "translation",
+        "quaternion_kinematics",
+        "scheduled_attitude_response",
+        "direct_surface_channels"
+      ],
+      "qualification_class": "surrogate_composite",
+      "reduction_id": "hl20-attitude-response-pseudo6dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "artifact": "families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml",
+      "artifact_sha256": "62c945252f0578fc2dd4c9adab3fb085bd39d28437efc27584004dc0f0372aeb",
+      "comparison": {
+        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "pass_rule": "reduction_must_match_parent_at_source_staging_checkpoints",
+        "required_evidence": [
+          "stage_event_times",
+          "altitude_history",
+          "velocity_history",
+          "mass_history"
+        ]
+      },
+      "family_id": "reference_nesc_two_stage_rocket",
+      "omits": [
+        "attitude_dynamics",
+        "aerodynamic_moments",
+        "body_rates"
+      ],
+      "parent": {
+        "family_id": "reference_nesc_two_stage_rocket",
+        "fidelity": "rigid_body_6dof",
+        "manifest": "families/reference_nesc_two_stage_rocket/family.yaml",
+        "source_package_sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e"
+      },
+      "preserves": [
+        "variable_mass_translation",
+        "atmosphere",
+        "gravity",
+        "aerodynamic_force_tables",
+        "propulsion_stage_schedule",
+        "staging_events"
+      ],
+      "qualification_class": "derived_exact",
+      "reduction_id": "nesc-performance-3dof-v1",
+      "status": "equivalence_pending"
+    },
+    {
+      "artifact": "families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml",
+      "artifact_sha256": "45b323dbc5ae2ad67ee17b7fcab24315325174559dd0aead51944137b2039e7d",
+      "comparison": {
+        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "pass_rule": "response_model_must_be_compared_against_parent_and_open_loop_claims_retained",
+        "required_evidence": [
+          "stage_event_times",
+          "attitude_history",
+          "body_rate_history",
+          "bounded_response_error"
+        ]
+      },
+      "family_id": "reference_nesc_two_stage_rocket",
+      "omits": [
+        "full_moment_balance",
+        "actuator_dynamics",
+        "guidance"
+      ],
+      "parent": {
+        "family_id": "reference_nesc_two_stage_rocket",
+        "fidelity": "rigid_body_6dof",
+        "manifest": "families/reference_nesc_two_stage_rocket/family.yaml",
+        "source_package_sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e"
+      },
+      "preserves": [
+        "variable_mass_translation",
+        "quaternion_kinematics",
+        "staging_events",
+        "scheduled_attitude_response"
+      ],
+      "qualification_class": "surrogate_composite",
+      "reduction_id": "nesc-attitude-response-pseudo6dof-v1",
+      "status": "equivalence_pending"
+    }
+  ],
+  "schema_version": "taoryx.daveml-alpha3-reduction-evidence/v1",
+  "status": "verified_with_known_gaps"
+}

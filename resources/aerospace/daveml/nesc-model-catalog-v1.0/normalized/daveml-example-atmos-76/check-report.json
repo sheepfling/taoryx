@@ -1,0 +1,388 @@
+{
+  "case_count": 42,
+  "cases": [
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "sea level",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "5000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "10000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "15000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "20000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "25000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "30000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "35000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "40000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "45000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "50000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "55000 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "60695 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "67257 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "73818 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "80380 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "86942 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "93503 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "100065 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "103018 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "106299 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "109580 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "112860 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "116141 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "119422 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "122703 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "125984 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "129265 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "132545 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "135826 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "139107 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "142388 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "145669 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "152230 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "160761 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "175524 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "188648 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "205052 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "221456 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "237860 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "254265 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    },
+    {
+      "clamp_events": [],
+      "error": "Unknown or ambiguous DAVE-ML signalName 'GeometricAltitude'.",
+      "internal_values": [],
+      "name": "270669 ft",
+      "outputs": [],
+      "passed": false,
+      "reference_id": null
+    }
+  ],
+  "document_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
+  "failed_count": 42,
+  "model_name": null,
+  "passed": false,
+  "passed_count": 0
+}

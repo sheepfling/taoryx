@@ -8,6 +8,11 @@ import xml.etree.ElementTree as ET
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
+from typing import Any
+
+from .daveml_compatibility import DAVEMLCompatibilityOverlay
+
+UNGRIDDED_POLICIES = frozenset({"strict_unspecified", "janus_delaunay_linear_qhull_v1", "nearest_neighbor", "user_supplied"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,6 +28,7 @@ class DAVEMLCheckResult:
     status: str
     reason: str | None = None
     absolute_tolerance: float | None = None
+    reason_code: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-safe result."""
@@ -37,6 +43,39 @@ class DAVEMLCheckResult:
             "status": self.status,
             "reason": self.reason,
             "absolute_tolerance": self.absolute_tolerance,
+            "reason_code": self.reason_code,
+        }
+        ####
+####
+
+
+@dataclass(frozen=True, slots=True)
+class DAVEMLVectorCheckResult:
+    """One evaluated vector-valued static DAVE-ML check shot."""
+
+    case_id: str
+    output_id: str
+    expected: tuple[float, ...]
+    actual: tuple[float, ...] | None
+    maximum_absolute_error: float | None
+    status: str
+    reason: str | None = None
+    absolute_tolerance: float | None = None
+    reason_code: str | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a JSON-safe vector result."""
+
+        return {
+            "case_id": self.case_id,
+            "output_id": self.output_id,
+            "expected": list(self.expected),
+            "actual": list(self.actual) if self.actual is not None else None,
+            "maximum_absolute_error": self.maximum_absolute_error,
+            "status": self.status,
+            "reason": self.reason,
+            "absolute_tolerance": self.absolute_tolerance,
+            "reason_code": self.reason_code,
         }
         ####
 ####
@@ -51,6 +90,7 @@ class DAVEMLGraph:
     variables: Mapping[str, ET.Element]
     variable_names: Mapping[str, str]
     variable_units: Mapping[str, str]
+    ungridded_policy: str = "strict_unspecified"
 
     def evaluate(self, inputs: Mapping[str, float], outputs: Sequence[str]) -> dict[str, float]:
         """Evaluate named scalar outputs against explicit graph inputs."""
@@ -69,6 +109,7 @@ class DAVEMLGraph:
                 self.functions,
                 self.variables,
                 self.variable_names,
+                self.ungridded_policy,
             )
         return result
         ####
@@ -80,12 +121,40 @@ class DAVEMLGraph:
         return self.variable_units.get(canonical_id)
         ####
 
+    def dimension_for(self, identifier: str) -> str | None:
+        """Return the deterministic dimension signature for a source unit."""
+
+        unit = self.unit_for(identifier)
+        if unit is None:
+            return None
+        dimensions = {
+            "nd": "1",
+            "deg": "angle",
+            "rad": "angle",
+            "deg_rad": "angle",
+            "rad_s": "angle/time",
+            "f_s": "length/time",
+            "ft_s": "length/time",
+            "f": "length",
+            "ft": "length",
+            "f2": "length^2",
+            "fracMAC": "1",
+            "slug": "mass",
+            "slug_ft2": "mass*length^2",
+            "lb": "force",
+            "lbf": "force",
+            "s": "time",
+            "s_rad": "time/angle",
+        }
+        return dimensions.get(unit.strip(), "unknown")
+        ####
+
     def evaluate_vectors(
         self,
         inputs: Mapping[str, Sequence[float]],
         outputs: Sequence[str],
     ) -> dict[str, tuple[float, ...]]:
-        """Evaluate vector constants and explicit vector inputs fail-closed."""
+        """Evaluate vector constants, inputs, and bounded vector calculations."""
 
         mapped_inputs: dict[str, tuple[float, ...]] = {}
         for identifier, values in inputs.items():
@@ -94,26 +163,51 @@ class DAVEMLGraph:
                 raise ValueError(f"DAVE-ML vector input {identifier!r} must be finite and non-empty")
             mapped_inputs[self.variable_names.get(identifier, identifier)] = vector
         result: dict[str, tuple[float, ...]] = {}
+        visiting: set[str] = set()
+
+        @lru_cache(maxsize=None)
+        def resolve(identifier: str) -> tuple[float, ...]:
+            canonical_id = self.variable_names.get(identifier, identifier)
+            if canonical_id in mapped_inputs:
+                return mapped_inputs[canonical_id]
+            if canonical_id in visiting:
+                raise ValueError(f"cyclic vector dependency at {canonical_id!r}")
+            visiting.add(canonical_id)
+            try:
+                variable = self.variables.get(canonical_id)
+                calculation = _first_child(variable, "calculation") if variable is not None else None
+                if calculation is not None:
+                    math_node = _first_child(calculation, "math")
+                    expression = next(iter(list(math_node)), None) if math_node is not None else None
+                    if expression is not None:
+                        return _evaluate_vector_math(expression, resolve)
+                initial = variable.attrib.get("initialValue") if variable is not None else None
+                values = _numbers(initial) if initial is not None else []
+                if len(values) >= 1 and canonical_id not in self.functions:
+                    return tuple(values)
+                raise ValueError(f"vector variable {canonical_id!r} has no supported vector source")
+            finally:
+                visiting.remove(canonical_id)
+
         for output in outputs:
             identifier = self.variable_names.get(output, output)
-            if identifier in mapped_inputs:
-                result[output] = mapped_inputs[identifier]
-                continue
-            variable = self.variables.get(identifier)
-            initial = variable.attrib.get("initialValue") if variable is not None else None
-            values = _numbers(initial) if initial is not None else []
-            if len(values) > 1 and identifier not in self.functions:
-                result[output] = tuple(values)
-                continue
-            raise ValueError(f"DAVE-ML vector output {identifier!r} has no supported vector source")
+            result[output] = resolve(identifier)
         return result
         ####
     ####
 
 
-def load_daveml_graph(payload: bytes, *, document_id: str = "daveml-document") -> DAVEMLGraph:
+def load_daveml_graph(
+    payload: bytes,
+    *,
+    document_id: str = "daveml-document",
+    ungridded_policy: str = "strict_unspecified",
+    compatibility_overlay: DAVEMLCompatibilityOverlay | None = None,
+) -> DAVEMLGraph:
     """Parse one DAVE-ML document into a reusable typed graph view."""
 
+    if ungridded_policy not in UNGRIDDED_POLICIES:
+        raise ValueError(f"unknown ungridded interpolation policy: {ungridded_policy}")
     root = ET.fromstring(payload)
     variables = {
         str(element.attrib.get("varID", "")): element
@@ -131,7 +225,14 @@ def load_daveml_graph(payload: bytes, *, document_id: str = "daveml-document") -
         for identifier, element in variables.items()
         if element.attrib.get("units")
     }
-    return DAVEMLGraph(document_id, _function_index(root), variables, variable_names, variable_units)
+    return DAVEMLGraph(
+        document_id,
+        _function_index(root, compatibility_overlay=compatibility_overlay),
+        variables,
+        variable_names,
+        variable_units,
+        ungridded_policy,
+    )
     ####
 
 
@@ -140,6 +241,9 @@ def evaluate_daveml_checkdata(
     *,
     absolute_tolerance: float = 1.0e-5,
     relative_tolerance: float = 1.0e-5,
+    ungridded_policy: str = "strict_unspecified",
+    compatibility_overlay: DAVEMLCompatibilityOverlay | None = None,
+    quarantine: Mapping[str, object] | None = None,
 ) -> tuple[DAVEMLCheckResult, ...]:
     """Evaluate supported static shots from one DAVE-ML document.
 
@@ -150,7 +254,7 @@ def evaluate_daveml_checkdata(
     if absolute_tolerance < 0.0 or relative_tolerance < 0.0:
         raise ValueError("numeric tolerances must be nonnegative")
     root = ET.fromstring(payload)
-    graph = load_daveml_graph(payload)
+    graph = load_daveml_graph(payload, ungridded_policy=ungridded_policy, compatibility_overlay=compatibility_overlay)
     variable_names = graph.variable_names
     results: list[DAVEMLCheckResult] = []
     for shot in _children_by_local(root, "checkData", recursive=True):
@@ -170,6 +274,12 @@ def evaluate_daveml_checkdata(
                 relative_error = absolute_error / max(abs(expected), 1.0e-30)
                 effective_tolerance = absolute_tolerance if declared_tolerance is None else declared_tolerance
                 status = "passed" if absolute_error <= effective_tolerance + relative_tolerance * max(abs(expected), abs(actual)) else "failed"
+                reason = None
+                reason_code = None
+                if status == "failed" and _matches_quarantine(quarantine, case_id, output_id, expected, actual, ungridded_policy):
+                    status = "quarantined"
+                    reason = str(quarantine.get("reason", "case-level compatibility quarantine")) if quarantine else None
+                    reason_code = "legacy_triangulation_ambiguity"
                 results.append(
                     DAVEMLCheckResult(
                         case_id,
@@ -179,14 +289,67 @@ def evaluate_daveml_checkdata(
                         absolute_error,
                         relative_error,
                         status,
+                        reason=reason,
                         absolute_tolerance=effective_tolerance,
+                        reason_code=reason_code,
                     )
                 )
     return tuple(results)
     ####
 
 
-def _function_index(root: ET.Element) -> dict[str, dict[str, object]]:
+def evaluate_daveml_vector_checkdata(
+    payload: bytes,
+    *,
+    absolute_tolerance: float = 1.0e-5,
+) -> tuple[DAVEMLVectorCheckResult, ...]:
+    """Evaluate vector-valued static shots through the typed vector graph."""
+
+    if absolute_tolerance < 0.0:
+        raise ValueError("numeric tolerances must be nonnegative")
+    root = ET.fromstring(payload)
+    graph = load_daveml_graph(payload)
+    results: list[DAVEMLVectorCheckResult] = []
+    for shot in _children_by_local(root, "checkData", recursive=True):
+        for case in _children_by_local(shot, "staticShot"):
+            case_id = case.attrib.get("name", "staticShot")
+            inputs = _vector_signals(case, "checkInputs")
+            for output_id, (expected, declared_tolerance) in _vector_output_signals(case).items():
+                resolved_output_id = graph.variable_names.get(output_id, output_id)
+                tolerance = absolute_tolerance if declared_tolerance is None else declared_tolerance
+                try:
+                    actual = graph.evaluate_vectors(inputs, (resolved_output_id,))[resolved_output_id]
+                except ValueError as error:
+                    reason_code = _vector_unsupported_code(graph, resolved_output_id, str(error))
+                    results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, None, None, "unsupported", str(error), tolerance, reason_code))
+                    continue
+                if len(actual) != len(expected):
+                    results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, actual, None, "failed", "vector widths differ", tolerance))
+                    continue
+                maximum_error = max(abs(left - right) for left, right in zip(actual, expected, strict=True))
+                status = "passed" if maximum_error <= tolerance else "failed"
+                results.append(DAVEMLVectorCheckResult(case_id, output_id, expected, actual, maximum_error, status, absolute_tolerance=tolerance))
+    return tuple(results)
+    ####
+
+
+def _vector_unsupported_code(graph: DAVEMLGraph, identifier: str, reason: str) -> str | None:
+    """Return a stable feature code for a quarantined vector evaluation."""
+
+    function = graph.functions.get(identifier)
+    if isinstance(function, dict) and function.get("kind") in {"grid", "ungridded", "points"}:
+        return "vector_table_function_semantics"
+    if "cyclic vector dependency" in reason:
+        return "vector_dependency_cycle"
+    return None
+    ####
+
+
+def _function_index(
+    root: ET.Element,
+    *,
+    compatibility_overlay: DAVEMLCompatibilityOverlay | None = None,
+) -> dict[str, dict[str, object]]:
     """Index supported function definitions by dependent variable ID."""
 
     breakpoints = {
@@ -232,10 +395,25 @@ def _function_index(root: ET.Element) -> dict[str, dict[str, object]]:
             if reference is not None:
                 table_id = str(reference.attrib.get("gtID", reference.attrib.get("utID", ""))).strip()
                 table = tables.get(table_id)
+                reference_kind = _local(reference.tag)
+                if (
+                    reference_kind == "griddedTableRef"
+                    and table is not None
+                    and _local(table.tag) == "ungriddedTableDef"
+                    and compatibility_overlay is not None
+                    and compatibility_overlay.permits_legacy_ungridded_reference(table_id)
+                ):
+                    reference_kind = "ungriddedTableRef"
+            else:
+                table = None
+                reference_kind = None
+        else:
+            reference_kind = None
         if table is None:
             continue
         functions[dependent[0]] = {
             "kind": "ungridded" if _local(table.tag) == "ungriddedTableDef" else "grid",
+            "reference_kind": reference_kind,
             "independent": independent,
             "table": table,
             "axes": _table_axes(table, breakpoints),
@@ -250,6 +428,7 @@ def _evaluate_variable(
     functions: Mapping[str, dict[str, object]],
     variables: Mapping[str, ET.Element],
     variable_names: Mapping[str, str],
+    ungridded_policy: str,
 ) -> float:
     """Resolve one variable through inputs, calculations, or functions."""
 
@@ -267,7 +446,7 @@ def _evaluate_variable(
             variable = variables.get(canonical_id)
             function = functions.get(canonical_id)
             if function is not None:
-                return _evaluate_function(function, resolve)
+                return _evaluate_function(function, resolve, ungridded_policy)
             calculation = _first_child(variable, "calculation") if variable is not None else None
             if calculation is not None:
                 math_node = _first_child(calculation, "math")
@@ -286,7 +465,7 @@ def _evaluate_variable(
     ####
 
 
-def _evaluate_function(function: dict[str, object], resolve: Callable[[str], float]) -> float:
+def _evaluate_function(function: dict[str, object], resolve: Callable[[str], float], ungridded_policy: str) -> float:
     """Evaluate one indexed function."""
 
     independent_values = function.get("independent", [])
@@ -307,7 +486,9 @@ def _evaluate_function(function: dict[str, object], resolve: Callable[[str], flo
     if not isinstance(table, ET.Element):
         raise ValueError("table definition is unavailable")
     if function.get("kind") == "ungridded":
-        return _ungridded(query, table)
+        if function.get("reference_kind") == "griddedTableRef":
+            raise ValueError("griddedTableRef resolves to an ungridded table; interpolation semantics are unresolved")
+        return _ungridded(query, table, policy=ungridded_policy)
     axes = function.get("axes", [])
     if not isinstance(axes, list):
         raise ValueError("table breakpoints are unavailable")
@@ -318,6 +499,63 @@ def _evaluate_function(function: dict[str, object], resolve: Callable[[str], flo
     if len(values) != expected_size:
         raise ValueError("gridded table data size does not match breakpoints")
     return _multilinear(query, axes, values)
+    ####
+
+
+def _evaluate_vector_math(
+    element: ET.Element,
+    resolve: Callable[[str], tuple[float, ...]],
+) -> tuple[float, ...]:
+    """Evaluate the bounded elementwise vector MathML subset."""
+
+    tag = _local(element.tag)
+    if tag == "ci":
+        identifier = " ".join(element.itertext()).strip()
+        if not identifier:
+            raise ValueError("MathML vector ci has no variable identifier")
+        return resolve(identifier)
+    if tag == "cn":
+        numeric_values = _numbers(" ".join(element.itertext()))
+        if len(numeric_values) != 1:
+            raise ValueError("MathML vector cn must be scalar")
+        return (numeric_values[0],)
+    if tag != "apply":
+        raise ValueError(f"unsupported vector MathML element {tag!r}")
+    children = list(element)
+    if not children:
+        raise ValueError("MathML vector apply has no operator")
+    operator = _local(children[0].tag)
+    operands = children[1:]
+    if operator not in {"plus", "minus", "times", "divide"} or not operands:
+        raise ValueError(f"unsupported vector MathML operator {operator!r}")
+    values: list[tuple[float, ...]] = [_evaluate_vector_math(child, resolve) for child in operands]
+    vector_operands = [value for value in values if len(value) > 1]
+    if not vector_operands:
+        scalar_values = [value[0] for value in values]
+        if operator == "plus":
+            return (sum(scalar_values),)
+        if operator == "minus":
+            return ((-scalar_values[0],) if len(scalar_values) == 1 else (scalar_values[0] - scalar_values[1],))
+        if operator == "times":
+            return (math.prod(scalar_values),)
+        if len(scalar_values) != 2:
+            raise ValueError("vector divide requires two operands")
+        return (scalar_values[0] / scalar_values[1],)
+    width = len(vector_operands[0])
+    if any(len(value) not in {1, width} for value in values):
+        raise ValueError("vector MathML operands have incompatible widths")
+    expanded = [value if len(value) == width else value * width for value in values]
+    if operator == "plus":
+        return tuple(sum(value[index] for value in expanded) for index in range(width))
+    if operator == "minus":
+        if len(expanded) == 1:
+            return tuple(-value for value in expanded[0])
+        return tuple(expanded[0][index] - expanded[1][index] for index in range(width))
+    if operator == "times":
+        return tuple(math.prod(value[index] for value in expanded) for index in range(width))
+    if len(expanded) != 2:
+        raise ValueError("vector divide requires two operands")
+    return tuple(expanded[0][index] / expanded[1][index] for index in range(width))
     ####
 
 
@@ -429,29 +667,91 @@ def _table_axes(table: ET.Element, breakpoints: dict[str, list[float]]) -> list[
     ####
 
 
-def _ungridded(query: list[float], table: ET.Element) -> float:
-    """Evaluate an ungridded table using slice interpolation when available."""
+def _ungridded(query: list[float], table: ET.Element, *, policy: str = "strict_unspecified") -> float:
+    """Evaluate an ungridded table with deterministic simplicial interpolation."""
 
     points = [_numbers(element.text) for element in _children_by_local(table, "dataPoint")]
     points = [point for point in points if len(point) == len(query) + 1]
     if not points:
         raise ValueError("ungridded table has no compatible data points")
-    if len(query) == 2:
-        rows: dict[float, list[tuple[float, float]]] = {}
-        for point in points:
-            rows.setdefault(point[0], []).append((point[1], point[2]))
-        if len(rows) >= 2 and all(len(row) >= 2 for row in rows.values()):
-            row_values = [(coordinate, _linear(query[1], [item[0] for item in sorted(row)], [item[1] for item in sorted(row)])) for coordinate, row in sorted(rows.items())]
-            return _linear(query[0], [item[0] for item in row_values], [item[1] for item in row_values])
-    scales = [max(point[index] for point in points) - min(point[index] for point in points) for index in range(len(query))]
-    distances: list[tuple[float, float]] = []
-    for point in points:
-        distance = math.sqrt(sum(((query[index] - point[index]) / (scales[index] or 1.0)) ** 2 for index in range(len(query))))
-        if distance == 0.0:
-            return point[-1]
-        distances.append((distance, point[-1]))
-    weights = [1.0 / distance for distance, _ in distances]
-    return sum(weight * value for weight, (_, value) in zip(weights, distances, strict=True)) / sum(weights)
+    if policy == "user_supplied":
+        raise ValueError("user_supplied interpolation requires an explicit runtime backend")
+    try:
+        import numpy as np
+        from scipy.spatial import Delaunay
+    except ImportError as error:
+        raise ValueError("ungridded interpolation requires scipy") from error
+    coordinates = np.asarray([point[:-1] for point in points], dtype=float)
+    values = np.asarray([point[-1] for point in points], dtype=float)
+    query_array = np.asarray(query, dtype=float)
+    if policy == "nearest_neighbor":
+        scales = np.ptp(coordinates, axis=0)
+        scales[scales == 0.0] = 1.0
+        normalized = (coordinates - coordinates.min(axis=0)) / scales
+        nearest = int(np.argmin(np.sum((normalized - (query_array - coordinates.min(axis=0)) / scales) ** 2, axis=1)))
+        return float(values[nearest])
+    if policy not in {"strict_unspecified", "janus_delaunay_linear_qhull_v1"}:
+        raise ValueError(f"unknown ungridded interpolation policy: {policy}")
+    scales = np.ptp(coordinates, axis=0)
+    scales[scales == 0.0] = 1.0
+    origin = coordinates.min(axis=0)
+    normalized = (coordinates - origin) / scales if policy == "janus_delaunay_linear_qhull_v1" else coordinates
+    normalized_query = (query_array - origin) / scales if policy == "janus_delaunay_linear_qhull_v1" else query_array
+    triangulation = Delaunay(normalized, qhull_options="Qbb Qc Qz Q12")
+    weights: Any
+    vertices: Any
+    if policy == "janus_delaunay_linear_qhull_v1":
+        candidates: list[tuple[tuple[int, ...], int, object]] = []
+        for candidate, transform in enumerate(triangulation.transform):
+            barycentric = transform[: len(query)] @ (normalized_query - transform[len(query)])
+            candidate_weights = np.append(barycentric, 1.0 - barycentric.sum())
+            if np.all(candidate_weights >= -1.0e-10):
+                vertices = tuple(int(item) for item in triangulation.simplices[candidate])
+                candidates.append((tuple(sorted(vertices)), candidate, candidate_weights))
+        if not candidates:
+            raise ValueError("ungridded query lies outside the source convex hull")
+        _, simplex, weights = min(candidates, key=lambda item: (item[0], item[1]))
+        vertices = triangulation.simplices[simplex]
+    else:
+        simplex = int(triangulation.find_simplex(normalized_query))
+        if simplex < 0:
+            raise ValueError("ungridded query lies outside the source convex hull")
+        transform = triangulation.transform[simplex]
+        barycentric = transform[: len(query)] @ (normalized_query - transform[len(query)])
+        weights = np.append(barycentric, 1.0 - barycentric.sum())
+        vertices = triangulation.simplices[simplex]
+    if np.any(weights < -1.0e-10):
+        raise ValueError("ungridded query lies outside the source convex hull")
+    return float(np.dot(weights, values[vertices]))
+    ####
+
+
+def _matches_quarantine(
+    quarantine: Mapping[str, object] | None,
+    case_id: str,
+    output_id: str,
+    expected: float,
+    actual: float,
+    policy: str,
+) -> bool:
+    """Match only the exact pinned case, value, and interpolation policy."""
+
+    if quarantine is None:
+        return False
+    try:
+        quarantined_expected = quarantine.get("expected")
+        quarantined_actual = quarantine.get("actual")
+        if not isinstance(quarantined_expected, (int, float)) or not isinstance(quarantined_actual, (int, float)):
+            return False
+        return (
+            quarantine.get("case_id") == case_id
+            and quarantine.get("output_id", output_id) == output_id
+            and quarantine.get("policy") == policy
+            and math.isclose(float(quarantined_expected), expected, rel_tol=0.0, abs_tol=0.0)
+            and math.isclose(float(quarantined_actual), actual, rel_tol=0.0, abs_tol=1.0e-12)
+        )
+    except (KeyError, TypeError, ValueError):
+        return False
     ####
 
 
@@ -524,6 +824,22 @@ def _signals(case: ET.Element, group: str) -> dict[str, float]:
     ####
 
 
+def _vector_signals(case: ET.Element, group: str) -> dict[str, tuple[float, ...]]:
+    """Read vector-valued static-shot inputs."""
+
+    result: dict[str, tuple[float, ...]] = {}
+    parent = _first_child(case, group)
+    if parent is None:
+        return result
+    for signal in _children_by_local(parent, "signal"):
+        identifier = _signal_identifier(signal)
+        values = _numbers(_text_of_first(signal, "signalValue"))
+        if identifier and len(values) > 1:
+            result[identifier] = tuple(values)
+    return result
+    ####
+
+
 def _output_signals(case: ET.Element) -> dict[str, tuple[float, float | None]]:
     """Read expected output values and optional source tolerances."""
 
@@ -537,6 +853,23 @@ def _output_signals(case: ET.Element) -> dict[str, tuple[float, float | None]]:
         tolerance_values = _numbers(_text_of_first(signal, "tol"))
         if identifier and len(values) == 1:
             result[identifier] = (values[0], tolerance_values[0] if len(tolerance_values) == 1 else None)
+    return result
+    ####
+
+
+def _vector_output_signals(case: ET.Element) -> dict[str, tuple[tuple[float, ...], float | None]]:
+    """Read vector-valued expected outputs and optional tolerances."""
+
+    result: dict[str, tuple[tuple[float, ...], float | None]] = {}
+    parent = _first_child(case, "checkOutputs")
+    if parent is None:
+        return result
+    for signal in _children_by_local(parent, "signal"):
+        identifier = _signal_identifier(signal)
+        values = _numbers(_text_of_first(signal, "signalValue"))
+        tolerance_values = _numbers(_text_of_first(signal, "tol"))
+        if identifier and len(values) > 1:
+            result[identifier] = (tuple(values), tolerance_values[0] if len(tolerance_values) == 1 else None)
     return result
     ####
 
@@ -596,7 +929,12 @@ def _unsupported(
 ) -> DAVEMLCheckResult:
     """Create an explicit quarantined check result."""
 
-    return DAVEMLCheckResult(case_id, output_id, expected, None, None, None, "unsupported", reason, absolute_tolerance)
+    reason_code = (
+        "legacy_table_reference_type_mismatch"
+        if "griddedTableRef resolves to an ungridded table" in reason
+        else "unsupported_scalar_graph"
+    )
+    return DAVEMLCheckResult(case_id, output_id, expected, None, None, None, "unsupported", reason, absolute_tolerance, reason_code)
     ####
 
 

@@ -1,0 +1,13 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+alpha,angleOfAttack,deg,α,,,,,,,isInput;isStdAIAA,False,"Instantaneous true angle-of-attack, in degrees"
+beta,angleOfSideslip,deg,β,,wind in right ear,,,,,isInput;isStdAIAA,False,"Instantaneous true angle-of-sideslip, in degrees"
+cbar,longitudinalReferenceLength,m,,,,,3.0,,,isOutput;isStdAIAA,False,Length of aerodynamic chord
+bspan,lateralReferencelength,m,,,,,3.0,,,isOutput;isStdAIAA,False,Length of aerodynamic span
+sref,referenceArea,m2,,,,,7.0,,,isOutput;isStdAIAA,False,Reference area of aerodynamic model
+alphaT,totalAlpha,deg,,,,,,,,,True,Total aerodynamic angle of X-axis to V-vector
+totalCoefficientOfLift,liftCoefficient,nd,,,,,,,,isOutput;isStdAIAA,False,Lift coefficient output from lookup table.
+totalCoefficientOfDrag,dragCoefficient,nd,,,,,,,,isOutput;isStdAIAA,False,Drag coefficient output from lookup table.
+aeroBodyForceCoefficient_Y,sideforceCoefficient,nd,,,,,,,,isOutput;isStdAIAA,False,Sideforce coefficient output from lookup table.
+aeroBodyMomentCoefficient_Roll,rollingMomentCoefficient,nd,,,,,0.0,,,isOutput;isStdAIAA,False,Rolling moment coefficient (hardwired to 0)
+aeroBodyMomentCoefficient_Pitch,pitchingMomentCoefficient,nd,,,,,,,,isOutput;isStdAIAA,False,Pitching moment coefficient output from lookup table.
+aeroBodyMomentCoefficient_Yaw,yawingMomentCoefficient,nd,,,,,,,,isOutput;isStdAIAA,False,Yawing moment coefficient output from lookup table.

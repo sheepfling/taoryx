@@ -1,0 +1,32 @@
+{
+  "calculation_count": 6,
+  "declared_outputs": [
+    "SWING",
+    "BSPAN",
+    "CBAR",
+    "CL",
+    "CD",
+    "CY",
+    "Cl",
+    "Cm",
+    "Cn"
+  ],
+  "document_sha256": "a5883cfbde33969296a9578ac467e06e5920c5c1dc036d9ff654e111185af31d",
+  "function_count": 0,
+  "model_name": "Example brick aerodynamic model",
+  "required_inputs": [
+    "VRW",
+    "PB",
+    "QB",
+    "RB"
+  ],
+  "topological_order": [
+    "PBO2V",
+    "QCO2V",
+    "RBO2V",
+    "Cl",
+    "Cm",
+    "Cn"
+  ],
+  "variable_count": 21
+}

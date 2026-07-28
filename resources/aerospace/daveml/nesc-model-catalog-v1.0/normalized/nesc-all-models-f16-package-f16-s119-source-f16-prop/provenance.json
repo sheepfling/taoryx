@@ -1,0 +1,113 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "e5fd7772e5c05cdac666c94febbe4cb50139418b26045affd92dbd198f2215c6",
+  "header": {
+    "attributes": {
+      "name": "F-16 propulsion model (a la Stevens & Lewis)"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2012-08-07",
+    "description": "A simple propulsion model for the F-16 Fighting Falcon, as described in Stevens & Lewis [01].",
+    "file_version": "Initial version",
+    "modification_records": [],
+    "name": "F-16 propulsion model (a la Stevens & Lewis)",
+    "raw": {
+      "attributes": {
+        "name": "F-16 propulsion model (a la Stevens & Lewis)"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2012-08-07"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Initial version"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "A simple propulsion model for the F-16 Fighting Falcon, as described in Stevens & Lewis [01]."
+        },
+        {
+          "attributes": {
+            "accession": "ISBN 0-471-37145-9",
+            "author": "Stevens, Brian L. and Lewis, Frank L.",
+            "date": "2003-01-01",
+            "refID": "REF01",
+            "title": "Aircraft control and Simulation, 2nd Edition"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "ISBN 0-471-37145-9",
+          "author": "Stevens, Brian L. and Lewis, Frank L.",
+          "date": "2003-01-01",
+          "refID": "REF01",
+          "title": "Aircraft control and Simulation, 2nd Edition"
+        },
+        "description": null,
+        "ref_id": "REF01"
+      }
+    ]
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/F16_package/F16_S119_source/F16_prop.dml"
+}

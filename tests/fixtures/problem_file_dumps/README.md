@@ -11,9 +11,9 @@ deduplication before it becomes a test fixture.
 - `simple_aero_segments/` - initial Simple Aero problem-file segment dump area
 - `simple_aero_trajectories/` - full Simple Aero-like trajectory working set
 
-The Simple Aero leaf is being organized around the observed simple-aero family
-set from `INBOX/` and can later be split into phase-specific subfixtures such
-as boost, coast, maneuver, and final pronav. That phase split is an inferred
+The Simple Aero leaf is being organized around the tracked simple-aero family
+set and can later be split into phase-specific subfixtures such as boost,
+coast, maneuver, and final pronav. That phase split is an inferred
 organization aid, not a rendered TAOS runtime model yet.
 
 The working rule is to keep each dump self-describing, provenance-aware, and

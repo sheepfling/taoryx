@@ -1,0 +1,98 @@
+[
+  {
+    "attributes": {
+      "name": "CLBASIC_func"
+    },
+    "dependent_variable_id": "CLBASIC",
+    "description": null,
+    "function_id": "function-0001",
+    "independent_variables": [
+      {
+        "attributes": {
+          "varID": "flapdef"
+        },
+        "extrapolation": null,
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": null,
+        "minimum_value": null,
+        "variable_id": "flapdef"
+      },
+      {
+        "attributes": {
+          "varID": "AOAdwp"
+        },
+        "extrapolation": null,
+        "inline_breakpoints": [],
+        "interpolation": null,
+        "maximum_value": null,
+        "minimum_value": null,
+        "variable_id": "AOAdwp"
+      }
+    ],
+    "issues": [
+      "Function 'function-0001' references unknown gridded table ' CLBAlfaFlap_Table'."
+    ],
+    "name": "CLBASIC_func",
+    "provenance": {
+      "attributes": {},
+      "authors": [
+        {
+          "attributes": {
+            "name": "Peter Grant",
+            "org": "UTIAS"
+          },
+          "email": null,
+          "name": "Peter Grant",
+          "organization": "UTIAS"
+        }
+      ],
+      "creation_date": "2006-11-01",
+      "description": null,
+      "document_refs": [
+        "PRG1"
+      ],
+      "modification_refs": [],
+      "provenance_id": null,
+      "provenance_ref": null,
+      "raw": {
+        "attributes": {},
+        "children": [
+          {
+            "attributes": {
+              "name": "Peter Grant",
+              "org": "UTIAS"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "author",
+            "text": null
+          },
+          {
+            "attributes": {
+              "date": "2006-11-01"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "functionCreationDate",
+            "text": null
+          },
+          {
+            "attributes": {
+              "refID": "PRG1"
+            },
+            "children": [],
+            "namespace": "http://daveml.org/2010/DAVEML",
+            "tag": "documentRef",
+            "text": null
+          }
+        ],
+        "namespace": "http://daveml.org/2010/DAVEML",
+        "tag": "provenance",
+        "text": null
+      }
+    },
+    "table_id": "CLBAlfaFlap_Table",
+    "table_kind": "gridded"
+  }
+]

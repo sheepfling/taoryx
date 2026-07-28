@@ -1,0 +1,12 @@
+{
+  "source_sha256": "2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d",
+  "case_id": "case 2",
+  "output_id": "CLBASIC",
+  "policy": "janus_delaunay_linear_qhull_v1",
+  "expected": 0.26,
+  "actual": 0.235,
+  "reason": "Delaunay triangulation ambiguity in legacy fixture",
+  "scope": "fixture-only",
+  "expires_on_source_change": true,
+  "expires_on_policy_change": true
+}

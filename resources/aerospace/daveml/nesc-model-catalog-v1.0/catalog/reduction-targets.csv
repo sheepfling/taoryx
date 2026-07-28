@@ -1,0 +1,27 @@
+model_id,target_tier,parent_fidelity,source_authority,status,acceptance_rule
+nesc-atmospheric-spheroid,3dof-point-mass,3dof-point-mass,NASA/NESC 2015 DAVE-ML,existing-parent,Preserve parent/source behavior over the declared reduction envelope
+nesc-atmospheric-spheroid,3t+3k1,3dof-point-mass,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-atmospheric-spheroid,6dof-rigid-body-check,3dof-point-mass,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-tumbling-brick,3t+3k2,6dof-rigid-body,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-tumbling-brick,6dof-rigid-body,6dof-rigid-body,NASA/NESC 2015 DAVE-ML,existing-parent,Preserve parent/source behavior over the declared reduction envelope
+f16-s119,3dof-performance,6dof-rigid-body,DAVE-ML examples and NASA/NESC 2015,candidate,Preserve parent/source behavior over the declared reduction envelope
+f16-s119,3t+3k1,6dof-rigid-body,DAVE-ML examples and NASA/NESC 2015,candidate,Preserve parent/source behavior over the declared reduction envelope
+f16-s119,3t+3k2,6dof-rigid-body,DAVE-ML examples and NASA/NESC 2015,candidate,Preserve parent/source behavior over the declared reduction envelope
+f16-s119,6dof-rigid-body,6dof-rigid-body,DAVE-ML examples and NASA/NESC 2015,existing-parent,Preserve parent/source behavior over the declared reduction envelope
+nesc-two-stage-rocket,3dof-variable-mass,6dof-variable-mass,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-two-stage-rocket,3t+3k1-gravity-turn,6dof-variable-mass,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-two-stage-rocket,6dof-variable-mass,6dof-variable-mass,NASA/NESC 2015 DAVE-ML,existing-parent,Preserve parent/source behavior over the declared reduction envelope
+nesc-orbital-spheroid,3dof-orbit,3dof-orbit,NASA/NESC 2015 DAVE-ML,existing-parent,Preserve parent/source behavior over the declared reduction envelope
+nesc-orbital-spheroid,3t+3k1,3dof-orbit,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-orbital-spheroid,6dof-attitude-check,3dof-orbit,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-orbital-cylinder,3dof-orbit,6dof-orbital-rigid-body,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-orbital-cylinder,3t+3k2,6dof-orbital-rigid-body,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-orbital-cylinder,6dof-orbital-rigid-body,6dof-orbital-rigid-body,NASA/NESC 2015 DAVE-ML,existing-parent,Preserve parent/source behavior over the declared reduction envelope
+nesc-international-space-station,3dof-orbit,6dof-orbital-rigid-body,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-international-space-station,3t+3k2,6dof-orbital-rigid-body,NASA/NESC 2015 DAVE-ML,candidate,Preserve parent/source behavior over the declared reduction envelope
+nesc-international-space-station,6dof-orbital-rigid-body,6dof-orbital-rigid-body,NASA/NESC 2015 DAVE-ML,existing-parent,Preserve parent/source behavior over the declared reduction envelope
+hl20-mod-k,3dof-glide,6dof-unpowered,Official DAVE-ML example plus separately attributed fixed inertial binding,candidate,Preserve parent/source behavior over the declared reduction envelope
+hl20-mod-k,3t+3k1,6dof-unpowered,Official DAVE-ML example plus separately attributed fixed inertial binding,candidate,Preserve parent/source behavior over the declared reduction envelope
+hl20-mod-k,3t+3k2,6dof-unpowered,Official DAVE-ML example plus separately attributed fixed inertial binding,candidate,Preserve parent/source behavior over the declared reduction envelope
+hl20-mod-k,6dof-unpowered,6dof-unpowered,Official DAVE-ML example plus separately attributed fixed inertial binding,existing-parent,Preserve parent/source behavior over the declared reduction envelope
+daveml-atmosphere-1976,environment-table-service,static-environment,Official DAVE-ML example,candidate,Preserve parent/source behavior over the declared reduction envelope

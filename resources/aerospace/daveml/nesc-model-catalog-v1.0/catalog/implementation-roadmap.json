@@ -1,0 +1,82 @@
+[
+  {
+    "deliverables": "Green conformance suite and portable offline schema catalog",
+    "dependencies": "Current v0.10 parser/runtime",
+    "exit_criteria": "All seven fixtures parse; all executable source checks pass; unsupported semantics are explicit",
+    "inputs": "Official DAVE-ML fixture set",
+    "milestone_id": "M0",
+    "priority": 0,
+    "scope": "Implement ungridded 2D/3D execution, DTD validation, and atmosphere check-name resolution",
+    "title": "Finish DAVE-ML conformance runtime"
+  },
+  {
+    "deliverables": "sphere.txair; brick.txair; trajectory evidence",
+    "dependencies": "M0; WGS84/J2/wind host",
+    "exit_criteria": "Atmos_01-10 accepted against reference ensembles",
+    "inputs": "NESC DAVE-ML models, initial conditions, Atmos_01-10 trajectories",
+    "milestone_id": "M1",
+    "priority": 1,
+    "scope": "Compile the two simplest NESC bodies into standalone 3-DOF and 6-DOF Taoryx packages",
+    "title": "Atmospheric spheroid and brick packages"
+  },
+  {
+    "deliverables": "versioned environment collection and output adapter",
+    "dependencies": "M1",
+    "exit_criteria": "Same environment services support atmospheric and orbital cases without model-specific forks",
+    "inputs": "NESC specifications and environmental cases",
+    "milestone_id": "M2",
+    "priority": 1,
+    "scope": "Unify geodesy, gravity, atmosphere, wind, and output conventions",
+    "title": "Canonical NESC environment services"
+  },
+  {
+    "deliverables": "three orbital .txair packages and scenario sidecars",
+    "dependencies": "M2",
+    "exit_criteria": "Orbital cases pass defined ensemble tolerances",
+    "inputs": "Orbital DAVE-ML models and Orbit_02-FULL trajectories",
+    "milestone_id": "M3",
+    "priority": 2,
+    "scope": "Add orbit translation, attitude, applied loads, gravity gradient, higher-order gravity, third bodies, and MET atmosphere",
+    "title": "Orbital spheroid, cylinder, and ISS"
+  },
+  {
+    "deliverables": "scenario-qualified F-16 collection",
+    "dependencies": "M0;M2",
+    "exit_criteria": "Subsonic cases pass; supersonic authority is separately sourced and qualified",
+    "inputs": "F-16 package and Atmos_11-16",
+    "milestone_id": "M4",
+    "priority": 2,
+    "scope": "Bind controls/GNC and reproduce trim, maneuvers, polar and dateline cases",
+    "title": "Full F-16 NESC scenario family"
+  },
+  {
+    "deliverables": "qualification report with source discrepancies retained",
+    "dependencies": "M2",
+    "exit_criteria": "State, event, mass, and orbit metrics meet declared thresholds",
+    "inputs": "Rocket v0.9 and Atmos_17 archive",
+    "milestone_id": "M5",
+    "priority": 2,
+    "scope": "Compare the existing rocket package against complete participating-simulation histories",
+    "title": "Rocket independent trajectory qualification"
+  },
+  {
+    "deliverables": "tiered model families sharing provenance and acceptance vectors",
+    "dependencies": "M4;M5",
+    "exit_criteria": "Reduced models preserve parent translational behavior within model-specific tolerances",
+    "inputs": "Qualified 6-DOF source collections",
+    "milestone_id": "M6",
+    "priority": 3,
+    "scope": "Compile 3-DOF and pseudo-6DOF reductions from F-16, HL-20, and rocket parents",
+    "title": "Generate reduced-order families"
+  },
+  {
+    "deliverables": "txcollection schema, exporter, and CI round-trip suite",
+    "dependencies": "M0-M6",
+    "exit_criteria": "Source identity or declared numerical equivalence passes across all models",
+    "inputs": "All qualified collections",
+    "milestone_id": "M7",
+    "priority": 3,
+    "scope": "Authoring collections, source-preserving export, canonical export, and numerical re-import equivalence",
+    "title": "DAVE-ML collection round trip"
+  }
+]

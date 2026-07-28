@@ -1,0 +1,65 @@
+{
+  "acceptance_layers": [
+    "source_integrity",
+    "DAVE-ML parse and semantic validation",
+    "embedded static check cases where supplied",
+    "canonical SI/frame dimensional evaluation",
+    "host-dynamics scenario execution",
+    "trajectory-family comparison"
+  ],
+  "canonical_contract": {
+    "attitude": "scalar-first body-to-navigation quaternion",
+    "body_frame": "FRD",
+    "reference_points": "explicit MRC and CG with audited moment transfer",
+    "units": "SI"
+  },
+  "component_documents": {
+    "aerodynamics": [
+      "daveml-example-f16-aero",
+      "nesc-all-models-f16-package-f16-s119-source-f16-aero"
+    ],
+    "control_mapping": [
+      "nesc-all-models-f16-package-f16-s119-source-f16-control"
+    ],
+    "guidance_navigation_control": [
+      "nesc-all-models-f16-package-f16-s119-source-f16-gnc"
+    ],
+    "mass_properties": [
+      "nesc-all-models-f16-package-f16-s119-source-f16-inertia"
+    ],
+    "propulsion": [
+      "nesc-all-models-f16-package-f16-s119-source-f16-prop"
+    ]
+  },
+  "display_name": "F-16 S-119",
+  "host_capabilities": [
+    "US1976",
+    "WGS84",
+    "J2",
+    "trim",
+    "control-law host"
+  ],
+  "known_gaps": "NESC scenario-family qualification remains; supersonic Case 12 requires a separately qualified supersonic aero path",
+  "model_id": "f16-s119",
+  "qualification_status": "qualified-subsonic-baseline",
+  "qualified_package": "qualified/f16-s119-reference-v0.7.txair",
+  "scenario_ids": [
+    "Atmos_11",
+    "Atmos_12",
+    "Atmos_13p1",
+    "Atmos_13p2",
+    "Atmos_13p3",
+    "Atmos_13p4",
+    "Atmos_15",
+    "Atmos_16"
+  ],
+  "schema_version": "1.0",
+  "source_authority": "DAVE-ML examples and NASA/NESC 2015",
+  "stateful_sidecar_required": true,
+  "target_fidelities": [
+    "3dof-performance",
+    "3t+3k1",
+    "3t+3k2",
+    "6dof-rigid-body"
+  ]
+}

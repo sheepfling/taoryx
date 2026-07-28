@@ -1,0 +1,8 @@
+fixture_id,source_file,feature_under_test,parse_status,compile_status,check_status,check_case_count,taoryx_role,remaining_gap
+simple-aero,raw/daveml/examples/simple_aero.dml,legacy one-dimensional gridded table,passed,passed,no_cases,0,import/export conformance,None beyond round-trip/export qualification
+twod-table,raw/daveml/examples/twod_table.dml,two-dimensional regular gridded table,passed,passed,no_cases,0,import/export conformance,None beyond round-trip/export qualification
+twod-ungridded,raw/daveml/examples/twod_ungridded.dml,two-dimensional partially nonorthogonal ungridded table,passed,failed,not_attempted,4,import/export conformance,Implement named ungridded interpolation policy
+threed-ungridded,raw/daveml/examples/threed_ungridded.dml,three-dimensional scattered aerodynamic point cloud,passed,failed,not_attempted,0,import/export conformance,Implement named ungridded interpolation policy
+atmos-76,raw/daveml/examples/atmos_76.dml,large one-dimensional atmosphere tables and embedded check cases,passed,passed,failed,42,import/export conformance,None beyond round-trip/export qualification
+f16-aero,raw/daveml/examples/f16_aero.dml,nonlinear multi-table aerodynamic model with MathML and check cases,passed,passed,passed,17,import/export conformance,None beyond round-trip/export qualification
+hl20-aero,raw/daveml/examples/hl20_aero.dml,"large shared-table polynomial buildup, controls, damping, and check cases",passed,passed,passed,24,import/export conformance,None beyond round-trip/export qualification

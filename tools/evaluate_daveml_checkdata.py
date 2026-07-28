@@ -6,7 +6,8 @@ import argparse
 import json
 from pathlib import Path
 
-from taoryx.trajectory.daveml_evaluator import evaluate_daveml_checkdata
+from taoryx.trajectory import load_compatibility_overlay_for_payload, load_quarantine_for_payload
+from taoryx.trajectory.daveml_evaluator import evaluate_daveml_checkdata, evaluate_daveml_vector_checkdata
 
 
 def main() -> int:
@@ -15,10 +16,30 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source_dir", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--ungridded-policy",
+        choices=("strict_unspecified", "janus_delaunay_linear_qhull_v1", "nearest_neighbor", "user_supplied"),
+        default="strict_unspecified",
+    )
+    parser.add_argument("--compatibility-overlay-dir", type=Path)
+    parser.add_argument("--quarantine-dir", type=Path)
     arguments = parser.parse_args()
     documents: list[dict[str, object]] = []
     for source in sorted(arguments.source_dir.glob("*.dml")):
-        results = evaluate_daveml_checkdata(source.read_bytes())
+        payload = source.read_bytes()
+        overlay = load_compatibility_overlay_for_payload(payload, arguments.compatibility_overlay_dir) if arguments.compatibility_overlay_dir else None
+        quarantine = (
+            load_quarantine_for_payload(payload, arguments.quarantine_dir, arguments.ungridded_policy)
+            if arguments.quarantine_dir
+            else None
+        )
+        results = evaluate_daveml_checkdata(
+            payload,
+            ungridded_policy=arguments.ungridded_policy,
+            compatibility_overlay=overlay,
+            quarantine=quarantine,
+        )
+        vector_results = evaluate_daveml_vector_checkdata(payload)
         documents.append(
             {
                 "document": source.name,
@@ -26,14 +47,23 @@ def main() -> int:
                 "passed": sum(result.status == "passed" for result in results),
                 "failed": sum(result.status == "failed" for result in results),
                 "unsupported": sum(result.status == "unsupported" for result in results),
+                "quarantined": sum(result.status == "quarantined" for result in results),
                 "checks": [result.to_dict() for result in results],
+                "vector_check_count": len(vector_results),
+                "vector_passed": sum(result.status == "passed" for result in vector_results),
+                "vector_failed": sum(result.status == "failed" for result in vector_results),
+                "vector_unsupported": sum(result.status == "unsupported" for result in vector_results),
+                "vector_checks": [result.to_dict() for result in vector_results],
             }
         )
-    has_unsupported = any(item["unsupported"] > 0 for item in documents)
+    has_unsupported = any(item["unsupported"] > 0 or item["vector_unsupported"] > 0 or item["quarantined"] > 0 for item in documents)
     report = {
         "schema_version": "taoryx.daveml-checkdata/v1",
-        "status": "failed" if any(item["failed"] > 0 for item in documents) else "verified_with_quarantine" if has_unsupported else "verified",
+        "status": "failed" if any(item["failed"] > 0 or item["vector_failed"] > 0 for item in documents) else "verified_with_quarantine" if has_unsupported else "verified",
         "documents": documents,
+        "ungridded_policy": arguments.ungridded_policy,
+        "compatibility_overlay_dir": str(arguments.compatibility_overlay_dir) if arguments.compatibility_overlay_dir else None,
+        "quarantine_dir": str(arguments.quarantine_dir) if arguments.quarantine_dir else None,
         "limitations": [
             "Direct point functions, nested MathML calculations, and regular gridded tables are evaluated.",
             "Regular-grid queries follow NASA DAVEtools endpoint-clamp behavior outside breakpoint bounds.",

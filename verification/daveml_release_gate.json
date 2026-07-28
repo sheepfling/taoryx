@@ -1,18 +1,35 @@
 {
   "artifacts": {
+    "build/daveml-release-catalog/canonical/export-manifest.json": "20cff07730e0986aa385088fe813eb543131898552b1bc4a1906503954ca45d9",
+    "families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json": "041485fa47f164c5754333c5180b351289ec096f223a440e58cbff3c5106b813",
+    "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json": "bbf04df9c151bf9d8991469f32b3e63d2899a244f579172d6fecf13caf36d52f",
+    "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json": "3255c0007a9d4af208e97c3f1f82bbaa16d3bbd6544f5e835fbf452a4088e271",
+    "verification/daveml_a320_openap_integration.json": "8b4c458881d566fb9bcee28312fd554b4507fb33de0a6a199a989829c9e95bec",
+    "verification/daveml_a320_pseudo6dof_integration.json": "4f528b844b268f0388429f040195f769528a9810b3a74ed5493abd617e1e46da",
+    "verification/daveml_alpha3_completion.json": "d8ce639333b21e1fa0528596148d1a342e37ce37d54ec77fabab3a65a5c64702",
+    "verification/daveml_alpha3_deployment_evidence.json": "47ad06e34d619e14ba14b996c858fd834d46ffd4f4698e2a20012837de4a3b50",
+    "verification/daveml_alpha3_overlay_evidence.json": "9c36ac27ad6ba8aa8f73e88b2ff2dbe25db67fc497368d5dd45a71bc3eb0c0d1",
+    "verification/daveml_alpha3_reduction_evidence.json": "be7678dee087bd3d528d2639a302492733c5930d2fd4ef6b92e634ae41342814",
     "verification/daveml_atmosphere_binding.json": "982ad29009e87c5ea5e7e9e7bdf251cc442d08bd1650ae0b35a884d5573d484a",
+    "verification/daveml_catalog_roundtrip.json": "cdc6442701a4cc8e34bd0d2df32449c6097f82d2faf71478d5e1775d5691c95d",
     "verification/daveml_collection_roundtrip_evidence.json": "d84dcbf6a686c899325282e99b3bfb812a8e0a47ea34de150550ab49b12cf5ee",
     "verification/daveml_f16_equilibrium_trim_evidence.json": "400da9183034b3f5fd83c4ebcc63ceede5ae7de1729483e8352d99fca803dbf8",
-    "verification/daveml_f16_linearization_evidence.json": "66cca0f378b4622cceec09d4441b06b651f62588f515079ea330ed72b7408512",
-    "verification/daveml_f16_scenario_evidence.json": "628ad40114b1c25b4082d6ab9733971c69fde03a182b0dcf437e21ebdce7188a",
+    "verification/daveml_f16_linearization_evidence.json": "e6ddb6b95b2b4fbf4b7d3374124a638d99796053b547de4925a6a5c4db8e2262",
+    "verification/daveml_f16_scenario_evidence.json": "a048a12f685429e26ae19e35426c0207226f46e6f9fdc4d467ffcefe554d159e",
     "verification/daveml_f16_trim_evidence.json": "bd131b577c08ec4c3e7640af5ddefce1f7b24908ad1704eeb7f13029a73b8322",
-    "verification/daveml_f16_tuning_evidence.json": "ae3f51a44d5ea26264f10122f3bda5a0d1cc8d64d029af89c512673a153dfc00",
-    "verification/daveml_family_readiness.json": "c4a91f3786fdb3f30f73102529b0dabecab68ef9b3bf1beb31b921cf18186584",
+    "verification/daveml_f16_tuning_evidence.json": "76748e3201c7d81b434141be090adf622d4da787ae57f25785e38c67e431b598",
+    "verification/daveml_family_layer_dispositions.json": "e8f15facca97f551980ebcf6fdf02fd8e6386ecfefb7ff485eb5c6fc29ab8f36",
+    "verification/daveml_family_readiness.json": "d98a030cdb237cf21433254277a2baa52aa713f488af190492d9964f10931948",
     "verification/daveml_hl20_linearization_evidence.json": "858de314a1c49635547e1343f1769ba8310c4bb01a23d38557fd777e4ead8a02",
     "verification/daveml_hl20_load_evidence.json": "9651fb6c4266daa356ff7abeef0eef767a302c9a6c43efa0467605596438d0d4",
     "verification/daveml_hl20_scenario_evidence.json": "f8f60cb946e24d7180ef25fabcf3ec4503b11e4bf5581496ec021c180cc022be",
     "verification/daveml_hl20_trim_evidence.json": "c29ceb249710dd037e7191c808300b93db2cf8d80b1a6510ab0408ff5af49a3f",
-    "verification/daveml_nesc_replay_evidence.json": "12bdd48ea012586295d230618c068def183a0a558bcd530aaaaad62bdd2f5a7b"
+    "verification/daveml_nesc_objectives_evidence.json": "9f35f2ebf2ea07dd695bd09800640dd833f0634220b05d23dcaa35f80adfb0e2",
+    "verification/daveml_nesc_replay_evidence.json": "18bb853ebca4690ceda25039ca1dffdaef71cb3812e41fe97fb0dc7e1c964eeb",
+    "verification/daveml_official_checkdata.json": "3cf04390e89031ebdf572e7f8a9b016edb3131ff78ce3c37bc601f720f1c32ca",
+    "verification/daveml_official_conformance.json": "deaa6f110a305d0ad555434f4e4c04aa2773d73847324b3e605f816c150de169",
+    "verification/daveml_operating_point_catalog.json": "fbedbcb301391fb5e784aa162a5495429410b274ac8a68cd0fd3845de42b471f",
+    "verification/daveml_operational_contracts.json": "a0375e95090bff8750f991f0db65c2ac67fa200e2c2f0c7885510c869a218751"
   },
   "claim_boundary": "bounded source integration release gate; not flight qualification",
   "runs": [
@@ -27,7 +44,29 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "  },\n        {\n          \"document_sha256\": \"9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4\",\n          \"function_count\": 0,\n          \"package_member\": \"source/nesc/twostage_prop.normalized.dml\",\n          \"role\": \"propulsion\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 14\n        }\n      ],\n      \"graph_failures\": [],\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"pending_derived_layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      },\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"layers\": {\n        \"objectives\": \"trajectory_checkpoint_only\",\n        \"trim\": \"scenario_regression_only\"\n      }\n    }\n  ],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "\"388d2192c337c380dd4ebe6d7678815b3b384733113803509eb1298d1a3192cd\",\n          \"function_count\": 0,\n          \"package_member\": \"source/nesc/twostage_inertia.normalized.dml\",\n          \"role\": \"mass_properties\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 23\n        },\n        {\n          \"document_sha256\": \"9f5c6a481917a77f4abf969854951ad3763e4cb7fc00f4b707999b02af3d80f4\",\n          \"function_count\": 0,\n          \"package_member\": \"source/nesc/twostage_prop.normalized.dml\",\n          \"role\": \"propulsion\",\n          \"status\": \"loaded_hash_verified\",\n          \"variable_count\": 14\n        }\n      ],\n      \"graph_failures\": [],\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"pending_derived_layers\": {},\n      \"source_import_declared\": \"verified\"\n    }\n  ],\n  \"pending_derived_layers\": [],\n  \"readiness_registry\": \"verification/daveml_family_readiness.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-readiness-report/v1\",\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_layer_dispositions.py",
+        "--registry",
+        "verification/daveml_family_layer_dispositions.yaml",
+        "--output",
+        "verification/daveml_family_layer_dispositions.json"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "hored surrogate documents round-trip in a fresh process.\",\n          \"status\": \"verified\"\n        },\n        \"full_rigidbody_6dof\": {\n          \"evidence\": \"families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml\",\n          \"failures\": [],\n          \"rationale\": \"The current qualification is pseudo-6DOF and does not claim full rigid-body source equivalence.\",\n          \"status\": \"not_promoted\"\n        },\n        \"stability_augmentation\": {\n          \"evidence\": \"families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json\",\n          \"failures\": [],\n          \"rationale\": \"Bounded Taoryx stability augmentation is explicitly part of the surrogate contract.\",\n          \"status\": \"verified\"\n        }\n      },\n      \"status\": \"verified\"\n    }\n  ],\n  \"family_count\": 5,\n  \"layer_count\": 18,\n  \"registry\": \"verification/daveml_family_layer_dispositions.yaml\",\n  \"schema_version\": \"taoryx.daveml-family-layer-dispositions-report/v1\",\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_operational_contracts.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "lection-manifest.json\",\n      \"manifest_kind\": \"collection\",\n      \"manifest_sha256\": \"5ab346f462d2e3bcb3ecd6992c34cef2bfb2e90c56237b4026c6de8d46982200\",\n      \"nonclaim_count\": 4,\n      \"qualification_class\": \"derived_exact\",\n      \"status\": \"verified\"\n    },\n    {\n      \"applicability\": {\n        \"linearization\": \"required\",\n        \"objectives\": \"required\",\n        \"scenarios\": \"required\",\n        \"trim\": \"required\",\n        \"tuning\": \"required\"\n      },\n      \"binding_count\": 5,\n      \"family_id\": \"a320_openap_jsbsim_pseudo6dof\",\n      \"manifest\": \"families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json\",\n      \"manifest_kind\": \"collection\",\n      \"manifest_sha256\": \"6573d827ba06e451c31dae876151954ca9f4bbba4e241496491b9f1d03af43c4\",\n      \"nonclaim_count\": 4,\n      \"qualification_class\": \"surrogate_composite\",\n      \"status\": \"verified\"\n    }\n  ],\n  \"family_count\": 5,\n  \"report_type\": \"taoryx.daveml-operational-contracts/v1\",\n  \"schema_version\": 1,\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [
@@ -99,7 +138,61 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "\"reference_nesc_two_stage_rocket\",\n  \"package\": \"INBOX/taoryx-daveml-nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair\",\n  \"replay\": {\n    \"collection_id\": null,\n    \"family_id\": null,\n    \"fidelity\": \"6dof\",\n    \"force_moment_residual\": 0.0,\n    \"hold_evidence\": \"validation/acceptance.json#passed\",\n    \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n    \"package\": \"C:\\\\Users\\\\peanu\\\\GIT\\\\sheepfling\\\\taoryx\\\\INBOX\\\\taoryx-daveml-nesc-model-catalog-v1.0\\\\qualified\\\\nesc-two-stage-rocket\\\\nesc-two-stage-rocket-v0.9.txair\",\n    \"runtime_load_contract\": \"taoryx_rigid_body_6dof\",\n    \"runtime_member\": null,\n    \"source_evaluation\": \"verified_pinned_package_acceptance\",\n    \"source_sha256\": \"d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6\",\n    \"status\": \"runtime_replay_qualification_passed\"\n  },\n  \"schema_version\": \"taoryx.daveml-nesc-replay-evidence/v1\",\n  \"status\": \"verified\",\n  \"stderr_tail\": \"\",\n  \"subprocess_returncode\": 0\n}\n"
+      "stdout_tail": "two_stage_rocket\",\n  \"package\": \"resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair\",\n  \"replay\": {\n    \"collection_id\": null,\n    \"family_id\": null,\n    \"fidelity\": \"6dof\",\n    \"force_moment_residual\": 0.0,\n    \"hold_evidence\": \"validation/acceptance.json#passed\",\n    \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n    \"package\": \"C:\\\\Users\\\\peanu\\\\GIT\\\\sheepfling\\\\taoryx\\\\resources\\\\aerospace\\\\daveml\\\\nesc-model-catalog-v1.0\\\\qualified\\\\nesc-two-stage-rocket\\\\nesc-two-stage-rocket-v0.9.txair\",\n    \"runtime_load_contract\": \"taoryx_rigid_body_6dof\",\n    \"runtime_member\": null,\n    \"source_evaluation\": \"verified_pinned_package_acceptance\",\n    \"source_sha256\": \"d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6\",\n    \"status\": \"runtime_replay_qualification_passed\"\n  },\n  \"schema_version\": \"taoryx.daveml-nesc-replay-evidence/v1\",\n  \"status\": \"verified\",\n  \"stderr_tail\": \"\",\n  \"subprocess_returncode\": 0\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_nesc_objectives.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "     \"id\": \"scenario17-schedule\",\n        \"kind\": \"staging\",\n        \"message\": null,\n        \"normalized_error\": 0.0,\n        \"quality_normalized_error\": 0.0,\n        \"severity\": \"required\",\n        \"slack\": 0.0,\n        \"source\": \"final\",\n        \"status\": \"pass\",\n        \"target\": true,\n        \"time_s\": 200.0,\n        \"tolerance\": null,\n        \"unit\": \"event\",\n        \"weight\": 1.0\n      }\n    ],\n    \"quality_score\": null,\n    \"required_objectives\": 4,\n    \"required_passed\": 4,\n    \"scenario_contract_sha256\": \"204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e\",\n    \"score\": 100.0,\n    \"score_kind\": \"gate_compliance_legacy\",\n    \"status\": \"pass\",\n    \"termination\": {\n      \"reason\": \"retained package acceptance benchmark\",\n      \"status\": \"completed\"\n    },\n    \"worst_required_normalized_error\": 0.0\n  },\n  \"package_sha256\": \"204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e\",\n  \"schema_version\": \"taoryx.daveml-nesc-objectives/v1\",\n  \"status\": \"pass\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/canonical_daveml_roundtrip.py",
+        "--catalog-root",
+        "resources/aerospace/daveml/nesc-model-catalog-v1.0",
+        "--output-dir",
+        "build/daveml-release-catalog",
+        "--summary-output",
+        "verification/daveml_catalog_roundtrip.json"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "        \"count\": 0,\n        \"failed\": 0,\n        \"passed\": 0,\n        \"quarantined\": 0,\n        \"results\": [],\n        \"status\": \"not_present\",\n        \"unsupported\": 0,\n        \"vector_count\": 0,\n        \"vector_failed\": 0,\n        \"vector_passed\": 0,\n        \"vector_results\": [],\n        \"vector_unsupported\": 0\n      },\n      \"checkdata_failed\": 0,\n      \"checkdata_status\": \"not_present\",\n      \"exported_sha256\": \"9fef17ccd7a5b972b7aa4856cf42fd8ab9f818b5fda426276da4e24b94d908b0\",\n      \"fresh_process_checkdata\": \"verified\",\n      \"fresh_process_reimport\": \"verified\",\n      \"ir_sha256\": \"fde442aa7b079817b375d32d650ac125853610bf741b8c318098324d1ed6e1f5\",\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"reference_summary\": {},\n      \"source\": \"normalized/nesc-all-models-two-stage-package-twostage-prop/source.dml\",\n      \"source_sha256\": \"297cb7b8950a1ba5185fca98b5966cb8ad14cf76f8d2d0af9b17e7b0785197ee\",\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/evaluate_daveml_checkdata.py",
+        "resources/aerospace/daveml/official-conformance-v1",
+        "--output",
+        "verification/daveml_official_checkdata.json",
+        "--ungridded-policy",
+        "janus_delaunay_linear_qhull_v1",
+        "--compatibility-overlay-dir",
+        "resources/aerospace/daveml/compatibility-overlays",
+        "--quarantine-dir",
+        "resources/aerospace/daveml/compatibility-overlays/quarantines"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "reason_code\": null,\n          \"relative_error\": 1.0451068098926523e-05,\n          \"status\": \"passed\"\n        }\n      ],\n      \"document\": \"twoD_ungridded.dml\",\n      \"failed\": 0,\n      \"passed\": 3,\n      \"quarantined\": 1,\n      \"unsupported\": 0,\n      \"vector_check_count\": 0,\n      \"vector_checks\": [],\n      \"vector_failed\": 0,\n      \"vector_passed\": 0,\n      \"vector_unsupported\": 0\n    }\n  ],\n  \"limitations\": [\n    \"Direct point functions, nested MathML calculations, and regular gridded tables are evaluated.\",\n    \"Regular-grid queries follow NASA DAVEtools endpoint-clamp behavior outside breakpoint bounds.\",\n    \"Unsupported graph forms remain explicit quarantined results.\",\n    \"Documents without checkData are represented with check_count zero.\"\n  ],\n  \"quarantine_dir\": \"resources\\\\aerospace\\\\daveml\\\\compatibility-overlays\\\\quarantines\",\n  \"schema_version\": \"taoryx.daveml-checkdata/v1\",\n  \"status\": \"verified_with_quarantine\",\n  \"ungridded_policy\": \"janus_delaunay_linear_qhull_v1\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/official_daveml_conformance.py",
+        "resources/aerospace/daveml/official-conformance-v1",
+        "--output",
+        "verification/daveml_official_conformance.json"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "ble.dml\",\n      \"manifest_hash_match\": true,\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"source_sha256\": \"988923d3273751872838fc637f1eb835e0061d92e5224ebbc1e205b1f9318d92\",\n      \"structural_diff_count\": 0\n    },\n    {\n      \"checkdata_count\": 1,\n      \"checkdata_numeric_literal_count\": 16,\n      \"checkdata_roundtrip_match\": true,\n      \"exported_sha256\": \"18ef85500d2a4cd0d5081438f19cfb97234037956497ad6820352d532f9372db\",\n      \"fixture\": \"twoD_ungridded.dml\",\n      \"manifest_hash_match\": true,\n      \"numeric_diff_count\": 0,\n      \"opaque_paths\": [],\n      \"source_sha256\": \"2c6c66492f30560a631c7905e07cc806931c3eae1d8a630f0e5168951ac3a46d\",\n      \"structural_diff_count\": 0\n    }\n  ],\n  \"fixture_count\": 7,\n  \"limitations\": [\n    \"This gate verifies source-preserving semantic export and fresh import.\",\n    \"DAVE-ML checkData numerical evaluation remains a separate runtime gate.\"\n  ],\n  \"schema_version\": \"taoryx.daveml-official-conformance/v1\",\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [
@@ -108,7 +201,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "119\",\n  \"perturbations\": {\n    \"control_step\": 0.0001,\n    \"method\": \"central_finite_difference\",\n    \"state_step\": 0.0001\n  },\n  \"provenance\": {\n    \"aerodynamics_document_sha256\": \"272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764\",\n    \"aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n    \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"schema_version\": \"taoryx.daveml-linearization-evidence/v1\",\n  \"state_names\": [\n    \"u_m_s\",\n    \"v_m_s\",\n    \"w_m_s\",\n    \"p_rad_s\",\n    \"q_rad_s\",\n    \"r_rad_s\"\n  ],\n  \"status\": \"verified\",\n  \"trim_controls\": {\n    \"aileron_deg\": 0.0,\n    \"elevator_deg\": 0.0,\n    \"rudder_deg\": 0.0\n  },\n  \"trim_state\": {\n    \"p_rad_s\": 0.0,\n    \"q_rad_s\": 0.0,\n    \"r_rad_s\": 0.0,\n    \"u_m_s\": 152.4,\n    \"v_m_s\": 0.0,\n    \"w_m_s\": 0.0\n  }\n}\n"
+      "stdout_tail": "ab2ca1c7837a1a38ba2764\",\n    \"aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n    \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"propulsion_document_sha256\": \"1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4\",\n    \"propulsion_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"schema_version\": \"taoryx.daveml-linearization-evidence/v1\",\n  \"state_names\": [\n    \"u_m_s\",\n    \"v_m_s\",\n    \"w_m_s\",\n    \"p_rad_s\",\n    \"q_rad_s\",\n    \"r_rad_s\"\n  ],\n  \"status\": \"verified\",\n  \"trim_controls\": {\n    \"aileron_deg\": 0.0,\n    \"elevator_deg\": 0.0,\n    \"power_pct\": 0.0,\n    \"rudder_deg\": 0.0\n  },\n  \"trim_state\": {\n    \"p_rad_s\": 0.0,\n    \"q_rad_s\": 0.0,\n    \"r_rad_s\": 0.0,\n    \"u_m_s\": 152.4,\n    \"v_m_s\": 0.0,\n    \"w_m_s\": 0.0\n  }\n}\n"
     },
     {
       "command": [
@@ -117,7 +210,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n    \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"q_matrix\": [\n    [\n      2.0,\n      0.0,\n      0.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      2.0,\n      0.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      2.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      0.0,\n      2.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      0.0,\n      0.0,\n      2.0\n    ]\n  ],\n  \"r_matrix\": [\n    [\n      1.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      1.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      1.0\n    ]\n  ],\n  \"schema_version\": \"taoryx.daveml-tuning-evidence/v1\",\n  \"state_names\": [\n    \"v_m_s\",\n    \"w_m_s\",\n    \"p_rad_s\",\n    \"q_rad_s\",\n    \"r_rad_s\"\n  ],\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "ha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"q_matrix\": [\n    [\n      2.0,\n      0.0,\n      0.0,\n      0.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      2.0,\n      0.0,\n      0.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      2.0,\n      0.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      0.0,\n      2.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      0.0,\n      0.0,\n      2.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      0.0,\n      0.0,\n      0.0,\n      2.0\n    ]\n  ],\n  \"r_matrix\": [\n    [\n      1.0,\n      0.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      1.0,\n      0.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      1.0,\n      0.0\n    ],\n    [\n      0.0,\n      0.0,\n      0.0,\n      1.0\n    ]\n  ],\n  \"schema_version\": \"taoryx.daveml-tuning-evidence/v1\",\n  \"state_names\": [\n    \"u_m_s\",\n    \"v_m_s\",\n    \"w_m_s\",\n    \"p_rad_s\",\n    \"q_rad_s\",\n    \"r_rad_s\"\n  ],\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [
@@ -126,7 +219,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": ",\n    \"output_rate_hz\": 10.0,\n    \"propulsion_model_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"scenario_id\": \"f16-s119-daveml-controller-smoke\",\n    \"schema_version\": 1,\n    \"termination_policy_sha256\": \"f70afada179fa82982569039a287d00d2eafb120f211e06b906ff2409774f455\",\n    \"unit_system\": \"si\",\n    \"vehicle\": \"f16-s119-reference\",\n    \"vehicle_model_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"schema_version\": \"taoryx.daveml-scenario-evidence/v1\",\n  \"status\": \"pass\",\n  \"tuning_provenance\": {\n    \"aerodynamics_document_sha256\": \"272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764\",\n    \"aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n    \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  }\n}\n"
+      "stdout_tail": "\": 1,\n    \"termination_policy_sha256\": \"f70afada179fa82982569039a287d00d2eafb120f211e06b906ff2409774f455\",\n    \"unit_system\": \"si\",\n    \"vehicle\": \"f16-s119-reference\",\n    \"vehicle_model_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  },\n  \"schema_version\": \"taoryx.daveml-scenario-evidence/v1\",\n  \"status\": \"pass\",\n  \"tuning_provenance\": {\n    \"aerodynamics_document_sha256\": \"272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764\",\n    \"aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n    \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n    \"propulsion_document_sha256\": \"1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4\",\n    \"propulsion_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n  }\n}\n"
     },
     {
       "command": [
@@ -140,7 +233,7 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "a287d00d2eafb120f211e06b906ff2409774f455\",\n      \"unit_system\": \"si\",\n      \"vehicle\": \"f16-s119-reference\",\n      \"vehicle_model_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n    },\n    \"schema_version\": \"taoryx.daveml-scenario-evidence/v1\",\n    \"status\": \"pass\",\n    \"tuning_provenance\": {\n      \"aerodynamics_document_sha256\": \"272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764\",\n      \"aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n      \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n      \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n    }\n  },\n  \"family_id\": \"reference_f16_s119\",\n  \"model_id\": \"f16-s119-reference\",\n  \"roles_hash_verified\": [\n    \"aerodynamics\",\n    \"propulsion\",\n    \"mass_properties\"\n  ],\n  \"schema_version\": \"taoryx.daveml-cli-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "   },\n    \"schema_version\": \"taoryx.daveml-scenario-evidence/v1\",\n    \"status\": \"pass\",\n    \"tuning_provenance\": {\n      \"aerodynamics_document_sha256\": \"272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764\",\n      \"aerodynamics_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n      \"mass_properties_document_sha256\": \"f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28\",\n      \"mass_properties_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\",\n      \"propulsion_document_sha256\": \"1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4\",\n      \"propulsion_package_sha256\": \"eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c\"\n    }\n  },\n  \"family_id\": \"reference_f16_s119\",\n  \"model_id\": \"f16-s119-reference\",\n  \"roles_hash_verified\": [\n    \"aerodynamics\",\n    \"propulsion\",\n    \"mass_properties\"\n  ],\n  \"schema_version\": \"taoryx.daveml-cli-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
     },
     {
       "command": [
@@ -168,7 +261,84 @@
       ],
       "returncode": 0,
       "stderr_tail": "",
-      "stdout_tail": "e\": \"validation/acceptance.json#passed\",\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"package\": \"C:\\\\Users\\\\peanu\\\\GIT\\\\sheepfling\\\\taoryx\\\\INBOX\\\\taoryx-daveml-nesc-model-catalog-v1.0\\\\qualified\\\\nesc-two-stage-rocket\\\\nesc-two-stage-rocket-v0.9.txair\",\n      \"runtime_load_contract\": \"taoryx_rigid_body_6dof\",\n      \"runtime_member\": null,\n      \"source_evaluation\": \"verified_pinned_package_acceptance\",\n      \"source_sha256\": \"d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6\",\n      \"status\": \"runtime_replay_qualification_passed\"\n    },\n    \"schema_version\": \"taoryx.daveml-nesc-replay-evidence/v1\",\n    \"status\": \"verified\",\n    \"stderr_tail\": \"\",\n    \"subprocess_returncode\": 0\n  },\n  \"family_id\": \"reference_nesc_two_stage_rocket\",\n  \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n  \"roles_hash_verified\": [\n    \"aerodynamics\",\n    \"propulsion\",\n    \"mass_properties\"\n  ],\n  \"schema_version\": \"taoryx.daveml-cli-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
+      "stdout_tail": "dation/acceptance.json#passed\",\n      \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n      \"package\": \"C:\\\\Users\\\\peanu\\\\GIT\\\\sheepfling\\\\taoryx\\\\resources\\\\aerospace\\\\daveml\\\\nesc-model-catalog-v1.0\\\\qualified\\\\nesc-two-stage-rocket\\\\nesc-two-stage-rocket-v0.9.txair\",\n      \"runtime_load_contract\": \"taoryx_rigid_body_6dof\",\n      \"runtime_member\": null,\n      \"source_evaluation\": \"verified_pinned_package_acceptance\",\n      \"source_sha256\": \"d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6\",\n      \"status\": \"runtime_replay_qualification_passed\"\n    },\n    \"schema_version\": \"taoryx.daveml-nesc-replay-evidence/v1\",\n    \"status\": \"verified\",\n    \"stderr_tail\": \"\",\n    \"subprocess_returncode\": 0\n  },\n  \"family_id\": \"reference_nesc_two_stage_rocket\",\n  \"model_id\": \"nasa-nesc-two-stage-rocket-scenario17\",\n  \"roles_hash_verified\": [\n    \"aerodynamics\",\n    \"propulsion\",\n    \"mass_properties\"\n  ],\n  \"schema_version\": \"taoryx.daveml-cli-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "-m",
+        "taoryx.runtime.cli",
+        "daveml",
+        "smoke",
+        "--family",
+        "a320_openap_3dof",
+        "--output",
+        "verification/daveml_a320_openap_integration.json"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "ust_n\": 32807.7165860874,\n    \"true_airspeed_mps\": 230.154204937076\n  },\n  \"provenance\": {\n    \"corpus_sha256\": \"9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31\",\n    \"manufacturer_validated\": \"false\",\n    \"model_id\": \"a320-openap-3dof\",\n    \"package_sha256\": \"f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87\",\n    \"qualification_class\": \"derived_exact\",\n    \"source_exact\": \"true\",\n    \"upstream\": \"OpenAP 2.6.0\"\n  },\n  \"qualification_class\": \"derived_exact\",\n  \"schema_version\": \"taoryx.daveml-cli-smoke/v1\",\n  \"status\": \"verified\",\n  \"trim\": {\n    \"controls\": {\n      \"flight_path_angle_rad\": 0.0,\n      \"throttle_ratio\": 0.7174806937690654\n    },\n    \"residuals\": {\n      \"altitude_rate_mps\": 0.0,\n      \"axial_acceleration_mps2\": 0.0\n    },\n    \"state\": {},\n    \"success\": true\n  },\n  \"tuning\": {\n    \"inequality_values\": [\n      0.0\n    ],\n    \"objective\": 0.692155083089858,\n    \"parameters\": [\n      0.7174806937690654\n    ],\n    \"status\": \"converged\"\n  }\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_a320_pseudo6dof_daveml.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "ap-2.6.0\",\n        \"moments.pitch\": \"jsbsim-1.3.1-a320\",\n        \"moments.roll\": \"jsbsim-1.3.1-a320\",\n        \"moments.yaw\": \"jsbsim-1.3.1-a320\",\n        \"propulsion.fuel_flow\": \"openap-2.6.0\",\n        \"propulsion.thrust\": \"openap-2.6.0\",\n        \"stability_augmentation\": \"taoryx-controller\"\n      },\n      \"corpus_sha256\": \"9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31\",\n      \"disabled_contributions\": [\n        \"jsbsim.aerodynamic_drag\",\n        \"jsbsim.propulsion_thrust\",\n        \"jsbsim.fuel_flow\"\n      ],\n      \"inertia_policy\": \"linear_mass_rescale_from_jsbsim_empty_mass\",\n      \"manufacturer_validated\": false,\n      \"model_id\": \"a320-openap-jsbsim-pseudo6dof\",\n      \"openap_package_sha256\": \"f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87\",\n      \"qualification_class\": \"surrogate_composite\",\n      \"source_exact\": false\n    }\n  },\n  \"schema_version\": \"taoryx.a320-pseudo6dof-daveml-roundtrip/v1\",\n  \"status\": \"verified\",\n  \"structural_diff\": []\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_a320_pseudo6dof_runtime.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "181082e-29,\n        \"elevator_rad\": 0.01999999999996443,\n        \"flight_path_angle_rad\": 9.293022439594822e-25,\n        \"rudder_rad\": -3.885551116729471e-27,\n        \"throttle_ratio\": 0.5156870883463449\n      },\n      \"iterations\": 6,\n      \"max_residual\": 7.077238101116379e-15,\n      \"message\": \"`gtol` termination condition is satisfied.\",\n      \"pass\": true,\n      \"state\": {\n        \"alpha_rad\": 0.0025000000000132473\n      },\n      \"success\": true\n    },\n    \"cruise\": {\n      \"controls\": {\n        \"aileron_rad\": -2.631345584668991e-28,\n        \"elevator_rad\": 0.019999999999995393,\n        \"flight_path_angle_rad\": -1.283415175352058e-23,\n        \"rudder_rad\": 1.0525382338683311e-26,\n        \"throttle_ratio\": 0.7174806937690654\n      },\n      \"iterations\": 6,\n      \"max_residual\": 9.144161122742744e-16,\n      \"message\": \"`gtol` termination condition is satisfied.\",\n      \"pass\": true,\n      \"state\": {\n        \"alpha_rad\": 0.00250000000000171\n      },\n      \"success\": true\n    }\n  }\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "-m",
+        "taoryx.runtime.cli",
+        "daveml",
+        "composite-smoke",
+        "--family",
+        "a320_openap_jsbsim_pseudo6dof",
+        "--output",
+        "verification/daveml_a320_pseudo6dof_integration.json"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "6729471e-27,\n          \"throttle_ratio\": 0.5156870883463449\n        },\n        \"iterations\": 6,\n        \"max_residual\": 7.077238101116379e-15,\n        \"message\": \"`gtol` termination condition is satisfied.\",\n        \"pass\": true,\n        \"state\": {\n          \"alpha_rad\": 0.0025000000000132473\n        },\n        \"success\": true\n      },\n      \"cruise\": {\n        \"controls\": {\n          \"aileron_rad\": -2.631345584668991e-28,\n          \"elevator_rad\": 0.019999999999995393,\n          \"flight_path_angle_rad\": -1.283415175352058e-23,\n          \"rudder_rad\": 1.0525382338683311e-26,\n          \"throttle_ratio\": 0.7174806937690654\n        },\n        \"iterations\": 6,\n        \"max_residual\": 9.144161122742744e-16,\n        \"message\": \"`gtol` termination condition is satisfied.\",\n        \"pass\": true,\n        \"state\": {\n          \"alpha_rad\": 0.00250000000000171\n        },\n        \"success\": true\n      }\n    }\n  },\n  \"schema_version\": \"taoryx.daveml-cli-composite-smoke/v1\",\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_operating_points.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "lse\"\n      ],\n      \"family_id\": \"a320_openap_jsbsim_pseudo6dof\",\n      \"non_applicable_reason\": null,\n      \"nonclaims\": [\n        \"manufacturer_truth\",\n        \"source_exact_6dof\",\n        \"Airbus_validation\",\n        \"flight_qualification\"\n      ],\n      \"operating_point\": {\n        \"altitude_m\": 11000.0,\n        \"flap_angle_deg\": 0.0,\n        \"mach\": 0.78,\n        \"mass_kg\": 60000.0,\n        \"vertical_speed_mps\": 0.0\n      },\n      \"point_id\": \"a320-pseudo6dof-cruise-mach078\",\n      \"point_type\": \"pseudo_6dof_composite_performance\",\n      \"qualification_class\": \"surrogate_composite\",\n      \"residual\": {\n        \"metric\": \"result.performance.pitch_moment_nm\",\n        \"tolerance\": 1e-09,\n        \"unit\": \"N-m\"\n      },\n      \"status\": \"verified\"\n    }\n  ],\n  \"family_count\": 5,\n  \"operational_contracts_sha256\": \"a0375e95090bff8750f991f0db65c2ac67fa200e2c2f0c7885510c869a218751\",\n  \"report_type\": \"taoryx.daveml-operating-point-catalog/v1\",\n  \"schema_version\": 1,\n  \"status\": \"verified\"\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/build_daveml_alpha3_evidence.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "{\n  \"status\": \"verified\",\n  \"reports\": [\n    \"verification\\\\daveml_alpha3_overlay_evidence.json\",\n    \"verification\\\\daveml_alpha3_reduction_evidence.json\",\n    \"verification\\\\daveml_alpha3_deployment_evidence.json\"\n  ]\n}\n"
+    },
+    {
+      "command": [
+        "C:\\Users\\peanu\\scoop\\apps\\python313\\current\\python.exe",
+        "tools/validate_daveml_alpha3_completion.py"
+      ],
+      "returncode": 0,
+      "stderr_tail": "",
+      "stdout_tail": "reference_f16_s119\",\n      \"id\": \"f16-point-mass-3dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_f16_s119\",\n      \"id\": \"f16-attitude-response-pseudo6dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"id\": \"hl20-energy-glide-3dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_hl20_mod_k\",\n      \"id\": \"hl20-attitude-response-pseudo6dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"id\": \"nesc-performance-3dof-v1\",\n      \"status\": \"equivalence_pending\"\n    },\n    {\n      \"family_id\": \"reference_nesc_two_stage_rocket\",\n      \"id\": \"nesc-attitude-response-pseudo6dof-v1\",\n      \"status\": \"equivalence_pending\"\n    }\n  ],\n  \"registry\": \"verification/daveml_alpha3_completion.yaml\",\n  \"schema_version\": \"taoryx.daveml-alpha3-completion-report/v1\",\n  \"status\": \"verified_with_known_gaps\"\n}\n"
     }
   ],
   "schema_version": "taoryx.daveml-release-gate/v1",

@@ -1,9 +1,9 @@
 # Taoryx DAVE-ML reference corpus v1.1
 
-This is the minimal offline input required to rebuild the Alpha 3 F-16 S-119
-and HL-20 Mod K source-grounded reference collections. The archive is kept as
-one immutable payload so the exact Taoryx-normalized F-16 inputs and compiled
-`.txair` package remain reproducible.
+This is the immutable offline input for the Alpha 3 F-16 S-119, HL-20 Mod K,
+and NESC two-stage source-grounded reference collections. The archive is kept
+as one exact payload, and the extracted qualified packages under
+`qualified-models/` provide stable local paths for runtime replay.
 
 ## Integrity
 
@@ -49,6 +49,8 @@ authoring tree unless a release specifically packages them.
   verified `.txair` package.
 - HL-20 Mod K byte-pinned DAVE-ML, fixed mass-property binding, tables,
   validation evidence, and verified `.txair` package.
+- NESC two-stage rocket normalized DAVE-ML, staging tables, trajectory evidence,
+  and verified `.txair` package.
 - Embedded provenance and package checksum ledgers.
 
 This corpus does not establish operational, certification, or real-aircraft

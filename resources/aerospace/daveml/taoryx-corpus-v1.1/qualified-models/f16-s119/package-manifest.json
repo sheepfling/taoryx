@@ -1,0 +1,127 @@
+{
+  "artifacts": [
+    {
+      "media_type": "application/json",
+      "path": "bindings/control-binding.json",
+      "role": "control-binding",
+      "sha256": "09517d0bc605ef8aad42f4e3f2e39f843bb6bd79ad17e469af1ce103700cbc2b",
+      "size_bytes": 729
+    },
+    {
+      "media_type": "application/xml",
+      "path": "models/aerodynamics.dml",
+      "role": "aerodynamics-source",
+      "sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+      "size_bytes": 84886
+    },
+    {
+      "media_type": "application/xml",
+      "path": "models/inertia.dml",
+      "role": "mass-properties-source",
+      "sha256": "f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28",
+      "size_bytes": 9428
+    },
+    {
+      "media_type": "application/xml",
+      "path": "models/propulsion.dml",
+      "role": "propulsion-source",
+      "sha256": "1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4",
+      "size_bytes": 22768
+    },
+    {
+      "media_type": "application/json",
+      "path": "runtime/binding.json",
+      "role": "runtime-binding",
+      "sha256": "e2a862922483e75f69e25ce10442eafe4f58c4672366104712293a3f597b5c0c",
+      "size_bytes": 428
+    },
+    {
+      "media_type": "application/json",
+      "path": "validation/acceptance.json",
+      "role": "validation-evidence",
+      "sha256": "74dbd7e0531f42cf1f29da806749776efb5a0af3e8461c0c4a9aa609c379cb14",
+      "size_bytes": 95035
+    },
+    {
+      "media_type": "text/csv",
+      "path": "validation/trim-hold.csv",
+      "role": "trajectory-validation-evidence",
+      "sha256": "8ce74e9b1087c71728101ddf05e643d82200ad297a44c9499eb1aeca3842f4a6",
+      "size_bytes": 95766
+    }
+  ],
+  "created_utc": "2026-07-19T00:00:00Z",
+  "display_name": "F-16 S-119 Reference Aircraft",
+  "fidelity": "6dof",
+  "frames": {
+    "body": "FRD",
+    "navigation": "NED",
+    "quaternion_order": "wxyz"
+  },
+  "model_id": "f16-s119-reference",
+  "notes": [
+    "Canonical body axes are forward-right-down.",
+    "Direct control binding uses the S-119 pilot mixer without SAS or autopilot states.",
+    "The package is suitable for pointwise 6-DOF force/moment evaluation."
+  ],
+  "reference_geometry": {
+    "area_m2": 27.870912,
+    "mean_aerodynamic_chord_m": 3.450336,
+    "span_m": 9.144
+  },
+  "schema_version": "0.2.0",
+  "source": {
+    "documents": [
+      {
+        "byte_identical_to_upstream": false,
+        "file_version": "Mod K, 2011-01-28",
+        "model_name": "F-16 Subsonic Aerodynamics Model (a la Garza)",
+        "path": "models/aerodynamics.dml",
+        "role": "aerodynamics",
+        "sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+        "upstream_git_blob_sha": "0e504504c9bf902792495d70e2c1f6e352a1d069",
+        "upstream_path": "assets/F16_aero.dml",
+        "upstream_repository": "shobhitvoleti/F16ModelWorkshop"
+      },
+      {
+        "byte_identical_to_upstream": false,
+        "file_version": "Initial version",
+        "model_name": "F-16 propulsion model (a la Stevens & Lewis)",
+        "path": "models/propulsion.dml",
+        "role": "propulsion",
+        "sha256": "1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4",
+        "upstream_git_blob_sha": "a7ac299713529da781552cd8faaca7359059eed7",
+        "upstream_path": "NESC_data/All_models/F16_package/F16_S119_source/F16_prop.dml",
+        "upstream_repository": "nasa/simupy-flight"
+      },
+      {
+        "byte_identical_to_upstream": false,
+        "file_version": "Initial version",
+        "model_name": "F-16 inertia model (a la Stevens & Lewis)",
+        "path": "models/inertia.dml",
+        "role": "mass_properties",
+        "sha256": "f3c79750931698430b3ae8aa3d293b2954ea507e2151eeba9013bfcc40ca2b28",
+        "upstream_git_blob_sha": "4f4c6fbe6c02e8f846a084f5b9b2571543dff546",
+        "upstream_path": "NESC_data/All_models/F16_package/F16_S119_source/F16_inertia.dml",
+        "upstream_repository": "nasa/simupy-flight"
+      }
+    ],
+    "notes": [
+      "Aerodynamics is the normalized F-16 Mod K semantic mirror.",
+      "Propulsion is steady-state thrust only; fuel flow and spool dynamics are absent.",
+      "Mass and inertia are constant except for the scheduled longitudinal CG offset."
+    ],
+    "source_kind": "daveml",
+    "source_license": "Source-specific public research/example data; see embedded provenance."
+  },
+  "validity_envelope": {
+    "alpha_max_rad": 0.7853981633974483,
+    "alpha_min_rad": -0.17453292519943295,
+    "altitude_max_m": 15240.0,
+    "altitude_min_m": 0.0,
+    "beta_max_rad": 0.5235987755982988,
+    "beta_min_rad": -0.5235987755982988,
+    "mach_max": 1.0,
+    "mach_min": 0.0
+  }
+}

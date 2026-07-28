@@ -1,0 +1,16 @@
+{
+  "alpha_rad": 0.046369206000629846,
+  "converged": true,
+  "dynamic_pressure_pa": 13441.450740674618,
+  "elevator_control_ratio": 0.12970163035515778,
+  "elevator_trailing_edge_down_rad": -0.05659301237255313,
+  "iterations": 3,
+  "mach": 0.5250787165224478,
+  "mass_kg": 9298.643898518936,
+  "power_lever_angle_pct": 13.90408357542583,
+  "required_thrust_n": 10527.699366849421,
+  "residual_force_x_n": 1.901753421407193e-09,
+  "residual_force_z_n": -1.1408701539039612e-07,
+  "residual_pitch_moment_nm": -3.5625273023720933e-07,
+  "throttle_ratio": 0.1390408357542583
+}

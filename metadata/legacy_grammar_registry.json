@@ -1,7 +1,7 @@
 {
   "format": "taoryx-legacy-grammar-registry",
   "schema_version": "1",
-  "source": "INBOX/taos_legacy_preservation_intial_work_maybe_faulty/toolkit/grammar",
+  "source": "historical-legacy-preservation-archive/toolkit/grammar",
   "policy": "Accepted entries are implemented supported subsets; archived entries remain research material and do not expand the canonical grammar.",
   "entries": [
     {"file": "taos96_aero_constants.ebnf", "status": "archived", "manual_pages": "4-9 through 4-11"},

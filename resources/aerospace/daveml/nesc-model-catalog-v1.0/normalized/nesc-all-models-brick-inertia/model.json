@@ -1,0 +1,363 @@
+{
+  "breakpoints": [],
+  "check_cases": [],
+  "check_data_provenance": [],
+  "container_sha256": "eae595902d2f2a6cd96632536ecbd4e55681b66dc3f6bdc22dbe2882247fbfa1",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "eae595902d2f2a6cd96632536ecbd4e55681b66dc3f6bdc22dbe2882247fbfa1",
+  "document_size_bytes": 4051,
+  "functions": [],
+  "gridded_tables": [],
+  "header": {
+    "attributes": {
+      "name": "Example brick inertia model"
+    },
+    "authors": [
+      {
+        "attributes": {
+          "email": "bruce.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "bruce.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2012-10-04",
+    "description": "A simple, made-up constant mass matrix for a US face brick (8\" x 4\" x 2.25\") for use in the 2012 NASA NESC EOM verification data project.",
+    "file_version": "Initial version",
+    "modification_records": [],
+    "name": "Example brick inertia model",
+    "raw": {
+      "attributes": {
+        "name": "Example brick inertia model"
+      },
+      "children": [
+        {
+          "attributes": {
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "address",
+              "text": "MS 132 NASA, Hampton, VA 23681"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2012-10-04"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Initial version"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "A simple, made-up constant mass matrix for a US face brick (8\" x 4\" x 2.25\") for use in the 2012 NASA NESC EOM verification data project."
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": []
+  },
+  "issues": [],
+  "provenance_definitions": [],
+  "root_name": "DAVEfunc",
+  "root_namespace": "http://daveml.org/2010/DAVEML",
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models/All_models/brick_inertia.dml",
+  "ungridded_tables": [],
+  "unsupported_top_level": [],
+  "variables": [
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.00189422",
+        "name": "bodyMomentOfInertia_Roll",
+        "units": "slugft2",
+        "varID": "XIXX"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Rolling moment of inertia about the body X axis",
+      "initial_value": 0.00189422,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyMomentOfInertia_Roll",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "slugft2",
+      "variable_id": "XIXX"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.006211019",
+        "name": "bodyMomentOfInertia_Pitch",
+        "units": "slugft2",
+        "varID": "XIYY"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Pitching moment of inertia about the body Y axis",
+      "initial_value": 0.006211019,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyMomentOfInertia_Pitch",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "slugft2",
+      "variable_id": "XIYY"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.007194665",
+        "name": "bodyMomentOfInertia_Yaw",
+        "units": "slugft2",
+        "varID": "XIZZ"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Yawing moment of inertia about the body Z axis",
+      "initial_value": 0.007194665,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyMomentOfInertia_Yaw",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "slugft2",
+      "variable_id": "XIZZ"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyProductOfInertia_ZX",
+        "units": "slugft2",
+        "varID": "XIZX"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Cross-product of inertia in the body X-Z plane",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyProductOfInertia_ZX",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "slugft2",
+      "variable_id": "XIZX"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyProductOfInertia_XY",
+        "units": "slugft2",
+        "varID": "XIXY"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Cross-product of inertia in the body X-Y plane",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyProductOfInertia_XY",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "slugft2",
+      "variable_id": "XIXY"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyProductOfInertia_YZ",
+        "units": "slugft2",
+        "varID": "XIYZ"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Cross-product of inertia in the body Y-Z plane",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyProductOfInertia_YZ",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "slugft2",
+      "variable_id": "XIYZ"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.155404754",
+        "name": "totalMass",
+        "units": "slug",
+        "varID": "XMASS"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Total mass of brick (5 lbm)",
+      "initial_value": 0.155404754,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "totalMass",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": null,
+      "symbol": null,
+      "uncertainty": null,
+      "units": "slug",
+      "variable_id": "XMASS"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.0",
+        "name": "bodyPositionOfCmWrtMrc_X",
+        "sign": "FWD",
+        "units": "ft",
+        "varID": "DXCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Longitudinal location of the center of mass relative to the geometric center of the brick, positive if the CM is in front of the volumetric center",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyPositionOfCmWrtMrc_X",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "FWD",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "DXCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "bodyPositionOfCmWrtMrc_Y",
+        "sign": "RT",
+        "units": "ft",
+        "varID": "DYCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Longitudinal location of the center of mass relative to the geometric center of the brick, positive if the CM is to the right of the volumetric center",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyPositionOfCmWrtMrc_Y",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "RT",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "DYCG"
+    },
+    {
+      "alias": null,
+      "attributes": {
+        "initialValue": "0.",
+        "name": "bodyPositionOfCmWrtMrc_Z",
+        "sign": "DOWN",
+        "units": "ft",
+        "varID": "DZCG"
+      },
+      "axis_system": null,
+      "calculation": null,
+      "description": "Vertical location of the center of mass relative to the geometric center of the brick, positive if the CM is below the volumetric center",
+      "initial_value": 0.0,
+      "maximum_value": null,
+      "minimum_value": null,
+      "name": "bodyPositionOfCmWrtMrc_Z",
+      "provenance": null,
+      "roles": [
+        "isOutput",
+        "isStdAIAA"
+      ],
+      "sign": "DOWN",
+      "symbol": null,
+      "uncertainty": null,
+      "units": "ft",
+      "variable_id": "DZCG"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 (simple_aero-slalom)
 
-# Synthetic TAOS translation of INBOX/simple_aero-snippet-v1/simple_aero/slalom.yaml
+# Synthetic TAOS translation of tests/fixtures/simple_aero_v1/slalom.yaml
 # Simple Aero family: slalom
 # Start controls: start_range_to_go_km
 # Stop controls: end_range_to_go_km, min_time_to_go_s

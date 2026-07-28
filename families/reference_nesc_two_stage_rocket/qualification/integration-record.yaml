@@ -5,7 +5,7 @@ source:
   package: nesc-two-stage-rocket-v0.9.txair
   package_sha256: 204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e
   aerodynamics_sha256: d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6
-  catalog: INBOX/taoryx-daveml-nesc-model-catalog-v1.0
+  catalog: resources/aerospace/daveml/nesc-model-catalog-v1.0
   catalog_release: taoryx-daveml-nesc-model-catalog-v1.0
   source_corpus_archive_sha256: 2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9
   source_components: [aerodynamics, propulsion, mass_properties]
@@ -26,7 +26,8 @@ layers:
   aerodynamics: {version: normalized-daveml-v1, evidence: source_checked_static}
   propulsion: {version: two-stage-constant-thrust-v1, evidence: source_checked_schedule}
   staging: {version: instantaneous-dry-mass-transition-v1, evidence: source_checked_acceptance}
-  reductions: {version: pending, evidence: derived_from_parent_plant}
+  controllers: {version: not-applicable-open-loop-v1, evidence: no_declared_controls}
+  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
 claims:
   - source-grounded NASA/NESC Scenario 17 variable-mass launch vehicle plant
   - package replay passed source-equivalence, event/mass, convergence, and checkpoint-envelope evidence
@@ -35,6 +36,7 @@ nonclaims:
   - independent full participating-simulation trajectory equivalence
   - reduced-order fidelity before a separate reduction qualification
 open_questions:
-  - compare the full scenario history against the participating-simulation family
-  - qualify 3-DOF and pseudo-6DOF reductions from this parent plant
-next_gate: qualify_reduced_order_rocket_and_full_trajectory_comparison
+  - compare the full scenario history against an independent participating-simulation family when one is available
+  - qualify 3-DOF and pseudo-6DOF reductions from this parent plant against staging checkpoints
+  - keep synthetic deployment children in separate lineage and qualification records
+next_gate: alpha3_full_trajectory_and_reduction_equivalence

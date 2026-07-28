@@ -1,0 +1,120 @@
+{
+  "center_of_gravity_fraction_reference_chord": 0.555,
+  "clamp_events": [],
+  "drag_coefficient": 0.13693620284215202,
+  "dynamic_pressure_pa": 5121.28008,
+  "force_coefficients_at_cg": {
+    "cx": -0.03760026739531658,
+    "cy": 0.0,
+    "cz": -0.4688759746528002
+  },
+  "force_moment": {
+    "aerodynamic_force_body_n": {
+      "x": -5124.461246727796,
+      "y": 0.0,
+      "z": -63902.119002730265
+    },
+    "aerodynamic_moment_body_nm": {
+      "x": 0.0,
+      "y": -21370.97798000814,
+      "z": 0.0
+    },
+    "fuel_flow_kg_s": 0.0,
+    "gear_force_body_n": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "gear_moment_body_nm": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "other_force_body_n": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "other_moment_body_nm": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "propulsion_force_body_n": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "propulsion_moment_body_nm": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "status": {
+      "diagnostics": {
+        "center_of_gravity_fraction": 0.555,
+        "cl": 0.0,
+        "cm": -0.01821744479124081,
+        "cn": 0.0,
+        "cx": -0.03760026739531658,
+        "cy": 0.0,
+        "cz": -0.4688759746528002,
+        "drag_coefficient": 0.13693620284215202,
+        "dynamic_pressure_pa": 5121.28008,
+        "lift_coefficient": 0.450007706673992,
+        "moment_reference_fraction": 0.54
+      },
+      "disposition": "valid",
+      "warnings": []
+    }
+  },
+  "lift_coefficient": 0.450007706673992,
+  "moment_coefficients_at_cg": {
+    "cl_roll": 0.0,
+    "cm_pitch": -0.01821744479124081,
+    "cn_yaw": 0.0
+  },
+  "moment_coefficients_at_mrc": {
+    "cl_roll": 0.0,
+    "cm_pitch": -0.011184305171448798,
+    "cn_yaw": 0.0
+  },
+  "moment_reference_fraction": 0.54,
+  "reference_geometry": {
+    "area_m2": 26.612075808,
+    "mean_aerodynamic_chord_m": 8.607552,
+    "span_m": 4.233672
+  },
+  "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+  "source_git_blob_sha": "71e01b91e3a299a5b272c69f9a8296039aca59eb",
+  "source_inputs": {
+    "angleOfAttack": 12.34,
+    "angleOfSideslip": 0.0,
+    "bodyAngularRate_Pitch": 0.0,
+    "bodyAngularRate_Roll": 0.0,
+    "bodyAngularRate_Yaw": 0.0,
+    "heightOfCgWrtRwy": 34.725,
+    "landingGearExtension": 0.0,
+    "leftWingFlapDeflection": 0.0,
+    "lowerLeftBodyFlapDeflection": 0.0,
+    "lowerRightBodyFlapDeflection": 0.0,
+    "mach": 0.8,
+    "rightWingFlapDeflection": 0.0,
+    "rudderDeflection": 0.0,
+    "trueAirspeed": 300.0,
+    "upperLeftBodyFlapDeflection": 0.0,
+    "upperRightBodyFlapDeflection": 0.0
+  },
+  "source_outputs": {
+    "aeroBodyForceCoefficient_Y": 0.0,
+    "aeroBodyMomentCoefficient_Pitch": -0.011184305171448798,
+    "aeroBodyMomentCoefficient_Roll": 0.0,
+    "aeroBodyMomentCoefficient_Yaw": 0.0,
+    "referenceWingArea": 286.45,
+    "referenceWingChord": 28.24,
+    "referenceWingSpan": 13.89,
+    "totalCoefficientOfDrag": 0.13693620284215202,
+    "totalCoefficientOfLift": 0.450007706673992,
+    "vrsPositionOfMrc_X": 0.54
+  }
+}

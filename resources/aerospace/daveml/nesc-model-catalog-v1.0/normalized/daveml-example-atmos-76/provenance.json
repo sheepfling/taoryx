@@ -1,0 +1,200 @@
+{
+  "check_data_provenance": [],
+  "container_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
+  "doctype": {
+    "name": "DAVEfunc",
+    "public_id": "-//AIAA//DTD for Flight Dynamic Models - Functions 2.0//EN",
+    "system_id": "http://www.daveml.org/DTDs/2p0/DAVEfunc.dtd"
+  },
+  "document_sha256": "b0803b550447f2fa10c81bf7e703449a1944fb633955990a1d01c2dea71c29ca",
+  "header": {
+    "attributes": {},
+    "authors": [
+      {
+        "attributes": {
+          "email": "e.b.jackson@nasa.gov",
+          "name": "Bruce Jackson",
+          "org": "NASA Langley Research Center"
+        },
+        "email": "e.b.jackson@nasa.gov",
+        "name": "Bruce Jackson",
+        "organization": "NASA Langley Research Center"
+      }
+    ],
+    "creation_date": "2011-01-21",
+    "description": "Standard 1976 atmosphere. Based on tables built for iOS app, \"FlightMechanic\", by Bruce Jackson dated 2010-08-07.",
+    "file_version": "Mod A, 2011-01-25",
+    "modification_records": [
+      {
+        "attributes": {
+          "date": "2011-01-25",
+          "modID": "A"
+        },
+        "authors": [
+          {
+            "attributes": {
+              "email": "bruce.jackson@nasa.gov",
+              "name": "Bruce Jackson",
+              "org": "NASA Langley Research Center"
+            },
+            "email": "bruce.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "organization": "NASA Langley Research Center"
+          }
+        ],
+        "date": "2011-01-25",
+        "description": "Added xmlns=\"http://www.w3.org/1998/Math/MathML\" to <math> elements as required.",
+        "modification_id": "A"
+      }
+    ],
+    "name": null,
+    "raw": {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "email": "e.b.jackson@nasa.gov",
+            "name": "Bruce Jackson",
+            "org": "NASA Langley Research Center"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "author",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2011-01-21"
+          },
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "creationDate",
+          "text": null
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "fileVersion",
+          "text": "Mod A, 2011-01-25"
+        },
+        {
+          "attributes": {},
+          "children": [],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "description",
+          "text": "Standard 1976 atmosphere. Based on tables built for iOS app, \"FlightMechanic\", by Bruce Jackson dated 2010-08-07."
+        },
+        {
+          "attributes": {
+            "accession": "",
+            "author": "NOASS, NASA, USAF Joint Publication",
+            "date": "1976-01-01",
+            "refID": "REF01",
+            "title": "US Standard Atmosphere, 1976"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Data hand-entered from Table I: Geometric Altitude, Metric Units, p53ff"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "accession": "Ronald Press, New York",
+            "author": "Shapiro, Ascher H.",
+            "date": "1953-01-01",
+            "refID": "REF02",
+            "title": "The Dynamics and Thermodynamics of Compressible Flow, Volume I"
+          },
+          "children": [
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Used equation 3.6 on page 48 for relationship between temperature and speed-of-sound"
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "reference",
+          "text": null
+        },
+        {
+          "attributes": {
+            "date": "2011-01-25",
+            "modID": "A"
+          },
+          "children": [
+            {
+              "attributes": {
+                "email": "bruce.jackson@nasa.gov",
+                "name": "Bruce Jackson",
+                "org": "NASA Langley Research Center"
+              },
+              "children": [
+                {
+                  "attributes": {},
+                  "children": [],
+                  "namespace": "http://daveml.org/2010/DAVEML",
+                  "tag": "address",
+                  "text": "MS 132 NASA, Hampton, VA 23681"
+                }
+              ],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "author",
+              "text": null
+            },
+            {
+              "attributes": {},
+              "children": [],
+              "namespace": "http://daveml.org/2010/DAVEML",
+              "tag": "description",
+              "text": "Added xmlns=\"http://www.w3.org/1998/Math/MathML\" to <math> elements as required."
+            }
+          ],
+          "namespace": "http://daveml.org/2010/DAVEML",
+          "tag": "modificationRecord",
+          "text": null
+        }
+      ],
+      "namespace": "http://daveml.org/2010/DAVEML",
+      "tag": "fileHeader",
+      "text": null
+    },
+    "references": [
+      {
+        "attributes": {
+          "accession": "",
+          "author": "NOASS, NASA, USAF Joint Publication",
+          "date": "1976-01-01",
+          "refID": "REF01",
+          "title": "US Standard Atmosphere, 1976"
+        },
+        "description": "Data hand-entered from Table I: Geometric Altitude, Metric Units, p53ff",
+        "ref_id": "REF01"
+      },
+      {
+        "attributes": {
+          "accession": "Ronald Press, New York",
+          "author": "Shapiro, Ascher H.",
+          "date": "1953-01-01",
+          "refID": "REF02",
+          "title": "The Dynamics and Thermodynamics of Compressible Flow, Volume I"
+        },
+        "description": "Used equation 3.6 on page 48 for relationship between temperature and speed-of-sound",
+        "ref_id": "REF02"
+      }
+    ]
+  },
+  "provenance_definitions": [],
+  "source_member": null,
+  "source_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/daveml/examples/atmos_76.dml"
+}

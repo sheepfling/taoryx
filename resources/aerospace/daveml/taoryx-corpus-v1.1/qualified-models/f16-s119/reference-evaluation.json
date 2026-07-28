@@ -1,0 +1,84 @@
+{
+  "aerodynamic_source_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+  "alpha_rad": 0.046369206000629846,
+  "beta_rad": 0.0,
+  "center_of_gravity_fraction_mac": 0.24999999999999994,
+  "controls": {
+    "aileron_left_roll_rad": -0.0,
+    "directional_ratio": 0.0,
+    "elevator_trailing_edge_down_rad": -0.05659301237255314,
+    "lateral_ratio": 0.0,
+    "longitudinal_ratio": 0.12970163035515778,
+    "power_lever_angle_pct": 13.90408357542583,
+    "rudder_trailing_edge_left_rad": -0.0,
+    "throttle_ratio": 0.1390408357542583,
+    "warnings": []
+  },
+  "force_moment": {
+    "aerodynamic_force_body_n": {
+      "x": -6298.909721801465,
+      "y": 0.0,
+      "z": -91132.861587782
+    },
+    "aerodynamic_moment_body_nm": {
+      "x": 0.0,
+      "y": -3.562347920332699e-07,
+      "z": 0.0
+    },
+    "fuel_flow_kg_s": 0.0,
+    "gear_force_body_n": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "gear_moment_body_nm": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "other_force_body_n": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "other_moment_body_nm": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "propulsion_force_body_n": {
+      "x": 10527.699366851322,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "propulsion_moment_body_nm": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "status": {
+      "diagnostics": {
+        "aileron_rad": -0.0,
+        "alpha_rad": 0.046369206000629846,
+        "beta_rad": 0.0,
+        "cg_fraction_mac": 0.24999999999999994,
+        "elevator_rad": -0.05659301237255314,
+        "fuel_flow_available": 0.0,
+        "input_mass_relative_error": 0.0,
+        "mach": 0.5250787165224478,
+        "power_lever_angle_pct": 13.90408357542583,
+        "propulsion_steady_state_only": 1.0,
+        "reference_mass_kg": 9298.643898518936,
+        "rudder_rad": -0.0,
+        "true_airspeed_mps": 172.420788
+      },
+      "disposition": "valid",
+      "warnings": [
+        "The source propulsion model does not define fuel flow or spool dynamics."
+      ]
+    }
+  },
+  "mach": 0.5250787165224478,
+  "propulsion_source_sha256": "1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4",
+  "true_airspeed_mps": 172.420788
+}

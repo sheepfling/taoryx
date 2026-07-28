@@ -1,0 +1,6 @@
+variable_id,name,units,symbol,axis_system,sign,alias,initial_value,minimum_value,maximum_value,roles,has_calculation,description
+angleOfAttack,angleOfAttack_d,d,α,Body Axis,ANU,,,,,isStdAIAA,False,Instantaneous body reference angle of attack
+angleOfSideslip,angleOfSideslip_d,d,β,Body Axis,ANL,,,,,isStdAIAA,False,Instantaneous body reference angle of sideslip
+yawControlDeflection,yawControlDeflection_d,d,δr,Body Axis,TEL,,,,,,False,Instantaneous body reference angle of sideslip
+aeroBodyYawMomentCoefficient_1,aeroBodyYawMomentCoefficient_1,ND,Cn,Body Axis,,,,,,isOutput,False,Total yawing moment coefficient
+aeroBodyYawMomentCoefficient_2,aeroBodyYawMomentCoefficient_2,ND,Cn,Body Axis,,,,,,isOutput,False,Total yawing moment coefficient

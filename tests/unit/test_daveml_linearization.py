@@ -13,6 +13,7 @@ def test_f16_linearization_evidence_has_true_dynamics_shape_and_provenance() -> 
     assert len(report["a_matrix"]) == 6
     assert all(len(row) == 6 for row in report["a_matrix"])
     assert len(report["b_matrix"]) == 6
-    assert all(len(row) == 3 for row in report["b_matrix"])
+    assert all(len(row) == 4 for row in report["b_matrix"])
     assert report["b_matrix"][3][0] != 0.0 or report["b_matrix"][4][0] != 0.0 or report["b_matrix"][5][0] != 0.0
     assert all(len(value) == 64 for value in report["provenance"].values())
+    assert report["provenance"]["propulsion_document_sha256"]

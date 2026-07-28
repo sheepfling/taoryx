@@ -1,0 +1,57 @@
+{
+  "acceptance_layers": [
+    "source_integrity",
+    "DAVE-ML parse and semantic validation",
+    "embedded static check cases where supplied",
+    "canonical SI/frame dimensional evaluation",
+    "host-dynamics scenario execution",
+    "trajectory-family comparison"
+  ],
+  "canonical_contract": {
+    "attitude": "scalar-first body-to-navigation quaternion",
+    "body_frame": "FRD",
+    "reference_points": "explicit MRC and CG with audited moment transfer",
+    "units": "SI"
+  },
+  "component_documents": {
+    "mass_properties": [
+      "nesc-all-models-orbital-station-inertia"
+    ]
+  },
+  "display_name": "NASA/NESC International Space Station",
+  "host_capabilities": [
+    "High-order gravity",
+    "third body",
+    "MET atmosphere",
+    "applied force/torque",
+    "cross products of inertia"
+  ],
+  "known_gaps": "Environment and applied loads are external to the inertia document",
+  "model_id": "nesc-international-space-station",
+  "qualification_status": "source-ready",
+  "qualified_package": null,
+  "scenario_ids": [
+    "Orbit_02",
+    "Orbit_03A",
+    "Orbit_03B",
+    "Orbit_04",
+    "Orbit_05A",
+    "Orbit_05B",
+    "Orbit_05C",
+    "Orbit_08A",
+    "Orbit_08B",
+    "Orbit_09A",
+    "Orbit_09B",
+    "Orbit_09C",
+    "Orbit_09D",
+    "Orbit_FULL"
+  ],
+  "schema_version": "1.0",
+  "source_authority": "NASA/NESC 2015 DAVE-ML",
+  "stateful_sidecar_required": true,
+  "target_fidelities": [
+    "3dof-orbit",
+    "3t+3k2",
+    "6dof-orbital-rigid-body"
+  ]
+}

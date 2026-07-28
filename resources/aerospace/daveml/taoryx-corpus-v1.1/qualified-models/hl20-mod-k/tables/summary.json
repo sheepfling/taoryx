@@ -1,0 +1,6 @@
+{
+  "alpha_limit_rows": 7,
+  "clean_aerodynamics_rows": 28,
+  "control_increment_rows": 9,
+  "mass_properties_rows": 1
+}
