@@ -26,6 +26,31 @@ freeze baselines
   -> publish controller and mission claims separately
 ```
 
+Adaptive augmentation is intentionally outside the Alpha 2 vertical slice.
+The near-term controller is fixed or gain-scheduled LQR (or another named
+bounded regulator) connected to real effectors. Alpha 3 adds adaptive control
+only after that path is physically accountable, so adaptation cannot conceal
+bad trim, incorrect control signs, missing effectiveness data, or direct
+wrench injection.
+
+The planned Alpha 3 adaptive path is:
+
+```text
+validated trim and scheduled baseline
+  -> bounded uncertainty/parameter estimator
+  -> projected gain or effectiveness update
+  -> requested wrench
+  -> constrained allocator and actuator model
+  -> nonlinear plant
+```
+
+The estimator and update law are part of the immutable controller realization.
+They must declare update rate, parameters, projection bounds, excitation
+requirements, freeze/fallback policy, and reset behavior. Adaptive evidence
+is additive: it must be compared with the scheduled baseline under the same
+initial conditions and perturbations, and it cannot raise a vehicle above the
+plant/allocator evidence tier it has independently passed.
+
 The first tranche now exists in code as
 `taoryx.controller_realization.ControllerRealization` and
 `preflight_controller_realization`. A resolved Alpha 2 case may carry this

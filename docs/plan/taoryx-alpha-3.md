@@ -153,6 +153,50 @@ contract](../architecture/eom-timing-contract.md). IMU, estimator, and
 multi-rate sensor development cannot begin by interpolating published vehicle
 states or exposing RK solver stages as truth.
 
+### A3-W4A — Bounded adaptive-control augmentation
+
+Adaptive control is an Alpha 3 controller workstream, not an Alpha 2 exit
+gate. It begins only after a vehicle has a validated scheduled or fixed
+regulator, plant-derived trim and linearization, and a physically accountable
+allocator. The first implementation should be a bounded augmentation around
+the existing controller, not an unconstrained replacement:
+
+```text
+scheduled baseline
+    -> bounded parameter/effectiveness estimator
+    -> projected gain or feedforward update
+    -> desired wrench
+    -> physical allocator
+    -> actuator limits and dynamics
+    -> nonlinear plant
+```
+
+The common adaptive contract must declare:
+
+- estimated parameters and their physical meaning;
+- update law, update cadence, and required excitation;
+- projection or normalization bounds;
+- reset, freeze, and fallback behavior;
+- interaction with gain scheduling and operating-point changes;
+- anti-windup and actuator-saturation handling; and
+- telemetry for estimates, updates, projection events, and achieved authority.
+
+The first pilots should be one fixed-wing case (X8 or B747) and one
+rotorcraft case (Hummingbird or R44). The adaptive layer must be tested against
+the same nominal, perturbation, and near-limit cases as the scheduled
+baseline. Required evidence includes:
+
+- baseline-versus-adaptive tracking and authority comparison;
+- boundedness when estimates are wrong or excitation is insufficient;
+- actuator saturation and rate-limit behavior;
+- update-law ablation showing that adaptation is responsible for the claimed
+  improvement; and
+- deterministic replay, batch/step parity, and explicit fallback events.
+
+An adaptive run cannot promote a model past the evidence tier of its physical
+plant or allocator. Unmodeled effectors, direct wrench injection, failed trim,
+or unresolved sign conventions remain blockers regardless of adaptation.
+
 ### A3-W5 — Aero-ballistic deployment and spawned bodies
 
 Promote stage separation from a parent mass adjustment into a first-class
@@ -206,6 +250,10 @@ Alpha 3 can close only when:
 - breadth work has not introduced bespoke runners or bypassed the common
   evaluator;
 - every release claim links to a machine-readable maturity and evidence record.
+- if adaptive control is advertised, at least one fixed-wing and one
+  rotorcraft pilot pass the bounded adaptive contract and publish a comparison
+  against the validated non-adaptive baseline; adaptive control is not required
+  for Alpha 3 completion of families that do not advertise it.
 
 ## Deferred beyond Alpha 3
 

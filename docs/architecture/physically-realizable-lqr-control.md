@@ -26,6 +26,44 @@ Direct body-force or body-moment injection is permitted only as
 and guidance wiring. It must not be presented as actuator realization,
 nonlinear controller validation, or a qualified showcase result.
 
+## Adaptive-control boundary
+
+Adaptive control is a later augmentation, not a substitute for physical
+effectors, correct trim, or plant-derived control effectiveness. Alpha 2 uses
+fixed or gain-scheduled regulators over explicitly validated operating-point
+domains. This keeps model error visible while the X8, B747, Hummingbird, and
+X-15 establish the complete path from guidance demand to physical actuator or
+rotor response.
+
+Alpha 3 may add a bounded adaptive augmentation after a vehicle has a T4 or
+T5 baseline. The adaptive layer may update a declared subset of gains or
+uncertain-effectiveness estimates, but it must remain downstream of the same
+guidance/regulator/allocation/actuator contracts:
+
+```text
+scheduled nominal controller
+        -> bounded adaptive augmentation
+        -> desired wrench
+        -> constrained physical allocator
+        -> actuator dynamics
+        -> nonlinear plant
+```
+
+An adaptive result must record the nominal controller, estimated parameters,
+update law, projection bounds, adaptation rate, excitation or persistence
+conditions, freeze/fallback behavior, and the requested-versus-achieved
+authority evidence. It may not adapt around missing trim, an incorrect sign
+convention, a rank-deficient actuator set, or an unmodeled direct-wrench
+shortcut. If the adaptive estimate leaves its declared projection set, the
+controller freezes or falls back to the validated scheduled controller and
+emits an explicit event.
+
+Adaptive control is therefore a separate evidence claim. A stable adaptive
+simulation does not promote a vehicle beyond the evidence tier of its plant
+and allocator. Promotion requires comparison against the non-adaptive
+baseline, bounded-uncertainty tests, actuator saturation tests, update-law
+ablation, and repeatable nonlinear runs over the declared envelope.
+
 Taoryx records the following monotonic evidence tiers.
 
 | Tier | Name | Minimum evidence |

@@ -43,6 +43,8 @@ procedure P1-4 are complete:
   ranges, semantic modifiers, projection/rejection reports, and fingerprints;
 - reproducible B747, X8, Hummingbird, and X-15 flagship missions;
 - normalized plant-truth controller presets and tuning;
+- fixed or gain-scheduled regulators connected to the declared plant and
+  allocator; adaptive control is explicitly deferred to Alpha 3;
 - reusable trim generation and operating-point procedure for the four
   established families, including the source-backed X-15 glide trim;
 - M4 Composable maturity for the four established proof families.
@@ -54,6 +56,13 @@ their runtime qualification must not block the Alpha 2 release signal.
 The finish line does not require implementing every vehicle now in intake. It
 permits their source records and maturity entries to exist while keeping their
 runtime claims in Alpha 3.
+
+Alpha 2 controller boundary: a vehicle may use a fixed regulator, scaled LQR,
+or validated gain schedule, but it must not require adaptation to remain
+bounded. Adaptive estimation, online gain updates, and model-reference
+augmentation are Alpha 3 work. Alpha 2 may record the interfaces and
+telemetry needed for them, but no adaptive result is part of the Alpha 2
+release claim.
 
 ### Alpha 3 boundary
 
