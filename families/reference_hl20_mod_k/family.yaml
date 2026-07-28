@@ -35,6 +35,12 @@ plant:
     area_m2: 26.612075808
     mean_aerodynamic_chord_m: 8.607552
     span_m: 4.233672
+  mass_properties:
+    profile_id: hl20_mod_k_fixed_mass_inertia_v1
+    dry_mass_kg: 8664.1
+    inertia_body_kg_m2: [31190.76, 160480.6870520227, 160480.6870520227]
+    binding_status: source_geometry_fixed_mass_runtime_binding
+    perturbation_policy: explicit_named_variants_only
   validity_envelope:
     mach_min: 0.3
     mach_max: 4.0
@@ -50,30 +56,30 @@ fidelity_profiles:
   - profile_id: hl20.energy_glide_3dof.v1
     runtime_fidelity: point_mass_3dof
     equations: [newton_point_mass_translation]
-    status: planned_derived_from_parent
+    status: source_graph_coupled_reduced_fail_closed_witness
     parent_profile: hl20.rigid_body_6dof.v1
     data_contract: [broad_mach_force_sweeps, lift_drag, energy_rate, crossrange_authority]
     omitted_physics: [physical_attitude_dynamics, aerodynamic_moments, physical_actuator_states]
   - profile_id: hl20.attitude_response_p6dof.v1
     runtime_fidelity: pseudo_6dof
     equations: [newton_point_mass_translation, quaternion_kinematics, scheduled_attitude_response]
-    status: planned_derived_from_parent
+    status: source_graph_coupled_energy_profile_fail_closed_witness
     parent_profile: hl20.rigid_body_6dof.v1
     data_contract: [attitude_response_sweeps, bank_response, seven_surface_surrogate_response]
     omitted_physics: [moment_balance_as_response_source, physical_actuator_states]
   - profile_id: hl20.rigid_body_6dof.v1
     runtime_fidelity: rigid_body_6dof
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
-    status: runtime_replay_qualification_passed
+    status: source_graph_reachability_coupled_native_stabilization_witness
     data_contract: [exact_daveml_force_moment_graph, fixed_mass_properties, seven_direct_surfaces]
     omitted_physics: [propulsion, actuator_dynamics, landing_contact]
   - profile_id: hl20.rigid_body_6dof_surface_allocated.v1
     runtime_fidelity: rigid_body_6dof
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation, logical_surface_allocation]
-    status: contract_ready
+    status: source_graph_actuator_probe_and_native_stabilization_witness
     parent_profile: hl20.rigid_body_6dof.v1
-    data_contract: [exact_daveml_force_moment_graph, fixed_mass_properties, seven_surface_logical_allocator]
-    omitted_physics: [source_actuator_dynamics, controller_qualification, landing_contact]
+    data_contract: [exact_daveml_force_moment_graph, fixed_mass_properties, seven_surface_actuator_trace, control_direction_probe]
+    omitted_physics: [closed_loop_controller, landing_contact]
 parameters:
   - {id: vehicle.source_package, kind: string, default: hl20-mod-k-unpowered-v0.10.txair}
   - {id: vehicle.body_frame, kind: string, default: FRD}
@@ -89,14 +95,16 @@ segment_graphs:
   baseline:
     schema_version: 1
     segments:
-      - {id: release, kind: air_release, qualification: planned}
-      - {id: stabilization, kind: attitude_stabilization, qualification: planned}
+      - {id: release, kind: air_release, qualification: source_bound_witness}
+      - {id: stabilization, kind: attitude_stabilization, qualification: source_bound_witness}
       - {id: glide_trim, kind: glide_trim_capture, qualification: source_package_regression}
-      - {id: right_bank, kind: crossrange_leg, qualification: planned}
-      - {id: left_bank, kind: crossrange_leg, qualification: planned}
-      - {id: energy_descent, kind: energy_management, qualification: planned}
-      - {id: arrival, kind: terminal_energy_corridor, qualification: planned}
+      - {id: right_bank, kind: crossrange_leg, qualification: source_bound_witness}
+      - {id: left_bank, kind: crossrange_leg, qualification: source_bound_witness}
+      - {id: energy_descent, kind: energy_management, qualification: source_bound_witness}
+      - {id: arrival, kind: terminal_energy_corridor, qualification: terminal_contract_exercised}
     terminal: approach_energy_arrival_gate
+post_g6_program: docs/plan/hl20-post-g6-program.md
+next_milestone: alpha4-new-hl20-physics-or-controller-contract
 controls:
   - {id: control.surface.upper_left_body_flap, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct upper-left body flap input.}
   - {id: control.surface.lower_left_body_flap, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct lower-left body flap input.}
@@ -147,4 +155,4 @@ claims:
 nonclaims:
   - landing gear, ground contact, flare, tire friction, touchdown, or rollout behavior
   - generic hypersonic-glider or operational spacecraft performance
-next_gate: alpha3_allocator_and_reduction_equivalence
+next_gate: hl20_repository_verification_and_closure

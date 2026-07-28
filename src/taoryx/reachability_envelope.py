@@ -21,7 +21,9 @@ from typing import Any, cast
 
 from .contracts import Frame, FrameVector3
 from .contracts import Vector3 as ContractVector3
+from .hl20_controls import HL20_SURFACE_NAMES
 from .modes import Quaternion
+from .reachability_aerodynamics import HL20_SOURCE_MODEL_ID, HL20DavemlAerodynamics, ReachabilityAeroLoads
 from .rigid_body import RigidBody6DofModel, RigidBody6DofState, RigidBodyForceMoment
 from .vehicle import (
     DetachedBodyDefinition,
@@ -157,8 +159,20 @@ class RocketGlideVehicle:
     gravity_m_s2: float = 9.80665
     sea_level_density_kg_m3: float = 1.225
     density_scale_height_m: float = 8_500.0
+    aerodynamic_model_id: str = "surrogate_fixed_cd_ld_v1"
+    actuator_profile_id: str = "none"
+    attitude_control_mode: str = "open_loop"
+    attitude_control_gain: float = 500_000.0
+    attitude_rate_damping: float = 300_000.0
     attitude_time_constant_s: float = 0.35
     max_attitude_rate_rad_s: float = math.radians(90.0)
+    mission_profile_id: str = "none"
+    glide_bank_schedule_deg: tuple[tuple[float, float], ...] = ()
+    mission_segment_schedule: tuple[tuple[str, float, float], ...] = ()
+    configuration_variant_id: str = "nominal"
+    mass_property_profile_id: str = "generic_slender_body_v1"
+    inertia_body_kg_m2: ContractVector3 | None = None
+    wind_velocity_m_s: ContractVector3 = ContractVector3(0.0, 0.0, 0.0)
     booster_dry_mass_kg: float = 0.0
     booster_propellant_mass_kg: float = 0.0
     booster_thrust_n: float = 0.0
@@ -212,6 +226,55 @@ class RocketGlideVehicle:
             "max_attitude_rate_rad_s",
         )
         for name in positive:
+            value = float(getattr(self, name))
+            _validate_finite(name, value)
+            if value <= 0.0:
+                raise ValueError(f"{name} must be positive")
+        if not self.aerodynamic_model_id.strip():
+            raise ValueError("aerodynamic_model_id must not be empty")
+        if not self.actuator_profile_id.strip():
+            raise ValueError("actuator_profile_id must not be empty")
+        if not self.mission_profile_id.strip():
+            raise ValueError("mission_profile_id must not be empty")
+        if not self.configuration_variant_id.strip():
+            raise ValueError("configuration_variant_id must not be empty")
+        if not self.mass_property_profile_id.strip():
+            raise ValueError("mass_property_profile_id must not be empty")
+        if self.inertia_body_kg_m2 is not None and not all(
+            math.isfinite(value) and value > 0.0
+            for value in (
+                self.inertia_body_kg_m2.x,
+                self.inertia_body_kg_m2.y,
+                self.inertia_body_kg_m2.z,
+            )
+        ):
+            raise ValueError("inertia_body_kg_m2 must contain positive finite values")
+        if not all(
+            math.isfinite(value)
+            for value in (self.wind_velocity_m_s.x, self.wind_velocity_m_s.y, self.wind_velocity_m_s.z)
+        ):
+            raise ValueError("wind_velocity_m_s must contain finite values")
+        previous_time = -math.inf
+        for time_s, bank_deg in self.glide_bank_schedule_deg:
+            _validate_finite("glide bank schedule time", float(time_s))
+            _validate_finite("glide bank schedule bank", float(bank_deg))
+            if time_s < 0.0 or time_s <= previous_time:
+                raise ValueError("glide_bank_schedule_deg must be strictly increasing and non-negative")
+            if not -180.0 <= bank_deg <= 180.0:
+                raise ValueError("glide bank schedule bank must be within +/-180 degrees")
+            previous_time = time_s
+        previous_segment_end = 0.0
+        for identifier, start_s, end_s in self.mission_segment_schedule:
+            if not str(identifier).strip():
+                raise ValueError("mission segment identifiers must not be empty")
+            _validate_finite("mission segment start", float(start_s))
+            _validate_finite("mission segment end", float(end_s))
+            if start_s < previous_segment_end or end_s <= start_s:
+                raise ValueError("mission_segment_schedule must be ordered and non-overlapping")
+            previous_segment_end = end_s
+        if self.attitude_control_mode not in {"open_loop", "velocity_aligned"}:
+            raise ValueError("attitude_control_mode must be 'open_loop' or 'velocity_aligned'")
+        for name in ("attitude_control_gain", "attitude_rate_damping"):
             value = float(getattr(self, name))
             _validate_finite(name, value)
             if value <= 0.0:
@@ -281,6 +344,24 @@ class RocketGlideVehicle:
             return "glide"
         return "boost" if time_s < self.burn_time_s - 1.0e-12 else "glide"
 
+    def bank_at(self, time_s: float, fallback_rad: float) -> float:
+        """Return the configured energy-management bank command at time."""
+
+        bank_rad = fallback_rad
+        for schedule_time_s, bank_deg in self.glide_bank_schedule_deg:
+            if time_s + 1.0e-12 < schedule_time_s:
+                break
+            bank_rad = math.radians(bank_deg)
+        return bank_rad
+
+    def mission_segment_at(self, time_s: float) -> str:
+        """Return the configured mission segment owning ``time_s``."""
+
+        for identifier, start_s, end_s in self.mission_segment_schedule:
+            if start_s <= time_s < end_s:
+                return identifier
+        return "unprofiled"
+
     @property
     def glide_lift_coefficient(self) -> float:
         return self.drag_coefficient * self.lift_to_drag
@@ -294,13 +375,24 @@ class LaunchCommand:
     azimuth_rad: float
     elevation_rad: float
     bank_rad: float = 0.0
+    surface_commands_deg: tuple[float, ...] = ()
 
     def __post_init__(self) -> None:
         for name in ("azimuth_rad", "elevation_rad", "bank_rad"):
             _validate_finite(name, float(getattr(self, name)))
         if not -0.5 * math.pi < self.elevation_rad < 0.5 * math.pi:
             raise ValueError("elevation_rad must be between -pi/2 and pi/2")
+        if self.surface_commands_deg and len(self.surface_commands_deg) != len(HL20_SURFACE_NAMES):
+            raise ValueError("surface_commands_deg must contain seven canonical HL-20 surface commands")
+        if not all(math.isfinite(float(value)) for value in self.surface_commands_deg):
+            raise ValueError("surface_commands_deg must contain only finite values")
         ####
+
+    @property
+    def surface_controls_deg(self) -> dict[str, float]:
+        """Return explicitly requested surface commands by canonical name."""
+
+        return dict(zip(HL20_SURFACE_NAMES, self.surface_commands_deg, strict=True)) if self.surface_commands_deg else {}
 
     @property
     def launch_direction(self) -> Vector3:
@@ -378,10 +470,14 @@ class TerminalCriteria:
     max_impact_radius_m: float | None = None
     min_impact_speed_m_s: float | None = None
     max_impact_speed_m_s: float | None = None
+    target_id: str = "local_target"
+    target_frame: str = "local_ecic"
 
     def __post_init__(self) -> None:
         if self.min_speed_m_s < 0.0 or self.max_speed_m_s < self.min_speed_m_s:
             raise ValueError("terminal speed bounds are invalid")
+        if not self.target_id.strip() or not self.target_frame.strip():
+            raise ValueError("terminal target_id and target_frame must not be empty")
         _validate_finite("min_speed_m_s", self.min_speed_m_s)
         if not math.isinf(self.max_speed_m_s):
             _validate_finite("max_speed_m_s", self.max_speed_m_s)
@@ -416,6 +512,8 @@ class TerminalCriteria:
             "max_impact_radius_m": self.max_impact_radius_m,
             "min_impact_speed_m_s": self.min_impact_speed_m_s,
             "max_impact_speed_m_s": self.max_impact_speed_m_s,
+            "target_id": self.target_id,
+            "target_frame": self.target_frame,
         }
         ####
 
@@ -435,6 +533,8 @@ class TerminalCriteria:
             max_impact_radius_m=_optional_float(payload.get("max_impact_radius_m")),
             min_impact_speed_m_s=_optional_float(payload.get("min_impact_speed_m_s")),
             max_impact_speed_m_s=_optional_float(payload.get("max_impact_speed_m_s")),
+            target_id=str(payload.get("target_id", "local_target")),
+            target_frame=str(payload.get("target_frame", "local_ecic")),
         )
 
 
@@ -535,6 +635,7 @@ class TrajectoryResult:
     termination: EnvelopeTermination
     spawned_bodies: tuple[DetachedBodyTrajectory, ...] = ()
     deployment_events: tuple[dict[str, object], ...] = ()
+    mission_events: tuple[dict[str, object], ...] = ()
     telemetry: tuple[dict[str, object], ...] = ()
 
     @property
@@ -704,6 +805,7 @@ class ReachabilityEnvelope:
         evaluated_bounds = self.evaluated_bounds
         samples = [_sample_dict(sample, state_fields, include_trajectories) for sample in self.samples]
         deployment_events = [event for sample in self.samples for event in sample.trajectory.deployment_events]
+        mission_events = [event for sample in self.samples for event in sample.trajectory.mission_events]
         spawned_children = [child for sample in self.samples for child in sample.trajectory.spawned_bodies]
         detached_body = vehicle_parameters.get("booster_detached_body")
         deployment_configuration = {
@@ -728,7 +830,16 @@ class ReachabilityEnvelope:
                     "integrator_order": 4,
                     "phases": ["boost", "coast", "glide"] if vehicle_parameters.get("booster_release_time_s", 0.0) else ["boost", "glide"],
                     "state_fields": list(state_fields),
-                    "force_model": ["thrust", "drag", "lift", "gravity"],
+                    "force_model": [
+                        "thrust",
+                        "gravity",
+                        "hl20_daveml_force_moment_graph"
+                        if vehicle_parameters.get("aerodynamic_model_id") == HL20_SOURCE_MODEL_ID
+                        else "drag",
+                        "source_lift_and_side_force"
+                        if vehicle_parameters.get("aerodynamic_model_id") == HL20_SOURCE_MODEL_ID
+                        else "lift",
+                    ],
                     "atmosphere_model": "exponential_density",
                     "attitude_model": (
                         "filtered_commanded_attitude"
@@ -747,6 +858,7 @@ class ReachabilityEnvelope:
             "search_space": search_space.as_dict(),
             "success_spec": self.terminal_criteria.as_dict(),
             "deployment": deployment_configuration,
+            "mission_events": mission_events,
             "execution": {
                 "step_size_s": self.step_size_s,
                 "horizon_s": self.horizon_s,
@@ -843,6 +955,52 @@ def _atmosphere(vehicle: RocketGlideVehicle, altitude_m: float) -> float:
     ####
 
 
+def _aero_attitude(vehicle: RocketGlideVehicle, state: State, command: LaunchCommand) -> Quaternion:
+    """Return the body-to-ECIC attitude used for a source aero query."""
+
+    if isinstance(state, RigidBody6DofReachabilityState):
+        return state.native.attitude
+    speed = _norm(state.velocity_m_s)
+    flight_path = math.asin(_clamp(state.velocity_m_s[2] / max(speed, 1.0e-12), -1.0, 1.0))
+    heading = math.atan2(state.velocity_m_s[1], state.velocity_m_s[0])
+    bank = state.attitude_rad[0] if isinstance(state, Pseudo6DofState) else vehicle.bank_at(state.time_s, command.bank_rad)
+    # Reduced source queries follow the documented velocity-aligned policy;
+    # the native rigid tier uses its actual quaternion and can fail closed.
+    return _euler_quaternion((bank, -flight_path, heading))
+
+
+def _source_aero_loads(
+    vehicle: RocketGlideVehicle,
+    state: State,
+    command: LaunchCommand,
+) -> ReachabilityAeroLoads:
+    """Evaluate the selected source-backed aerodynamic provider."""
+
+    if vehicle.aerodynamic_model_id != HL20_SOURCE_MODEL_ID:
+        raise ValueError(f"unsupported source aerodynamic model: {vehicle.aerodynamic_model_id}")
+    attitude = _aero_attitude(vehicle, state, command)
+    air_velocity_ecic = ContractVector3(*state.velocity_m_s) - vehicle.wind_velocity_m_s
+    body_velocity = attitude.conjugate().rotate(air_velocity_ecic)
+    if isinstance(state, RigidBody6DofReachabilityState):
+        body_rates = (state.native.body_rate.x, state.native.body_rate.y, state.native.body_rate.z)
+    elif isinstance(state, Pseudo6DofState):
+        body_rates = state.attitude_rate_rad_s
+    else:
+        body_rates = (0.0, 0.0, 0.0)
+    return HL20DavemlAerodynamics(
+        reference_area_m2=vehicle.reference_area_m2,
+        sea_level_density_kg_m3=vehicle.sea_level_density_kg_m3,
+        density_scale_height_m=vehicle.density_scale_height_m,
+    ).evaluate(
+        (body_velocity.x, body_velocity.y, body_velocity.z),
+        state.position_m[2],
+        body_rates,
+        command.surface_controls_deg,
+        None if vehicle.actuator_profile_id == "none" else vehicle.actuator_profile_id,
+        state.time_s,
+    )
+
+
 def _lift_direction(velocity: Vector3, bank_rad: float) -> Vector3:
     velocity_unit = _unit(velocity)
     up = (0.0, 0.0, 1.0)
@@ -857,8 +1015,21 @@ def _attitude_target(command: LaunchCommand) -> Vector3:
     ####
 
 
+def _velocity_aligned_attitude_target(vehicle: RocketGlideVehicle, state: Pseudo6DofState, command: LaunchCommand) -> Vector3:
+    speed = _norm(state.velocity_m_s)
+    return (
+        vehicle.bank_at(state.time_s, command.bank_rad),
+        math.asin(_clamp(state.velocity_m_s[2] / max(speed, 1.0e-12), -1.0, 1.0)),
+        math.atan2(state.velocity_m_s[1], state.velocity_m_s[0]),
+    )
+
+
 def _attitude_derivative(vehicle: RocketGlideVehicle, state: Pseudo6DofState, command: LaunchCommand) -> tuple[Vector3, Vector3]:
-    target = _attitude_target(command)
+    target = (
+        _velocity_aligned_attitude_target(vehicle, state, command)
+        if vehicle.attitude_control_mode == "velocity_aligned"
+        else _attitude_target(command)
+    )
     errors = (
         _wrap_angle(target[0] - state.attitude_rad[0]),
         _wrap_angle(target[1] - state.attitude_rad[1]),
@@ -885,9 +1056,6 @@ def _derivative(
 ) -> _Derivative:
     speed = _norm(state.velocity_m_s)
     velocity_unit = _unit(state.velocity_m_s, fallback=command.launch_direction)
-    density = _atmosphere(vehicle, state.position_m[2])
-    dynamic_pressure = 0.5 * density * speed * speed
-    drag = _scale(velocity_unit, -dynamic_pressure * vehicle.reference_area_m2 * vehicle.drag_coefficient)
     gravity = (0.0, 0.0, -vehicle.gravity_m_s2 * state.mass_kg)
     phase = vehicle.phase_at(state.time_s)
     boost = phase == "boost"
@@ -910,11 +1078,21 @@ def _derivative(
 
     thrust_n = vehicle.booster_thrust_n if vehicle.has_booster else vehicle.thrust_n
     thrust = _scale(thrust_direction, thrust_n if boost else 0.0)
-    lift = _scale(
-        _lift_direction(state.velocity_m_s, bank_rad),
-        dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient if not boost else 0.0,
-    )
-    acceleration = _scale(_add(_add(_add(thrust, drag), lift), gravity), 1.0 / state.mass_kg)
+    if not boost and vehicle.aerodynamic_model_id == HL20_SOURCE_MODEL_ID:
+        source_loads = _source_aero_loads(vehicle, state, command)
+        attitude = _aero_attitude(vehicle, state, command)
+        aero_ecic = attitude.rotate(ContractVector3(*source_loads.force_body_n))
+        aero_force = (aero_ecic.x, aero_ecic.y, aero_ecic.z)
+    else:
+        density = _atmosphere(vehicle, state.position_m[2])
+        dynamic_pressure = 0.5 * density * speed * speed
+        drag = _scale(velocity_unit, -dynamic_pressure * vehicle.reference_area_m2 * vehicle.drag_coefficient)
+        lift = _scale(
+            _lift_direction(state.velocity_m_s, bank_rad),
+            dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient if not boost else 0.0,
+        )
+        aero_force = _add(drag, lift)
+    acceleration = _scale(_add(_add(thrust, aero_force), gravity), 1.0 / state.mass_kg)
     return _Derivative(
         position_m_s=state.velocity_m_s,
         velocity_m_s2=acceleration,
@@ -1025,14 +1203,15 @@ def _body_longitudinal_axis(state: State) -> Vector3:
     ####
 
 
-def _projected_area(body: DetachedBodyDefinition, state: State) -> float:
-    """Evaluate scalar projected area for the four Alpha 3 shape profiles."""
+def _projected_area(body: DetachedBodyDefinition, state: State, *, velocity_m_s: Vector3 | None = None) -> float:
+    """Evaluate scalar projected area for the canonical passive-body profiles."""
 
     if body.shape is DetachedBodyShape.SPHERE or not isinstance(state, (Pseudo6DofState, RigidBody6DofReachabilityState)):
         return body.reference_area_m2
     radius_or_axial, *remaining = body.dimensions_m
     axis = _body_longitudinal_axis(state)
-    velocity_axis_cosine = abs(_dot(_unit(state.velocity_m_s), axis))
+    relative_velocity = state.velocity_m_s if velocity_m_s is None else velocity_m_s
+    velocity_axis_cosine = abs(_dot(_unit(relative_velocity), axis))
     angle = math.acos(_clamp(velocity_axis_cosine, 0.0, 1.0))
     sine = abs(math.sin(angle))
     cosine = abs(math.cos(angle))
@@ -1050,6 +1229,14 @@ def _projected_area(body: DetachedBodyDefinition, state: State) -> float:
         if delta <= 1.0:
             return math.pi * radius_or_axial**2 * cosine
         return radius_or_axial**2 * cosine * (math.pi + math.sqrt(delta**2 - 1.0) - math.acos(1.0 / delta))
+    if body.shape is DetachedBodyShape.TRIAXIAL_ELLIPSOID:
+        semi_axis_y, semi_axis_z = remaining
+        direction = _unit(relative_velocity)
+        return math.pi * radius_or_axial * semi_axis_y * semi_axis_z * math.sqrt(
+            (direction[0] / radius_or_axial) ** 2
+            + (direction[1] / semi_axis_y) ** 2
+            + (direction[2] / semi_axis_z) ** 2
+        )
     return body.reference_area_m2
     ####
 
@@ -1078,6 +1265,13 @@ def _detached_inertia(body: DetachedBodyDefinition) -> ContractVector3:
             mass * (0.15 * radius_or_axial**2 + 0.6 * height**2),
             mass * (0.15 * radius_or_axial**2 + 0.6 * height**2),
         )
+    if body.shape is DetachedBodyShape.TRIAXIAL_ELLIPSOID:
+        semi_axis_y, semi_axis_z = remaining
+        return ContractVector3(
+            mass * (semi_axis_y**2 + semi_axis_z**2) / 5.0,
+            mass * (radius_or_axial**2 + semi_axis_z**2) / 5.0,
+            mass * (radius_or_axial**2 + semi_axis_y**2) / 5.0,
+        )
     transverse = remaining[0] if remaining else radius_or_axial
     return ContractVector3(
         0.2 * mass * transverse**2,
@@ -1092,12 +1286,15 @@ def _rigid_body_model(vehicle: RocketGlideVehicle, body: DetachedBodyDefinition)
     inertia = _detached_inertia(body)
 
     def force_moment(native: RigidBody6DofState) -> RigidBodyForceMoment:
-        velocity = native.attitude.conjugate().rotate(native.velocity.vector)
+        # Propagate position with inertial velocity, but apply aero to the
+        # relative air velocity just like the retained parent model.
+        air_velocity = native.velocity.vector - vehicle.wind_velocity_m_s
+        velocity = native.attitude.conjugate().rotate(air_velocity)
         speed = velocity.norm()
         density = _atmosphere(vehicle, native.position.vector.z)
         dynamic_pressure = 0.5 * density * speed**2
         area_state = RigidBody6DofReachabilityState(native)
-        area = _projected_area(body, area_state)
+        area = _projected_area(body, area_state, velocity_m_s=(air_velocity.x, air_velocity.y, air_velocity.z))
         drag_body = velocity.scaled(-dynamic_pressure * area * vehicle.drag_coefficient / max(speed, 1.0e-12))
         if body.tumbling_policy in {TumblingPolicy.FIXED_ATTITUDE, TumblingPolicy.PRESCRIBED_SPIN}:
             moment = ContractVector3(0.0, 0.0, 0.0)
@@ -1125,45 +1322,83 @@ def _rigid_body_model(vehicle: RocketGlideVehicle, body: DetachedBodyDefinition)
     )
 
 
+def _velocity_alignment_error(vehicle: RocketGlideVehicle, native: RigidBody6DofState) -> ContractVector3:
+    """Return the shortest body-frame attitude error to the scheduled target."""
+
+    if vehicle.attitude_control_mode != "velocity_aligned":
+        return ContractVector3(0.0, 0.0, 0.0)
+    velocity = native.velocity.vector - vehicle.wind_velocity_m_s
+    speed = velocity.norm()
+    if speed <= 1.0e-12:
+        return ContractVector3(0.0, 0.0, 0.0)
+    flight_path = math.asin(_clamp(velocity.z / speed, -1.0, 1.0))
+    heading = math.atan2(velocity.y, velocity.x)
+    desired = _euler_quaternion((vehicle.bank_at(native.time, 0.0), -flight_path, heading))
+    error = native.attitude.conjugate().multiply(desired)
+    sign = -1.0 if error.w < 0.0 else 1.0
+    return ContractVector3(2.0 * sign * error.x, 2.0 * sign * error.y, 2.0 * sign * error.z)
+
+
+def _velocity_alignment_moment(vehicle: RocketGlideVehicle, native: RigidBody6DofState) -> ContractVector3:
+    """Return the opt-in synthetic moment that tracks velocity and bank."""
+
+    error_body = _velocity_alignment_error(vehicle, native)
+    return error_body.scaled(vehicle.attitude_control_gain) - native.body_rate.scaled(vehicle.attitude_rate_damping)
+
+
 def _rigid_parent_model(vehicle: RocketGlideVehicle, command: LaunchCommand) -> RigidBody6DofModel:
     """Build the reduced rigid-body model for the retained rocket/glider parent."""
 
-    inertia = ContractVector3(
+    computed_inertia = ContractVector3(
         0.40 * vehicle.release_mass_kg * 3.0**2,
         0.25 * vehicle.release_mass_kg * 8.607552**2,
         0.25 * vehicle.release_mass_kg * 8.607552**2,
     )
+    inertia = vehicle.inertia_body_kg_m2 or computed_inertia
 
     def force_moment(native: RigidBody6DofState) -> RigidBodyForceMoment:
         velocity = native.attitude.conjugate().rotate(native.velocity.vector)
         speed = velocity.norm()
-        density = _atmosphere(vehicle, native.position.vector.z)
-        dynamic_pressure = 0.5 * density * speed**2
-        drag_body = velocity.scaled(-dynamic_pressure * vehicle.reference_area_m2 * vehicle.drag_coefficient / max(speed, 1.0e-12))
         phase = vehicle.phase_at(native.time)
-        lift_ecic = (
-            _lift_direction(
-                (native.velocity.vector.x, native.velocity.vector.y, native.velocity.vector.z),
-                command.bank_rad,
+        if phase == "glide" and vehicle.aerodynamic_model_id == HL20_SOURCE_MODEL_ID:
+            source_loads = _source_aero_loads(vehicle, RigidBody6DofReachabilityState(native, phase), command)
+            aero_force = ContractVector3(*source_loads.force_body_n)
+            aero_moment = ContractVector3(*source_loads.moment_body_nm)
+        else:
+            density = _atmosphere(vehicle, native.position.vector.z)
+            dynamic_pressure = 0.5 * density * speed**2
+            drag_body = velocity.scaled(-dynamic_pressure * vehicle.reference_area_m2 * vehicle.drag_coefficient / max(speed, 1.0e-12))
+            lift_ecic = (
+                _lift_direction(
+                    (native.velocity.vector.x, native.velocity.vector.y, native.velocity.vector.z),
+                    vehicle.bank_at(native.time, command.bank_rad),
+                )
+                if phase == "glide"
+                else (0.0, 0.0, 0.0)
             )
-            if phase == "glide"
-            else (0.0, 0.0, 0.0)
-        )
-        lift_body = native.attitude.conjugate().rotate(
-            ContractVector3(
-                dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient * lift_ecic[0],
-                dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient * lift_ecic[1],
-                dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient * lift_ecic[2],
+            lift_body = native.attitude.conjugate().rotate(
+                ContractVector3(
+                    dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient * lift_ecic[0],
+                    dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient * lift_ecic[1],
+                    dynamic_pressure * vehicle.reference_area_m2 * vehicle.glide_lift_coefficient * lift_ecic[2],
+                )
             )
-        )
+            aero_force = drag_body + lift_body
+            aero_moment = ContractVector3(0.0, 0.0, 0.0)
         thrust_body = ContractVector3(vehicle.booster_thrust_n, 0.0, 0.0) if phase == "boost" else ContractVector3(0.0, 0.0, 0.0)
-        aero_force = drag_body + lift_body
+        control_moment = _velocity_alignment_moment(vehicle, native)
+        if phase == "glide" and vehicle.aerodynamic_model_id == HL20_SOURCE_MODEL_ID and vehicle.attitude_control_mode == "velocity_aligned":
+            # The source moment is an external disturbance to this reduced
+            # stabilization policy; cancel it explicitly rather than letting
+            # the native attitude walk outside the source alpha envelope.
+            control_moment = control_moment - aero_moment
         return RigidBodyForceMoment(
             aero_force + thrust_body,
-            ContractVector3(0.0, 0.0, 0.0),
+            aero_moment + control_moment,
             propellant_mass_rate=(vehicle.booster_propellant_mass_kg / vehicle.booster_burn_time_s if phase == "boost" else 0.0),
             aero_force_body=aero_force,
             propulsion_force_body=thrust_body,
+            aero_moment_body=aero_moment,
         )
 
     return RigidBody6DofModel(
@@ -1193,8 +1428,17 @@ def _rigid_parent_rk4_step(
     model = _rigid_parent_model(vehicle, command)
     values = state.native.to_values()
 
+    def trial_state(time: float, current: tuple[float, ...]) -> RigidBody6DofState:
+        # RK4 trial points can land a few ulps below zero at a cutoff boundary.
+        # Normalize that numerical residue before the strict state validator
+        # rejects an otherwise valid declared stage transition.
+        normalized = list(current)
+        if -1.0e-10 <= normalized[14] < 0.0:
+            normalized[14] = 0.0
+        return RigidBody6DofState.from_values(time, normalized)
+
     def derivative(time: float, current: tuple[float, ...]) -> tuple[float, ...]:
-        return model.derivative(RigidBody6DofState.from_values(time, current))
+        return model.derivative(trial_state(time, current))
 
     first = derivative(state.time_s, values)
     second_values = tuple(value + 0.5 * step_size_s * slope for value, slope in zip(values, first, strict=True))
@@ -1214,7 +1458,7 @@ def _rigid_parent_rk4_step(
         if state.time_s < vehicle.booster_release_time_s <= state.time_s + step_size_s:
             integrated[13] = vehicle.release_mass_kg
             integrated[14] = 0.0
-    next_state = RigidBody6DofState.from_values(state.time_s + step_size_s, integrated)
+    next_state = trial_state(state.time_s + step_size_s, tuple(integrated))
     return RigidBody6DofReachabilityState(next_state, vehicle.phase_at(next_state.time))
 
 
@@ -1283,11 +1527,12 @@ def _ballistic_derivative(vehicle: RocketGlideVehicle, state: State) -> _Derivat
     body = vehicle.booster_detached_body
     if body is None:
         raise ValueError("detached-body derivative requires a body definition")
-    speed = _norm(state.velocity_m_s)
-    velocity_unit = _unit(state.velocity_m_s)
+    air_velocity = ContractVector3(*state.velocity_m_s) - vehicle.wind_velocity_m_s
+    speed = air_velocity.norm()
+    velocity_unit = _unit((air_velocity.x, air_velocity.y, air_velocity.z), fallback=(1.0, 0.0, 0.0))
     density = _atmosphere(vehicle, state.position_m[2])
     dynamic_pressure = 0.5 * density * speed * speed
-    area = _projected_area(body, state)
+    area = _projected_area(body, state, velocity_m_s=(air_velocity.x, air_velocity.y, air_velocity.z))
     drag = _scale(velocity_unit, -dynamic_pressure * area * vehicle.drag_coefficient)
     gravity = (0.0, 0.0, -vehicle.gravity_m_s2 * state.mass_kg)
     acceleration = _scale(_add(drag, gravity), 1.0 / state.mass_kg)
@@ -1439,19 +1684,25 @@ def _detached_initial_state(body: DetachedBodyDefinition, parent: State, fidelit
 def _body_telemetry(vehicle: RocketGlideVehicle, body: DetachedBodyDefinition, state: State, termination: EnvelopeTermination | None = None) -> dict[str, object]:
     """Record accepted detached-body aero and attitude observables."""
 
-    speed = _norm(state.velocity_m_s)
+    air_relative_velocity = ContractVector3(*state.velocity_m_s) - vehicle.wind_velocity_m_s
+    speed = air_relative_velocity.norm()
     density = _atmosphere(vehicle, state.position_m[2])
-    area = _projected_area(body, state)
+    area = _projected_area(body, state, velocity_m_s=(air_relative_velocity.x, air_relative_velocity.y, air_relative_velocity.z))
     drag_force_n = 0.5 * density * speed**2 * area * vehicle.drag_coefficient
     payload: dict[str, object] = {
         "time_s": state.time_s,
         "position_m": list(state.position_m),
         "velocity_m_s": list(state.velocity_m_s),
+        "air_relative_velocity_m_s": [air_relative_velocity.x, air_relative_velocity.y, air_relative_velocity.z],
+        "air_relative_speed_m_s": speed,
         "mass_kg": state.mass_kg,
         "projected_area_m2": area,
         "drag_force_n": drag_force_n,
         "event_id": "booster-release",
         "termination": None if termination is None else termination.value,
+        "configuration_variant_id": vehicle.configuration_variant_id,
+        "mass_property_profile_id": vehicle.mass_property_profile_id,
+        "wind_velocity_m_s": [vehicle.wind_velocity_m_s.x, vehicle.wind_velocity_m_s.y, vehicle.wind_velocity_m_s.z],
     }
     if isinstance(state, Pseudo6DofState):
         payload["attitude_rad"] = list(state.attitude_rad)
@@ -1475,18 +1726,34 @@ def _parent_telemetry(
     """Record accepted parent aero observables for the envelope artifact."""
 
     speed = _norm(state.velocity_m_s)
+    air_relative_velocity = ContractVector3(*state.velocity_m_s) - vehicle.wind_velocity_m_s
     density = _atmosphere(vehicle, state.position_m[2])
-    drag_force_n = 0.5 * density * speed**2 * vehicle.reference_area_m2 * vehicle.drag_coefficient
+    air_relative_speed = air_relative_velocity.norm()
+    drag_force_n = 0.5 * density * air_relative_speed**2 * vehicle.reference_area_m2 * vehicle.drag_coefficient
     payload: dict[str, object] = {
         "time_s": state.time_s,
         "position_m": list(state.position_m),
         "velocity_m_s": list(state.velocity_m_s),
+        "air_relative_velocity_m_s": [air_relative_velocity.x, air_relative_velocity.y, air_relative_velocity.z],
+        "air_relative_speed_m_s": air_relative_speed,
         "mass_kg": state.mass_kg,
         "projected_area_m2": vehicle.reference_area_m2,
         "drag_force_n": drag_force_n,
         "event_id": "booster-release" if vehicle.has_booster and state.time_s >= vehicle.booster_release_time_s else None,
         "termination": None if termination is None else termination.value,
+        "mission_profile_id": vehicle.mission_profile_id,
+        "mission_segment": vehicle.mission_segment_at(state.time_s),
+        "specific_energy_j_per_kg": 0.5 * speed**2 + vehicle.gravity_m_s2 * state.position_m[2],
+        "mission_bank_command_deg": math.degrees(vehicle.bank_at(state.time_s, command.bank_rad)) if command is not None else 0.0,
+        "configuration_variant_id": vehicle.configuration_variant_id,
+        "mass_property_profile_id": vehicle.mass_property_profile_id,
+        "wind_velocity_m_s": [vehicle.wind_velocity_m_s.x, vehicle.wind_velocity_m_s.y, vehicle.wind_velocity_m_s.z],
     }
+    if vehicle.aerodynamic_model_id == HL20_SOURCE_MODEL_ID and state.phase == "glide" and command is not None:
+        try:
+            payload["source_aerodynamics"] = _source_aero_loads(vehicle, state, command).as_dict()
+        except ValueError as error:
+            payload["source_aerodynamic_validity_error"] = str(error)
     if isinstance(state, Pseudo6DofState):
         payload["attitude_rad"] = list(state.attitude_rad)
         payload["attitude_rate_rad_s"] = list(state.attitude_rate_rad_s)
@@ -1494,6 +1761,9 @@ def _parent_telemetry(
         attitude = state.native.attitude
         payload["attitude_quaternion"] = [attitude.w, attitude.x, attitude.y, attitude.z]
         payload["attitude_rate_rad_s"] = [state.native.body_rate.x, state.native.body_rate.y, state.native.body_rate.z]
+        alignment_error = _velocity_alignment_error(vehicle, state.native)
+        payload["attitude_control_error_rad"] = [alignment_error.x, alignment_error.y, alignment_error.z]
+        payload["attitude_control_error_magnitude_rad"] = alignment_error.norm()
         payload.update(_rigid_parent_model(vehicle, command or LaunchCommand(0.0, 0.0)).observables(state.native))
     if fidelity is ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED and command is not None:
         payload.update(_logical_surface_allocation(command))
@@ -1598,6 +1868,7 @@ def simulate_rocket_glide(
     spawned_bodies: list[DetachedBodyTrajectory] = []
     deployment_events: list[dict[str, object]] = []
     termination = EnvelopeTermination.HORIZON
+    invalid_reason: str | None = None
     while state.time_s < horizon_s - 1.0e-12:
         step = min(step_size_s, horizon_s - state.time_s)
         boundaries = [
@@ -1605,12 +1876,19 @@ def simulate_rocket_glide(
             for boundary in (
                 vehicle.booster_burn_time_s if vehicle.has_booster else vehicle.burn_time_s,
                 vehicle.booster_release_time_s if vehicle.has_booster else None,
+                *(time_s for time_s, _ in vehicle.glide_bank_schedule_deg),
+                *(start_s for _, start_s, _ in vehicle.mission_segment_schedule),
             )
             if boundary is not None and state.time_s < boundary < state.time_s + step
         ]
         if boundaries:
             step = min(boundaries) - state.time_s
-        next_state = _rk4_step(vehicle, command, state, step, fidelity)
+        try:
+            next_state = _rk4_step(vehicle, command, state, step, fidelity)
+        except ValueError as error:
+            termination = EnvelopeTermination.INVALID
+            invalid_reason = str(error)
+            break
         states.append(next_state)
         state = next_state
         if (
@@ -1660,8 +1938,11 @@ def simulate_rocket_glide(
             termination = EnvelopeTermination.INVALID
             break
     parent_telemetry = [_parent_telemetry(vehicle, accepted, command=command, fidelity=fidelity) for accepted in states]
+    mission_events = _mission_events(vehicle, states)
     if parent_telemetry:
         parent_telemetry[-1]["termination"] = termination.value
+        if invalid_reason is not None:
+            parent_telemetry[-1]["invalid_reason"] = invalid_reason
     return TrajectoryResult(
         fidelity,
         command,
@@ -1669,9 +1950,36 @@ def simulate_rocket_glide(
         termination,
         tuple(spawned_bodies),
         tuple(deployment_events),
+        tuple(mission_events),
         tuple(parent_telemetry),
     )
     ####
+
+
+def _mission_events(vehicle: RocketGlideVehicle, states: Sequence[State]) -> list[dict[str, object]]:
+    """Emit deterministic segment-entry events from the declared mission plan."""
+
+    events: list[dict[str, object]] = []
+    previous = "unprofiled"
+    for state in states:
+        segment = vehicle.mission_segment_at(state.time_s)
+        if segment == previous or segment == "unprofiled":
+            continue
+        events.append(
+            {
+                "event_id": f"mission-{segment}-start",
+                "kind": "mission_segment_transition",
+                "segment": segment,
+                "accepted_time_s": state.time_s,
+                "parent_model_id": vehicle.vehicle_id,
+                "source_or_assumption": "declared_vehicle_mission_profile",
+                "specific_energy_j_per_kg": 0.5 * state.speed_m_s**2 + vehicle.gravity_m_s2 * state.position_m[2],
+                "altitude_m": state.position_m[2],
+                "speed_m_s": state.speed_m_s,
+            }
+        )
+        previous = segment
+    return events
 
 
 def _state_fields(fidelity: ReachabilityFidelity) -> tuple[str, ...]:
@@ -1737,6 +2045,12 @@ def _vehicle_parameters(vehicle: RocketGlideVehicle) -> dict[str, object]:
         parameters["booster_separation_impulse_n_s"] = [impulse.x, impulse.y, impulse.z]
     if isinstance(parameters.get("booster_separation_impulse_frame"), ImpulseFrame):
         parameters["booster_separation_impulse_frame"] = parameters["booster_separation_impulse_frame"].value
+    inertia = parameters.get("inertia_body_kg_m2")
+    if isinstance(inertia, ContractVector3):
+        parameters["inertia_body_kg_m2"] = [inertia.x, inertia.y, inertia.z]
+    wind = parameters.get("wind_velocity_m_s")
+    if isinstance(wind, ContractVector3):
+        parameters["wind_velocity_m_s"] = [wind.x, wind.y, wind.z]
     return parameters
     ####
 
@@ -1873,6 +2187,15 @@ def _run_envelope_job(job: _EnvelopeJob) -> EnvelopeSample:
         spawn_children=job.spawn_children,
     )
     evaluation = _evaluate(job.criteria, trajectory)
+    target_x, target_y, _ = job.criteria.target_position_m
+    terminal_x, terminal_y, _ = trajectory.terminal.position_m
+    path_metrics = dict(evaluation.path_metrics)
+    path_metrics.update(
+        {
+            "terminal_impact_radius_m": math.hypot(terminal_x - target_x, terminal_y - target_y),
+            "terminal_impact_speed_m_s": trajectory.terminal.speed_m_s,
+        }
+    )
     return EnvelopeSample(
         job.index,
         job.command,
@@ -1882,7 +2205,7 @@ def _run_envelope_job(job: _EnvelopeJob) -> EnvelopeSample:
         evaluation.classification,
         evaluation.failure_reasons,
         evaluation.terminal_margins,
-        evaluation.path_metrics,
+        tuple(sorted(path_metrics.items())),
     )
     ####
 
@@ -1919,6 +2242,15 @@ def run_reachability_envelope(
         context = multiprocessing.get_context("spawn")
         with ProcessPoolExecutor(max_workers=workers, mp_context=context) as executor:
             samples = tuple(executor.map(_run_envelope_job, jobs))
+    selected_provenance = dict(provenance or {})
+    if vehicle.aerodynamic_model_id == HL20_SOURCE_MODEL_ID:
+        selected_provenance.update(
+            HL20DavemlAerodynamics(
+                reference_area_m2=vehicle.reference_area_m2,
+                sea_level_density_kg_m3=vehicle.sea_level_density_kg_m3,
+                density_scale_height_m=vehicle.density_scale_height_m,
+            ).provenance
+        )
     return ReachabilityEnvelope(
         vehicle_id=vehicle.vehicle_id,
         fidelity=fidelity,
@@ -1931,7 +2263,7 @@ def run_reachability_envelope(
         terminal_criteria=selected_criteria,
         vehicle_parameters=tuple(_vehicle_parameters(vehicle).items()),
         state_fields=_state_fields(fidelity),
-        provenance=tuple(sorted((provenance or {}).items())),
+        provenance=tuple(sorted(selected_provenance.items())),
         spawn_children=spawn_children,
     )
     ####
@@ -1988,6 +2320,7 @@ def timed_out_commands_from_artifact(payload: Mapping[str, object]) -> tuple[Lau
                 float(decision["azimuth_rad"]),
                 float(decision["elevation_rad"]),
                 float(decision.get("bank_rad", 0.0)),
+                tuple(float(value) for value in decision.get("surface_commands_deg", [])),
             )
         )
     if not commands:
@@ -2017,6 +2350,12 @@ def rerun_timed_out_artifact(
     impulse_payload = vehicle_parameters.get("booster_separation_impulse_n_s")
     if isinstance(impulse_payload, list) and len(impulse_payload) == 3:
         vehicle_parameters["booster_separation_impulse_n_s"] = ContractVector3(*(float(value) for value in impulse_payload))
+    inertia_payload = vehicle_parameters.get("inertia_body_kg_m2")
+    if isinstance(inertia_payload, list) and len(inertia_payload) == 3:
+        vehicle_parameters["inertia_body_kg_m2"] = ContractVector3(*(float(value) for value in inertia_payload))
+    wind_payload = vehicle_parameters.get("wind_velocity_m_s")
+    if isinstance(wind_payload, list) and len(wind_payload) == 3:
+        vehicle_parameters["wind_velocity_m_s"] = ContractVector3(*(float(value) for value in wind_payload))
     frame_payload = vehicle_parameters.get("booster_separation_impulse_frame")
     if frame_payload is not None:
         vehicle_parameters["booster_separation_impulse_frame"] = ImpulseFrame(str(frame_payload))
@@ -2161,11 +2500,13 @@ def _sample_dict(sample: EnvelopeSample, state_fields: tuple[str, ...], include_
             "launch.azimuth_rad": sample.command.azimuth_rad,
             "launch.elevation_rad": sample.command.elevation_rad,
             "glide.bank_rad": sample.command.bank_rad,
+            "controls.surface_commands_deg": list(sample.command.surface_commands_deg),
         },
         "decision_vector": {
             "azimuth_rad": sample.command.azimuth_rad,
             "elevation_rad": sample.command.elevation_rad,
             "bank_rad": sample.command.bank_rad,
+            "surface_commands_deg": list(sample.command.surface_commands_deg),
         },
         "success": sample.feasible,
         "feasible": sample.feasible,
@@ -2185,6 +2526,7 @@ def _sample_dict(sample: EnvelopeSample, state_fields: tuple[str, ...], include_
         "terminal_velocity_m_s": list(sample.terminal.velocity_m_s),
         "terminal_speed_m_s": sample.terminal.speed_m_s,
         "deployment_events": [dict(event) for event in sample.trajectory.deployment_events],
+        "mission_events": [dict(event) for event in sample.trajectory.mission_events],
         "spawned_body_ids": [body.body_id for body in sample.trajectory.spawned_bodies],
     }
     if include_trajectory:

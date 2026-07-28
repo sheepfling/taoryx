@@ -5,11 +5,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from taoryx.trajectory import A320OpenAPOperatingPoint, A320Pseudo6DOFModel, A320Pseudo6DOFOperatingPoint
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
+@pytest.mark.artifact
 def test_a320_pseudo6dof_runtime_report_is_verified() -> None:
     report = json.loads((ROOT / "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json").read_text(encoding="utf-8"))
 

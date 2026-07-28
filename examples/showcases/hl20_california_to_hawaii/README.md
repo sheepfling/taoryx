@@ -22,6 +22,13 @@ Run the four-fidelity tranche from the repository root:
 python -m tools.dev showcase-hl20-composites
 ```
 
+Render the source-coupled variant, which uses the pinned DAVE-ML graph and
+records actuator and energy-management telemetry:
+
+```text
+python -m tools.dev showcase-hl20-source-composites
+```
+
 Qualify the generated bundle through the explicit HL-20 gates with:
 
 ```text
@@ -61,6 +68,7 @@ files retain the per-tier candidate, parent telemetry, spent-cylinder
 telemetry, and logical surface-allocation rows used by the boards. The adjacent
 `showcase-manifest.json` hashes every input envelope, data artifact, and image.
 
-The surface-allocated file is a bounded synthetic logical seven-surface
-overlay. It proves requested/achieved channel and residual telemetry, but does
-not claim source actuator dynamics or controller qualification.
+The default surface-allocated file is a bounded synthetic logical seven-surface
+overlay. The `source_bound` packet replaces that aerodynamic path with the
+pinned DAVE-ML force/moment graph and first-order actuator realization, while
+remaining explicitly open-loop and non-controller-qualified.

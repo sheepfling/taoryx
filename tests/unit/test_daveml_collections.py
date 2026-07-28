@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import hashlib
-import io
 import json
-import zipfile
 from pathlib import Path
 
 import pytest
@@ -127,13 +125,10 @@ def test_source_preserving_export_reports_verified_hash_reload(tmp_path: Path) -
 def test_collection_replay_resolves_and_replays_declared_runtime_artifact(tmp_path: Path) -> None:
     """A collection replay verifies the outer archive before the runtime seam."""
 
-    corpus = Path(__file__).parents[2] / "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip"
-    package_member = "taoryx-aerospace-data-corpus-v1.1/qualified-models/f16-s119/taoryx-f16-s119-reference-v0.7.txair"
-    with zipfile.ZipFile(corpus) as archive:
-        runtime = archive.read(package_member)
-    with zipfile.ZipFile(io.BytesIO(runtime)) as package:
-        source_name = next(name for name in package.namelist() if name.endswith("aerodynamics.dml"))
-        source = package.read(source_name)
+    resource_root = Path(__file__).parents[2] / "resources/aerospace/daveml/taoryx-corpus-v1.1/qualified-models/f16-s119"
+    runtime = (resource_root / "taoryx-f16-s119-reference-v0.7.txair").read_bytes()
+    source_name = "F16_aero_mod_k_normalized.dml"
+    source = (resource_root / source_name).read_bytes()
     source_hash = hashlib.sha256(source).hexdigest()
     manifest = CollectionManifest(
         collection_type="taoryx.txcollection/v1alpha1",

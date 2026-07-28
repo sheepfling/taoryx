@@ -3,7 +3,10 @@
 import json
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
+pytestmark = pytest.mark.artifact
 
 
 def test_f16_linearization_evidence_has_true_dynamics_shape_and_provenance() -> None:

@@ -1,6 +1,6 @@
 # TAORYX Alpha 3: vehicle breadth and qualification expansion
 
-**Status:** Planned after Alpha 2 closeout  
+**Status:** Active; passive aero-ballistic deployment tranche qualified
 **Predecessor:** Alpha 2 closeout contract  
 **Boundary:** Add and qualify new vehicle archetypes without weakening the
 common runtime, family-package, control, or evidence contracts.
@@ -207,17 +207,18 @@ The workstream covers:
 - shared stage mass, propulsion-authority, separation, and detached-body
   definitions;
 - parent pre/post event states and optional body-frame/inertial impulse;
-- cylindrical spent rocket stages and spheroidal spent tanks as ballistic
+- cylindrical spent rocket stages and ellipsoid spent tanks as ballistic
   child bodies;
 - point-mass 3DOF, pseudo-6DOF tumbling, and separately gated rigid-body 6DOF;
 - deterministic child initialization, mass accounting, event identity, and
   parent/child artifact visualization; and
 - source-language lowering only after the shared semantic contract is stable.
 
-A3-W5 is not complete when a separation merely changes parent mass. It is
-complete when a declared passive aero-ballistic child can be initialized,
-propagated, terminated, and visualized with the same event and provenance
-identity as its parent. Active arbitrary-child deployment, including child
+A3-W5 is complete for the passive specialization: declared sphere, cylinder,
+cone, and triaxial-ellipsoid children are initialized, propagated, terminated,
+uncertainty-swept, and visualized with the same event and provenance identity
+as their parent. Their physical terminal footprints remain separate from
+parent capability claims. Active arbitrary-child deployment, including child
 propulsion, guidance, and vehicle-specific configuration builders, is deferred
 to Alpha 4.
 

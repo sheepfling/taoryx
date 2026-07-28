@@ -8,6 +8,8 @@ developed progressively without duplicating its mission contract.
 
 For the operator-facing setup, trim declaration, commands, and failure
 diagnostics, follow [Trim And Fidelity Walkthrough](../plan/trim-and-fidelity-walkthrough.md).
+For the promotion order, evidence packet, and DaveML/IMU alignment, follow
+[Fidelity-first vehicle integration program](../plan/fidelity-first-integration-program.md).
 
 ## Modes
 
@@ -78,6 +80,12 @@ estimate inertia response, or claim rigid-body stability.
    surface-allocated tier.
 5. Compare histories over the same initial condition and declared maneuver.
    Differences should be attributed to the named tier change.
+
+Promotion is ordered, even though diagnostic execution is not. A higher-tier
+case may be run to expose a missing model input, but it remains
+`diagnostic_only` until the preceding tier has promoted evidence for the same
+vehicle identity and mission boundary. Data readiness, runtime execution,
+qualification, and promotion are separate statuses.
 
 The bridge is therefore a diagnostic and development mode, not evidence that a
 vehicle has passed full 6-DOF verification.

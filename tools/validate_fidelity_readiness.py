@@ -30,22 +30,55 @@ def _render(report: FidelityReadinessReport) -> str:
     ####
 
 
+def _ordered_blocker(reports: tuple[FidelityReadinessReport, ...]) -> FidelityReadinessReport | None:
+    """Return the first blocked prerequisite in an ordered tier sequence."""
+
+    return next((report for report in reports if report.errors), None)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--vehicle", default="all", help="registered vehicle ID or 'all' (default: all)")
-    parser.add_argument("--tier", choices=TIERS + ("all",), default="all")
+    tier_group = parser.add_mutually_exclusive_group()
+    tier_group.add_argument("--tier", choices=TIERS + ("all",), default="all")
+    tier_group.add_argument(
+        "--through-tier",
+        choices=TIERS,
+        help="evaluate the ordered prerequisites from point-mass through this tier",
+    )
     parser.add_argument("--json", type=Path, help="write the machine-readable report")
     args = parser.parse_args(argv)
-    tiers = TIERS if args.tier == "all" else (args.tier,)
+    if args.through_tier:
+        tiers = TIERS[: TIERS.index(args.through_tier) + 1]
+    else:
+        tiers = TIERS if args.tier == "all" else (args.tier,)
     vehicle_ids = tuple(load_vehicle_registry()) if args.vehicle == "all" else (args.vehicle,)
     reports = tuple(report for vehicle_id in vehicle_ids for report in validate_all_fidelity_readiness(vehicle_id, tiers))
     for report in reports:
         print(_render(report))
+    ordered_blockers: dict[str, dict[str, str]] = {}
+    if args.through_tier:
+        for vehicle_id in vehicle_ids:
+            vehicle_reports = tuple(report for report in reports if report.vehicle_id == vehicle_id)
+            blocker = _ordered_blocker(vehicle_reports)
+            if blocker is not None:
+                ordered_blockers[vehicle_id] = {
+                    "tier": blocker.tier,
+                    "message": "required intake data are missing at this tier",
+                }
+                print(f"{vehicle_id}: ordered promotion blocked at {blocker.tier}")
     if args.json:
         args.json.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"schema_version": 1, "vehicle": args.vehicle, "reports": [report.as_dict() for report in reports]}
+        payload = {
+            "schema_version": 1,
+            "vehicle": args.vehicle,
+            "requested_tier": args.through_tier or args.tier,
+            "ordered": bool(args.through_tier),
+            "ordered_blockers": ordered_blockers,
+            "reports": [report.as_dict() for report in reports],
+        }
         args.json.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return 0 if all(not report.errors for report in reports) else 1
+    return 0 if all(not report.errors for report in reports) and not ordered_blockers else 1
     ####
 
 

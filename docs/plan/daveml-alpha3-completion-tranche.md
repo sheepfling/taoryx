@@ -7,6 +7,13 @@ synthetic demonstration into one claim
 **Claim boundary:** source-bounded research integration; not flight
 qualification, manufacturer validation, or historical TAOS compatibility
 
+**Fidelity workflow:** DAVE-ML package completion and vehicle-tier qualification
+are separate axes. Imported channels are promoted in order through
+`point_mass_3dof`, `pseudo_6dof_kinematic_bridge`,
+`rigid_body_6dof_direct_wrench`, and
+`rigid_body_6dof_surface_allocated`; a higher-tier diagnostic cannot promote
+while an earlier tier is blocked. See [Fidelity-first vehicle integration program](fidelity-first-integration-program.md).
+
 ## Pinned Plan
 
 This is the pinned remaining-work plan for the current DAVE-ML tranche. The
@@ -17,15 +24,17 @@ not another broad importer rewrite.
 
 ### Priority 1: Promote the Existing Executable Families
 
-1. **F-16:** add multipoint operating evidence, then qualify controller,
-   actuator, mission, and reduced-order overlays independently.
-2. **HL-20:** add wider energy-glide and attitude-response evidence; keep the
+1. **F-16:** establish the point-mass and pseudo-6DOF operating evidence,
+   then qualify controller, actuator, mission, and reduced-order overlays
+   independently before any physical-effector claim.
+2. **HL-20:** establish the point-mass and pseudo-6DOF energy-glide evidence,
+   then add wider attitude-response evidence; keep the
    unpowered source boundary and do not infer controller authority from it.
-3. **NESC two-stage:** complete an independent full-trajectory comparison,
-   preserve staging history, and keep any deployment child as a separate
+3. **NESC two-stage:** complete the point-mass trajectory and independent
+   comparison first, then preserve staging history and keep any deployment child as a separate
    lineage artifact.
-4. **A320:** maintain the derived-exact OpenAP and surrogate-composite
-   OpenAP-plus-JSBSim lanes; compare them at matched operating points without
+4. **A320:** maintain the derived-exact OpenAP point-mass lane, then the
+   surrogate-composite pseudo-6DOF OpenAP-plus-JSBSim lane; compare them at matched operating points without
    presenting either as an authoritative Airbus 6-DOF source.
 
 ### Priority 2: Qualify Reductions and Demonstrations

@@ -3,7 +3,10 @@
 import json
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
+pytestmark = pytest.mark.artifact
 
 
 def test_daveml_atmosphere_evidence_is_hash_linked_and_sampled() -> None:

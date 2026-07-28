@@ -1,6 +1,6 @@
 # Alpha 3 Aero-Ballistic Deployment Plan
 
-**Status:** Alpha 3 promotion implemented and under verification
+**Status:** Alpha 3 qualification complete for the passive aero-ballistic tranche
 **Scope:** the aero-ballistic specialization of generic deployment: staged
 separation, spawned ballistic bodies, and passive/tumbling deployable-body
 reachability
@@ -30,18 +30,18 @@ mass subtraction hidden inside a reachability adapter. A separation may:
 The first proof cases are:
 
 1. X-15-style spent rocket stage, represented as a cylindrical passive tumbler.
-2. Spent fighter tank, represented as a spheroid/elliptic passive tumbler.
+2. Spent fighter tank, represented as an ellipsoid passive tumbler.
 3. A no-kick separation, proving that deployment does not invent momentum.
 
 Alpha 3 will close on four canonical detached-body profiles:
 
 1. sphere, for the orientation-independent baseline;
 2. cylinder, for a spent rocket stage or fighter store;
-3. spheroid, for an elliptic tank or rounded store; and
-4. cone, for a pointed aero-ballistic body.
+3. cone, for a pointed aero-ballistic body; and
+4. triaxial ellipsoid, for a parameterized elliptic tank or rounded store.
 
-The existing triaxial-ellipsoid support remains a compatible extension and
-test target, but is not required to close the first deployment milestone.
+The two-axis spheroid constructor remains a compatible convenience profile;
+the release qualification uses the more general triaxial ellipsoid contract.
 
 ## Contract Layers
 
@@ -326,13 +326,22 @@ records by ID and accepted time.
 ## Alpha 3 Release Gate
 
 Alpha 3 aero-ballistic deployment is complete when the four canonical passive
-profiles, including the X-15 cylindrical stage and spheroidal tank examples,
+profiles, including the X-15 cylindrical stage and triaxial ellipsoid tank examples,
 pass shared contract validation, deterministic event-boundary tests,
 active-model spawn/ejection processing, parent/child 3DOF propagation,
 pseudo-6DOF tumble evidence, native rigid-body child promotion, complete
-artifact accounting, and Matplotlib visualization. Historical X-15
+artifact accounting, seeded uncertainty sweeps, physical terminal-footprint
+distributions, and Matplotlib visualization. Historical X-15
 aerodynamic validation and arbitrary active-child deployment remain outside
 this release gate.
+
+The canonical qualification command is
+`python -m tools.dev qualify-passive-deployment`. It writes
+`artifacts/verification/alpha3-passive-deployment.json` and the associated
+`artifacts/deployment/passive_ballistic` manifest, nominal tier artifacts,
+CSV samples, footprint distributions, and deployment plot bundles. Its
+footprints are physical child outcomes only; they do not promote the parent
+vehicle to a reachability or controller capability claim.
 
 The Alpha 3 user path should be straightforward: declare the detached-body
 shape, mass, inertia, impulse/ejection policy, and passive aerodynamic model;

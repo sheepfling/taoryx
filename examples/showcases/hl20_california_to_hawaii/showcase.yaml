@@ -16,7 +16,7 @@ route:
   kind: synthetic_great_circle
   start: {latitude_deg: 34.7, longitude_deg: -120.6}
   target: {latitude_deg: 21.31, longitude_deg: -157.86}
-  target_tolerance_km: null
+  target_tolerance_km: 40.0
 vehicle:
   model: reference_hl20_mod_k
   propulsion: none
@@ -26,13 +26,13 @@ vehicle:
   source_envelope: {mach: [0.3, 4.0], altitude_m: [-1000.0, 20000.0]}
 phases:
   - id: initial_condition
-    qualification: planned
+    qualification: executable
   - id: energy_entry
-    qualification: planned
+    qualification: source_bound_executable
   - id: hypersonic_glide
-    qualification: planned
+    qualification: source_bound_executable
   - id: terminal_termination
-    qualification: planned
+    qualification: contract_executable
 comparison_channels:
   - time_s
   - altitude_m
@@ -49,7 +49,22 @@ nonclaims:
   - This is not a NASA trajectory reconstruction.
   - This does not establish California-to-Hawaii range or arrival capability.
   - No controller, guidance, thermal, landing, or terminal ProNav claim is made.
-next_implementation_gate: expand_source_bound_dynamics_or_route_contract
+terminal_contract:
+  target_id: honolulu_terminal_reference
+  target_frame: local_ecic_tangent_from_california_origin
+  max_impact_radius_m: 40000.0
+  impact_speed_m_s: {min: 1000.0, max: 3000.0}
+  ground_contact_required: true
+  timeout_is_not_success: true
+next_implementation_gate: alpha4-new-hl20-physics-or-controller-contract
+post_g6_program: docs/plan/hl20-post-g6-program.md
+source_bound_showcase:
+  command: python -m tools.dev showcase-hl20-source-composites
+  destination: artifacts/showcases/hl20_california_to_hawaii/source_bound
+  aerodynamic_model: hl20_mod_k_daveml_source_v1
+  actuator_profile: hl20.reference_first_order.v1
+  mission_profile: hl20.energy_managed_entry_glide.v1
+  claim_boundary: source force/moment and actuator telemetry with synthetic booster and route assumptions; not source-exact trajectory or controller qualification
 quality_gates:
   contract: examples/showcases/hl20_california_to_hawaii/quality_gates.yaml
   report: verification/hl20_ca_hi_qualification.json

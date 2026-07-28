@@ -234,6 +234,13 @@ blocked for surface allocation at the same time. A Hummingbird can be ready for
 rotor allocation while still blocked for a battery-energy claim. Family names
 never promote a vehicle automatically.
 
+Promotion is also ordered. Use the readiness validator with
+`--through-tier <tier>` to evaluate every prerequisite from point-mass through
+the requested tier. A higher tier may still be run diagnostically, but it is
+not promoted while an earlier tier is blocked, partial, or missing runtime
+proof. This ordering applies independently to the DAVE-ML package axis and the
+vehicle dynamics axis.
+
 The next implementation extension should add per-vehicle `readiness_probes`
 and `claim_profiles` to the registry, allowing the same command to launch the
 appropriate trim, hover, orbit, allocation, resource, and mission tests. The

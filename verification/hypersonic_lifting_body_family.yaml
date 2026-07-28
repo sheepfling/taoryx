@@ -28,6 +28,16 @@ comparison_contract:
   route: synthetic_california_to_hawaii
   status: contract_only
   source_evidence: false
+  source_bound_evidence:
+    status: coupled_fail_closed_witness
+    reachability_artifact: artifacts/verification/hl20-source-reachability.json
+    terminal_artifact: artifacts/verification/hl20-ca-hi-terminal-contract.json
+    robustness_artifact: artifacts/verification/hl20-source-robustness.json
+    interpretation: >-
+      Source data are exercised through the reduced and native tiers with
+      hashes, bounds, trim dispositions, invalid candidates, and timeout
+      reruns. This is integration evidence, not source-exact trajectory or
+      route-capability evidence.
   controller_claims: false
   required_phases:
     - release_or_initial_condition
@@ -60,6 +70,7 @@ comparison_contract:
     supplies those claims.
 rocket_composition:
   status: qualified_through_hl20_g6
+  post_g6_program: docs/plan/hl20-post-g6-program.md
   quality_gate_contract: examples/showcases/hl20_california_to_hawaii/quality_gates.yaml
   quality_gate_report: verification/hl20_ca_hi_qualification.json
   parent_role: generic_or_source_grounded_booster
@@ -89,6 +100,7 @@ rocket_composition:
       runtime_fidelity: rigid_body_6dof_surface_allocated
       qualification: verified_witness
       evidence: logical_surface_allocation_and_residual_telemetry
+  next_milestone: alpha4-new-hl20-physics-or-controller-contract
   members:
     x15:
       rocket_parent: synthetic_or_existing_booster_contract
@@ -100,4 +112,13 @@ rocket_composition:
       first_case: examples/showcases/hl20_california_to_hawaii/showcase.yaml
       low_fidelity_runner: src/taoryx/hl20_reachability.py
       low_fidelity_status: verified_witness
-      fidelity_ladder_status: all_four_executable
+      fidelity_ladder_status: all_four_source_bound_witnesses
+      source_bound_status: coupled_fail_closed_with_trim_dispositions
+      source_bound_evidence:
+        - artifacts/verification/hl20-source-reachability.json
+        - artifacts/verification/hl20-ca-hi-terminal-contract.json
+        - artifacts/verification/hl20-source-robustness.json
+      trim_disposition: >-
+        Mach 0.3 is a near-tolerance numerical residual and Mach 2.0 has no
+        zero-surface pitch trim in the declared alpha range; both are emitted
+        as explicit diagnostics and are not promoted as stabilized trim.

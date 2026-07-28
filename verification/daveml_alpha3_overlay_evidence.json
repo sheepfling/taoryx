@@ -43,7 +43,7 @@
     },
     {
       "artifact": "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml",
-      "artifact_sha256": "e0e64c66d9da2b36e3e2f1f20cfd36d48cf77a6221eac3a790c1071f540463ba",
+      "artifact_sha256": "959feaaa9fbea85b0623abbc68157ed01fd4c44b22a1173693804f818956fe9c",
       "authority": "downstream_taoryx_overlay",
       "family_id": "reference_hl20_mod_k",
       "kind": "allocation",

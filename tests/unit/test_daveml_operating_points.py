@@ -21,5 +21,6 @@ def test_operating_point_catalog_covers_all_contract_families() -> None:
     assert "open-loop" in nesc["non_applicable_reason"]
 
 
+@pytest.mark.artifact
 def test_generated_operating_point_report_is_current() -> None:
     assert json.loads((ROOT / "verification/daveml_operating_point_catalog.json").read_text(encoding="utf-8")) == validate()

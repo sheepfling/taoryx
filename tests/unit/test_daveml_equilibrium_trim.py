@@ -3,7 +3,10 @@
 import json
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
+pytestmark = pytest.mark.artifact
 
 
 def test_f16_equilibrium_trim_evidence_converges_inside_bounds() -> None:
@@ -14,4 +17,3 @@ def test_f16_equilibrium_trim_evidence_converges_inside_bounds() -> None:
     assert report["bounds"]["elevator_deg"][0] <= report["controls"]["elevator_deg"] <= report["bounds"]["elevator_deg"][1]
     assert report["bounds"]["power_pct"][0] <= report["controls"]["power_pct"] <= report["bounds"]["power_pct"][1]
     assert all(len(value) == 64 for value in report["provenance"].values())
-

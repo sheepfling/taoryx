@@ -324,6 +324,7 @@ def test_hl20_lifting_body_binding_maps_wind_axis_coefficients_to_body_loads() -
     assert loads["body_force_z_n"] == pytest.approx(-loads["lift_n"])
 
 
+@pytest.mark.artifact
 @pytest.mark.skipif(not CATALOG_ROOT.is_dir(), reason="local DAVE-ML catalog is external to the repository")
 def test_full_catalog_import_report_covers_sources_packages_and_library_targets() -> None:
     """The importer keeps source-ready records distinct from runtime families."""

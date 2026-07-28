@@ -294,6 +294,36 @@ class DetachedBodyDefinition:
             center_of_pressure_m if center_of_pressure_m is not None else Vector3(0.25 * axial_semi_axis_m, 0.0, 0.0),
         )
 
+    @classmethod
+    def triaxial_ellipsoid(
+        cls,
+        body_id: str,
+        *,
+        mass_kg: float,
+        semi_axis_x_m: float,
+        semi_axis_y_m: float,
+        semi_axis_z_m: float,
+        tumbling_policy: TumblingPolicy = TumblingPolicy.PASSIVE_TUMBLE,
+        inertia_kg_m2: Vector3 | None = None,
+        initial_angular_rate_body_rad_s: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_mass_m: Vector3 = Vector3(0.0, 0.0, 0.0),
+        center_of_pressure_m: Vector3 | None = None,
+    ) -> DetachedBodyDefinition:
+        """Build a fully parameterized ellipsoid using its broadside area."""
+
+        return cls(
+            body_id,
+            mass_kg,
+            DetachedBodyShape.TRIAXIAL_ELLIPSOID,
+            (semi_axis_x_m, semi_axis_y_m, semi_axis_z_m),
+            math.pi * semi_axis_y_m * semi_axis_z_m,
+            tumbling_policy,
+            inertia_kg_m2,
+            initial_angular_rate_body_rad_s,
+            center_of_mass_m,
+            center_of_pressure_m if center_of_pressure_m is not None else Vector3(0.25 * semi_axis_x_m, 0.0, 0.0),
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class StageMassDefinition:

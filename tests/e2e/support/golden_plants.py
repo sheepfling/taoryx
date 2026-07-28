@@ -121,11 +121,15 @@ class GoldenPlantRun:
 
         assert self.history, f"{self.case.vehicle} produced no telemetry"
         for sample in self.history:
+            angle_names = {"alpha", "beta", "aero_alpha_deg", "aero_sideslip_deg"}
             for name, value in sample.items():
                 if name in {"aero_table_min_margin", "aero_table_min_normalized_margin"} and math.isnan(value):
                     continue
-                if name in {"alpha", "beta", "aero_alpha_deg", "aero_sideslip_deg"} and sample.get("aero_air_data_valid", 1.0) < 0.5:
+                if name in angle_names and sample.get("aero_air_data_valid", 1.0) < 0.5:
                     assert math.isnan(value)
+                    continue
+                if name in angle_names or name in {"aero_table_min_margin", "aero_table_min_normalized_margin"}:
+                    assert math.isfinite(value), (name, value)
                     continue
                 assert math.isfinite(value), (name, value)
     ####

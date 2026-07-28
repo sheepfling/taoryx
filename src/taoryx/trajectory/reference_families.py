@@ -70,6 +70,28 @@ class ReferenceGeometry(BaseModel):
 ####
 
 
+class ReferenceMassProperties(BaseModel):
+    """Fixed mass and inertia binding used by the source-grounded plant."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    profile_id: str = Field(min_length=1)
+    dry_mass_kg: float = Field(gt=0.0)
+    inertia_body_kg_m2: tuple[float, float, float]
+    binding_status: str = Field(min_length=1)
+    perturbation_policy: str = Field(min_length=1)
+
+    @classmethod
+    def model_validate(cls, obj: Any, **kwargs: Any) -> "ReferenceMassProperties":
+        """Accept the YAML list form while retaining a fixed three-axis contract."""
+
+        if isinstance(obj, dict) and isinstance(obj.get("inertia_body_kg_m2"), list):
+            obj = dict(obj)
+            obj["inertia_body_kg_m2"] = tuple(obj["inertia_body_kg_m2"])
+        return super().model_validate(obj, **kwargs)
+####
+
+
 class ReferenceValidityEnvelope(BaseModel):
     """Closed validity bounds for the source plant's advertised axes."""
 
@@ -111,6 +133,7 @@ class ReferencePlantBinding(BaseModel):
     quaternion_order: Literal["wxyz", "xyzw"]
     package_schema_version: str = Field(min_length=1)
     reference_geometry: ReferenceGeometry
+    mass_properties: ReferenceMassProperties | None = None
     validity_envelope: ReferenceValidityEnvelope
     qualification: str = Field(min_length=1)
     source_payload_required_for_execution: bool = True
@@ -175,6 +198,8 @@ class ReferenceFamilyManifest(BaseModel):
     bindings: tuple[str, ...] = ()
     claims: tuple[str, ...] = ()
     nonclaims: tuple[str, ...] = ()
+    post_g6_program: str | None = None
+    next_milestone: str | None = None
     next_gate: str = Field(min_length=1)
 
     def fidelity_map(self) -> dict[str, ReferenceFidelityProfile]:

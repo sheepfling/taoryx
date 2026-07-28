@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from tools.validate_daveml_family_readiness import validate_readiness
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,6 +23,7 @@ def test_family_readiness_passes_source_and_graph_gates_without_promoting_derive
     assert families["reference_hl20_mod_k"]["derived_layers"]["trim"] == "source_channel_trim_verified"
 
 
+@pytest.mark.artifact
 def test_checked_in_readiness_report_is_json_and_matches_registry() -> None:
     report = json.loads((ROOT / "verification/daveml_family_readiness.json").read_text(encoding="utf-8"))
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from tools.validate_daveml_layer_dispositions import validate_dispositions
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -24,6 +26,7 @@ def test_daveml_layer_dispositions_are_explicit_and_evidence_backed() -> None:
     assert "not_promoted" in statuses
 
 
+@pytest.mark.artifact
 def test_checked_in_layer_disposition_report_is_verified() -> None:
     report = json.loads((ROOT / "verification/daveml_family_layer_dispositions.json").read_text(encoding="utf-8"))
 

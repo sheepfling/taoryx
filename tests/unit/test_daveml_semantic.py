@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import io
-import zipfile
+from pathlib import Path
 
 import pytest
 
@@ -12,7 +11,7 @@ from taoryx.trajectory import (
     export_daveml_ir,
 )
 
-CORPUS = "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip"
+CORPUS_ROOT = Path("resources/aerospace/daveml/taoryx-corpus-v1.1/qualified-models")
 
 
 def test_semantic_ir_is_deterministic_and_retains_unknown_nodes() -> None:
@@ -138,22 +137,18 @@ def test_semantic_ir_classifies_modification_reference_as_external_provenance() 
 
 
 @pytest.mark.parametrize(
-    "package_member",
+    "source_path",
     (
-        "taoryx-aerospace-data-corpus-v1.1/qualified-models/f16-s119/taoryx-f16-s119-reference-v0.7.txair",
-        "taoryx-aerospace-data-corpus-v1.1/qualified-models/hl20-mod-k/taoryx-hl20-mod-k-unpowered-v0.10.txair",
+        CORPUS_ROOT / "f16-s119/F16_aero_mod_k_normalized.dml",
+        CORPUS_ROOT / "hl20-mod-k/source/aerodynamics.dml",
     ),
 )
-def test_real_reference_sources_roundtrip_through_canonical_ir(package_member: str) -> None:
+def test_real_reference_sources_roundtrip_through_canonical_ir(source_path: Path) -> None:
     """The two promoted vehicle source documents structurally re-import."""
 
-    with zipfile.ZipFile(CORPUS) as corpus:
-        package_payload = corpus.read(package_member)
-    with zipfile.ZipFile(io.BytesIO(package_payload)) as package:
-        source_member = next(name for name in package.namelist() if name.startswith("models/") and name.endswith(".dml"))
-        source = package.read(source_member)
-    ir = build_daveml_ir(source, document_id=source_member)
-    fresh = build_daveml_ir(export_daveml_ir(ir), document_id=source_member)
+    source = source_path.read_bytes()
+    ir = build_daveml_ir(source, document_id=source_path.as_posix())
+    fresh = build_daveml_ir(export_daveml_ir(ir), document_id=source_path.as_posix())
 
     assert compare_daveml_ir(ir, fresh) == ()
     assert ir.source_sha256
