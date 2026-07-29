@@ -13,6 +13,7 @@ from ..controller_realization import (
     ControllerSchedule,
     preflight_controller_realization,
 )
+from ..racetrack_guidance import RacetrackGuidanceReference, racetrack_reference_at_time
 from .a320_openap import A320OpenAPEnvelopeError, A320OpenAPModel, A320OpenAPOperatingPoint, A320OpenAPResult
 from .a320_pseudo6dof import A320Pseudo6DOFModel, A320Pseudo6DOFOperatingPoint, A320Pseudo6DOFResult
 from .authority import ArbitrationResult, ControlArbitrator, ControlAuthorityError, ControlDecision
@@ -127,7 +128,18 @@ from .evaluation import (
     TrajectoryEvaluation,
     objective_report_to_evaluation,
 )
+from .f16_operating_points import F16OperatingPoint, runtime_trim_result, solve_f16_source_trim
+from .f16_racetrack import F16RacetrackMode, F16RacetrackNavigationState, F16RacetrackRun, F16RacetrackRunner
+from .f16_reduced_racetrack import F16ReducedRacetrackMode, F16ReducedRacetrackRun, F16ReducedRacetrackRunner
+from .f16_reductions import F16AttitudeResponsePseudo6DOFModel, F16PointMass3DOFModel
+from .f16_reference import (
+    F16ReferencePhysicalPlant,
+    F16ReferencePlant,
+    F16ReferenceRigidBodyPlant,
+    load_f16_reference_plant,
+)
 from .fidelity_ladder import FidelityProblem, project_state, render_fidelity_problems, scale_problem_step
+from .fidelity_selection import FidelitySelectionRequest, FidelitySelectionResult, select_validated_fidelity
 from .providers import (
     CompiledCase,
     ProviderCapabilities,
@@ -257,6 +269,27 @@ __all__ = [
     "DAVEMLVectorCheckResult",
     "DAVEMLAtmosphereBinding",
     "DAVEMLInertiaBinding",
+    "F16ReferencePlant",
+    "F16ReferencePhysicalPlant",
+    "F16ReferenceRigidBodyPlant",
+    "F16OperatingPoint",
+    "F16RacetrackMode",
+    "F16RacetrackNavigationState",
+    "F16RacetrackRun",
+    "F16RacetrackRunner",
+    "F16AttitudeResponsePseudo6DOFModel",
+    "F16PointMass3DOFModel",
+    "F16ReducedRacetrackMode",
+    "F16ReducedRacetrackRun",
+    "F16ReducedRacetrackRunner",
+    "runtime_trim_result",
+    "solve_f16_source_trim",
+    "load_f16_reference_plant",
+    "FidelitySelectionRequest",
+    "FidelitySelectionResult",
+    "RacetrackGuidanceReference",
+    "racetrack_reference_at_time",
+    "select_validated_fidelity",
     "DAVEMLFixedWingDynamicsBinding",
     "DAVEMLGraph",
     "evaluate_daveml_checkdata",

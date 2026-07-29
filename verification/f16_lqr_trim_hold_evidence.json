@@ -1,0 +1,131 @@
+{
+  "actuator_limits": {
+    "aileron": {
+      "lower": -24.0,
+      "provenance": "engineering_assumption_pending_source_actuator_data",
+      "rate_limit_per_s": 60.0,
+      "time_constant_s": 0.05,
+      "unit": "deg",
+      "upper": 24.0
+    },
+    "elevator": {
+      "lower": -24.0,
+      "provenance": "source_aerodynamic_input_bound_plus_engineering_response_assumption",
+      "rate_limit_per_s": 60.0,
+      "time_constant_s": 0.05,
+      "unit": "deg",
+      "upper": 24.0
+    },
+    "rudder": {
+      "lower": -24.0,
+      "provenance": "engineering_assumption_pending_source_actuator_data",
+      "rate_limit_per_s": 60.0,
+      "time_constant_s": 0.05,
+      "unit": "deg",
+      "upper": 24.0
+    },
+    "throttle": {
+      "lower": 0.0,
+      "provenance": "canonical_resource_command_assumption",
+      "rate_limit_per_s": 1.0,
+      "time_constant_s": 0.2,
+      "unit": "fraction",
+      "upper": 1.0
+    }
+  },
+  "actuator_profile_id": "f16.reference_first_order.v1",
+  "claim_boundary": "local nonlinear trim-hold screen using plant-derived LQR, direct physical effector commands, and bounded engineering actuator overlays; not scheduled control, wrench allocation, or flight qualification",
+  "closed_loop": {
+    "a_sha256": "c3daf0908587fd14d927366ef73b1fd09583baa378d54877ee42f2201cd5743e",
+    "b_sha256": "ab6c121521be2e96ed7b4387f6131c46444bb52ef2d61f4bdf6961940bf1ba56",
+    "condition_number": 1.0,
+    "hurwitz": true,
+    "k_sha256": "8554702f0c934bb1e947bf4456615a064ff541614414bef59c9c4818226080b6",
+    "maximum_real_pole": -0.1251717100926285,
+    "poles": [
+      {
+        "imag": 0.0,
+        "real": -17.432441620064015
+      },
+      {
+        "imag": 0.0,
+        "real": -0.1251717100926285
+      },
+      {
+        "imag": 0.0,
+        "real": -1.7311739582814059
+      },
+      {
+        "imag": 0.0,
+        "real": -74.0109022544187
+      },
+      {
+        "imag": 0.8034442001393136,
+        "real": -3.6683991467467996
+      },
+      {
+        "imag": -0.8034442001393136,
+        "real": -3.6683991467467996
+      }
+    ],
+    "q_sha256": "7267324cbc2b473c42b638ab6607702ed08fd066375aa2494f88b7cdd938d4c2",
+    "r_sha256": "658294101da7cb3de76e17a85322361cc3a749a39c87411a85d3421c76b84665"
+  },
+  "control_path": "lqr_to_bounded_direct_effectors_to_source_nonlinear_plant",
+  "controller_id": "f16.local_lqr_trim_hold.v1",
+  "evidence": {
+    "actuators": "taoryx_engineering_assumption",
+    "controller": "development_screen",
+    "linearization": "source-backed local body-dynamics A/B derived from the corrected runtime plant; not scheduled control, actuator allocation, or nonlinear mission qualification"
+  },
+  "family_id": "reference_f16_s119",
+  "final_error": {
+    "p_rad_s": 3.2703337985000784e-17,
+    "q_rad_s": 6.745919402816054e-05,
+    "r_rad_s": 1.2730665042928046e-18,
+    "u_m_s": 0.39867052313039153,
+    "v_m_s": -1.2214191362894952e-16,
+    "w_m_s": -0.029435118082325573
+  },
+  "final_state": {
+    "p_rad_s": 3.2703337985000784e-17,
+    "q_rad_s": 6.745919402816054e-05,
+    "r_rad_s": 1.2730665042928046e-18,
+    "u_m_s": 152.6918613261458,
+    "v_m_s": -1.2214191362894952e-16,
+    "w_m_s": 5.675302828251883
+  },
+  "initial_perturbation": {
+    "q_rad_s": 0.02,
+    "u_m_s": 5.0,
+    "w_m_s": 1.0
+  },
+  "linearization_artifact": "verification/f16_runtime_linearization_evidence.json",
+  "metrics": {
+    "final_error_limit_mixed_units": 0.5,
+    "final_error_norm_mixed_units": 0.39975569632004415,
+    "horizon_s": 20.0,
+    "maximum_effector_rate": 46.137443716094396,
+    "maximum_state_error_mixed_units": 4.9985560034550645,
+    "rate_limited_fraction": 0.0,
+    "saturation_fraction": 0.0,
+    "step_s": 0.01
+  },
+  "plant_id": "reference-f16-s119-source-runtime-plant",
+  "schema_version": "taoryx.f16-lqr-trim-hold-evidence/v1",
+  "status": "development_screen_passed",
+  "trim_controls": {
+    "aileron_deg": 0.0,
+    "elevator_deg": -0.7562951013162765,
+    "rudder_deg": 0.0,
+    "throttle_fraction": 0.0893225837337992
+  },
+  "trim_state": {
+    "p_rad_s": 0.0,
+    "q_rad_s": 0.0,
+    "r_rad_s": 0.0,
+    "u_m_s": 152.29319080301542,
+    "v_m_s": 0.0,
+    "w_m_s": 5.704737946334209
+  }
+}

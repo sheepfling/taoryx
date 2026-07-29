@@ -13,6 +13,8 @@ families:
     required_vehicle_fields: [reference_area_m2, reference_length_m, dry_mass_kg, nominal_mass_kg, inertia_kg_m2, envelope, controls, table_bindings]
     control_roles: [longitudinal, lateral, propulsion]
     examples: [b747, skywalker_x8]
+    reference_family_examples: [reference_f16_s119]
+    reference_manifests: [families/reference_f16_s119/family.yaml]
   rocket_plane:
     title: Rocket-plane or high-speed research aircraft
     dynamics_mode: rigid-body-6dof
@@ -29,3 +31,13 @@ families:
     required_vehicle_fields: [reference_area_m2, reference_length_m, dry_mass_kg, nominal_mass_kg, inertia_kg_m2, envelope, controls, table_bindings, aero_load_mode, aero_wrench_frame]
     control_roles: [collective, attitude, allocation]
     examples: [hummingbird]
+  unpowered_lifting_body:
+    title: Unpowered lifting body and glide vehicle
+    dynamics_mode: rigid-body-6dof
+    problem_template: rigid_body_6dof
+    body_frame: x-forward-y-right-z-down
+    required_vehicle_fields: [reference_area_m2, reference_length_m, dry_mass_kg, nominal_mass_kg, inertia_kg_m2, envelope, controls, table_bindings]
+    control_roles: [longitudinal, lateral, allocation]
+    examples: []
+    reference_family_examples: [reference_hl20_mod_k]
+    reference_manifests: [families/reference_hl20_mod_k/family.yaml]

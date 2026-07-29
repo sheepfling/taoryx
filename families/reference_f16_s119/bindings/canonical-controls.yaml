@@ -6,7 +6,7 @@ controls:
   - {id: control.elevator, source_name: elevator, realization: source_direct_input, overlay_ready: true}
   - {id: control.aileron, source_name: aileron, realization: source_direct_input, overlay_ready: true}
   - {id: control.rudder, source_name: rudder, realization: source_direct_input, overlay_ready: true}
-  - {id: control.throttle, source_name: throttle, realization: source_direct_input, overlay_ready: true}
+  - {id: control.throttle, source_name: powerLeverAngle, source_unit: pct, canonical_unit: fraction, transform: source_value = 100 * canonical_value, realization: source_direct_input, overlay_ready: true}
 omitted_until_overlay:
   - actuator_position
   - actuator_rate

@@ -1,0 +1,254 @@
+{
+  "a_matrix": [
+    [
+      -0.016552150760856036,
+      0.0,
+      0.05432608038082233,
+      0.0,
+      -5.342357571446093,
+      0.0
+    ],
+    [
+      0.0,
+      -0.3206086621162602,
+      0.0,
+      5.627803437806315,
+      0.0,
+      -151.12763275780696
+    ],
+    [
+      -0.09059195809279945,
+      0.0,
+      -1.0172273921196855,
+      0.0,
+      137.82618393001746,
+      0.0
+    ],
+    [
+      0.0,
+      -0.19997321160026676,
+      0.0,
+      -3.6616697129548315,
+      0.0,
+      0.6643573565249487
+    ],
+    [
+      -0.00020032039380439665,
+      0.0,
+      0.005347735906530977,
+      0.0,
+      -1.072901129750086,
+      0.0
+    ],
+    [
+      0.0,
+      0.055610219655165376,
+      0.0,
+      -0.025785708264062592,
+      0.0,
+      -0.47458243331906047
+    ]
+  ],
+  "b_matrix": [
+    [
+      0.0644628138257719,
+      0.0,
+      0.0,
+      12.261348503553315
+    ],
+    [
+      0.0,
+      0.04477100979150622,
+      0.12223196324030264,
+      0.0
+    ],
+    [
+      -0.32405683265679386,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      -0.7273698677066882,
+      0.13040551573628859,
+      0.0
+    ],
+    [
+      -0.1741051101837738,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      -0.031599295160007944,
+      -0.061536413943126526,
+      0.0
+    ]
+  ],
+  "claim_boundary": "source-backed local body-dynamics A/B derived from the corrected runtime plant; not scheduled control, actuator allocation, or nonlinear mission qualification",
+  "comparison_a_matrix": [
+    [
+      -0.01655215076109296,
+      0.0,
+      0.05432608037449737,
+      0.0,
+      -5.342357571443317,
+      0.0
+    ],
+    [
+      0.0,
+      -0.3206086621162594,
+      0.0,
+      5.627803437806315,
+      0.0,
+      -151.12763275780696
+    ],
+    [
+      -0.09059195809513226,
+      0.0,
+      -1.0172273921508237,
+      0.0,
+      137.82618393001746,
+      0.0
+    ],
+    [
+      0.0,
+      -0.1999732116002662,
+      0.0,
+      -3.6616697129548315,
+      0.0,
+      0.6643573565249487
+    ],
+    [
+      -0.00020032039378847013,
+      0.0,
+      0.005347735906667847,
+      0.0,
+      -1.072901129750086,
+      0.0
+    ],
+    [
+      0.0,
+      0.05561021965516525,
+      0.0,
+      -0.025785708264062592,
+      0.0,
+      -0.47458243331906047
+    ]
+  ],
+  "comparison_b_matrix": [
+    [
+      0.0644628138257719,
+      0.0,
+      0.0,
+      12.26134850356164
+    ],
+    [
+      0.0,
+      0.04477100979150622,
+      0.12223196324030264,
+      0.0
+    ],
+    [
+      -0.3240568329232474,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      -0.7273698677066882,
+      0.13040551573628859,
+      0.0
+    ],
+    [
+      -0.17410511015907792,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      -0.031599295160007944,
+      -0.061536413943126526,
+      0.0
+    ]
+  ],
+  "control_names": [
+    "elevator_deg",
+    "aileron_deg",
+    "rudder_deg",
+    "throttle_fraction"
+  ],
+  "derivative_consistency": {
+    "allowed_relative_difference": 0.05,
+    "maximum_absolute_difference": 2.6645352591003757e-10,
+    "maximum_relative_difference": 8.22243195758032e-10,
+    "passed": true
+  },
+  "family_id": "reference_f16_s119",
+  "metadata": {
+    "altitude_m": 0.0,
+    "linearization_scope": "fixed_altitude_local_body_dynamics",
+    "method": "centered-finite-difference",
+    "source_quality": "source_grounded",
+    "trim_pitch_rad": 0.037441411008153194
+  },
+  "perturbations": {
+    "comparison_factor": 0.5,
+    "control_step": 1e-05,
+    "method": "centered-finite-difference",
+    "state_step": 1e-05
+  },
+  "plant_id": "reference-f16-s119-source-runtime-plant",
+  "plant_revision": "f16-s119-local-runtime-v1",
+  "provenance": {
+    "aerodynamics_document_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+    "aerodynamics_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
+    "mass_properties_inertia_matrix_kg_m2": [
+      [
+        12874.847237354978,
+        -0.0,
+        -1331.4132252614352
+      ],
+      [
+        -0.0,
+        75673.62296816878,
+        -0.0
+      ],
+      [
+        -1331.4132252614352,
+        -0.0,
+        85552.11253971136
+      ]
+    ],
+    "propulsion_document_sha256": "1e4f99f0c8252aed7d25f2667d8f8a0c10367edbeecd80aaa357d84c68bddcc4",
+    "propulsion_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
+  },
+  "schema_version": "taoryx.f16-runtime-linearization-evidence/v1",
+  "state_names": [
+    "u_m_s",
+    "v_m_s",
+    "w_m_s",
+    "p_rad_s",
+    "q_rad_s",
+    "r_rad_s"
+  ],
+  "status": "verified",
+  "trim_controls": {
+    "aileron_deg": 0.0,
+    "elevator_deg": -0.7562951013162765,
+    "rudder_deg": 0.0,
+    "throttle_fraction": 0.0893225837337992
+  },
+  "trim_state": {
+    "p_rad_s": 0.0,
+    "q_rad_s": 0.0,
+    "r_rad_s": 0.0,
+    "u_m_s": 152.29319080301542,
+    "v_m_s": 0.0,
+    "w_m_s": 5.704737946334209
+  }
+}

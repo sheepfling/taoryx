@@ -14,12 +14,18 @@
     ]
   },
   "claim_boundary": "source-backed fixed-altitude/airspeed force-moment equilibrium; not flight qualification",
+  "control_contract": {
+    "canonical_throttle": "fraction",
+    "canonical_to_source": "source_percent = 100 * canonical_fraction",
+    "source_throttle": "powerLeverAngle_pct",
+    "throttle_fraction": 0.0893225837337992
+  },
   "controls": {
-    "elevator_deg": -0.7560886118577249,
-    "power_pct": 1.130793097701422
+    "elevator_deg": -0.7562951013162765,
+    "power_pct": 8.93225837337992
   },
   "family_id": "reference_f16_s119",
-  "max_residual": 3.3242031349800527e-09,
+  "max_residual": 1.4651959645561874e-08,
   "operating_point": {
     "geometric_altitude_m": 0.0,
     "gravity_m_s2": 9.80665,
@@ -36,20 +42,37 @@
     "propulsion_package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c"
   },
   "residuals": {
-    "force_x_n": 3.3242031349800527e-09,
-    "force_z_n": 2.0372681319713593e-10,
-    "moment_y_nm": 1.0738347056774311e-10
+    "force_x_n": 1.4651959645561874e-08,
+    "force_z_n": -1.0186340659856796e-10,
+    "moment_y_nm": 7.131211691846808e-10
   },
-  "scaled_residual_norm": 3.3321708099642557e-13,
+  "resolved_state": {
+    "attitude": {
+      "pitch_rad": 0.037441411008153194,
+      "roll_rad": 0.0,
+      "yaw_rad": 0.0
+    },
+    "body_rates_rad_s": {
+      "p": 0.0,
+      "q": 0.0,
+      "r": 0.0
+    },
+    "body_velocity_m_s": {
+      "u": 152.29319080301542,
+      "v": 0.0,
+      "w": 5.704737946334209
+    }
+  },
+  "scaled_residual_norm": 1.4669657099288885e-12,
   "schema_version": "taoryx.daveml-equilibrium-trim/v1",
   "solver": {
-    "iterations": 11,
+    "iterations": 8,
     "message": "`gtol` termination condition is satisfied.",
     "status": 1,
     "success": true
   },
   "state": {
-    "alpha_deg": 2.147760465658469
+    "alpha_deg": 2.1452348297818387
   },
   "status": "verified"
 }

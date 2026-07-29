@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -48,16 +49,22 @@ def main() -> int:
     )
 
     def evaluate(state: dict[str, float], controls: dict[str, float]) -> dict[str, float]:
+        pitch_rad = math.radians(state["alpha_deg"])
+        atmosphere_properties = atmosphere.evaluate(ALTITUDE_M)
+        mach = TRUE_AIRSPEED_M_S / atmosphere_properties["speed_of_sound_m_s"]
         values = loads.evaluate_with_atmosphere(
-            {"alpha_deg": state["alpha_deg"], "altitude_ft": 0.0, "mach": 0.0},
+            {"alpha_deg": state["alpha_deg"], "altitude_ft": 0.0, "mach": mach},
             controls,
             atmosphere,
             geometric_altitude_m=ALTITUDE_M,
             true_airspeed_m_s=TRUE_AIRSPEED_M_S,
         )
         return {
-            "force_x_n": values["total_force_x_n"],
-            "force_z_n": values["total_force_z_n"] + mass * GRAVITY_M_S2,
+            # For a level-flight trim, pitch equals angle of attack. Resolve
+            # gravity in the trimmed FRD body frame instead of adding mg only
+            # to the body-Z residual.
+            "force_x_n": values["total_force_x_n"] - mass * GRAVITY_M_S2 * math.sin(pitch_rad),
+            "force_z_n": values["total_force_z_n"] + mass * GRAVITY_M_S2 * math.cos(pitch_rad),
             "moment_y_nm": values["total_moment_y_nm"],
         }
 
@@ -79,10 +86,31 @@ def main() -> int:
         "status": "verified" if result.success else "failed",
         "claim_boundary": "source-backed fixed-altitude/airspeed force-moment equilibrium; not flight qualification",
         "family_id": "reference_f16_s119",
-        "operating_point": {"geometric_altitude_m": ALTITUDE_M, "true_airspeed_m_s": TRUE_AIRSPEED_M_S, "gravity_m_s2": GRAVITY_M_S2, "mass_kg": mass},
+        "operating_point": {
+            "geometric_altitude_m": ALTITUDE_M,
+            "true_airspeed_m_s": TRUE_AIRSPEED_M_S,
+            "mach": TRUE_AIRSPEED_M_S / atmosphere.evaluate(ALTITUDE_M)["speed_of_sound_m_s"],
+            "gravity_m_s2": GRAVITY_M_S2,
+            "mass_kg": mass,
+        },
         "bounds": {"alpha_deg": [0.0, 15.0], "elevator_deg": [-24.0, 24.0], "power_pct": [0.0, 100.0]},
         "state": dict(result.state),
+        "resolved_state": {
+            "body_velocity_m_s": {
+                "u": TRUE_AIRSPEED_M_S * math.cos(math.radians(result.state["alpha_deg"])),
+                "v": 0.0,
+                "w": TRUE_AIRSPEED_M_S * math.sin(math.radians(result.state["alpha_deg"])),
+            },
+            "attitude": {"roll_rad": 0.0, "pitch_rad": math.radians(result.state["alpha_deg"]), "yaw_rad": 0.0},
+            "body_rates_rad_s": {"p": 0.0, "q": 0.0, "r": 0.0},
+        },
         "controls": dict(result.controls),
+        "control_contract": {
+            "canonical_throttle": "fraction",
+            "source_throttle": "powerLeverAngle_pct",
+            "canonical_to_source": "source_percent = 100 * canonical_fraction",
+            "throttle_fraction": result.controls["power_pct"] / 100.0,
+        },
         "residuals": dict(result.residuals),
         "max_residual": result.max_residual,
         "scaled_residual_norm": result.scaled_residual_norm,
@@ -105,4 +133,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

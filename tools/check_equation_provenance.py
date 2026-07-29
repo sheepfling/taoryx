@@ -3,8 +3,9 @@ from __future__ import annotations
 import csv
 import json
 
-from audit_equation_provenance import ROOT, asdict, build_records
 from pypdf import PdfReader
+
+from .audit_equation_provenance import ROOT, asdict, build_records
 
 SOURCE_PDF = ROOT / "TAOS_manual_1995.pdf"
 AUX_PATH = ROOT / "build" / "manual.aux"

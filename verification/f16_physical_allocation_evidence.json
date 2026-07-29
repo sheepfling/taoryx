@@ -1,0 +1,103 @@
+{
+  "actuator_profile_id": "f16.reference_first_order.v1",
+  "claim_boundary": "source-derived local load-effectiveness and bounded allocation screen; not source-validated actuator dynamics, closed-loop maneuver qualification, or operational F-16 fidelity",
+  "effectiveness": {
+    "matrix": [
+      [
+        0.0,
+        599.4167505787118,
+        0.0,
+        114013.91347135359
+      ],
+      [
+        -9322.704212293735,
+        0.0,
+        1760.8814893722474,
+        0.0
+      ],
+      [
+        0.0,
+        -13175.1644646826,
+        0.0,
+        0.0
+      ],
+      [
+        -1734.9565941832113,
+        0.0,
+        -5438.193839250956,
+        0.0
+      ]
+    ],
+    "rank": 4,
+    "reference_effectors": {
+      "aileron_deg": 0.0,
+      "elevator_deg": -0.7562951013162765,
+      "rudder_deg": 0.0,
+      "throttle_fraction": 0.0893225837337992
+    },
+    "reference_wrench": {
+      "total_force_x_n": 3413.430182468406,
+      "total_moment_x_nm": 0.0,
+      "total_moment_y_nm": 7.12527890341765e-10,
+      "total_moment_z_nm": 0.0
+    },
+    "source": "f16-s119-source-load-centered-finite-difference-v1"
+  },
+  "effector_names": [
+    "aileron_deg",
+    "elevator_deg",
+    "rudder_deg",
+    "throttle_fraction"
+  ],
+  "family_id": "reference_f16_s119",
+  "infeasible_witness": {
+    "achieved_wrench": {
+      "total_force_x_n": 3403.8419304357362,
+      "total_moment_x_nm": -1.9783667717423045e-09,
+      "total_moment_y_nm": 1432.9512843527614,
+      "total_moment_z_nm": -3.681743406404576e-10
+    },
+    "requested_wrench": {
+      "total_force_x_n": 10003413.430182468,
+      "total_moment_x_nm": 0.0,
+      "total_moment_y_nm": 100000000.0,
+      "total_moment_z_nm": 0.0
+    },
+    "residual_wrench": {
+      "total_force_x_n": 10000009.588252032,
+      "total_moment_x_nm": 1.9783667717423045e-09,
+      "total_moment_y_nm": 99998567.04871565,
+      "total_moment_z_nm": 3.681743406404576e-10
+    },
+    "saturated_channels": [
+      "elevator_deg",
+      "throttle_fraction"
+    ],
+    "status": "partially_achievable"
+  },
+  "plant_id": "reference-f16-s119-source-runtime-plant",
+  "schema_version": "taoryx.f16-physical-allocation-evidence/v1",
+  "status": "development_screen_passed",
+  "trim_witness": {
+    "actual_effectors": {
+      "aileron_deg": 0.0,
+      "elevator_deg": -0.7562951013162765,
+      "rudder_deg": 0.0,
+      "throttle_fraction": 0.0893225837337992
+    },
+    "commands": {
+      "aileron_deg": 0.0,
+      "elevator_deg": -0.7562951013162768,
+      "rudder_deg": 0.0,
+      "throttle_fraction": 0.0893225837337992
+    },
+    "controlled_residual_norm": 0.0,
+    "status": "feasible"
+  },
+  "wrench_names": [
+    "total_force_x_n",
+    "total_moment_x_nm",
+    "total_moment_y_nm",
+    "total_moment_z_nm"
+  ]
+}

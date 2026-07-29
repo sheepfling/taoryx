@@ -25,7 +25,7 @@
         "objectives": "source_channel_smoke_verified",
         "scenarios": "source_channel_smoke_verified",
         "trim": "source_equilibrium_trim_verified",
-        "tuning": "source_channel_full_lqr_verified"
+        "tuning": "verification/f16_physical_wrench_perturbation_evidence.json"
       },
       "family_id": "reference_f16_s119",
       "graph_bindings": [

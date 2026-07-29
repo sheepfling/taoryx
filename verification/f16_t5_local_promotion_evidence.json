@@ -1,0 +1,37 @@
+{
+  "checks": {
+    "physical_path_no_nominal_saturation": true,
+    "representative_maneuvers": true,
+    "sea_level_operating_point": true,
+    "semantic_step_convergence": true,
+    "source_envelope": true,
+    "source_load_closure": true,
+    "surface_route_hard_gates": true,
+    "surface_route_truth_objectives": true,
+    "trim_hold": true
+  },
+  "claim": "One source-grounded F-16 S-119 local operating point passes the nonlinear physical-effector racetrack and representative bank/pitch maneuver evidence through bounded elevator, aileron, rudder, and throttle allocation.",
+  "evidence": {
+    "operating_points": "verification/f16_operating_points_evidence.json",
+    "representative_maneuvers": "verification/f16_local_maneuver_evidence.json",
+    "surface_packet": "artifacts/showcases/f16-s119-racetrack-fidelity-ladder/6dof-surfaces",
+    "trim_hold": "verification/f16_physical_wrench_lqr_evidence.json"
+  },
+  "family_id": "reference_f16_s119",
+  "nonclaims": [
+    "continuous gain scheduling between operating points",
+    "full-envelope or flight qualification",
+    "wind, sensor, or release robustness qualification",
+    "manufacturer flight-control fidelity",
+    "fuel-flow or endurance qualification",
+    "TAOS 96 runtime compatibility"
+  ],
+  "operating_point_id": "f16-sea-level-152mps",
+  "qualification_tier": "T5_local_nonlinear_validation",
+  "robustness": {
+    "claim": "R1 boundary evidence is retained separately and is not converted into a release robustness pass.",
+    "status": "R1_fixed_matrix_boundary_failure_recorded"
+  },
+  "schema_version": "taoryx.f16-t5-local-promotion/v1",
+  "status": "development_t5_local_pass"
+}

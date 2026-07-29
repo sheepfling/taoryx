@@ -1,0 +1,1051 @@
+{
+  "acceptance": {
+    "maximum_absolute_trim_residual": 0.0003,
+    "note": "The bound is in mixed force/moment residual units. The high-altitude source-table witnesses retain their raw residuals and scaled solver norms per point; the gate is not silently replaced by the scaled norm."
+  },
+  "claim": "Seven source-retrimmed fixed-altitude, fixed-airspeed local operating points with plant-derived linearization and local physical-effector authority checks.",
+  "claim_boundary": "This is local operating-point and schedule-readiness evidence. It does not claim a validated gain schedule, continuous transitions, wind robustness, or full-envelope F-16 flight control.",
+  "family_id": "reference_f16_s119",
+  "point_count": 7,
+  "points": [
+    {
+      "claim_boundary": "fixed-altitude, fixed-airspeed source equilibrium for local plant and control evidence; not a scheduled controller or flight-envelope qualification",
+      "controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.7562951013162249,
+        "rudder_deg": 0.0,
+        "source_powerLeverAngle_pct": 8.93225837337992,
+        "throttle_fraction": 0.0893225837337992
+      },
+      "environment": {
+        "geometric_altitude_m": 0.0,
+        "gravity_m_s2": 9.80665,
+        "mach": 0.447869133900138,
+        "true_airspeed_m_s": 152.4
+      },
+      "id": "f16-sea-level-152mps",
+      "linearization": {
+        "comparison_control_step": 5e-06,
+        "comparison_state_step": 5e-06,
+        "control_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "control_shape": [
+          6,
+          4
+        ],
+        "control_step": 1e-05,
+        "derivative_consistent": true,
+        "maximum_absolute_difference": 8.881784197001252e-11,
+        "maximum_relative_difference": 2.7408106532779776e-10,
+        "plant_id": "reference-f16-s119-source-runtime-plant",
+        "plant_revision": "f16-s119-local-runtime-v1",
+        "state_names": [
+          "u_m_s",
+          "v_m_s",
+          "w_m_s",
+          "p_rad_s",
+          "q_rad_s",
+          "r_rad_s"
+        ],
+        "state_shape": [
+          6,
+          6
+        ],
+        "state_step": 1e-05
+      },
+      "local_lqr": {
+        "closed_loop_poles": [
+          {
+            "imaginary": 0.0,
+            "real": -0.027268878098512195
+          },
+          {
+            "imaginary": 0.0,
+            "real": -0.2986147795805654
+          },
+          {
+            "imaginary": 0.0,
+            "real": -1.9059464833099313
+          },
+          {
+            "imaginary": 3.0189531575171253,
+            "real": -0.5434816946859158
+          },
+          {
+            "imaginary": -3.0189531575171253,
+            "real": -0.5434816946859158
+          },
+          {
+            "imaginary": 0.0,
+            "real": -3.8414321520802788
+          }
+        ],
+        "condition_number": 1.0,
+        "controllable": true,
+        "controller_id": "f16.local_physical_wrench_lqr.v1:f16-sea-level-152mps",
+        "hurwitz": true,
+        "maximum_real_pole": -0.027268878098512195,
+        "trim_hold_validation": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "dt_s": 0.02,
+          "duration_s": 1.0,
+          "final_normalized_feedback_error_norm": 2.7865900128415116e-14,
+          "maximum_controlled_actual_residual": 5.02297842140374e-11,
+          "saturation_fraction": 0.0
+        }
+      },
+      "max_residual": 1.4686065696878359e-08,
+      "physical_effectiveness": {
+        "effector_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "rank": 4,
+        "shape": [
+          4,
+          4
+        ],
+        "source": "f16-s119-source-load-centered-finite-difference-v1",
+        "trim_allocation_residual_norm": 1.4627370942007634e-12,
+        "trim_allocation_saturated": [],
+        "trim_allocation_status": "feasible",
+        "wrench_names": [
+          "total_force_x_n",
+          "total_moment_x_nm",
+          "total_moment_y_nm",
+          "total_moment_z_nm"
+        ]
+      },
+      "residuals": {
+        "force_x_n": 1.4686065696878359e-08,
+        "force_z_n": 1.4551915228366852e-11,
+        "moment_y_nm": 1.601852875872411e-11
+      },
+      "scaled_residual_norm": 1.4686072993731055e-12,
+      "solver": {
+        "iterations": 1,
+        "message": "`gtol` termination condition is satisfied.",
+        "status": 1,
+        "success": true
+      },
+      "state": {
+        "alpha_deg": 2.1452348297818276,
+        "attitude": {
+          "pitch_rad": 0.037441411008153,
+          "roll_rad": 0.0,
+          "yaw_rad": 0.0
+        },
+        "body_rates_rad_s": {
+          "p": 0.0,
+          "q": 0.0,
+          "r": 0.0
+        },
+        "body_velocity_m_s": {
+          "u": 152.29319080301542,
+          "v": 0.0,
+          "w": 5.704737946334179
+        }
+      },
+      "validity": "source_backed_local_equilibrium"
+    },
+    {
+      "claim_boundary": "fixed-altitude, fixed-airspeed source equilibrium for local plant and control evidence; not a scheduled controller or flight-envelope qualification",
+      "controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.654255033838822,
+        "rudder_deg": 0.0,
+        "source_powerLeverAngle_pct": 10.849099700806596,
+        "throttle_fraction": 0.10849099700806596
+      },
+      "environment": {
+        "geometric_altitude_m": 3000.0,
+        "gravity_m_s2": 9.80665,
+        "mach": 0.4638309751317455,
+        "true_airspeed_m_s": 152.4
+      },
+      "id": "f16-3km-152mps",
+      "linearization": {
+        "comparison_control_step": 5e-06,
+        "comparison_state_step": 5e-06,
+        "control_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "control_shape": [
+          6,
+          4
+        ],
+        "control_step": 1e-05,
+        "derivative_consistent": true,
+        "maximum_absolute_difference": 1.7763568394002505e-10,
+        "maximum_relative_difference": 7.385141533911179e-10,
+        "plant_id": "reference-f16-s119-source-runtime-plant",
+        "plant_revision": "f16-s119-local-runtime-v1",
+        "state_names": [
+          "u_m_s",
+          "v_m_s",
+          "w_m_s",
+          "p_rad_s",
+          "q_rad_s",
+          "r_rad_s"
+        ],
+        "state_shape": [
+          6,
+          6
+        ],
+        "state_step": 1e-05
+      },
+      "local_lqr": {
+        "closed_loop_poles": [
+          {
+            "imaginary": 0.0,
+            "real": -0.019374406236532138
+          },
+          {
+            "imaginary": 0.0,
+            "real": -0.2832381687146223
+          },
+          {
+            "imaginary": 0.0,
+            "real": -1.5230815405380267
+          },
+          {
+            "imaginary": 2.7060469520851593,
+            "real": -0.499455896428911
+          },
+          {
+            "imaginary": -2.7060469520851593,
+            "real": -0.499455896428911
+          },
+          {
+            "imaginary": 0.0,
+            "real": -2.9007874197845283
+          }
+        ],
+        "condition_number": 1.0,
+        "controllable": true,
+        "controller_id": "f16.local_physical_wrench_lqr.v1:f16-3km-152mps",
+        "hurwitz": true,
+        "maximum_real_pole": -0.019374406236532138,
+        "trim_hold_validation": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "dt_s": 0.02,
+          "duration_s": 1.0,
+          "final_normalized_feedback_error_norm": 1.0978506873130285e-15,
+          "maximum_controlled_actual_residual": 8.369148183639093e-12,
+          "saturation_fraction": 0.0
+        }
+      },
+      "max_residual": 4.3655745685100555e-11,
+      "physical_effectiveness": {
+        "effector_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "rank": 4,
+        "shape": [
+          4,
+          4
+        ],
+        "source": "f16-s119-source-load-centered-finite-difference-v1",
+        "trim_allocation_residual_norm": 0.0,
+        "trim_allocation_saturated": [],
+        "trim_allocation_status": "feasible",
+        "wrench_names": [
+          "total_force_x_n",
+          "total_moment_x_nm",
+          "total_moment_y_nm",
+          "total_moment_z_nm"
+        ]
+      },
+      "residuals": {
+        "force_x_n": -9.094947017729282e-13,
+        "force_z_n": -4.3655745685100555e-11,
+        "moment_y_nm": -4.0953593567339114e-11
+      },
+      "scaled_residual_norm": 4.385684986630386e-15,
+      "solver": {
+        "iterations": 1,
+        "message": "`gtol` termination condition is satisfied.",
+        "status": 1,
+        "success": true
+      },
+      "state": {
+        "alpha_deg": 3.3906337409669205,
+        "attitude": {
+          "pitch_rad": 0.059177722509085304,
+          "roll_rad": 0.0,
+          "yaw_rad": 0.0
+        },
+        "body_rates_rad_s": {
+          "p": 0.0,
+          "q": 0.0,
+          "r": 0.0
+        },
+        "body_velocity_m_s": {
+          "u": 152.13322525094975,
+          "v": 0.0,
+          "w": 9.013421921988892
+        }
+      },
+      "validity": "source_backed_local_equilibrium"
+    },
+    {
+      "claim_boundary": "fixed-altitude, fixed-airspeed source equilibrium for local plant and control evidence; not a scheduled controller or flight-envelope qualification",
+      "controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.7099543367965413,
+        "rudder_deg": 0.0,
+        "source_powerLeverAngle_pct": 9.619027824439302,
+        "throttle_fraction": 0.09619027824439302
+      },
+      "environment": {
+        "geometric_altitude_m": 1500.0,
+        "gravity_m_s2": 9.80665,
+        "mach": 0.45564254550847055,
+        "true_airspeed_m_s": 152.4
+      },
+      "id": "f16-1p5km-152mps",
+      "linearization": {
+        "comparison_control_step": 5e-06,
+        "comparison_state_step": 5e-06,
+        "control_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "control_shape": [
+          6,
+          4
+        ],
+        "control_step": 1e-05,
+        "derivative_consistent": true,
+        "maximum_absolute_difference": 8.881784197001252e-11,
+        "maximum_relative_difference": 3.533476757548653e-10,
+        "plant_id": "reference-f16-s119-source-runtime-plant",
+        "plant_revision": "f16-s119-local-runtime-v1",
+        "state_names": [
+          "u_m_s",
+          "v_m_s",
+          "w_m_s",
+          "p_rad_s",
+          "q_rad_s",
+          "r_rad_s"
+        ],
+        "state_shape": [
+          6,
+          6
+        ],
+        "state_step": 1e-05
+      },
+      "local_lqr": {
+        "closed_loop_poles": [
+          {
+            "imaginary": 0.0,
+            "real": -0.021514518599991928
+          },
+          {
+            "imaginary": 0.0,
+            "real": -0.274793998167964
+          },
+          {
+            "imaginary": 0.0,
+            "real": -1.7071216598018508
+          },
+          {
+            "imaginary": 0.0,
+            "real": -3.341137306422827
+          },
+          {
+            "imaginary": 2.8553836298326982,
+            "real": -0.5174687637981525
+          },
+          {
+            "imaginary": -2.8553836298326982,
+            "real": -0.5174687637981525
+          }
+        ],
+        "condition_number": 1.0,
+        "controllable": true,
+        "controller_id": "f16.local_physical_wrench_lqr.v1:f16-1p5km-152mps",
+        "hurwitz": true,
+        "maximum_real_pole": -0.021514518599991928,
+        "trim_hold_validation": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "dt_s": 0.02,
+          "duration_s": 1.0,
+          "final_normalized_feedback_error_norm": 1.4600444767357095e-12,
+          "maximum_controlled_actual_residual": 4.603420752540999e-09,
+          "saturation_fraction": 0.0
+        }
+      },
+      "max_residual": 5.618507647724742e-08,
+      "physical_effectiveness": {
+        "effector_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "rank": 4,
+        "shape": [
+          4,
+          4
+        ],
+        "source": "f16-s119-source-load-centered-finite-difference-v1",
+        "trim_allocation_residual_norm": 9.384995150012017e-13,
+        "trim_allocation_saturated": [],
+        "trim_allocation_status": "feasible",
+        "wrench_names": [
+          "total_force_x_n",
+          "total_moment_x_nm",
+          "total_moment_y_nm",
+          "total_moment_z_nm"
+        ]
+      },
+      "residuals": {
+        "force_x_n": 1.1614247341640294e-08,
+        "force_z_n": -4.6711647883057594e-09,
+        "moment_y_nm": 5.618507647724742e-08
+      },
+      "scaled_residual_norm": 1.3721448537958652e-12,
+      "solver": {
+        "iterations": 4,
+        "message": "`gtol` termination condition is satisfied.",
+        "status": 1,
+        "success": true
+      },
+      "state": {
+        "alpha_deg": 2.71148997347306,
+        "attitude": {
+          "pitch_rad": 0.047324427671918606,
+          "roll_rad": 0.0,
+          "yaw_rad": 0.0
+        },
+        "body_rates_rad_s": {
+          "p": 0.0,
+          "q": 0.0,
+          "r": 0.0
+        },
+        "body_velocity_m_s": {
+          "u": 152.22937421721457,
+          "v": 0.0,
+          "w": 7.209550987075957
+        }
+      },
+      "validity": "source_backed_local_equilibrium"
+    },
+    {
+      "claim_boundary": "fixed-altitude, fixed-airspeed source equilibrium for local plant and control evidence; not a scheduled controller or flight-envelope qualification",
+      "controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.5258694697396235,
+        "rudder_deg": 0.0,
+        "source_powerLeverAngle_pct": 14.265717048794324,
+        "throttle_fraction": 0.14265717048794324
+      },
+      "environment": {
+        "geometric_altitude_m": 6000.0,
+        "gravity_m_s2": 9.80665,
+        "mach": 0.4816125042077692,
+        "true_airspeed_m_s": 152.4
+      },
+      "id": "f16-6km-152mps",
+      "linearization": {
+        "comparison_control_step": 5e-06,
+        "comparison_state_step": 5e-06,
+        "control_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "control_shape": [
+          6,
+          4
+        ],
+        "control_step": 1e-05,
+        "derivative_consistent": true,
+        "maximum_absolute_difference": 1.2843393015771198e-11,
+        "maximum_relative_difference": 9.654265899557974e-11,
+        "plant_id": "reference-f16-s119-source-runtime-plant",
+        "plant_revision": "f16-s119-local-runtime-v1",
+        "state_names": [
+          "u_m_s",
+          "v_m_s",
+          "w_m_s",
+          "p_rad_s",
+          "q_rad_s",
+          "r_rad_s"
+        ],
+        "state_shape": [
+          6,
+          6
+        ],
+        "state_step": 1e-05
+      },
+      "local_lqr": {
+        "closed_loop_poles": [
+          {
+            "imaginary": 0.0,
+            "real": -0.021231604107611046
+          },
+          {
+            "imaginary": 0.4086998239694491,
+            "real": -0.6478564437802767
+          },
+          {
+            "imaginary": -0.4086998239694491,
+            "real": -0.6478564437802767
+          },
+          {
+            "imaginary": 2.4516113761364333,
+            "real": -0.48673977584679545
+          },
+          {
+            "imaginary": -2.4516113761364333,
+            "real": -0.48673977584679545
+          },
+          {
+            "imaginary": 0.0,
+            "real": -2.1746505090747856
+          }
+        ],
+        "condition_number": 1.0,
+        "controllable": true,
+        "controller_id": "f16.local_physical_wrench_lqr.v1:f16-6km-152mps",
+        "hurwitz": true,
+        "maximum_real_pole": -0.021231604107611046,
+        "trim_hold_validation": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "dt_s": 0.02,
+          "duration_s": 1.0,
+          "final_normalized_feedback_error_norm": 1.092392185617571e-09,
+          "maximum_controlled_actual_residual": 5.0355636525105554e-06,
+          "saturation_fraction": 0.0
+        }
+      },
+      "max_residual": 4.0070965516103775e-05,
+      "physical_effectiveness": {
+        "effector_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "rank": 4,
+        "shape": [
+          4,
+          4
+        ],
+        "source": "f16-s119-source-load-centered-finite-difference-v1",
+        "trim_allocation_residual_norm": 0.0,
+        "trim_allocation_saturated": [],
+        "trim_allocation_status": "feasible",
+        "wrench_names": [
+          "total_force_x_n",
+          "total_moment_x_nm",
+          "total_moment_y_nm",
+          "total_moment_z_nm"
+        ]
+      },
+      "residuals": {
+        "force_x_n": -3.5046159609919414e-06,
+        "force_z_n": -4.4310581870377064e-08,
+        "moment_y_nm": -4.0070965516103775e-05
+      },
+      "scaled_residual_norm": 5.323637782159201e-10,
+      "solver": {
+        "iterations": 1,
+        "message": "`gtol` termination condition is satisfied.",
+        "status": 1,
+        "success": true
+      },
+      "state": {
+        "alpha_deg": 5.2069828607451125,
+        "attitude": {
+          "pitch_rad": 0.09087899501491561,
+          "roll_rad": 0.0,
+          "yaw_rad": 0.0
+        },
+        "body_rates_rad_s": {
+          "p": 0.0,
+          "q": 0.0,
+          "r": 0.0
+        },
+        "body_velocity_m_s": {
+          "u": 151.77109785007084,
+          "v": 0.0,
+          "w": 13.830902262116528
+        }
+      },
+      "validity": "source_backed_local_equilibrium"
+    },
+    {
+      "claim_boundary": "fixed-altitude, fixed-airspeed source equilibrium for local plant and control evidence; not a scheduled controller or flight-envelope qualification",
+      "controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.5868926332262653,
+        "rudder_deg": 0.0,
+        "source_powerLeverAngle_pct": 12.101083056228331,
+        "throttle_fraction": 0.12101083056228332
+      },
+      "environment": {
+        "geometric_altitude_m": 4500.0,
+        "gravity_m_s2": 9.80665,
+        "mach": 0.4724727951716731,
+        "true_airspeed_m_s": 152.4
+      },
+      "id": "f16-4p5km-152mps",
+      "linearization": {
+        "comparison_control_step": 5e-06,
+        "comparison_state_step": 5e-06,
+        "control_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "control_shape": [
+          6,
+          4
+        ],
+        "control_step": 1e-05,
+        "derivative_consistent": true,
+        "maximum_absolute_difference": 1.7763568394002505e-10,
+        "maximum_relative_difference": 4.320864316315959e-10,
+        "plant_id": "reference-f16-s119-source-runtime-plant",
+        "plant_revision": "f16-s119-local-runtime-v1",
+        "state_names": [
+          "u_m_s",
+          "v_m_s",
+          "w_m_s",
+          "p_rad_s",
+          "q_rad_s",
+          "r_rad_s"
+        ],
+        "state_shape": [
+          6,
+          6
+        ],
+        "state_step": 1e-05
+      },
+      "local_lqr": {
+        "closed_loop_poles": [
+          {
+            "imaginary": 0.0,
+            "real": -1.3517895602362273
+          },
+          {
+            "imaginary": 0.0,
+            "real": -0.022674657199791382
+          },
+          {
+            "imaginary": 0.0,
+            "real": -0.31407869963424845
+          },
+          {
+            "imaginary": 0.0,
+            "real": -2.5156641898885317
+          },
+          {
+            "imaginary": 2.5720620512692887,
+            "real": -0.48874390087559416
+          },
+          {
+            "imaginary": -2.5720620512692887,
+            "real": -0.48874390087559416
+          }
+        ],
+        "condition_number": 1.0,
+        "controllable": true,
+        "controller_id": "f16.local_physical_wrench_lqr.v1:f16-4p5km-152mps",
+        "hurwitz": true,
+        "maximum_real_pole": -0.022674657199791382,
+        "trim_hold_validation": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "dt_s": 0.02,
+          "duration_s": 1.0,
+          "final_normalized_feedback_error_norm": 1.1845287438369322e-11,
+          "maximum_controlled_actual_residual": 3.109793533544638e-08,
+          "saturation_fraction": 0.0
+        }
+      },
+      "max_residual": 4.7533768904564115e-07,
+      "physical_effectiveness": {
+        "effector_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "rank": 4,
+        "shape": [
+          4,
+          4
+        ],
+        "source": "f16-s119-source-load-centered-finite-difference-v1",
+        "trim_allocation_residual_norm": 0.0,
+        "trim_allocation_saturated": [],
+        "trim_allocation_status": "feasible",
+        "wrench_names": [
+          "total_force_x_n",
+          "total_moment_x_nm",
+          "total_moment_y_nm",
+          "total_moment_z_nm"
+        ]
+      },
+      "residuals": {
+        "force_x_n": 8.218012226279825e-08,
+        "force_z_n": 2.2177118808031082e-08,
+        "moment_y_nm": 4.7533768904564115e-07
+      },
+      "scaled_residual_norm": 9.749285245609803e-12,
+      "solver": {
+        "iterations": 4,
+        "message": "`gtol` termination condition is satisfied.",
+        "status": 1,
+        "success": true
+      },
+      "state": {
+        "alpha_deg": 4.2098542754763795,
+        "attitude": {
+          "pitch_rad": 0.0734758181362232,
+          "roll_rad": 0.0,
+          "yaw_rad": 0.0
+        },
+        "body_rates_rad_s": {
+          "p": 0.0,
+          "q": 0.0,
+          "r": 0.0
+        },
+        "body_velocity_m_s": {
+          "u": 151.98880441943973,
+          "v": 0.0,
+          "w": 11.187641894040928
+        }
+      },
+      "validity": "source_backed_local_equilibrium"
+    },
+    {
+      "claim_boundary": "fixed-altitude, fixed-airspeed source equilibrium for local plant and control evidence; not a scheduled controller or flight-envelope qualification",
+      "controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.5803189815591208,
+        "rudder_deg": 0.0,
+        "source_powerLeverAngle_pct": 21.546885539596737,
+        "throttle_fraction": 0.21546885539596738
+      },
+      "environment": {
+        "geometric_altitude_m": 9000.0,
+        "gravity_m_s2": 9.80665,
+        "mach": 0.5015898652849708,
+        "true_airspeed_m_s": 152.4
+      },
+      "id": "f16-9km-152mps",
+      "linearization": {
+        "comparison_control_step": 5e-06,
+        "comparison_state_step": 5e-06,
+        "control_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "control_shape": [
+          6,
+          4
+        ],
+        "control_step": 1e-05,
+        "derivative_consistent": true,
+        "maximum_absolute_difference": 1.7763568394002505e-10,
+        "maximum_relative_difference": 7.188445897044698e-10,
+        "plant_id": "reference-f16-s119-source-runtime-plant",
+        "plant_revision": "f16-s119-local-runtime-v1",
+        "state_names": [
+          "u_m_s",
+          "v_m_s",
+          "w_m_s",
+          "p_rad_s",
+          "q_rad_s",
+          "r_rad_s"
+        ],
+        "state_shape": [
+          6,
+          6
+        ],
+        "state_step": 1e-05
+      },
+      "local_lqr": {
+        "closed_loop_poles": [
+          {
+            "imaginary": 0.0,
+            "real": -0.019829013364852845
+          },
+          {
+            "imaginary": 0.40794369573668027,
+            "real": -0.5534570364822228
+          },
+          {
+            "imaginary": -0.40794369573668027,
+            "real": -0.5534570364822228
+          },
+          {
+            "imaginary": 0.0,
+            "real": -1.5785177086411553
+          },
+          {
+            "imaginary": 2.2487811088616696,
+            "real": -0.5191961004931311
+          },
+          {
+            "imaginary": -2.2487811088616696,
+            "real": -0.5191961004931311
+          }
+        ],
+        "condition_number": 1.0,
+        "controllable": true,
+        "controller_id": "f16.local_physical_wrench_lqr.v1:f16-9km-152mps",
+        "hurwitz": true,
+        "maximum_real_pole": -0.019829013364852845,
+        "trim_hold_validation": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "dt_s": 0.02,
+          "duration_s": 1.0,
+          "final_normalized_feedback_error_norm": 9.626278829207778e-16,
+          "maximum_controlled_actual_residual": 3.4959628793690477e-12,
+          "saturation_fraction": 0.0
+        }
+      },
+      "max_residual": 8.731149137020111e-11,
+      "physical_effectiveness": {
+        "effector_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "rank": 4,
+        "shape": [
+          4,
+          4
+        ],
+        "source": "f16-s119-source-load-centered-finite-difference-v1",
+        "trim_allocation_residual_norm": 5.578039219502503e-13,
+        "trim_allocation_saturated": [],
+        "trim_allocation_status": "feasible",
+        "wrench_names": [
+          "total_force_x_n",
+          "total_moment_x_nm",
+          "total_moment_y_nm",
+          "total_moment_z_nm"
+        ]
+      },
+      "residuals": {
+        "force_x_n": 1.6370904631912708e-11,
+        "force_z_n": 8.731149137020111e-11,
+        "moment_y_nm": -4.25266071586574e-11
+      },
+      "scaled_residual_norm": 8.893474105725024e-15,
+      "solver": {
+        "iterations": 1,
+        "message": "`gtol` termination condition is satisfied.",
+        "status": 1,
+        "success": true
+      },
+      "state": {
+        "alpha_deg": 7.949593280417001,
+        "attitude": {
+          "pitch_rad": 0.13874657693769352,
+          "roll_rad": 0.0,
+          "yaw_rad": 0.0
+        },
+        "body_rates_rad_s": {
+          "p": 0.0,
+          "q": 0.0,
+          "r": 0.0
+        },
+        "body_velocity_m_s": {
+          "u": 150.93545503110386,
+          "v": 0.0,
+          "w": 21.07720129793386
+        }
+      },
+      "validity": "source_backed_local_equilibrium"
+    },
+    {
+      "claim_boundary": "fixed-altitude, fixed-airspeed source equilibrium for local plant and control evidence; not a scheduled controller or flight-envelope qualification",
+      "controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.5503869305423588,
+        "rudder_deg": 0.0,
+        "source_powerLeverAngle_pct": 16.358787424657056,
+        "throttle_fraction": 0.16358787424657056
+      },
+      "environment": {
+        "geometric_altitude_m": 7500.0,
+        "gravity_m_s2": 9.80665,
+        "mach": 0.4912999005942015,
+        "true_airspeed_m_s": 152.4
+      },
+      "id": "f16-7p5km-152mps",
+      "linearization": {
+        "comparison_control_step": 5e-06,
+        "comparison_state_step": 5e-06,
+        "control_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "control_shape": [
+          6,
+          4
+        ],
+        "control_step": 1e-05,
+        "derivative_consistent": true,
+        "maximum_absolute_difference": 1.7763568394002505e-10,
+        "maximum_relative_difference": 6.025746187658772e-10,
+        "plant_id": "reference-f16-s119-source-runtime-plant",
+        "plant_revision": "f16-s119-local-runtime-v1",
+        "state_names": [
+          "u_m_s",
+          "v_m_s",
+          "w_m_s",
+          "p_rad_s",
+          "q_rad_s",
+          "r_rad_s"
+        ],
+        "state_shape": [
+          6,
+          6
+        ],
+        "state_step": 1e-05
+      },
+      "local_lqr": {
+        "closed_loop_poles": [
+          {
+            "imaginary": 0.0,
+            "real": -0.01838172692963209
+          },
+          {
+            "imaginary": 0.40696470925180894,
+            "real": -0.5939387859259774
+          },
+          {
+            "imaginary": -0.40696470925180894,
+            "real": -0.5939387859259774
+          },
+          {
+            "imaginary": 0.0,
+            "real": -1.8554520410268083
+          },
+          {
+            "imaginary": 2.338280200628941,
+            "real": -0.4997676880092613
+          },
+          {
+            "imaginary": -2.338280200628941,
+            "real": -0.4997676880092613
+          }
+        ],
+        "condition_number": 1.0,
+        "controllable": true,
+        "controller_id": "f16.local_physical_wrench_lqr.v1:f16-7p5km-152mps",
+        "hurwitz": true,
+        "maximum_real_pole": -0.01838172692963209,
+        "trim_hold_validation": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "dt_s": 0.02,
+          "duration_s": 1.0,
+          "final_normalized_feedback_error_norm": 5.88633219371419e-09,
+          "maximum_controlled_actual_residual": 2.3678635823136352e-05,
+          "saturation_fraction": 0.0
+        }
+      },
+      "max_residual": 0.00021764818119559656,
+      "physical_effectiveness": {
+        "effector_names": [
+          "elevator_deg",
+          "aileron_deg",
+          "rudder_deg",
+          "throttle_fraction"
+        ],
+        "rank": 4,
+        "shape": [
+          4,
+          4
+        ],
+        "source": "f16-s119-source-load-centered-finite-difference-v1",
+        "trim_allocation_residual_norm": 6.636955525093913e-13,
+        "trim_allocation_saturated": [],
+        "trim_allocation_status": "feasible",
+        "wrench_names": [
+          "total_force_x_n",
+          "total_moment_x_nm",
+          "total_moment_y_nm",
+          "total_moment_z_nm"
+        ]
+      },
+      "residuals": {
+        "force_x_n": 4.389627247292083e-05,
+        "force_z_n": -2.1211308194324374e-06,
+        "moment_y_nm": 0.00021764818119559656
+      },
+      "scaled_residual_norm": 4.904170919480239e-09,
+      "solver": {
+        "iterations": 4,
+        "message": "`gtol` termination condition is satisfied.",
+        "status": 1,
+        "success": true
+      },
+      "state": {
+        "alpha_deg": 6.438691768444072,
+        "attitude": {
+          "pitch_rad": 0.11237637088040539,
+          "roll_rad": 0.0,
+          "yaw_rad": 0.0
+        },
+        "body_rates_rad_s": {
+          "p": 0.0,
+          "q": 0.0,
+          "r": 0.0
+        },
+        "body_velocity_m_s": {
+          "u": 151.43872446391663,
+          "v": 0.0,
+          "w": 17.09013553901606
+        }
+      },
+      "validity": "source_backed_local_equilibrium"
+    }
+  ],
+  "schema_version": "taoryx.f16-operating-points-evidence/v1",
+  "source_plant": "reference-f16-s119-source-runtime-plant",
+  "status": "development_schedule_witness_passed"
+}

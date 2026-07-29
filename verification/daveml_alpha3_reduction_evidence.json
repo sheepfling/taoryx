@@ -5,9 +5,9 @@
   "reductions": [
     {
       "artifact": "families/reference_f16_s119/reductions/point-mass-3dof-v1.yaml",
-      "artifact_sha256": "85b7ae84c17aac65fb2e28f21b471ceff403ccc3b19a3eb52e5b8cfb2100864f",
+      "artifact_sha256": "be3a4430de3fd2b89eaf834f856b885935fb9b0b13acaf54e2ea28813f177bca",
       "comparison": {
-        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "evidence_artifact": "verification/f16_reduction_evidence.json",
         "pass_rule": "parent_and_reduction_histories_must_be_compared_over_declared_in_envelope_window",
         "required_evidence": [
           "matched_initial_state",
@@ -43,9 +43,9 @@
     },
     {
       "artifact": "families/reference_f16_s119/reductions/attitude-response-pseudo6dof-v1.yaml",
-      "artifact_sha256": "1f501734b04d1609f1b771edb730086ad36dbabdaf8f6d541e4000edd8a46f2f",
+      "artifact_sha256": "95710620c7c5762ca3b9cab31c044e9e112b890798eb6ce41727828190a9a053",
       "comparison": {
-        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "evidence_artifact": "verification/f16_reduction_evidence.json",
         "pass_rule": "response_error_must_be_reported_against_parent_without_source_equivalence_claim",
         "required_evidence": [
           "matched_control_pulse",

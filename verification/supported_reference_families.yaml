@@ -1,0 +1,75 @@
+schema_version: 1
+registry_id: taoryx_supported_reference_families_v1
+purpose: >-
+  Explicit support boundary for source-grounded reference families. These
+  records make a family selectable and auditable without promoting it to the
+  fully qualified executable vehicle registry.
+claim_boundary: >-
+  A supported reference family has a pinned source package, a validated family
+  manifest, and a declared fidelity/evidence boundary. It is not a claim of
+  production, operational, actuator, or all-fidelity qualification.
+families:
+  - id: reference_f16_s119
+    display_name: F-16 S-119 source-grounded reference family
+    physical_family: powered_fixed_wing
+    manifest: families/reference_f16_s119/family.yaml
+    maturity: M4
+    evidence_strength: source_grounded_reference
+    status: source_replay_and_nominal_racetrack_evidence_available
+    supported_profiles:
+      - id: f16.rigid_body_6dof.v1
+        fidelity: rigid_body_6dof
+        status: runtime_replay_qualification_passed
+        claim: source-bounded nonlinear rigid-body reference replay
+      - id: f16.performance_3dof.v1
+        fidelity: point_mass_3dof
+        status: development_nominal_case_pass
+        claim: bounded translational racetrack and truth-gate evidence at f16-sea-level-152mps
+      - id: f16.attitude_response_p6dof.v1
+        fidelity: pseudo_6dof
+        status: development_nominal_case_pass
+        claim: named attitude/rate response bridge with shared truth-gate evidence at f16-sea-level-152mps
+      - id: f16.rigid_body_6dof.direct_wrench_screen.v1
+        fidelity: rigid_body_6dof
+        status: development_screen_pending
+        claim: direct generalized-wrench comparison screen only
+      - id: f16.rigid_body_6dof.surface_allocated.v1
+        fidelity: rigid_body_6dof
+        status: development_nominal_case_pass
+        claim: bounded elevator/aileron/rudder/throttle allocation with independent truth-gate evidence at f16-sea-level-152mps
+    nonclaims:
+      - actuator or servo dynamics
+      - SAS or autopilot fidelity
+      - fuel-transient or runway behavior
+      - production, training, or operational F-16 fidelity
+    next_gate: multi_point_scheduled_control_and_r1_robustness_review
+  - id: reference_hl20_mod_k
+    display_name: HL-20 Mod K source-grounded reference family
+    physical_family: unpowered_lifting_body
+    manifest: families/reference_hl20_mod_k/family.yaml
+    maturity: M3
+    evidence_strength: source_grounded_reference
+    status: source_replay_qualified_surface_allocation_contract_ready
+    supported_profiles:
+      - id: hl20.rigid_body_6dof.v1
+        fidelity: rigid_body_6dof
+        status: runtime_replay_qualification_passed
+        claim: source-bounded nonlinear unpowered lifting-body replay
+      - id: hl20.rigid_body_6dof_surface_allocated.v1
+        fidelity: rigid_body_6dof
+        status: contract_ready
+        claim: not_qualified
+      - id: hl20.energy_glide_3dof.v1
+        fidelity: point_mass_3dof
+        status: planned_derived_from_parent
+        claim: not_qualified
+      - id: hl20.attitude_response_p6dof.v1
+        fidelity: pseudo_6dof
+        status: planned_derived_from_parent
+        claim: not_qualified
+    nonclaims:
+      - propulsion
+      - actuator dynamics or controller qualification
+      - landing gear, contact, flare, touchdown, or rollout
+      - generic hypersonic-glider or operational performance
+    next_gate: surface_allocator_glide_guidance_and_arrival_showcase

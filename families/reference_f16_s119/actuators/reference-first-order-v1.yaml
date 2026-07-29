@@ -3,23 +3,42 @@ kind: taoryx.reference-actuator-profile/v1alpha1
 family: reference_f16_s119
 profile_id: f16.reference_first_order.v1
 evidence: taoryx_engineering_assumption
-status: planned
+status: development_only
 channels: [elevator, aileron, rudder, throttle]
+control_path: direct_physical_effector_command
+claim_boundary: >-
+  Bounded physical-effector overlay for local controller development; not
+  source-validated actuator dynamics or operational F-16 fidelity.
+limits:
+  elevator:
+    lower: -24.0
+    upper: 24.0
+    unit: deg
+    rate_limit_per_s: 60.0
+    time_constant_s: 0.05
+    provenance: source_aerodynamic_input_bound_plus_engineering_response_assumption
+  aileron:
+    lower: -24.0
+    upper: 24.0
+    unit: deg
+    rate_limit_per_s: 60.0
+    time_constant_s: 0.05
+    provenance: engineering_assumption_pending_source_actuator_data
+  rudder:
+    lower: -24.0
+    upper: 24.0
+    unit: deg
+    rate_limit_per_s: 60.0
+    time_constant_s: 0.05
+    provenance: engineering_assumption_pending_source_actuator_data
+  throttle:
+    lower: 0.0
+    upper: 1.0
+    unit: fraction
+    rate_limit_per_s: 1.0
+    time_constant_s: 0.20
+    provenance: canonical_resource_command_assumption
 qualification_required:
   - command_to_achieved_trace
   - rate_and_latency_report
   - saturation_and_health_report
-*** Add File: /Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/families/reference_hl20_mod_k/plant/source-lock.yaml
-schema_version: 1
-kind: taoryx.reference-plant-source-lock/v1alpha1
-family: reference_hl20_mod_k
-package:
-  relative_to_corpus: qualified-models/hl20-mod-k/taoryx-hl20-mod-k-unpowered-v0.10.txair
-  sha256: 443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63
-aerodynamics:
-  relative_to_corpus: qualified-models/hl20-mod-k/source/aerodynamics.dml
-  sha256: b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec
-corpus:
-  archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
-  sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
-replay_boundary: parent_plant_runtime_replay_complete

@@ -50,23 +50,37 @@ fidelity_profiles:
   - profile_id: f16.performance_3dof.v1
     runtime_fidelity: point_mass_3dof
     equations: [newton_point_mass_translation]
-    status: planned_derived_from_parent
+    status: development_nominal_case_pass
     parent_profile: f16.rigid_body_6dof.v1
     data_contract: [trim_force_sweeps, thrust_availability, energy_rate, bank_and_load_factor_limits]
     omitted_physics: [physical_attitude_dynamics, aerodynamic_moments, physical_actuator_states]
   - profile_id: f16.attitude_response_p6dof.v1
     runtime_fidelity: pseudo_6dof
     equations: [newton_point_mass_translation, quaternion_kinematics, scheduled_attitude_response]
-    status: planned_derived_from_parent
+    status: development_nominal_case_pass
     parent_profile: f16.rigid_body_6dof.v1
     data_contract: [attitude_response_sweeps, body_rate_response, actuator_response_schedule]
     omitted_physics: [moment_balance_as_response_source, fuel_mass_evolution]
   - profile_id: f16.rigid_body_6dof.v1
     runtime_fidelity: rigid_body_6dof
     equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
-    status: runtime_replay_qualification_passed
+    status: runtime_replay_and_surface_route_development_pass
     data_contract: [source_force_moment_graph, fixed_mass_properties, steady_propulsion, direct_controls]
     omitted_physics: [fuel_mass_evolution, actuator_dynamics, runway_contact]
+  - profile_id: f16.rigid_body_6dof.direct_wrench_screen.v1
+    runtime_fidelity: rigid_body_6dof
+    equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
+    status: development_screen_pending
+    parent_profile: f16.rigid_body_6dof.v1
+    data_contract: [source_force_moment_graph, fixed_mass_properties, direct_generalized_wrench]
+    omitted_physics: [physical_effector_allocation, actuator_dynamics, fuel_mass_evolution, runway_contact]
+  - profile_id: f16.rigid_body_6dof.surface_allocated.v1
+    runtime_fidelity: rigid_body_6dof
+    equations: [newton_center_of_mass_translation, quaternion_kinematics, newton_euler_rotation]
+    status: development_nominal_case_pass
+    parent_profile: f16.rigid_body_6dof.v1
+    data_contract: [source_force_moment_graph, fixed_mass_properties, bounded_surface_allocation, actuator_overlay]
+    omitted_physics: [source_validated_actuator_dynamics, fuel_mass_evolution, runway_contact]
 parameters:
   - {id: vehicle.source_package, kind: string, default: f16-s119-reference-v0.7.txair}
   - {id: vehicle.body_frame, kind: string, default: FRD}
@@ -76,8 +90,12 @@ parameters:
   - {id: mission.profile, kind: string, default: subsonic_energy_route_arrival}
 variants: {baseline: {}}
 loadouts: {baseline: {}}
-missions: {baseline: {}}
-segment_plans: {baseline: {}}
+missions:
+  baseline:
+    mission.profile: subsonic_energy_racetrack_contract
+segment_plans:
+  baseline:
+    mission.profile: subsonic_energy_racetrack_contract
 segment_graphs:
   baseline:
     schema_version: 1
@@ -93,7 +111,7 @@ controls:
   - {id: control.elevator, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct elevator input; actuator overlay pending.}
   - {id: control.aileron, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct aileron input; actuator overlay pending.}
   - {id: control.rudder, unit: deg, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, description: Source direct rudder input; actuator overlay pending.}
-  - {id: control.throttle, unit: dimensionless, minimum: 0.0, maximum: 1.0, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, default_command_mode: absolute, description: Source steady power/throttle input.}
+  - {id: control.throttle, unit: dimensionless, minimum: 0.0, maximum: 1.0, authority_modes: [autopilot, commanded, overlay, direct, mixed], default_authority: direct, default_command_mode: absolute, description: Canonical normalized throttle; source powerLeverAngle is percent and uses the binding transform.}
 observations:
   - {id: state.position.north, unit: m, source: position.north, description: NED north position.}
   - {id: state.position.east, unit: m, source: position.east, description: NED east position.}
@@ -113,12 +131,14 @@ layers:
   mass_properties: {version: v1, evidence: source_bound_fixed}
   aerodynamics: {version: v1, evidence: source_checked_semantic_reconstruction}
   propulsion: {version: v1, evidence: source_checked_steady}
-  actuators: {version: external-overlay-required-v1, evidence: no_source_actuator_dynamics}
-  controllers: {version: external-overlay-required-v1, evidence: no_source_controller_contract}
-  reductions: {version: alpha3-reduction-contract-v1, evidence: verification/daveml_alpha3_reduction_evidence.json}
+  actuators: {version: reference-first-order-v1, evidence: development_engineering_overlay}
+  controllers: {version: local-physical-wrench-lqr-v1, evidence: development_local_wrench_screen}
+  reductions: {version: local-reduction-screen-v1, evidence: verification/f16_reduction_evidence.json}
   trim: {version: source-equilibrium-trim-v1, evidence: source_equilibrium_trim_verified}
   linearization: {version: source-channel-dynamics-with-propulsion-v2, evidence: source_channel_full_dynamics_verified}
-  tuning: {version: source-channel-full-lqr-v2, evidence: source_channel_full_lqr_verified}
+  tuning: {version: local-physical-wrench-lqr-v1, evidence: verification/f16_physical_wrench_perturbation_evidence.json}
+  operating_points: {version: source-retrimmed-local-catalog-v1, evidence: verification/f16_operating_points_evidence.json}
+  racetrack: {version: shared-powered-fixed-wing-racetrack-v1, evidence: artifacts/showcases/f16-s119-racetrack-fidelity-ladder/manifest.json}
   objectives: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
   scenarios: {version: source-channel-smoke-v1, evidence: source_channel_smoke_verified}
 bindings:
@@ -126,6 +146,7 @@ bindings:
   - bindings/canonical-observations.yaml
   - bindings/envelope.yaml
   - plant/source-lock.yaml
+  - qualification/racetrack-binding.yaml
 claims:
   - source-grounded nonlinear powered fixed-wing reference plant
   - source-normalized DAVE-ML aerodynamics independently parsed and statically accepted
@@ -133,4 +154,4 @@ claims:
 nonclaims:
   - production F-16 training or operational fidelity
   - actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone
-next_gate: alpha3_overlay_and_reduction_equivalence
+next_gate: multi_point_scheduled_control_and_r1_robustness_review

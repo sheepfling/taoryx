@@ -1,0 +1,178 @@
+schema_version: 1
+kind: taoryx.operating-point-catalog/v1alpha1
+family: reference_f16_s119
+claim_boundary: >-
+  Source-backed fixed-altitude, fixed-airspeed force/moment equilibrium used
+  as the initial controller and mission operating point; not flight
+  qualification or full-envelope coverage.
+schedule_readiness: expanded_local_witness_catalog
+controller_schedule_status: local_nodes_and_midpoints_validated; continuous_runtime_schedule_pending
+source_evidence: verification/daveml_f16_equilibrium_trim_evidence.json
+points:
+  - id: f16-sea-level-152mps
+    environment:
+      geometric_altitude_m: 0.0
+      true_airspeed_m_s: 152.4
+      mach: 0.447869133900138
+      gravity_m_s2: 9.80665
+      atmosphere: verification/daveml_atmosphere_binding.json
+    target:
+      flight_path_angle_rad: 0.0
+      turn_rate_rad_s: 0.0
+      sideslip_rad: 0.0
+    state:
+      alpha_deg: 2.1452348297818276
+      body_velocity_m_s: {u: 152.29319080301542, v: 0.0, w: 5.704737946334179}
+      body_rates_rad_s: {p: 0.0, q: 0.0, r: 0.0}
+      attitude: {roll_rad: 0.0, pitch_rad: 0.037441411008153, yaw_rad: 0.0}
+    controls:
+      elevator_deg: -0.7562951013162249
+      aileron_deg: 0.0
+      rudder_deg: 0.0
+      throttle_fraction: 0.0893225837337992
+      source_powerLeverAngle_pct: 8.93225837337992
+    residuals:
+      force_x_n: 1.4651959645561874e-08
+      force_z_n: -1.0186340659856796e-10
+      moment_y_nm: 7.131211691846808e-10
+      max_residual: 1.4651959645561874e-08
+    validity: certified_source_operating_point
+    next_use: plant_state_initialization_then_local_linearization
+  - id: f16-3km-152mps
+    environment:
+      geometric_altitude_m: 3000.0
+      true_airspeed_m_s: 152.4
+      mach: 0.4638309751317455
+      gravity_m_s2: 9.80665
+      atmosphere: verification/daveml_atmosphere_binding.json
+    target:
+      flight_path_angle_rad: 0.0
+      turn_rate_rad_s: 0.0
+      sideslip_rad: 0.0
+    state:
+      alpha_deg: 3.3906337409669205
+      body_velocity_m_s: {u: 152.13322525094975, v: 0.0, w: 9.013421921988892}
+      body_rates_rad_s: {p: 0.0, q: 0.0, r: 0.0}
+      attitude: {roll_rad: 0.0, pitch_rad: 0.059177722509085304, yaw_rad: 0.0}
+    controls:
+      elevator_deg: -0.654255033838822
+      aileron_deg: 0.0
+      rudder_deg: 0.0
+      throttle_fraction: 0.10849099700806596
+      source_powerLeverAngle_pct: 10.849099700806596
+    validity: source_retrimmed_local_operating_point
+    next_use: local_linearization_and_effectiveness_schedule_witness
+  - id: f16-1p5km-152mps
+    environment:
+      geometric_altitude_m: 1500.0
+      true_airspeed_m_s: 152.4
+      gravity_m_s2: 9.80665
+      atmosphere: verification/daveml_atmosphere_binding.json
+    target:
+      flight_path_angle_rad: 0.0
+      turn_rate_rad_s: 0.0
+      sideslip_rad: 0.0
+    state:
+      alpha_deg: 2.767934285
+      body_velocity_m_s: {u: 152.217211, v: 0.0, w: 7.3589}
+      body_rates_rad_s: {p: 0.0, q: 0.0, r: 0.0}
+      attitude: {roll_rad: 0.0, pitch_rad: 0.04831, yaw_rad: 0.0}
+    controls:
+      elevator_deg: -0.705275067
+      aileron_deg: 0.0
+      rudder_deg: 0.0
+      throttle_fraction: 0.09890679
+    validity: source_retrimmed_local_midpoint_witness
+    next_use: midpoint_schedule_witness
+  - id: f16-6km-152mps
+    environment:
+      geometric_altitude_m: 6000.0
+      true_airspeed_m_s: 152.4
+      mach: 0.4816125042077692
+      gravity_m_s2: 9.80665
+      atmosphere: verification/daveml_atmosphere_binding.json
+    target:
+      flight_path_angle_rad: 0.0
+      turn_rate_rad_s: 0.0
+      sideslip_rad: 0.0
+    state:
+      alpha_deg: 5.2069828607451125
+      body_velocity_m_s: {u: 151.77109785007084, v: 0.0, w: 13.830902262116528}
+      body_rates_rad_s: {p: 0.0, q: 0.0, r: 0.0}
+      attitude: {roll_rad: 0.0, pitch_rad: 0.09087899501491561, yaw_rad: 0.0}
+    controls:
+      elevator_deg: -0.5258694697396235
+      aileron_deg: 0.0
+      rudder_deg: 0.0
+      throttle_fraction: 0.14265717048794324
+      source_powerLeverAngle_pct: 14.265717048794325
+    validity: source_retrimmed_local_operating_point
+    next_use: local_linearization_and_effectiveness_schedule_witness
+  - id: f16-4p5km-152mps
+    environment:
+      geometric_altitude_m: 4500.0
+      true_airspeed_m_s: 152.4
+      gravity_m_s2: 9.80665
+      atmosphere: verification/daveml_atmosphere_binding.json
+    target:
+      flight_path_angle_rad: 0.0
+      turn_rate_rad_s: 0.0
+      sideslip_rad: 0.0
+    state:
+      alpha_deg: 4.298808300
+      body_velocity_m_s: {u: 151.952162, v: 0.0, w: 11.4222}
+      body_rates_rad_s: {p: 0.0, q: 0.0, r: 0.0}
+      attitude: {roll_rad: 0.0, pitch_rad: 0.07503, yaw_rad: 0.0}
+    controls:
+      elevator_deg: -0.590062251
+      aileron_deg: 0.0
+      rudder_deg: 0.0
+      throttle_fraction: 0.125574084
+    validity: source_retrimmed_local_midpoint_witness
+    next_use: midpoint_schedule_witness
+  - id: f16-9km-152mps
+    environment:
+      geometric_altitude_m: 9000.0
+      true_airspeed_m_s: 152.4
+      mach: 0.5015898652849708
+      gravity_m_s2: 9.80665
+      atmosphere: verification/daveml_atmosphere_binding.json
+    target:
+      flight_path_angle_rad: 0.0
+      turn_rate_rad_s: 0.0
+      sideslip_rad: 0.0
+    state:
+      alpha_deg: 7.949593280417001
+      body_velocity_m_s: {u: 150.93545503110386, v: 0.0, w: 21.07720129793386}
+      body_rates_rad_s: {p: 0.0, q: 0.0, r: 0.0}
+      attitude: {roll_rad: 0.0, pitch_rad: 0.13874657693769352, yaw_rad: 0.0}
+    controls:
+      elevator_deg: -0.5803189815591208
+      aileron_deg: 0.0
+      rudder_deg: 0.0
+      throttle_fraction: 0.21546885539596738
+      source_powerLeverAngle_pct: 21.54688553959674
+    validity: source_retrimmed_local_operating_point
+    next_use: local_linearization_and_effectiveness_schedule_witness
+  - id: f16-7p5km-152mps
+    environment:
+      geometric_altitude_m: 7500.0
+      true_airspeed_m_s: 152.4
+      gravity_m_s2: 9.80665
+      atmosphere: verification/daveml_atmosphere_binding.json
+    target:
+      flight_path_angle_rad: 0.0
+      turn_rate_rad_s: 0.0
+      sideslip_rad: 0.0
+    state:
+      alpha_deg: 6.578288070
+      body_velocity_m_s: {u: 151.6088, v: 0.0, w: 17.4753}
+      body_rates_rad_s: {p: 0.0, q: 0.0, r: 0.0}
+      attitude: {roll_rad: 0.0, pitch_rad: 0.11475, yaw_rad: 0.0}
+    controls:
+      elevator_deg: -0.553094226
+      aileron_deg: 0.0
+      rudder_deg: 0.0
+      throttle_fraction: 0.179063013
+    validity: source_retrimmed_local_midpoint_witness
+    next_use: midpoint_schedule_witness

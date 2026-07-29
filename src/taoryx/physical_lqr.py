@@ -139,11 +139,30 @@ class PhysicalWrenchLqrDesign:
         wrench so a rank-limited plant can make their status explicit.
         """
 
+        return self.requested_wrench_for_reference(state, self.projection.trim_state)
+        ####
+    ####
+
+    def requested_wrench_for_reference(
+        self,
+        state: Mapping[str, float],
+        state_reference: Mapping[str, float],
+    ) -> tuple[dict[str, float], dict[str, float]]:
+        """Return a wrench request for an explicit local state reference.
+
+        The reference must remain inside the declared linearization envelope.
+        This method changes the feedback target only; it does not bypass the
+        allocator or inject a wrench into the nonlinear plant.
+        """
+
         missing = set(self.projection.state_names) - set(state)
         if missing:
             raise KeyError(f"physical LQR state is missing: {', '.join(sorted(missing))}")
+        missing_reference = set(self.projection.state_names) - set(state_reference)
+        if missing_reference:
+            raise KeyError(f"physical LQR reference is missing: {', '.join(sorted(missing_reference))}")
         error = np.asarray(
-            [float(state[name]) - float(self.projection.trim_state[name]) for name in self.projection.state_names],
+            [float(state[name]) - float(state_reference[name]) for name in self.projection.state_names],
             dtype=float,
         )
         increment = -np.asarray(self.result.gain, dtype=float) @ error

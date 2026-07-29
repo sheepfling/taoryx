@@ -22,10 +22,10 @@ def _ladder_module():
 def test_ladder_exposes_each_airbreathing_vehicle_at_each_fidelity() -> None:
     module = _ladder_module()
     selected = module._selected_missions("all", "all")
-    assert len(selected) == 8
+    assert len(selected) == 12
     assert {(vehicle, fidelity) for vehicle, fidelity, _ in selected} == {
         (vehicle, fidelity)
-        for vehicle in ("x8", "b747")
+        for vehicle in ("x8", "b747", "f16")
         for fidelity in module.FIDELITIES
     }
     ####

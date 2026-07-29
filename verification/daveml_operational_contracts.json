@@ -15,7 +15,7 @@
       "family_id": "reference_f16_s119",
       "manifest": "families/reference_f16_s119/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "434b7d649d23dd483cd202c7a982b4ed8167b2dc2effd777c6591fe6e130eb73",
+      "manifest_sha256": "a8625bb8b2155fad911660f755bc5783c08131d133048e16657df51c9190ce7c",
       "nonclaim_count": 3,
       "qualification_class": "reference_exact",
       "status": "verified"

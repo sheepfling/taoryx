@@ -109,6 +109,12 @@ class ResolvedRacetrack:
     altitude_capture_max_mps: float
     position_capture_gain: float
     position_capture_max_correction_mps: float
+    gate_corridor_m: float = 250.0
+    gate_altitude_tolerance_m: float = 35.0
+    gate_speed_tolerance_mps: float = 12.0
+    position_capture_bank_gain_rad_per_m: float = 2.5e-5
+    position_capture_max_bank_correction_deg: float = 3.0
+    turn_rate_command_scale: float = 1.0
 
     @property
     def declared_duration_s(self) -> float:
@@ -188,6 +194,12 @@ class ResolvedRacetrack:
             "inbound_level_time_s": self.timing.inbound_level_time_s,
             "route_duration_s": self.declared_duration_s,
             "simulation_horizon_s": self.horizon_s,
+            "gate_corridor_m": self.gate_corridor_m,
+            "gate_altitude_tolerance_m": self.gate_altitude_tolerance_m,
+            "gate_speed_tolerance_mps": self.gate_speed_tolerance_mps,
+            "position_capture_bank_gain_rad_per_m": self.position_capture_bank_gain_rad_per_m,
+            "position_capture_max_bank_correction_deg": self.position_capture_max_bank_correction_deg,
+            "turn_rate_command_scale": self.turn_rate_command_scale,
         }
         ####
 
@@ -293,6 +305,12 @@ def resolve_racetrack_binding(template_id: str, binding_id: str, values: dict[st
         altitude_capture_max_mps=float(values.get("altitude_capture_max_mps", 0.0)),
         position_capture_gain=float(values.get("position_capture_gain", 0.0)),
         position_capture_max_correction_mps=float(values.get("position_capture_max_correction_mps", 0.0)),
+        gate_corridor_m=float(values.get("gate_corridor_m", 250.0)),
+        gate_altitude_tolerance_m=float(values.get("gate_altitude_tolerance_m", 35.0)),
+        gate_speed_tolerance_mps=float(values.get("gate_speed_tolerance_mps", 12.0)),
+        position_capture_bank_gain_rad_per_m=float(values.get("position_capture_bank_gain_rad_per_m", 2.5e-5)),
+        position_capture_max_bank_correction_deg=float(values.get("position_capture_max_bank_correction_deg", 3.0)),
+        turn_rate_command_scale=float(values.get("turn_rate_command_scale", 1.0)),
     )
     ####
 

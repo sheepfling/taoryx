@@ -45,19 +45,19 @@ records:
     status: operable_source_bounded_segments
     next_gate: continuous_energy_managed_mission_and_terminal_contract
   - id: reference_f16_s119
-    family: source_reference_anchor
-    maturity: M2
-    evidence_strength: source_checked_static
-    status: package_replay_pending
-    next_gate: actuators_and_controller_replay
+    family: powered_fixed_wing
+    maturity: M4
+    evidence_strength: source_grounded_reference
+    status: nominal_multi_fidelity_racetrack_evidence_with_surface_path_pending_promotion
+    next_gate: multi_point_scheduled_control_and_r1_robustness_review
   - id: reference_hl20_mod_k
-    family: source_reference_anchor
+    family: unpowered_lifting_body
     family_group: hypersonic_lifting_body_research
     subtype: unpowered_hypersonic_lifting_body_entry_glider
-    maturity: M2
-    evidence_strength: source_checked_static
-    status: package_replay_pending
-    next_gate: allocation_guidance_and_arrival_replay
+    maturity: M3
+    evidence_strength: source_grounded_reference
+    status: source_replay_qualified_surface_allocation_contract_ready
+    next_gate: surface_allocator_glide_guidance_and_arrival_showcase
   - id: c172p_hybrid
     family: light_propeller_aircraft
     maturity: M0

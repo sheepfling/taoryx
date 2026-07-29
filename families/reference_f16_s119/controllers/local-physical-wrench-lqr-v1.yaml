@@ -1,0 +1,21 @@
+schema_version: 1
+kind: taoryx.reference-controller-profile/v1alpha1
+family: reference_f16_s119
+controller_id: f16.local_physical_wrench_lqr.v1
+method: continuous_lqr
+fidelity: rigid_body_6dof_physical_effectors_local
+control_space: desired_wrench
+linearization_artifact: verification/f16_runtime_linearization_evidence.json
+effectiveness_artifact: verification/f16_physical_allocation_evidence.json
+state_names: [u_m_s, v_m_s, w_m_s, p_rad_s, q_rad_s, r_rad_s]
+effector_names: [elevator_deg, aileron_deg, rudder_deg, throttle_fraction]
+wrench_names: [total_force_x_n, total_moment_x_nm, total_moment_y_nm, total_moment_z_nm]
+state_scales: [50.0, 50.0, 50.0, 0.5, 0.5, 0.5]
+wrench_scales: [5000.0, 10000.0, 10000.0, 10000.0]
+q_diagonal: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+r_diagonal: [1.0, 1.0, 1.0, 1.0]
+evidence: development_screen
+claim_boundary: >-
+  Local plant-derived wrench-LQR design through bounded physical effectors;
+  not a scheduled controller, source-validated actuator model, or flight
+  qualification.

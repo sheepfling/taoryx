@@ -1,0 +1,24 @@
+schema_version: 1
+kind: taoryx.showcase-binding/v1alpha1
+family: reference_f16_s119
+mission_profile: subsonic_energy_racetrack_contract
+template: powered_fixed_wing_racetrack_v1
+source_catalog: verification/racetrack_templates.yaml
+binding_ids:
+  - f16-s119-point-mass
+  - f16-s119-pseudo-6dof
+  - f16-s119-direct-wrench
+  - f16-s119-surfaces
+phase_order:
+  - outbound-climb
+  - outbound-level
+  - left-turn
+  - inbound-descent
+  - inbound-level
+  - right-turn
+status: adapter_available_development_qualification_pending
+claim_boundary: >-
+  Shared racetrack geometry, source-aware navigation execution, and independent
+  truth telemetry are available as development evidence; no F-16 route is
+  qualified until all required gates, actuator limits, envelope checks, and
+  numerical checks pass.

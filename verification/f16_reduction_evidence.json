@@ -1,0 +1,163 @@
+{
+  "claim_boundary": "development reduction screen; reduction contracts remain equivalence_pending until mission-window comparison is added",
+  "family_id": "reference_f16_s119",
+  "operating_point": {
+    "altitude_m": 0.0,
+    "step_s": 0.01,
+    "trim_controls": {
+      "aileron_deg": 0.0,
+      "elevator_deg": -0.7562951013162765,
+      "rudder_deg": 0.0,
+      "throttle_fraction": 0.0893225837337992
+    },
+    "trim_pitch_rad": 0.037441411008153194,
+    "trim_state": {
+      "p_rad_s": 0.0,
+      "q_rad_s": 0.0,
+      "r_rad_s": 0.0,
+      "u_m_s": 152.29319080301542,
+      "v_m_s": 0.0,
+      "w_m_s": 5.704737946334209
+    }
+  },
+  "parent_plant_id": "reference-f16-s119-source-runtime-plant",
+  "reductions": {
+    "point_mass_3dof": {
+      "claim": "local source-force translational reduction at one fixed operating point",
+      "matched_pulse_window_passed": true,
+      "maximum_absolute_trim_error_m_s2": 0.0,
+      "maximum_translation_history_error_m_s": 0.02018830234724188,
+      "model_id": "f16-point-mass-3dof-v1",
+      "nonclaims": [
+        "attitude dynamics",
+        "aerodynamic moments",
+        "body rates",
+        "actuator dynamics",
+        "flight qualification"
+      ],
+      "passed": true,
+      "trim_translational_error_m_s2": {
+        "u_m_s": 0.0,
+        "v_m_s": 0.0,
+        "w_m_s": 0.0
+      }
+    },
+    "pseudo_6dof": {
+      "claim": "local response-bridge pulse comparison against the source plant",
+      "maximum_relative_rate_error": 0.0005333604825675065,
+      "model_id": "f16-attitude-response-pseudo6dof-v1",
+      "nonclaims": [
+        "full moment balance",
+        "physical actuator states",
+        "source controller equivalence",
+        "flight qualification"
+      ],
+      "passed": true,
+      "pulses": {
+        "aileron": {
+          "delta_controls": {
+            "aileron_deg": 0.05
+          },
+          "duration_s": 0.2,
+          "maximum_translation_history_error_m_s": 0.0010523565868626858,
+          "parent_rate_change_norm_rad_s": 0.005261466211346362,
+          "parent_rates_rad_s": {
+            "p_rad_s": -0.005253865903433314,
+            "q_rad_s": 6.087230685495276e-08,
+            "r_rad_s": -0.0002827008280406046
+          },
+          "pseudo_rates_rad_s": {
+            "p_rad_s": -0.005251186682406769,
+            "q_rad_s": 5.86855182388911e-11,
+            "r_rad_s": -0.00028353339109580926
+          },
+          "rate_error_norm_rad_s": 2.8062581574963256e-06,
+          "rate_error_rad_s": {
+            "p_rad_s": 2.6792210265453795e-06,
+            "q_rad_s": -6.081362133671387e-08,
+            "r_rad_s": -8.325630552046557e-07
+          },
+          "relative_rate_error": 0.0005333604825675065
+        },
+        "elevator": {
+          "delta_controls": {
+            "elevator_deg": 0.05
+          },
+          "duration_s": 0.2,
+          "maximum_translation_history_error_m_s": 0.02018830234724188,
+          "parent_rate_change_norm_rad_s": 0.00158240783820141,
+          "parent_rates_rad_s": {
+            "p_rad_s": 0.0,
+            "q_rad_s": -0.00158240783820141,
+            "r_rad_s": 0.0
+          },
+          "pseudo_rates_rad_s": {
+            "p_rad_s": 0.0,
+            "q_rad_s": -0.0015823937315982593,
+            "r_rad_s": 0.0
+          },
+          "rate_error_norm_rad_s": 1.410660315078957e-08,
+          "rate_error_rad_s": {
+            "p_rad_s": 0.0,
+            "q_rad_s": 1.410660315078957e-08,
+            "r_rad_s": 0.0
+          },
+          "relative_rate_error": 8.914644385750364e-06
+        },
+        "rudder": {
+          "delta_controls": {
+            "rudder_deg": 0.05
+          },
+          "duration_s": 0.2,
+          "maximum_translation_history_error_m_s": 0.008713828358586357,
+          "parent_rate_change_norm_rad_s": 0.0009701164479243916,
+          "parent_rates_rad_s": {
+            "p_rad_s": 0.000795539900343596,
+            "q_rad_s": -3.123069768533e-08,
+            "r_rad_s": -0.0005551956308540116
+          },
+          "pseudo_rates_rad_s": {
+            "p_rad_s": 0.0007950979847634539,
+            "q_rad_s": -8.205069340345937e-11,
+            "r_rad_s": -0.0005550602808368674
+          },
+          "rate_error_norm_rad_s": 4.6322699114220835e-07,
+          "rate_error_rad_s": {
+            "p_rad_s": -4.4191558014208907e-07,
+            "q_rad_s": 3.114864699192654e-08,
+            "r_rad_s": 1.3535001714413183e-07
+          },
+          "relative_rate_error": 0.00047749627597109976
+        },
+        "throttle": {
+          "delta_controls": {
+            "throttle_fraction": 0.002
+          },
+          "duration_s": 0.2,
+          "maximum_translation_history_error_m_s": 7.793392321187629e-07,
+          "parent_rate_change_norm_rad_s": 1.000654270775158e-07,
+          "parent_rates_rad_s": {
+            "p_rad_s": 0.0,
+            "q_rad_s": -1.000654270775158e-07,
+            "r_rad_s": 0.0
+          },
+          "pseudo_rates_rad_s": {
+            "p_rad_s": 0.0,
+            "q_rad_s": -1.0006341519016732e-07,
+            "r_rad_s": 0.0
+          },
+          "rate_error_norm_rad_s": 2.0118873484754612e-12,
+          "rate_error_rad_s": {
+            "p_rad_s": 0.0,
+            "q_rad_s": 2.0118873484754612e-12,
+            "r_rad_s": 0.0
+          },
+          "relative_rate_error": 2.0105718900464496e-05
+        }
+      },
+      "response_law": "source-derived-local-linear-rate-response-plus-quaternion-kinematics"
+    }
+  },
+  "schema_version": "taoryx.f16-reduction-evidence/v1",
+  "status": "development_screen_passed"
+}

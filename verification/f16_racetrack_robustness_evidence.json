@@ -1,0 +1,77 @@
+{
+  "base_step_s": 0.5,
+  "cases": [
+    {
+      "first_failed_objective": null,
+      "first_failed_status": null,
+      "id": "north_offset_plus_100m",
+      "mission_pass": true,
+      "numerical_valid": true,
+      "perturbation": {
+        "initial_north_offset_m": 100.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4,
+      "sample_count": 2618,
+      "terminal_time_s": 1137.0
+    },
+    {
+      "first_failed_objective": null,
+      "first_failed_status": null,
+      "id": "east_offset_minus_100m",
+      "mission_pass": true,
+      "numerical_valid": true,
+      "perturbation": {
+        "initial_east_offset_m": -100.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4,
+      "sample_count": 2618,
+      "terminal_time_s": 1195.0
+    },
+    {
+      "first_failed_objective": null,
+      "first_failed_status": null,
+      "id": "speed_offset_plus_2mps",
+      "mission_pass": true,
+      "numerical_valid": true,
+      "perturbation": {
+        "initial_speed_offset_m_s": 2.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4,
+      "sample_count": 2618,
+      "terminal_time_s": 1194.0
+    },
+    {
+      "first_failed_objective": "left-turn-exit-gate",
+      "first_failed_status": "fail",
+      "id": "bank_offset_plus_2deg",
+      "mission_pass": false,
+      "numerical_valid": true,
+      "perturbation": {
+        "initial_bank_offset_rad": 0.03490658503988659
+      },
+      "required_objectives": 4,
+      "required_passed": 2,
+      "sample_count": 2618,
+      "terminal_time_s": 1226.5
+    }
+  ],
+  "claim": "Fixed initial-condition perturbation evidence for the locally surface-allocated F-16 racetrack.",
+  "claim_boundary": "This is a development R1 witness matrix, not a statistical reliability claim, wind robustness claim, scheduled-controller qualification, or full-envelope flight-control qualification.",
+  "control_path": "physical_effectors",
+  "execution_backend": "thread_pool_fallback",
+  "family_id": "reference_f16_s119",
+  "fidelity": "rigid_body_6dof_surface_allocated",
+  "schema_version": "taoryx.f16-racetrack-robustness/v1",
+  "status": "R1_fixed_matrix_boundary_failure_recorded",
+  "summary": {
+    "all_numerically_valid": true,
+    "case_count": 4,
+    "failed_case_count": 1,
+    "passed_case_count": 3
+  },
+  "tier": "R1_fixed_initial_condition_matrix",
+  "vehicle_id": "reference_f16_s119"
+}

@@ -214,11 +214,13 @@ class ThermalAssessment:
 ForceMomentProvider = Callable[[RigidBody6DofState], RigidBodyForceMoment]
 GravityProvider = Callable[[RigidBody6DofState], Vector3]
 InertiaProvider = Callable[[RigidBody6DofState], Vector3]
+InertiaMatrix = tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]
+InertiaMatrixProvider = Callable[[RigidBody6DofState], InertiaMatrix]
 
 
 @dataclass(frozen=True, slots=True)
 class RigidBody6DofModel:
-    """Evaluate a diagonal-inertia rigid-body state derivative.
+    """Evaluate a rigid-body state derivative with diagonal or full inertia.
 
     Forces and moments are supplied in body coordinates. Gravity is supplied
     in ECIC coordinates. This keeps the model usable for stage, coast, entry,
@@ -231,6 +233,7 @@ class RigidBody6DofModel:
     gravity: GravityProvider = lambda state: Vector3(0.0, 0.0, 0.0)
     dry_mass: float | None = None
     inertia_provider: InertiaProvider | None = None
+    inertia_matrix_provider: InertiaMatrixProvider | None = None
 
     def __post_init__(self) -> None:
         if not all(math.isfinite(value) and value > 0.0 for value in (self.inertia.x, self.inertia.y, self.inertia.z)):
@@ -247,6 +250,13 @@ class RigidBody6DofModel:
                 "set dry mass in kilograms below the initial total mass",
                 field="dry_mass",
             )
+        if self.inertia_provider is not None and self.inertia_matrix_provider is not None:
+            raise FidelitySetupError(
+                "multiple-inertia-providers",
+                "rigid-body model cannot use both diagonal and full inertia providers",
+                "select one source-backed inertia representation for the runtime model",
+                field="inertia_provider/inertia_matrix_provider",
+            )
         ####
 
     def inertia_at(self, state: RigidBody6DofState) -> Vector3:
@@ -261,6 +271,21 @@ class RigidBody6DofModel:
                 field="inertia_provider",
             )
         return inertia
+        ####
+
+    def inertia_matrix_at(self, state: RigidBody6DofState) -> InertiaMatrix:
+        """Return a validated full inertia matrix at the current state."""
+
+        if self.inertia_matrix_provider is None:
+            diagonal = self.inertia_at(state)
+            return (
+                (diagonal.x, 0.0, 0.0),
+                (0.0, diagonal.y, 0.0),
+                (0.0, 0.0, diagonal.z),
+            )
+        matrix = self.inertia_matrix_provider(state)
+        _validate_inertia_matrix(matrix)
+        return matrix
         ####
 
     def _load(self, state: RigidBody6DofState) -> RigidBodyForceMoment:
@@ -291,12 +316,8 @@ class RigidBody6DofModel:
         gravity = self.gravity(state)
         force_ecic = state.attitude.rotate(load.force_body) + gravity.scaled(state.mass)
         acceleration = force_ecic.scaled(1.0 / state.mass)
-        inertia = self.inertia_at(state)
-        angular_momentum = Vector3(
-            inertia.x * state.body_rate.x,
-            inertia.y * state.body_rate.y,
-            inertia.z * state.body_rate.z,
-        )
+        inertia = self.inertia_matrix_at(state)
+        angular_momentum = _matrix_vector(inertia, state.body_rate)
         try:
             gyroscopic_term = state.body_rate.cross(angular_momentum)
         except ValueError as error:
@@ -304,11 +325,7 @@ class RigidBody6DofModel:
                 "rigid-body rotational cross term became non-finite: "
                 f"body_rate={state.body_rate!r}, angular_momentum={angular_momentum!r}"
             ) from error
-        angular_acceleration = Vector3(
-            (load.moment_body.x - gyroscopic_term.x) / inertia.x,
-            (load.moment_body.y - gyroscopic_term.y) / inertia.y,
-            (load.moment_body.z - gyroscopic_term.z) / inertia.z,
-        )
+        angular_acceleration = _solve_inertia(inertia, load.moment_body - gyroscopic_term)
         quaternion_rate = state.attitude.derivative(state.body_rate)
         derivative = (
             state.velocity.vector.x,
@@ -352,7 +369,7 @@ class RigidBody6DofModel:
         force_ecic = state.attitude.rotate(load.force_body)
         total_force_ecic = force_ecic + gravity.scaled(state.mass)
         acceleration = total_force_ecic.scaled(1.0 / state.mass)
-        inertia = self.inertia_at(state)
+        inertia = self.inertia_matrix_at(state)
         gravity_force_body = state.attitude.conjugate().rotate(gravity.scaled(state.mass))
         total_force_body = load.force_body + gravity_force_body
         acceleration_body = state.attitude.conjugate().rotate(acceleration)
@@ -376,7 +393,7 @@ class RigidBody6DofModel:
         propulsion_force = load.propulsion_force_body or (load.force_body - aero_force)
         aero_moment = load.aero_moment_body or Vector3(0.0, 0.0, 0.0)
         propulsion_moment = load.propulsion_moment_body or (load.moment_body - aero_moment)
-        angular_momentum = Vector3(inertia.x * state.body_rate.x, inertia.y * state.body_rate.y, inertia.z * state.body_rate.z)
+        angular_momentum = _matrix_vector(inertia, state.body_rate)
         try:
             gyroscopic_term = state.body_rate.cross(angular_momentum)
         except ValueError as error:
@@ -384,16 +401,8 @@ class RigidBody6DofModel:
                 "rigid-body observable rotational cross term became non-finite: "
                 f"body_rate={state.body_rate!r}, angular_momentum={angular_momentum!r}"
             ) from error
-        angular_acceleration = Vector3(
-            (load.moment_body.x - gyroscopic_term.x) / inertia.x,
-            (load.moment_body.y - gyroscopic_term.y) / inertia.y,
-            (load.moment_body.z - gyroscopic_term.z) / inertia.z,
-        )
-        moment_residual = Vector3(
-            inertia.x * angular_acceleration.x,
-            inertia.y * angular_acceleration.y,
-            inertia.z * angular_acceleration.z,
-        ) + gyroscopic_term - load.moment_body
+        angular_acceleration = _solve_inertia(inertia, load.moment_body - gyroscopic_term)
+        moment_residual = _matrix_vector(inertia, angular_acceleration) + gyroscopic_term - load.moment_body
         force_scale = max(state.mass * gravity.norm(), total_force_body.norm(), 1.0e-12)
         moment_scale = max(load.moment_body.norm(), 1.0)
         return {
@@ -442,9 +451,10 @@ class RigidBody6DofModel:
             "angular_acceleration_body_y_rad_s2": angular_acceleration.y,
             "angular_acceleration_body_z_rad_s2": angular_acceleration.z,
             "propellant_mass_rate_kg_s": load.propellant_mass_rate,
-            "inertia_x_kg_m2": inertia.x,
-            "inertia_y_kg_m2": inertia.y,
-            "inertia_z_kg_m2": inertia.z,
+            "inertia_x_kg_m2": inertia[0][0],
+            "inertia_y_kg_m2": inertia[1][1],
+            "inertia_z_kg_m2": inertia[2][2],
+            "inertia_xz_kg_m2": inertia[0][2],
             "heat_rate_w_m2": load.heat_rate,
             "roll_deg": math.degrees(roll),
             "pitch_deg": math.degrees(pitch),
@@ -473,3 +483,90 @@ def assess_thermal_limits(state: RigidBody6DofState, limits: ThermalLimits, heat
     load_margin = limits.maximum_heat_load - state.heat_load
     return ThermalAssessment(rate_margin, load_margin, rate_margin >= 0.0 and load_margin >= 0.0)
 ####
+
+
+def _validate_inertia_matrix(matrix: InertiaMatrix) -> None:
+    """Validate the symmetric-positive-definite rigid-body inertia contract."""
+
+    if len(matrix) != 3 or any(len(row) != 3 for row in matrix):
+        raise FidelitySetupError(
+            "invalid-inertia-matrix-shape",
+            "rigid-body inertia matrix must be 3x3",
+            "provide Ixx/Iyy/Izz and the symmetric products of inertia",
+            field="inertia_matrix",
+        )
+    if not all(math.isfinite(value) for row in matrix for value in row):
+        raise FidelitySetupError(
+            "invalid-inertia-matrix-values",
+            "rigid-body inertia matrix must contain only finite values",
+            "remove non-finite mass-property entries before runtime construction",
+            field="inertia_matrix",
+        )
+    if any(matrix[row][column] != matrix[column][row] for row in range(3) for column in range(3)):
+        raise FidelitySetupError(
+            "nonsymmetric-inertia-matrix",
+            "rigid-body inertia matrix must be symmetric",
+            "declare matching products of inertia on both sides of the diagonal",
+            field="inertia_matrix",
+        )
+    leading_two = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[0][1]
+    determinant = (
+        matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[1][2])
+        - matrix[0][1] * (matrix[0][1] * matrix[2][2] - matrix[1][2] * matrix[0][2])
+        + matrix[0][2] * (matrix[0][1] * matrix[1][2] - matrix[1][1] * matrix[0][2])
+    )
+    if matrix[0][0] <= 0.0 or leading_two <= 0.0 or determinant <= 0.0:
+        raise FidelitySetupError(
+            "nonpositive-inertia-matrix",
+            "rigid-body inertia matrix must be positive definite",
+            "check principal moments and products of inertia against the physical mass distribution",
+            field="inertia_matrix",
+        )
+    ####
+
+
+def _matrix_vector(matrix: InertiaMatrix, vector: Vector3) -> Vector3:
+    """Multiply a 3x3 inertia matrix by a body-rate vector."""
+
+    return Vector3(
+        matrix[0][0] * vector.x + matrix[0][1] * vector.y + matrix[0][2] * vector.z,
+        matrix[1][0] * vector.x + matrix[1][1] * vector.y + matrix[1][2] * vector.z,
+        matrix[2][0] * vector.x + matrix[2][1] * vector.y + matrix[2][2] * vector.z,
+    )
+    ####
+
+
+def _solve_inertia(matrix: InertiaMatrix, vector: Vector3) -> Vector3:
+    """Solve ``matrix * x = vector`` for the angular acceleration."""
+
+    determinant = (
+        matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1])
+        - matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0])
+        + matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0])
+    )
+    if abs(determinant) <= 1.0e-18:
+        raise FidelitySetupError(
+            "singular-inertia-matrix",
+            "rigid-body inertia matrix is singular at runtime",
+            "provide a positive-definite inertia matrix for the current mass configuration",
+            field="inertia_matrix",
+        )
+    inverse = (
+        (
+            (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]) / determinant,
+            (matrix[0][2] * matrix[2][1] - matrix[0][1] * matrix[2][2]) / determinant,
+            (matrix[0][1] * matrix[1][2] - matrix[0][2] * matrix[1][1]) / determinant,
+        ),
+        (
+            (matrix[1][2] * matrix[2][0] - matrix[1][0] * matrix[2][2]) / determinant,
+            (matrix[0][0] * matrix[2][2] - matrix[0][2] * matrix[2][0]) / determinant,
+            (matrix[0][2] * matrix[1][0] - matrix[0][0] * matrix[1][2]) / determinant,
+        ),
+        (
+            (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]) / determinant,
+            (matrix[0][1] * matrix[2][0] - matrix[0][0] * matrix[2][1]) / determinant,
+            (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]) / determinant,
+        ),
+    )
+    return _matrix_vector(inverse, vector)
+    ####

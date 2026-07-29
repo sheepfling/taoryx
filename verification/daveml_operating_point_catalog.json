@@ -6,7 +6,7 @@
     {
       "applicability": "required",
       "evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
-      "evidence_sha256": "e9a2866f07cdbbf93e82f7334ffb24f77f78071795b51cbda993076a28996759",
+      "evidence_sha256": "df97e5e127327872611bd9f119d5971564df3f7939c1858f71bc0ae748fd93f1",
       "evidence_status": "verified",
       "expansion_axes": [
         "geometric_altitude_m",
@@ -171,7 +171,7 @@
     }
   ],
   "family_count": 5,
-  "operational_contracts_sha256": "eaf0aa0445ed62b838c2f9ae491ccb9e62fd4d624cb4f547ef39acd6f48505ee",
+  "operational_contracts_sha256": "a6b6401cc81af5899a86bbbf2ccc90695d0e6ab5b742ebb16cada29ca5d1b5bd",
   "report_type": "taoryx.daveml-operating-point-catalog/v1",
   "schema_version": 1,
   "status": "verified"

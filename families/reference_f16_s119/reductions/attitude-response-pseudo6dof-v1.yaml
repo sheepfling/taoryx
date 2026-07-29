@@ -14,5 +14,5 @@ omits: [full_moment_balance, physical_actuator_states, source_controller_contrac
 comparison:
   required_evidence: [matched_control_pulse, body_rate_history, attitude_history, bounded_response_error]
   pass_rule: response_error_must_be_reported_against_parent_without_source_equivalence_claim
-  evidence_artifact: verification/daveml_alpha3_reduction_evidence.json
+  evidence_artifact: verification/f16_reduction_evidence.json
 nonclaims: [source_exact_controller, actuator_fidelity, flight_qualification]

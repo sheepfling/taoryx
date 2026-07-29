@@ -402,6 +402,12 @@ def check_vehicle_models() -> None:
     ####
 
 
+def check_supported_reference_families() -> None:
+    """Verify source-grounded family bindings and their claim boundaries."""
+    run(tool_script("validate_supported_reference_families.py"))
+    ####
+
+
 def onboard_vehicles() -> None:
     """Diagnose every registered vehicle's metadata and source-contract hooks."""
     run(tool_script("validate_vehicle_onboarding.py", "--vehicle", "all"))
@@ -691,6 +697,55 @@ def daveml_equilibrium_trim() -> None:
     ####
 
 
+def daveml_f16_runtime_linearization() -> None:
+    """Generate the plant-derived F-16 runtime A/B evidence."""
+
+    run(tool_script("validate_f16_runtime_linearization.py"))
+    ####
+
+
+def daveml_f16_lqr_trim_hold() -> None:
+    """Generate bounded local F-16 LQR trim-hold evidence."""
+
+    run(tool_script("validate_f16_lqr_trim_hold.py"))
+    ####
+
+
+def daveml_f16_physical_allocation() -> None:
+    """Generate F-16 source-effectiveness and bounded-allocation evidence."""
+
+    run(tool_script("validate_f16_physical_allocation.py"))
+    ####
+
+
+def daveml_f16_physical_wrench_lqr() -> None:
+    """Generate the local F-16 wrench-LQR physical recovery evidence."""
+
+    run(tool_script("validate_f16_physical_wrench_lqr.py"))
+    ####
+
+
+def daveml_f16_physical_wrench_perturbations() -> None:
+    """Generate the F-16 local physical-wrench perturbation matrix."""
+
+    run(tool_script("validate_f16_physical_wrench_perturbations.py"))
+    ####
+
+
+def daveml_f16_local_maneuvers() -> None:
+    """Generate local F-16 bank/pitch reversal maneuver evidence."""
+
+    run(tool_script("validate_f16_local_maneuvers.py"))
+    ####
+
+
+def daveml_f16_reductions() -> None:
+    """Generate local F-16 point-mass and pseudo-6DOF reduction evidence."""
+
+    run(tool_script("validate_f16_reductions.py"))
+    ####
+
+
 def daveml_hl20_load() -> None:
     """Generate reproducible HL-20 DAVE-ML load evidence."""
 
@@ -783,6 +838,7 @@ def handoff() -> None:
 
 def check() -> None:
     check_vehicle_models()
+    check_supported_reference_families()
     onboard_vehicles()
     check_fidelity_parity_contracts()
     check_reference_tuning()
@@ -851,6 +907,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "generate-problems": generate_problem_files,
     "check-problems": check_problem_files,
     "check-vehicles": check_vehicle_models,
+    "check-reference-families": check_supported_reference_families,
     "onboard-vehicles": onboard_vehicles,
     "fidelity-readiness": fidelity_readiness,
     "reference-tuning": check_reference_tuning,
@@ -881,6 +938,13 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-scenario": daveml_scenario,
     "daveml-release": daveml_release,
     "daveml-equilibrium-trim": daveml_equilibrium_trim,
+    "daveml-f16-runtime-linearization": daveml_f16_runtime_linearization,
+    "daveml-f16-lqr-trim-hold": daveml_f16_lqr_trim_hold,
+    "daveml-f16-physical-allocation": daveml_f16_physical_allocation,
+    "daveml-f16-physical-wrench-lqr": daveml_f16_physical_wrench_lqr,
+    "daveml-f16-physical-wrench-perturbations": daveml_f16_physical_wrench_perturbations,
+    "daveml-f16-local-maneuvers": daveml_f16_local_maneuvers,
+    "daveml-f16-reductions": daveml_f16_reductions,
     "daveml-hl20-load": daveml_hl20_load,
     "daveml-hl20-linearization": daveml_hl20_linearization,
     "daveml-hl20-scenario": daveml_hl20_scenario,

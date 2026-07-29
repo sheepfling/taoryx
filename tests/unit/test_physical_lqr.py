@@ -187,6 +187,35 @@ def test_physical_wrench_lqr_projects_real_effectors_and_recovers_the_nonlinear_
     ####
 
 
+def test_physical_wrench_lqr_accepts_explicit_local_state_reference() -> None:
+    """A maneuver reference changes feedback demand without bypassing allocation."""
+
+    trim = _trim()
+    projection = project_linearization_to_wrench(
+        _linearization(),
+        _effectiveness(),
+        state_names=("angle_rad", "rate_rad_s"),
+        wrench_names=("pitch_moment_nm",),
+        effector_names=("elevon_rad",),
+    )
+    design = design_physical_wrench_lqr(
+        "reference-test",
+        projection,
+        q_diagonal=(10.0, 1.0),
+        r_diagonal=(1.0,),
+        state_scales=(0.2, 1.0),
+        wrench_scales=(1.0,),
+    )
+    requested, increment = design.requested_wrench_for_reference(
+        trim.state,
+        {"angle_rad": 0.0, "rate_rad_s": 0.1},
+    )
+
+    assert requested["pitch_moment_nm"] == pytest.approx(increment["pitch_moment_nm"])
+    assert increment["pitch_moment_nm"] > 0.0
+    ####
+
+
 def test_wrench_projection_rejects_an_underactuated_requested_axis() -> None:
     trim = _trim()
     effectiveness = EffectorEffectiveness(

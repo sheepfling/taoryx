@@ -13,7 +13,7 @@ families:
     atmosphere_binding: source_package_declared
     trim: source_equilibrium_trim_verified
     linearization: source_channel_full_dynamics_verified
-    tuning: source_channel_full_lqr_verified
+    tuning: verification/f16_physical_wrench_perturbation_evidence.json
     objectives: source_channel_smoke_verified
     scenarios: source_channel_smoke_verified
     runtime: runtime_replay_qualification_passed

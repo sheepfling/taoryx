@@ -40,6 +40,14 @@ FIDELITY_DEFINITIONS: Final[dict[str, dict[str, str]]] = {
     },
 }
 
+F16_PACKET_DIR: Final[str] = "f16-s119-racetrack-fidelity-ladder"
+F16_PACKET_FIDELITY_DIR: Final[dict[str, str]] = {
+    "3dof": "3dof",
+    "pseudo-6dof": "pseudo-6dof",
+    "6dof-direct-wrench": "6dof-direct-wrench",
+    "6dof-surfaces": "6dof-surfaces",
+}
+
 MISSION_IDS: Final[dict[str, dict[str, str | None]]] = {
     "x8": {
         "3dof": "x8-racetrack-altitude-turns-3dof-v1",
@@ -51,6 +59,12 @@ MISSION_IDS: Final[dict[str, dict[str, str | None]]] = {
         "3dof": "b747-racetrack-altitude-turns-3dof-v1",
         "pseudo-6dof": "b747-racetrack-altitude-turns-pseudo-6dof-v1",
         "6dof-direct-wrench": "b747-racetrack-altitude-turns-6dof-v1",
+        "6dof-surfaces": None,
+    },
+    "f16": {
+        "3dof": None,
+        "pseudo-6dof": None,
+        "6dof-direct-wrench": None,
         "6dof-surfaces": None,
     },
 }
@@ -89,6 +103,7 @@ def _write_ladder_manifest(output: Path, selected: tuple[tuple[str, str, str | N
                 "Build one vehicle at every advertised fidelity:",
                 "PYTHONPATH=src python3 tools/build_airbreathing_racetrack_ladder.py --vehicle x8",
                 "PYTHONPATH=src python3 tools/build_airbreathing_racetrack_ladder.py --vehicle b747",
+                "PYTHONPATH=src python3 tools/build_airbreathing_racetrack_ladder.py --vehicle f16",
                 "",
                 "Build one exact packet:",
                 "PYTHONPATH=src python3 tools/build_airbreathing_racetrack_ladder.py --vehicle x8 --fidelity pseudo-6dof",
@@ -104,14 +119,48 @@ def _write_ladder_manifest(output: Path, selected: tuple[tuple[str, str, str | N
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--vehicle", choices=("all", "x8", "b747"), default="all")
+    parser.add_argument("--vehicle", choices=("all", "x8", "b747", "f16"), default="all")
     parser.add_argument("--fidelity", choices=("all", *FIDELITIES), default="all")
     args = parser.parse_args()
 
     selected = _selected_missions(args.vehicle, args.fidelity)
     records: list[dict[str, object]] = []
+    f16_archive: Path | None = None
+    f16_packet: Path | None = None
     for vehicle, fidelity, mission_id in selected:
         if mission_id is None:
+            if vehicle == "f16":
+                if f16_archive is None:
+                    try:
+                        from build_f16_racetrack_fidelity_packet import build as build_f16_packet
+                    except ModuleNotFoundError:  # pragma: no cover - package execution path
+                        from tools.build_f16_racetrack_fidelity_packet import build as build_f16_packet
+
+                    f16_packet = args.output / F16_PACKET_DIR
+                    f16_archive = build_f16_packet(f16_packet)
+                assert f16_packet is not None
+                packet = f16_packet / F16_PACKET_FIDELITY_DIR[fidelity]
+                evidence = json.loads((packet / "evidence.json").read_text(encoding="utf-8"))
+                runtime = evidence["runtime"]
+                evaluation = evidence["evaluation"]
+                record = {
+                    "vehicle": vehicle,
+                    "fidelity": fidelity,
+                    "fidelity_definition": FIDELITY_DEFINITIONS[fidelity],
+                    "mission_id": "f16-s119-shared-racetrack-fidelity-v1",
+                    "archive": str(f16_archive),
+                    "status": evidence["status"],
+                    "mission_pass": evaluation["mission_pass"],
+                    "numerical_valid": runtime["numerical_valid"],
+                    "duration_s": runtime["duration_s"],
+                    "reproduction_command": (
+                        "PYTHONPATH=src python3 tools/build_f16_racetrack_fidelity_packet.py "
+                        f"--output {f16_packet} --dt-s 0.5"
+                    ),
+                }
+                records.append(record)
+                print(f"{vehicle:5s} {fidelity:18s} {evidence['status']}: {f16_archive}")
+                continue
             records.append(
                 {
                     "vehicle": vehicle,

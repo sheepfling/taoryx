@@ -26,10 +26,12 @@ layers:
   mass_properties: {version: v1, evidence: source_bound_fixed}
   aerodynamics: {version: v1, evidence: source_checked_semantic_reconstruction}
   propulsion: {version: v1, evidence: source_checked_steady}
-  actuators: {version: external-overlay-required-v1, evidence: no_source_actuator_dynamics}
-  controller: {version: external-overlay-required-v1, evidence: no_source_controller_contract}
+  actuators: {version: reference-first-order-v1, evidence: engineering_overlay_development_screen}
+  controller: {version: local-lqr-trim-hold-v1, evidence: plant_derived_development_screen}
+  allocation: {version: source-local-effectiveness-v1, evidence: verification/f16_physical_wrench_lqr_evidence.json}
   mission: {version: external-overlay-required-v1, evidence: no_source_mission_contract}
-  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
+  reductions: {version: local-reduction-screen-v1, evidence: verification/f16_reduction_evidence.json}
+  operating_points: {version: source-retrimmed-local-catalog-v1, evidence: verification/f16_operating_points_evidence.json}
 claims:
   - source-grounded nonlinear powered fixed-wing reference plant
   - subsonic rigid-body 6DOF regression represented by the verified corpus package and embedded evidence
@@ -38,6 +40,8 @@ nonclaims:
   - production F-16 training or operational fidelity
   - actuator, SAS, autopilot, fuel-transient, or runway behavior from the source plant alone
 open_questions:
-  - qualify the reference-first-order actuator overlay with command, rate, latency, and saturation evidence
-  - qualify reductions generated from this parent plant against matched parent histories
+  - replace the development actuator overlay with source-backed command, rate, latency, and saturation evidence where available
+  - synthesize and validate local wrench-LQR witnesses at the additional operating points before scheduling gains
+  - run nonlinear coupled perturbation cases after the local trim-hold screen
+  - qualify the screened reductions against matched parent histories over the racetrack mission window
 next_gate: alpha3_overlay_and_reduction_equivalence

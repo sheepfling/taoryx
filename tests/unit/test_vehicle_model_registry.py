@@ -20,7 +20,12 @@ def test_vehicle_registry_covers_the_standard_four() -> None:
     families = yaml.safe_load(FAMILIES.read_text(encoding="utf-8"))
     catalog = yaml.safe_load(CATALOG.read_text(encoding="utf-8"))
     assert set(registry["vehicles"]) == {"b747", "skywalker_x8", "hummingbird", "x15"}
-    assert set(families["families"]) == {"powered_fixed_wing", "rocket_plane", "multirotor_direct_wrench"}
+    assert set(families["families"]) == {
+        "powered_fixed_wing",
+        "rocket_plane",
+        "multirotor_direct_wrench",
+        "unpowered_lifting_body",
+    }
     assert {entry["model_id"] for entry in catalog["vehicles"]} == set(registry["vehicles"])
     for vehicle_id, vehicle in registry["vehicles"].items():
         family = families["families"][vehicle["family_id"]]
