@@ -1,0 +1,1776 @@
+{
+  "family": "all",
+  "reports": [
+    {
+      "blockers": [],
+      "caveats": [
+        {
+          "code": "nesc-lineage-verified",
+          "hint": "Retain each artifact and its hash in the integration packet.",
+          "message": "staging, reduction, replay, and synthetic deployment lineage are included in the pilot",
+          "path": "verification/daveml_nesc_staging_lineage.json",
+          "severity": "info"
+        },
+        {
+          "code": "effectivity-not-applicable",
+          "hint": "Keep the model open-loop and do not invent a controller or actuator tier.",
+          "message": "the pilot declares no physical control/effectivity path",
+          "path": "families/reference_nesc_two_stage_rocket/family.yaml",
+          "severity": "info"
+        },
+        {
+          "code": "trim-not-applicable",
+          "hint": "Use trajectory checkpoints and event evidence instead of inventing a trim solve.",
+          "message": "the operational contract declares no equilibrium trim requirement",
+          "path": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+          "severity": "info"
+        },
+        {
+          "code": "fidelity-profile-deferred",
+          "hint": "Promote only the profiles with their own evidence and retain deferred tiers as explicit gates.",
+          "message": "one or more declared fidelity profiles remain deferred: ['deferred_no_attitude_comparison']",
+          "path": "families/reference_nesc_two_stage_rocket/family.yaml",
+          "severity": "warning"
+        },
+        {
+          "code": "controller-not-applicable",
+          "hint": "Do not infer controller evidence from source replay.",
+          "message": "no controller is declared for this pilot",
+          "path": "families/reference_nesc_two_stage_rocket/family.yaml",
+          "severity": "info"
+        }
+      ],
+      "claim_boundary": "provider-neutral integration pilot evidence; not flight or operational qualification",
+      "current_tier": "T2_plant_ready",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "manifest_kind": "reference",
+      "next_gate": "alpha3_full_trajectory_and_reduction_equivalence",
+      "promotion_eligible": false,
+      "qualification_class": "reference_exact",
+      "schema_version": "taoryx.vehicle-integration-pilot/v1",
+      "snapshot": {
+        "applicability": {
+          "linearization": "not_applicable",
+          "objectives": "required",
+          "scenarios": "required",
+          "trim": "not_applicable",
+          "tuning": "not_applicable"
+        },
+        "catalog_path": "verification/daveml_operating_point_catalog.yaml",
+        "contract_path": "verification/daveml_operational_contracts.yaml",
+        "dependency_hashes": {
+          "family_file.families/reference_nesc_two_stage_rocket/bindings/canonical-observations.yaml": "99396803c681fdb213068e9b3ec450043d17c36328e45edb07e6844f4c5b0938",
+          "family_file.families/reference_nesc_two_stage_rocket/bindings/envelope.yaml": "97780883b60bd53db0abd514c903e51d62743d14ac703a3088bf2d4d373fb9a8",
+          "family_file.families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml": "9b066a2fb9f678d6f727cc0516ce844bd5ff5a4123aaeb9f0f339056a743d416",
+          "family_file.families/reference_nesc_two_stage_rocket/family.yaml": "4597c8e774e6e3c8f37d4eb7e1d9fcc3ed820329fb1d21681b7dee9b9970d80e",
+          "family_file.families/reference_nesc_two_stage_rocket/plant/daveml-import.json": "6b2c18a542eeefa4df05d50a7c5b09880ff88f339e007dcbc6725224591e0abb",
+          "family_file.families/reference_nesc_two_stage_rocket/plant/source-lock.yaml": "3a266e17c2a1b274c8bbfa5cfe121e2e31202e1fe468cd3bc5bb9d5d14f0fed0",
+          "family_file.families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml": "c02a720864f9b9512ddbfcf1493ed232ace5d9a9a604fe6618819bc485f1b6a8",
+          "family_file.families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml": "5b6fef275e43946486633eabb47e26285b44a005d76f4f1cc136773b72bf2999",
+          "family_file.families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml": "f9210a85468f569034f02c51c6c978ed47f2d70dc4299f964ceb4405af538318",
+          "integration_record": "c02a720864f9b9512ddbfcf1493ed232ace5d9a9a604fe6618819bc485f1b6a8",
+          "manifest": "4597c8e774e6e3c8f37d4eb7e1d9fcc3ed820329fb1d21681b7dee9b9970d80e",
+          "manifest.source.corpus_archive": "2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9",
+          "manifest.source.package": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+          "nesc_lineage.daveml_alpha3_deployment_evidence": "029fc3a1b9c983777b5ef4d8b883122557287a69c6e9f6a1e75aee1a08cec157",
+          "nesc_lineage.daveml_nesc_objectives_evidence": "43425d423961937f8d3f6ab12630c6e3df36ab9331f88ca35e8e139ac5318a20",
+          "nesc_lineage.daveml_nesc_reduction_qualification": "1f093098f7b8150e318dede684a052407bfd77630107fe33d1535e6a4478901d",
+          "nesc_lineage.daveml_nesc_replay_evidence": "34e5c32f7bf43c0d896bd45ec1c295d4112bea69b8897181acdc1cb6529e2301",
+          "nesc_lineage.daveml_nesc_staging_lineage": "2407c758e256436df23f97ce5a95029f28b0cf2baab701d4b667e7c97cba2baf",
+          "operating_point_catalog": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+          "operational_contract": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+          "record.source.aerodynamics": "d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6",
+          "record.source.package": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+          "record.source.source_corpus_archive": "2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9"
+        },
+        "evidence": [
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "manifest",
+            "observed_sha256": "4597c8e774e6e3c8f37d4eb7e1d9fcc3ed820329fb1d21681b7dee9b9970d80e",
+            "path": "families/reference_nesc_two_stage_rocket/family.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/family.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "integration_record",
+            "observed_sha256": "c02a720864f9b9512ddbfcf1493ed232ace5d9a9a604fe6618819bc485f1b6a8",
+            "path": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "operational_contract",
+            "observed_sha256": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+            "path": "verification/daveml_operational_contracts.yaml",
+            "reference": "verification/daveml_operational_contracts.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "operating_point_catalog",
+            "observed_sha256": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+            "path": "verification/daveml_operating_point_catalog.yaml",
+            "reference": "verification/daveml_operating_point_catalog.yaml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e",
+            "kind": "external_path",
+            "label": "manifest.source.package",
+            "observed_sha256": null,
+            "path": "nesc-two-stage-rocket-v0.9.txair",
+            "reference": "nesc-two-stage-rocket-v0.9.txair"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "manifest.source.package_relative_path",
+            "observed_sha256": null,
+            "path": "qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair",
+            "reference": "qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9.txair"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "manifest.source.aerodynamic_source",
+            "observed_sha256": null,
+            "path": "source/nesc/twostage_aero.normalized.dml",
+            "reference": "source/nesc/twostage_aero.normalized.dml"
+          },
+          {
+            "available": true,
+            "declared_sha256": "2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9",
+            "kind": "local_path",
+            "label": "manifest.source.corpus_archive",
+            "observed_sha256": "2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9",
+            "path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models.zip",
+            "reference": "resources/aerospace/daveml/nesc-model-catalog-v1.0/raw/nesc/official/All_models.zip"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "manifest.daveml_import",
+            "observed_sha256": null,
+            "path": "plant/daveml-import.json",
+            "reference": "plant/daveml-import.json"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "manifest.bindings[0]",
+            "observed_sha256": null,
+            "path": "bindings/canonical-observations.yaml",
+            "reference": "bindings/canonical-observations.yaml"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "manifest.bindings[1]",
+            "observed_sha256": null,
+            "path": "bindings/envelope.yaml",
+            "reference": "bindings/envelope.yaml"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "manifest.bindings[2]",
+            "observed_sha256": null,
+            "path": "plant/source-lock.yaml",
+            "reference": "plant/source-lock.yaml"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "record.source.package",
+            "observed_sha256": null,
+            "path": "nesc-two-stage-rocket-v0.9.txair",
+            "reference": "nesc-two-stage-rocket-v0.9.txair"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.mass_properties.evidence",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "source_checked_schedule"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.mass_properties.version",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "scheduled-propellant-and-staging-v1"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.aerodynamics.evidence",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "source_checked_static"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.aerodynamics.version",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "normalized-daveml-v1"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.propulsion.evidence",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "source_checked_schedule"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.propulsion.version",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "two-stage-constant-thrust-v1"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.staging.evidence",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "source_checked_acceptance"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.staging.version",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "instantaneous-dry-mass-transition-v1"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.controllers.evidence",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "no_declared_controls"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.controllers.version",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "not-applicable-open-loop-v1"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.reductions.evidence",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "no_reduced_order_equivalence"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.reductions.version",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "not-promoted-derived-layer-v1"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "operating_point.evidence",
+            "observed_sha256": "43425d423961937f8d3f6ab12630c6e3df36ab9331f88ca35e8e139ac5318a20",
+            "path": "verification/daveml_nesc_objectives_evidence.json",
+            "reference": "verification/daveml_nesc_objectives_evidence.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/reference_nesc_two_stage_rocket/bindings/canonical-observations.yaml",
+            "observed_sha256": "99396803c681fdb213068e9b3ec450043d17c36328e45edb07e6844f4c5b0938",
+            "path": "families/reference_nesc_two_stage_rocket/bindings/canonical-observations.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/bindings/canonical-observations.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/reference_nesc_two_stage_rocket/bindings/envelope.yaml",
+            "observed_sha256": "97780883b60bd53db0abd514c903e51d62743d14ac703a3088bf2d4d373fb9a8",
+            "path": "families/reference_nesc_two_stage_rocket/bindings/envelope.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/bindings/envelope.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml",
+            "observed_sha256": "9b066a2fb9f678d6f727cc0516ce844bd5ff5a4123aaeb9f0f339056a743d416",
+            "path": "families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/reference_nesc_two_stage_rocket/family.yaml",
+            "observed_sha256": "4597c8e774e6e3c8f37d4eb7e1d9fcc3ed820329fb1d21681b7dee9b9970d80e",
+            "path": "families/reference_nesc_two_stage_rocket/family.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/family.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/reference_nesc_two_stage_rocket/plant/daveml-import.json",
+            "observed_sha256": "6b2c18a542eeefa4df05d50a7c5b09880ff88f339e007dcbc6725224591e0abb",
+            "path": "families/reference_nesc_two_stage_rocket/plant/daveml-import.json",
+            "reference": "families/reference_nesc_two_stage_rocket/plant/daveml-import.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/reference_nesc_two_stage_rocket/plant/source-lock.yaml",
+            "observed_sha256": "3a266e17c2a1b274c8bbfa5cfe121e2e31202e1fe468cd3bc5bb9d5d14f0fed0",
+            "path": "families/reference_nesc_two_stage_rocket/plant/source-lock.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/plant/source-lock.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+            "observed_sha256": "c02a720864f9b9512ddbfcf1493ed232ace5d9a9a604fe6618819bc485f1b6a8",
+            "path": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml",
+            "observed_sha256": "5b6fef275e43946486633eabb47e26285b44a005d76f4f1cc136773b72bf2999",
+            "path": "families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml",
+            "observed_sha256": "f9210a85468f569034f02c51c6c978ed47f2d70dc4299f964ceb4405af538318",
+            "path": "families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml",
+            "reference": "families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "nesc_lineage.daveml_nesc_reduction_qualification",
+            "observed_sha256": "1f093098f7b8150e318dede684a052407bfd77630107fe33d1535e6a4478901d",
+            "path": "verification/daveml_nesc_reduction_qualification.json",
+            "reference": "verification/daveml_nesc_reduction_qualification.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "nesc_lineage.daveml_nesc_staging_lineage",
+            "observed_sha256": "2407c758e256436df23f97ce5a95029f28b0cf2baab701d4b667e7c97cba2baf",
+            "path": "verification/daveml_nesc_staging_lineage.json",
+            "reference": "verification/daveml_nesc_staging_lineage.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "nesc_lineage.daveml_alpha3_deployment_evidence",
+            "observed_sha256": "029fc3a1b9c983777b5ef4d8b883122557287a69c6e9f6a1e75aee1a08cec157",
+            "path": "verification/daveml_alpha3_deployment_evidence.json",
+            "reference": "verification/daveml_alpha3_deployment_evidence.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "nesc_lineage.daveml_nesc_replay_evidence",
+            "observed_sha256": "34e5c32f7bf43c0d896bd45ec1c295d4112bea69b8897181acdc1cb6529e2301",
+            "path": "verification/daveml_nesc_replay_evidence.json",
+            "reference": "verification/daveml_nesc_replay_evidence.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "nesc_lineage.daveml_nesc_objectives_evidence",
+            "observed_sha256": "43425d423961937f8d3f6ab12630c6e3df36ab9331f88ca35e8e139ac5318a20",
+            "path": "verification/daveml_nesc_objectives_evidence.json",
+            "reference": "verification/daveml_nesc_objectives_evidence.json"
+          }
+        ],
+        "external_dependency_count": 8,
+        "family_id": "reference_nesc_two_stage_rocket",
+        "frames": {
+          "body": "FRD",
+          "navigation": "NED"
+        },
+        "local_evidence_count": 20,
+        "manifest_kind": "reference",
+        "manifest_path": "families/reference_nesc_two_stage_rocket/family.yaml",
+        "qualification_class": "reference_exact",
+        "record_path": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+        "runtime_fidelity": "rigid_body_6dof",
+        "schema_version": "taoryx.vehicle-integration-snapshot/v1",
+        "source_kind": "daveml",
+        "source_payload_external": true
+      },
+      "stages": [
+        {
+          "claim": "manifest and integration record are discoverable, typed, and provenance-bearing",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_nesc_two_stage_rocket/family.yaml",
+            "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "evidence_reference_count": 40,
+            "external_dependency_count": 8,
+            "local_evidence_count": 20,
+            "manifest_kind": "reference"
+          },
+          "stage_id": "intake",
+          "status": "passed"
+        },
+        {
+          "claim": "frames and source-to-canonical transforms are explicit at the collection boundary",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_nesc_two_stage_rocket/family.yaml",
+            "verification/daveml_operational_contracts.yaml",
+            "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "contract_checked": true
+          },
+          "stage_id": "conventions",
+          "status": "passed"
+        },
+        {
+          "claim": "the declared source or composite plant has a verified package/roundtrip boundary",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_nesc_two_stage_rocket/family.yaml",
+            "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+            "verification/daveml_nesc_reduction_qualification.json",
+            "verification/daveml_nesc_staging_lineage.json",
+            "verification/daveml_alpha3_deployment_evidence.json",
+            "verification/daveml_nesc_replay_evidence.json",
+            "verification/daveml_nesc_objectives_evidence.json"
+          ],
+          "findings": [
+            {
+              "code": "nesc-lineage-verified",
+              "hint": "Retain each artifact and its hash in the integration packet.",
+              "message": "staging, reduction, replay, and synthetic deployment lineage are included in the pilot",
+              "path": "verification/daveml_nesc_staging_lineage.json",
+              "severity": "info"
+            }
+          ],
+          "metrics": {
+            "family_id": "reference_nesc_two_stage_rocket",
+            "nesc_lineage": {
+              "deployment_child_id": "synthetic",
+              "deployment_status": "verified_witness",
+              "parent_qualification_unchanged_by_child": true,
+              "reduction_id": "nesc-performance-3dof-v1",
+              "reduction_pass": true,
+              "reduction_status": "verified_bounded_replay",
+              "staging_event_count": 5,
+              "staging_status": "verified"
+            },
+            "qualification": "runtime_replay_qualification_passed",
+            "roundtrip_status": "verified"
+          },
+          "stage_id": "plant",
+          "status": "passed"
+        },
+        {
+          "claim": "control-effectivity validation is not applicable to this open-loop or point-mass lane",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_nesc_two_stage_rocket/family.yaml"
+          ],
+          "findings": [
+            {
+              "code": "effectivity-not-applicable",
+              "hint": "Keep the model open-loop and do not invent a controller or actuator tier.",
+              "message": "the pilot declares no physical control/effectivity path",
+              "path": "families/reference_nesc_two_stage_rocket/family.yaml",
+              "severity": "info"
+            }
+          ],
+          "metrics": {
+            "physical_control_bindings": 0
+          },
+          "stage_id": "effectivity",
+          "status": "not_applicable"
+        },
+        {
+          "claim": "trim is explicitly not applicable for the declared open-loop contract",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml"
+          ],
+          "findings": [
+            {
+              "code": "trim-not-applicable",
+              "hint": "Use trajectory checkpoints and event evidence instead of inventing a trim solve.",
+              "message": "the operational contract declares no equilibrium trim requirement",
+              "path": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+              "severity": "info"
+            }
+          ],
+          "metrics": {},
+          "stage_id": "trim",
+          "status": "not_applicable"
+        },
+        {
+          "claim": "the family has a typed operating-point or trajectory-checkpoint entry",
+          "error_count": 0,
+          "evidence": [
+            "verification/daveml_operating_point_catalog.yaml",
+            "verification/daveml_nesc_objectives_evidence.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "point_id": "nesc-scenario17-t200s",
+            "point_type": "trajectory_checkpoint"
+          },
+          "stage_id": "operating_points",
+          "status": "passed"
+        },
+        {
+          "claim": "the runtime fidelity and evidence class are explicit",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_nesc_two_stage_rocket/family.yaml"
+          ],
+          "findings": [
+            {
+              "code": "fidelity-profile-deferred",
+              "hint": "Promote only the profiles with their own evidence and retain deferred tiers as explicit gates.",
+              "message": "one or more declared fidelity profiles remain deferred: ['deferred_no_attitude_comparison']",
+              "path": "families/reference_nesc_two_stage_rocket/family.yaml",
+              "severity": "warning"
+            }
+          ],
+          "metrics": {
+            "automatic_lowering_eligible": true,
+            "automatic_lowering_eligible_profiles": [
+              "nesc_rocket.performance_3dof.v1",
+              "nesc_rocket.variable_mass_6dof.v1"
+            ],
+            "profile_statuses": [
+              "qualified_bounded_replay",
+              "deferred_no_attitude_comparison",
+              "runtime_replay_qualification_passed"
+            ],
+            "profiles": [
+              {
+                "profile_id": "nesc_rocket.performance_3dof.v1",
+                "runtime_fidelity": "point_mass_3dof",
+                "status": "qualified_bounded_replay"
+              },
+              {
+                "profile_id": "nesc_rocket.attitude_response_p6dof.v1",
+                "runtime_fidelity": "pseudo_6dof",
+                "status": "deferred_no_attitude_comparison"
+              },
+              {
+                "profile_id": "nesc_rocket.variable_mass_6dof.v1",
+                "runtime_fidelity": "rigid_body_6dof",
+                "status": "runtime_replay_qualification_passed"
+              }
+            ],
+            "qualification_class": "reference_exact",
+            "runtime_fidelity": "rigid_body_6dof"
+          },
+          "stage_id": "fidelity",
+          "status": "development"
+        },
+        {
+          "claim": "controller synthesis is outside the declared open-loop or performance-only contract",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_nesc_two_stage_rocket/family.yaml"
+          ],
+          "findings": [
+            {
+              "code": "controller-not-applicable",
+              "hint": "Do not infer controller evidence from source replay.",
+              "message": "no controller is declared for this pilot",
+              "path": "families/reference_nesc_two_stage_rocket/family.yaml",
+              "severity": "info"
+            }
+          ],
+          "metrics": {},
+          "stage_id": "controller",
+          "status": "not_applicable"
+        },
+        {
+          "claim": "source Scenario 17 segment graph and terminal event contract are discoverable",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_nesc_two_stage_rocket/family.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "source_segment_graph": true
+          },
+          "stage_id": "mission",
+          "status": "passed"
+        }
+      ],
+      "status": "development_ready_with_gates"
+    },
+    {
+      "blockers": [],
+      "caveats": [
+        {
+          "code": "source-payload-external",
+          "hint": "Keep the external hash and retrieval instructions in the handoff packet.",
+          "message": "collection depends on an external pinned source payload",
+          "path": "families/a320_openap_3dof/collection-manifest.json",
+          "severity": "info"
+        },
+        {
+          "code": "effectivity-not-applicable",
+          "hint": "Keep the model open-loop and do not invent a controller or actuator tier.",
+          "message": "the pilot declares no physical control/effectivity path",
+          "path": "families/a320_openap_3dof/collection-manifest.json",
+          "severity": "info"
+        },
+        {
+          "code": "controller-not-applicable",
+          "hint": "Do not infer controller evidence from source replay.",
+          "message": "no controller is declared for this pilot",
+          "path": "families/a320_openap_3dof/collection-manifest.json",
+          "severity": "info"
+        }
+      ],
+      "claim_boundary": "provider-neutral integration pilot evidence; not flight or operational qualification",
+      "current_tier": "T2_plant_ready",
+      "family_id": "a320_openap_3dof",
+      "manifest_kind": "collection",
+      "next_gate": "surrogate_composite_6dof_qualified; full_rigidbody_6dof_source_remains_external",
+      "promotion_eligible": true,
+      "qualification_class": "derived_exact",
+      "schema_version": "taoryx.vehicle-integration-pilot/v1",
+      "snapshot": {
+        "applicability": {
+          "linearization": "required",
+          "objectives": "required",
+          "scenarios": "required",
+          "trim": "required",
+          "tuning": "not_applicable"
+        },
+        "catalog_path": "verification/daveml_operating_point_catalog.yaml",
+        "contract_path": "verification/daveml_operational_contracts.yaml",
+        "dependency_hashes": {
+          "family_file.families/a320_openap_3dof/collection-manifest.json": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
+          "family_file.families/a320_openap_3dof/qualification/integration-record.yaml": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
+          "family_file.families/a320_openap_3dof/qualification/racetrack-binding.yaml": "63a4b647b00fd3f1af474c5eaa8573147c2fbe393d1e3398c3d6e65a4f6841c4",
+          "integration_record": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
+          "manifest": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
+          "mission.a320-openap-point-mass-racetrack.board.png": "6fb81e5f3562602a6a7c42c611263daa61f0096e2dbc9a976731a8062e22fb70",
+          "mission.a320-openap-point-mass-racetrack.evidence.json": "b3ca553fe9ddbedfc2bc35df9427f6c8961cbc0a43ca1154658d6f8665427b17",
+          "mission.a320-openap-point-mass-racetrack.telemetry.csv": "1f7e9c7f5e9ece186b034e82559ef2ab467e410426338eb8f38d34e3086d81c4",
+          "operating_point_catalog": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+          "operational_contract": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+          "record.source.corpus_archive": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+          "record.source.package": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+          "source_documents.a320-openap.runtime.package_member": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+          "source_documents.a320-openap.runtime.source_path": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63"
+        },
+        "evidence": [
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "manifest",
+            "observed_sha256": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
+            "path": "families/a320_openap_3dof/collection-manifest.json",
+            "reference": "families/a320_openap_3dof/collection-manifest.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "integration_record",
+            "observed_sha256": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
+            "path": "families/a320_openap_3dof/qualification/integration-record.yaml",
+            "reference": "families/a320_openap_3dof/qualification/integration-record.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "operational_contract",
+            "observed_sha256": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+            "path": "verification/daveml_operational_contracts.yaml",
+            "reference": "verification/daveml_operational_contracts.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "operating_point_catalog",
+            "observed_sha256": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+            "path": "verification/daveml_operating_point_catalog.yaml",
+            "reference": "verification/daveml_operating_point_catalog.yaml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+            "kind": "external_path",
+            "label": "source_documents.a320-openap.runtime.source_path",
+            "observed_sha256": null,
+            "path": "qualified-models/a320-openap/runtime/openap-a320.json",
+            "reference": "qualified-models/a320-openap/runtime/openap-a320.json"
+          },
+          {
+            "available": false,
+            "declared_sha256": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+            "kind": "external_path",
+            "label": "source_documents.a320-openap.runtime.package_member",
+            "observed_sha256": null,
+            "path": "qualified-models/a320-openap/runtime/openap-a320.json",
+            "reference": "qualified-models/a320-openap/runtime/openap-a320.json"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "runtime_artifact",
+            "observed_sha256": null,
+            "path": "qualified-models/a320-openap/taoryx-a320-openap-2.6-v0.8.txair",
+            "reference": "qualified-models/a320-openap/taoryx-a320-openap-2.6-v0.8.txair"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "validation_artifact",
+            "observed_sha256": null,
+            "path": "qualified-models/a320-openap/verification-report.json",
+            "reference": "qualified-models/a320-openap/verification-report.json"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "record.source.package",
+            "observed_sha256": null,
+            "path": "qualified-models/a320-openap/taoryx-a320-openap-2.6-v0.8.txair",
+            "reference": "qualified-models/a320-openap/taoryx-a320-openap-2.6-v0.8.txair"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "record.source.corpus_archive",
+            "observed_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+            "path": "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip",
+            "reference": "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.aerodynamics.evidence",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "272/272 oracle comparisons"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.propulsion.evidence",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "thrust and fuel oracle comparisons"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "inline_status",
+            "label": "record.layers.mass_properties.evidence",
+            "observed_sha256": null,
+            "path": null,
+            "reference": "scalar schedule only"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "record.layers.trim.evidence",
+            "observed_sha256": null,
+            "path": "reference-cruise-trim.json",
+            "reference": "reference-cruise-trim.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "operating_point.evidence",
+            "observed_sha256": "0fc54c2a92fe2798e75edef807d589c843e69b6cb5a49f3c20f3cf93a09d26af",
+            "path": "verification/daveml_a320_openap_integration.json",
+            "reference": "verification/daveml_a320_openap_integration.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_3dof/collection-manifest.json",
+            "observed_sha256": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
+            "path": "families/a320_openap_3dof/collection-manifest.json",
+            "reference": "families/a320_openap_3dof/collection-manifest.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_3dof/qualification/integration-record.yaml",
+            "observed_sha256": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
+            "path": "families/a320_openap_3dof/qualification/integration-record.yaml",
+            "reference": "families/a320_openap_3dof/qualification/integration-record.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_3dof/qualification/racetrack-binding.yaml",
+            "observed_sha256": "63a4b647b00fd3f1af474c5eaa8573147c2fbe393d1e3398c3d6e65a4f6841c4",
+            "path": "families/a320_openap_3dof/qualification/racetrack-binding.yaml",
+            "reference": "families/a320_openap_3dof/qualification/racetrack-binding.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "mission.a320-openap-point-mass-racetrack.evidence.json",
+            "observed_sha256": "b3ca553fe9ddbedfc2bc35df9427f6c8961cbc0a43ca1154658d6f8665427b17",
+            "path": "verification/a320_racetrack/point_mass_3dof_evidence.json",
+            "reference": "verification/a320_racetrack/point_mass_3dof_evidence.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "mission.a320-openap-point-mass-racetrack.telemetry.csv",
+            "observed_sha256": "1f7e9c7f5e9ece186b034e82559ef2ab467e410426338eb8f38d34e3086d81c4",
+            "path": "verification/a320_racetrack/point_mass_3dof_telemetry.csv",
+            "reference": "verification/a320_racetrack/point_mass_3dof_telemetry.csv"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "mission.a320-openap-point-mass-racetrack.board.png",
+            "observed_sha256": "6fb81e5f3562602a6a7c42c611263daa61f0096e2dbc9a976731a8062e22fb70",
+            "path": "verification/a320_racetrack/point_mass_3dof_board.png",
+            "reference": "verification/a320_racetrack/point_mass_3dof_board.png"
+          }
+        ],
+        "external_dependency_count": 6,
+        "family_id": "a320_openap_3dof",
+        "frames": {
+          "body": "FRD",
+          "navigation": "NED",
+          "quaternion_order": "wxyz"
+        },
+        "local_evidence_count": 12,
+        "manifest_kind": "collection",
+        "manifest_path": "families/a320_openap_3dof/collection-manifest.json",
+        "qualification_class": "derived_exact",
+        "record_path": "families/a320_openap_3dof/qualification/integration-record.yaml",
+        "runtime_fidelity": "point_mass_3dof",
+        "schema_version": "taoryx.vehicle-integration-snapshot/v1",
+        "source_kind": "OpenAP",
+        "source_payload_external": true
+      },
+      "stages": [
+        {
+          "claim": "manifest and integration record are discoverable, typed, and provenance-bearing",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_3dof/collection-manifest.json",
+            "families/a320_openap_3dof/qualification/integration-record.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "evidence_reference_count": 21,
+            "external_dependency_count": 6,
+            "local_evidence_count": 12,
+            "manifest_kind": "collection"
+          },
+          "stage_id": "intake",
+          "status": "passed"
+        },
+        {
+          "claim": "frames and source-to-canonical transforms are explicit at the collection boundary",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_3dof/collection-manifest.json",
+            "verification/daveml_operational_contracts.yaml",
+            "families/a320_openap_3dof/qualification/integration-record.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "contract_checked": true
+          },
+          "stage_id": "conventions",
+          "status": "passed"
+        },
+        {
+          "claim": "the declared source or composite plant has a verified package/roundtrip boundary",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_3dof/collection-manifest.json",
+            "families/a320_openap_3dof/qualification/integration-record.yaml"
+          ],
+          "findings": [
+            {
+              "code": "source-payload-external",
+              "hint": "Keep the external hash and retrieval instructions in the handoff packet.",
+              "message": "collection depends on an external pinned source payload",
+              "path": "families/a320_openap_3dof/collection-manifest.json",
+              "severity": "info"
+            }
+          ],
+          "metrics": {
+            "family_id": "a320_openap_3dof",
+            "qualification": "openap_oracle_and_reference_trim_passed",
+            "roundtrip_status": "verified"
+          },
+          "stage_id": "plant",
+          "status": "passed"
+        },
+        {
+          "claim": "control-effectivity validation is not applicable to this open-loop or point-mass lane",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_3dof/collection-manifest.json"
+          ],
+          "findings": [
+            {
+              "code": "effectivity-not-applicable",
+              "hint": "Keep the model open-loop and do not invent a controller or actuator tier.",
+              "message": "the pilot declares no physical control/effectivity path",
+              "path": "families/a320_openap_3dof/collection-manifest.json",
+              "severity": "info"
+            }
+          ],
+          "metrics": {
+            "physical_control_bindings": 0
+          },
+          "stage_id": "effectivity",
+          "status": "not_applicable"
+        },
+        {
+          "claim": "trim/steady-performance evidence is discoverable in the shared operating-point catalog",
+          "error_count": 0,
+          "evidence": [
+            "verification/daveml_operating_point_catalog.yaml",
+            "verification/daveml_a320_openap_integration.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "applicability": "required",
+            "point_id": "a320-openap-cruise-mach078"
+          },
+          "stage_id": "trim",
+          "status": "passed"
+        },
+        {
+          "claim": "the family has a typed operating-point or trajectory-checkpoint entry",
+          "error_count": 0,
+          "evidence": [
+            "verification/daveml_operating_point_catalog.yaml",
+            "verification/daveml_a320_openap_integration.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "point_id": "a320-openap-cruise-mach078",
+            "point_type": "point_mass_level_performance"
+          },
+          "stage_id": "operating_points",
+          "status": "passed"
+        },
+        {
+          "claim": "the runtime fidelity and evidence class are explicit",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_3dof/collection-manifest.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "automatic_lowering_eligible": true,
+            "automatic_lowering_eligible_profiles": [],
+            "profile_statuses": [],
+            "profiles": [],
+            "qualification_class": "derived_exact",
+            "runtime_fidelity": "point_mass_3dof"
+          },
+          "stage_id": "fidelity",
+          "status": "passed"
+        },
+        {
+          "claim": "controller synthesis is outside the declared open-loop or performance-only contract",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_3dof/collection-manifest.json"
+          ],
+          "findings": [
+            {
+              "code": "controller-not-applicable",
+              "hint": "Do not infer controller evidence from source replay.",
+              "message": "no controller is declared for this pilot",
+              "path": "families/a320_openap_3dof/collection-manifest.json",
+              "severity": "info"
+            }
+          ],
+          "metrics": {},
+          "stage_id": "controller",
+          "status": "not_applicable"
+        },
+        {
+          "claim": "shared A320 racetrack executed and all required truth gates passed",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_3dof/qualification/racetrack-binding.yaml",
+            "verification/a320_racetrack/point_mass_3dof_evidence.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "estimated_duration_s_by_realization": {
+              "a320-openap-3dof": 764.494151499636
+            },
+            "estimated_duration_s_max": 764.494151499636,
+            "estimated_duration_s_min": 764.494151499636,
+            "realization_count": 1,
+            "runtime_evidence": "verification/a320_racetrack/point_mass_3dof_evidence.json",
+            "runtime_mission_pass": true
+          },
+          "stage_id": "mission",
+          "status": "passed"
+        }
+      ],
+      "status": "promotion_ready"
+    },
+    {
+      "blockers": [],
+      "caveats": [
+        {
+          "code": "surrogate-effectivity-overlay",
+          "hint": "Keep coefficient authority, actuator limits, and pseudo-6DOF response evidence separate from source-exact flight-control claims.",
+          "message": "bounded semantic effectors are declared, but their actuator behavior remains a Taoryx policy overlay",
+          "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml",
+          "severity": "warning"
+        },
+        {
+          "code": "surrogate-fidelity-boundary",
+          "hint": "Do not lower or promote it as manufacturer-authoritative rigid-body evidence.",
+          "message": "this fidelity combines authorities and is not source-exact",
+          "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+          "severity": "warning"
+        },
+        {
+          "code": "controller-overlay-development",
+          "hint": "Retain command/achieved and nonlinear response evidence before promotion.",
+          "message": "controller authority is not source-exact for this pilot",
+          "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+          "severity": "warning"
+        }
+      ],
+      "claim_boundary": "provider-neutral integration pilot evidence; not flight or operational qualification",
+      "current_tier": "T2_plant_ready",
+      "family_id": "a320_openap_jsbsim_pseudo6dof",
+      "manifest_kind": "collection",
+      "next_gate": "acquire_or_bind_full_rigidbody_6dof_source",
+      "promotion_eligible": false,
+      "qualification_class": "surrogate_composite",
+      "schema_version": "taoryx.vehicle-integration-pilot/v1",
+      "snapshot": {
+        "applicability": {
+          "linearization": "required",
+          "objectives": "required",
+          "scenarios": "required",
+          "trim": "required",
+          "tuning": "required"
+        },
+        "catalog_path": "verification/daveml_operating_point_catalog.yaml",
+        "contract_path": "verification/daveml_operational_contracts.yaml",
+        "dependency_hashes": {
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/assumptions.json": "a5142582d78f13e7417985ea83d7a00fd5215795c0fcdce497fb0a3c7f89ed5a",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/authority-map.json": "fb3d0ca3c0ced52d111da90c91da18720470faffc234904f4526138980e0ece9",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-performance-openap.dml": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-rotational-jsbsim.dml": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/assumptions.json": "73063720f4d3e2d09708433ec3b65f73febcd0ad573b0e1128d940701c54eed8",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/authority-map.json": "8b5583482ee959a17c331552583542389901c7b0addbdc07ae0af88d350f930c",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/control-mapping.dml": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/mass-properties-estimated.dml": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/propulsion-openap.dml": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/provenance.json": "6cf05e55c811b9fb32dabec921c95b619dd5a6ac75cb7c485823cff244fa603e",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml": "783b9bc6a8d4c84ce16ade13a7c935f9c0f1ca628162fa605e6ea96295a1de4f",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml": "3543b7315e066b4885a5d2a910ee03d781649bcc5822370b5261989ea1370cae",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/racetrack-binding.yaml": "d98dedf41a7140f23021165dca24d1c26262bfc2bb301ce15fc271cd3976627e",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json": "865671b7c6383e2369cf96ea05f71d103275afd13be27120122a6d612563ba04",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json": "55b7a3e608fdc049c09023787b5e7606f9b51fe22b995d3d13feb4b06bee13e9",
+          "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json": "7c6dee9f8948d4613d178b5b68a0e836732ad4a6d7a572a348c17e007fd678ac",
+          "integration_record": "3543b7315e066b4885a5d2a910ee03d781649bcc5822370b5261989ea1370cae",
+          "manifest": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
+          "mission.a320-openap-pseudo6dof-racetrack.board.png": "cfaa9582ebe662a38a12b44da09d12b3656bc3b0e5908043d5650daa8806fc91",
+          "mission.a320-openap-pseudo6dof-racetrack.evidence.json": "7a6e7f27c4e6f56890c0f53c30630da76e609878a0902e8f5aa88073c91361d6",
+          "mission.a320-openap-pseudo6dof-racetrack.telemetry.csv": "27afeced44789debf2241b382e3d8f597af99de75e448ab3b27e00ab66124e14",
+          "operating_point_catalog": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+          "operational_contract": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+          "record.source.corpus_archive": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+          "source_documents.a320-jsbsim.model.package_member": "3b82824f3fe5a1be0e467a77feba57e0a9776e35c04903d1e534e29cc54c5585",
+          "source_documents.a320-jsbsim.model.source_path": "3b82824f3fe5a1be0e467a77feba57e0a9776e35c04903d1e534e29cc54c5585",
+          "source_documents.a320-openap.runtime.package_member": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+          "source_documents.a320-openap.runtime.source_path": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+          "source_documents.a320-pseudo6dof.aerodynamics-performance-openap.package_member": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+          "source_documents.a320-pseudo6dof.aerodynamics-performance-openap.source_path": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+          "source_documents.a320-pseudo6dof.aerodynamics-rotational-jsbsim.package_member": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+          "source_documents.a320-pseudo6dof.aerodynamics-rotational-jsbsim.source_path": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+          "source_documents.a320-pseudo6dof.control-mapping.package_member": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+          "source_documents.a320-pseudo6dof.control-mapping.source_path": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+          "source_documents.a320-pseudo6dof.mass-properties-estimated.package_member": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+          "source_documents.a320-pseudo6dof.mass-properties-estimated.source_path": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+          "source_documents.a320-pseudo6dof.propulsion-openap.package_member": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+          "source_documents.a320-pseudo6dof.propulsion-openap.source_path": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb"
+        },
+        "evidence": [
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "manifest",
+            "observed_sha256": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "integration_record",
+            "observed_sha256": "3543b7315e066b4885a5d2a910ee03d781649bcc5822370b5261989ea1370cae",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "operational_contract",
+            "observed_sha256": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+            "path": "verification/daveml_operational_contracts.yaml",
+            "reference": "verification/daveml_operational_contracts.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "operating_point_catalog",
+            "observed_sha256": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+            "path": "verification/daveml_operating_point_catalog.yaml",
+            "reference": "verification/daveml_operating_point_catalog.yaml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+            "kind": "external_path",
+            "label": "source_documents.a320-openap.runtime.source_path",
+            "observed_sha256": null,
+            "path": "qualified-models/a320-openap/runtime/openap-a320.json",
+            "reference": "qualified-models/a320-openap/runtime/openap-a320.json"
+          },
+          {
+            "available": false,
+            "declared_sha256": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+            "kind": "external_path",
+            "label": "source_documents.a320-openap.runtime.package_member",
+            "observed_sha256": null,
+            "path": "qualified-models/a320-openap/runtime/openap-a320.json",
+            "reference": "qualified-models/a320-openap/runtime/openap-a320.json"
+          },
+          {
+            "available": false,
+            "declared_sha256": "3b82824f3fe5a1be0e467a77feba57e0a9776e35c04903d1e534e29cc54c5585",
+            "kind": "external_path",
+            "label": "source_documents.a320-jsbsim.model.source_path",
+            "observed_sha256": null,
+            "path": "source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/model.json",
+            "reference": "source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/model.json"
+          },
+          {
+            "available": false,
+            "declared_sha256": "3b82824f3fe5a1be0e467a77feba57e0a9776e35c04903d1e534e29cc54c5585",
+            "kind": "external_path",
+            "label": "source_documents.a320-jsbsim.model.package_member",
+            "observed_sha256": null,
+            "path": "source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/model.json",
+            "reference": "source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/model.json"
+          },
+          {
+            "available": false,
+            "declared_sha256": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.aerodynamics-performance-openap.source_path",
+            "observed_sha256": null,
+            "path": "daveml/aerodynamics-performance-openap.dml",
+            "reference": "daveml/aerodynamics-performance-openap.dml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.aerodynamics-performance-openap.package_member",
+            "observed_sha256": null,
+            "path": "daveml/aerodynamics-performance-openap.dml",
+            "reference": "daveml/aerodynamics-performance-openap.dml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.aerodynamics-rotational-jsbsim.source_path",
+            "observed_sha256": null,
+            "path": "daveml/aerodynamics-rotational-jsbsim.dml",
+            "reference": "daveml/aerodynamics-rotational-jsbsim.dml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.aerodynamics-rotational-jsbsim.package_member",
+            "observed_sha256": null,
+            "path": "daveml/aerodynamics-rotational-jsbsim.dml",
+            "reference": "daveml/aerodynamics-rotational-jsbsim.dml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.propulsion-openap.source_path",
+            "observed_sha256": null,
+            "path": "daveml/propulsion-openap.dml",
+            "reference": "daveml/propulsion-openap.dml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.propulsion-openap.package_member",
+            "observed_sha256": null,
+            "path": "daveml/propulsion-openap.dml",
+            "reference": "daveml/propulsion-openap.dml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.mass-properties-estimated.source_path",
+            "observed_sha256": null,
+            "path": "daveml/mass-properties-estimated.dml",
+            "reference": "daveml/mass-properties-estimated.dml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.mass-properties-estimated.package_member",
+            "observed_sha256": null,
+            "path": "daveml/mass-properties-estimated.dml",
+            "reference": "daveml/mass-properties-estimated.dml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.control-mapping.source_path",
+            "observed_sha256": null,
+            "path": "daveml/control-mapping.dml",
+            "reference": "daveml/control-mapping.dml"
+          },
+          {
+            "available": false,
+            "declared_sha256": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+            "kind": "external_path",
+            "label": "source_documents.a320-pseudo6dof.control-mapping.package_member",
+            "observed_sha256": null,
+            "path": "daveml/control-mapping.dml",
+            "reference": "daveml/control-mapping.dml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "runtime_artifact",
+            "observed_sha256": "9d0a79979b664d5ad19bb7f433a7f538f91be21cbcd6e26eae7a96cd36b7899e",
+            "path": "src/taoryx/trajectory/a320_pseudo6dof.py",
+            "reference": "src/taoryx/trajectory/a320_pseudo6dof.py"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "validation_artifact",
+            "observed_sha256": null,
+            "path": "validation/roundtrip-report.json",
+            "reference": "validation/roundtrip-report.json"
+          },
+          {
+            "available": false,
+            "declared_sha256": null,
+            "kind": "external_path",
+            "label": "runtime_qualification_artifact",
+            "observed_sha256": null,
+            "path": "validation/runtime-qualification.json",
+            "reference": "validation/runtime-qualification.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "record.source.corpus_archive",
+            "observed_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+            "path": "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip",
+            "reference": "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "operating_point.evidence",
+            "observed_sha256": "067231a147c0c470f93b4d8d4bc077cbbe23568709531b50a29bcaab9465e166",
+            "path": "verification/daveml_a320_pseudo6dof_integration.json",
+            "reference": "verification/daveml_a320_pseudo6dof_integration.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/assumptions.json",
+            "observed_sha256": "a5142582d78f13e7417985ea83d7a00fd5215795c0fcdce497fb0a3c7f89ed5a",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/assumptions.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/assumptions.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/authority-map.json",
+            "observed_sha256": "fb3d0ca3c0ced52d111da90c91da18720470faffc234904f4526138980e0ece9",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/authority-map.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/authority-map.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+            "observed_sha256": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-performance-openap.dml",
+            "observed_sha256": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-performance-openap.dml",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-performance-openap.dml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-rotational-jsbsim.dml",
+            "observed_sha256": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-rotational-jsbsim.dml",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-rotational-jsbsim.dml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/assumptions.json",
+            "observed_sha256": "73063720f4d3e2d09708433ec3b65f73febcd0ad573b0e1128d940701c54eed8",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/assumptions.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/assumptions.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/authority-map.json",
+            "observed_sha256": "8b5583482ee959a17c331552583542389901c7b0addbdc07ae0af88d350f930c",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/authority-map.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/authority-map.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/control-mapping.dml",
+            "observed_sha256": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/control-mapping.dml",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/control-mapping.dml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/mass-properties-estimated.dml",
+            "observed_sha256": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/mass-properties-estimated.dml",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/mass-properties-estimated.dml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/propulsion-openap.dml",
+            "observed_sha256": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/propulsion-openap.dml",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/propulsion-openap.dml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/provenance.json",
+            "observed_sha256": "6cf05e55c811b9fb32dabec921c95b619dd5a6ac75cb7c485823cff244fa603e",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/provenance.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/provenance.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml",
+            "observed_sha256": "783b9bc6a8d4c84ce16ade13a7c935f9c0f1ca628162fa605e6ea96295a1de4f",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+            "observed_sha256": "3543b7315e066b4885a5d2a910ee03d781649bcc5822370b5261989ea1370cae",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/racetrack-binding.yaml",
+            "observed_sha256": "d98dedf41a7140f23021165dca24d1c26262bfc2bb301ce15fc271cd3976627e",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/racetrack-binding.yaml",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/qualification/racetrack-binding.yaml"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json",
+            "observed_sha256": "865671b7c6383e2369cf96ea05f71d103275afd13be27120122a6d612563ba04",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json",
+            "observed_sha256": "55b7a3e608fdc049c09023787b5e7606f9b51fe22b995d3d13feb4b06bee13e9",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
+            "observed_sha256": "7c6dee9f8948d4613d178b5b68a0e836732ad4a6d7a572a348c17e007fd678ac",
+            "path": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
+            "reference": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "mission.a320-openap-pseudo6dof-racetrack.evidence.json",
+            "observed_sha256": "7a6e7f27c4e6f56890c0f53c30630da76e609878a0902e8f5aa88073c91361d6",
+            "path": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
+            "reference": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "mission.a320-openap-pseudo6dof-racetrack.telemetry.csv",
+            "observed_sha256": "27afeced44789debf2241b382e3d8f597af99de75e448ab3b27e00ab66124e14",
+            "path": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_telemetry.csv",
+            "reference": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_telemetry.csv"
+          },
+          {
+            "available": true,
+            "declared_sha256": null,
+            "kind": "local_path",
+            "label": "mission.a320-openap-pseudo6dof-racetrack.board.png",
+            "observed_sha256": "cfaa9582ebe662a38a12b44da09d12b3656bc3b0e5908043d5650daa8806fc91",
+            "path": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_board.png",
+            "reference": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_board.png"
+          }
+        ],
+        "external_dependency_count": 16,
+        "family_id": "a320_openap_jsbsim_pseudo6dof",
+        "frames": {
+          "body": "FRD",
+          "navigation": "NED",
+          "quaternion_order": "wxyz"
+        },
+        "local_evidence_count": 27,
+        "manifest_kind": "collection",
+        "manifest_path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+        "qualification_class": "surrogate_composite",
+        "record_path": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+        "runtime_fidelity": "pseudo_6dof",
+        "schema_version": "taoryx.vehicle-integration-snapshot/v1",
+        "source_kind": "OpenAP",
+        "source_payload_external": false
+      },
+      "stages": [
+        {
+          "claim": "manifest and integration record are discoverable, typed, and provenance-bearing",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+            "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "evidence_reference_count": 43,
+            "external_dependency_count": 16,
+            "local_evidence_count": 27,
+            "manifest_kind": "collection"
+          },
+          "stage_id": "intake",
+          "status": "passed"
+        },
+        {
+          "claim": "frames and source-to-canonical transforms are explicit at the collection boundary",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+            "verification/daveml_operational_contracts.yaml",
+            "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "contract_checked": true
+          },
+          "stage_id": "conventions",
+          "status": "passed"
+        },
+        {
+          "claim": "the declared source or composite plant has a verified package/roundtrip boundary",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+            "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "family_id": "a320_openap_jsbsim_pseudo6dof",
+            "qualification": "bounded_runtime_verified",
+            "roundtrip_status": "verified"
+          },
+          "stage_id": "plant",
+          "status": "passed"
+        },
+        {
+          "claim": "typed pseudo-6DOF effectivity contract is present with explicit surrogate boundaries",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+            "families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml"
+          ],
+          "findings": [
+            {
+              "code": "surrogate-effectivity-overlay",
+              "hint": "Keep coefficient authority, actuator limits, and pseudo-6DOF response evidence separate from source-exact flight-control claims.",
+              "message": "bounded semantic effectors are declared, but their actuator behavior remains a Taoryx policy overlay",
+              "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml",
+              "severity": "warning"
+            }
+          ],
+          "metrics": {
+            "contract": "families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml",
+            "declared_effectors": 4,
+            "physical_allocator": false,
+            "physical_control_bindings": 1
+          },
+          "stage_id": "effectivity",
+          "status": "development"
+        },
+        {
+          "claim": "trim/steady-performance evidence is discoverable in the shared operating-point catalog",
+          "error_count": 0,
+          "evidence": [
+            "verification/daveml_operating_point_catalog.yaml",
+            "verification/daveml_a320_pseudo6dof_integration.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "applicability": "required",
+            "point_id": "a320-pseudo6dof-cruise-mach078"
+          },
+          "stage_id": "trim",
+          "status": "passed"
+        },
+        {
+          "claim": "the family has a typed operating-point or trajectory-checkpoint entry",
+          "error_count": 0,
+          "evidence": [
+            "verification/daveml_operating_point_catalog.yaml",
+            "verification/daveml_a320_pseudo6dof_integration.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "point_id": "a320-pseudo6dof-cruise-mach078",
+            "point_type": "pseudo_6dof_composite_performance"
+          },
+          "stage_id": "operating_points",
+          "status": "passed"
+        },
+        {
+          "claim": "the runtime fidelity and evidence class are explicit",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json"
+          ],
+          "findings": [
+            {
+              "code": "surrogate-fidelity-boundary",
+              "hint": "Do not lower or promote it as manufacturer-authoritative rigid-body evidence.",
+              "message": "this fidelity combines authorities and is not source-exact",
+              "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+              "severity": "warning"
+            }
+          ],
+          "metrics": {
+            "automatic_lowering_eligible": false,
+            "automatic_lowering_eligible_profiles": [],
+            "profile_statuses": [],
+            "profiles": [],
+            "qualification_class": "surrogate_composite",
+            "runtime_fidelity": "pseudo_6dof"
+          },
+          "stage_id": "fidelity",
+          "status": "development"
+        },
+        {
+          "claim": "controller metadata exists only as a Taoryx overlay pending independent nonlinear qualification",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json"
+          ],
+          "findings": [
+            {
+              "code": "controller-overlay-development",
+              "hint": "Retain command/achieved and nonlinear response evidence before promotion.",
+              "message": "controller authority is not source-exact for this pilot",
+              "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+              "severity": "warning"
+            }
+          ],
+          "metrics": {},
+          "stage_id": "controller",
+          "status": "development"
+        },
+        {
+          "claim": "shared A320 racetrack executed and all required truth gates passed",
+          "error_count": 0,
+          "evidence": [
+            "families/a320_openap_jsbsim_pseudo6dof/qualification/racetrack-binding.yaml",
+            "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "estimated_duration_s_by_realization": {
+              "a320-openap-pseudo6dof": 794.494151499636
+            },
+            "estimated_duration_s_max": 794.494151499636,
+            "estimated_duration_s_min": 794.494151499636,
+            "realization_count": 1,
+            "runtime_evidence": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
+            "runtime_mission_pass": true
+          },
+          "stage_id": "mission",
+          "status": "passed"
+        }
+      ],
+      "status": "development_ready_with_gates"
+    }
+  ],
+  "schema_version": "taoryx.vehicle-integration-pilot/v1"
+}

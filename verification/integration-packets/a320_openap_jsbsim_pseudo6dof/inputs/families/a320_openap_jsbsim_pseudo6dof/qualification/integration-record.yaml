@@ -1,0 +1,36 @@
+schema: taoryx.model-integration/v1alpha1
+family: a320_openap_jsbsim_pseudo6dof
+model_id: a320-openap-jsbsim-pseudo6dof
+qualification_class: surrogate_composite
+manufacturer_validated: false
+source_exact: false
+source:
+  kind: composite_openap_jsbsim
+  corpus_archive: resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip
+  corpus_archive_sha256: 9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31
+  openap_revision: OpenAP 2.6.0
+  jsbsim_revision: refs/tags/v1.3.1
+  jsbsim_commit: 3b25f25e49b42d0489c04ac805674fc1450ca579
+plant:
+  fidelity: pseudo_6dof
+  frames: {body: FRD, navigation: NED, quaternion_order: wxyz}
+  qualification: bounded_runtime_verified
+layers:
+  aerodynamics: {performance_authority: openap-2.6.0, rotational_authority: jsbsim-1.3.1-a320}
+  propulsion: {authority: openap-2.6.0, duplicate_jsbsim_contribution: disabled}
+  mass_properties: {scalar_schedule: openap-2.6.0, cg_and_inertia: jsbsim-rescaled-estimate}
+runtime_binding:
+  implementation: taoryx.trajectory.a320_pseudo6dof.A320Pseudo6DOFModel
+  status: executable_surrogate_binding
+  verified: [source_hashes, authority_map, side_force, roll_moment, pitch_moment, yaw_moment, mass_rescaled_inertia, canonical_daveml_export, fresh_process_roundtrip, trim_close, coordinated_turn, control_pulse_bounds, runtime_roundtrip]
+  remaining: [full_rigidbody_6dof_validation]
+  actuators: {authority: taoryx-policy, evidence: validation/runtime-qualification.json}
+  stability_augmentation: {authority: taoryx-controller, evidence: validation/runtime-qualification.json}
+claims:
+  - executable research surrogate combining OpenAP performance with JSBSim rotational structure
+  - canonical regenerated DAVE-ML export can represent this composite collection
+nonclaims:
+  - upstream Airbus or manufacturer-authoritative DAVE-ML equivalence
+  - source-exact JSBSim A320 aerodynamic or propulsion reproduction after disabled contributions
+  - certification, training, or flight-test validation
+next_gate: acquire_or_bind_full_rigidbody_6dof_source

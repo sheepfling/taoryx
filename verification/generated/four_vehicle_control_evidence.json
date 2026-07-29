@@ -32,8 +32,8 @@
   "status": "tiered_evidence_complete",
   "vehicles": {
     "b747": {
-      "artifact": "verification\\generated\\b747_condition3_physical_surface_lqr.json",
-      "artifact_sha256": "29a4b20b686f097bbf3d0be2bd3a7f9b817c4717d6c70d19a838584c3c96c66a",
+      "artifact": "verification/generated/b747_condition3_physical_surface_lqr.json",
+      "artifact_sha256": "4538f76cc98a97b754f46f98d4a59269d00a5b79c01468a38232d19bffff852a",
       "direct_body_moment_injection": false,
       "evidence_tier": "T5_nonlinearly_validated",
       "nonclaims": [
@@ -48,8 +48,8 @@
       "status": "local_nonlinear_surface_validation"
     },
     "hummingbird": {
-      "artifact": "verification\\generated\\hummingbird_individual_rotor_physical_lqr.json",
-      "artifact_sha256": "64df0718640437a47a63db612931eafe7dfa437ed0227abb2e433f24ed1bbab3",
+      "artifact": "verification/generated/hummingbird_individual_rotor_physical_lqr.json",
+      "artifact_sha256": "ad8050f1e9eb36eec4973660464d2995142067dc48e2924ddfa371f2bec2291c",
       "direct_body_moment_injection": false,
       "evidence_tier": "T5_nonlinearly_validated",
       "nonclaims": [
@@ -64,8 +64,8 @@
       "status": "local_nonlinear_individual_rotor_validation"
     },
     "skywalker_x8": {
-      "artifact": "verification\\generated\\x8_table_coordinate_physical_lqr.json",
-      "artifact_sha256": "46277b3867fb49ec0777cf87606a5b1989624008e1acb4bfe69cde874e19fb82",
+      "artifact": "verification/generated/x8_table_coordinate_physical_lqr.json",
+      "artifact_sha256": "397e8d6a63d50755506ed13be0a9bbf19b58c7f5983e97061860f0142698c6b2",
       "direct_body_moment_injection": false,
       "evidence_tier": "T3_linearly_controlled",
       "nonclaims": [
@@ -81,8 +81,8 @@
       "status": "local_nonlinear_table_coordinate_validation"
     },
     "x15": {
-      "artifact": "verification\\generated\\x15_physical_lqr_readiness.json",
-      "artifact_sha256": "90a8774e2ae3ee18c4a9ee6fbeffbaadc4cf04273da64469ff68ca1a609b3940",
+      "artifact": "verification/generated/x15_physical_lqr_readiness.json",
+      "artifact_sha256": "93b1caf2cc2f96ea4c037915761cbc53a434f4c239ebd2275543e3720a269e0f",
       "direct_body_moment_injection": false,
       "evidence_tier": "T0_structural",
       "nonclaims": [

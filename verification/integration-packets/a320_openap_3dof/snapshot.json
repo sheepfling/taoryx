@@ -1,0 +1,234 @@
+{
+  "applicability": {
+    "linearization": "required",
+    "objectives": "required",
+    "scenarios": "required",
+    "trim": "required",
+    "tuning": "not_applicable"
+  },
+  "catalog_path": "verification/daveml_operating_point_catalog.yaml",
+  "contract_path": "verification/daveml_operational_contracts.yaml",
+  "dependency_hashes": {
+    "family_file.families/a320_openap_3dof/collection-manifest.json": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
+    "family_file.families/a320_openap_3dof/qualification/integration-record.yaml": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
+    "family_file.families/a320_openap_3dof/qualification/racetrack-binding.yaml": "63a4b647b00fd3f1af474c5eaa8573147c2fbe393d1e3398c3d6e65a4f6841c4",
+    "integration_record": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
+    "manifest": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
+    "mission.a320-openap-point-mass-racetrack.board.png": "6fb81e5f3562602a6a7c42c611263daa61f0096e2dbc9a976731a8062e22fb70",
+    "mission.a320-openap-point-mass-racetrack.evidence.json": "b3ca553fe9ddbedfc2bc35df9427f6c8961cbc0a43ca1154658d6f8665427b17",
+    "mission.a320-openap-point-mass-racetrack.telemetry.csv": "1f7e9c7f5e9ece186b034e82559ef2ab467e410426338eb8f38d34e3086d81c4",
+    "operating_point_catalog": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+    "operational_contract": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+    "record.source.corpus_archive": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+    "record.source.package": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+    "source_documents.a320-openap.runtime.package_member": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+    "source_documents.a320-openap.runtime.source_path": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63"
+  },
+  "evidence": [
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "manifest",
+      "observed_sha256": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
+      "path": "families/a320_openap_3dof/collection-manifest.json",
+      "reference": "families/a320_openap_3dof/collection-manifest.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "integration_record",
+      "observed_sha256": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
+      "path": "families/a320_openap_3dof/qualification/integration-record.yaml",
+      "reference": "families/a320_openap_3dof/qualification/integration-record.yaml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "operational_contract",
+      "observed_sha256": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+      "path": "verification/daveml_operational_contracts.yaml",
+      "reference": "verification/daveml_operational_contracts.yaml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "operating_point_catalog",
+      "observed_sha256": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+      "path": "verification/daveml_operating_point_catalog.yaml",
+      "reference": "verification/daveml_operating_point_catalog.yaml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+      "kind": "external_path",
+      "label": "source_documents.a320-openap.runtime.source_path",
+      "observed_sha256": null,
+      "path": "qualified-models/a320-openap/runtime/openap-a320.json",
+      "reference": "qualified-models/a320-openap/runtime/openap-a320.json"
+    },
+    {
+      "available": false,
+      "declared_sha256": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+      "kind": "external_path",
+      "label": "source_documents.a320-openap.runtime.package_member",
+      "observed_sha256": null,
+      "path": "qualified-models/a320-openap/runtime/openap-a320.json",
+      "reference": "qualified-models/a320-openap/runtime/openap-a320.json"
+    },
+    {
+      "available": false,
+      "declared_sha256": null,
+      "kind": "external_path",
+      "label": "runtime_artifact",
+      "observed_sha256": null,
+      "path": "qualified-models/a320-openap/taoryx-a320-openap-2.6-v0.8.txair",
+      "reference": "qualified-models/a320-openap/taoryx-a320-openap-2.6-v0.8.txair"
+    },
+    {
+      "available": false,
+      "declared_sha256": null,
+      "kind": "external_path",
+      "label": "validation_artifact",
+      "observed_sha256": null,
+      "path": "qualified-models/a320-openap/verification-report.json",
+      "reference": "qualified-models/a320-openap/verification-report.json"
+    },
+    {
+      "available": false,
+      "declared_sha256": null,
+      "kind": "external_path",
+      "label": "record.source.package",
+      "observed_sha256": null,
+      "path": "qualified-models/a320-openap/taoryx-a320-openap-2.6-v0.8.txair",
+      "reference": "qualified-models/a320-openap/taoryx-a320-openap-2.6-v0.8.txair"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "record.source.corpus_archive",
+      "observed_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+      "path": "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip",
+      "reference": "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "inline_status",
+      "label": "record.layers.aerodynamics.evidence",
+      "observed_sha256": null,
+      "path": null,
+      "reference": "272/272 oracle comparisons"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "inline_status",
+      "label": "record.layers.propulsion.evidence",
+      "observed_sha256": null,
+      "path": null,
+      "reference": "thrust and fuel oracle comparisons"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "inline_status",
+      "label": "record.layers.mass_properties.evidence",
+      "observed_sha256": null,
+      "path": null,
+      "reference": "scalar schedule only"
+    },
+    {
+      "available": false,
+      "declared_sha256": null,
+      "kind": "external_path",
+      "label": "record.layers.trim.evidence",
+      "observed_sha256": null,
+      "path": "reference-cruise-trim.json",
+      "reference": "reference-cruise-trim.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "operating_point.evidence",
+      "observed_sha256": "0fc54c2a92fe2798e75edef807d589c843e69b6cb5a49f3c20f3cf93a09d26af",
+      "path": "verification/daveml_a320_openap_integration.json",
+      "reference": "verification/daveml_a320_openap_integration.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_3dof/collection-manifest.json",
+      "observed_sha256": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
+      "path": "families/a320_openap_3dof/collection-manifest.json",
+      "reference": "families/a320_openap_3dof/collection-manifest.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_3dof/qualification/integration-record.yaml",
+      "observed_sha256": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
+      "path": "families/a320_openap_3dof/qualification/integration-record.yaml",
+      "reference": "families/a320_openap_3dof/qualification/integration-record.yaml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_3dof/qualification/racetrack-binding.yaml",
+      "observed_sha256": "63a4b647b00fd3f1af474c5eaa8573147c2fbe393d1e3398c3d6e65a4f6841c4",
+      "path": "families/a320_openap_3dof/qualification/racetrack-binding.yaml",
+      "reference": "families/a320_openap_3dof/qualification/racetrack-binding.yaml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "mission.a320-openap-point-mass-racetrack.evidence.json",
+      "observed_sha256": "b3ca553fe9ddbedfc2bc35df9427f6c8961cbc0a43ca1154658d6f8665427b17",
+      "path": "verification/a320_racetrack/point_mass_3dof_evidence.json",
+      "reference": "verification/a320_racetrack/point_mass_3dof_evidence.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "mission.a320-openap-point-mass-racetrack.telemetry.csv",
+      "observed_sha256": "1f7e9c7f5e9ece186b034e82559ef2ab467e410426338eb8f38d34e3086d81c4",
+      "path": "verification/a320_racetrack/point_mass_3dof_telemetry.csv",
+      "reference": "verification/a320_racetrack/point_mass_3dof_telemetry.csv"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "mission.a320-openap-point-mass-racetrack.board.png",
+      "observed_sha256": "6fb81e5f3562602a6a7c42c611263daa61f0096e2dbc9a976731a8062e22fb70",
+      "path": "verification/a320_racetrack/point_mass_3dof_board.png",
+      "reference": "verification/a320_racetrack/point_mass_3dof_board.png"
+    }
+  ],
+  "external_dependency_count": 6,
+  "family_id": "a320_openap_3dof",
+  "frames": {
+    "body": "FRD",
+    "navigation": "NED",
+    "quaternion_order": "wxyz"
+  },
+  "local_evidence_count": 12,
+  "manifest_kind": "collection",
+  "manifest_path": "families/a320_openap_3dof/collection-manifest.json",
+  "qualification_class": "derived_exact",
+  "record_path": "families/a320_openap_3dof/qualification/integration-record.yaml",
+  "runtime_fidelity": "point_mass_3dof",
+  "schema_version": "taoryx.vehicle-integration-snapshot/v1",
+  "source_kind": "OpenAP",
+  "source_payload_external": true
+}

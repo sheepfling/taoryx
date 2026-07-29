@@ -1,0 +1,142 @@
+{
+  "reports": [
+    {
+      "error_count": 0,
+      "evidence": [
+        "verification/f16_physical_wrench_lqr_evidence.json"
+      ],
+      "family_id": "reference_f16_s119",
+      "findings": [
+        {
+          "code": "effectivity-development-screen",
+          "hint": "Do not promote it to controller qualification without actuator and nonlinear response evidence.",
+          "message": "numeric effectivity evidence is a local development/allocation screen",
+          "path": "verification/f16_physical_wrench_lqr_evidence.json",
+          "severity": "warning"
+        },
+        {
+          "code": "bounded-replay-development",
+          "hint": "Retain command/actual, rate, saturation, and nonlinear response evidence before promotion.",
+          "message": "bounded allocation replay is a generic numerical screen, not nonlinear actuator qualification",
+          "path": "reference_f16_s119",
+          "severity": "warning"
+        },
+        {
+          "code": "actuator-evidence-not-resolved",
+          "hint": "Declare the actuator overlay path or explicitly state that only a contract-level screen exists.",
+          "message": "actuator layer is declared without a resolvable evidence artifact",
+          "path": "families/reference_f16_s119/qualification/integration-record.yaml",
+          "severity": "warning"
+        }
+      ],
+      "metrics": {
+        "bounded_replay": {
+          "effectivity_rank": 4,
+          "residual_norm": 2.998416303520215e-13,
+          "saturated_effectors": [],
+          "status": "feasible"
+        },
+        "computed_rank": 4,
+        "condition_number": 20.18332572097007,
+        "matrix_columns": 4,
+        "matrix_rows": 4,
+        "matrix_source": "sample",
+        "nonzero_column_count": 4,
+        "sign_probe": {
+          "aileron_deg": {
+            "negative_axes": [
+              "total_moment_x_nm",
+              "total_moment_z_nm"
+            ],
+            "positive_axes": [],
+            "zero_axes": [
+              "total_force_x_n",
+              "total_moment_y_nm"
+            ]
+          },
+          "elevator_deg": {
+            "negative_axes": [
+              "total_moment_y_nm"
+            ],
+            "positive_axes": [
+              "total_force_x_n"
+            ],
+            "zero_axes": [
+              "total_moment_x_nm",
+              "total_moment_z_nm"
+            ]
+          },
+          "rudder_deg": {
+            "negative_axes": [
+              "total_moment_z_nm"
+            ],
+            "positive_axes": [
+              "total_moment_x_nm"
+            ],
+            "zero_axes": [
+              "total_force_x_n",
+              "total_moment_y_nm"
+            ]
+          },
+          "throttle_fraction": {
+            "negative_axes": [],
+            "positive_axes": [
+              "total_force_x_n"
+            ],
+            "zero_axes": [
+              "total_moment_x_nm",
+              "total_moment_y_nm",
+              "total_moment_z_nm"
+            ]
+          }
+        },
+        "singular_values": [
+          114030.1229722287,
+          13192.253428005366,
+          9539.672342686805,
+          5649.719206273012
+        ]
+      },
+      "schema_version": "taoryx.vehicle-effectivity-preflight/v1",
+      "status": "development"
+    },
+    {
+      "error_count": 0,
+      "evidence": [
+        "verification/daveml_alpha3_overlay_evidence.json",
+        "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml"
+      ],
+      "family_id": "reference_hl20_mod_k",
+      "findings": [
+        {
+          "code": "allocation-evidence-not-numeric",
+          "hint": "Keep the overlay contract explicit and add a numeric sign, saturation, and residual screen before promotion.",
+          "message": "allocation evidence does not contain a numeric local effectivity matrix",
+          "path": "verification/daveml_alpha3_overlay_evidence.json",
+          "severity": "warning"
+        },
+        {
+          "code": "synthetic-effectivity-overlay",
+          "hint": "Keep source and overlay claims separate and require sign, saturation, and nonlinear regression evidence.",
+          "message": "effectivity is a downstream or synthetic overlay rather than source-declared authority",
+          "path": "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml",
+          "severity": "warning"
+        },
+        {
+          "code": "actuator-evidence-not-resolved",
+          "hint": "Declare the actuator overlay path or explicitly state that only a contract-level screen exists.",
+          "message": "actuator layer is declared without a resolvable evidence artifact",
+          "path": "families/reference_hl20_mod_k/qualification/integration-record.yaml",
+          "severity": "warning"
+        }
+      ],
+      "metrics": {
+        "logical_command_count": 5,
+        "physical_output_count": 7
+      },
+      "schema_version": "taoryx.vehicle-effectivity-preflight/v1",
+      "status": "development"
+    }
+  ],
+  "schema_version": "taoryx.vehicle-effectivity-preflight/v1"
+}

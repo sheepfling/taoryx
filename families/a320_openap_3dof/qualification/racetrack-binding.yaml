@@ -1,0 +1,20 @@
+schema_version: 1
+kind: taoryx.showcase-binding/v1alpha1
+family: a320_openap_3dof
+mission_profile: powered_fixed_wing_racetrack_contract
+template: verification/racetrack_templates.yaml#powered_fixed_wing_racetrack_v1
+source_catalog: verification/racetrack_templates.yaml
+binding_ids:
+  - a320-openap-3dof
+phase_order:
+  - outbound-climb
+  - outbound-level
+  - left-turn
+  - inbound-descent
+  - inbound-level
+  - right-turn
+status: adapter_available_mission_execution_pending
+claim_boundary: >-
+  A reusable A320 point-mass racetrack contract uses the pinned OpenAP
+  Mach-0.78 operating point for timing and shared truth-gate semantics. It
+  does not claim physical attitude, surface, or manufacturer flight fidelity.

@@ -1,0 +1,119 @@
+{
+  "claim_boundary": "fresh-process numerical replay of authored surrogate channels; not full authoritative flight-dynamics validation",
+  "collection": "a320-openap-jsbsim-pseudo6dof",
+  "comparison_count": 11,
+  "comparisons": [
+    {
+      "absolute_difference": 0.0,
+      "channel": "performance.drag_n",
+      "daveml_value": 32807.7165860874,
+      "model_value": 32807.7165860874,
+      "pass": true
+    },
+    {
+      "absolute_difference": 0.0,
+      "channel": "rotational.side_force_coefficient",
+      "daveml_value": 0.0,
+      "model_value": 0.0,
+      "pass": true
+    },
+    {
+      "absolute_difference": 0.0,
+      "channel": "rotational.roll_moment_coefficient",
+      "daveml_value": 0.002,
+      "model_value": 0.002,
+      "pass": true
+    },
+    {
+      "absolute_difference": 6.938893903907228e-18,
+      "channel": "rotational.pitch_moment_coefficient",
+      "daveml_value": 0.05500000000000001,
+      "model_value": 0.055,
+      "pass": true
+    },
+    {
+      "absolute_difference": 0.0,
+      "channel": "rotational.yaw_moment_coefficient",
+      "daveml_value": -0.005,
+      "model_value": -0.005,
+      "pass": true
+    },
+    {
+      "absolute_difference": 0.0,
+      "channel": "propulsion.thrust_n",
+      "daveml_value": 32807.7165860874,
+      "model_value": 32807.7165860874,
+      "pass": true
+    },
+    {
+      "absolute_difference": 0.0,
+      "channel": "propulsion.fuel_flow_kg_s",
+      "daveml_value": 0.692155083089858,
+      "model_value": 0.692155083089858,
+      "pass": true
+    },
+    {
+      "absolute_difference": 0.0,
+      "channel": "mass.scalar_schedule",
+      "daveml_value": 60000.0,
+      "model_value": 60000.0,
+      "pass": true
+    },
+    {
+      "absolute_difference": 0.0,
+      "channel": "mass.cg_and_inertia.ixx",
+      "daveml_value": 1523417.5407182917,
+      "model_value": 1523417.5407182917,
+      "pass": true
+    },
+    {
+      "absolute_difference": 0.0,
+      "channel": "mass.cg_and_inertia.iyy",
+      "daveml_value": 4506091.0889331885,
+      "model_value": 4506091.0889331885,
+      "pass": true
+    },
+    {
+      "absolute_difference": 0.0,
+      "channel": "mass.cg_and_inertia.izz",
+      "daveml_value": 5812636.475342919,
+      "model_value": 5812636.475342919,
+      "pass": true
+    }
+  ],
+  "provenance": {
+    "authorities": {
+      "actuators": "taoryx-policy",
+      "aerodynamics.alpha_mapping": "jsbsim-1.3.1-a320",
+      "aerodynamics.drag": "openap-2.6.0",
+      "aerodynamics.normal_force_target": "openap-2.6.0",
+      "aerodynamics.side_force": "jsbsim-1.3.1-a320",
+      "mass.cg_and_inertia": "jsbsim-rescaled-estimate",
+      "mass.scalar_schedule": "openap-2.6.0",
+      "moments.pitch": "jsbsim-1.3.1-a320",
+      "moments.roll": "jsbsim-1.3.1-a320",
+      "moments.yaw": "jsbsim-1.3.1-a320",
+      "propulsion.fuel_flow": "openap-2.6.0",
+      "propulsion.thrust": "openap-2.6.0",
+      "stability_augmentation": "taoryx-controller"
+    },
+    "corpus_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+    "disabled_contributions": [
+      "jsbsim.aerodynamic_drag",
+      "jsbsim.propulsion_thrust",
+      "jsbsim.fuel_flow"
+    ],
+    "inertia_policy": "linear_mass_rescale_from_jsbsim_empty_mass",
+    "manufacturer_validated": false,
+    "model_id": "a320-openap-jsbsim-pseudo6dof",
+    "openap_package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+    "qualification_class": "surrogate_composite",
+    "rate_damping_policy": {
+      "coefficient_per_s": 10.0,
+      "type": "diagonal_body_rate_feedback"
+    },
+    "source_exact": false
+  },
+  "schema_version": "taoryx.a320-pseudo6dof-daveml-runtime-replay/v1",
+  "status": "verified"
+}

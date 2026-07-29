@@ -1,0 +1,15 @@
+{
+  "actuators": "taoryx-policy",
+  "aerodynamics.alpha_mapping": "jsbsim-1.3.1-a320",
+  "aerodynamics.drag": "openap-2.6.0",
+  "aerodynamics.normal_force_target": "openap-2.6.0",
+  "aerodynamics.side_force": "jsbsim-1.3.1-a320",
+  "mass.cg_and_inertia": "jsbsim-rescaled-estimate",
+  "mass.scalar_schedule": "openap-2.6.0",
+  "moments.pitch": "jsbsim-1.3.1-a320",
+  "moments.roll": "jsbsim-1.3.1-a320",
+  "moments.yaw": "jsbsim-1.3.1-a320",
+  "propulsion.fuel_flow": "openap-2.6.0",
+  "propulsion.thrust": "openap-2.6.0",
+  "stability_augmentation": "taoryx-controller"
+}

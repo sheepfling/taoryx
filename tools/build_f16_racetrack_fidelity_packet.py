@@ -85,6 +85,117 @@ def _write_csv(path: Path, rows: list[dict[str, float | int | str]]) -> None:
     ####
 
 
+def _reduction_mission_window_comparison(
+    reduced_runs: dict[str, tuple[dict[str, Any], list[dict[str, float | int | str]]]],
+    parent_run: tuple[dict[str, Any], list[dict[str, float | int | str]]],
+) -> dict[str, object]:
+    """Compare reduced and parent routes by semantic mission evidence.
+
+    Lower fidelities are not expected to reproduce rigid-body samples exactly.
+    This report therefore gates common time/reference channels and objective
+    parity, while retaining measured trajectory disagreement as a declared
+    comparison result rather than hiding it in a scalar score.
+    """
+
+    parent_evidence, parent_rows = parent_run
+    parent_results = {str(item["id"]): item for item in parent_evidence["evaluation"]["results"]}
+    comparisons: dict[str, object] = {}
+    for mode, (evidence, rows) in reduced_runs.items():
+        common_count = min(len(rows), len(parent_rows))
+        route_fields = (
+            "route_north_command_m",
+            "route_east_command_m",
+            "route_altitude_command_m",
+            "route_speed_command_m_s",
+            "route_heading_command_deg",
+            "route_bank_command_deg",
+        )
+        max_reference_error = max(
+            (
+                abs(float(rows[index][field]) - float(parent_rows[index][field]))
+                for index in range(common_count)
+                for field in route_fields
+            ),
+            default=0.0,
+        )
+        trajectory_fields = ("north_m", "east_m", "altitude_m", "speed_m_s")
+        trajectory_disagreement = {
+            field: {
+                "maximum_absolute": max(
+                    (
+                        abs(float(rows[index][field]) - float(parent_rows[index][field]))
+                        for index in range(common_count)
+                    ),
+                    default=0.0,
+                ),
+                "rms": (
+                    sum(
+                        (float(rows[index][field]) - float(parent_rows[index][field])) ** 2
+                        for index in range(common_count)
+                    )
+                    / max(common_count, 1)
+                )
+                ** 0.5,
+            }
+            for field in trajectory_fields
+        }
+        objective_results = []
+        objective_parity = True
+        for item in evidence["evaluation"]["results"]:
+            objective_id = str(item["id"])
+            parent_item = parent_results.get(objective_id)
+            status_parity = parent_item is not None and item["status"] == parent_item["status"]
+            objective_parity = objective_parity and status_parity
+            reduced_time = item.get("truth_time_s")
+            parent_time = None if parent_item is None else parent_item.get("truth_time_s")
+            objective_results.append(
+                {
+                    "id": objective_id,
+                    "reduced_status": item["status"],
+                    "parent_status": None if parent_item is None else parent_item["status"],
+                    "status_parity": status_parity,
+                    "reduced_truth_time_s": reduced_time,
+                    "parent_truth_time_s": parent_time,
+                    "truth_time_delta_s": (
+                        None
+                        if reduced_time is None or parent_time is None
+                        else float(reduced_time) - float(parent_time)
+                    ),
+                }
+            )
+        mission_parity = bool(evidence["evaluation"]["mission_pass"]) == bool(
+            parent_evidence["evaluation"]["mission_pass"]
+        )
+        comparisons[mode] = {
+            "status": "semantic_mission_parity_passed" if objective_parity and mission_parity else "semantic_mission_parity_failed",
+            "reduced_fidelity": evidence["fidelity"],
+            "parent_fidelity": parent_evidence["fidelity"],
+            "sample_count": common_count,
+            "time_grid_parity": len(rows) == len(parent_rows)
+            and all(abs(float(rows[index]["time_s"]) - float(parent_rows[index]["time_s"])) <= 1.0e-9 for index in range(common_count)),
+            "maximum_reference_channel_error": max_reference_error,
+            "trajectory_disagreement": trajectory_disagreement,
+            "objective_parity": objective_parity,
+            "mission_status_parity": mission_parity,
+            "objectives": objective_results,
+            "claim_boundary": "Semantic mission parity only; trajectory disagreement is retained and no parent-plant or actuator equivalence is claimed.",
+        }
+    return {
+        "schema_version": 1,
+        "family_id": "reference_f16_s119",
+        "comparison": "shared_racetrack_semantic_mission_window_v1",
+        "parent_packet": "6dof-surfaces",
+        "records": comparisons,
+        "status": "semantic_mission_parity_passed"
+        if all(
+            isinstance(record, dict) and record.get("status") == "semantic_mission_parity_passed"
+            for record in comparisons.values()
+        )
+        else "semantic_mission_parity_failed",
+    }
+    ####
+
+
 def _envelope_report(rows: list[dict[str, float | int | str]]) -> dict[str, object]:
     channels = (
         "dynamic_pressure_pa",
@@ -137,7 +248,7 @@ def _truth_event_artifacts(
         passed = result.get("status") == "pass" and truth_time is not None
         if passed:
             event_ids.append(objective_id)
-            event_times[objective_id] = float(truth_time)
+            event_times[objective_id] = float(truth_time) if truth_time is not None else 0.0
         records.append(
             {
                 "id": objective_id,
@@ -238,8 +349,10 @@ def build(output: Path = DEFAULT_OUTPUT, *, dt_s: float = 0.5) -> Path:
         (ROOT / "verification/f16_racetrack_robustness_evidence.json").read_text(encoding="utf-8")
     )
     records: list[dict[str, object]] = []
+    run_artifacts: dict[str, tuple[dict[str, Any], list[dict[str, float | int | str]]]] = {}
     for packet_name, runtime_mode in MODES:
         evidence, rows = run_case(runtime_mode, None, dt_s)
+        run_artifacts[runtime_mode] = (evidence, rows)
         packet = output / packet_name
         if packet.exists():
             shutil.rmtree(packet)
@@ -416,6 +529,16 @@ def build(output: Path = DEFAULT_OUTPUT, *, dt_s: float = 0.5) -> Path:
         "records": records,
         "rule": "Fidelity passes are reported independently; no lower-fidelity pass promotes a higher-fidelity control claim.",
     })
+    _write_json(
+        output / "reduction_mission_window_comparison.json",
+        _reduction_mission_window_comparison(
+            {
+                mode: run_artifacts[mode]
+                for mode in ("point_mass_3dof", "pseudo_6dof_kinematic_bridge")
+            },
+            run_artifacts["surface_allocated"],
+        ),
+    )
     _write_json(output / "robustness_evidence.json", robustness_evidence)
     (output / "reproduction.txt").write_text(
         f"PYTHONPATH=src python3 tools/build_f16_racetrack_fidelity_packet.py --output {output} --dt-s {dt_s}\n",

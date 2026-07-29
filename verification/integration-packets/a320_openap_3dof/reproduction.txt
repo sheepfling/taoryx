@@ -1,0 +1,1 @@
+python tools/validate_vehicle_integration_pilots.py --family a320_openap_3dof --json a320_openap_3dof-report.json

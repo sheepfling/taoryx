@@ -1,0 +1,12 @@
+schema_version: 1
+kind: taoryx.reference-observation-binding/v1alpha1
+family: reference_nesc_two_stage_rocket
+frames:
+  body: FRD
+  navigation: NED
+observations:
+  state: [position.north, position.east, position.down, velocity.body, attitude.quaternion, body_rates]
+  resources: [mass.total, mass.propellant]
+  events: [staging.stage]
+  aerodynamics: [alpha, mach]
+source_truth_required: true

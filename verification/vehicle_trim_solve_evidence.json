@@ -1,0 +1,180 @@
+{
+  "reports": [
+    {
+      "adapter": "taoryx.adapters.reference_f16_s119.daveml_equilibrium",
+      "claim_boundary": "Source-backed force/moment equilibrium worklist for fixed-altitude and fixed-airspeed operating points; the generic layer does not claim to solve or validate the F-16 plant without the family adapter.",
+      "family_id": "reference_f16_s119",
+      "findings": [],
+      "points": [
+        {
+          "controls": {
+            "elevator_deg": -0.7562951013162249,
+            "power_pct": 8.93225837337992
+          },
+          "iterations": 1,
+          "max_residual": 1.4686065696878359e-08,
+          "point_id": "f16-sea-level-152mps",
+          "residuals": {
+            "force_x_n": 1.4686065696878359e-08,
+            "force_z_n": 1.4551915228366852e-11,
+            "moment_y_nm": 1.661180760163982e-11
+          },
+          "solver_message": "`gtol` termination condition is satisfied.",
+          "solver_status": 1,
+          "state": {
+            "alpha_deg": 2.1452348297818276
+          },
+          "success": true
+        },
+        {
+          "controls": {
+            "elevator_deg": -0.654255033838822,
+            "power_pct": 10.849099700806596
+          },
+          "iterations": 1,
+          "max_residual": 7.275957614183426e-11,
+          "point_id": "f16-3km-152mps",
+          "residuals": {
+            "force_x_n": -9.094947017729282e-13,
+            "force_z_n": -7.275957614183426e-11,
+            "moment_y_nm": -4.0953593567339114e-11
+          },
+          "solver_message": "`gtol` termination condition is satisfied.",
+          "solver_status": 1,
+          "state": {
+            "alpha_deg": 3.3906337409669205
+          },
+          "success": true
+        },
+        {
+          "controls": {
+            "elevator_deg": -0.7099543367916668,
+            "power_pct": 9.619027824425329
+          },
+          "iterations": 8,
+          "max_residual": 4.247340257279575e-10,
+          "point_id": "f16-1p5km-152mps",
+          "residuals": {
+            "force_x_n": 4.247340257279575e-10,
+            "force_z_n": -1.4551915228366852e-11,
+            "moment_y_nm": 1.9473120267561127e-11
+          },
+          "solver_message": "`gtol` termination condition is satisfied.",
+          "solver_status": 1,
+          "state": {
+            "alpha_deg": 2.7114899734722617
+          },
+          "success": true
+        },
+        {
+          "controls": {
+            "elevator_deg": -0.5258694754231061,
+            "power_pct": 14.265717057447398
+          },
+          "iterations": 2,
+          "max_residual": 1.4551915228366852e-11,
+          "point_id": "f16-6km-152mps",
+          "residuals": {
+            "force_x_n": 1.8189894035458565e-12,
+            "force_z_n": -1.4551915228366852e-11,
+            "moment_y_nm": 1.4586320259990675e-12
+          },
+          "solver_message": "`gtol` termination condition is satisfied.",
+          "solver_status": 1,
+          "state": {
+            "alpha_deg": 5.206982861420203
+          },
+          "success": true
+        },
+        {
+          "controls": {
+            "elevator_deg": -0.5868926331696276,
+            "power_pct": 12.101083056083578
+          },
+          "iterations": 8,
+          "max_residual": 1.4551915228366852e-11,
+          "point_id": "f16-4p5km-152mps",
+          "residuals": {
+            "force_x_n": 9.094947017729282e-13,
+            "force_z_n": -1.4551915228366852e-11,
+            "moment_y_nm": 9.031887255319e-12
+          },
+          "solver_message": "`gtol` termination condition is satisfied.",
+          "solver_status": 1,
+          "state": {
+            "alpha_deg": 4.209854275471004
+          },
+          "success": true
+        },
+        {
+          "controls": {
+            "elevator_deg": -0.5803189815591208,
+            "power_pct": 21.54688553959674
+          },
+          "iterations": 1,
+          "max_residual": 8.731149137020111e-11,
+          "point_id": "f16-9km-152mps",
+          "residuals": {
+            "force_x_n": 1.6370904631912708e-11,
+            "force_z_n": 8.731149137020111e-11,
+            "moment_y_nm": -4.23004018014305e-11
+          },
+          "solver_message": "`gtol` termination condition is satisfied.",
+          "solver_status": 1,
+          "state": {
+            "alpha_deg": 7.949593280417001
+          },
+          "success": true
+        },
+        {
+          "controls": {
+            "elevator_deg": -0.5503868940449633,
+            "power_pct": 16.358787312625516
+          },
+          "iterations": 7,
+          "max_residual": 4.067260306328535e-08,
+          "point_id": "f16-7p5km-152mps",
+          "residuals": {
+            "force_x_n": 4.067260306328535e-08,
+            "force_z_n": -9.74978320300579e-10,
+            "moment_y_nm": 1.8874859810521166e-09
+          },
+          "solver_message": "`gtol` termination condition is satisfied.",
+          "solver_status": 1,
+          "state": {
+            "alpha_deg": 6.438691763925584
+          },
+          "success": true
+        }
+      ],
+      "schema_version": "taoryx.vehicle-trim-solve/v1",
+      "status": "verified"
+    },
+    {
+      "adapter": "taoryx.adapters.reference_hl20_mod_k.daveml_pitch_channel",
+      "claim_boundary": "Source-bounded pitch-channel trim worklist at the pinned Mach 1 operating point; no full 6-DOF equilibrium or controller claim.",
+      "family_id": "reference_hl20_mod_k",
+      "findings": [],
+      "points": [
+        {
+          "controls": {},
+          "iterations": 1,
+          "max_residual": 1.1578411840407199e-14,
+          "point_id": "hl20-mach1-pitch-trim",
+          "residuals": {
+            "pitch_cm": 1.1578411840407199e-14
+          },
+          "solver_message": "`gtol` termination condition is satisfied.",
+          "solver_status": 1,
+          "state": {
+            "alpha_deg": 6.457652069267908
+          },
+          "success": true
+        }
+      ],
+      "schema_version": "taoryx.vehicle-trim-solve/v1",
+      "status": "verified"
+    }
+  ],
+  "schema_version": "taoryx.vehicle-trim-solve/v1"
+}

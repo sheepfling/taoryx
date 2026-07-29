@@ -288,11 +288,56 @@ from .vehicle import (
     TableAerodynamicModel,
     TumblingPolicy,
 )
+from .vehicle_controller_mission_preflight import (
+    ControllerPreflightResult,
+    MissionPreflightResult,
+    PreflightFinding,
+    VehicleControllerMissionPreflightReport,
+    validate_all_vehicle_controller_mission_preflight,
+    validate_vehicle_controller_mission_preflight,
+)
+from .vehicle_effectivity_preflight import (
+    EffectivityFinding,
+    VehicleEffectivityPreflightReport,
+    validate_all_vehicle_effectivity_preflight,
+    validate_vehicle_effectivity_preflight,
+)
+from .vehicle_integration_pipeline import (
+    IntegrationPipelineFinding,
+    IntegrationStageReport,
+    VehicleIntegrationPipelineReport,
+    validate_all_vehicle_integration_pipelines,
+    validate_vehicle_integration_pipeline,
+    write_vehicle_integration_packet,
+)
+from .vehicle_integration_readiness import (
+    FidelityProfileReadiness,
+    IntegrationReadinessFinding,
+    VehicleIntegrationReadinessReport,
+    validate_all_vehicle_integration_readiness,
+    validate_vehicle_integration_readiness,
+)
 from .vehicle_onboarding import (
     OnboardingFinding,
     VehicleOnboardingReport,
     validate_all_vehicle_onboarding,
     validate_vehicle_onboarding,
+)
+from .vehicle_trim_adapters import (
+    TrimSolvePoint,
+    VehicleTrimSolveReport,
+    solve_all_vehicle_trim_evidence,
+    solve_vehicle_trim_evidence,
+)
+from .vehicle_trim_orchestration import (
+    TrimOrchestrationReport,
+    TrimRecipe,
+    TrimRecipeFinding,
+    TrimRecipeResidual,
+    TrimRecipeVariable,
+    TrimWorkItem,
+    load_trim_recipe,
+    orchestrate_trim_recipe,
 )
 from .visualization import render_run_artifact_html, render_run_artifact_plots
 from .x15_reachability import (
@@ -380,4 +425,47 @@ __all__ += [
     "TruthPoint",
     "TruthSegment",
     "TranslationAccelerationAdapter",
+]
+__all__ += [
+    "EffectivityFinding",
+    "VehicleEffectivityPreflightReport",
+    "validate_all_vehicle_effectivity_preflight",
+    "validate_vehicle_effectivity_preflight",
+]
+__all__ += [
+    "FidelityProfileReadiness",
+    "IntegrationReadinessFinding",
+    "VehicleIntegrationReadinessReport",
+    "validate_all_vehicle_integration_readiness",
+    "validate_vehicle_integration_readiness",
+    "IntegrationPipelineFinding",
+    "IntegrationStageReport",
+    "VehicleIntegrationPipelineReport",
+    "validate_all_vehicle_integration_pipelines",
+    "validate_vehicle_integration_pipeline",
+    "write_vehicle_integration_packet",
+]
+__all__ += [
+    "TrimOrchestrationReport",
+    "TrimRecipe",
+    "TrimRecipeFinding",
+    "TrimRecipeResidual",
+    "TrimRecipeVariable",
+    "TrimWorkItem",
+    "load_trim_recipe",
+    "orchestrate_trim_recipe",
+]
+__all__ += [
+    "ControllerPreflightResult",
+    "MissionPreflightResult",
+    "PreflightFinding",
+    "VehicleControllerMissionPreflightReport",
+    "validate_all_vehicle_controller_mission_preflight",
+    "validate_vehicle_controller_mission_preflight",
+]
+__all__ += [
+    "TrimSolvePoint",
+    "VehicleTrimSolveReport",
+    "solve_all_vehicle_trim_evidence",
+    "solve_vehicle_trim_evidence",
 ]

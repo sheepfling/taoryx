@@ -1,0 +1,42 @@
+schema: taoryx.model-integration/v1alpha1
+family: reference_nesc_two_stage_rocket
+source:
+  kind: daveml
+  package: nesc-two-stage-rocket-v0.9.txair
+  package_sha256: 204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e
+  aerodynamics_sha256: d1994c03ce9533a82df56a9c44e518ce5a8e7d89562f6eedd42a150a8c1384b6
+  catalog: resources/aerospace/daveml/nesc-model-catalog-v1.0
+  catalog_release: taoryx-daveml-nesc-model-catalog-v1.0
+  source_corpus_archive_sha256: 2e6511dab5846fa3dd9514d03a1e9c7c515210f5236837a32ffc3bea2016b5f9
+  source_components: [aerodynamics, propulsion, mass_properties]
+  availability: local_catalog_input_verified
+plant:
+  fidelity: rigid_body_6dof
+  body_frame: FRD
+  navigation_frame: NED
+  qualification: runtime_replay_qualification_passed
+  source_payload_required_for_execution: true
+library:
+  family_manifest: families/reference_nesc_two_stage_rocket/family.yaml
+  standardized_shape: source_grounded_reference_manifest_to_family_package
+  case_resolution: supported
+  native_runtime_replay: verified_load_contract_and_scenario17_acceptance
+layers:
+  mass_properties: {version: scheduled-propellant-and-staging-v1, evidence: source_checked_schedule}
+  aerodynamics: {version: normalized-daveml-v1, evidence: source_checked_static}
+  propulsion: {version: two-stage-constant-thrust-v1, evidence: source_checked_schedule}
+  staging: {version: instantaneous-dry-mass-transition-v1, evidence: source_checked_acceptance}
+  controllers: {version: not-applicable-open-loop-v1, evidence: no_declared_controls}
+  reductions: {version: not-promoted-derived-layer-v1, evidence: no_reduced_order_equivalence}
+claims:
+  - source-grounded NASA/NESC Scenario 17 variable-mass launch vehicle plant
+  - package replay passed source-equivalence, event/mass, convergence, and checkpoint-envelope evidence
+  - the 200-second perigee discrepancy is retained as a visible warning
+nonclaims:
+  - independent full participating-simulation trajectory equivalence
+  - reduced-order fidelity before a separate reduction qualification
+open_questions:
+  - compare the full scenario history against an independent participating-simulation family when one is available
+  - qualify 3-DOF and pseudo-6DOF reductions from this parent plant against staging checkpoints
+  - keep synthetic deployment children in separate lineage and qualification records
+next_gate: alpha3_full_trajectory_and_reduction_equivalence

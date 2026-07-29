@@ -1,0 +1,838 @@
+{
+  "family": "all",
+  "reports": [
+    {
+      "blockers": [],
+      "caveats": [
+        {
+          "code": "effectivity-development-screen",
+          "hint": "Do not promote it to controller qualification without actuator and nonlinear response evidence.",
+          "message": "numeric effectivity evidence is a local development/allocation screen",
+          "path": "verification/f16_physical_wrench_lqr_evidence.json",
+          "severity": "warning"
+        },
+        {
+          "code": "bounded-replay-development",
+          "hint": "Retain command/actual, rate, saturation, and nonlinear response evidence before promotion.",
+          "message": "bounded allocation replay is a generic numerical screen, not nonlinear actuator qualification",
+          "path": "reference_f16_s119",
+          "severity": "warning"
+        },
+        {
+          "code": "actuator-evidence-not-resolved",
+          "hint": "Declare the actuator overlay path or explicitly state that only a contract-level screen exists.",
+          "message": "actuator layer is declared without a resolvable evidence artifact",
+          "path": "families/reference_f16_s119/qualification/integration-record.yaml",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[1].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[2].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[3].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[4].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[5].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[6].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "trim-adapter-solve-verified",
+          "hint": "Retain the generated solve evidence and do not extend the claim beyond the declared recipe boundary.",
+          "message": "family adapter solved 7 operating point(s) against the pinned evaluator",
+          "path": "reference_f16_s119:trim",
+          "severity": "info"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[1].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[2].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[3].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[4].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[5].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[6].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-solve-verified",
+          "hint": "Persist the solve report in the evidence packet before promotion.",
+          "message": "family adapter solved 7 catalog point(s)",
+          "path": "reference_f16_s119:operating_points",
+          "severity": "info"
+        },
+        {
+          "code": "controller-effectors-unresolved",
+          "hint": "Keep the profile at screen/development evidence until the allocator and actuator path are explicit.",
+          "message": "controller profile does not declare a separate physical-effector realization",
+          "path": "families/reference_f16_s119/controllers/local-lqr-trim-hold-v1.yaml",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-realization-pending",
+          "hint": "Do not promote the mission until its truth objectives and controls pass.",
+          "message": "mission realization is declared 'binding_defined_mission_pending'",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-point-mass",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-realization-pending",
+          "hint": "Do not promote the mission until its truth objectives and controls pass.",
+          "message": "mission realization is declared 'binding_defined_mission_pending'",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-pseudo-6dof",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-direct-wrench-realization",
+          "hint": "Keep this mission as an integration baseline until physical effector realization is selected.",
+          "message": "mission realization declares direct-wrench or moment-injection behavior",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-direct-wrench",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-realization-pending",
+          "hint": "Do not promote the mission until its truth objectives and controls pass.",
+          "message": "mission realization is declared 'development_route_evidence_pending_qualification'",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-direct-wrench",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-realization-pending",
+          "hint": "Do not promote the mission until its truth objectives and controls pass.",
+          "message": "mission realization is declared 'development_route_evidence_pending_qualification'",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-surfaces",
+          "severity": "warning"
+        }
+      ],
+      "claim_boundary": "provider-neutral integration evidence; not flight, operational, or family qualification",
+      "current_tier": "T2_source_plant_ready",
+      "display_name": "F-16 S-119 source-grounded reference family",
+      "family_id": "reference_f16_s119",
+      "next_gate": "multi_point_scheduled_control_and_r1_robustness_review",
+      "physical_family": "powered_fixed_wing",
+      "promotion_eligible": false,
+      "schema_version": "taoryx.vehicle-integration-pipeline/v1",
+      "stages": [
+        {
+          "claim": "family manifest, source import record, and integration record are discoverable and readiness-valid",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_f16_s119/family.yaml",
+            "families/reference_f16_s119/plant/daveml-import.json",
+            "families/reference_f16_s119/qualification/integration-record.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "readiness_status": "ready_for_runtime_probes"
+          },
+          "stage_id": "intake",
+          "status": "passed"
+        },
+        {
+          "claim": "frames, geometry, envelopes, aerodynamic conventions, and semantic IDs agree across source records",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_f16_s119/family.yaml",
+            "families/reference_f16_s119/plant/daveml-import.json",
+            "verification/daveml_operational_contracts.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "binding_count": 5,
+            "contract_checked": true
+          },
+          "stage_id": "conventions",
+          "status": "passed"
+        },
+        {
+          "claim": "the pinned source plant loads, round-trips, and reproduces its declared runtime load contract",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_f16_s119/plant/daveml-import.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "force_moment_residual": 0.0,
+            "replay_status": "runtime_replay_qualification_passed",
+            "roundtrip_status": "verified",
+            "source_document_count": 3
+          },
+          "stage_id": "plant",
+          "status": "passed"
+        },
+        {
+          "claim": "numeric local effectivity or an explicitly bounded downstream allocation overlay is declared and diagnosed",
+          "error_count": 0,
+          "evidence": [
+            "verification/f16_physical_wrench_lqr_evidence.json"
+          ],
+          "findings": [
+            {
+              "code": "effectivity-development-screen",
+              "hint": "Do not promote it to controller qualification without actuator and nonlinear response evidence.",
+              "message": "numeric effectivity evidence is a local development/allocation screen",
+              "path": "verification/f16_physical_wrench_lqr_evidence.json",
+              "severity": "warning"
+            },
+            {
+              "code": "bounded-replay-development",
+              "hint": "Retain command/actual, rate, saturation, and nonlinear response evidence before promotion.",
+              "message": "bounded allocation replay is a generic numerical screen, not nonlinear actuator qualification",
+              "path": "reference_f16_s119",
+              "severity": "warning"
+            },
+            {
+              "code": "actuator-evidence-not-resolved",
+              "hint": "Declare the actuator overlay path or explicitly state that only a contract-level screen exists.",
+              "message": "actuator layer is declared without a resolvable evidence artifact",
+              "path": "families/reference_f16_s119/qualification/integration-record.yaml",
+              "severity": "warning"
+            }
+          ],
+          "metrics": {
+            "bounded_replay": {
+              "effectivity_rank": 4,
+              "residual_norm": 2.998416303520215e-13,
+              "saturated_effectors": [],
+              "status": "feasible"
+            },
+            "computed_rank": 4,
+            "condition_number": 20.18332572097007,
+            "matrix_columns": 4,
+            "matrix_rows": 4,
+            "matrix_source": "sample",
+            "nonzero_column_count": 4,
+            "sign_probe": {
+              "aileron_deg": {
+                "negative_axes": [
+                  "total_moment_x_nm",
+                  "total_moment_z_nm"
+                ],
+                "positive_axes": [],
+                "zero_axes": [
+                  "total_force_x_n",
+                  "total_moment_y_nm"
+                ]
+              },
+              "elevator_deg": {
+                "negative_axes": [
+                  "total_moment_y_nm"
+                ],
+                "positive_axes": [
+                  "total_force_x_n"
+                ],
+                "zero_axes": [
+                  "total_moment_x_nm",
+                  "total_moment_z_nm"
+                ]
+              },
+              "rudder_deg": {
+                "negative_axes": [
+                  "total_moment_z_nm"
+                ],
+                "positive_axes": [
+                  "total_moment_x_nm"
+                ],
+                "zero_axes": [
+                  "total_force_x_n",
+                  "total_moment_y_nm"
+                ]
+              },
+              "throttle_fraction": {
+                "negative_axes": [],
+                "positive_axes": [
+                  "total_force_x_n"
+                ],
+                "zero_axes": [
+                  "total_moment_x_nm",
+                  "total_moment_y_nm",
+                  "total_moment_z_nm"
+                ]
+              }
+            },
+            "singular_values": [
+              114030.1229722287,
+              13192.253428005366,
+              9539.672342686805,
+              5649.719206273012
+            ]
+          },
+          "stage_id": "effectivity",
+          "status": "development"
+        },
+        {
+          "claim": "declarative trim unknowns, residuals, bounds, and solver policy are validated and bound to the declared family evaluator",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_f16_s119/qualification/trim-recipe.yaml",
+            "families/reference_f16_s119/qualification/operating-points.yaml"
+          ],
+          "findings": [
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[1].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[2].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[3].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[4].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[5].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[6].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "trim-adapter-solve-verified",
+              "hint": "Retain the generated solve evidence and do not extend the claim beyond the declared recipe boundary.",
+              "message": "family adapter solved 7 operating point(s) against the pinned evaluator",
+              "path": "reference_f16_s119:trim",
+              "severity": "info"
+            }
+          ],
+          "metrics": {
+            "adapter_solve_status": "verified",
+            "recipe_status": "ready_for_adapter",
+            "work_item_count": 7
+          },
+          "stage_id": "trim",
+          "status": "passed"
+        },
+        {
+          "claim": "operating-point catalog is structurally validated and ordered into adapter-ready trim work items",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_f16_s119/qualification/trim-recipe.yaml",
+            "families/reference_f16_s119/qualification/operating-points.yaml"
+          ],
+          "findings": [
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[1].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[2].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[3].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[4].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[5].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-residuals-pending",
+              "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+              "message": "operating point has no independently recorded residual values",
+              "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[6].residuals",
+              "severity": "warning"
+            },
+            {
+              "code": "operating-point-solve-verified",
+              "hint": "Persist the solve report in the evidence packet before promotion.",
+              "message": "family adapter solved 7 catalog point(s)",
+              "path": "reference_f16_s119:operating_points",
+              "severity": "info"
+            }
+          ],
+          "metrics": {
+            "adapter_solve_status": "verified",
+            "recipe_id": "f16-s119-force-moment-equilibrium-v1",
+            "work_item_count": 7
+          },
+          "stage_id": "operating_points",
+          "status": "passed"
+        },
+        {
+          "claim": "each declared fidelity is explicit, and automatic lowering is permitted only by qualified evidence",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_f16_s119/family.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "automatic_lowering_eligible_profiles": [],
+            "profile_count": 4
+          },
+          "stage_id": "fidelity",
+          "status": "development"
+        },
+        {
+          "claim": "declared controller profiles, plant/effectiveness references, and physical control-path claims pass structural preflight",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_f16_s119/controllers"
+          ],
+          "findings": [
+            {
+              "code": "controller-effectors-unresolved",
+              "hint": "Keep the profile at screen/development evidence until the allocator and actuator path are explicit.",
+              "message": "controller profile does not declare a separate physical-effector realization",
+              "path": "families/reference_f16_s119/controllers/local-lqr-trim-hold-v1.yaml",
+              "severity": "warning"
+            }
+          ],
+          "metrics": {
+            "canonical_control_count": 5,
+            "profiles_checked": 2
+          },
+          "stage_id": "controller",
+          "status": "development"
+        },
+        {
+          "claim": "mission binding, realization IDs, route geometry, phase order, and capability-based time estimates pass preflight",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_f16_s119/qualification/racetrack-binding.yaml",
+            "verification/racetrack_templates.yaml"
+          ],
+          "findings": [
+            {
+              "code": "mission-realization-pending",
+              "hint": "Do not promote the mission until its truth objectives and controls pass.",
+              "message": "mission realization is declared 'binding_defined_mission_pending'",
+              "path": "verification/racetrack_templates.yaml:bindings.f16-s119-point-mass",
+              "severity": "warning"
+            },
+            {
+              "code": "mission-realization-pending",
+              "hint": "Do not promote the mission until its truth objectives and controls pass.",
+              "message": "mission realization is declared 'binding_defined_mission_pending'",
+              "path": "verification/racetrack_templates.yaml:bindings.f16-s119-pseudo-6dof",
+              "severity": "warning"
+            },
+            {
+              "code": "mission-direct-wrench-realization",
+              "hint": "Keep this mission as an integration baseline until physical effector realization is selected.",
+              "message": "mission realization declares direct-wrench or moment-injection behavior",
+              "path": "verification/racetrack_templates.yaml:bindings.f16-s119-direct-wrench",
+              "severity": "warning"
+            },
+            {
+              "code": "mission-realization-pending",
+              "hint": "Do not promote the mission until its truth objectives and controls pass.",
+              "message": "mission realization is declared 'development_route_evidence_pending_qualification'",
+              "path": "verification/racetrack_templates.yaml:bindings.f16-s119-direct-wrench",
+              "severity": "warning"
+            },
+            {
+              "code": "mission-realization-pending",
+              "hint": "Do not promote the mission until its truth objectives and controls pass.",
+              "message": "mission realization is declared 'development_route_evidence_pending_qualification'",
+              "path": "verification/racetrack_templates.yaml:bindings.f16-s119-surfaces",
+              "severity": "warning"
+            }
+          ],
+          "metrics": {
+            "estimated_duration_s_by_realization": {
+              "f16-s119-direct-wrench": 1408.1865661383833,
+              "f16-s119-point-mass": 1408.1865661383833,
+              "f16-s119-pseudo-6dof": 1408.1865661383833,
+              "f16-s119-surfaces": 1408.1865661383833
+            },
+            "estimated_duration_s_max": 1408.1865661383833,
+            "estimated_duration_s_min": 1408.1865661383833,
+            "realization_count": 4
+          },
+          "stage_id": "mission",
+          "status": "development"
+        }
+      ],
+      "status": "development_ready_with_gates"
+    },
+    {
+      "blockers": [
+        {
+          "code": "profile-not-declared",
+          "hint": "Add a named profile or explicitly remove this tier from the family support contract.",
+          "message": "expected profile for 'rigid_body_6dof' is not declared",
+          "path": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/families/reference_hl20_mod_k/family.yaml:fidelity_profiles",
+          "severity": "error"
+        },
+        {
+          "code": "profile-not-declared",
+          "hint": "Add a named profile or explicitly remove this tier from the family support contract.",
+          "message": "expected profile for 'rigid_body_6dof' is not declared",
+          "path": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/families/reference_hl20_mod_k/family.yaml:fidelity_profiles",
+          "severity": "error"
+        },
+        {
+          "code": "mission-binding-missing",
+          "hint": "Declare a family mission binding before running or estimating a flagship mission.",
+          "message": "no reusable mission binding is declared for this family",
+          "path": "families/reference_hl20_mod_k/qualification/racetrack-binding.yaml",
+          "severity": "error"
+        }
+      ],
+      "caveats": [
+        {
+          "code": "allocation-evidence-not-numeric",
+          "hint": "Keep the overlay contract explicit and add a numeric sign, saturation, and residual screen before promotion.",
+          "message": "allocation evidence does not contain a numeric local effectivity matrix",
+          "path": "verification/daveml_alpha3_overlay_evidence.json",
+          "severity": "warning"
+        },
+        {
+          "code": "synthetic-effectivity-overlay",
+          "hint": "Keep source and overlay claims separate and require sign, saturation, and nonlinear regression evidence.",
+          "message": "effectivity is a downstream or synthetic overlay rather than source-declared authority",
+          "path": "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml",
+          "severity": "warning"
+        },
+        {
+          "code": "actuator-evidence-not-resolved",
+          "hint": "Declare the actuator overlay path or explicitly state that only a contract-level screen exists.",
+          "message": "actuator layer is declared without a resolvable evidence artifact",
+          "path": "families/reference_hl20_mod_k/qualification/integration-record.yaml",
+          "severity": "warning"
+        },
+        {
+          "code": "trim-adapter-solve-verified",
+          "hint": "Retain the generated solve evidence and do not extend the claim beyond the declared recipe boundary.",
+          "message": "family adapter solved 1 operating point(s) against the pinned evaluator",
+          "path": "reference_hl20_mod_k:trim",
+          "severity": "info"
+        },
+        {
+          "code": "operating-point-solve-verified",
+          "hint": "Persist the solve report in the evidence packet before promotion.",
+          "message": "family adapter solved 1 catalog point(s)",
+          "path": "reference_hl20_mod_k:operating_points",
+          "severity": "info"
+        },
+        {
+          "code": "controller-directory-absent",
+          "hint": "Use not_applicable only when the family contract explicitly declares no controller.",
+          "message": "no controller profiles are declared",
+          "path": "families/reference_hl20_mod_k/controllers",
+          "severity": "info"
+        }
+      ],
+      "claim_boundary": "provider-neutral integration evidence; not flight, operational, or family qualification",
+      "current_tier": "T2_source_plant_ready",
+      "display_name": "HL-20 Mod K source-grounded reference family",
+      "family_id": "reference_hl20_mod_k",
+      "next_gate": "alpha3_allocator_and_reduction_equivalence",
+      "physical_family": "unpowered_lifting_body",
+      "promotion_eligible": false,
+      "schema_version": "taoryx.vehicle-integration-pipeline/v1",
+      "stages": [
+        {
+          "claim": "family manifest, source import record, and integration record are discoverable and readiness-valid",
+          "error_count": 1,
+          "evidence": [
+            "families/reference_hl20_mod_k/family.yaml",
+            "families/reference_hl20_mod_k/plant/daveml-import.json",
+            "families/reference_hl20_mod_k/qualification/integration-record.yaml"
+          ],
+          "findings": [
+            {
+              "code": "profile-not-declared",
+              "hint": "Add a named profile or explicitly remove this tier from the family support contract.",
+              "message": "expected profile for 'rigid_body_6dof' is not declared",
+              "path": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/families/reference_hl20_mod_k/family.yaml:fidelity_profiles",
+              "severity": "error"
+            }
+          ],
+          "metrics": {
+            "readiness_status": "blocked"
+          },
+          "stage_id": "intake",
+          "status": "blocked"
+        },
+        {
+          "claim": "frames, geometry, envelopes, aerodynamic conventions, and semantic IDs agree across source records",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_hl20_mod_k/family.yaml",
+            "families/reference_hl20_mod_k/plant/daveml-import.json",
+            "verification/daveml_operational_contracts.yaml"
+          ],
+          "findings": [],
+          "metrics": {
+            "binding_count": 4,
+            "contract_checked": true
+          },
+          "stage_id": "conventions",
+          "status": "passed"
+        },
+        {
+          "claim": "the pinned source plant loads, round-trips, and reproduces its declared runtime load contract",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_hl20_mod_k/plant/daveml-import.json"
+          ],
+          "findings": [],
+          "metrics": {
+            "force_moment_residual": 0.0,
+            "replay_status": "runtime_replay_qualification_passed",
+            "roundtrip_status": "verified",
+            "source_document_count": 1
+          },
+          "stage_id": "plant",
+          "status": "passed"
+        },
+        {
+          "claim": "numeric local effectivity or an explicitly bounded downstream allocation overlay is declared and diagnosed",
+          "error_count": 0,
+          "evidence": [
+            "verification/daveml_alpha3_overlay_evidence.json",
+            "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml"
+          ],
+          "findings": [
+            {
+              "code": "allocation-evidence-not-numeric",
+              "hint": "Keep the overlay contract explicit and add a numeric sign, saturation, and residual screen before promotion.",
+              "message": "allocation evidence does not contain a numeric local effectivity matrix",
+              "path": "verification/daveml_alpha3_overlay_evidence.json",
+              "severity": "warning"
+            },
+            {
+              "code": "synthetic-effectivity-overlay",
+              "hint": "Keep source and overlay claims separate and require sign, saturation, and nonlinear regression evidence.",
+              "message": "effectivity is a downstream or synthetic overlay rather than source-declared authority",
+              "path": "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml",
+              "severity": "warning"
+            },
+            {
+              "code": "actuator-evidence-not-resolved",
+              "hint": "Declare the actuator overlay path or explicitly state that only a contract-level screen exists.",
+              "message": "actuator layer is declared without a resolvable evidence artifact",
+              "path": "families/reference_hl20_mod_k/qualification/integration-record.yaml",
+              "severity": "warning"
+            }
+          ],
+          "metrics": {
+            "logical_command_count": 5,
+            "physical_output_count": 7
+          },
+          "stage_id": "effectivity",
+          "status": "development"
+        },
+        {
+          "claim": "declarative trim unknowns, residuals, bounds, and solver policy are validated and bound to the declared family evaluator",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_hl20_mod_k/qualification/trim-recipe.yaml",
+            "families/reference_hl20_mod_k/qualification/operating-points.yaml"
+          ],
+          "findings": [
+            {
+              "code": "trim-adapter-solve-verified",
+              "hint": "Retain the generated solve evidence and do not extend the claim beyond the declared recipe boundary.",
+              "message": "family adapter solved 1 operating point(s) against the pinned evaluator",
+              "path": "reference_hl20_mod_k:trim",
+              "severity": "info"
+            }
+          ],
+          "metrics": {
+            "adapter_solve_status": "verified",
+            "recipe_status": "ready_for_adapter",
+            "work_item_count": 1
+          },
+          "stage_id": "trim",
+          "status": "passed"
+        },
+        {
+          "claim": "operating-point catalog is structurally validated and ordered into adapter-ready trim work items",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_hl20_mod_k/qualification/trim-recipe.yaml",
+            "families/reference_hl20_mod_k/qualification/operating-points.yaml"
+          ],
+          "findings": [
+            {
+              "code": "operating-point-solve-verified",
+              "hint": "Persist the solve report in the evidence packet before promotion.",
+              "message": "family adapter solved 1 catalog point(s)",
+              "path": "reference_hl20_mod_k:operating_points",
+              "severity": "info"
+            }
+          ],
+          "metrics": {
+            "adapter_solve_status": "verified",
+            "recipe_id": "hl20-mod-k-pitch-channel-trim-v1",
+            "work_item_count": 1
+          },
+          "stage_id": "operating_points",
+          "status": "passed"
+        },
+        {
+          "claim": "each declared fidelity is explicit, and automatic lowering is permitted only by qualified evidence",
+          "error_count": 1,
+          "evidence": [
+            "families/reference_hl20_mod_k/family.yaml"
+          ],
+          "findings": [
+            {
+              "code": "profile-not-declared",
+              "hint": "Add a named profile or explicitly remove this tier from the family support contract.",
+              "message": "expected profile for 'rigid_body_6dof' is not declared",
+              "path": "/Users/rick/LocalStorage/GIT_LOCAL/active/taoryx/families/reference_hl20_mod_k/family.yaml:fidelity_profiles",
+              "severity": "error"
+            }
+          ],
+          "metrics": {
+            "automatic_lowering_eligible_profiles": [],
+            "profile_count": 4
+          },
+          "stage_id": "fidelity",
+          "status": "blocked"
+        },
+        {
+          "claim": "declared controller profiles, plant/effectiveness references, and physical control-path claims pass structural preflight",
+          "error_count": 0,
+          "evidence": [
+            "families/reference_hl20_mod_k/controllers"
+          ],
+          "findings": [
+            {
+              "code": "controller-directory-absent",
+              "hint": "Use not_applicable only when the family contract explicitly declares no controller.",
+              "message": "no controller profiles are declared",
+              "path": "families/reference_hl20_mod_k/controllers",
+              "severity": "info"
+            }
+          ],
+          "metrics": {
+            "profiles_checked": 0
+          },
+          "stage_id": "controller",
+          "status": "not_applicable"
+        },
+        {
+          "claim": "mission binding, realization IDs, route geometry, phase order, and capability-based time estimates pass preflight",
+          "error_count": 1,
+          "evidence": [],
+          "findings": [
+            {
+              "code": "mission-binding-missing",
+              "hint": "Declare a family mission binding before running or estimating a flagship mission.",
+              "message": "no reusable mission binding is declared for this family",
+              "path": "families/reference_hl20_mod_k/qualification/racetrack-binding.yaml",
+              "severity": "error"
+            }
+          ],
+          "metrics": {
+            "estimated_duration_s": null
+          },
+          "stage_id": "mission",
+          "status": "blocked"
+        }
+      ],
+      "status": "blocked"
+    }
+  ],
+  "schema_version": "taoryx.vehicle-integration-pipeline/v1"
+}

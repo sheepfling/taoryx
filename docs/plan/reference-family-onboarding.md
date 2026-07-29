@@ -33,7 +33,7 @@ vehicle.
 
 | Family | Physical family | Supported now | Still pending |
 |---|---|---|---|
-| F-16 S-119 | powered fixed-wing | source-grounded rigid-body 6DOF replay | physical surface allocation, scheduled controls, 3DOF/pseudo-6DOF reductions, route showcase |
+| F-16 S-119 | powered fixed-wing | source-grounded replay; 3DOF and pseudo-6DOF nominal racetrack; local physical-surface T5 development pass | multi-point scheduled nonlinear control, source-backed actuator data, R1/release robustness, batch/step parity, family promotion |
 | HL-20 Mod K | unpowered lifting body | source-grounded rigid-body 6DOF replay; logical surface-allocation contract | validated allocator/controller, glide guidance and arrival showcase, 3DOF/pseudo-6DOF reductions, landing/contact |
 
 The replay claim is deliberately narrower than a vehicle qualification claim.
@@ -143,18 +143,17 @@ Remaining to behave like the B747/X8 integration path:
 4. Extend the local reduction screen into matched parent/reduction mission
    windows, then promote the 3DOF and pseudo-6DOF profiles only if their
    declared comparison gates pass.
-5. Add the subsonic F-16 racetrack showcase only after the trim hold, local
-   authority, allocator, and reduction parity checks pass.
+5. The subsonic F-16 racetrack packet now exists at all four declared
+   comparison tiers. Promote it only after the remaining schedule, robustness,
+   replay, and claim-review gates pass.
 
 The F-16 now has four explicit, preflightable bindings in the shared
 `powered_fixed_wing_racetrack_v1` catalog. They use a long, high-speed course
 with a 12 km straight, 3.5 km semicircle turns, a 300 m altitude step, and
-20-degree signed turn-bank targets. These bindings deliberately have no
-mission packet IDs yet: the source runtime is a fixed-altitude local fixture,
-and the route adapter still needs to connect navigation state, guidance
-references, physical allocation, and truth telemetry. The ladder therefore
-reports all four F-16 tiers as `not_available` rather than presenting the
-geometry contract as a qualification result.
+20-degree signed turn-bank targets. The route adapter, truth evaluator, and
+four-tier packet are now present. The source runtime remains a fixed-altitude
+local fixture, so the route result is a local development witness rather than
+an all-envelope mission qualification.
 
 The next route slice is:
 
@@ -174,12 +173,12 @@ The next route slice is:
 | Tier | Current disposition | Evidence | Remaining promotion work |
 |---|---|---|---|
 | T0 structural | passed | source locks, FRD/NED conventions, canonical controls and observations | keep source hashes immutable |
-| T1 trimmed | passed locally | `daveml_f16_equilibrium_trim_evidence.json` | add additional airspeed/altitude operating points |
-| T2 linearized | passed locally | `f16_runtime_linearization_evidence.json` | schedule and validate adjacent operating points |
-| T3 linearly controlled | development screen passed | plant-derived LQR trim hold and local response matrices | add guidance-reference tuning and gain scheduling |
-| T4 physically allocated | development screen passed | source-local effectiveness, bounded allocator, actuator overlay | replace engineering actuator assumptions where possible; publish authority envelopes |
-| T5 nonlinear response | local perturbation/maneuver screen passed | physical-wrench perturbations and bank/pitch reversal witnesses | integrate translation, attitude, and route guidance over a mission window |
-| T6 envelope/multi-fidelity | pending | reduction screen is not equivalence evidence | matched 3DOF/pseudo/rigid mission windows, schedule transitions, and route qualification |
+| T1 trimmed | passed locally | `daveml_f16_equilibrium_trim_evidence.json`, seven-point catalog | arbitrary configuration/fuel trim remains pending |
+| T2 linearized | passed locally | `f16_runtime_linearization_evidence.json`, operating-point evidence | continuous schedule and transition derivatives remain pending |
+| T3 linearly controlled | development screen passed | plant-derived LQR trim hold and local response matrices | automated gain selection and schedule transition gates |
+| T4 physically allocated | development screen passed | source-local effectiveness, bounded allocator, actuator overlay | source-backed actuator data and authority-envelope promotion |
+| T5 nonlinear response | local development pass | physical-surface racetrack, perturbations, and bank/pitch witnesses | R1/release robustness, batch/step parity, family promotion |
+| T6 envelope/multi-fidelity | pending | nominal 3DOF/pseudo/surface packet; reductions remain local | matched multi-point mission windows, schedule transitions, and release qualification |
 
 The exact missing work is therefore not another trim solve. It is the bridge
 from one fixed operating point to a scheduled powered-fixed-wing controller:

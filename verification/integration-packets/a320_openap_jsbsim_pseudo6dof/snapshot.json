@@ -1,0 +1,457 @@
+{
+  "applicability": {
+    "linearization": "required",
+    "objectives": "required",
+    "scenarios": "required",
+    "trim": "required",
+    "tuning": "required"
+  },
+  "catalog_path": "verification/daveml_operating_point_catalog.yaml",
+  "contract_path": "verification/daveml_operational_contracts.yaml",
+  "dependency_hashes": {
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/assumptions.json": "a5142582d78f13e7417985ea83d7a00fd5215795c0fcdce497fb0a3c7f89ed5a",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/authority-map.json": "fb3d0ca3c0ced52d111da90c91da18720470faffc234904f4526138980e0ece9",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-performance-openap.dml": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-rotational-jsbsim.dml": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/assumptions.json": "73063720f4d3e2d09708433ec3b65f73febcd0ad573b0e1128d940701c54eed8",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/authority-map.json": "8b5583482ee959a17c331552583542389901c7b0addbdc07ae0af88d350f930c",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/control-mapping.dml": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/mass-properties-estimated.dml": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/propulsion-openap.dml": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/provenance.json": "6cf05e55c811b9fb32dabec921c95b619dd5a6ac75cb7c485823cff244fa603e",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml": "783b9bc6a8d4c84ce16ade13a7c935f9c0f1ca628162fa605e6ea96295a1de4f",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml": "3543b7315e066b4885a5d2a910ee03d781649bcc5822370b5261989ea1370cae",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/racetrack-binding.yaml": "d98dedf41a7140f23021165dca24d1c26262bfc2bb301ce15fc271cd3976627e",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json": "865671b7c6383e2369cf96ea05f71d103275afd13be27120122a6d612563ba04",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json": "55b7a3e608fdc049c09023787b5e7606f9b51fe22b995d3d13feb4b06bee13e9",
+    "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json": "7c6dee9f8948d4613d178b5b68a0e836732ad4a6d7a572a348c17e007fd678ac",
+    "integration_record": "3543b7315e066b4885a5d2a910ee03d781649bcc5822370b5261989ea1370cae",
+    "manifest": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
+    "mission.a320-openap-pseudo6dof-racetrack.board.png": "cfaa9582ebe662a38a12b44da09d12b3656bc3b0e5908043d5650daa8806fc91",
+    "mission.a320-openap-pseudo6dof-racetrack.evidence.json": "7a6e7f27c4e6f56890c0f53c30630da76e609878a0902e8f5aa88073c91361d6",
+    "mission.a320-openap-pseudo6dof-racetrack.telemetry.csv": "27afeced44789debf2241b382e3d8f597af99de75e448ab3b27e00ab66124e14",
+    "operating_point_catalog": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+    "operational_contract": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+    "record.source.corpus_archive": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+    "source_documents.a320-jsbsim.model.package_member": "3b82824f3fe5a1be0e467a77feba57e0a9776e35c04903d1e534e29cc54c5585",
+    "source_documents.a320-jsbsim.model.source_path": "3b82824f3fe5a1be0e467a77feba57e0a9776e35c04903d1e534e29cc54c5585",
+    "source_documents.a320-openap.runtime.package_member": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+    "source_documents.a320-openap.runtime.source_path": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+    "source_documents.a320-pseudo6dof.aerodynamics-performance-openap.package_member": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+    "source_documents.a320-pseudo6dof.aerodynamics-performance-openap.source_path": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+    "source_documents.a320-pseudo6dof.aerodynamics-rotational-jsbsim.package_member": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+    "source_documents.a320-pseudo6dof.aerodynamics-rotational-jsbsim.source_path": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+    "source_documents.a320-pseudo6dof.control-mapping.package_member": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+    "source_documents.a320-pseudo6dof.control-mapping.source_path": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+    "source_documents.a320-pseudo6dof.mass-properties-estimated.package_member": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+    "source_documents.a320-pseudo6dof.mass-properties-estimated.source_path": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+    "source_documents.a320-pseudo6dof.propulsion-openap.package_member": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+    "source_documents.a320-pseudo6dof.propulsion-openap.source_path": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb"
+  },
+  "evidence": [
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "manifest",
+      "observed_sha256": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "integration_record",
+      "observed_sha256": "3543b7315e066b4885a5d2a910ee03d781649bcc5822370b5261989ea1370cae",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "operational_contract",
+      "observed_sha256": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+      "path": "verification/daveml_operational_contracts.yaml",
+      "reference": "verification/daveml_operational_contracts.yaml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "operating_point_catalog",
+      "observed_sha256": "d6795b02439b5a0b36d9ea3bbae4adcc3cee654774da65492a23a2aaf8fcd097",
+      "path": "verification/daveml_operating_point_catalog.yaml",
+      "reference": "verification/daveml_operating_point_catalog.yaml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+      "kind": "external_path",
+      "label": "source_documents.a320-openap.runtime.source_path",
+      "observed_sha256": null,
+      "path": "qualified-models/a320-openap/runtime/openap-a320.json",
+      "reference": "qualified-models/a320-openap/runtime/openap-a320.json"
+    },
+    {
+      "available": false,
+      "declared_sha256": "987464f4a7ba818ca9b727201b550cdec57df8673c30329c82237f602d13da63",
+      "kind": "external_path",
+      "label": "source_documents.a320-openap.runtime.package_member",
+      "observed_sha256": null,
+      "path": "qualified-models/a320-openap/runtime/openap-a320.json",
+      "reference": "qualified-models/a320-openap/runtime/openap-a320.json"
+    },
+    {
+      "available": false,
+      "declared_sha256": "3b82824f3fe5a1be0e467a77feba57e0a9776e35c04903d1e534e29cc54c5585",
+      "kind": "external_path",
+      "label": "source_documents.a320-jsbsim.model.source_path",
+      "observed_sha256": null,
+      "path": "source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/model.json",
+      "reference": "source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/model.json"
+    },
+    {
+      "available": false,
+      "declared_sha256": "3b82824f3fe5a1be0e467a77feba57e0a9776e35c04903d1e534e29cc54c5585",
+      "kind": "external_path",
+      "label": "source_documents.a320-jsbsim.model.package_member",
+      "observed_sha256": null,
+      "path": "source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/model.json",
+      "reference": "source-corpora/jsbsim-1.3.1/normalized-models/A320/A320/model.json"
+    },
+    {
+      "available": false,
+      "declared_sha256": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.aerodynamics-performance-openap.source_path",
+      "observed_sha256": null,
+      "path": "daveml/aerodynamics-performance-openap.dml",
+      "reference": "daveml/aerodynamics-performance-openap.dml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.aerodynamics-performance-openap.package_member",
+      "observed_sha256": null,
+      "path": "daveml/aerodynamics-performance-openap.dml",
+      "reference": "daveml/aerodynamics-performance-openap.dml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.aerodynamics-rotational-jsbsim.source_path",
+      "observed_sha256": null,
+      "path": "daveml/aerodynamics-rotational-jsbsim.dml",
+      "reference": "daveml/aerodynamics-rotational-jsbsim.dml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.aerodynamics-rotational-jsbsim.package_member",
+      "observed_sha256": null,
+      "path": "daveml/aerodynamics-rotational-jsbsim.dml",
+      "reference": "daveml/aerodynamics-rotational-jsbsim.dml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.propulsion-openap.source_path",
+      "observed_sha256": null,
+      "path": "daveml/propulsion-openap.dml",
+      "reference": "daveml/propulsion-openap.dml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.propulsion-openap.package_member",
+      "observed_sha256": null,
+      "path": "daveml/propulsion-openap.dml",
+      "reference": "daveml/propulsion-openap.dml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.mass-properties-estimated.source_path",
+      "observed_sha256": null,
+      "path": "daveml/mass-properties-estimated.dml",
+      "reference": "daveml/mass-properties-estimated.dml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.mass-properties-estimated.package_member",
+      "observed_sha256": null,
+      "path": "daveml/mass-properties-estimated.dml",
+      "reference": "daveml/mass-properties-estimated.dml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.control-mapping.source_path",
+      "observed_sha256": null,
+      "path": "daveml/control-mapping.dml",
+      "reference": "daveml/control-mapping.dml"
+    },
+    {
+      "available": false,
+      "declared_sha256": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+      "kind": "external_path",
+      "label": "source_documents.a320-pseudo6dof.control-mapping.package_member",
+      "observed_sha256": null,
+      "path": "daveml/control-mapping.dml",
+      "reference": "daveml/control-mapping.dml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "runtime_artifact",
+      "observed_sha256": "9d0a79979b664d5ad19bb7f433a7f538f91be21cbcd6e26eae7a96cd36b7899e",
+      "path": "src/taoryx/trajectory/a320_pseudo6dof.py",
+      "reference": "src/taoryx/trajectory/a320_pseudo6dof.py"
+    },
+    {
+      "available": false,
+      "declared_sha256": null,
+      "kind": "external_path",
+      "label": "validation_artifact",
+      "observed_sha256": null,
+      "path": "validation/roundtrip-report.json",
+      "reference": "validation/roundtrip-report.json"
+    },
+    {
+      "available": false,
+      "declared_sha256": null,
+      "kind": "external_path",
+      "label": "runtime_qualification_artifact",
+      "observed_sha256": null,
+      "path": "validation/runtime-qualification.json",
+      "reference": "validation/runtime-qualification.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "record.source.corpus_archive",
+      "observed_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+      "path": "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip",
+      "reference": "resources/aerospace/daveml/taoryx-corpus-v1.1/corpus.zip"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "operating_point.evidence",
+      "observed_sha256": "067231a147c0c470f93b4d8d4bc077cbbe23568709531b50a29bcaab9465e166",
+      "path": "verification/daveml_a320_pseudo6dof_integration.json",
+      "reference": "verification/daveml_a320_pseudo6dof_integration.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/assumptions.json",
+      "observed_sha256": "a5142582d78f13e7417985ea83d7a00fd5215795c0fcdce497fb0a3c7f89ed5a",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/assumptions.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/assumptions.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/authority-map.json",
+      "observed_sha256": "fb3d0ca3c0ced52d111da90c91da18720470faffc234904f4526138980e0ece9",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/authority-map.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/authority-map.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+      "observed_sha256": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-performance-openap.dml",
+      "observed_sha256": "55ade5f3a7152468b6c692d0d2a3561e9829c8c333893f7e7aa4bcb3a1f576de",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-performance-openap.dml",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-performance-openap.dml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-rotational-jsbsim.dml",
+      "observed_sha256": "b2d833ba1b64fd34b8ea9840ebef392ebfc5e17391584113c711db7933a4dfd5",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-rotational-jsbsim.dml",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/aerodynamics-rotational-jsbsim.dml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/assumptions.json",
+      "observed_sha256": "73063720f4d3e2d09708433ec3b65f73febcd0ad573b0e1128d940701c54eed8",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/assumptions.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/assumptions.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/authority-map.json",
+      "observed_sha256": "8b5583482ee959a17c331552583542389901c7b0addbdc07ae0af88d350f930c",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/authority-map.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/authority-map.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/control-mapping.dml",
+      "observed_sha256": "612097a974ddd0a8cb44c5924bf15b17f9e8f79d84a7c4e4f3386da708958a6d",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/control-mapping.dml",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/control-mapping.dml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/mass-properties-estimated.dml",
+      "observed_sha256": "7e3e36e4eb2386d2036ee8a80bcb9b6acc516237b39dd943c280857d16cd01d9",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/mass-properties-estimated.dml",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/mass-properties-estimated.dml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/propulsion-openap.dml",
+      "observed_sha256": "7859a9c10c4cf35c980ffcd0d6bd070bb2d95426258ccb10f6bd42421f515dbb",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/propulsion-openap.dml",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/propulsion-openap.dml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/daveml/provenance.json",
+      "observed_sha256": "6cf05e55c811b9fb32dabec921c95b619dd5a6ac75cb7c485823cff244fa603e",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/daveml/provenance.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/daveml/provenance.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml",
+      "observed_sha256": "783b9bc6a8d4c84ce16ade13a7c935f9c0f1ca628162fa605e6ea96295a1de4f",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/qualification/effector-contract.yaml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+      "observed_sha256": "3543b7315e066b4885a5d2a910ee03d781649bcc5822370b5261989ea1370cae",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/qualification/racetrack-binding.yaml",
+      "observed_sha256": "d98dedf41a7140f23021165dca24d1c26262bfc2bb301ce15fc271cd3976627e",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/qualification/racetrack-binding.yaml",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/qualification/racetrack-binding.yaml"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json",
+      "observed_sha256": "865671b7c6383e2369cf96ea05f71d103275afd13be27120122a6d612563ba04",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/validation/roundtrip-report.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json",
+      "observed_sha256": "55b7a3e608fdc049c09023787b5e7606f9b51fe22b995d3d13feb4b06bee13e9",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-daveml-replay.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "family_file.families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
+      "observed_sha256": "7c6dee9f8948d4613d178b5b68a0e836732ad4a6d7a572a348c17e007fd678ac",
+      "path": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
+      "reference": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "mission.a320-openap-pseudo6dof-racetrack.evidence.json",
+      "observed_sha256": "7a6e7f27c4e6f56890c0f53c30630da76e609878a0902e8f5aa88073c91361d6",
+      "path": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
+      "reference": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "mission.a320-openap-pseudo6dof-racetrack.telemetry.csv",
+      "observed_sha256": "27afeced44789debf2241b382e3d8f597af99de75e448ab3b27e00ab66124e14",
+      "path": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_telemetry.csv",
+      "reference": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_telemetry.csv"
+    },
+    {
+      "available": true,
+      "declared_sha256": null,
+      "kind": "local_path",
+      "label": "mission.a320-openap-pseudo6dof-racetrack.board.png",
+      "observed_sha256": "cfaa9582ebe662a38a12b44da09d12b3656bc3b0e5908043d5650daa8806fc91",
+      "path": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_board.png",
+      "reference": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_board.png"
+    }
+  ],
+  "external_dependency_count": 16,
+  "family_id": "a320_openap_jsbsim_pseudo6dof",
+  "frames": {
+    "body": "FRD",
+    "navigation": "NED",
+    "quaternion_order": "wxyz"
+  },
+  "local_evidence_count": 27,
+  "manifest_kind": "collection",
+  "manifest_path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
+  "qualification_class": "surrogate_composite",
+  "record_path": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
+  "runtime_fidelity": "pseudo_6dof",
+  "schema_version": "taoryx.vehicle-integration-snapshot/v1",
+  "source_kind": "OpenAP",
+  "source_payload_external": false
+}

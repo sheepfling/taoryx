@@ -1,0 +1,22 @@
+schema_version: 1
+kind: taoryx.synthetic-deployment-child/v1
+family: reference_nesc_two_stage_rocket
+deployment_id: nesc-synthetic-passive-cylinder-v1
+qualification_class: synthetic
+status: verified_witness
+parent:
+  family_id: reference_nesc_two_stage_rocket
+  package_sha256: 204adcffcbbbd3caa7679b5adcb6fdd51c70d93fb2150a5bd2dfdc640831f07e
+child:
+  id: nesc-synthetic-cylinder
+  shape: cylinder
+  mass_kg: 19000.0
+  reference_area_m2: 7.0
+  model: radial-ballistic-witness-v1
+  active_guidance: false
+lineage:
+  separation_event: stage1_burnout
+  separation_time_source: source_mission_events
+  terminal_horizon_s: 200.0
+evidence: verification/daveml_alpha3_deployment_evidence.json
+nonclaims: [source-exact-child-aerodynamics, historical-detached-body-validation, active-guidance, parent-source-mutation]

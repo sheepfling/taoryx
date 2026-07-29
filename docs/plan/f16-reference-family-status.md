@@ -43,6 +43,12 @@ The following pieces are now present and tested:
     snapshot with post-gate drift, control-coverage metrics, explicit resource
     nonclaims, and the supporting trim, maneuver, linearization, allocation,
     reduction, and robustness evidence files.
+13. The packet now includes
+    `reduction_mission_window_comparison.json`, which checks shared route
+    references, truth-objective parity, event-time deltas, and measured
+    trajectory disagreement against the physical-surface parent. This is
+    semantic mission validation, not an assertion of rigid-body or actuator
+    equivalence.
 
 The direct-wrench result is therefore a comparison screen only.  The surface
 result is the physically accountable path, but it remains development evidence
@@ -204,8 +210,9 @@ The appropriate next work is:
    points; the seven-node catalog is schedule-readiness evidence, but no
    continuous runtime schedule is implied.
 6. Keep the reduced 3DOF and named pseudo-6DOF passes as valid lower-tier
-   evidence, but report disagreement instead of treating them as a rescue for
-   a failed surface run.
+   semantic mission evidence, but report disagreement instead of treating them
+   as a rescue for a failed surface run. The packet's
+   `reduction_mission_window_comparison.json` is the authoritative comparison.
 7. Repair the direct-wrench route behavior or retain it explicitly as a
    screen-only comparison; it is not eligible for T4 promotion.
 8. Connect the local runner to the provider batch/step API and add true

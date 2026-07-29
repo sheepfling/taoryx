@@ -1,0 +1,195 @@
+{
+  "reports": [
+    {
+      "blockers": [],
+      "caveats": [
+        {
+          "code": "controller-effectors-unresolved",
+          "hint": "Keep the profile at screen/development evidence until the allocator and actuator path are explicit.",
+          "message": "controller profile does not declare a separate physical-effector realization",
+          "path": "families/reference_f16_s119/controllers/local-lqr-trim-hold-v1.yaml",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-realization-pending",
+          "hint": "Do not promote the mission until its truth objectives and controls pass.",
+          "message": "mission realization is declared 'binding_defined_mission_pending'",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-point-mass",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-realization-pending",
+          "hint": "Do not promote the mission until its truth objectives and controls pass.",
+          "message": "mission realization is declared 'binding_defined_mission_pending'",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-pseudo-6dof",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-direct-wrench-realization",
+          "hint": "Keep this mission as an integration baseline until physical effector realization is selected.",
+          "message": "mission realization declares direct-wrench or moment-injection behavior",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-direct-wrench",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-realization-pending",
+          "hint": "Do not promote the mission until its truth objectives and controls pass.",
+          "message": "mission realization is declared 'development_route_evidence_pending_qualification'",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-direct-wrench",
+          "severity": "warning"
+        },
+        {
+          "code": "mission-realization-pending",
+          "hint": "Do not promote the mission until its truth objectives and controls pass.",
+          "message": "mission realization is declared 'development_route_evidence_pending_qualification'",
+          "path": "verification/racetrack_templates.yaml:bindings.f16-s119-surfaces",
+          "severity": "warning"
+        }
+      ],
+      "controller": {
+        "error_count": 0,
+        "family_id": "reference_f16_s119",
+        "findings": [
+          {
+            "code": "controller-effectors-unresolved",
+            "hint": "Keep the profile at screen/development evidence until the allocator and actuator path are explicit.",
+            "message": "controller profile does not declare a separate physical-effector realization",
+            "path": "families/reference_f16_s119/controllers/local-lqr-trim-hold-v1.yaml",
+            "severity": "warning"
+          }
+        ],
+        "metrics": {
+          "canonical_control_count": 5,
+          "profiles_checked": 2
+        },
+        "profiles_checked": [
+          "f16.local_lqr_trim_hold.v1",
+          "f16.local_physical_wrench_lqr.v1"
+        ],
+        "status": "development"
+      },
+      "family_id": "reference_f16_s119",
+      "mission": {
+        "error_count": 0,
+        "evidence": [
+          "families/reference_f16_s119/qualification/racetrack-binding.yaml",
+          "verification/racetrack_templates.yaml"
+        ],
+        "family_id": "reference_f16_s119",
+        "findings": [
+          {
+            "code": "mission-realization-pending",
+            "hint": "Do not promote the mission until its truth objectives and controls pass.",
+            "message": "mission realization is declared 'binding_defined_mission_pending'",
+            "path": "verification/racetrack_templates.yaml:bindings.f16-s119-point-mass",
+            "severity": "warning"
+          },
+          {
+            "code": "mission-realization-pending",
+            "hint": "Do not promote the mission until its truth objectives and controls pass.",
+            "message": "mission realization is declared 'binding_defined_mission_pending'",
+            "path": "verification/racetrack_templates.yaml:bindings.f16-s119-pseudo-6dof",
+            "severity": "warning"
+          },
+          {
+            "code": "mission-direct-wrench-realization",
+            "hint": "Keep this mission as an integration baseline until physical effector realization is selected.",
+            "message": "mission realization declares direct-wrench or moment-injection behavior",
+            "path": "verification/racetrack_templates.yaml:bindings.f16-s119-direct-wrench",
+            "severity": "warning"
+          },
+          {
+            "code": "mission-realization-pending",
+            "hint": "Do not promote the mission until its truth objectives and controls pass.",
+            "message": "mission realization is declared 'development_route_evidence_pending_qualification'",
+            "path": "verification/racetrack_templates.yaml:bindings.f16-s119-direct-wrench",
+            "severity": "warning"
+          },
+          {
+            "code": "mission-realization-pending",
+            "hint": "Do not promote the mission until its truth objectives and controls pass.",
+            "message": "mission realization is declared 'development_route_evidence_pending_qualification'",
+            "path": "verification/racetrack_templates.yaml:bindings.f16-s119-surfaces",
+            "severity": "warning"
+          }
+        ],
+        "metrics": {
+          "estimated_duration_s_by_realization": {
+            "f16-s119-direct-wrench": 1408.1865661383833,
+            "f16-s119-point-mass": 1408.1865661383833,
+            "f16-s119-pseudo-6dof": 1408.1865661383833,
+            "f16-s119-surfaces": 1408.1865661383833
+          },
+          "estimated_duration_s_max": 1408.1865661383833,
+          "estimated_duration_s_min": 1408.1865661383833,
+          "realization_count": 4
+        },
+        "mission_id": "subsonic_energy_racetrack_contract",
+        "status": "development"
+      },
+      "schema_version": "taoryx.vehicle-controller-mission-preflight/v1",
+      "status": "development"
+    },
+    {
+      "blockers": [
+        {
+          "code": "mission-binding-missing",
+          "hint": "Declare a family mission binding before running or estimating a flagship mission.",
+          "message": "no reusable mission binding is declared for this family",
+          "path": "families/reference_hl20_mod_k/qualification/racetrack-binding.yaml",
+          "severity": "error"
+        }
+      ],
+      "caveats": [
+        {
+          "code": "controller-directory-absent",
+          "hint": "Use not_applicable only when the family contract explicitly declares no controller.",
+          "message": "no controller profiles are declared",
+          "path": "families/reference_hl20_mod_k/controllers",
+          "severity": "info"
+        }
+      ],
+      "controller": {
+        "error_count": 0,
+        "family_id": "reference_hl20_mod_k",
+        "findings": [
+          {
+            "code": "controller-directory-absent",
+            "hint": "Use not_applicable only when the family contract explicitly declares no controller.",
+            "message": "no controller profiles are declared",
+            "path": "families/reference_hl20_mod_k/controllers",
+            "severity": "info"
+          }
+        ],
+        "metrics": {
+          "profiles_checked": 0
+        },
+        "profiles_checked": [],
+        "status": "not_applicable"
+      },
+      "family_id": "reference_hl20_mod_k",
+      "mission": {
+        "error_count": 1,
+        "evidence": [],
+        "family_id": "reference_hl20_mod_k",
+        "findings": [
+          {
+            "code": "mission-binding-missing",
+            "hint": "Declare a family mission binding before running or estimating a flagship mission.",
+            "message": "no reusable mission binding is declared for this family",
+            "path": "families/reference_hl20_mod_k/qualification/racetrack-binding.yaml",
+            "severity": "error"
+          }
+        ],
+        "metrics": {
+          "estimated_duration_s": null
+        },
+        "mission_id": null,
+        "status": "blocked"
+      },
+      "schema_version": "taoryx.vehicle-controller-mission-preflight/v1",
+      "status": "blocked"
+    }
+  ],
+  "schema_version": "taoryx.vehicle-controller-mission-preflight/v1"
+}

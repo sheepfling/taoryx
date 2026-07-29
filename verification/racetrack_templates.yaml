@@ -170,6 +170,50 @@ bindings:
     simulation_margin_s: 10.0
     source_realization: source_table_aerodynamics_plus_bounded_direct_local_bank_pitch_pd_total_wrench
     status: nominal_case_pass_overall_qualification_pending
+  a320-openap-3dof:
+    vehicle_id: a320_openap_3dof
+    fidelity: point_mass_3dof
+    straight_length_m: 30000.0
+    turn_radius_m: 6000.0
+    speed_m_s: 230.1542
+    low_altitude_m: 10500.0
+    high_altitude_m: 11000.0
+    climb_rate_m_s: 4.0
+    descent_rate_m_s: 4.0
+    left_turn_bank_deg: -20.0
+    right_turn_bank_deg: 20.0
+    altitude_capture_gain_per_s: 0.15
+    altitude_capture_max_mps: 8.0
+    position_capture_gain: 0.001
+    position_capture_max_correction_mps: 25.0
+    gate_corridor_m: 500.0
+    gate_altitude_tolerance_m: 75.0
+    gate_speed_tolerance_mps: 8.0
+    simulation_margin_s: 90.0
+    source_realization: openap_derived_exact_point_mass_performance
+    status: binding_defined_mission_execution_pending
+  a320-openap-pseudo6dof:
+    vehicle_id: a320_openap_jsbsim_pseudo6dof
+    fidelity: pseudo_6dof_kinematic_bridge
+    straight_length_m: 30000.0
+    turn_radius_m: 6000.0
+    speed_m_s: 230.1542
+    low_altitude_m: 10500.0
+    high_altitude_m: 11000.0
+    climb_rate_m_s: 4.0
+    descent_rate_m_s: 4.0
+    left_turn_bank_deg: -20.0
+    right_turn_bank_deg: 20.0
+    altitude_capture_gain_per_s: 0.15
+    altitude_capture_max_mps: 8.0
+    position_capture_gain: 0.001
+    position_capture_max_correction_mps: 25.0
+    gate_corridor_m: 500.0
+    gate_altitude_tolerance_m: 75.0
+    gate_speed_tolerance_mps: 8.0
+    simulation_margin_s: 120.0
+    source_realization: openap_performance_plus_jsbsim_rotational_surrogate
+    status: binding_defined_mission_execution_pending
   f16-s119-point-mass:
     vehicle_id: reference_f16_s119
     fidelity: point_mass_3dof

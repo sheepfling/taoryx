@@ -465,6 +465,94 @@ def fidelity_readiness() -> None:
     ####
 
 
+def integration_readiness() -> None:
+    """Check source-family intake and fidelity readiness before runtime probes."""
+    run(tool_script("validate_vehicle_integration_readiness.py", "--family", "all"))
+    ####
+
+
+def integration_pipeline() -> None:
+    """Run staged provider-neutral source-family integration diagnostics."""
+    run(tool_script("validate_vehicle_integration_pipeline.py", "--family", "all", "--allow-blocked"))
+    ####
+
+
+def integration_pilots() -> None:
+    """Run the A320 collection and NESC reference integration pilots."""
+    run(
+        tool_script(
+            "validate_a320_racetrack.py",
+            "--mode",
+            "all",
+            "--output-dir",
+            "verification/a320_racetrack",
+        )
+    )
+    run(
+        tool_script(
+            "validate_vehicle_integration_pilots.py",
+            "--family",
+            "all",
+            "--allow-blocked",
+            "--json",
+            "verification/vehicle_integration_pilots.json",
+            "--packet-dir",
+            "verification/integration-packets",
+        )
+    )
+    ####
+
+
+def effectivity_preflight() -> None:
+    """Run numeric effectivity and downstream allocation diagnostics."""
+    run(
+        tool_script(
+            "validate_vehicle_effectivity_preflight.py",
+            "--family",
+            "all",
+            "--allow-blocked",
+            "--json",
+            "verification/vehicle_effectivity_preflight.json",
+        )
+    )
+    ####
+
+
+def trim_orchestration() -> None:
+    """Validate pilot trim recipes and emit adapter-ready worklists."""
+    run(
+        tool_script(
+            "validate_vehicle_trim_orchestration.py",
+            "--family",
+            "all",
+            "--json",
+            "verification/vehicle_trim_orchestration.json",
+        )
+    )
+    ####
+
+
+def controller_mission_preflight() -> None:
+    """Run controller and mission preflight for the conformance pilots."""
+    run(
+        tool_script(
+            "validate_vehicle_controller_mission_preflight.py",
+            "--family",
+            "all",
+            "--allow-blocked",
+            "--json",
+            "verification/vehicle_controller_mission_preflight.json",
+        )
+    )
+    ####
+
+
+def solve_trim_evidence() -> None:
+    """Solve the conformance-pilot trim worklists through family adapters."""
+    run(tool_script("solve_vehicle_trim_evidence.py"))
+    ####
+
+
 def check_fidelity_parity_contracts() -> None:
     """Verify shared four-family reduction-parity metadata and hashes."""
     run(tool_script("generate_fidelity_parity_contracts.py", "--check"))
@@ -968,6 +1056,13 @@ TASKS: dict[str, Callable[[], None]] = {
     "check-reference-families": check_supported_reference_families,
     "onboard-vehicles": onboard_vehicles,
     "fidelity-readiness": fidelity_readiness,
+    "integration-readiness": integration_readiness,
+    "integration-pipeline": integration_pipeline,
+    "integration-pilots": integration_pilots,
+    "effectivity-preflight": effectivity_preflight,
+    "trim-orchestration": trim_orchestration,
+    "controller-mission-preflight": controller_mission_preflight,
+    "solve-trim-evidence": solve_trim_evidence,
     "reference-tuning": check_reference_tuning,
     "check-parity": check_fidelity_parity_contracts,
     "run-parity": run_fidelity_parity,

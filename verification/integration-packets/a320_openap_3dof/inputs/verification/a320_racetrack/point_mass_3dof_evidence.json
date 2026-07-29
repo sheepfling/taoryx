@@ -1,0 +1,217 @@
+{
+  "binding_id": "a320-openap-3dof",
+  "claim_boundary": "Exact OpenAP point-mass performance channels plus a bounded kinematic navigation realization; no physical attitude, moment, surface, actuator, or manufacturer-aircraft claim.",
+  "evaluation": {
+    "claim_boundary": "truth telemetry verifies objective geometry; controller transitions are diagnostic and cannot create a pass",
+    "evaluator": "independent_truth_telemetry",
+    "hard_gates_passed": true,
+    "mission_pass": true,
+    "objective_pass": true,
+    "required_objectives": 4,
+    "required_passed": 4,
+    "results": [
+      {
+        "closest_error": 7.158978007331086,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 7.158978007331086,
+          "channel": "gate_speed_error",
+          "error": 7.158978007331086,
+          "limit": 8.0,
+          "margin": 0.8410219926689138,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "high-altitude-level-gate",
+        "margin": 0.8410219926689138,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 133.40000000000097
+      },
+      {
+        "closest_error": 1.3604231242908895,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 1.3604231242908895,
+          "channel": "gate_speed_error",
+          "error": 1.3604231242908895,
+          "limit": 8.0,
+          "margin": 6.6395768757091105,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "left-turn-exit-gate",
+        "margin": 6.6395768757091105,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 212.79999999999646
+      },
+      {
+        "closest_error": 7.730652493090986,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 7.730652493090986,
+          "channel": "gate_speed_error",
+          "error": 7.730652493090986,
+          "limit": 8.0,
+          "margin": 0.2693475069090141,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "low-altitude-level-gate",
+        "margin": 0.2693475069090141,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 340.39999999998923
+      },
+      {
+        "closest_error": 1.1044382909238948,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 1.1044382909238948,
+          "channel": "gate_speed_error",
+          "error": 1.1044382909238948,
+          "limit": 8.0,
+          "margin": 6.895561709076105,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "terminal-start-finish-gate",
+        "margin": 6.895561709076105,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 432.199999999984
+      }
+    ],
+    "schema_version": 1
+  },
+  "family_id": "a320_openap_3dof",
+  "fidelity": "point_mass_3dof",
+  "model_provenance": {
+    "corpus_sha256": "9dbb38f23924f2cd2775cb37b1b87476d9ddda672ecab9b84828b253931ebd31",
+    "manufacturer_validated": "false",
+    "model_id": "a320-openap-3dof",
+    "package_sha256": "f72662740bd4e7f57c57244fa535e08daeef1cb25f3302c95dc5f8acfcfb4c87",
+    "qualification_class": "derived_exact",
+    "source_exact": "true",
+    "upstream": "OpenAP 2.6.0"
+  },
+  "nonclaims": [
+    "manufacturer validation",
+    "source-exact aircraft control law",
+    "physical actuator qualification",
+    "full rigid-body 6DOF equivalence"
+  ],
+  "route": {
+    "gates": [
+      {
+        "altitude_m": 11000.0,
+        "east_m": 30000.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
+        "id": "high-altitude-level-gate",
+        "north_m": 0.0,
+        "phase": "outbound-level"
+      },
+      {
+        "altitude_m": 11000.0,
+        "east_m": 30000.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
+        "id": "left-turn-exit-gate",
+        "north_m": 12000.0,
+        "phase": "left-turn"
+      },
+      {
+        "altitude_m": 10500.0,
+        "east_m": 0.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
+        "id": "low-altitude-level-gate",
+        "north_m": 12000.0,
+        "phase": "inbound-level"
+      },
+      {
+        "altitude_m": 10500.0,
+        "east_m": 0.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
+        "id": "terminal-start-finish-gate",
+        "north_m": 0.0,
+        "phase": "right-turn"
+      }
+    ],
+    "source_realization": "openap_derived_exact_point_mass_performance",
+    "template_id": "powered_fixed_wing_racetrack_v1",
+    "timing": {
+      "climb_time_s": 125.0,
+      "descent_time_s": 125.0,
+      "gate_altitude_tolerance_m": 75.0,
+      "gate_corridor_m": 500.0,
+      "gate_speed_tolerance_mps": 8.0,
+      "inbound_level_time_s": 5.347393182483728,
+      "outbound_level_time_s": 5.347393182483728,
+      "position_capture_bank_gain_rad_per_m": 2.5e-05,
+      "position_capture_max_bank_correction_deg": 3.0,
+      "route_duration_s": 424.4941514996359,
+      "simulation_horizon_s": 514.4941514996359,
+      "straight_time_s": 130.34739318248373,
+      "turn_rate_command_scale": 1.0,
+      "turn_time_s": 81.89968256733424
+    }
+  },
+  "runtime": {
+    "dt_s": 0.2,
+    "duration_s": 514.4941514996359,
+    "failure": null,
+    "hard_gates_passed": true,
+    "numerical_valid": true
+  },
+  "schema_version": "taoryx.a320-racetrack-evidence/v1",
+  "status": "nominal_case_pass",
+  "trim": {
+    "controls": {
+      "flight_path_angle_rad": 0.0,
+      "throttle_ratio": 0.7182817244469165
+    },
+    "cost": 0.0,
+    "diagnostics": [],
+    "iterations": 1,
+    "max_residual": 0.0,
+    "message": "`gtol` termination condition is satisfied.",
+    "operating_point": {},
+    "residuals": {
+      "altitude_rate_mps": 0.0,
+      "axial_acceleration_mps2": 0.0
+    },
+    "scaled_residual_norm": 0.0,
+    "state": {},
+    "status": 1,
+    "success": true
+  },
+  "vehicle_id": "a320_openap"
+}

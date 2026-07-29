@@ -1,0 +1,492 @@
+{
+  "families": [
+    {
+      "catalog_path": "families/reference_f16_s119/qualification/operating-points.yaml",
+      "claim_boundary": "Source-backed force/moment equilibrium worklist for fixed-altitude and fixed-airspeed operating points; the generic layer does not claim to solve or validate the F-16 plant without the family adapter.",
+      "error_count": 0,
+      "family_id": "reference_f16_s119",
+      "findings": [
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[1].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[2].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[3].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[4].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[5].residuals",
+          "severity": "warning"
+        },
+        {
+          "code": "operating-point-residuals-pending",
+          "hint": "Run the family adapter and write residual evidence before promoting the point beyond a worklist.",
+          "message": "operating point has no independently recorded residual values",
+          "path": "families/reference_f16_s119/qualification/operating-points.yaml:points[6].residuals",
+          "severity": "warning"
+        }
+      ],
+      "recipe_id": "f16-s119-force-moment-equilibrium-v1",
+      "schema_version": "taoryx.vehicle-trim-orchestration/v1",
+      "status": "ready_for_adapter",
+      "work_items": [
+        {
+          "adapter": "taoryx.adapters.reference_f16_s119.daveml_equilibrium",
+          "execution_status": "ready_for_family_evaluator",
+          "point_id": "f16-sea-level-152mps",
+          "recipe_id": "f16-s119-force-moment-equilibrium-v1",
+          "source_evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
+          "trim_spec": {
+            "control_initial": {
+              "elevator_deg": -0.7562951013162249,
+              "power_pct": 8.93225837337992
+            },
+            "control_lower": {
+              "elevator_deg": -24.0,
+              "power_pct": 0.0
+            },
+            "control_names": [
+              "elevator_deg",
+              "power_pct"
+            ],
+            "control_upper": {
+              "elevator_deg": 24.0,
+              "power_pct": 100.0
+            },
+            "operating_point": {
+              "atmosphere": "verification/daveml_atmosphere_binding.json",
+              "geometric_altitude_m": 0.0,
+              "gravity_m_s2": 9.80665,
+              "mach": 0.447869133900138,
+              "point_id": "f16-sea-level-152mps",
+              "true_airspeed_m_s": 152.4
+            },
+            "residual_names": [
+              "force_x_n",
+              "force_z_n",
+              "moment_y_nm"
+            ],
+            "residual_scales": {
+              "force_x_n": 10000.0,
+              "force_z_n": 10000.0,
+              "moment_y_nm": 10000.0
+            },
+            "state_initial": {
+              "alpha_deg": 2.1452348297818276
+            },
+            "state_lower": {
+              "alpha_deg": 0.0
+            },
+            "state_names": [
+              "alpha_deg"
+            ],
+            "state_upper": {
+              "alpha_deg": 15.0
+            }
+          }
+        },
+        {
+          "adapter": "taoryx.adapters.reference_f16_s119.daveml_equilibrium",
+          "execution_status": "ready_for_family_evaluator",
+          "point_id": "f16-3km-152mps",
+          "recipe_id": "f16-s119-force-moment-equilibrium-v1",
+          "source_evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
+          "trim_spec": {
+            "control_initial": {
+              "elevator_deg": -0.654255033838822,
+              "power_pct": 10.849099700806596
+            },
+            "control_lower": {
+              "elevator_deg": -24.0,
+              "power_pct": 0.0
+            },
+            "control_names": [
+              "elevator_deg",
+              "power_pct"
+            ],
+            "control_upper": {
+              "elevator_deg": 24.0,
+              "power_pct": 100.0
+            },
+            "operating_point": {
+              "atmosphere": "verification/daveml_atmosphere_binding.json",
+              "geometric_altitude_m": 3000.0,
+              "gravity_m_s2": 9.80665,
+              "mach": 0.4638309751317455,
+              "point_id": "f16-3km-152mps",
+              "true_airspeed_m_s": 152.4
+            },
+            "residual_names": [
+              "force_x_n",
+              "force_z_n",
+              "moment_y_nm"
+            ],
+            "residual_scales": {
+              "force_x_n": 10000.0,
+              "force_z_n": 10000.0,
+              "moment_y_nm": 10000.0
+            },
+            "state_initial": {
+              "alpha_deg": 3.3906337409669205
+            },
+            "state_lower": {
+              "alpha_deg": 0.0
+            },
+            "state_names": [
+              "alpha_deg"
+            ],
+            "state_upper": {
+              "alpha_deg": 15.0
+            }
+          }
+        },
+        {
+          "adapter": "taoryx.adapters.reference_f16_s119.daveml_equilibrium",
+          "execution_status": "ready_for_family_evaluator",
+          "point_id": "f16-1p5km-152mps",
+          "recipe_id": "f16-s119-force-moment-equilibrium-v1",
+          "source_evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
+          "trim_spec": {
+            "control_initial": {
+              "elevator_deg": -0.705275067,
+              "power_pct": 50.0
+            },
+            "control_lower": {
+              "elevator_deg": -24.0,
+              "power_pct": 0.0
+            },
+            "control_names": [
+              "elevator_deg",
+              "power_pct"
+            ],
+            "control_upper": {
+              "elevator_deg": 24.0,
+              "power_pct": 100.0
+            },
+            "operating_point": {
+              "atmosphere": "verification/daveml_atmosphere_binding.json",
+              "geometric_altitude_m": 1500.0,
+              "gravity_m_s2": 9.80665,
+              "point_id": "f16-1p5km-152mps",
+              "true_airspeed_m_s": 152.4
+            },
+            "residual_names": [
+              "force_x_n",
+              "force_z_n",
+              "moment_y_nm"
+            ],
+            "residual_scales": {
+              "force_x_n": 10000.0,
+              "force_z_n": 10000.0,
+              "moment_y_nm": 10000.0
+            },
+            "state_initial": {
+              "alpha_deg": 2.767934285
+            },
+            "state_lower": {
+              "alpha_deg": 0.0
+            },
+            "state_names": [
+              "alpha_deg"
+            ],
+            "state_upper": {
+              "alpha_deg": 15.0
+            }
+          }
+        },
+        {
+          "adapter": "taoryx.adapters.reference_f16_s119.daveml_equilibrium",
+          "execution_status": "ready_for_family_evaluator",
+          "point_id": "f16-6km-152mps",
+          "recipe_id": "f16-s119-force-moment-equilibrium-v1",
+          "source_evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
+          "trim_spec": {
+            "control_initial": {
+              "elevator_deg": -0.5258694697396235,
+              "power_pct": 14.265717048794325
+            },
+            "control_lower": {
+              "elevator_deg": -24.0,
+              "power_pct": 0.0
+            },
+            "control_names": [
+              "elevator_deg",
+              "power_pct"
+            ],
+            "control_upper": {
+              "elevator_deg": 24.0,
+              "power_pct": 100.0
+            },
+            "operating_point": {
+              "atmosphere": "verification/daveml_atmosphere_binding.json",
+              "geometric_altitude_m": 6000.0,
+              "gravity_m_s2": 9.80665,
+              "mach": 0.4816125042077692,
+              "point_id": "f16-6km-152mps",
+              "true_airspeed_m_s": 152.4
+            },
+            "residual_names": [
+              "force_x_n",
+              "force_z_n",
+              "moment_y_nm"
+            ],
+            "residual_scales": {
+              "force_x_n": 10000.0,
+              "force_z_n": 10000.0,
+              "moment_y_nm": 10000.0
+            },
+            "state_initial": {
+              "alpha_deg": 5.2069828607451125
+            },
+            "state_lower": {
+              "alpha_deg": 0.0
+            },
+            "state_names": [
+              "alpha_deg"
+            ],
+            "state_upper": {
+              "alpha_deg": 15.0
+            }
+          }
+        },
+        {
+          "adapter": "taoryx.adapters.reference_f16_s119.daveml_equilibrium",
+          "execution_status": "ready_for_family_evaluator",
+          "point_id": "f16-4p5km-152mps",
+          "recipe_id": "f16-s119-force-moment-equilibrium-v1",
+          "source_evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
+          "trim_spec": {
+            "control_initial": {
+              "elevator_deg": -0.590062251,
+              "power_pct": 50.0
+            },
+            "control_lower": {
+              "elevator_deg": -24.0,
+              "power_pct": 0.0
+            },
+            "control_names": [
+              "elevator_deg",
+              "power_pct"
+            ],
+            "control_upper": {
+              "elevator_deg": 24.0,
+              "power_pct": 100.0
+            },
+            "operating_point": {
+              "atmosphere": "verification/daveml_atmosphere_binding.json",
+              "geometric_altitude_m": 4500.0,
+              "gravity_m_s2": 9.80665,
+              "point_id": "f16-4p5km-152mps",
+              "true_airspeed_m_s": 152.4
+            },
+            "residual_names": [
+              "force_x_n",
+              "force_z_n",
+              "moment_y_nm"
+            ],
+            "residual_scales": {
+              "force_x_n": 10000.0,
+              "force_z_n": 10000.0,
+              "moment_y_nm": 10000.0
+            },
+            "state_initial": {
+              "alpha_deg": 4.2988083
+            },
+            "state_lower": {
+              "alpha_deg": 0.0
+            },
+            "state_names": [
+              "alpha_deg"
+            ],
+            "state_upper": {
+              "alpha_deg": 15.0
+            }
+          }
+        },
+        {
+          "adapter": "taoryx.adapters.reference_f16_s119.daveml_equilibrium",
+          "execution_status": "ready_for_family_evaluator",
+          "point_id": "f16-9km-152mps",
+          "recipe_id": "f16-s119-force-moment-equilibrium-v1",
+          "source_evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
+          "trim_spec": {
+            "control_initial": {
+              "elevator_deg": -0.5803189815591208,
+              "power_pct": 21.54688553959674
+            },
+            "control_lower": {
+              "elevator_deg": -24.0,
+              "power_pct": 0.0
+            },
+            "control_names": [
+              "elevator_deg",
+              "power_pct"
+            ],
+            "control_upper": {
+              "elevator_deg": 24.0,
+              "power_pct": 100.0
+            },
+            "operating_point": {
+              "atmosphere": "verification/daveml_atmosphere_binding.json",
+              "geometric_altitude_m": 9000.0,
+              "gravity_m_s2": 9.80665,
+              "mach": 0.5015898652849708,
+              "point_id": "f16-9km-152mps",
+              "true_airspeed_m_s": 152.4
+            },
+            "residual_names": [
+              "force_x_n",
+              "force_z_n",
+              "moment_y_nm"
+            ],
+            "residual_scales": {
+              "force_x_n": 10000.0,
+              "force_z_n": 10000.0,
+              "moment_y_nm": 10000.0
+            },
+            "state_initial": {
+              "alpha_deg": 7.949593280417001
+            },
+            "state_lower": {
+              "alpha_deg": 0.0
+            },
+            "state_names": [
+              "alpha_deg"
+            ],
+            "state_upper": {
+              "alpha_deg": 15.0
+            }
+          }
+        },
+        {
+          "adapter": "taoryx.adapters.reference_f16_s119.daveml_equilibrium",
+          "execution_status": "ready_for_family_evaluator",
+          "point_id": "f16-7p5km-152mps",
+          "recipe_id": "f16-s119-force-moment-equilibrium-v1",
+          "source_evidence": "verification/daveml_f16_equilibrium_trim_evidence.json",
+          "trim_spec": {
+            "control_initial": {
+              "elevator_deg": -0.553094226,
+              "power_pct": 50.0
+            },
+            "control_lower": {
+              "elevator_deg": -24.0,
+              "power_pct": 0.0
+            },
+            "control_names": [
+              "elevator_deg",
+              "power_pct"
+            ],
+            "control_upper": {
+              "elevator_deg": 24.0,
+              "power_pct": 100.0
+            },
+            "operating_point": {
+              "atmosphere": "verification/daveml_atmosphere_binding.json",
+              "geometric_altitude_m": 7500.0,
+              "gravity_m_s2": 9.80665,
+              "point_id": "f16-7p5km-152mps",
+              "true_airspeed_m_s": 152.4
+            },
+            "residual_names": [
+              "force_x_n",
+              "force_z_n",
+              "moment_y_nm"
+            ],
+            "residual_scales": {
+              "force_x_n": 10000.0,
+              "force_z_n": 10000.0,
+              "moment_y_nm": 10000.0
+            },
+            "state_initial": {
+              "alpha_deg": 6.57828807
+            },
+            "state_lower": {
+              "alpha_deg": 0.0
+            },
+            "state_names": [
+              "alpha_deg"
+            ],
+            "state_upper": {
+              "alpha_deg": 15.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "catalog_path": "families/reference_hl20_mod_k/qualification/operating-points.yaml",
+      "claim_boundary": "Source-bounded pitch-channel trim worklist at the pinned Mach 1 operating point; no full 6-DOF equilibrium or controller claim.",
+      "error_count": 0,
+      "family_id": "reference_hl20_mod_k",
+      "findings": [],
+      "recipe_id": "hl20-mod-k-pitch-channel-trim-v1",
+      "schema_version": "taoryx.vehicle-trim-orchestration/v1",
+      "status": "ready_for_adapter",
+      "work_items": [
+        {
+          "adapter": "taoryx.adapters.reference_hl20_mod_k.daveml_pitch_channel",
+          "execution_status": "ready_for_family_evaluator",
+          "point_id": "hl20-mach1-pitch-trim",
+          "recipe_id": "hl20-mod-k-pitch-channel-trim-v1",
+          "source_evidence": "verification/daveml_hl20_trim_evidence.json",
+          "trim_spec": {
+            "control_initial": {},
+            "control_lower": {},
+            "control_names": [],
+            "control_upper": {},
+            "operating_point": {
+              "atmosphere": "verification/daveml_atmosphere_binding.json",
+              "gravity_m_s2": 9.80665,
+              "mach": 1.0,
+              "point_id": "hl20-mach1-pitch-trim",
+              "true_airspeed_f_s": 100.0
+            },
+            "residual_names": [
+              "pitch_cm"
+            ],
+            "residual_scales": {
+              "pitch_cm": 1.0
+            },
+            "state_initial": {
+              "alpha_deg": 6.457652069267908
+            },
+            "state_lower": {
+              "alpha_deg": 0.0
+            },
+            "state_names": [
+              "alpha_deg"
+            ],
+            "state_upper": {
+              "alpha_deg": 15.0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "schema_version": "taoryx.vehicle-trim-orchestration/v1"
+}

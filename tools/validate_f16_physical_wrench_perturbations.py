@@ -43,17 +43,23 @@ def _build_case() -> tuple[F16ReferencePhysicalPlant, TrimResult, Any]:
         "rudder": "rudder_deg",
         "throttle": "throttle_fraction",
     }
-    limits = {
-        names[source_name]: EffectorLimits(
+    dynamics = actuator_profile.get("dynamics", {})
+    default_time_constant = float(dynamics.get("time_constant_s", 0.0))
+    limits = {}
+    for source_name, values in actuator_profile["limits"].items():
+        position = values.get("position")
+        if position is None:
+            position = [values["lower"], values["upper"]]
+        rate = values.get("rate_per_s", values.get("rate_limit_per_s"))
+        unit = values.get("unit", "fraction" if source_name == "throttle" else "deg")
+        limits[names[source_name]] = EffectorLimits(
             names[source_name],
-            float(values["lower"]),
-            float(values["upper"]),
-            str(values["unit"]),
-            float(values["rate_limit_per_s"]),
-            float(values["time_constant_s"]),
+            float(position[0]),
+            float(position[1]),
+            str(unit),
+            float(rate) if rate is not None else None,
+            float(values.get("time_constant_s", default_time_constant)),
         )
-        for source_name, values in actuator_profile["limits"].items()
-    }
     state_names = tuple(controller_profile["state_names"])
     control_names = tuple(controller_profile["effector_names"])
     trim_pitch_rad = float(evidence["metadata"]["trim_pitch_rad"])

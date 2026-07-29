@@ -1,0 +1,65 @@
+schema_version: 1
+registry: taoryx-daveml-operating-point-catalog/v1
+claim_boundary: certified source-bounded operating points; not flight qualification
+families:
+  - id: reference_f16_s119
+    qualification_class: reference_exact
+    applicability: required
+    evidence: verification/daveml_f16_equilibrium_trim_evidence.json
+    evidence_status: verified
+    point_type: force_moment_equilibrium
+    point_id: f16-sea-level-152mps
+    operating_point: {geometric_altitude_m: 0.0, true_airspeed_m_s: 152.4, mass_kg: 9298.64390029893, gravity_m_s2: 9.80665}
+    residual: {metric: max_residual, tolerance: 1.0e-6, unit: mixed-force-moment}
+    expansion_axes: [geometric_altitude_m, true_airspeed_m_s, load_factor]
+    claim: source-backed fixed-altitude/airspeed force-moment equilibrium
+    nonclaims: [flight_qualification, full_envelope_coverage]
+  - id: reference_hl20_mod_k
+    qualification_class: reference_exact
+    applicability: required
+    evidence: verification/daveml_hl20_trim_evidence.json
+    evidence_status: verified
+    point_type: pitch_channel_trim
+    point_id: hl20-mach1-pitch-trim
+    operating_point: {mach: 1.0, true_airspeed_f_s: 100.0, alpha_deg: 6.457652069267908}
+    residual: {metric: max_residual, tolerance: 1.0e-10, unit: pitch_coefficient}
+    expansion_axes: [mach, true_airspeed_f_s, alpha_deg]
+    claim: source-bounded pitch-channel trim with no controller claim
+    nonclaims: [full_6dof_equilibrium, controller_design, flight_qualification]
+  - id: reference_nesc_two_stage_rocket
+    qualification_class: reference_exact
+    applicability: not_applicable
+    evidence: verification/daveml_nesc_objectives_evidence.json
+    evidence_status: pass
+    point_type: trajectory_checkpoint
+    point_id: nesc-scenario17-t200s
+    operating_point: {time_s: 200.0, stage_schedule: verified}
+    residual: {metric: objective_gate_score, tolerance: 0.0, unit: percent}
+    expansion_axes: [time_s, stage_event, trajectory_checkpoint]
+    claim: source-retained trajectory checkpoint and staging evidence
+    non_applicable_reason: authoritative package is open-loop and declares no controls or equilibrium trim
+    nonclaims: [equilibrium_trim, controller_design, independent_full_trajectory_equivalence]
+  - id: a320_openap_3dof
+    qualification_class: derived_exact
+    applicability: required
+    evidence: verification/daveml_a320_openap_integration.json
+    evidence_status: verified
+    point_type: point_mass_level_performance
+    point_id: a320-openap-cruise-mach078
+    operating_point: {altitude_m: 11000.0, mach: 0.78, mass_kg: 60000.0, flap_angle_deg: 0.0, vertical_speed_mps: 0.0}
+    residual: {metric: trim.residuals.axial_acceleration_mps2, tolerance: 1.0e-10, unit: m/s2}
+    expansion_axes: [altitude_m, mach, mass_kg, flap_angle_deg]
+    claim: exact reproduction of the pinned OpenAP performance model
+    nonclaims: [manufacturer_truth, rigid_body_moment_equivalence, flight_qualification]
+  - id: a320_openap_jsbsim_pseudo6dof
+    qualification_class: surrogate_composite
+    applicability: required
+    evidence: verification/daveml_a320_pseudo6dof_integration.json
+    evidence_status: verified
+    point_type: pseudo_6dof_composite_performance
+    point_id: a320-pseudo6dof-cruise-mach078
+    operating_point: {altitude_m: 11000.0, mach: 0.78, mass_kg: 60000.0, flap_angle_deg: 0.0, vertical_speed_mps: 0.0}
+    residual: {metric: result.performance.pitch_moment_nm, tolerance: 1.0e-9, unit: N-m}
+    expansion_axes: [altitude_m, mach, mass_kg, control_pulse]
+    claim: Taoryx-authored OpenAP plus JSBSim surrogate-composite operating point
+    nonclaims: [manufacturer_truth, source_exact_6dof, Airbus_validation, flight_qualification]

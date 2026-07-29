@@ -1,0 +1,1 @@
+python tools/validate_vehicle_integration_pilots.py --family reference_nesc_two_stage_rocket --json reference_nesc_two_stage_rocket-report.json

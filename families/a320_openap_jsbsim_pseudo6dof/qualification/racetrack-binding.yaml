@@ -1,0 +1,21 @@
+schema_version: 1
+kind: taoryx.showcase-binding/v1alpha1
+family: a320_openap_jsbsim_pseudo6dof
+mission_profile: powered_fixed_wing_racetrack_contract
+template: verification/racetrack_templates.yaml#powered_fixed_wing_racetrack_v1
+source_catalog: verification/racetrack_templates.yaml
+binding_ids:
+  - a320-openap-pseudo6dof
+phase_order:
+  - outbound-climb
+  - outbound-level
+  - left-turn
+  - inbound-descent
+  - inbound-level
+  - right-turn
+status: adapter_available_mission_execution_pending
+claim_boundary: >-
+  A reusable A320 pseudo-6DOF racetrack contract composes the exact OpenAP
+  performance layer with the declared JSBSim rotational surrogate and Taoryx
+  control overlay. It does not claim source-exact surfaces, actuators, or
+  manufacturer flight fidelity.

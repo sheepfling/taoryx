@@ -16,6 +16,7 @@ from ..controller_realization import (
 from ..racetrack_guidance import RacetrackGuidanceReference, racetrack_reference_at_time
 from .a320_openap import A320OpenAPEnvelopeError, A320OpenAPModel, A320OpenAPOperatingPoint, A320OpenAPResult
 from .a320_pseudo6dof import A320Pseudo6DOFModel, A320Pseudo6DOFOperatingPoint, A320Pseudo6DOFResult
+from .a320_racetrack import A320RacetrackMode, A320RacetrackRun, A320RacetrackRunner
 from .authority import ArbitrationResult, ControlArbitrator, ControlAuthorityError, ControlDecision
 from .catalog import FamilyCatalog, load_family_catalog
 from .collections import (
@@ -305,6 +306,9 @@ __all__ = [
     "A320Pseudo6DOFModel",
     "A320Pseudo6DOFOperatingPoint",
     "A320Pseudo6DOFResult",
+    "A320RacetrackMode",
+    "A320RacetrackRun",
+    "A320RacetrackRunner",
     "load_daveml_atmosphere",
     "DAVEMLCheckRecord",
     "DAVEMLCheckSignalRecord",
