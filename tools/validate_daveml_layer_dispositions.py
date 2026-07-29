@@ -16,6 +16,8 @@ ALLOWED_STATUSES = {
     "not_in_source_contract",
     "external_overlay_required",
     "not_promoted",
+    "qualified_external_overlay",
+    "qualified_bounded_comparison",
 }
 
 

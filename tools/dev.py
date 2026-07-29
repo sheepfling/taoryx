@@ -803,7 +803,15 @@ def daveml_alpha3_completion() -> None:
     """Build and validate the Alpha 3 DAVE-ML completion evidence."""
 
     run(tool_script("build_daveml_alpha3_evidence.py"))
+    run(tool_script("validate_daveml_alpha3_qualification.py"))
     run(tool_script("validate_daveml_alpha3_completion.py"))
+    ####
+
+
+def daveml_alpha3_qualification() -> None:
+    """Build the requested F-16, NESC, and A320 Alpha 3 qualification evidence."""
+
+    run(tool_script("validate_daveml_alpha3_qualification.py"))
     ####
 
 
@@ -941,6 +949,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-operational-contracts": daveml_operational_contracts,
     "daveml-operating-points": daveml_operating_points,
     "daveml-alpha3-completion": daveml_alpha3_completion,
+    "daveml-alpha3-qualification": daveml_alpha3_qualification,
     "handoff": handoff,
     "check": check,
     "all": check,

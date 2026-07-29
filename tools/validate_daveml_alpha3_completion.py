@@ -17,6 +17,11 @@ ALLOWED_STATUSES = {
     "contract_ready",
     "equivalence_pending",
     "verified_witness",
+    "verified_overlay",
+    "verified_local_projection",
+    "verified_surrogate_response",
+    "verified_bounded_replay",
+    "deferred_no_attitude_comparison",
 }
 
 
@@ -67,11 +72,18 @@ def validate(registry_path: str | Path = REGISTRY) -> dict[str, Any]:
         if qualification not in set(payload.get("qualification_classes", [])):
             failures.append(f"{family_id}: invalid qualification class {qualification!r}")
         family_failures: list[str] = []
+        if not family.get("owner"):
+            family_failures.append("owner is required")
         source = _required_path(str(family.get("source_parent", "")), family_failures, family_id)
         evidence_records = [
             _required_path(str(item), family_failures, f"{family_id} evidence")
             for item in family.get("evidence", [])
         ]
+        for item in family.get("qualification_evidence", []):
+            evidence_records.append(_required_path(str(item), family_failures, f"{family_id} qualification evidence"))
+        for item in (family.get("comparison_evidence"), family.get("staging_lineage_evidence")):
+            if item:
+                evidence_records.append(_required_path(str(item), family_failures, f"{family_id} qualification evidence"))
         if not evidence_records and family_id not in {"reference_nesc_two_stage_rocket"}:
             family_failures.append(f"{family_id}: no evidence records")
         overlay_records: list[dict[str, Any]] = []

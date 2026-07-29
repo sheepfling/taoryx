@@ -13,13 +13,13 @@
     },
     {
       "artifact": "families/reference_f16_s119/actuators/reference-first-order-v1.yaml",
-      "artifact_sha256": "9fed347d8325aabfe99e6bc7cf90471ddc6f4266c2291645335995a0c72a04a2",
+      "artifact_sha256": "cc6eba9fbecdd5cb7d6cc613abc0f69b4d06ca29924c768f75389c895b33b660",
       "authority": "downstream_taoryx_overlay",
       "family_id": "reference_f16_s119",
       "kind": "actuator",
       "overlay_id": "f16-reference-first-order-v1",
       "source_parent": "families/reference_f16_s119/family.yaml",
-      "status": "contract_ready"
+      "status": "verified_overlay"
     },
     {
       "artifact": "families/reference_hl20_mod_k/actuators/ideal-direct.yaml",

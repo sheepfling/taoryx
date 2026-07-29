@@ -1,7 +1,7 @@
 {
   "claim_boundary": "source-bounded family-library operational integration; not flight qualification",
   "contract_registry": "verification/daveml_operational_contracts.yaml",
-  "contract_registry_sha256": "13b81285bbcd655de4c1524f01699e1f8d63c44627d86507222cbecb5678768d",
+  "contract_registry_sha256": "a6f999b2aedaea283d5a700427e35770939071271fc1a890eae9c83c4b132461",
   "families": [
     {
       "applicability": {
@@ -15,7 +15,7 @@
       "family_id": "reference_f16_s119",
       "manifest": "families/reference_f16_s119/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "434b7d649d23dd483cd202c7a982b4ed8167b2dc2effd777c6591fe6e130eb73",
+      "manifest_sha256": "bad1a5a7fe618e44ad1718971613a9eb0b18cba02f3195210108860c70e903e2",
       "nonclaim_count": 3,
       "qualification_class": "reference_exact",
       "status": "verified"
@@ -32,7 +32,7 @@
       "family_id": "reference_hl20_mod_k",
       "manifest": "families/reference_hl20_mod_k/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "94f09c30cd313438d3280fae9a4223b649c0cf7bfb23ce4908ecd253e84602fc",
+      "manifest_sha256": "032a3ff885861c47194e88f6343bc0232e0bc99a743a71c6fbb0d0725ed22e73",
       "nonclaim_count": 4,
       "qualification_class": "reference_exact",
       "status": "verified"
@@ -49,7 +49,7 @@
       "family_id": "reference_nesc_two_stage_rocket",
       "manifest": "families/reference_nesc_two_stage_rocket/family.yaml",
       "manifest_kind": "reference",
-      "manifest_sha256": "5879ac5da527b2f75ad4cdd1718b81c08d0c9cde4f575396882178fb20385f02",
+      "manifest_sha256": "850039e00c89fe7b9b810fec517a243f7ffbe155c22467a2b6f391ca5fe906ca",
       "nonclaim_count": 4,
       "qualification_class": "reference_exact",
       "status": "verified"
@@ -66,7 +66,7 @@
       "family_id": "a320_openap_3dof",
       "manifest": "families/a320_openap_3dof/collection-manifest.json",
       "manifest_kind": "collection",
-      "manifest_sha256": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0",
+      "manifest_sha256": "5ab346f462d2e3bcb3ecd6992c34cef2bfb2e90c56237b4026c6de8d46982200",
       "nonclaim_count": 4,
       "qualification_class": "derived_exact",
       "status": "verified"
@@ -83,7 +83,7 @@
       "family_id": "a320_openap_jsbsim_pseudo6dof",
       "manifest": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
       "manifest_kind": "collection",
-      "manifest_sha256": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa",
+      "manifest_sha256": "6573d827ba06e451c31dae876151954ca9f4bbba4e241496491b9f1d03af43c4",
       "nonclaim_count": 4,
       "qualification_class": "surrogate_composite",
       "status": "verified"

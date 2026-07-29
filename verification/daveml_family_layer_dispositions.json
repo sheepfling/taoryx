@@ -9,16 +9,16 @@
       "layer_count": 4,
       "layers": {
         "actuators": {
-          "evidence": "families/reference_f16_s119/qualification/integration-record.yaml",
+          "evidence": "verification/daveml_f16_overlay_qualification.json",
           "failures": [],
-          "rationale": "The promoted DAVE-ML plant exposes command channels, not physical actuator dynamics.",
-          "status": "external_overlay_required"
+          "rationale": "The promoted DAVE-ML plant exposes command channels; the first-order position/rate overlay is separately qualified and remains downstream policy.",
+          "status": "qualified_external_overlay"
         },
         "controllers": {
-          "evidence": "families/reference_f16_s119/qualification/integration-record.yaml",
+          "evidence": "verification/daveml_f16_controller_qualification.json",
           "failures": [],
-          "rationale": "Controller design is a Taoryx overlay and is not source-exact plant content.",
-          "status": "external_overlay_required"
+          "rationale": "The source-channel LQR and bounded smoke objectives pass as a Taoryx overlay; no source controller claim is made.",
+          "status": "qualified_external_overlay"
         },
         "mission": {
           "evidence": "families/reference_f16_s119/qualification/integration-record.yaml",
@@ -27,10 +27,10 @@
           "status": "external_overlay_required"
         },
         "reductions": {
-          "evidence": "families/reference_f16_s119/qualification/integration-record.yaml",
+          "evidence": "verification/daveml_f16_reduction_qualification.json",
           "failures": [],
-          "rationale": "No reduced-order equivalence report has been promoted from the parent plant.",
-          "status": "not_promoted"
+          "rationale": "Point-mass and pseudo-6DOF reports are promoted only as a local linearized projection and bounded surrogate response.",
+          "status": "qualified_bounded_comparison"
         }
       },
       "status": "verified"
@@ -81,10 +81,10 @@
           "status": "not_applicable"
         },
         "reductions": {
-          "evidence": "families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml",
+          "evidence": "verification/daveml_nesc_reduction_qualification.json",
           "failures": [],
-          "rationale": "Reduced-order rocket fidelity requires a separate comparison against the parent trajectory.",
-          "status": "not_promoted"
+          "rationale": "Translation replay is bounded against retained ECI telemetry; attitude pseudo-6DOF remains explicitly deferred.",
+          "status": "qualified_bounded_comparison"
         }
       },
       "status": "verified"
@@ -93,13 +93,19 @@
       "failures": [],
       "family_id": "a320_openap_3dof",
       "integration_record": "families/a320_openap_3dof/qualification/integration-record.yaml",
-      "layer_count": 4,
+      "layer_count": 5,
       "layers": {
         "controllers": {
           "evidence": "families/a320_openap_3dof/qualification/integration-record.yaml",
           "failures": [],
           "rationale": "OpenAP performance data does not provide source-exact actuator or controller dynamics.",
           "status": "not_in_source_contract"
+        },
+        "matched_comparison": {
+          "evidence": "verification/daveml_a320_matched_comparison.json",
+          "failures": [],
+          "rationale": "Derived-exact performance and surrogate-composite common channels match at declared operating points; rotational authorities remain separate.",
+          "status": "verified"
         },
         "objectives": {
           "evidence": "verification/daveml_a320_openap_integration.json",
@@ -126,7 +132,7 @@
       "failures": [],
       "family_id": "a320_openap_jsbsim_pseudo6dof",
       "integration_record": "families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml",
-      "layer_count": 4,
+      "layer_count": 5,
       "layers": {
         "actuators": {
           "evidence": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
@@ -146,6 +152,12 @@
           "rationale": "The current qualification is pseudo-6DOF and does not claim full rigid-body source equivalence.",
           "status": "not_promoted"
         },
+        "matched_comparison": {
+          "evidence": "verification/daveml_a320_matched_comparison.json",
+          "failures": [],
+          "rationale": "The surrogate-composite lane shares OpenAP translational performance with the derived-exact baseline and is compared without merging rotational authority.",
+          "status": "verified"
+        },
         "stability_augmentation": {
           "evidence": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
           "failures": [],
@@ -157,7 +169,7 @@
     }
   ],
   "family_count": 5,
-  "layer_count": 18,
+  "layer_count": 20,
   "registry": "verification/daveml_family_layer_dispositions.yaml",
   "schema_version": "taoryx.daveml-family-layer-dispositions-report/v1",
   "status": "verified"

@@ -1,0 +1,125 @@
+{
+  "claim_boundary": "requested DAVE-ML Alpha 3 family qualification slice; not flight qualification or manufacturer validation",
+  "deferred_families": {
+    "reference_hl20_mod_k": "existing reduction contracts remain equivalence_pending and are explicitly outside this requested F-16/NESC/A320 completion slice"
+  },
+  "evidence": {
+    "a320_comparison": {
+      "artifact": "verification/daveml_a320_matched_comparison.json",
+      "sha256": "2bbf6ed961567f5821882cf6b55e64f64b440c7d46992b244192a4bc664e5a88"
+    },
+    "f16_controller": {
+      "artifact": "verification/daveml_f16_controller_qualification.json",
+      "sha256": "dade6e9c770195639ba0921fcf46fa76af9d4800bc182aacb8ab59b5103bb008"
+    },
+    "f16_operating_points": {
+      "artifact": "verification/daveml_f16_operating_points_evidence.json",
+      "sha256": "7d961eb683dad4d49df29011fd16260d7341405c0e9ddf4e1fecf567593493d1"
+    },
+    "f16_overlay": {
+      "artifact": "verification/daveml_f16_overlay_qualification.json",
+      "sha256": "2cbfa9f8de4e60918a777590040214d4a3dae641b1b9dbbbcacc3814fbdeab87"
+    },
+    "f16_reduction": {
+      "artifact": "verification/daveml_f16_reduction_qualification.json",
+      "sha256": "6280153371bafe747cd3d04507972369507db425b568aacd0c10c3b5465d97bc"
+    },
+    "nesc_lineage": {
+      "artifact": "verification/daveml_nesc_staging_lineage.json",
+      "sha256": "7717e0871e9dba768d97bc1566d55c2d5413606d3a591f5bbfd8bcce8cbaee29"
+    },
+    "nesc_reduction": {
+      "artifact": "verification/daveml_nesc_reduction_qualification.json",
+      "sha256": "2afb615a2e455fda79ed853807d62b586f84c95b2253dd8c829493e8a57a80db"
+    }
+  },
+  "gates": {
+    "A3-1": {
+      "condition": "registry entries carry parent, evidence, status, and claim boundaries",
+      "evidence": [
+        "verification/daveml_alpha3_completion.yaml"
+      ],
+      "scope": [
+        "reference_f16_s119",
+        "reference_hl20_mod_k",
+        "reference_nesc_two_stage_rocket",
+        "a320_openap_3dof",
+        "a320_openap_jsbsim_pseudo6dof"
+      ],
+      "status": "pass"
+    },
+    "A3-2": {
+      "condition": "F-16 S-119 source operating point, envelope, controls, residuals, and unqualified axes are recorded",
+      "evidence": [
+        "verification/daveml_f16_operating_points_evidence.json"
+      ],
+      "status": "pass"
+    },
+    "A3-3": {
+      "condition": "F-16 actuator and controller overlays have separate command/achieved and controller evidence",
+      "dispositions": {
+        "A320": "not_in_source_contract",
+        "NESC": "not_applicable_open_loop_source"
+      },
+      "evidence": [
+        "verification/daveml_f16_overlay_qualification.json",
+        "verification/daveml_f16_controller_qualification.json"
+      ],
+      "status": "pass"
+    },
+    "A3-4": {
+      "condition": "requested F-16 and NESC reductions name parents, omitted physics, windows, metrics, and pass rules",
+      "deferred_family_disposition": {
+        "reference_hl20_mod_k": "deferred_pending_parent_comparison; outside this requested qualification slice"
+      },
+      "evidence": [
+        "verification/daveml_f16_reduction_qualification.json",
+        "verification/daveml_nesc_reduction_qualification.json"
+      ],
+      "status": "pass"
+    },
+    "A3-5": {
+      "condition": "NESC staging history and synthetic deployment lineage are source-backed and separately reported",
+      "evidence": [
+        "verification/daveml_nesc_staging_lineage.json",
+        "verification/daveml_nesc_reduction_qualification.json",
+        "verification/daveml_alpha3_deployment_evidence.json"
+      ],
+      "status": "pass"
+    },
+    "A3-6": {
+      "condition": "A320 derived-exact and surrogate-composite common channels compare at matched points without merging authority",
+      "evidence": [
+        "verification/daveml_a320_matched_comparison.json"
+      ],
+      "status": "pass"
+    },
+    "A3-7": {
+      "condition": "all requested Alpha 3 qualification artifacts are deterministic and the explicit deferred lanes remain machine-readable",
+      "evidence": [
+        "verification/daveml_f16_operating_points_evidence.json",
+        "verification/daveml_f16_overlay_qualification.json",
+        "verification/daveml_f16_controller_qualification.json",
+        "verification/daveml_f16_reduction_qualification.json",
+        "verification/daveml_nesc_staging_lineage.json",
+        "verification/daveml_nesc_reduction_qualification.json",
+        "verification/daveml_a320_matched_comparison.json",
+        "verification/daveml_alpha3_completion.yaml"
+      ],
+      "status": "pass"
+    }
+  },
+  "lineage_policy": {
+    "independent_participating_simulation_equivalence": "unavailable",
+    "parent_vehicle_capability": "separate from deployment child claims",
+    "synthetic_deployment_child": "nesc-synthetic-cylinder"
+  },
+  "requested_families": [
+    "reference_f16_s119",
+    "reference_nesc_two_stage_rocket",
+    "a320_openap_3dof",
+    "a320_openap_jsbsim_pseudo6dof"
+  ],
+  "schema_version": "taoryx.daveml-alpha3-qualification/v1",
+  "status": "verified"
+}

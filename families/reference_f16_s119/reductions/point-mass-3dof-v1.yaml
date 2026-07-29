@@ -3,7 +3,7 @@ kind: taoryx.reference-reduction-contract/v1
 family: reference_f16_s119
 reduction_id: f16-point-mass-3dof-v1
 qualification_class: derived_exact
-status: equivalence_pending
+status: verified_local_projection
 parent:
   family_id: reference_f16_s119
   fidelity: rigid_body_6dof
@@ -14,5 +14,5 @@ omits: [attitude_dynamics, aerodynamic_moments, body_rates, actuator_dynamics]
 comparison:
   required_evidence: [matched_initial_state, matched_force_channels, position_velocity_history, energy_residual]
   pass_rule: parent_and_reduction_histories_must_be_compared_over_declared_in_envelope_window
-  evidence_artifact: verification/daveml_alpha3_reduction_evidence.json
+  evidence_artifact: verification/daveml_f16_reduction_qualification.json
 nonclaims: [flight_qualification, source_exact_attitude_response, actuator_fidelity]

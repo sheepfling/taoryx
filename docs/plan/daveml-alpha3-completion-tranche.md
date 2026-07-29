@@ -22,6 +22,30 @@ readiness records, and runtime replay for the currently promoted corpus are
 complete. The remaining work is qualification depth and explicit disposition,
 not another broad importer rewrite.
 
+### Requested Qualification Closure
+
+The current execution slice closes the requested F-16 S-119, NESC two-stage,
+and A320 work with the deterministic command:
+
+```text
+python -m tools.dev daveml-alpha3-completion
+```
+
+It produces the machine-readable gate report at
+`verification/daveml_alpha3_qualification.json` and the following evidence
+families:
+
+| Family | Evidence | Qualification boundary |
+|---|---|---|
+| F-16 S-119 | operating points, first-order actuator trace, LQR/controller evidence, local 3-DOF and pseudo-6-DOF response | source-backed operating point plus downstream overlay evidence; no source actuator/controller or flight claim |
+| NESC two-stage | staging lineage and bounded ECI translation replay | source-retained trajectory and staging evidence; no independent participating simulation claim |
+| A320 | matched derived-exact versus surrogate-composite common-channel comparison | OpenAP common performance remains the authority; JSBSim rotational channels remain non-comparable surrogate outputs |
+
+All A3-1 through A3-7 gates pass for this requested slice. HL-20 remains an
+explicit deferred disposition in the report because its two reduction contracts
+still require a parent comparison; it is not silently promoted by the F-16,
+NESC, or A320 results.
+
 ### Priority 1: Promote the Existing Executable Families
 
 1. **F-16:** establish the point-mass and pseudo-6DOF operating evidence,
@@ -57,12 +81,14 @@ aero-ballistic behavior; it is not source-equivalence evidence.
 
 ### Pinned Exit Conditions
 
-The tranche is complete when the applicable F-16, HL-20, NESC, and A320 lanes
-pass A3-1 through A3-7; each non-applicable or unavailable lane has an
+The requested F-16, NESC, and A320 qualification slice is complete when those
+lanes pass A3-1 through A3-7; each non-applicable or unavailable lane has an
 explicit machine-readable disposition; reduction and deployment artifacts
 carry lineage and nonclaims; and the deterministic release report, focused
-tests, CI job, and catalog registries agree. The known semantic gaps remain
-documented rather than silently waived.
+tests, CI job, and catalog registries agree. The HL-20 reduction lane remains
+an explicit follow-on under this broader plan until its parent comparison is
+qualified. The known semantic gaps remain documented rather than silently
+waived.
 
 ## Completion Strategy
 
@@ -91,9 +117,9 @@ The Alpha 3 completion work is split into five independently auditable lanes:
 | Gate | Exit condition |
 |---|---|
 | A3-1 registry | Every remaining family layer has an owner, parent, evidence, status, and nonclaims. |
-| A3-2 source-channel expansion | F-16 and HL-20 operating points identify their source hashes, envelope, residuals, and unqualified axes. |
-| A3-3 overlay qualification | Actuator and allocator overlays are separate artifacts with command/achieved, bounds, and provenance evidence. |
-| A3-4 reduction qualification | Each promoted reduction names its parent, omitted physics, comparison window, metrics, and pass/fail rule. |
+| A3-2 source-channel expansion | F-16 requested-slice operating points identify source hashes, envelope, residuals, controls, and unqualified axes; HL-20 remains separately dispositioned. |
+| A3-3 overlay qualification | Requested-slice actuator/controller overlays are separate artifacts with command/achieved, bounds, and provenance evidence; source-open-loop and A320 no-source-control lanes are explicit dispositions. |
+| A3-4 reduction qualification | Each promoted requested-slice reduction names its parent, omitted physics, comparison window, metrics, and pass/fail rule; deferred HL-20 reductions remain machine-readable. |
 | A3-5 trajectory and lineage | NESC staging history is source-backed; independent comparison and synthetic child behavior are separately reported. |
 | A3-6 A320 comparison | Derived-exact and surrogate-composite outputs are compared at matched points without merging authority. |
 | A3-7 release | Deterministic validators, focused tests, full applicable DAVE-ML gates, and provenance reports pass. |

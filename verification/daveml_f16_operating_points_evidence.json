@@ -1,0 +1,173 @@
+{
+  "claim_boundary": "source-bounded S-119 operating-point and channel evidence; not flight qualification",
+  "controls": {
+    "channels": [
+      {
+        "authority_modes": [
+          "autopilot",
+          "commanded",
+          "overlay",
+          "direct",
+          "mixed"
+        ],
+        "default_authority": "direct",
+        "description": "Source direct elevator input; actuator overlay pending.",
+        "id": "control.elevator",
+        "unit": "deg"
+      },
+      {
+        "authority_modes": [
+          "autopilot",
+          "commanded",
+          "overlay",
+          "direct",
+          "mixed"
+        ],
+        "default_authority": "direct",
+        "description": "Source direct aileron input; actuator overlay pending.",
+        "id": "control.aileron",
+        "unit": "deg"
+      },
+      {
+        "authority_modes": [
+          "autopilot",
+          "commanded",
+          "overlay",
+          "direct",
+          "mixed"
+        ],
+        "default_authority": "direct",
+        "description": "Source direct rudder input; actuator overlay pending.",
+        "id": "control.rudder",
+        "unit": "deg"
+      },
+      {
+        "authority_modes": [
+          "autopilot",
+          "commanded",
+          "overlay",
+          "direct",
+          "mixed"
+        ],
+        "default_authority": "direct",
+        "default_command_mode": "absolute",
+        "description": "Source steady power/throttle input.",
+        "id": "control.throttle",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "unit": "dimensionless"
+      }
+    ],
+    "declared_bounds": {
+      "control.aileron": {},
+      "control.elevator": {},
+      "control.rudder": {},
+      "control.throttle": {
+        "maximum": 1.0,
+        "minimum": 0.0
+      }
+    },
+    "physical_actuator_fields": [
+      "actuator_position",
+      "actuator_rate",
+      "latency",
+      "saturation_reason"
+    ],
+    "physical_actuator_status": "qualified_by_separate_overlay",
+    "source_binding": "families/reference_f16_s119/bindings/canonical-controls.yaml",
+    "source_binding_sha256": "bf93bb67d1b2c84bc21b7becd9db8a28968909159478bf19d202fe82949723fa",
+    "unbounded_source_direct_channels": [
+      "control.elevator",
+      "control.aileron",
+      "control.rudder"
+    ]
+  },
+  "evidence": [
+    "verification/daveml_f16_equilibrium_trim_evidence.json",
+    "verification/daveml_f16_linearization_evidence.json"
+  ],
+  "family_id": "reference_f16_s119",
+  "operating_points": [
+    {
+      "aerodynamic_state": {
+        "alpha_deg": 2.147760465658469
+      },
+      "controls": {
+        "elevator_deg": -0.7560886118577249,
+        "power_pct": 1.130793097701422
+      },
+      "id": "s119_reference_trim",
+      "max_residual": 3.3242031349800527e-09,
+      "residuals": {
+        "force_x_n": 3.3242031349800527e-09,
+        "force_z_n": 2.0372681319713593e-10,
+        "moment_y_nm": 1.0738347056774311e-10
+      },
+      "scaled_residual_norm": 3.3321708099642557e-13,
+      "state": {
+        "geometric_altitude_m": 0.0,
+        "gravity_m_s2": 9.80665,
+        "mass_kg": 9298.64390029893,
+        "true_airspeed_m_s": 152.4
+      },
+      "status": "verified"
+    },
+    {
+      "control_names": [
+        "elevator_deg",
+        "aileron_deg",
+        "rudder_deg",
+        "power_pct"
+      ],
+      "controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": 0.0,
+        "power_pct": 0.0,
+        "rudder_deg": 0.0
+      },
+      "id": "s119_source_channel_linearization",
+      "state": {
+        "p_rad_s": 0.0,
+        "q_rad_s": 0.0,
+        "r_rad_s": 0.0,
+        "u_m_s": 152.4,
+        "v_m_s": 0.0,
+        "w_m_s": 0.0
+      },
+      "state_names": [
+        "u_m_s",
+        "v_m_s",
+        "w_m_s",
+        "p_rad_s",
+        "q_rad_s",
+        "r_rad_s"
+      ],
+      "status": "verified"
+    }
+  ],
+  "qualification_class": "reference_exact",
+  "schema_version": "taoryx.daveml-f16-operating-points-evidence/v1",
+  "source_parent": {
+    "aerodynamics_sha256": "272c647bd7b958ebb1fffc3406d835c39ff1c5a96dab2ca1c7837a1a38ba2764",
+    "artifact": "families/reference_f16_s119/family.yaml",
+    "package_sha256": "eeaeaf17f2ca49fc13ab61805634e569cfb302cff302610ea13caa862c4dae1c",
+    "sha256": "bad1a5a7fe618e44ad1718971613a9eb0b18cba02f3195210108860c70e903e2"
+  },
+  "status": "verified",
+  "unqualified_axes": [
+    "fuel_mass_evolution",
+    "mission_segments",
+    "source_actuator_dynamics",
+    "runway_contact"
+  ],
+  "validity_envelope": {
+    "alpha_max_rad": 0.7853981633974483,
+    "alpha_min_rad": -0.17453292519943295,
+    "altitude_max_m": 15240.0,
+    "altitude_min_m": 0.0,
+    "beta_max_rad": 0.5235987755982988,
+    "beta_min_rad": -0.5235987755982988,
+    "mach_max": 1.0,
+    "mach_min": 0.0
+  }
+}

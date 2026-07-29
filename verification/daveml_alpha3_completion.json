@@ -16,6 +16,18 @@
         {
           "path": "verification/daveml_f16_scenario_evidence.json",
           "sha256": "a048a12f685429e26ae19e35426c0207226f46e6f9fdc4d467ffcefe554d159e"
+        },
+        {
+          "path": "verification/daveml_f16_overlay_qualification.json",
+          "sha256": "2cbfa9f8de4e60918a777590040214d4a3dae641b1b9dbbbcacc3814fbdeab87"
+        },
+        {
+          "path": "verification/daveml_f16_controller_qualification.json",
+          "sha256": "dade6e9c770195639ba0921fcf46fa76af9d4800bc182aacb8ab59b5103bb008"
+        },
+        {
+          "path": "verification/daveml_f16_reduction_qualification.json",
+          "sha256": "6280153371bafe747cd3d04507972369507db425b568aacd0c10c3b5465d97bc"
         }
       ],
       "failures": [],
@@ -37,8 +49,8 @@
           "id": "f16-reference-first-order-v1",
           "kind": "actuator",
           "path": "families/reference_f16_s119/actuators/reference-first-order-v1.yaml",
-          "sha256": "9fed347d8325aabfe99e6bc7cf90471ddc6f4266c2291645335995a0c72a04a2",
-          "status": "contract_ready"
+          "sha256": "cc6eba9fbecdd5cb7d6cc613abc0f69b4d06ca29924c768f75389c895b33b660",
+          "status": "verified_overlay"
         }
       ],
       "qualification_class": "reference_exact",
@@ -46,19 +58,19 @@
         {
           "id": "f16-point-mass-3dof-v1",
           "path": "families/reference_f16_s119/reductions/point-mass-3dof-v1.yaml",
-          "sha256": "1f3dfd4a541b39ae03860d93d9748339388f815c74a6205f0fff9757fe9fb08c",
-          "status": "equivalence_pending"
+          "sha256": "e79c44d8200b4a5d787144f1ecb6ed208c213f2e36042c791be766e8e8c26966",
+          "status": "verified_local_projection"
         },
         {
           "id": "f16-attitude-response-pseudo6dof-v1",
           "path": "families/reference_f16_s119/reductions/attitude-response-pseudo6dof-v1.yaml",
-          "sha256": "cd26a4a6dd368fb36869f9ffdd23fe6885b09f779b61a1013105782bf0b2b335",
-          "status": "equivalence_pending"
+          "sha256": "58dbc054d62091c0a576cc31bf67f8f3983e1dfc4673d25c10ea987b2474cad2",
+          "status": "verified_surrogate_response"
         }
       ],
       "source_parent": {
         "path": "families/reference_f16_s119/family.yaml",
-        "sha256": "5e2727fc2992c8e3d36cff65c95275fdbb2bb9d0c7f384bdf72ae80b20cbeb31"
+        "sha256": "bad1a5a7fe618e44ad1718971613a9eb0b18cba02f3195210108860c70e903e2"
       },
       "status": "verified"
     },
@@ -125,7 +137,7 @@
       ],
       "source_parent": {
         "path": "families/reference_hl20_mod_k/family.yaml",
-        "sha256": "bf79d2c2b558796f46b289df6023428d99c92aec69717da514ca17305a31bbfa"
+        "sha256": "032a3ff885861c47194e88f6343bc0232e0bc99a743a71c6fbb0d0725ed22e73"
       },
       "status": "verified"
     },
@@ -145,6 +157,18 @@
         {
           "path": "verification/daveml_nesc_objectives_evidence.json",
           "sha256": "9f35f2ebf2ea07dd695bd09800640dd833f0634220b05d23dcaa35f80adfb0e2"
+        },
+        {
+          "path": "verification/daveml_nesc_staging_lineage.json",
+          "sha256": "7717e0871e9dba768d97bc1566d55c2d5413606d3a591f5bbfd8bcce8cbaee29"
+        },
+        {
+          "path": "verification/daveml_nesc_reduction_qualification.json",
+          "sha256": "2afb615a2e455fda79ed853807d62b586f84c95b2253dd8c829493e8a57a80db"
+        },
+        {
+          "path": "verification/daveml_nesc_staging_lineage.json",
+          "sha256": "7717e0871e9dba768d97bc1566d55c2d5413606d3a591f5bbfd8bcce8cbaee29"
         }
       ],
       "failures": [],
@@ -160,19 +184,19 @@
         {
           "id": "nesc-performance-3dof-v1",
           "path": "families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml",
-          "sha256": "573ee97c9077369f15c88b0eb39ebcf53181de2fb946986e0c971ba2ebaa107f",
-          "status": "equivalence_pending"
+          "sha256": "0134afe820939727864c76b8f2892312ffb00a0799b9b35d1493c6854b4211e1",
+          "status": "verified_bounded_replay"
         },
         {
           "id": "nesc-attitude-response-pseudo6dof-v1",
           "path": "families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml",
-          "sha256": "d2d9acaff7ea37d4546d01ba0492a98c54f8577433041dbdba5c568cc63187d3",
-          "status": "equivalence_pending"
+          "sha256": "e0bac690c6c24820ccbfe9acc9622c977137c13dededc534e708f1dc4235bcab",
+          "status": "deferred_no_attitude_comparison"
         }
       ],
       "source_parent": {
         "path": "families/reference_nesc_two_stage_rocket/family.yaml",
-        "sha256": "ee1c4b02e3e9c84840e588f03ffd4180cf9730faecb51547db7fb1adac0aa3a8"
+        "sha256": "850039e00c89fe7b9b810fec517a243f7ffbe155c22467a2b6f391ca5fe906ca"
       },
       "status": "verified"
     },
@@ -182,6 +206,10 @@
         {
           "path": "verification/daveml_a320_openap_integration.json",
           "sha256": "8b4c458881d566fb9bcee28312fd554b4507fb33de0a6a199a989829c9e95bec"
+        },
+        {
+          "path": "verification/daveml_a320_matched_comparison.json",
+          "sha256": "2bbf6ed961567f5821882cf6b55e64f64b440c7d46992b244192a4bc664e5a88"
         }
       ],
       "failures": [],
@@ -210,6 +238,10 @@
         {
           "path": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
           "sha256": "3255c0007a9d4af208e97c3f1f82bbaa16d3bbd6544f5e835fbf452a4088e271"
+        },
+        {
+          "path": "verification/daveml_a320_matched_comparison.json",
+          "sha256": "2bbf6ed961567f5821882cf6b55e64f64b440c7d46992b244192a4bc664e5a88"
         }
       ],
       "failures": [],
@@ -233,16 +265,6 @@
   "family_count": 5,
   "pending_reduction_equivalence": [
     {
-      "family_id": "reference_f16_s119",
-      "id": "f16-point-mass-3dof-v1",
-      "status": "equivalence_pending"
-    },
-    {
-      "family_id": "reference_f16_s119",
-      "id": "f16-attitude-response-pseudo6dof-v1",
-      "status": "equivalence_pending"
-    },
-    {
       "family_id": "reference_hl20_mod_k",
       "id": "hl20-energy-glide-3dof-v1",
       "status": "equivalence_pending"
@@ -250,16 +272,6 @@
     {
       "family_id": "reference_hl20_mod_k",
       "id": "hl20-attitude-response-pseudo6dof-v1",
-      "status": "equivalence_pending"
-    },
-    {
-      "family_id": "reference_nesc_two_stage_rocket",
-      "id": "nesc-performance-3dof-v1",
-      "status": "equivalence_pending"
-    },
-    {
-      "family_id": "reference_nesc_two_stage_rocket",
-      "id": "nesc-attitude-response-pseudo6dof-v1",
       "status": "equivalence_pending"
     }
   ],
