@@ -3,6 +3,11 @@
 Status: implementation complete for the committed free-flight tranche; residual
 Earth-rate and 3-DOF attitude limitations remain explicitly fail-closed.
 
+Sensor integration follows the same ordered fidelity ladder as the plant. T0
+uses acceleration-only translation, T1 may use explicitly synthesized attitude,
+T2 requires physical rotational truth for full IMU/MEKF evidence, and T3 adds
+effector/resource telemetry. See [Fidelity-first vehicle integration program](fidelity-first-integration-program.md).
+
 ## Objective
 
 Prove that a real Taoryx scenario can be run through the complete sensor path:
@@ -21,6 +26,11 @@ must not replace plant validation, silently change the dynamics, or claim that
 a notional IMU profile is hardware qualification.
 
 ## Vehicle Order
+
+The vehicle order is also a fidelity order: complete the smallest translation
+case and its artifact contract before attaching the next sensor or estimator
+channel. Higher-tier sensor runs may be diagnostic, but they do not promote a
+vehicle past a blocked lower-tier plant contract.
 
 ### 1. Hummingbird diagnostic integration
 

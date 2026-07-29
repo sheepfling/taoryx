@@ -5,21 +5,21 @@ families:
     integration_record: families/reference_f16_s119/qualification/integration-record.yaml
     layers:
       actuators:
-        status: external_overlay_required
-        evidence: families/reference_f16_s119/qualification/integration-record.yaml
-        rationale: The promoted DAVE-ML plant exposes command channels, not physical actuator dynamics.
+        status: qualified_external_overlay
+        evidence: verification/daveml_f16_overlay_qualification.json
+        rationale: The promoted DAVE-ML plant exposes command channels; the first-order position/rate overlay is separately qualified and remains downstream policy.
       controllers:
-        status: external_overlay_required
-        evidence: families/reference_f16_s119/qualification/integration-record.yaml
-        rationale: Controller design is a Taoryx overlay and is not source-exact plant content.
+        status: qualified_external_overlay
+        evidence: verification/daveml_f16_controller_qualification.json
+        rationale: The source-channel LQR and bounded smoke objectives pass as a Taoryx overlay; no source controller claim is made.
       mission:
         status: external_overlay_required
         evidence: families/reference_f16_s119/qualification/integration-record.yaml
         rationale: Mission logic is outside the source package and requires a separate scenario contract.
       reductions:
-        status: not_promoted
-        evidence: families/reference_f16_s119/qualification/integration-record.yaml
-        rationale: No reduced-order equivalence report has been promoted from the parent plant.
+        status: qualified_bounded_comparison
+        evidence: verification/daveml_f16_reduction_qualification.json
+        rationale: Point-mass and pseudo-6DOF reports are promoted only as a local linearized projection and bounded surrogate response.
   - family_id: reference_hl20_mod_k
     integration_record: families/reference_hl20_mod_k/qualification/integration-record.yaml
     layers:
@@ -47,9 +47,9 @@ families:
         evidence: families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml
         rationale: The authoritative two-stage source is an open-loop trajectory package with no controls.
       reductions:
-        status: not_promoted
-        evidence: families/reference_nesc_two_stage_rocket/qualification/integration-record.yaml
-        rationale: Reduced-order rocket fidelity requires a separate comparison against the parent trajectory.
+        status: qualified_bounded_comparison
+        evidence: verification/daveml_nesc_reduction_qualification.json
+        rationale: Translation replay is bounded against retained ECI telemetry; attitude pseudo-6DOF remains explicitly deferred.
   - family_id: a320_openap_3dof
     integration_record: families/a320_openap_3dof/qualification/integration-record.yaml
     layers:
@@ -69,6 +69,10 @@ families:
         status: not_in_source_contract
         evidence: families/a320_openap_3dof/qualification/integration-record.yaml
         rationale: OpenAP performance data does not provide source-exact actuator or controller dynamics.
+      matched_comparison:
+        status: verified
+        evidence: verification/daveml_a320_matched_comparison.json
+        rationale: Derived-exact performance and surrogate-composite common channels match at declared operating points; rotational authorities remain separate.
   - family_id: a320_openap_jsbsim_pseudo6dof
     integration_record: families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml
     layers:
@@ -88,3 +92,7 @@ families:
         status: not_promoted
         evidence: families/a320_openap_jsbsim_pseudo6dof/qualification/integration-record.yaml
         rationale: The current qualification is pseudo-6DOF and does not claim full rigid-body source equivalence.
+      matched_comparison:
+        status: verified
+        evidence: verification/daveml_a320_matched_comparison.json
+        rationale: The surrogate-composite lane shares OpenAP translational performance with the derived-exact baseline and is compared without merging rotational authority.

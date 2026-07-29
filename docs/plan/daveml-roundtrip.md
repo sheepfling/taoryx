@@ -18,6 +18,12 @@ regenerated DAVE-ML
 fresh import and equivalence report
 ```
 
+Round-trip status is not vehicle fidelity status. After package and semantic
+checks pass, bind the imported channels to the lowest supported vehicle tier
+and promote upward in order. A DAVE-ML package may be complete while its
+6-DOF controller or physical-effector claim remains unavailable. The shared
+promotion gates are defined in [Fidelity-first vehicle integration program](fidelity-first-integration-program.md).
+
 ## Current implementation status
 
 | Milestone | Status | Evidence |

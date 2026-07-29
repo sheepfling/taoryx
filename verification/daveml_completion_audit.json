@@ -1,19 +1,19 @@
 {
   "claim_boundary": "requirement audit; not a flight qualification or historical TAOS compatibility claim",
   "evidence_hashes": {
-    "docs/plan/daveml-roundtrip.md": "2c3ffe265dbfd93b1ed1817ed8aaf60f3ffb8949e8183cf78a4b473d6cfc00f6",
+    "docs/plan/daveml-roundtrip.md": "ba636279ff0f65c08a5f6453175c09a43225caaff856e33db92d1c2d201c0f72",
     "families/a320_openap_3dof/qualification/integration-record.yaml": "162e4f29bda3e8b903445c1383c6e233300bba81fa36aa595d55630011c52300",
     "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json": "7c6dee9f8948d4613d178b5b68a0e836732ad4a6d7a572a348c17e007fd678ac",
     "families/reference_a320/qualification/integration-record.yaml": "e8376d380013315898f730f70cd2b8b8ed8278059902bbc356029e2d2fca31bd",
-    "verification/daveml_catalog_import.json": "2067e1ca4f577b6a0cae4ffc90d3c67f197e846dd1aa7d50b5a883e1801cdd5c",
-    "verification/daveml_catalog_roundtrip.json": "bae51c6da56d8844590626361ed5411a8a4efd0a37c8524f7a322db2af4571b6",
+    "verification/daveml_catalog_import.json": "fdded732f25e209d0e3c5179b5df4e52905e27cb214c998b47db0ad749dbb8ef",
+    "verification/daveml_catalog_roundtrip.json": "34f603f148777dec75e6b08a29ee635b925ba6dbb63bdbd2686fedb4d0f662aa",
     "verification/daveml_family_layer_dispositions.json": "70c3366e16d7a71ae509216eed1a974b07310d62eb8831b14b3a704e01a0b2af",
     "verification/daveml_family_readiness.json": "286d9b867ed33455c35550b143c26b091f9762498366bd84624a68f493db816c",
     "verification/daveml_official_checkdata.json": "eb621fa798b0a08e1c579b8197a1c037ba73b0063b9c9142af14e3ca327e6b72",
     "verification/daveml_official_conformance.json": "e8a94e57b364697a25f1844c6ee7000dadc61bab0840a5276d17726d5f274531",
-    "verification/daveml_operating_point_catalog.json": "61da5063e2cd6ae749dbbf7c01f891640ef257cb3b9f7170c207e40f912112c3",
-    "verification/daveml_operational_contracts.json": "83b9fff61f47b87df387e9969db2425da8f37e1bb710543616d057466ceca0fb",
-    "verification/daveml_release_gate.json": "255c673f339d2e1dc26f16dbbc9cefc3fe86300476242d97b9237ebc065fab5e"
+    "verification/daveml_operating_point_catalog.json": "cc962c7d218359551b3e7b715f9f84a8ca97a2ead4f05b4d333ea8d540873425",
+    "verification/daveml_operational_contracts.json": "35162e069e53c14009a3c21068561c35bce817e94aeffc0d979941a208c0848f",
+    "verification/daveml_release_gate.json": "c21084f0fe8a81a92701ebb601d82ff946d224d1e7ceeeaa14f04d18bb345eaa"
   },
   "known_gaps": [
     "official_2d_ungridded_interpolation_case_2",
@@ -23,8 +23,8 @@
   "operating_point_family_count": 5,
   "operational_family_count": 5,
   "readiness_family_count": 3,
-  "release_artifact_count": 26,
-  "release_stage_count": 26,
+  "release_artifact_count": 30,
+  "release_stage_count": 28,
   "requirements": [
     {
       "evidence": "verification/daveml_catalog_import.json",

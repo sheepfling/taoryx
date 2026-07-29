@@ -334,7 +334,7 @@ items:
     target_release: alpha3
     lane: alpha3-breadth
     name: passive-tumbling-deployable-body-geometry-qualification
-    status: partial
+    status: complete
     depends_on: [A2-POST-P0-1, A2-POST-P0-3, A2-POST-P1-1]
     rationale: Passive and tumbling deployable bodies are a bounded Alpha 3 physics tranche. Existing full-angle drag-area models and four-shape analysis fixtures provide a natural first implementation slice after the Alpha 2 platform closeout.
     geometries: [sphere, cylinder, cone, triaxial_ellipsoid]
@@ -362,6 +362,13 @@ items:
       - trajectories remain bounded by declared atmosphere, table, and integration validity limits
       - the existing suborbital ballistic tumble-return example passes as a promoted Alpha 3 proof case
       - no powered guidance, seeker, or Alpha 3 family qualification is implied
+    completed_evidence:
+      - src/taoryx/vehicle.py
+      - src/taoryx/reachability_envelope.py
+      - tools/validate_passive_deployment.py
+      - verification/alpha3-passive-deployment.json
+      - artifacts/deployment/passive_ballistic/deployment-manifest.json
+      - tests/unit/test_passive_deployment_qualification.py
 
   - id: A2-POST-P1-3
     priority: P2

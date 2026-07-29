@@ -211,6 +211,46 @@ def test_four_canonical_detached_body_profiles_have_stable_geometry_contracts() 
         assert all(float(row["projected_area_m2"]) > 0.0 for row in result.spawned_bodies[0].telemetry)
 
 
+def test_triaxial_ellipsoid_detached_body_has_orientation_dependent_area() -> None:
+    body = DetachedBodyDefinition.triaxial_ellipsoid(
+        "elliptic-tank",
+        mass_kg=10.0,
+        semi_axis_x_m=1.5,
+        semi_axis_y_m=0.75,
+        semi_axis_z_m=0.5,
+        inertia_kg_m2=Vector3(1.0, 2.0, 3.0),
+        initial_angular_rate_body_rad_s=Vector3(0.25, 0.4, 0.6),
+    )
+    vehicle = RocketGlideVehicle(
+        dry_mass_kg=100.0,
+        propellant_mass_kg=10.0,
+        thrust_n=1_000.0,
+        burn_time_s=2.0,
+        initial_altitude_m=100.0,
+        booster_dry_mass_kg=10.0,
+        booster_propellant_mass_kg=5.0,
+        booster_thrust_n=1_000.0,
+        booster_burn_time_s=1.0,
+        booster_release_time_s=1.5,
+        booster_detached_body=body,
+    )
+
+    result = simulate_rocket_glide(
+        vehicle,
+        LaunchCommand(0.0, math.radians(45.0)),
+        fidelity=ReachabilityFidelity.PSEUDO_6DOF,
+        horizon_s=3.0,
+        step_size_s=0.1,
+        spawn_children=True,
+    )
+
+    child = result.spawned_bodies[0]
+    areas = [float(row["projected_area_m2"]) for row in child.telemetry]
+    assert child.shape == "triaxial_ellipsoid"
+    assert max(areas) > min(areas)
+    assert all("attitude_rate_rad_s" in row for row in child.telemetry)
+
+
 def test_reachability_can_spawn_and_serialize_a_detached_ballistic_witness(tmp_path: Path) -> None:
     body = DetachedBodyDefinition.cylinder(
         "spent-booster",
@@ -268,6 +308,45 @@ def test_reachability_can_spawn_and_serialize_a_detached_ballistic_witness(tmp_p
     manifest = json.loads(report.manifest_path.read_text(encoding="utf-8"))
     assert manifest["deployment_event_count"] == 1
     assert manifest["source_configuration_hash"]
+
+
+def test_detached_body_aerodynamics_use_declared_crosswind() -> None:
+    body = DetachedBodyDefinition.cylinder(
+        "winded-stage",
+        mass_kg=5.0,
+        radius_m=0.2,
+        length_m=1.0,
+        inertia_kg_m2=Vector3(1.0, 1.0, 1.0),
+    )
+    vehicle = RocketGlideVehicle(
+        dry_mass_kg=100.0,
+        propellant_mass_kg=10.0,
+        thrust_n=1_000.0,
+        burn_time_s=2.0,
+        initial_altitude_m=100.0,
+        wind_velocity_m_s=Vector3(0.0, 10.0, 0.0),
+        booster_dry_mass_kg=5.0,
+        booster_propellant_mass_kg=5.0,
+        booster_thrust_n=1_000.0,
+        booster_burn_time_s=1.0,
+        booster_release_time_s=1.5,
+        booster_detached_body=body,
+    )
+
+    result = simulate_rocket_glide(
+        vehicle,
+        LaunchCommand(0.0, math.radians(45.0)),
+        horizon_s=2.0,
+        step_size_s=0.25,
+        spawn_children=True,
+    )
+    row = result.spawned_bodies[0].telemetry[0]
+    velocity = row["velocity_m_s"]
+    air_velocity = row["air_relative_velocity_m_s"]
+
+    assert air_velocity == pytest.approx([velocity[0], velocity[1] - 10.0, velocity[2]])
+    assert row["air_relative_speed_m_s"] == pytest.approx(math.sqrt(sum(value * value for value in air_velocity)))
+    assert row["air_relative_speed_m_s"] != pytest.approx(math.sqrt(sum(value * value for value in velocity)))
 
 
 def test_pseudo_sixdof_passive_tumble_changes_projected_area_and_records_rates() -> None:

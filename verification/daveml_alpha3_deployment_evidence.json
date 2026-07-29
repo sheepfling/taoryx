@@ -6528,7 +6528,7 @@
   "schema_version": "taoryx.daveml-alpha3-deployment-evidence/v1",
   "source_event_count": 5,
   "source_hashes": {
-    "deployment_contract_sha256": "9b066a2fb9f678d6f727cc0516ce844bd5ff5a4123aaeb9f0f339056a743d416",
+    "deployment_contract_sha256": "181811319d0d6e9782103ae53f3f6ae298366543507cbe2fb687d03c58e4314f",
     "evidence_archive_sha256": "e6f096af5fe2ef7d3519eb1ca712c8f876a067f4ecaea6f91e7422f361ab65b0",
     "parent_replay_sha256": "34e5c32f7bf43c0d896bd45ec1c295d4112bea69b8897181acdc1cb6529e2301"
   },

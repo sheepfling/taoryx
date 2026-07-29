@@ -3,7 +3,10 @@
 import json
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
+pytestmark = pytest.mark.artifact
 
 
 def test_nesc_replay_is_verified() -> None:

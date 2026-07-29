@@ -50,14 +50,14 @@ fidelity_profiles:
   - profile_id: nesc_rocket.performance_3dof.v1
     runtime_fidelity: point_mass_3dof
     equations: [newton_point_mass_translation, variable_mass_translation]
-    status: planned_derived_from_parent
+    status: qualified_bounded_replay
     parent_profile: nesc_rocket.variable_mass_6dof.v1
     data_contract: [aerodynamic_force_tables, propulsion_stage_schedule, mass_schedule, staging_events]
     omitted_physics: [attitude_dynamics, aerodynamic_moments, body_rates]
   - profile_id: nesc_rocket.attitude_response_p6dof.v1
     runtime_fidelity: pseudo_6dof
     equations: [newton_point_mass_translation, quaternion_kinematics, scheduled_attitude_response]
-    status: planned_derived_from_parent
+    status: deferred_no_attitude_comparison
     parent_profile: nesc_rocket.variable_mass_6dof.v1
     data_contract: [aerodynamic_force_tables, propulsion_stage_schedule, mass_schedule, staging_events]
     omitted_physics: [full_moment_balance, actuator_dynamics]
@@ -110,7 +110,7 @@ layers:
   staging: {version: instantaneous-dry-mass-transition-v1, evidence: source_checked_acceptance}
   environment: {version: US1976-upper-continuation-v1, evidence: package_declared}
   controllers: {version: not-applicable-open-loop-v1, evidence: not_applicable_no_declared_controls}
-  reductions: {version: alpha3-reduction-contract-v1, evidence: verification/daveml_alpha3_reduction_evidence.json}
+  reductions: {version: alpha3-reduction-contract-v1, evidence: verification/daveml_nesc_reduction_qualification.json}
   trim: {version: not-applicable-open-loop-v1, evidence: not_applicable_no_declared_controls}
   linearization: {version: not-applicable, evidence: not_applicable_current_rocket_contract}
   tuning: {version: not-applicable, evidence: not_applicable_current_open_loop_contract}
@@ -128,4 +128,4 @@ nonclaims:
   - independent full participating-simulation trajectory equivalence
   - perigee performance beyond the package's retained acceptance boundary
   - actuator, guidance, or launch-pad contact behavior not present in the package
-next_gate: alpha3_full_trajectory_and_reduction_equivalence
+next_gate: alpha3_nesc_attitude_comparison_if_authoritative_input_arrives

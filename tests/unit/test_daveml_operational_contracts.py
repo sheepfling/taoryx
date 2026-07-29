@@ -23,6 +23,7 @@ def test_all_promoted_daveml_families_have_verified_operational_contracts() -> N
     assert all(item["status"] == "verified" for item in report["families"])
 
 
+@pytest.mark.artifact
 def test_generated_contract_report_is_current() -> None:
     report = validate()
     checked = json.loads((ROOT / "verification/daveml_operational_contracts.json").read_text(encoding="utf-8"))

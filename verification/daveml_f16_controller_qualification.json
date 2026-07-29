@@ -1,0 +1,90 @@
+{
+  "checks": {
+    "bounded_probe": true,
+    "closed_loop_hurwitz": true,
+    "controllable": true,
+    "required_scenario_objectives": true,
+    "source_linearization_verified": true
+  },
+  "claim_boundary": "source-channel LQR and bounded controller smoke evidence; not source controller or flight qualification",
+  "controller": {
+    "control_names": [
+      "elevator_deg",
+      "aileron_deg",
+      "rudder_deg",
+      "power_pct"
+    ],
+    "design_id": "f16-s119-source-channel-lqr",
+    "gain": [
+      [
+        -1.2963906200034855e-05,
+        -4.8164577435126456e-17,
+        -1.4142135623136771,
+        -1.0228715082585936e-16,
+        -184.88204354630108,
+        -1.379481356018172e-15
+      ],
+      [
+        4.4206317764356953e-16,
+        0.6426682119635528,
+        -3.521319297319525e-17,
+        -1.2597529794890632,
+        -6.032906675693849e-16,
+        -130.81250812046116
+      ],
+      [
+        -3.988601900905314e-16,
+        1.2597529794890607,
+        -5.718507459136258e-17,
+        0.6426682119635541,
+        -2.6591342202398766e-16,
+        -264.5402394059525
+      ],
+      [
+        1.4142135623136762,
+        4.169660598121072e-18,
+        -1.2963906199724278e-05,
+        -1.2890174511195676e-15,
+        -0.014260958771263633,
+        7.522475976159662e-15
+      ]
+    ],
+    "kind": "full_state_lqr_overlay",
+    "maximum_real_pole": -0.070207024743692,
+    "state_names": [
+      "u_m_s",
+      "v_m_s",
+      "w_m_s",
+      "p_rad_s",
+      "q_rad_s",
+      "r_rad_s"
+    ]
+  },
+  "family_id": "reference_f16_s119",
+  "nonclaims": [
+    "source-exact controller",
+    "actuator source fidelity",
+    "flight qualification",
+    "mission qualification"
+  ],
+  "qualification_class": "downstream_controller_overlay",
+  "schema_version": "taoryx.daveml-f16-controller-qualification/v1",
+  "source_evidence": [
+    {
+      "artifact": "verification/daveml_f16_linearization_evidence.json",
+      "sha256": "e6ddb6b95b2b4fbf4b7d3374124a638d99796053b547de4925a6a5c4db8e2262",
+      "status": "verified"
+    },
+    {
+      "artifact": "verification/daveml_f16_tuning_evidence.json",
+      "sha256": "76748e3201c7d81b434141be090adf622d4da787ae57f25785e38c67e431b598",
+      "status": "verified"
+    },
+    {
+      "artifact": "verification/daveml_f16_scenario_evidence.json",
+      "sha256": "a048a12f685429e26ae19e35426c0207226f46e6f9fdc4d467ffcefe554d159e",
+      "status": "pass"
+    }
+  ],
+  "status": "verified"
+}

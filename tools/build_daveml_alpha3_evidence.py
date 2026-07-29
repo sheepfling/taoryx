@@ -74,7 +74,7 @@ def build_overlay_evidence(registry: dict[str, Any]) -> dict[str, Any]:
 
 
 def build_reduction_evidence(registry: dict[str, Any]) -> dict[str, Any]:
-    """Record every reduction parent and its unfulfilled equivalence gate."""
+    """Record every reduction parent, comparison contract, and disposition."""
 
     reductions: list[dict[str, Any]] = []
     for family in registry["families"]:
@@ -93,11 +93,12 @@ def build_reduction_evidence(registry: dict[str, Any]) -> dict[str, Any]:
                     "preserves": contract["preserves"],
                     "omits": contract["omits"],
                     "comparison": contract["comparison"],
+                    "nonclaims": contract.get("nonclaims", []),
                 }
             )
     return {
         "schema_version": "taoryx.daveml-alpha3-reduction-evidence/v1",
-        "claim_boundary": "reductions are not promoted until parent comparison passes",
+        "claim_boundary": "a reduction is promoted only under its declared comparison classification; source-equivalence and flight claims remain bounded",
         "reduction_count": len(reductions),
         "equivalence_pending_count": sum(item["status"] == "equivalence_pending" for item in reductions),
         "reductions": reductions,

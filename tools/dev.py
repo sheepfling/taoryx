@@ -30,7 +30,13 @@ def project_python() -> str:
 
 def run(command: list[str]) -> None:
     print("+", " ".join(command))
-    subprocess.run(command, cwd=ROOT, check=True)
+    environment = os.environ.copy()
+    source_path = str(ROOT / "src")
+    existing_pythonpath = environment.get("PYTHONPATH")
+    environment["PYTHONPATH"] = os.pathsep.join(
+        path for path in (source_path, existing_pythonpath) if path
+    )
+    subprocess.run(command, cwd=ROOT, check=True, env=environment)
     ####
 ####
 
@@ -210,10 +216,49 @@ def showcase_hl20_composites() -> None:
     ####
 
 
+def showcase_hl20_source_composites() -> None:
+    """Render HL-20 composites using the pinned source graph and actuators."""
+    run(
+        [
+            project_python(),
+            str(ROOT / "examples/showcases/hl20_california_to_hawaii/run_low_fidelity.py"),
+            "--source-bound",
+            "--output-dir",
+            "artifacts/showcases/hl20_california_to_hawaii/source_bound",
+        ]
+    )
+    ####
+
+
 def qualify_hl20() -> None:
     """Regenerate the HL-20 bundle and qualify it through HL20-G6."""
 
     run(tool_script("validate_hl20_qualification.py"))
+    ####
+
+
+def qualify_hl20_source_reachability() -> None:
+    """Qualify source-aero coupling and report fail-closed tier gaps."""
+
+    run(tool_script("validate_hl20_source_reachability.py"))
+    ####
+
+
+def qualify_hl20_terminal_contract() -> None:
+    """Execute the explicit CA-HI target, radius, speed, and timeout contract."""
+    run(tool_script("validate_hl20_terminal_contract.py"))
+    ####
+
+
+def qualify_hl20_source_robustness() -> None:
+    """Generate HL-20 timestep, source-boundary, and timeout-rerun evidence."""
+    run(tool_script("validate_hl20_source_robustness.py"))
+    ####
+
+
+def qualify_passive_deployment() -> None:
+    """Qualify passive sphere, cylinder, cone, and ellipsoid deployments."""
+    run(tool_script("validate_passive_deployment.py"))
     ####
 
 
@@ -813,7 +858,15 @@ def daveml_alpha3_completion() -> None:
     """Build and validate the Alpha 3 DAVE-ML completion evidence."""
 
     run(tool_script("build_daveml_alpha3_evidence.py"))
+    run(tool_script("validate_daveml_alpha3_qualification.py"))
     run(tool_script("validate_daveml_alpha3_completion.py"))
+    ####
+
+
+def daveml_alpha3_qualification() -> None:
+    """Build the requested F-16, NESC, and A320 Alpha 3 qualification evidence."""
+
+    run(tool_script("validate_daveml_alpha3_qualification.py"))
     ####
 
 
@@ -886,7 +939,12 @@ TASKS: dict[str, Callable[[], None]] = {
     "showcase-california-hawaii": showcase_california_hawaii,
     "showcase-hl20-low-fidelity": showcase_hl20_low_fidelity,
     "showcase-hl20-composites": showcase_hl20_composites,
+    "showcase-hl20-source-composites": showcase_hl20_source_composites,
     "qualify-hl20": qualify_hl20,
+    "qualify-hl20-source-reachability": qualify_hl20_source_reachability,
+    "qualify-hl20-terminal-contract": qualify_hl20_terminal_contract,
+    "qualify-hl20-source-robustness": qualify_hl20_source_robustness,
+    "qualify-passive-deployment": qualify_passive_deployment,
     "dof-matrix": dof_matrix,
     "robustness-matrix": robustness_matrix,
     "verification-artifacts": verification_artifacts,
@@ -955,6 +1013,7 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-operational-contracts": daveml_operational_contracts,
     "daveml-operating-points": daveml_operating_points,
     "daveml-alpha3-completion": daveml_alpha3_completion,
+    "daveml-alpha3-qualification": daveml_alpha3_qualification,
     "handoff": handoff,
     "check": check,
     "all": check,

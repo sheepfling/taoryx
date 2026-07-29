@@ -1,0 +1,129 @@
+{
+  "claim_boundary": "source-backed staging event and parent/child lineage evidence; not independent participating-simulation equivalence",
+  "events": [
+    {
+      "event": "liftoff_stage1_ignition",
+      "mass_transition_kg": 0.0,
+      "phase_after": "stage1_burn",
+      "phase_before": "stage1_burn",
+      "sample_after": {
+        "mass_kg": 314000.0,
+        "phase": "stage1_burn",
+        "time_s": 0.0
+      },
+      "sample_before": {
+        "mass_kg": 314000.0,
+        "phase": "stage1_burn",
+        "time_s": 0.0
+      },
+      "sample_time_error_s": 0.0,
+      "source_time_s": 0.0
+    },
+    {
+      "event": "stage1_burnout",
+      "mass_transition_kg": 387.4034947036416,
+      "phase_after": "stack_coast",
+      "phase_before": "stage1_burn",
+      "sample_after": {
+        "mass_kg": 134000.0,
+        "phase": "stack_coast",
+        "time_s": 37.4
+      },
+      "sample_before": {
+        "mass_kg": 134387.40349470364,
+        "phase": "stage1_burn",
+        "time_s": 37.299999999998946
+      },
+      "sample_time_error_s": 0.019548235294116978,
+      "source_time_s": 37.38045176470588
+    },
+    {
+      "event": "stage1_jettison_stage2_ignition",
+      "mass_transition_kg": 35038.629446435254,
+      "phase_after": "stage2_burn",
+      "phase_before": "stack_coast",
+      "sample_after": {
+        "mass_kg": 98961.37055356475,
+        "phase": "stage2_burn",
+        "time_s": 134.20000000000002
+      },
+      "sample_before": {
+        "mass_kg": 134000.0,
+        "phase": "stack_coast",
+        "time_s": 134.09999999999445
+      },
+      "sample_time_error_s": 0.0295482352941292,
+      "source_time_s": 134.1704517647059
+    },
+    {
+      "event": "stage2_burnout",
+      "mass_transition_kg": 83.1932716708252,
+      "phase_after": "orbit_coast",
+      "phase_before": "stage2_burn",
+      "sample_after": {
+        "mass_kg": 19000.0,
+        "phase": "orbit_coast",
+        "time_s": 195.4
+      },
+      "sample_before": {
+        "mass_kg": 19083.193271670825,
+        "phase": "stage2_burn",
+        "time_s": 195.29999999994445
+      },
+      "sample_time_error_s": 0.03636423529411559,
+      "source_time_s": 195.3636357647059
+    },
+    {
+      "event": "nominal_endpoint",
+      "mass_transition_kg": 0.0,
+      "phase_after": "orbit_coast",
+      "phase_before": "orbit_coast",
+      "sample_after": {
+        "mass_kg": 19000.0,
+        "phase": "orbit_coast",
+        "time_s": 199.99999999999582
+      },
+      "sample_before": {
+        "mass_kg": 19000.0,
+        "phase": "orbit_coast",
+        "time_s": 199.8999999999959
+      },
+      "sample_time_error_s": -4.177991286269389e-12,
+      "source_time_s": 200.0
+    }
+  ],
+  "family_id": "reference_nesc_two_stage_rocket",
+  "lineage": {
+    "deployment_artifact": "families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml",
+    "deployment_artifact_sha256": "181811319d0d6e9782103ae53f3f6ae298366543507cbe2fb687d03c58e4314f",
+    "deployment_child_id": "nesc-synthetic-cylinder",
+    "parent_id": "nesc-stack-v1",
+    "parent_qualification_unchanged_by_child": true,
+    "stage1_id": "nesc-stage1-v1",
+    "stage2_activation_event": "stage1_jettison_stage2_ignition",
+    "stage2_id": "nesc-stage2-v1"
+  },
+  "nonclaims": [
+    "independent participating-simulation equivalence",
+    "source-exact child aerodynamics",
+    "active guidance",
+    "flight qualification"
+  ],
+  "schema_version": "taoryx.daveml-nesc-staging-lineage/v1",
+  "source": {
+    "archive": "resources/aerospace/daveml/nesc-model-catalog-v1.0/qualified/nesc-two-stage-rocket/nesc-two-stage-rocket-v0.9-evidence.zip",
+    "archive_sha256": "e6f096af5fe2ef7d3519eb1ca712c8f876a067f4ecaea6f91e7422f361ab65b0",
+    "event_member": "taoryx-nesc-two-stage-rocket-v0.9/tables/mission-events.csv",
+    "parent_family": "families/reference_nesc_two_stage_rocket/family.yaml",
+    "parent_family_sha256": "850039e00c89fe7b9b810fec517a243f7ffbe155c22467a2b6f391ca5fe906ca",
+    "trajectory_member": "taoryx-nesc-two-stage-rocket-v0.9/validation/scenario17-trajectory.csv"
+  },
+  "status": "verified",
+  "trajectory": {
+    "mass_monotonic_nonincreasing": true,
+    "phase_change_count": 3,
+    "sample_count": 2001,
+    "time_end_s": 199.99999999999582,
+    "time_start_s": 0.0
+  }
+}

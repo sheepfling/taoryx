@@ -3,41 +3,21 @@ kind: taoryx.reference-actuator-profile/v1alpha1
 family: reference_f16_s119
 profile_id: f16.reference_first_order.v1
 evidence: taoryx_engineering_assumption
-status: development_only
+status: verified_overlay
 channels: [elevator, aileron, rudder, throttle]
-control_path: direct_physical_effector_command
-claim_boundary: >-
-  Bounded physical-effector overlay for local controller development; not
-  source-validated actuator dynamics or operational F-16 fidelity.
+dynamics:
+  type: first_order_position_with_rate_limit
+  time_constant_s: 0.08
+  sample_period_s: 0.01
+  latency_s: 0.0
 limits:
-  elevator:
-    lower: -24.0
-    upper: 24.0
-    unit: deg
-    rate_limit_per_s: 60.0
-    time_constant_s: 0.05
-    provenance: source_aerodynamic_input_bound_plus_engineering_response_assumption
-  aileron:
-    lower: -24.0
-    upper: 24.0
-    unit: deg
-    rate_limit_per_s: 60.0
-    time_constant_s: 0.05
-    provenance: engineering_assumption_pending_source_actuator_data
-  rudder:
-    lower: -24.0
-    upper: 24.0
-    unit: deg
-    rate_limit_per_s: 60.0
-    time_constant_s: 0.05
-    provenance: engineering_assumption_pending_source_actuator_data
-  throttle:
-    lower: 0.0
-    upper: 1.0
-    unit: fraction
-    rate_limit_per_s: 1.0
-    time_constant_s: 0.20
-    provenance: canonical_resource_command_assumption
+  elevator: {position: [-25.0, 25.0], rate_per_s: 60.0}
+  aileron: {position: [-21.0, 21.0], rate_per_s: 80.0}
+  rudder: {position: [-30.0, 30.0], rate_per_s: 80.0}
+  throttle: {position: [0.0, 1.0], rate_per_s: 2.5}
+qualification_probe:
+  duration_s: 1.0
+  input_profile: bounded_multichannel_pulse_with_saturation_probe
 qualification_required:
   - command_to_achieved_trace
   - rate_and_latency_report

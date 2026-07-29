@@ -26,7 +26,7 @@ controller, or route-success claim from the parent.
 
 ## Fidelity ladder
 
-### R1: boost and release point-mass: in progress
+### R1: boost and release point-mass: verified witness
 
 Use a point-mass parent and child to establish release altitude, velocity,
 flight-path angle, energy, mass, and event lineage. This is the first shared
@@ -50,23 +50,42 @@ byte-pinned DAVE-ML force/moment graph is the next fidelity promotion, not an
 implicit claim of source-exact trajectory equivalence. The case remains
 direct/open loop until a separately qualified controller is added.
 
-### R4: energy-managed entry/glide
+### R4: native rigid-body plus logical surface allocation: executable witness
 
-Only after R3 is stable, add explicit energy-management segments and compare
+The fourth ladder tier retains the native rigid-body state and adds a bounded
+seven-channel logical surface allocator. It records requested and achieved
+bank/pitch/yaw channels, residual, saturation, and the resolved logical
+deflections. The overlay is deliberately not coupled to source-declared
+actuator dynamics and does not make a controller claim.
+
+### R5: energy-managed entry/glide
+
+Only after R4 is stable, add explicit energy-management segments and compare
 normalized altitude/Mach, specific energy, range, crossrange, and termination
 disposition. Route success is not a default acceptance criterion.
+
+R1-R4 are now executable synthetic witnesses and are qualified by
+`HL20-G0` through `HL20-G6`. The remaining implementation is tracked in
+[`hl20-post-g6-program.md`](hl20-post-g6-program.md): P1 couples the source
+DAVE-ML force/moment graph, P2 qualifies controls and trim, P3 adds
+energy-managed segments, P4 makes terminal route goals executable, and P5
+closes robustness and evidence.
 
 ## Initial cases
 
 | Case | Parent | Child | Initial evidence |
 |---|---|---|---|
 | X-15 rocket release | synthetic or existing booster | X-15 public research surrogate | existing native showcase |
-| HL-20 rocket release | generic staged booster | HL-20 Mod K source-grounded plant | contract only |
+| HL-20 rocket release | generic staged booster | HL-20 Mod K source-grounded plant | four-tier synthetic witness qualified through HL20-G6 |
 
 The HL-20 CA-HI route contract remains separate from this executable release
 witness. The current runtime implementation is an open-loop release/glide
-trajectory across all three fidelity tiers, not a target-hit or landing
-simulation.
+trajectory across all four fidelity tiers, not a target-hit or landing
+simulation. Its reproducible showcase emits three evidence boards: the
+boost/coast/glide flight board, a cross-fidelity capability board, and a
+spent-cylinder deployment/tumble board. The associated JSON and CSV artifacts
+retain the exact search grid, per-candidate disposition, controls, and child
+telemetry used to render those boards.
 
 ## Nonclaims
 

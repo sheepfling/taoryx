@@ -160,7 +160,17 @@ def render_hl20_ca_hi_showcase_composites(
             "source_exact_route": False,
             "controller_claim": False,
             "arrival_or_landing_claim": False,
-            "logical_surface_allocator": "Tier 3 telemetry overlay only; it is not source actuator dynamics or controller qualification.",
+            "source_aerodynamics": all(
+                dict(envelope.provenance).get("aerodynamic_model") == "hl20_mod_k_daveml_source_v1"
+                for envelope in ordered
+            ),
+            "actuator_profiles": sorted(
+                {
+                    str(dict(envelope.provenance).get("actuator_profile_id", "none"))
+                    for envelope in ordered
+                }
+            ),
+            "surface_controls": "Requested and achieved source surface channels are recorded when the source model is selected; this is not a closed-loop authority claim.",
             "spent_stage": "Synthetic passive aero-ballistic cylinder. Native tumble is only represented in native rigid tiers.",
         },
         "data_artifacts": [path.name for path in data_paths],
@@ -802,6 +812,10 @@ def _tier_summary(envelope: ReachabilityEnvelope) -> dict[str, object]:
         "fidelity": envelope.fidelity.value,
         "label": _TIER_LABELS[envelope.fidelity],
         "contract": _TIER_CONTRACTS[envelope.fidelity],
+        "aerodynamic_model_id": parameters.get("aerodynamic_model_id"),
+        "actuator_profile_id": parameters.get("actuator_profile_id"),
+        "mission_profile_id": parameters.get("mission_profile_id"),
+        "mission_segment_schedule": parameters.get("mission_segment_schedule", []),
         "state_fields": list(envelope.state_fields),
         "candidates": candidates,
         "phase_objectives": _phase_objectives(envelope),
@@ -897,11 +911,23 @@ def _candidate_rows(envelope: ReachabilityEnvelope) -> list[dict[str, object]]:
                 "terminal_crossrange_m": sample.terminal.position_m[1],
                 "terminal_altitude_m": sample.terminal.position_m[2],
                 "terminal_speed_m_s": sample.terminal.speed_m_s,
+                "terminal_impact_radius_m": metrics.get("terminal_impact_radius_m"),
+                "terminal_impact_speed_m_s": metrics.get("terminal_impact_speed_m_s"),
+                "target_id": envelope.terminal_criteria.target_id,
+                "target_frame": envelope.terminal_criteria.target_frame,
                 "maximum_altitude_m": metrics.get("maximum_altitude_m"),
                 "maximum_speed_m_s": metrics.get("maximum_speed_m_s"),
                 "minimum_mass_kg": metrics.get("minimum_mass_kg"),
                 "phases": sorted({state.phase for state in sample.trajectory.states}),
                 "deployment_event_count": len(sample.trajectory.deployment_events),
+                "mission_event_count": len(sample.trajectory.mission_events),
+                "mission_segments": sorted(
+                    {
+                        str(row.get("mission_segment"))
+                        for row in sample.trajectory.telemetry
+                        if row.get("mission_segment") not in {None, "unprofiled"}
+                    }
+                ),
                 "child_body_id": None if child is None else child.body_id,
                 "child_shape": None if child is None else child.shape,
                 "child_termination": None if child is None else child.termination.value,
@@ -930,9 +956,41 @@ def _parent_rows(envelope: ReachabilityEnvelope) -> list[dict[str, object]]:
             }
             if index < len(telemetry):
                 row.update(telemetry[index])
+            _flatten_source_telemetry(row)
             rows.append(row)
     return rows
     ####
+
+
+def _flatten_source_telemetry(row: dict[str, object]) -> None:
+    """Expose source and actuator channels as analysis-friendly CSV columns."""
+
+    source = row.get("source_aerodynamics")
+    if not isinstance(source, Mapping):
+        return
+    coefficients = source.get("coefficients")
+    if isinstance(coefficients, Mapping):
+        for name, value in coefficients.items():
+            row[f"source_coefficient_{name}"] = value
+    operating_point = source.get("operating_point")
+    if isinstance(operating_point, Mapping):
+        for name, value in operating_point.items():
+            row[f"source_operating_{name}"] = value
+    actuator = source.get("actuator")
+    if not isinstance(actuator, Mapping):
+        return
+    for channel, values in (
+        ("requested", actuator.get("requested_deg")),
+        ("achieved", actuator.get("achieved_deg")),
+        ("rate", actuator.get("rate_deg_s")),
+    ):
+        if isinstance(values, Mapping):
+            for name, value in values.items():
+                row[f"actuator_{channel}_{name}"] = value
+    for field in ("saturated", "rate_limited"):
+        values = actuator.get(field)
+        if isinstance(values, list):
+            row[f"actuator_{field}"] = list(values)
 
 
 def _child_rows(envelope: ReachabilityEnvelope) -> list[dict[str, object]]:

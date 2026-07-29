@@ -3,7 +3,7 @@
   "overlays": [
     {
       "artifact": "families/reference_f16_s119/actuators/ideal-direct.yaml",
-      "artifact_sha256": "ee61c5be756d5e73f5ff5c1bdfcae769d57a845563be97962174395996501205",
+      "artifact_sha256": "011b4061a8533b990f39304529b5bcae97dda24dc633321fd75382a8e8743249",
       "authority": "downstream_taoryx_overlay",
       "family_id": "reference_f16_s119",
       "kind": "actuator",
@@ -13,17 +13,17 @@
     },
     {
       "artifact": "families/reference_f16_s119/actuators/reference-first-order-v1.yaml",
-      "artifact_sha256": "dddb11d1a2e1f39bc71150f1de7864ad6e105d09e76f5c541c4ef9d07495e710",
+      "artifact_sha256": "cc6eba9fbecdd5cb7d6cc613abc0f69b4d06ca29924c768f75389c895b33b660",
       "authority": "downstream_taoryx_overlay",
       "family_id": "reference_f16_s119",
       "kind": "actuator",
       "overlay_id": "f16-reference-first-order-v1",
       "source_parent": "families/reference_f16_s119/family.yaml",
-      "status": "contract_ready"
+      "status": "verified_overlay"
     },
     {
       "artifact": "families/reference_hl20_mod_k/actuators/ideal-direct.yaml",
-      "artifact_sha256": "c1c4675543af9f79500708665f02b1caf25c6627093aa093fe73aacd3af26492",
+      "artifact_sha256": "d9793be7bc210d0020b47043ea2c8e36d3e09eefa812daa49a0a1900c7f963ec",
       "authority": "downstream_taoryx_overlay",
       "family_id": "reference_hl20_mod_k",
       "kind": "actuator",
@@ -33,7 +33,7 @@
     },
     {
       "artifact": "families/reference_hl20_mod_k/actuators/reference-first-order-v1.yaml",
-      "artifact_sha256": "b6a9b7cf7b54418c46d42afc246eb34b0376e77c0b3e7547a229171d1f4d86c9",
+      "artifact_sha256": "5972b2348bdb28b2e36bbc81f44e7d01352a8629d2d1ac889d4d71ad9bf7556c",
       "authority": "downstream_taoryx_overlay",
       "family_id": "reference_hl20_mod_k",
       "kind": "actuator",
@@ -43,7 +43,7 @@
     },
     {
       "artifact": "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml",
-      "artifact_sha256": "e0e64c66d9da2b36e3e2f1f20cfd36d48cf77a6221eac3a790c1071f540463ba",
+      "artifact_sha256": "959feaaa9fbea85b0623abbc68157ed01fd4c44b22a1173693804f818956fe9c",
       "authority": "downstream_taoryx_overlay",
       "family_id": "reference_hl20_mod_k",
       "kind": "allocation",

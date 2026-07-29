@@ -7,15 +7,27 @@
       "evidence": [
         {
           "path": "verification/daveml_f16_linearization_evidence.json",
-          "sha256": "3166f6924da44f180fa929a41381bdc04cf697491250567f517bb42a8abba670"
+          "sha256": "e6ddb6b95b2b4fbf4b7d3374124a638d99796053b547de4925a6a5c4db8e2262"
         },
         {
           "path": "verification/daveml_f16_tuning_evidence.json",
-          "sha256": "26999635cacc02dce712c4dfef7a72ec090da7ccec6af3fca7b8e54bfb4cb4ae"
+          "sha256": "76748e3201c7d81b434141be090adf622d4da787ae57f25785e38c67e431b598"
         },
         {
           "path": "verification/daveml_f16_scenario_evidence.json",
-          "sha256": "c2201a98dfa39a3c5b72fcaf313a469ea03607df80fb57ceded6d883a1274274"
+          "sha256": "a048a12f685429e26ae19e35426c0207226f46e6f9fdc4d467ffcefe554d159e"
+        },
+        {
+          "path": "verification/daveml_f16_overlay_qualification.json",
+          "sha256": "2cbfa9f8de4e60918a777590040214d4a3dae641b1b9dbbbcacc3814fbdeab87"
+        },
+        {
+          "path": "verification/daveml_f16_controller_qualification.json",
+          "sha256": "dade6e9c770195639ba0921fcf46fa76af9d4800bc182aacb8ab59b5103bb008"
+        },
+        {
+          "path": "verification/daveml_f16_reduction_qualification.json",
+          "sha256": "6280153371bafe747cd3d04507972369507db425b568aacd0c10c3b5465d97bc"
         }
       ],
       "failures": [],
@@ -30,15 +42,15 @@
           "id": "f16-ideal-direct-v1",
           "kind": "actuator",
           "path": "families/reference_f16_s119/actuators/ideal-direct.yaml",
-          "sha256": "ee61c5be756d5e73f5ff5c1bdfcae769d57a845563be97962174395996501205",
+          "sha256": "011b4061a8533b990f39304529b5bcae97dda24dc633321fd75382a8e8743249",
           "status": "verified_parent_regression_only"
         },
         {
           "id": "f16-reference-first-order-v1",
           "kind": "actuator",
           "path": "families/reference_f16_s119/actuators/reference-first-order-v1.yaml",
-          "sha256": "dddb11d1a2e1f39bc71150f1de7864ad6e105d09e76f5c541c4ef9d07495e710",
-          "status": "contract_ready"
+          "sha256": "cc6eba9fbecdd5cb7d6cc613abc0f69b4d06ca29924c768f75389c895b33b660",
+          "status": "verified_overlay"
         }
       ],
       "qualification_class": "reference_exact",
@@ -46,19 +58,19 @@
         {
           "id": "f16-point-mass-3dof-v1",
           "path": "families/reference_f16_s119/reductions/point-mass-3dof-v1.yaml",
-          "sha256": "be3a4430de3fd2b89eaf834f856b885935fb9b0b13acaf54e2ea28813f177bca",
-          "status": "equivalence_pending"
+          "sha256": "e79c44d8200b4a5d787144f1ecb6ed208c213f2e36042c791be766e8e8c26966",
+          "status": "verified_local_projection"
         },
         {
           "id": "f16-attitude-response-pseudo6dof-v1",
           "path": "families/reference_f16_s119/reductions/attitude-response-pseudo6dof-v1.yaml",
-          "sha256": "95710620c7c5762ca3b9cab31c044e9e112b890798eb6ce41727828190a9a053",
-          "status": "equivalence_pending"
+          "sha256": "58dbc054d62091c0a576cc31bf67f8f3983e1dfc4673d25c10ea987b2474cad2",
+          "status": "verified_surrogate_response"
         }
       ],
       "source_parent": {
         "path": "families/reference_f16_s119/family.yaml",
-        "sha256": "32254c05d5b88fda1be5024f0a67c841b43d410a551cefc8ceefd54b141201b6"
+        "sha256": "bad1a5a7fe618e44ad1718971613a9eb0b18cba02f3195210108860c70e903e2"
       },
       "status": "verified"
     },
@@ -67,15 +79,15 @@
       "evidence": [
         {
           "path": "verification/daveml_hl20_linearization_evidence.json",
-          "sha256": "2caa57ca2396ebf59c1b2f10039d358e364a5b98f37bc19f45ff706d47f9cda8"
+          "sha256": "858de314a1c49635547e1343f1769ba8310c4bb01a23d38557fd777e4ead8a02"
         },
         {
           "path": "verification/daveml_hl20_scenario_evidence.json",
-          "sha256": "eb06bbd3abef449944d2653c6fc38ceee7c8c9ba5ab836c350600af9e6ee632e"
+          "sha256": "f8f60cb946e24d7180ef25fabcf3ec4503b11e4bf5581496ec021c180cc022be"
         },
         {
           "path": "verification/daveml_hl20_load_evidence.json",
-          "sha256": "81987d64d8081d1ee89c59c511c862d574c69414549168234cbe6d709559f101"
+          "sha256": "9651fb6c4266daa356ff7abeef0eef767a302c9a6c43efa0467605596438d0d4"
         }
       ],
       "failures": [],
@@ -90,21 +102,21 @@
           "id": "hl20-ideal-direct-v1",
           "kind": "actuator",
           "path": "families/reference_hl20_mod_k/actuators/ideal-direct.yaml",
-          "sha256": "c1c4675543af9f79500708665f02b1caf25c6627093aa093fe73aacd3af26492",
+          "sha256": "d9793be7bc210d0020b47043ea2c8e36d3e09eefa812daa49a0a1900c7f963ec",
           "status": "verified_parent_regression_only"
         },
         {
           "id": "hl20-reference-first-order-v1",
           "kind": "actuator",
           "path": "families/reference_hl20_mod_k/actuators/reference-first-order-v1.yaml",
-          "sha256": "b6a9b7cf7b54418c46d42afc246eb34b0376e77c0b3e7547a229171d1f4d86c9",
+          "sha256": "5972b2348bdb28b2e36bbc81f44e7d01352a8629d2d1ac889d4d71ad9bf7556c",
           "status": "contract_ready"
         },
         {
           "id": "hl20-logical-surface-allocation-v1",
           "kind": "allocation",
           "path": "families/reference_hl20_mod_k/overlays/logical-surface-allocation-v1.yaml",
-          "sha256": "e0e64c66d9da2b36e3e2f1f20cfd36d48cf77a6221eac3a790c1071f540463ba",
+          "sha256": "959feaaa9fbea85b0623abbc68157ed01fd4c44b22a1173693804f818956fe9c",
           "status": "contract_ready"
         }
       ],
@@ -113,19 +125,19 @@
         {
           "id": "hl20-energy-glide-3dof-v1",
           "path": "families/reference_hl20_mod_k/reductions/energy-glide-3dof-v1.yaml",
-          "sha256": "c198a45d10a901081b245139985ac40426d2eb6440344fffed9ca66c4fd8b7d5",
+          "sha256": "53b118e3cb303e43a8bd01b2f69912c89879c708f181bbfa1764e38881ba0b49",
           "status": "equivalence_pending"
         },
         {
           "id": "hl20-attitude-response-pseudo6dof-v1",
           "path": "families/reference_hl20_mod_k/reductions/attitude-response-pseudo6dof-v1.yaml",
-          "sha256": "f415d71871ba98ec484e403f4b62574d84f862ca16ab682c6bf66346cdba048b",
+          "sha256": "318786da2e23908bdc14ca6d18cb2fd96ad9c397b0c89b0b769293325c873353",
           "status": "equivalence_pending"
         }
       ],
       "source_parent": {
         "path": "families/reference_hl20_mod_k/family.yaml",
-        "sha256": "94f09c30cd313438d3280fae9a4223b649c0cf7bfb23ce4908ecd253e84602fc"
+        "sha256": "032a3ff885861c47194e88f6343bc0232e0bc99a743a71c6fbb0d0725ed22e73"
       },
       "status": "verified"
     },
@@ -134,17 +146,29 @@
         "artifact": "families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml",
         "child_qualification_class": "synthetic",
         "path": "families/reference_nesc_two_stage_rocket/deployment/synthetic-passive-cylinder-v1.yaml",
-        "sha256": "9b066a2fb9f678d6f727cc0516ce844bd5ff5a4123aaeb9f0f339056a743d416",
+        "sha256": "181811319d0d6e9782103ae53f3f6ae298366543507cbe2fb687d03c58e4314f",
         "status": "verified_witness"
       },
       "evidence": [
         {
           "path": "verification/daveml_nesc_replay_evidence.json",
-          "sha256": "34e5c32f7bf43c0d896bd45ec1c295d4112bea69b8897181acdc1cb6529e2301"
+          "sha256": "18bb853ebca4690ceda25039ca1dffdaef71cb3812e41fe97fb0dc7e1c964eeb"
         },
         {
           "path": "verification/daveml_nesc_objectives_evidence.json",
-          "sha256": "43425d423961937f8d3f6ab12630c6e3df36ab9331f88ca35e8e139ac5318a20"
+          "sha256": "9f35f2ebf2ea07dd695bd09800640dd833f0634220b05d23dcaa35f80adfb0e2"
+        },
+        {
+          "path": "verification/daveml_nesc_staging_lineage.json",
+          "sha256": "7717e0871e9dba768d97bc1566d55c2d5413606d3a591f5bbfd8bcce8cbaee29"
+        },
+        {
+          "path": "verification/daveml_nesc_reduction_qualification.json",
+          "sha256": "2afb615a2e455fda79ed853807d62b586f84c95b2253dd8c829493e8a57a80db"
+        },
+        {
+          "path": "verification/daveml_nesc_staging_lineage.json",
+          "sha256": "7717e0871e9dba768d97bc1566d55c2d5413606d3a591f5bbfd8bcce8cbaee29"
         }
       ],
       "failures": [],
@@ -160,19 +184,19 @@
         {
           "id": "nesc-performance-3dof-v1",
           "path": "families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml",
-          "sha256": "62c945252f0578fc2dd4c9adab3fb085bd39d28437efc27584004dc0f0372aeb",
-          "status": "equivalence_pending"
+          "sha256": "0134afe820939727864c76b8f2892312ffb00a0799b9b35d1493c6854b4211e1",
+          "status": "verified_bounded_replay"
         },
         {
           "id": "nesc-attitude-response-pseudo6dof-v1",
           "path": "families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml",
-          "sha256": "45b323dbc5ae2ad67ee17b7fcab24315325174559dd0aead51944137b2039e7d",
-          "status": "equivalence_pending"
+          "sha256": "e0bac690c6c24820ccbfe9acc9622c977137c13dededc534e708f1dc4235bcab",
+          "status": "deferred_no_attitude_comparison"
         }
       ],
       "source_parent": {
         "path": "families/reference_nesc_two_stage_rocket/family.yaml",
-        "sha256": "5879ac5da527b2f75ad4cdd1718b81c08d0c9cde4f575396882178fb20385f02"
+        "sha256": "850039e00c89fe7b9b810fec517a243f7ffbe155c22467a2b6f391ca5fe906ca"
       },
       "status": "verified"
     },
@@ -181,7 +205,11 @@
       "evidence": [
         {
           "path": "verification/daveml_a320_openap_integration.json",
-          "sha256": "0fc54c2a92fe2798e75edef807d589c843e69b6cb5a49f3c20f3cf93a09d26af"
+          "sha256": "8b4c458881d566fb9bcee28312fd554b4507fb33de0a6a199a989829c9e95bec"
+        },
+        {
+          "path": "verification/daveml_a320_matched_comparison.json",
+          "sha256": "2bbf6ed961567f5821882cf6b55e64f64b440c7d46992b244192a4bc664e5a88"
         }
       ],
       "failures": [],
@@ -196,7 +224,7 @@
       "reductions": [],
       "source_parent": {
         "path": "families/a320_openap_3dof/collection-manifest.json",
-        "sha256": "a5868a804054c32e9059f03de759ec5b6bcdaf7916a75657fcadb93c62263ec0"
+        "sha256": "5ab346f462d2e3bcb3ecd6992c34cef2bfb2e90c56237b4026c6de8d46982200"
       },
       "status": "verified"
     },
@@ -205,11 +233,15 @@
       "evidence": [
         {
           "path": "verification/daveml_a320_pseudo6dof_integration.json",
-          "sha256": "067231a147c0c470f93b4d8d4bc077cbbe23568709531b50a29bcaab9465e166"
+          "sha256": "4f528b844b268f0388429f040195f769528a9810b3a74ed5493abd617e1e46da"
         },
         {
           "path": "families/a320_openap_jsbsim_pseudo6dof/validation/runtime-qualification.json",
-          "sha256": "7c6dee9f8948d4613d178b5b68a0e836732ad4a6d7a572a348c17e007fd678ac"
+          "sha256": "3255c0007a9d4af208e97c3f1f82bbaa16d3bbd6544f5e835fbf452a4088e271"
+        },
+        {
+          "path": "verification/daveml_a320_matched_comparison.json",
+          "sha256": "2bbf6ed961567f5821882cf6b55e64f64b440c7d46992b244192a4bc664e5a88"
         }
       ],
       "failures": [],
@@ -225,23 +257,13 @@
       "reductions": [],
       "source_parent": {
         "path": "families/a320_openap_jsbsim_pseudo6dof/collection-manifest.json",
-        "sha256": "554752cf407dfd7cfe1bf797082c0aa00b5233ffea02ea22309f460db09e79fa"
+        "sha256": "6573d827ba06e451c31dae876151954ca9f4bbba4e241496491b9f1d03af43c4"
       },
       "status": "verified"
     }
   ],
   "family_count": 5,
   "pending_reduction_equivalence": [
-    {
-      "family_id": "reference_f16_s119",
-      "id": "f16-point-mass-3dof-v1",
-      "status": "equivalence_pending"
-    },
-    {
-      "family_id": "reference_f16_s119",
-      "id": "f16-attitude-response-pseudo6dof-v1",
-      "status": "equivalence_pending"
-    },
     {
       "family_id": "reference_hl20_mod_k",
       "id": "hl20-energy-glide-3dof-v1",
@@ -250,16 +272,6 @@
     {
       "family_id": "reference_hl20_mod_k",
       "id": "hl20-attitude-response-pseudo6dof-v1",
-      "status": "equivalence_pending"
-    },
-    {
-      "family_id": "reference_nesc_two_stage_rocket",
-      "id": "nesc-performance-3dof-v1",
-      "status": "equivalence_pending"
-    },
-    {
-      "family_id": "reference_nesc_two_stage_rocket",
-      "id": "nesc-attitude-response-pseudo6dof-v1",
       "status": "equivalence_pending"
     }
   ],

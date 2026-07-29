@@ -3,7 +3,10 @@
 import json
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
+pytestmark = pytest.mark.artifact
 
 
 def test_collection_roundtrip_evidence_is_fresh_process_verified() -> None:

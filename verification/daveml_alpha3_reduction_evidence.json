@@ -1,13 +1,13 @@
 {
-  "claim_boundary": "reductions are not promoted until parent comparison passes",
-  "equivalence_pending_count": 6,
+  "claim_boundary": "a reduction is promoted only under its declared comparison classification; source-equivalence and flight claims remain bounded",
+  "equivalence_pending_count": 2,
   "reduction_count": 6,
   "reductions": [
     {
       "artifact": "families/reference_f16_s119/reductions/point-mass-3dof-v1.yaml",
-      "artifact_sha256": "be3a4430de3fd2b89eaf834f856b885935fb9b0b13acaf54e2ea28813f177bca",
+      "artifact_sha256": "e79c44d8200b4a5d787144f1ecb6ed208c213f2e36042c791be766e8e8c26966",
       "comparison": {
-        "evidence_artifact": "verification/f16_reduction_evidence.json",
+        "evidence_artifact": "verification/daveml_f16_reduction_qualification.json",
         "pass_rule": "parent_and_reduction_histories_must_be_compared_over_declared_in_envelope_window",
         "required_evidence": [
           "matched_initial_state",
@@ -17,6 +17,11 @@
         ]
       },
       "family_id": "reference_f16_s119",
+      "nonclaims": [
+        "flight_qualification",
+        "source_exact_attitude_response",
+        "actuator_fidelity"
+      ],
       "omits": [
         "attitude_dynamics",
         "aerodynamic_moments",
@@ -39,13 +44,13 @@
       ],
       "qualification_class": "derived_exact",
       "reduction_id": "f16-point-mass-3dof-v1",
-      "status": "equivalence_pending"
+      "status": "verified_local_projection"
     },
     {
       "artifact": "families/reference_f16_s119/reductions/attitude-response-pseudo6dof-v1.yaml",
-      "artifact_sha256": "95710620c7c5762ca3b9cab31c044e9e112b890798eb6ce41727828190a9a053",
+      "artifact_sha256": "58dbc054d62091c0a576cc31bf67f8f3983e1dfc4673d25c10ea987b2474cad2",
       "comparison": {
-        "evidence_artifact": "verification/f16_reduction_evidence.json",
+        "evidence_artifact": "verification/daveml_f16_reduction_qualification.json",
         "pass_rule": "response_error_must_be_reported_against_parent_without_source_equivalence_claim",
         "required_evidence": [
           "matched_control_pulse",
@@ -55,6 +60,11 @@
         ]
       },
       "family_id": "reference_f16_s119",
+      "nonclaims": [
+        "source_exact_controller",
+        "actuator_fidelity",
+        "flight_qualification"
+      ],
       "omits": [
         "full_moment_balance",
         "physical_actuator_states",
@@ -74,11 +84,11 @@
       ],
       "qualification_class": "surrogate_composite",
       "reduction_id": "f16-attitude-response-pseudo6dof-v1",
-      "status": "equivalence_pending"
+      "status": "verified_surrogate_response"
     },
     {
       "artifact": "families/reference_hl20_mod_k/reductions/energy-glide-3dof-v1.yaml",
-      "artifact_sha256": "c198a45d10a901081b245139985ac40426d2eb6440344fffed9ca66c4fd8b7d5",
+      "artifact_sha256": "53b118e3cb303e43a8bd01b2f69912c89879c708f181bbfa1764e38881ba0b49",
       "comparison": {
         "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
         "pass_rule": "reduction_must_match_parent_over_declared_glide_envelope",
@@ -90,6 +100,11 @@
         ]
       },
       "family_id": "reference_hl20_mod_k",
+      "nonclaims": [
+        "controller_qualification",
+        "landing_validation",
+        "source_exact_attitude_response"
+      ],
       "omits": [
         "attitude_dynamics",
         "aerodynamic_moments",
@@ -116,7 +131,7 @@
     },
     {
       "artifact": "families/reference_hl20_mod_k/reductions/attitude-response-pseudo6dof-v1.yaml",
-      "artifact_sha256": "f415d71871ba98ec484e403f4b62574d84f862ca16ab682c6bf66346cdba048b",
+      "artifact_sha256": "318786da2e23908bdc14ca6d18cb2fd96ad9c397b0c89b0b769293325c873353",
       "comparison": {
         "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
         "pass_rule": "response_error_must_be_reported_against_parent_without_controller_claim",
@@ -128,6 +143,11 @@
         ]
       },
       "family_id": "reference_hl20_mod_k",
+      "nonclaims": [
+        "controller_qualification",
+        "actuator_source_fidelity",
+        "landing_validation"
+      ],
       "omits": [
         "full_moment_balance",
         "physical_actuator_states",
@@ -151,9 +171,9 @@
     },
     {
       "artifact": "families/reference_nesc_two_stage_rocket/reductions/performance-3dof-v1.yaml",
-      "artifact_sha256": "62c945252f0578fc2dd4c9adab3fb085bd39d28437efc27584004dc0f0372aeb",
+      "artifact_sha256": "0134afe820939727864c76b8f2892312ffb00a0799b9b35d1493c6854b4211e1",
       "comparison": {
-        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "evidence_artifact": "verification/daveml_nesc_reduction_qualification.json",
         "pass_rule": "reduction_must_match_parent_at_source_staging_checkpoints",
         "required_evidence": [
           "stage_event_times",
@@ -163,6 +183,11 @@
         ]
       },
       "family_id": "reference_nesc_two_stage_rocket",
+      "nonclaims": [
+        "participating_simulation_equivalence",
+        "attitude_fidelity",
+        "guidance"
+      ],
       "omits": [
         "attitude_dynamics",
         "aerodynamic_moments",
@@ -184,13 +209,13 @@
       ],
       "qualification_class": "derived_exact",
       "reduction_id": "nesc-performance-3dof-v1",
-      "status": "equivalence_pending"
+      "status": "verified_bounded_replay"
     },
     {
       "artifact": "families/reference_nesc_two_stage_rocket/reductions/attitude-response-pseudo6dof-v1.yaml",
-      "artifact_sha256": "45b323dbc5ae2ad67ee17b7fcab24315325174559dd0aead51944137b2039e7d",
+      "artifact_sha256": "e0bac690c6c24820ccbfe9acc9622c977137c13dededc534e708f1dc4235bcab",
       "comparison": {
-        "evidence_artifact": "verification/daveml_alpha3_reduction_evidence.json",
+        "evidence_artifact": "verification/daveml_nesc_reduction_qualification.json",
         "pass_rule": "response_model_must_be_compared_against_parent_and_open_loop_claims_retained",
         "required_evidence": [
           "stage_event_times",
@@ -200,6 +225,11 @@
         ]
       },
       "family_id": "reference_nesc_two_stage_rocket",
+      "nonclaims": [
+        "participating_simulation_equivalence",
+        "active_guidance",
+        "source_exact_controller"
+      ],
       "omits": [
         "full_moment_balance",
         "actuator_dynamics",
@@ -219,7 +249,7 @@
       ],
       "qualification_class": "surrogate_composite",
       "reduction_id": "nesc-attitude-response-pseudo6dof-v1",
-      "status": "equivalence_pending"
+      "status": "deferred_no_attitude_comparison"
     }
   ],
   "schema_version": "taoryx.daveml-alpha3-reduction-evidence/v1",

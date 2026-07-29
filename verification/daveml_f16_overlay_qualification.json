@@ -1,0 +1,3436 @@
+{
+  "checks": {
+    "achieved_within_position_limits": true,
+    "all_samples_finite": true,
+    "rate_limits_respected": true,
+    "saturation_report_present": true
+  },
+  "claim_boundary": "deterministic downstream actuator overlay evidence; not source actuator fidelity or flight qualification",
+  "contract": {
+    "artifact": "families/reference_f16_s119/actuators/reference-first-order-v1.yaml",
+    "dynamics": {
+      "latency_s": 0.0,
+      "sample_period_s": 0.01,
+      "time_constant_s": 0.08,
+      "type": "first_order_position_with_rate_limit"
+    },
+    "latency_s": 0.0,
+    "limits": {
+      "aileron": {
+        "position": [
+          -21.0,
+          21.0
+        ],
+        "rate_per_s": 80.0
+      },
+      "elevator": {
+        "position": [
+          -25.0,
+          25.0
+        ],
+        "rate_per_s": 60.0
+      },
+      "rudder": {
+        "position": [
+          -30.0,
+          30.0
+        ],
+        "rate_per_s": 80.0
+      },
+      "throttle": {
+        "position": [
+          0.0,
+          1.0
+        ],
+        "rate_per_s": 2.5
+      }
+    },
+    "sha256": "cc6eba9fbecdd5cb7d6cc613abc0f69b4d06ca29924c768f75389c895b33b660"
+  },
+  "family_id": "reference_f16_s119",
+  "health": {
+    "all_samples_finite": true,
+    "failed_sample_count": 0
+  },
+  "metrics": {
+    "aileron": {
+      "max_achieved_rate": 80.0,
+      "max_tracking_error": 20.2,
+      "saturation_count": 50
+    },
+    "elevator": {
+      "max_achieved_rate": 60.0,
+      "max_tracking_error": 24.4,
+      "saturation_count": 42
+    },
+    "rudder": {
+      "max_achieved_rate": 80.0,
+      "max_tracking_error": 24.2,
+      "saturation_count": 0
+    },
+    "throttle": {
+      "max_achieved_rate": 2.5,
+      "max_tracking_error": 0.975,
+      "saturation_count": 50
+    }
+  },
+  "nonclaims": [
+    "source actuator dynamics",
+    "source controller",
+    "flight qualification"
+  ],
+  "overlay_id": "f16.reference_first_order.v1",
+  "probe": {
+    "channels": [
+      "elevator",
+      "aileron",
+      "rudder",
+      "throttle"
+    ],
+    "command_units": "source channel units",
+    "duration_s": 1.0,
+    "sample_period_s": 0.01
+  },
+  "qualification_class": "engineering_overlay",
+  "schema_version": "taoryx.daveml-f16-overlay-qualification/v1",
+  "source_hashes": {
+    "control_binding": "bf93bb67d1b2c84bc21b7becd9db8a28968909159478bf19d202fe82949723fa",
+    "parent_family": "bad1a5a7fe618e44ad1718971613a9eb0b18cba02f3195210108860c70e903e2"
+  },
+  "status": "verified",
+  "trace": [
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.0
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.01
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.02
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.03
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.04
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.05
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.06
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.07
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.08
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.09
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.6,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.1
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 1.2,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.11
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 1.7999999999999998,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.12
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 2.4,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.13
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 3.0,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.14
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 3.6,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.15
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 4.2,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.16
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 4.8,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.17
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 5.3999999999999995,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.18
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 5.999999999999999,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.19
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 0.8,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 6.599999999999999,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.2
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 1.6,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 7.199999999999998,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.21
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 2.4000000000000004,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 7.799999999999998,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.22
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 3.2,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 8.399999999999999,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.23
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 4.0,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 8.999999999999998,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.24
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 4.8,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 9.599999999999998,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.25
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 5.6,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 10.199999999999998,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.26
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 6.3999999999999995,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 10.799999999999997,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.27
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 7.199999999999999,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 11.399999999999997,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.28
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 7.999999999999999,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 11.999999999999996,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.29
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 8.799999999999999,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 12.599999999999996,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 0.8,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.3
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 9.6,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 13.199999999999996,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 1.6,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.31
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 10.4,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 13.799999999999995,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 2.4000000000000004,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.32
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 11.200000000000001,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 14.399999999999995,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 3.2,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.33
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 12.000000000000002,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 14.999999999999995,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 4.0,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.34
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 12.800000000000002,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 15.599999999999994,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 4.8,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.35
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 13.600000000000003,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 16.199999999999996,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 5.6,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.36
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 14.400000000000004,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 16.799999999999997,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 6.3999999999999995,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.37
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 15.200000000000005,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 17.4,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 7.199999999999999,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.38
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 15.925000000000004,
+          "achieved_rate_per_s": 72.49999999999994,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 18.0,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 7.999999999999999,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.0,
+          "achieved_rate_per_s": 0.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.39
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 16.559375000000003,
+          "achieved_rate_per_s": 63.43749999999994,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 18.6,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 8.799999999999999,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.025,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.4
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 17.114453125000004,
+          "achieved_rate_per_s": 55.507812499999964,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 19.200000000000003,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 9.6,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.05,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.41
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 17.600146484375003,
+          "achieved_rate_per_s": 48.56933593749994,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 19.800000000000004,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 10.4,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.07500000000000001,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.42
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 18.02512817382813,
+          "achieved_rate_per_s": 42.498168945312464,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 20.400000000000006,
+          "achieved_rate_per_s": 60.0,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 11.200000000000001,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.1,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.43
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 18.396987152099612,
+          "achieved_rate_per_s": 37.18589782714838,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 20.975000000000005,
+          "achieved_rate_per_s": 57.49999999999993,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 12.000000000000002,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.125,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.44
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 18.722363758087162,
+          "achieved_rate_per_s": 32.53766059875485,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 21.478125000000006,
+          "achieved_rate_per_s": 50.312499999999936,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 12.800000000000002,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.15,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.45
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 19.007068288326266,
+          "achieved_rate_per_s": 28.47045302391047,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 21.918359375000005,
+          "achieved_rate_per_s": 44.02343749999993,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 13.600000000000003,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.175,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.46
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 19.256184752285485,
+          "achieved_rate_per_s": 24.91164639592167,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 22.303564453125006,
+          "achieved_rate_per_s": 38.520507812499936,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 14.400000000000004,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.19999999999999998,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.47
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 19.4741616582498,
+          "achieved_rate_per_s": 21.79769059643144,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 22.64061889648438,
+          "achieved_rate_per_s": 33.70544433593743,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 15.200000000000005,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.22499999999999998,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.48
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 19.664891450968575,
+          "achieved_rate_per_s": 19.07297927187752,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 22.935541534423834,
+          "achieved_rate_per_s": 29.49226379394525,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 16.000000000000004,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.24999999999999997,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.49
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 19.831780019597502,
+          "achieved_rate_per_s": 16.68885686289281,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 23.193598842620855,
+          "achieved_rate_per_s": 25.805730819702077,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 16.800000000000004,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.27499999999999997,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.5
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 19.977807517147816,
+          "achieved_rate_per_s": 14.602749755031219,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 23.41939898729325,
+          "achieved_rate_per_s": 22.580014467239316,
+          "bounded_command": 25.0,
+          "raw_command": 30.0,
+          "saturated": true
+        },
+        "rudder": {
+          "achieved": 17.600000000000005,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.3,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.51
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.10558157750434,
+          "achieved_rate_per_s": 12.777406035652294,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 22.819398987293248,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 18.400000000000006,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.325,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.52
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.217383880316298,
+          "achieved_rate_per_s": 11.180230281195769,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 22.219398987293246,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 19.200000000000006,
+          "achieved_rate_per_s": 80.0,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.35000000000000003,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.53
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.31521089527676,
+          "achieved_rate_per_s": 9.782701496046275,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 21.619398987293245,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 19.925000000000004,
+          "achieved_rate_per_s": 72.49999999999991,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.37500000000000006,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.54
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.400809533367166,
+          "achieved_rate_per_s": 8.559863809040502,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 21.019398987293243,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 20.559375000000003,
+          "achieved_rate_per_s": 63.43749999999994,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.4000000000000001,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.55
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.47570834169627,
+          "achieved_rate_per_s": 7.489880832910423,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 20.419398987293242,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 21.114453125000004,
+          "achieved_rate_per_s": 55.507812499999964,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.4250000000000001,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.56
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.541244798984234,
+          "achieved_rate_per_s": 6.553645728796642,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 19.81939898729324,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 21.600146484375003,
+          "achieved_rate_per_s": 48.56933593749994,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.4500000000000001,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.57
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.598589199111206,
+          "achieved_rate_per_s": 5.734440012697073,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 19.21939898729324,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 22.02512817382813,
+          "achieved_rate_per_s": 42.498168945312464,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.47500000000000014,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.58
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.648765549222304,
+          "achieved_rate_per_s": 5.017635011109922,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 18.619398987293238,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 22.396987152099612,
+          "achieved_rate_per_s": 37.18589782714838,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.5000000000000001,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.59
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.692669855569516,
+          "achieved_rate_per_s": 4.3904306347211985,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 18.019398987293236,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 22.722363758087162,
+          "achieved_rate_per_s": 32.53766059875485,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.5250000000000001,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.6
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.731086123623328,
+          "achieved_rate_per_s": 3.8416268053810487,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 17.419398987293235,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 23.007068288326266,
+          "achieved_rate_per_s": 28.47045302391047,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.5500000000000002,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.61
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.764700358170412,
+          "achieved_rate_per_s": 3.361423454708401,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 16.819398987293233,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 23.256184752285485,
+          "achieved_rate_per_s": 24.91164639592167,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.5750000000000002,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.62
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.79411281339911,
+          "achieved_rate_per_s": 2.941245522869851,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 16.219398987293232,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 23.4741616582498,
+          "achieved_rate_per_s": 21.79769059643144,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.6000000000000002,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.63
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.81984871172422,
+          "achieved_rate_per_s": 2.573589832511125,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 15.619398987293232,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 23.664891450968575,
+          "achieved_rate_per_s": 19.07297927187752,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.6250000000000002,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.64
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.842367622758694,
+          "achieved_rate_per_s": 2.2518911034472566,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 15.019398987293233,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 23.831780019597502,
+          "achieved_rate_per_s": 16.68885686289281,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.6500000000000002,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.65
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.862071669913856,
+          "achieved_rate_per_s": 1.9704047155163273,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 14.419398987293233,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 23.977807517147816,
+          "achieved_rate_per_s": 14.602749755031219,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.6750000000000003,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.66
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.879312711174624,
+          "achieved_rate_per_s": 1.7241041260767975,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 13.819398987293233,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.10558157750434,
+          "achieved_rate_per_s": 12.777406035652294,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.7000000000000003,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.67
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.894398622277794,
+          "achieved_rate_per_s": 1.5085911103172034,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 13.219398987293234,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.217383880316298,
+          "achieved_rate_per_s": 11.180230281195769,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.7250000000000003,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.68
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.90759879449307,
+          "achieved_rate_per_s": 1.3200172215275696,
+          "bounded_command": 21.0,
+          "raw_command": 25.0,
+          "saturated": true
+        },
+        "elevator": {
+          "achieved": 12.619398987293234,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.31521089527676,
+          "achieved_rate_per_s": 9.782701496046275,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.7500000000000003,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.69
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 20.107598794493068,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 12.019398987293235,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.400809533367166,
+          "achieved_rate_per_s": 8.559863809040502,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.7750000000000004,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.7
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 19.307598794493067,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 11.419398987293235,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.47570834169627,
+          "achieved_rate_per_s": 7.489880832910423,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8000000000000004,
+          "achieved_rate_per_s": 2.5,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.71
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 18.507598794493067,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 10.819398987293235,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.541244798984234,
+          "achieved_rate_per_s": 6.553645728796642,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8250000000000003,
+          "achieved_rate_per_s": 2.499999999999995,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.72
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 17.707598794493066,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 10.219398987293236,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.598589199111206,
+          "achieved_rate_per_s": 5.734440012697073,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8468750000000003,
+          "achieved_rate_per_s": 2.1874999999999964,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.73
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 16.907598794493065,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 9.619398987293236,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.648765549222304,
+          "achieved_rate_per_s": 5.017635011109922,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8660156250000002,
+          "achieved_rate_per_s": 1.9140624999999967,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.74
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 16.107598794493065,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 9.019398987293236,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.692669855569516,
+          "achieved_rate_per_s": 4.3904306347211985,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8827636718750002,
+          "achieved_rate_per_s": 1.6748046874999978,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.75
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 15.307598794493064,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 8.419398987293237,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.731086123623328,
+          "achieved_rate_per_s": 3.8416268053810487,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8974182128906252,
+          "achieved_rate_per_s": 1.465454101562498,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.76
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 14.507598794493063,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 7.819398987293237,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.764700358170412,
+          "achieved_rate_per_s": 3.361423454708401,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.910240936279297,
+          "achieved_rate_per_s": 1.2822723388671853,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.77
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 13.707598794493062,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 7.219398987293237,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.79411281339911,
+          "achieved_rate_per_s": 2.941245522869851,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9214608192443849,
+          "achieved_rate_per_s": 1.121988296508787,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.78
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 12.907598794493062,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 6.619398987293238,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.81984871172422,
+          "achieved_rate_per_s": 2.573589832511125,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9312782168388368,
+          "achieved_rate_per_s": 0.9817397594451882,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.79
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 12.107598794493061,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 6.019398987293238,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.842367622758694,
+          "achieved_rate_per_s": 2.2518911034472566,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9398684397339823,
+          "achieved_rate_per_s": 0.8590222895145396,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.8
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 11.30759879449306,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 5.419398987293238,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.862071669913856,
+          "achieved_rate_per_s": 1.9704047155163273,
+          "bounded_command": 25.0,
+          "raw_command": 25.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9473848847672345,
+          "achieved_rate_per_s": 0.7516445033252217,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.81
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 10.50759879449306,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 4.819398987293239,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 24.062071669913855,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9539617741713302,
+          "achieved_rate_per_s": 0.6576889404095689,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.82
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 9.707598794493059,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 4.219398987293239,
+          "achieved_rate_per_s": -60.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 23.262071669913855,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9597165523999139,
+          "achieved_rate_per_s": 0.5754778228583723,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.83
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 8.907598794493058,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 3.6919741138815843,
+          "achieved_rate_per_s": -52.742487341165486,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 22.462071669913854,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9647519833499247,
+          "achieved_rate_per_s": 0.5035430950010757,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.84
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 8.107598794493057,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 3.230477349646386,
+          "achieved_rate_per_s": -46.1496764235198,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 21.662071669913853,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9691579854311841,
+          "achieved_rate_per_s": 0.4406002081259408,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.85
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 7.307598794493058,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 2.826667680940588,
+          "achieved_rate_per_s": -40.380966870579826,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 20.862071669913853,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9730132372522862,
+          "achieved_rate_per_s": 0.3855251821101982,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.86
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 6.507598794493058,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 2.4733342208230145,
+          "achieved_rate_per_s": -35.33334601175735,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 20.062071669913852,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9763865825957504,
+          "achieved_rate_per_s": 0.3373345343464229,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.87
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 5.707598794493058,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 2.164167443220138,
+          "achieved_rate_per_s": -30.91667776028768,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 19.26207166991385,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9793382597712816,
+          "achieved_rate_per_s": 0.29516771755312005,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.88
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 4.994148945181426,
+          "achieved_rate_per_s": -71.34498493116322,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 1.8936465128176208,
+          "achieved_rate_per_s": -27.052093040251723,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 18.46207166991385,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9819209772998714,
+          "achieved_rate_per_s": 0.2582717528589795,
+          "bounded_command": 1.0,
+          "raw_command": 1.1,
+          "saturated": true
+        }
+      },
+      "time_s": 0.89
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 4.369880327033748,
+          "achieved_rate_per_s": -62.42686181476782,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 1.656940698715418,
+          "achieved_rate_per_s": -23.670581410220258,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 17.66207166991385,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9569209772998714,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.9
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 3.8236452861545294,
+          "achieved_rate_per_s": -54.623504087921845,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 1.4498231113759907,
+          "achieved_rate_per_s": -20.711758733942727,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 16.86207166991385,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9319209772998713,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.91
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 3.345689625385213,
+          "achieved_rate_per_s": -47.795566076931614,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 1.2685952224539918,
+          "achieved_rate_per_s": -18.122788892199885,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 16.06207166991385,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.9069209772998713,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.92
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 2.9274784222120616,
+          "achieved_rate_per_s": -41.82112031731516,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 1.1100208196472428,
+          "achieved_rate_per_s": -15.857440280674897,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 15.262071669913848,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8819209772998713,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.93
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 2.561543619435554,
+          "achieved_rate_per_s": -36.59348027765077,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.9712682171913374,
+          "achieved_rate_per_s": -13.875260245590534,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 14.462071669913847,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8569209772998713,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.94
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 2.2413506670061096,
+          "achieved_rate_per_s": -32.01929524294442,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.8498596900424202,
+          "achieved_rate_per_s": -12.140852714891716,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 13.662071669913846,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8319209772998712,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.95
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 1.961181833630346,
+          "achieved_rate_per_s": -28.01688333757637,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.7436272287871177,
+          "achieved_rate_per_s": -10.623246125530253,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 12.862071669913846,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.8069209772998712,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.96
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 1.7160341044265528,
+          "achieved_rate_per_s": -24.514772920379322,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.650673825188728,
+          "achieved_rate_per_s": -9.295340359838972,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 12.062071669913845,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.7819209772998712,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.97
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 1.5015298413732336,
+          "achieved_rate_per_s": -21.45042630533191,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.5693395970401369,
+          "achieved_rate_per_s": -8.133422814859099,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 11.262071669913844,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.7569209772998712,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.98
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 1.3138386112015794,
+          "achieved_rate_per_s": -18.76912301716542,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.49817214741011984,
+          "achieved_rate_per_s": -7.116744963001711,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 10.462071669913843,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.7319209772998712,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 0.99
+    },
+    {
+      "channels": {
+        "aileron": {
+          "achieved": 1.149608784801382,
+          "achieved_rate_per_s": -16.422982640019743,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "elevator": {
+          "achieved": 0.43590062898385484,
+          "achieved_rate_per_s": -6.227151842626498,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "rudder": {
+          "achieved": 9.662071669913843,
+          "achieved_rate_per_s": -80.0,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        },
+        "throttle": {
+          "achieved": 0.7069209772998711,
+          "achieved_rate_per_s": -2.5,
+          "bounded_command": 0.0,
+          "raw_command": 0.0,
+          "saturated": false
+        }
+      },
+      "time_s": 1.0
+    }
+  ]
+}
