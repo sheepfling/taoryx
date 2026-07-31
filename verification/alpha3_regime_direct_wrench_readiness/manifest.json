@@ -1,0 +1,131 @@
+{
+  "claim_boundary": "Readiness and promotion-boundary inventory; no blocked family is promoted by this artifact.",
+  "records": [
+    {
+      "available_evidence": [
+        "verification/alpha3_x15_direct_wrench/manifest.json",
+        "verification/generated/x15_physical_lqr_readiness.json",
+        "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl",
+        "tests/fixtures/x15_coherent_6dof_public_research_v1/controls/control_coordinate_mapping.csv"
+      ],
+      "blocker": "source-bounded trim must pass before a direct-wrench recovery screen can be promoted beyond structural readiness",
+      "claim": "The X-15 source control and actuator contract is inventoried and a local direct-wrench bridge is reproducible, while source-bounded T1 trim remains the next promotion gate.",
+      "claim_boundary": [
+        "No direct-wrench recovery result is claimed before T1 trim.",
+        "No physical-effector LQR or powered/coast authority transition is claimed."
+      ],
+      "direct_body_moment_injection": true,
+      "direct_wrench_mode": "bridge_available",
+      "evidence_tier": "T0_structural",
+      "family_id": "x15",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": null,
+      "physical_effector_allocation": false,
+      "required_inputs_to_promote": [
+        "source-bounded powered or glide trim with residual contract",
+        "resolved symmetric/differential stabilator gearing and signs",
+        "propulsion command contract or explicit coast-only scope",
+        "RCS geometry and impulse data before low-authority blending"
+      ],
+      "status": "direct_wrench_bridge_available_source_trim_blocked"
+    },
+    {
+      "available_evidence": [
+        "verification/alpha3_hl20_direct_wrench/manifest.json",
+        "verification/alpha3_hl20_source_surface_replay/manifest.json",
+        "verification/alpha3_hl20_source_allocation/manifest.json",
+        "families/reference_hl20_mod_k/family.yaml"
+      ],
+      "blocker": "the direct-wrench bridge is available, but source surface replay and bounded source-load allocation remain more informative until source-bound trim is connected",
+      "claim": "The HL-20 source surfaces and source-load direction/allocation probes are available for the physical path.",
+      "claim_boundary": [
+        "The open-loop allocation probe is not a direct-wrench controller pass.",
+        "No source-exact trim, closed-loop controller, or terminal arrival is claimed."
+      ],
+      "direct_body_moment_injection": true,
+      "direct_wrench_mode": "bridge_available",
+      "evidence_tier": "T0_source_effectivity",
+      "family_id": "hl20_mod_k",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": null,
+      "physical_effector_allocation": false,
+      "required_inputs_to_promote": [
+        "source-bound equilibrium with seven surface commands",
+        "nonlinear source-load residual after trim",
+        "surface actuator dynamics and rate limits",
+        "closed-loop bank, alpha, and energy mission contract"
+      ],
+      "status": "surface_path_preferred_direct_wrench_debug_not_promoted"
+    },
+    {
+      "available_evidence": [
+        "verification/alpha3_nesc_direct_wrench/manifest.json",
+        "verification/alpha3_nesc_attitude_data_contract/manifest.json",
+        "verification/daveml_nesc_reduction_qualification.json",
+        "families/reference_nesc_two_stage_rocket/family.yaml"
+      ],
+      "blocker": "the retained NESC package is a translation/mass/staging replay and declares no participating attitude or gimbal input",
+      "claim": "The NESC source-data boundary is audited and explicitly blocks invented direct-wrench authority.",
+      "claim_boundary": [
+        "No source-exact attitude, gimbal, or direct-wrench recovery result is claimed.",
+        "Static aerodynamic moments are not treated as control derivatives."
+      ],
+      "direct_body_moment_injection": true,
+      "direct_wrench_mode": "bridge_available",
+      "evidence_tier": "T0_translation_only",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": null,
+      "physical_effector_allocation": false,
+      "required_inputs_to_promote": [
+        "gimbal or thrust-vector input channels and signs",
+        "control-dependent force and moment outputs or effectiveness deck",
+        "stage-dependent actuator limits and rates",
+        "event-aligned attitude and body-rate history"
+      ],
+      "status": "direct_wrench_bridge_available_gimbal_blocked"
+    },
+    {
+      "available_evidence": [
+        "verification/alpha3_hummingbird_native_pad_to_pad/hummingbird-pad-to-pad-altitude-yaw-individual-rotor-v1/summary.json",
+        "verification/alpha3_hummingbird_native_horizontal/manifest.json",
+        "verification/alpha3_hummingbird_native_vertical/manifest.json",
+        "verification/alpha3_hummingbird_direct_wrench_debug/manifest.json"
+      ],
+      "blocker": "none for the declared native rotor path; direct wrench remains a diagnostic bypass and cannot replace rotor allocation",
+      "claim": "The Hummingbird native individual-rotor path remains the preferred 6DOF control realization.",
+      "claim_boundary": [
+        "A direct-wrench bypass is not evidence of motor or rotor allocation.",
+        "The native packet does not claim full rotorcraft aerodynamics beyond its declared model."
+      ],
+      "direct_body_moment_injection": true,
+      "direct_wrench_mode": "physical_preferred",
+      "evidence_tier": "T5_nonlinearly_validated_native_rotor",
+      "family_id": "hummingbird",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": null,
+      "physical_effector_allocation": true,
+      "required_inputs_to_promote": [
+        "rotor-resolved wind and voltage envelope before broader promotion",
+        "explicit motor failure and battery authority cases"
+      ],
+      "status": "native_rotor_path_preferred_direct_wrench_debug_only"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/build_alpha3_regime_direct_wrench_readiness.py",
+  "schema": "taoryx.alpha3-regime-direct-wrench-readiness/v1alpha1",
+  "source_statuses": {
+    "hl20_source_allocation": "open_loop_source_allocation_pass_with_boundary",
+    "hl20_surface_replay": "source_surface_replay_pass_with_open_loop_boundary",
+    "hummingbird_native": "nominal_case_pass_overall_qualification_pending",
+    "nesc_attitude_contract": "blocked_parent_attitude_data_unavailable",
+    "x15": "blocked_before_T1_trim"
+  },
+  "status": "development_fail_closed",
+  "summary": {
+    "blocked_or_debug_count": 4,
+    "direct_wrench_bridge_count": 4,
+    "promoted_direct_wrench_count": 0,
+    "record_count": 4
+  }
+}

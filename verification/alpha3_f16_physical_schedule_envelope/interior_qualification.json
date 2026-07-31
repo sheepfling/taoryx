@@ -1,0 +1,311 @@
+{
+  "boundary_witnesses": {
+    "case_ids": [
+      "beta_minus_2mps",
+      "beta_plus_2mps",
+      "coupled_high_rate",
+      "high_pitch_rate_plus",
+      "high_roll_rate_plus",
+      "high_yaw_rate_plus"
+    ],
+    "interpretation": "A case is schedule-wide boundary evidence when it fails at any validated source node; partial authority is retained and is not clipped into a pass.",
+    "node_results": {
+      "f16-3km-152mps": {
+        "beta_minus_2mps": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "v_m_s": -2.0
+          }
+        },
+        "beta_plus_2mps": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "v_m_s": 2.0
+          }
+        },
+        "coupled_high_rate": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "p_rad_s": 0.01,
+            "q_rad_s": -0.01,
+            "r_rad_s": 0.01
+          }
+        },
+        "high_pitch_rate_plus": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "q_rad_s": 0.02
+          }
+        },
+        "high_roll_rate_plus": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "p_rad_s": 0.02
+          }
+        },
+        "high_yaw_rate_plus": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "r_rad_s": 0.02
+          }
+        }
+      },
+      "f16-6km-152mps": {
+        "beta_minus_2mps": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "v_m_s": -2.0
+          }
+        },
+        "beta_plus_2mps": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "v_m_s": 2.0
+          }
+        },
+        "coupled_high_rate": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "p_rad_s": 0.01,
+            "q_rad_s": -0.01,
+            "r_rad_s": 0.01
+          }
+        },
+        "high_pitch_rate_plus": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "q_rad_s": 0.02
+          }
+        },
+        "high_roll_rate_plus": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "p_rad_s": 0.02
+          }
+        },
+        "high_yaw_rate_plus": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "r_rad_s": 0.02
+          }
+        }
+      },
+      "f16-9km-152mps": {
+        "beta_minus_2mps": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "v_m_s": -2.0
+          }
+        },
+        "beta_plus_2mps": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "v_m_s": 2.0
+          }
+        },
+        "coupled_high_rate": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "p_rad_s": 0.01,
+            "q_rad_s": -0.01,
+            "r_rad_s": 0.01
+          }
+        },
+        "high_pitch_rate_plus": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "q_rad_s": 0.02
+          }
+        },
+        "high_roll_rate_plus": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "p_rad_s": 0.02
+          }
+        },
+        "high_yaw_rate_plus": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "r_rad_s": 0.02
+          }
+        }
+      },
+      "f16-sea-level-152mps": {
+        "beta_minus_2mps": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "v_m_s": -2.0
+          }
+        },
+        "beta_plus_2mps": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "v_m_s": 2.0
+          }
+        },
+        "coupled_high_rate": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "p_rad_s": 0.01,
+            "q_rad_s": -0.01,
+            "r_rad_s": 0.01
+          }
+        },
+        "high_pitch_rate_plus": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "q_rad_s": 0.02
+          }
+        },
+        "high_roll_rate_plus": {
+          "failure_reason": null,
+          "mission_pass": true,
+          "perturbation": {
+            "p_rad_s": 0.02
+          }
+        },
+        "high_yaw_rate_plus": {
+          "failure_reason": "authority_or_recovery_boundary",
+          "mission_pass": false,
+          "perturbation": {
+            "r_rad_s": 0.02
+          }
+        }
+      }
+    },
+    "schedule_wide_case_count": 24
+  },
+  "claim_boundary": "Local schedule-wide interior physical-effector evidence only. This does not claim beta/high-rate authority outside the retained boundary cases, a full Mach/dynamic-pressure envelope, wind robustness, servo certification, statistical reliability, or operational flight control.",
+  "control_path": "source-trimmed node -> plant-derived LQR -> desired wrench -> bounded elevator/aileron/rudder/throttle -> source nonlinear plant",
+  "direct_body_moment_injection": false,
+  "family_id": "reference_f16_s119",
+  "reproduction": "PYTHONPATH=src python3 tools/qualify_f16_physical_schedule_interior.py",
+  "schema": "taoryx.f16-physical-schedule-interior-qualification/v1alpha1",
+  "source_artifact": "verification/alpha3_f16_physical_schedule_envelope/manifest.json",
+  "status": "F16_physical_schedule_interior_qualified",
+  "summary": {
+    "interior_case_count": 8,
+    "interior_case_id_count": 2,
+    "node_count": 4,
+    "schedule_wide_boundary_case_count": 24,
+    "source_case_count": 32
+  },
+  "validated_interior": {
+    "all_cases_pass_at_all_nodes": true,
+    "altitude_m": [
+      0.0,
+      3000.0,
+      6000.0,
+      9000.0
+    ],
+    "case_count": 8,
+    "case_ids": [
+      "alpha_minus_1mps",
+      "alpha_plus_1mps"
+    ],
+    "cases": {
+      "alpha_minus_1mps": {
+        "node_results": {
+          "f16-3km-152mps": {
+            "allocation_statuses": [
+              "feasible"
+            ],
+            "mission_pass": true,
+            "recovery_ratio": 0.040418174214188245,
+            "saturation_fraction": 0.0
+          },
+          "f16-6km-152mps": {
+            "allocation_statuses": [
+              "feasible"
+            ],
+            "mission_pass": true,
+            "recovery_ratio": 0.06017573405709722,
+            "saturation_fraction": 0.0
+          },
+          "f16-9km-152mps": {
+            "allocation_statuses": [
+              "feasible"
+            ],
+            "mission_pass": true,
+            "recovery_ratio": 0.08112797293750312,
+            "saturation_fraction": 0.0
+          },
+          "f16-sea-level-152mps": {
+            "allocation_statuses": [
+              "feasible"
+            ],
+            "mission_pass": true,
+            "recovery_ratio": 0.026633287393050053,
+            "saturation_fraction": 0.0
+          }
+        },
+        "perturbation": {
+          "w_m_s": -1.0
+        }
+      },
+      "alpha_plus_1mps": {
+        "node_results": {
+          "f16-3km-152mps": {
+            "allocation_statuses": [
+              "feasible"
+            ],
+            "mission_pass": true,
+            "recovery_ratio": 0.041095728440136356,
+            "saturation_fraction": 0.0
+          },
+          "f16-6km-152mps": {
+            "allocation_statuses": [
+              "feasible"
+            ],
+            "mission_pass": true,
+            "recovery_ratio": 0.06112771178459872,
+            "saturation_fraction": 0.0
+          },
+          "f16-9km-152mps": {
+            "allocation_statuses": [
+              "feasible"
+            ],
+            "mission_pass": true,
+            "recovery_ratio": 0.08264932645912766,
+            "saturation_fraction": 0.0
+          },
+          "f16-sea-level-152mps": {
+            "allocation_statuses": [
+              "feasible"
+            ],
+            "mission_pass": true,
+            "recovery_ratio": 0.026926025955380663,
+            "saturation_fraction": 0.0
+          }
+        },
+        "perturbation": {
+          "w_m_s": 1.0
+        }
+      }
+    },
+    "node_count": 4,
+    "true_airspeed_m_s": 152.4
+  }
+}

@@ -94,8 +94,8 @@ def _canonical_history(report: Any, tier: str, state_mapping: dict[str, Any]) ->
 ####
 
 
-def _run(problem: Path, tables: tuple[Path, ...], output: Path, tier: str, state_mapping: dict[str, Any]) -> dict[str, Any]:
-    report = run_files(problem, tables, output_dir=output, max_steps=10000, profile=GrammarProfile.TAORYX)
+def _run(problem: Path, tables: tuple[Path, ...], output: Path, tier: str, state_mapping: dict[str, Any], *, max_steps: int, integrator: str | None) -> dict[str, Any]:
+    report = run_files(problem, tables, output_dir=output, max_steps=max_steps, integrator=integrator, profile=GrammarProfile.TAORYX)
     try:
         problem_name = str(problem.relative_to(ROOT))
     except ValueError:
@@ -146,7 +146,7 @@ def _history_difference(
     ####
 
 
-def run(catalog_path: Path = CATALOG, output: Path | None = None) -> Path:
+def run(catalog_path: Path = CATALOG, output: Path | None = None, *, family_ids: tuple[str, ...] | None = None, max_steps: int = 10000, integrator: str | None = None) -> Path:
     payload = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
     destination = output or ROOT / "artifacts/verification/fidelity_parity_v1"
     destination.mkdir(parents=True, exist_ok=True)
@@ -155,6 +155,8 @@ def run(catalog_path: Path = CATALOG, output: Path | None = None) -> Path:
         temporary_root = Path(temporary)
         for family in payload["families"]:
             family_id = str(family["id"])
+            if family_ids is not None and family_id not in family_ids:
+                continue
             tables = tuple(ROOT / str(path) for path in family["source_tables"])
             record: dict[str, Any] = {
                 "id": family_id,
@@ -165,6 +167,7 @@ def run(catalog_path: Path = CATALOG, output: Path | None = None) -> Path:
                 "parity_tolerances": family["parity_tolerances"],
                 "continuity_tolerances": family["continuity_tolerances"],
                 "unit_profiles": {"point_mass": family["point_output_units"], "rigid_body": family["rigid_output_units"]},
+                "execution_policy": {"max_steps": max_steps, "integrator": integrator or "problem_default"},
             }
             if family["status"] != "candidate":
                 record["status"] = "blocked"
@@ -185,9 +188,9 @@ def run(catalog_path: Path = CATALOG, output: Path | None = None) -> Path:
                 generated_input_dir / f"{family_id}-bridge-{reduction_duration_s:g}s.prb",
             )
             record["runs"] = {
-                "3dof": _run(point, tables, destination / family_id / "3dof", "point", family["state_mapping"]),
-                "bridge": _run(bridge, tables, destination / family_id / "bridge", "point", family["state_mapping"]),
-                "6dof": _run(rigid, tables, destination / family_id / "6dof", "rigid", family["state_mapping"]),
+                "3dof": _run(point, tables, destination / family_id / "3dof", "point", family["state_mapping"], max_steps=max_steps, integrator=integrator),
+                "bridge": _run(bridge, tables, destination / family_id / "bridge", "point", family["state_mapping"], max_steps=max_steps, integrator=integrator),
+                "6dof": _run(rigid, tables, destination / family_id / "6dof", "rigid", family["state_mapping"], max_steps=max_steps, integrator=integrator),
             }
             record["reduction_duration_s"] = reduction_duration_s
             record["generated_inputs"] = [
@@ -233,9 +236,9 @@ def run(catalog_path: Path = CATALOG, output: Path | None = None) -> Path:
             refined_point = _scaled_problem(point, temporary_root / f"{family_id}-point-half.prb", 0.5)
             refined_bridge = _scaled_problem(bridge, temporary_root / f"{family_id}-bridge-half.prb", 0.5)
             refined_rigid = _scaled_problem(rigid, temporary_root / f"{family_id}-rigid-half.prb", 0.5)
-            refined_point_run = _run(refined_point, tables, destination / family_id / "3dof-half", "point", family["state_mapping"])
-            refined_bridge_run = _run(refined_bridge, tables, destination / family_id / "bridge-half", "point", family["state_mapping"])
-            refined_rigid_run = _run(refined_rigid, tables, destination / family_id / "6dof-half", "rigid", family["state_mapping"])
+            refined_point_run = _run(refined_point, tables, destination / family_id / "3dof-half", "point", family["state_mapping"], max_steps=max_steps, integrator=integrator)
+            refined_bridge_run = _run(refined_bridge, tables, destination / family_id / "bridge-half", "point", family["state_mapping"], max_steps=max_steps, integrator=integrator)
+            refined_rigid_run = _run(refined_rigid, tables, destination / family_id / "6dof-half", "rigid", family["state_mapping"], max_steps=max_steps, integrator=integrator)
             record["convergence"] = {
                 "base_step": {"3dof": record["runs"]["3dof"]["sample_counts"], "bridge": record["runs"]["bridge"]["sample_counts"], "6dof": record["runs"]["6dof"]["sample_counts"]},
                 "half_step": {"3dof": refined_point_run["sample_counts"], "bridge": refined_bridge_run["sample_counts"], "6dof": refined_rigid_run["sample_counts"]},
@@ -292,9 +295,15 @@ def package_report(report_path: Path, output: Path) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--families", help="comma-separated family IDs to run")
+    parser.add_argument("--max-steps", type=int, default=10000)
+    parser.add_argument("--integrator", choices=("euler", "rk4", "rkf45", "scipy-rk45", "scipy-dop853"))
     parser.add_argument("--zip", action="store_true", help="also write a scoped reduction-parity evidence ZIP")
     arguments = parser.parse_args()
-    report = run(output=arguments.output)
+    family_ids = tuple(item.strip() for item in arguments.families.split(",") if item.strip()) if arguments.families else None
+    if arguments.max_steps <= 0:
+        parser.error("--max-steps must be positive")
+    report = run(output=arguments.output, family_ids=family_ids, max_steps=arguments.max_steps, integrator=arguments.integrator)
     print(package_report(report, report.parent / "fidelity-parity-evidence") if arguments.zip else report)
     return 0
 ####

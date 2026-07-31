@@ -1,0 +1,1 @@
+PYTHONPATH=.:src python3 tools/build_hummingbird_pad_to_pad_packet.py --output verification/alpha3_hummingbird_native_pad_to_pad

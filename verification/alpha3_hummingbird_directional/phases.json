@@ -1,0 +1,122 @@
+[
+  {
+    "direction_axis": null,
+    "direction_sign": 0,
+    "duration_s": 6.0,
+    "phase_id": "takeoff_altitude_gate",
+    "target_m": [
+      0.0,
+      0.0,
+      3.0
+    ],
+    "target_yaw_rad": 0.0
+  },
+  {
+    "direction_axis": null,
+    "direction_sign": 0,
+    "duration_s": 2.5,
+    "phase_id": "hover_capture",
+    "target_m": [
+      0.0,
+      0.0,
+      3.0
+    ],
+    "target_yaw_rad": 0.0
+  },
+  {
+    "direction_axis": "u",
+    "direction_sign": 1,
+    "duration_s": 12.0,
+    "phase_id": "forward_body_leg",
+    "target_m": [
+      8.0,
+      0.0,
+      3.0
+    ],
+    "target_yaw_rad": 0.0
+  },
+  {
+    "direction_axis": null,
+    "direction_sign": 0,
+    "duration_s": 4.5,
+    "phase_id": "yaw_scan_gate",
+    "target_m": [
+      8.0,
+      0.0,
+      3.0
+    ],
+    "target_yaw_rad": 1.5707963267948966
+  },
+  {
+    "direction_axis": "v",
+    "direction_sign": 1,
+    "duration_s": 10.0,
+    "phase_id": "lateral_body_right_leg",
+    "target_m": [
+      4.0,
+      0.0,
+      3.0
+    ],
+    "target_yaw_rad": 1.5707963267948966
+  },
+  {
+    "direction_axis": "u",
+    "direction_sign": -1,
+    "duration_s": 11.0,
+    "phase_id": "rearward_body_leg",
+    "target_m": [
+      4.0,
+      -6.0,
+      3.0
+    ],
+    "target_yaw_rad": 1.5707963267948966
+  },
+  {
+    "direction_axis": null,
+    "direction_sign": 0,
+    "duration_s": 5.0,
+    "phase_id": "descent_altitude_gate",
+    "target_m": [
+      4.0,
+      -6.0,
+      2.0
+    ],
+    "target_yaw_rad": 1.5707963267948966
+  },
+  {
+    "direction_axis": null,
+    "direction_sign": 0,
+    "duration_s": 12.0,
+    "phase_id": "disturbance_recovery",
+    "target_m": [
+      0.0,
+      0.0,
+      2.0
+    ],
+    "target_yaw_rad": 1.5707963267948966
+  },
+  {
+    "direction_axis": null,
+    "direction_sign": 0,
+    "duration_s": 8.0,
+    "phase_id": "landing_contact",
+    "target_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "target_yaw_rad": 1.5707963267948966
+  },
+  {
+    "direction_axis": null,
+    "direction_sign": 0,
+    "duration_s": 2.5,
+    "phase_id": "post_contact_shutdown",
+    "target_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "target_yaw_rad": 1.5707963267948966
+  }
+]

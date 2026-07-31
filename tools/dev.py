@@ -167,6 +167,28 @@ def test_views() -> None:
     print("  check-vehicles verify vehicle-family contracts and table bindings")
     print("  onboard-vehicles diagnose the complete new-vehicle metadata path")
     print("  fidelity-readiness check declared data for all four fidelity tiers")
+    print("  pseudo6dof-profiles validate the Alpha 3 pseudo-6DOF family profile catalog")
+    print("  alpha3-readiness regenerate paired-fidelity, cross-fidelity, and R1 readiness indexes")
+    print("  alpha3-showcase-catalog verify all nine family recipes, evidence pairs, and canonical boards")
+    print("  hummingbird-directional validate the Hummingbird altitude/yaw/body-direction mission witness")
+    print("  hummingbird-native-horizontal validate the Hummingbird native source-plant horizontal witness")
+    print("  hummingbird-native-vertical validate the Hummingbird native source-plant vertical-force witness")
+    print("  airbreathing-r1 run the fixed initial-state R1 matrix for X8 and B747")
+    print("  a320-r1 run the fixed calibrated operating-point R1 matrix for A320 reductions")
+    print("  f16-r1 run the fixed reduced-tier R1 matrix for the reference F-16")
+    print("  hl20-r1 run the fixed passive/open-loop R1 matrix for HL-20 reductions")
+    print("  hummingbird-r1 run the fixed aggregate-thrust R1 matrix for Hummingbird")
+    print("  x15-r1 run the fixed staged-surrogate R1 matrix for X-15 reductions")
+    print("  nesc-r1 run the fixed source-replay/response-law R1 matrix for NESC")
+    print("  b747-physical-r1 run the fixed local B747 surface-allocation R1 matrix")
+    print("  f16-physical-r1 record the fixed local F-16 physical-effector R1 boundary matrix")
+    print("  f16-physical-schedule validate source-effector F-16 nodes across the local schedule")
+    print("  f16-physical-schedule-envelope record F-16 source-effector authority boundaries")
+    print("  f16-physical-schedule-interior qualify the conservative schedule-wide F-16 interior")
+    print("  x8-physical-mapping record fail-closed X8 left/right elevon mapping evidence")
+    print("  b747-physical-schedule validate source-effector B747 nodes across CR-2144 conditions")
+    print("  hummingbird-physical-r1 run the fixed local Hummingbird rotor-allocation R1 matrix")
+    print("  tumbling-r1 index the fixed passive tumbling-body matrix")
     print("  reference-tuning verify the four-family generic controller-design report")
     print("  compile-segments compile external segment catalogs into native .prb products")
     print("  audit-vehicles verify scoped problem files match registry provenance")
@@ -462,6 +484,115 @@ def onboard_vehicles() -> None:
 def fidelity_readiness() -> None:
     """Check declared data readiness for every registered fidelity tier."""
     run(tool_script("validate_fidelity_readiness.py", "--vehicle", "all"))
+    ####
+
+
+def pseudo6dof_profiles() -> None:
+    """Validate the Alpha 3 pseudo-6DOF family profile catalog."""
+    run(tool_script("validate_pseudo6dof_profiles.py", "--smoke"))
+    ####
+
+
+def alpha3_readiness() -> None:
+    """Regenerate the Alpha 3 paired-fidelity and readiness indexes."""
+    run(tool_script("validate_alpha3_fidelity_ladder.py"))
+    run(tool_script("build_alpha3_cross_fidelity_reports.py"))
+    run(tool_script("qualify_f16_physical_schedule_interior.py"))
+    run(tool_script("validate_hummingbird_directional_mission.py"))
+    run(tool_script("validate_hummingbird_native_horizontal_mission.py"))
+    run(tool_script("validate_hummingbird_native_vertical_mission.py"))
+    run(tool_script("build_alpha3_readiness_report.py"))
+    ####
+
+
+def alpha3_showcase_catalog() -> None:
+    """Verify the complete Alpha 3 family showcase artifact catalog."""
+    run(tool_script("build_alpha3_direct_wrench_contract.py"))
+    run(tool_script("validate_alpha3_showcase_catalog.py"))
+    ####
+
+
+def hummingbird_directional() -> None:
+    """Validate the Hummingbird directional-translation mission witness."""
+    run(tool_script("validate_hummingbird_directional_mission.py"))
+    ####
+
+
+def hummingbird_native_horizontal() -> None:
+    """Validate the native Hummingbird source-plant horizontal witness."""
+    run(tool_script("validate_hummingbird_native_horizontal_mission.py"))
+    ####
+
+
+def hummingbird_native_vertical() -> None:
+    """Validate the native Hummingbird source-plant vertical-force witness."""
+    run(tool_script("validate_hummingbird_native_vertical_mission.py"))
+    ####
+
+
+def f16_physical_schedule_interior() -> None:
+    """Qualify the conservative schedule-wide F-16 physical interior."""
+    run(tool_script("qualify_f16_physical_schedule_interior.py"))
+    ####
+
+
+def airbreathing_r1_matrix() -> None:
+    """Run the fixed initial-state R1 matrix for X8 and B747."""
+    run(tool_script("validate_airbreathing_r1_matrix.py"))
+    ####
+
+
+def a320_r1_matrix() -> None:
+    """Run the fixed calibrated operating-point R1 matrix for A320 reductions."""
+    run(tool_script("validate_a320_r1_matrix.py"))
+    ####
+
+
+def f16_r1_matrix() -> None:
+    """Run the fixed reduced-tier R1 matrix for the reference F-16."""
+    run(tool_script("validate_f16_r1_matrix.py"))
+    ####
+
+
+def hl20_r1_matrix() -> None:
+    """Run the fixed passive/open-loop R1 matrix for HL-20 reductions."""
+    run(tool_script("validate_hl20_r1_matrix.py"))
+    ####
+
+
+def hummingbird_r1_matrix() -> None:
+    """Run the fixed aggregate-thrust R1 matrix for Hummingbird."""
+    run(tool_script("validate_hummingbird_r1_matrix.py"))
+    ####
+
+
+def x15_r1_matrix() -> None:
+    """Run the fixed staged-surrogate R1 matrix for X-15 reductions."""
+    run(tool_script("validate_x15_r1_matrix.py"))
+    ####
+
+
+def nesc_r1_matrix() -> None:
+    """Run the fixed source-replay/response-law R1 matrix for NESC."""
+    run(tool_script("validate_nesc_r1_matrix.py"))
+    ####
+
+
+def b747_physical_r1_matrix() -> None:
+    """Run the fixed local B747 physical-surface R1 matrix."""
+    run(tool_script("validate_b747_physical_r1_matrix.py"))
+    ####
+
+
+def hummingbird_physical_r1_matrix() -> None:
+    """Run the fixed local Hummingbird individual-rotor R1 matrix."""
+    run(tool_script("validate_hummingbird_physical_r1_matrix.py"))
+    ####
+
+
+def tumbling_r1_matrix() -> None:
+    """Index the fixed passive tumbling-body matrix."""
+    run(tool_script("validate_tumbling_body_r1_matrix.py"))
     ####
 
 
@@ -865,6 +996,48 @@ def daveml_f16_physical_wrench_perturbations() -> None:
     ####
 
 
+def alpha3_f16_physical_r1() -> None:
+    """Build the fail-closed F-16 physical-effector R1 boundary artifact."""
+
+    run(tool_script("validate_f16_physical_r1_matrix.py"))
+    ####
+
+
+def alpha3_f16_physical_schedule() -> None:
+    """Validate source-effector F-16 physical controller nodes across altitude."""
+
+    run(tool_script("validate_f16_physical_schedule.py"))
+    ####
+
+
+def alpha3_f16_physical_schedule_transition() -> None:
+    """Replay the F-16 source-effector schedule through a local transition."""
+
+    run(tool_script("validate_f16_physical_schedule_transition.py"))
+    ####
+
+
+def alpha3_f16_physical_schedule_envelope() -> None:
+    """Record F-16 alpha/beta/rate authority boundaries around the schedule."""
+
+    run(tool_script("validate_f16_physical_schedule_envelope.py"))
+    ####
+
+
+def alpha3_x8_physical_mapping() -> None:
+    """Record both unresolved X8 physical left/right elevon sign hypotheses."""
+
+    run(tool_script("validate_x8_physical_mapping_evidence.py"))
+    ####
+
+
+def alpha3_b747_physical_schedule() -> None:
+    """Validate source-effector B747 nodes across CR-2144 conditions."""
+
+    run(tool_script("validate_b747_physical_schedule.py"))
+    ####
+
+
 def daveml_f16_local_maneuvers() -> None:
     """Generate local F-16 bank/pitch reversal maneuver evidence."""
 
@@ -981,6 +1154,8 @@ def check() -> None:
     check_vehicle_models()
     check_supported_reference_families()
     onboard_vehicles()
+    pseudo6dof_profiles()
+    run(tool_script("build_alpha3_direct_wrench_contract.py"))
     check_fidelity_parity_contracts()
     check_reference_tuning()
     compile_segments()
@@ -1056,6 +1231,23 @@ TASKS: dict[str, Callable[[], None]] = {
     "check-reference-families": check_supported_reference_families,
     "onboard-vehicles": onboard_vehicles,
     "fidelity-readiness": fidelity_readiness,
+    "pseudo6dof-profiles": pseudo6dof_profiles,
+    "alpha3-readiness": alpha3_readiness,
+    "alpha3-showcase-catalog": alpha3_showcase_catalog,
+    "hummingbird-directional": hummingbird_directional,
+    "hummingbird-native-horizontal": hummingbird_native_horizontal,
+    "hummingbird-native-vertical": hummingbird_native_vertical,
+    "f16-physical-schedule-interior": f16_physical_schedule_interior,
+    "airbreathing-r1": airbreathing_r1_matrix,
+    "a320-r1": a320_r1_matrix,
+    "f16-r1": f16_r1_matrix,
+    "hl20-r1": hl20_r1_matrix,
+    "hummingbird-r1": hummingbird_r1_matrix,
+    "x15-r1": x15_r1_matrix,
+    "nesc-r1": nesc_r1_matrix,
+    "b747-physical-r1": b747_physical_r1_matrix,
+    "hummingbird-physical-r1": hummingbird_physical_r1_matrix,
+    "tumbling-r1": tumbling_r1_matrix,
     "integration-readiness": integration_readiness,
     "integration-pipeline": integration_pipeline,
     "integration-pilots": integration_pilots,
@@ -1096,6 +1288,12 @@ TASKS: dict[str, Callable[[], None]] = {
     "daveml-f16-physical-allocation": daveml_f16_physical_allocation,
     "daveml-f16-physical-wrench-lqr": daveml_f16_physical_wrench_lqr,
     "daveml-f16-physical-wrench-perturbations": daveml_f16_physical_wrench_perturbations,
+    "f16-physical-r1": alpha3_f16_physical_r1,
+    "f16-physical-schedule": alpha3_f16_physical_schedule,
+    "f16-physical-schedule-transition": alpha3_f16_physical_schedule_transition,
+    "f16-physical-schedule-envelope": alpha3_f16_physical_schedule_envelope,
+    "x8-physical-mapping": alpha3_x8_physical_mapping,
+    "b747-physical-schedule": alpha3_b747_physical_schedule,
     "daveml-f16-local-maneuvers": daveml_f16_local_maneuvers,
     "daveml-f16-reductions": daveml_f16_reductions,
     "daveml-hl20-load": daveml_hl20_load,

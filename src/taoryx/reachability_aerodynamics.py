@@ -12,6 +12,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from functools import lru_cache
 
+from .control_allocation import EffectorEffectiveness
 from .hl20_controls import HL20_SOURCE_SURFACE_BOUNDS_DEG
 from .trajectory import DAVEMLTrimBinding, load_daveml_trim_binding
 
@@ -35,6 +36,14 @@ HL20_SOURCE_ENVELOPE = {
     "dynamic_pressure_min_pa": 0.0,
 }
 HL20_SOURCE_CONTROL_ENVELOPE = HL20_SOURCE_SURFACE_BOUNDS_DEG
+HL20_SOURCE_WRENCH_NAMES = (
+    "force_x_n",
+    "force_y_n",
+    "force_z_n",
+    "moment_x_nm",
+    "moment_y_nm",
+    "moment_z_nm",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,6 +68,57 @@ class ReachabilityAeroLoads:
         if self.actuator_trace is not None:
             payload["actuator"] = self.actuator_trace
         return payload
+
+
+def build_hl20_source_effectiveness(
+    provider: "HL20DavemlAerodynamics",
+    body_velocity_m_s: Vector,
+    altitude_m: float,
+    *,
+    body_rates_rad_s: Vector = (0.0, 0.0, 0.0),
+    controls: Mapping[str, float] | None = None,
+    perturbation_deg: Mapping[str, float] | None = None,
+) -> EffectorEffectiveness:
+    """Build a local source-load matrix for the generic bounded allocator.
+
+    The matrix is a centered finite-difference derivative of the pinned
+    DAVE-ML source loads with respect to the seven declared physical surface
+    channels. It is valid only at the supplied operating point; it does not
+    replace nonlinear source replay or establish closed-loop qualification.
+    """
+
+    baseline_controls = {name: float((controls or {}).get(name, 0.0)) for name in HL20_SOURCE_SURFACE_BOUNDS_DEG}
+    baseline = provider.evaluate(body_velocity_m_s, altitude_m, body_rates_rad_s, controls=baseline_controls)
+    baseline_wrench = (*baseline.force_body_n, *baseline.moment_body_nm)
+    columns: list[tuple[float, ...]] = []
+    for name, (lower, upper) in HL20_SOURCE_SURFACE_BOUNDS_DEG.items():
+        requested_step = float((perturbation_deg or {}).get(name, 1.0))
+        if not math.isfinite(requested_step) or requested_step == 0.0:
+            raise ValueError(f"HL-20 source-effectiveness perturbation must be finite and nonzero: {name}")
+        magnitude = abs(requested_step)
+        plus = min(upper, baseline_controls[name] + magnitude)
+        minus = max(lower, baseline_controls[name] - magnitude)
+        if plus == minus:
+            raise ValueError(f"HL-20 source-effectiveness perturbation is clipped at both bounds: {name}")
+        plus_controls = dict(baseline_controls)
+        minus_controls = dict(baseline_controls)
+        plus_controls[name] = plus
+        minus_controls[name] = minus
+        plus_loads = provider.evaluate(body_velocity_m_s, altitude_m, body_rates_rad_s, controls=plus_controls)
+        minus_loads = provider.evaluate(body_velocity_m_s, altitude_m, body_rates_rad_s, controls=minus_controls)
+        plus_wrench = (*plus_loads.force_body_n, *plus_loads.moment_body_nm)
+        minus_wrench = (*minus_loads.force_body_n, *minus_loads.moment_body_nm)
+        denominator = plus - minus
+        columns.append(tuple((high - low) / denominator for high, low in zip(plus_wrench, minus_wrench, strict=True)))
+    matrix = tuple(tuple(column[row] for column in columns) for row in range(len(HL20_SOURCE_WRENCH_NAMES)))
+    return EffectorEffectiveness(
+        wrench_names=HL20_SOURCE_WRENCH_NAMES,
+        effector_names=tuple(HL20_SOURCE_SURFACE_BOUNDS_DEG),
+        matrix=matrix,
+        reference_wrench=dict(zip(HL20_SOURCE_WRENCH_NAMES, baseline_wrench, strict=True)),
+        reference_effectors=baseline_controls,
+        source=f"{provider.model_id}:centered-source-load-derivative",
+    )
 
 
 def probe_hl20_control_directions(
@@ -329,11 +389,13 @@ def _add_vectors(left: Vector, right: Vector) -> Vector:
 
 
 __all__ = [
+    "HL20_SOURCE_WRENCH_NAMES",
     "HL20DavemlAerodynamics",
     "HL20_SOURCE_DOCUMENT_SHA256",
     "HL20_SOURCE_ENVELOPE",
     "HL20_SOURCE_MODEL_ID",
     "HL20_SOURCE_PACKAGE_SHA256",
     "ReachabilityAeroLoads",
+    "build_hl20_source_effectiveness",
     "probe_hl20_control_directions",
 ]

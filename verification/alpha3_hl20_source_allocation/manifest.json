@@ -1,0 +1,8 @@
+{
+  "artifact": "source_allocation_probe.json",
+  "claim_boundary": "Open-loop source-load allocation evidence only; no trim or controlled-flight qualification.",
+  "plot": "source_allocation_board.png",
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hl20_source_allocation_probe.py",
+  "schema": "taoryx.hl20-source-allocation-manifest/v1alpha1",
+  "status": "open_loop_source_allocation_pass_with_boundary"
+}

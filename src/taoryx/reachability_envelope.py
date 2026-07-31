@@ -25,6 +25,7 @@ from .hl20_controls import HL20_SURFACE_NAMES
 from .modes import Quaternion
 from .reachability_aerodynamics import HL20_SOURCE_MODEL_ID, HL20DavemlAerodynamics, ReachabilityAeroLoads
 from .rigid_body import RigidBody6DofModel, RigidBody6DofState, RigidBodyForceMoment
+from .trajectory.pseudo6dof_profiles import Pseudo6DOFProfile, load_pseudo6dof_catalog
 from .vehicle import (
     DetachedBodyDefinition,
     DetachedBodyShape,
@@ -161,6 +162,7 @@ class RocketGlideVehicle:
     density_scale_height_m: float = 8_500.0
     aerodynamic_model_id: str = "surrogate_fixed_cd_ld_v1"
     actuator_profile_id: str = "none"
+    pseudo6dof_profile_id: str | None = None
     attitude_control_mode: str = "open_loop"
     attitude_control_gain: float = 500_000.0
     attitude_rate_damping: float = 300_000.0
@@ -234,6 +236,12 @@ class RocketGlideVehicle:
             raise ValueError("aerodynamic_model_id must not be empty")
         if not self.actuator_profile_id.strip():
             raise ValueError("actuator_profile_id must not be empty")
+        if self.pseudo6dof_profile_id is not None:
+            if not self.pseudo6dof_profile_id.strip():
+                raise ValueError("pseudo6dof_profile_id must not be empty when provided")
+            profile = _load_pseudo6dof_profile(self.pseudo6dof_profile_id)
+            if not profile.response:
+                raise ValueError("reachability pseudo-6DOF profiles must declare response axes")
         if not self.mission_profile_id.strip():
             raise ValueError("mission_profile_id must not be empty")
         if not self.configuration_variant_id.strip():
@@ -272,8 +280,8 @@ class RocketGlideVehicle:
             if start_s < previous_segment_end or end_s <= start_s:
                 raise ValueError("mission_segment_schedule must be ordered and non-overlapping")
             previous_segment_end = end_s
-        if self.attitude_control_mode not in {"open_loop", "velocity_aligned"}:
-            raise ValueError("attitude_control_mode must be 'open_loop' or 'velocity_aligned'")
+        if self.attitude_control_mode not in {"open_loop", "velocity_aligned", "surface_open_loop"}:
+            raise ValueError("attitude_control_mode must be 'open_loop', 'velocity_aligned', or 'surface_open_loop'")
         for name in ("attitude_control_gain", "attitude_rate_damping"):
             value = float(getattr(self, name))
             _validate_finite(name, value)
@@ -608,6 +616,7 @@ class DetachedBodyTrajectory:
     states: tuple[State, ...]
     termination: EnvelopeTermination
     telemetry: tuple[dict[str, object], ...] = ()
+    requested_fidelity: ReachabilityFidelity | None = None
 
     @property
     def classification(self) -> str:
@@ -817,6 +826,11 @@ class ReachabilityEnvelope:
             "spawned_child_count": len(spawned_children),
             "child_models": [detached_body] if isinstance(detached_body, Mapping) else [],
             "child_classification_counts": self.child_classification_counts,
+            "child_fidelity_policy": (
+                "pseudo_6dof_reuses_rigid_body_for_tumbling"
+                if self.fidelity is ReachabilityFidelity.PSEUDO_6DOF
+                else "native_requested_fidelity"
+            ),
         }
         payload: dict[str, object] = {
             "schema": "trajectory.reachability-envelope/v1alpha1",
@@ -848,7 +862,13 @@ class ReachabilityEnvelope:
                         if self.fidelity in {ReachabilityFidelity.RIGID_BODY_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED}
                         else "launch_direction_and_bank_command"
                     ),
-                    "effector_model": "logical_surface_allocator" if self.fidelity is ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED else "none",
+                    "effector_model": (
+                        "source_daveml_surface_replay"
+                        if vehicle_parameters.get("attitude_control_mode") == "surface_open_loop"
+                        else "logical_surface_allocator"
+                        if self.fidelity is ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED
+                        else "none"
+                    ),
                     "spawn_children": self.spawn_children,
                     "deployment_composition": "enabled" if self.spawn_children else "standalone",
                 },
@@ -922,12 +942,13 @@ def _launch_state(vehicle: RocketGlideVehicle, command: LaunchCommand, fidelity:
     direction = command.launch_direction
     velocity = _scale(direction, vehicle.initial_speed_m_s)
     position: Vector3 = (0.0, 0.0, vehicle.initial_altitude_m)
+    phase = vehicle.phase_at(0.0)
     common = {
         "time_s": 0.0,
         "position_m": position,
         "velocity_m_s": velocity,
         "mass_kg": vehicle.initial_mass_kg,
-        "phase": "boost",
+        "phase": phase,
     }
     if fidelity in {ReachabilityFidelity.RIGID_BODY_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED}:
         native = RigidBody6DofState(
@@ -939,7 +960,7 @@ def _launch_state(vehicle: RocketGlideVehicle, command: LaunchCommand, fidelity:
             vehicle.initial_mass_kg,
             vehicle.booster_propellant_mass_kg if vehicle.has_booster else vehicle.propellant_mass_kg,
         )
-        return RigidBody6DofReachabilityState(native, "boost")
+        return RigidBody6DofReachabilityState(native, phase)
     if fidelity is ReachabilityFidelity.PSEUDO_6DOF:
         return Pseudo6DofState(
             **cast(Any, common),
@@ -1035,16 +1056,60 @@ def _attitude_derivative(vehicle: RocketGlideVehicle, state: Pseudo6DofState, co
         _wrap_angle(target[1] - state.attitude_rad[1]),
         _wrap_angle(target[2] - state.attitude_rad[2]),
     )
-    desired_rates = tuple(
-        _clamp(error / vehicle.attitude_time_constant_s, -vehicle.max_attitude_rate_rad_s, vehicle.max_attitude_rate_rad_s)
-        for error in errors
-    )
-    rates = tuple(float(rate) for rate in desired_rates)
-    rate_acceleration = tuple(
-        (desired - actual) / vehicle.attitude_time_constant_s
-        for desired, actual in zip(desired_rates, state.attitude_rate_rad_s, strict=True)
-    )
+    profile = _load_pseudo6dof_profile(vehicle.pseudo6dof_profile_id) if vehicle.pseudo6dof_profile_id is not None else None
+    if profile is None:
+        desired_rates = tuple(
+            _clamp(error / vehicle.attitude_time_constant_s, -vehicle.max_attitude_rate_rad_s, vehicle.max_attitude_rate_rad_s)
+            for error in errors
+        )
+        rates = tuple(float(rate) for rate in desired_rates)
+        rate_acceleration = tuple(
+            (desired - actual) / vehicle.attitude_time_constant_s
+            for desired, actual in zip(desired_rates, state.attitude_rate_rad_s, strict=True)
+        )
+    else:
+        _, response = profile.response_for_phase(state.phase)
+        axes = (response["roll"], response["pitch"], response["yaw"])
+        desired_rates = tuple(
+            _clamp(error / axis.time_constant_s, -axis.maximum_rate_rad_s, axis.maximum_rate_rad_s)
+            for error, axis in zip(errors, axes, strict=True)
+        )
+        # The reachability bridge retains its established first-order angle
+        # propagation so existing envelope checkpoints remain comparable.
+        # The declared profile supplies axis-specific rate limits and the
+        # propagated rate telemetry; the reusable second-order law is exposed
+        # separately for runners that carry the response state as their plant.
+        rates = tuple(float(rate) for rate in desired_rates)
+        rate_acceleration = tuple(
+            _clamp(
+                (desired - actual) * axis.damping_ratio / axis.time_constant_s,
+                -axis.maximum_acceleration_rad_s2,
+                axis.maximum_acceleration_rad_s2,
+            )
+            for desired, actual, axis in zip(desired_rates, state.attitude_rate_rad_s, axes, strict=True)
+        )
     return rates, rate_acceleration  # type: ignore[return-value]
+    ####
+
+
+def _load_pseudo6dof_profile(profile_id: str) -> Pseudo6DOFProfile:
+    """Resolve one declared pseudo-6DOF profile for the reduced runtime."""
+
+    profile = next((item for item in load_pseudo6dof_catalog().profiles if item.id == profile_id), None)
+    if profile is None:
+        raise ValueError(f"unknown pseudo6dof profile: {profile_id}")
+    return profile
+    ####
+
+
+def _pseudo6dof_response_provenance(vehicle: RocketGlideVehicle, phase: str) -> tuple[str, bool]:
+    """Return the active reduced response schedule label for telemetry."""
+
+    if vehicle.pseudo6dof_profile_id is None:
+        return "not_applicable", False
+    profile = _load_pseudo6dof_profile(vehicle.pseudo6dof_profile_id)
+    response_phase, _ = profile.response_for_phase(phase)
+    return response_phase, response_phase != "default"
     ####
 
 
@@ -1206,8 +1271,16 @@ def _body_longitudinal_axis(state: State) -> Vector3:
 def _projected_area(body: DetachedBodyDefinition, state: State, *, velocity_m_s: Vector3 | None = None) -> float:
     """Evaluate scalar projected area for the canonical passive-body profiles."""
 
-    if body.shape is DetachedBodyShape.SPHERE or not isinstance(state, (Pseudo6DofState, RigidBody6DofReachabilityState)):
+    if body.shape is DetachedBodyShape.SPHERE:
         return body.reference_area_m2
+    if not isinstance(state, (Pseudo6DofState, RigidBody6DofReachabilityState)):
+        if body.tumbling_policy is TumblingPolicy.FIXED_ATTITUDE:
+            return body.reference_area_m2
+        # A point-mass passive-body reduction has no attitude state. Use a
+        # deterministic orientation average instead of quietly reusing the
+        # broadside/frontal constructor area. The rigid tier evaluates the
+        # instantaneous geometry below, so this is a real reduction boundary.
+        return _average_projected_area(body)
     radius_or_axial, *remaining = body.dimensions_m
     axis = _body_longitudinal_axis(state)
     relative_velocity = state.velocity_m_s if velocity_m_s is None else velocity_m_s
@@ -1238,6 +1311,30 @@ def _projected_area(body: DetachedBodyDefinition, state: State, *, velocity_m_s:
             + (direction[2] / semi_axis_z) ** 2
         )
     return body.reference_area_m2
+    ####
+
+
+def _average_projected_area(body: DetachedBodyDefinition) -> float:
+    """Return a deterministic orientation-averaged area for point-mass use."""
+
+    # Symmetry reduces the body-axis inclination integral to [0, pi/2]. The
+    # midpoint quadrature is intentionally small and deterministic: this is a
+    # reduced-order area contract, not an aerodynamic table replacement.
+    samples = 128
+    total = 0.0
+    for index in range(samples):
+        inclination = (index + 0.5) * (0.5 * math.pi / samples)
+        state = Pseudo6DofState(
+            0.0,
+            (0.0, 0.0, 0.0),
+            (1.0, 0.0, 0.0),
+            body.mass_kg,
+            "ballistic",
+            (0.0, inclination, 0.0),
+            (0.0, 0.0, 0.0),
+        )
+        total += _projected_area(body, state)
+    return total / samples
     ####
 
 
@@ -1386,7 +1483,11 @@ def _rigid_parent_model(vehicle: RocketGlideVehicle, command: LaunchCommand) -> 
             aero_force = drag_body + lift_body
             aero_moment = ContractVector3(0.0, 0.0, 0.0)
         thrust_body = ContractVector3(vehicle.booster_thrust_n, 0.0, 0.0) if phase == "boost" else ContractVector3(0.0, 0.0, 0.0)
-        control_moment = _velocity_alignment_moment(vehicle, native)
+        control_moment = (
+            ContractVector3(0.0, 0.0, 0.0)
+            if vehicle.attitude_control_mode in {"open_loop", "surface_open_loop"}
+            else _velocity_alignment_moment(vehicle, native)
+        )
         if phase == "glide" and vehicle.aerodynamic_model_id == HL20_SOURCE_MODEL_ID and vehicle.attitude_control_mode == "velocity_aligned":
             # The source moment is an external disturbance to this reduced
             # stabilization policy; cancel it explicitly rather than letting
@@ -1637,7 +1738,8 @@ def _detached_initial_state(body: DetachedBodyDefinition, parent: State, fidelit
     impulse = _separation_impulse_inertial(vehicle, parent)
     child_delta = impulse.scaled(-1.0 / body.mass_kg)
     child_velocity = _add(parent.velocity_m_s, (child_delta.x, child_delta.y, child_delta.z))
-    if fidelity in {ReachabilityFidelity.RIGID_BODY_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED}:
+    reuse_rigid_for_pseudo = fidelity is ReachabilityFidelity.PSEUDO_6DOF and body.tumbling_policy is not TumblingPolicy.FIXED_ATTITUDE
+    if fidelity in {ReachabilityFidelity.RIGID_BODY_6DOF, ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED} or reuse_rigid_for_pseudo:
         native_angular_rate = (
             ContractVector3(0.0, 0.0, 0.0)
             if body.tumbling_policy is TumblingPolicy.FIXED_ATTITUDE
@@ -1653,11 +1755,7 @@ def _detached_initial_state(body: DetachedBodyDefinition, parent: State, fidelit
             0.0,
         )
         return RigidBody6DofReachabilityState(native)
-    if fidelity in {
-        ReachabilityFidelity.PSEUDO_6DOF,
-        ReachabilityFidelity.RIGID_BODY_6DOF,
-        ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED,
-    }:
+    if fidelity is ReachabilityFidelity.PSEUDO_6DOF:
         attitude = parent.attitude_rad if isinstance(parent, Pseudo6DofState) else (0.0, 0.0, 0.0)
         reduced_angular_rate: Vector3 = (
             (0.0, 0.0, 0.0)
@@ -1681,13 +1779,26 @@ def _detached_initial_state(body: DetachedBodyDefinition, parent: State, fidelit
     ####
 
 
-def _body_telemetry(vehicle: RocketGlideVehicle, body: DetachedBodyDefinition, state: State, termination: EnvelopeTermination | None = None) -> dict[str, object]:
+def _body_telemetry(
+    vehicle: RocketGlideVehicle,
+    body: DetachedBodyDefinition,
+    state: State,
+    termination: EnvelopeTermination | None = None,
+    requested_fidelity: ReachabilityFidelity | None = None,
+) -> dict[str, object]:
     """Record accepted detached-body aero and attitude observables."""
 
     air_relative_velocity = ContractVector3(*state.velocity_m_s) - vehicle.wind_velocity_m_s
     speed = air_relative_velocity.norm()
     density = _atmosphere(vehicle, state.position_m[2])
     area = _projected_area(body, state, velocity_m_s=(air_relative_velocity.x, air_relative_velocity.y, air_relative_velocity.z))
+    average_area = _average_projected_area(body)
+    if isinstance(state, PointMass3DofState):
+        area_policy = "orientation_averaged_projected_area"
+    elif requested_fidelity is ReachabilityFidelity.PSEUDO_6DOF:
+        area_policy = "native_rigid_body_reuse_instantaneous_projected_area"
+    else:
+        area_policy = "instantaneous_geometry_projected_area"
     drag_force_n = 0.5 * density * speed**2 * area * vehicle.drag_coefficient
     payload: dict[str, object] = {
         "time_s": state.time_s,
@@ -1697,6 +1808,16 @@ def _body_telemetry(vehicle: RocketGlideVehicle, body: DetachedBodyDefinition, s
         "air_relative_speed_m_s": speed,
         "mass_kg": state.mass_kg,
         "projected_area_m2": area,
+        "projected_area_reference_average_m2": average_area,
+        "projected_area_ratio_to_reference_average": area / max(average_area, 1.0e-12),
+        "projected_area_policy": area_policy,
+        "requested_fidelity": None if requested_fidelity is None else requested_fidelity.value,
+        "realized_state_fidelity": (
+            ReachabilityFidelity.POINT_MASS_3DOF.value
+            if isinstance(state, PointMass3DofState)
+            else ReachabilityFidelity.RIGID_BODY_6DOF.value
+        ),
+        "angular_rate_norm_rad_s": 0.0,
         "drag_force_n": drag_force_n,
         "event_id": "booster-release",
         "termination": None if termination is None else termination.value,
@@ -1707,10 +1828,12 @@ def _body_telemetry(vehicle: RocketGlideVehicle, body: DetachedBodyDefinition, s
     if isinstance(state, Pseudo6DofState):
         payload["attitude_rad"] = list(state.attitude_rad)
         payload["attitude_rate_rad_s"] = list(state.attitude_rate_rad_s)
+        payload["angular_rate_norm_rad_s"] = math.sqrt(sum(value * value for value in state.attitude_rate_rad_s))
     elif isinstance(state, RigidBody6DofReachabilityState):
         attitude = state.native.attitude
         payload["attitude_quaternion"] = [attitude.w, attitude.x, attitude.y, attitude.z]
         payload["attitude_rate_rad_s"] = [state.native.body_rate.x, state.native.body_rate.y, state.native.body_rate.z]
+        payload["angular_rate_norm_rad_s"] = state.native.body_rate.norm()
         payload.update(_rigid_body_model(vehicle, body).observables(state.native))
     return payload
     ####
@@ -1737,11 +1860,23 @@ def _parent_telemetry(
         "air_relative_velocity_m_s": [air_relative_velocity.x, air_relative_velocity.y, air_relative_velocity.z],
         "air_relative_speed_m_s": air_relative_speed,
         "mass_kg": state.mass_kg,
+        "phase": state.phase,
         "projected_area_m2": vehicle.reference_area_m2,
         "drag_force_n": drag_force_n,
         "event_id": "booster-release" if vehicle.has_booster and state.time_s >= vehicle.booster_release_time_s else None,
         "termination": None if termination is None else termination.value,
         "mission_profile_id": vehicle.mission_profile_id,
+        "pseudo6dof_profile_id": vehicle.pseudo6dof_profile_id,
+        "pseudo6dof_response_phase": (
+            _pseudo6dof_response_provenance(vehicle, state.phase)[0]
+            if isinstance(state, Pseudo6DofState)
+            else "not_applicable"
+        ),
+        "pseudo6dof_response_schedule_applied": (
+            _pseudo6dof_response_provenance(vehicle, state.phase)[1]
+            if isinstance(state, Pseudo6DofState)
+            else False
+        ),
         "mission_segment": vehicle.mission_segment_at(state.time_s),
         "specific_energy_j_per_kg": 0.5 * speed**2 + vehicle.gravity_m_s2 * state.position_m[2],
         "mission_bank_command_deg": math.degrees(vehicle.bank_at(state.time_s, command.bank_rad)) if command is not None else 0.0,
@@ -1766,7 +1901,10 @@ def _parent_telemetry(
         payload["attitude_control_error_magnitude_rad"] = alignment_error.norm()
         payload.update(_rigid_parent_model(vehicle, command or LaunchCommand(0.0, 0.0)).observables(state.native))
     if fidelity is ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED and command is not None:
-        payload.update(_logical_surface_allocation(command))
+        if vehicle.attitude_control_mode == "surface_open_loop":
+            payload.update(_source_surface_replay(command))
+        else:
+            payload.update(_logical_surface_allocation(command))
     return payload
     ####
 
@@ -1809,6 +1947,24 @@ def _logical_surface_allocation(command: LaunchCommand) -> dict[str, object]:
     ####
 
 
+def _source_surface_replay(command: LaunchCommand) -> dict[str, object]:
+    """Describe explicit source-surface commands without inventing control fit."""
+
+    controls = command.surface_controls_deg
+    if not controls:
+        controls = {name: 0.0 for name in HL20_SURFACE_NAMES}
+    return {
+        "surface_allocation_active": 1.0,
+        "surface_allocation_mode": "source_open_loop_replay",
+        "surface_allocation_synthetic": 0.0,
+        "surface_effectors_realized": 1.0,
+        "direct_body_moment_injection": 0.0,
+        "surface_commands_deg": {name: float(controls[name]) for name in HL20_SURFACE_NAMES},
+        "surface_command_source": "launch_command_explicit_open_loop",
+    }
+    ####
+
+
 def _simulate_detached_body(
     vehicle: RocketGlideVehicle,
     parent: State,
@@ -1822,6 +1978,11 @@ def _simulate_detached_body(
     assert vehicle.booster_detached_body is not None
     body = vehicle.booster_detached_body
     state = _detached_initial_state(body, parent, fidelity, vehicle)
+    realized_fidelity = (
+        ReachabilityFidelity.RIGID_BODY_6DOF
+        if fidelity is ReachabilityFidelity.PSEUDO_6DOF and body.tumbling_policy is not TumblingPolicy.FIXED_ATTITUDE
+        else fidelity
+    )
     states: list[State] = [state]
     termination = EnvelopeTermination.HORIZON
     while state.time_s < horizon_s - 1.0e-12:
@@ -1834,7 +1995,7 @@ def _simulate_detached_body(
         if not all(math.isfinite(value) for value in (*state.position_m, *state.velocity_m_s, state.mass_kg)):
             termination = EnvelopeTermination.INVALID
             break
-    telemetry = [_body_telemetry(vehicle, body, accepted) for accepted in states]
+    telemetry = [_body_telemetry(vehicle, body, accepted, requested_fidelity=fidelity) for accepted in states]
     if telemetry:
         telemetry[-1]["termination"] = termination.value
     return DetachedBodyTrajectory(
@@ -1842,10 +2003,11 @@ def _simulate_detached_body(
         body.shape.value,
         "booster-release",
         parent.time_s,
-        fidelity,
+        realized_fidelity,
         tuple(states),
         termination,
         tuple(telemetry),
+        fidelity,
     )
     ####
 
@@ -2542,6 +2704,7 @@ def _sample_dict(sample: EnvelopeSample, state_fields: tuple[str, ...], include_
                 "parent_event_id": body.parent_event_id,
                 "deployment_time_s": body.deployment_time_s,
                 "fidelity": body.fidelity.value,
+                "requested_fidelity": None if body.requested_fidelity is None else body.requested_fidelity.value,
                 "termination": body.termination.value,
                 "classification": body.classification,
                 "terminal_state": _terminal_state_dict(body.terminal),

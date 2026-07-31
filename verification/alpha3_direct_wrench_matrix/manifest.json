@@ -1,0 +1,150 @@
+{
+  "claim_boundary": "This matrix inventories direct-wrench evidence, physical-path precedence, and blockers. It does not promote a family to full-envelope or hardware qualification.",
+  "records": [
+    {
+      "artifact": "verification/alpha3_x8_direct_wrench/manifest.json",
+      "claim_boundary": [
+        "No left/right elevon, servo, throttle, or physical-effector allocation is used by this witness.",
+        "The direct wrench is an explicit injected control load and is not a hardware-realizable control claim.",
+        "This is one source-trim local operating point, not a scheduled or family-wide qualification."
+      ],
+      "direct_body_moment_injection": true,
+      "evidence_tier": "T3_screen_only",
+      "family_id": "skywalker_x8",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": true,
+      "physical_effector_allocation": false,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "artifacts/showcases/airbreathing-racetrack-fidelity-ladder/b747-racetrack-altitude-turns-6dof-v1/summary.json",
+      "claim_boundary": [
+        "physical elevator, aileron, or rudder allocation",
+        "source-validated transport flight-control law",
+        "fuel depletion or certified JT9D performance",
+        "takeoff, landing, wind robustness, or manufacturer fidelity"
+      ],
+      "direct_body_moment_injection": true,
+      "evidence_tier": "bounded_direct_wrench_nominal_case",
+      "family_id": "b747",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": true,
+      "physical_effector_allocation": false,
+      "status": "nominal_case_pass_overall_qualification_pending"
+    },
+    {
+      "artifact": "verification/alpha3_a320_direct_wrench/manifest.json",
+      "claim_boundary": [
+        "physical elevator, aileron, rudder, or engine allocation",
+        "full aircraft mission closure at rigid-body 6DOF",
+        "manufacturer-validated A320 flight dynamics",
+        "scheduled envelope qualification or fuel depletion"
+      ],
+      "direct_body_moment_injection": true,
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "a320_openap_3dof",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": true,
+      "physical_effector_allocation": false,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_f16_direct_wrench/manifest.json",
+      "claim_boundary": [
+        "physical elevator/aileron/rudder/throttle allocation",
+        "racetrack route closure",
+        "scheduled or full-envelope control",
+        "manufacturer flight-control fidelity"
+      ],
+      "direct_body_moment_injection": true,
+      "evidence_tier": "T3_screen_only",
+      "family_id": "f16_s119",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": true,
+      "physical_effector_allocation": false,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_x15_direct_wrench/manifest.json",
+      "claim_boundary": [
+        "source-bounded trim or equilibrium",
+        "physical stabilator/rudder/RCS/propulsion allocation",
+        "powered-to-coast authority transition",
+        "controlled terminal handoff or mission qualification",
+        "full-envelope or manufacturer validation"
+      ],
+      "direct_body_moment_injection": true,
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "x15",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": true,
+      "physical_effector_allocation": false,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_direct_wrench_debug/manifest.json",
+      "claim_boundary": [
+        "motor or rotor allocation",
+        "motor lag or rotor authority qualification",
+        "translation, contact, battery, wind, or envelope qualification"
+      ],
+      "direct_body_moment_injection": true,
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "hummingbird",
+      "fidelity": "rigid_body_6dof_direct_wrench_debug",
+      "mission_pass": true,
+      "physical_effector_allocation": false,
+      "status": "debug_comparator_pass"
+    },
+    {
+      "artifact": "verification/alpha3_hl20_direct_wrench/manifest.json",
+      "claim_boundary": [
+        "source-bounded trim or equilibrium using physical surfaces",
+        "closed-loop surface allocation",
+        "bank reversal, glide energy, landing, or family envelope qualification",
+        "source-exact flight-control law",
+        "hardware or manufacturer validation"
+      ],
+      "direct_body_moment_injection": true,
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "hl20_mod_k",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": true,
+      "physical_effector_allocation": false,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_nesc_direct_wrench/manifest.json",
+      "claim_boundary": [
+        "source-exact NESC attitude or gimbal response",
+        "source force/moment balance",
+        "physical thrust-vector allocation",
+        "stage-dependent controlled 6DOF mission",
+        "source-exact inertia or body-frame mapping"
+      ],
+      "direct_body_moment_injection": true,
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "mission_pass": true,
+      "physical_effector_allocation": false,
+      "status": "nominal_case_pass"
+    },
+    {
+      "available_lineage": "native passive rigid-body equations with averaged-area 3DOF reduction",
+      "blocker": "no controller or effector exists to realize a requested wrench",
+      "family_id": "tumbling_body",
+      "status": "not_applicable_native_uncontrolled"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/build_alpha3_direct_wrench_matrix.py",
+  "schema": "taoryx.alpha3-direct-wrench-matrix/v1alpha1",
+  "status": "development_direct_wrench_matrix",
+  "summary": {
+    "blocked_or_exception_count": 1,
+    "direct_wrench_artifact_count": 8,
+    "direct_wrench_bridge_pass_count": 8,
+    "family_count": 9,
+    "nominal_direct_wrench_pass_count": 8
+  }
+}

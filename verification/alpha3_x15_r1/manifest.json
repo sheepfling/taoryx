@@ -1,0 +1,131 @@
+{
+  "case_count": 10,
+  "cases": [
+    {
+      "artifact": "verification/alpha3_x15_r1/point_mass_3dof/release_angle_low/evidence.json",
+      "case_id": "release_angle_low",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 35.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_x15_r1/point_mass_3dof/release_angle_high/evidence.json",
+      "case_id": "release_angle_high",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 55.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_x15_r1/point_mass_3dof/initial_speed_plus/evidence.json",
+      "case_id": "initial_speed_plus",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 45.0,
+        "initial_speed_delta_m_s": 50.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_x15_r1/point_mass_3dof/booster_thrust_minus_10pct/evidence.json",
+      "case_id": "booster_thrust_minus_10pct",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "booster_thrust_scale": 0.9,
+        "elevation_deg": 45.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_x15_r1/point_mass_3dof/wind_vector_plus/evidence.json",
+      "case_id": "wind_vector_plus",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 45.0,
+        "wind_velocity_m_s": [
+          5.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "artifact": "verification/alpha3_x15_r1/pseudo_6dof/release_angle_low/evidence.json",
+      "case_id": "release_angle_low",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 35.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_x15_r1/pseudo_6dof/release_angle_high/evidence.json",
+      "case_id": "release_angle_high",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 55.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_x15_r1/pseudo_6dof/initial_speed_plus/evidence.json",
+      "case_id": "initial_speed_plus",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 45.0,
+        "initial_speed_delta_m_s": 50.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_x15_r1/pseudo_6dof/booster_thrust_minus_10pct/evidence.json",
+      "case_id": "booster_thrust_minus_10pct",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "booster_thrust_scale": 0.9,
+        "elevation_deg": 45.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_x15_r1/pseudo_6dof/wind_vector_plus/evidence.json",
+      "case_id": "wind_vector_plus",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 45.0,
+        "wind_velocity_m_s": [
+          5.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ],
+  "claim": "Fixed staged-surrogate event-chain evidence for the X-15 point-mass and pseudo-6DOF tiers.",
+  "claim_boundary": "This is deterministic X-15-scaled reduced-order evidence with explicit deployment events. It does not establish a controlled terminal handoff, native X-15 batch dynamics, physical stabilator/rudder/throttle/RCS allocation, wind robustness, statistical reliability, or full-envelope qualification.",
+  "failed_case_count": 0,
+  "fidelities": [
+    "point_mass_3dof",
+    "pseudo_6dof"
+  ],
+  "passed_case_count": 10,
+  "perturbation_contract": {
+    "deployment": "explicit spent-booster child and release event retained",
+    "dimensions": [
+      "release_angle_low",
+      "release_angle_high",
+      "initial_speed_plus",
+      "booster_thrust_minus_10pct",
+      "wind_vector_plus"
+    ],
+    "failure_policy": "retain failed event-chain or terminal witnesses as boundary evidence"
+  },
+  "reproduction": "PYTHONPATH=src python3 tools/validate_x15_r1_matrix.py",
+  "schema": "taoryx.x15-r1-matrix/v1alpha1",
+  "status": "R1_fixed_matrix_complete"
+}

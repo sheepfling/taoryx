@@ -1,0 +1,79 @@
+{
+  "claim": {
+    "nonclaims": [
+      "The booster is synthetic and the reduced aerodynamic branch is not source-exact.",
+      "The source DAVE-ML branch is not promoted by this packet; its independent invalid-state diagnostic remains authoritative.",
+      "No closed-loop surface allocation, thermal model, or source-exact terminal arrival is claimed."
+    ],
+    "proves": "A source-geometry/fixed-mass HL-20 reduced release, boost, glide, and terminal-impact witness across the declared reduced tiers."
+  },
+  "control_path": {
+    "direct_force_moment_injection": false,
+    "guidance": "open_loop_release_and_declared_energy_schedule",
+    "physical_effectors": [],
+    "realization": "response_law"
+  },
+  "evaluation": {
+    "hard_envelope_violations": [],
+    "mission_pass": true,
+    "numerical_pass": true
+  },
+  "family_id": "hl20_mod_k",
+  "fidelity": "pseudo_6dof",
+  "mission": {
+    "controller_transition_evidence": "not_applicable_open_loop",
+    "independent_truth_evaluation": true,
+    "required_objectives": [
+      {
+        "controller_transition": "not_applicable_open_loop",
+        "id": "boost",
+        "sample_id": "query-000000",
+        "truth_result": "PASS",
+        "type": "event"
+      },
+      {
+        "controller_transition": "not_applicable_open_loop",
+        "id": "booster_cutoff",
+        "sample_id": "query-000000",
+        "truth_result": "PASS",
+        "type": "event"
+      },
+      {
+        "controller_transition": "not_applicable_open_loop",
+        "id": "release",
+        "sample_id": "query-000000",
+        "truth_result": "PASS",
+        "type": "event"
+      },
+      {
+        "controller_transition": "not_applicable_open_loop",
+        "id": "glide_energy_segment",
+        "sample_id": "query-000000",
+        "truth_result": "PASS",
+        "type": "path_corridor"
+      },
+      {
+        "controller_transition": "not_applicable_open_loop",
+        "id": "terminal_impact_witness",
+        "sample_id": "query-000000",
+        "truth_result": "PASS",
+        "type": "event"
+      }
+    ],
+    "start_contract": "synthetic_booster_release",
+    "terminal_contract": "ground_contact_impact_witness"
+  },
+  "profile_id": "hl20.attitude_response_p6dof.v1",
+  "runtime": {
+    "exit_code": 0,
+    "hard_gates_passed": true
+  },
+  "schema": "taoryx.family-fidelity-evidence/v1alpha1",
+  "source_boundary": {
+    "aerodynamics": "surrogate_fixed_cd_ld_v1",
+    "booster": "synthetic",
+    "geometry": "source_bound_hl20_mod_k",
+    "mass": "source_bound_fixed_mass"
+  },
+  "status": "development"
+}

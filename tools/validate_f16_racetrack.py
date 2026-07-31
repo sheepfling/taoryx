@@ -37,6 +37,7 @@ from taoryx.trajectory import (
     F16ReducedRacetrackMode,
     F16ReducedRacetrackRun,
     F16ReducedRacetrackRunner,
+    load_pseudo6dof_catalog,
 )
 from tools.validate_f16_physical_wrench_perturbations import _build_case
 from tools.validate_f16_reductions import _build_case as _build_reduction_case
@@ -72,7 +73,8 @@ def _envelope_violations(rows: list[dict[str, float | int | str]]) -> list[dict[
             if telemetry_channel not in row:
                 continue
             value = float(row[telemetry_channel])
-            if not math.isfinite(value) or value < lower or value > upper:
+            numerical_tolerance = 1.0e-9 * max(1.0, abs(lower), abs(upper))
+            if not math.isfinite(value) or value < lower - numerical_tolerance or value > upper + numerical_tolerance:
                 violations.append({
                     "sample_index": index,
                     "time_s": float(row.get("time_s", index)),
@@ -80,6 +82,7 @@ def _envelope_violations(rows: list[dict[str, float | int | str]]) -> list[dict[
                     "value": value,
                     "lower": lower,
                     "upper": upper,
+                    "comparison_tolerance": numerical_tolerance,
                 })
     return violations
     ####
@@ -260,12 +263,23 @@ def run_case(
                 control_step=1.0e-5,
             )
             model = F16AttitudeResponsePseudo6DOFModel(source, trim, linearization, trim_pitch_rad)
+        response_profile = None
+        if reduced_mode == "pseudo_6dof_kinematic_bridge":
+            _, response_profile = load_pseudo6dof_catalog(ROOT / "verification/pseudo6dof_profiles.yaml").for_family("f16_s119")
         result = F16ReducedRacetrackRunner(
             model,
             trim,
             route,
             reduced_mode,
             dt_s=dt_s,
+            response_profile=response_profile,
+            initial_north_offset_m=float((perturbation or {}).get("initial_north_offset_m", 0.0)),
+            initial_east_offset_m=float((perturbation or {}).get("initial_east_offset_m", 0.0)),
+            initial_altitude_offset_m=float((perturbation or {}).get("initial_altitude_offset_m", 0.0)),
+            initial_speed_offset_m_s=float((perturbation or {}).get("initial_speed_offset_m_s", 0.0)),
+            initial_heading_offset_rad=float((perturbation or {}).get("initial_heading_offset_rad", 0.0)),
+            initial_flight_path_offset_rad=float((perturbation or {}).get("initial_flight_path_offset_rad", 0.0)),
+            initial_bank_offset_rad=float((perturbation or {}).get("initial_bank_offset_rad", 0.0)),
         ).run(duration_s=duration_s)
         rows = [dict(row) for row in result.rows]
         allocations_ok = True

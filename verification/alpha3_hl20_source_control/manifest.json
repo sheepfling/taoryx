@@ -1,0 +1,8 @@
+{
+  "artifact": "control_direction_probe.json",
+  "claim_boundary": "Open-loop source coefficient direction evidence only; no physical allocation or controlled-flight claim.",
+  "plot": "source_control_direction_board.png",
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hl20_source_control_probe.py",
+  "schema": "taoryx.hl20-source-control-direction-manifest/v1alpha1",
+  "status": "open_loop_source_direction_pass_with_boundary"
+}

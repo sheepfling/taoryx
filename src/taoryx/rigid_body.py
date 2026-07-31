@@ -149,6 +149,8 @@ class RigidBodyForceMoment:
     propulsion_force_body: Vector3 | None = None
     aero_moment_body: Vector3 | None = None
     propulsion_moment_body: Vector3 | None = None
+    control_force_body: Vector3 | None = None
+    control_moment_body: Vector3 | None = None
 
     def __post_init__(self) -> None:
         vectors = {

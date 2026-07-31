@@ -1,0 +1,29 @@
+{
+  "files": {
+    "README.md": "97f3a836209c6655f8ca28f74500142072067dcdfb4cfb019c404f7978f0ebcd",
+    "controller_transitions.json": "5ebf2e8445587510028d5a4419a11cf8a155550a2fb7ccdc4427ea0ec0a9cb57",
+    "events.json": "f37acb8233b25a8a085bc6a2fe9830e69d69006cf80f3c3a75f979995580bd08",
+    "inputs/00_takeoff.prb": "09ffafe6dcfbc3066322a47c664a15690da5c4d3d41b5a03b5871add6dd97f11",
+    "inputs/01_hover-dwell.prb": "0f296b78e37cd49b71e5739850b881563b8b3eb3dc012e2bfbb440959abda910",
+    "inputs/02_yaw-step.prb": "b930c030d513fdc636b625b2d78101793f6884a26a2aaf8321b3276c346b5b7f",
+    "inputs/03_climb-altitude-gate.prb": "b9458c4fc7b77a131b8c10bf71432c124509a77f51817126f8c92a51d6ef11ae",
+    "inputs/04_box-south-east.prb": "87b98c2c423d44fd0a45cf36b177f9403f05efd25b2f019547e53f97df1e96cf",
+    "inputs/05_box-north-east.prb": "c24cbc206b3cd8fca1eb77cd9cb405c267225474873b28bfd2e65722c1c52eb9",
+    "inputs/06_box-north-west.prb": "ee70309bd743e2c42b155f5a661b3d488869bddb707ea2b8c029b6895d389f6c",
+    "inputs/07_box-south-west.prb": "cbc48f8c0e2c09211bb749a9d44f1bbfb987bb37ce411dc2b0cd5c18d64af5bd",
+    "inputs/08_return-home.prb": "1d6808a0ca716310c12bee911cf3464caac496cf55b688950eab0acd83ce9ab9",
+    "inputs/09_descent-altitude-gate.prb": "d13cd8de2b81d42f546c7391da274070ed8de527c964faf637d9d2b6f792f755",
+    "inputs/10_touchdown.prb": "856f577b7c872707d68e656ac27737a92ee507b09f74d1c98a4815316e02247d",
+    "mission_sequence.png": "f71275cda686fc601993450d417add40b509a7d4c3e5f666edd8e59ed7e12ded",
+    "objective_report.json": "7a006a174bd96b0c65808fafb635c3c8cfe07af6f01d14c91d78dca235214009",
+    "phase_timeline.json": "1ca663b87246763951cfd97bb676be1f1b170d7ef5d03a7c4219bdd7f2180c50",
+    "plots/pad_to_pad_overview.png": "9167dd6f6c9c6f3fb6be745b2274e2c27c97e5ad5881529b2f24658c7c5965ee",
+    "reproduction.txt": "f3aeab9778fc7459d217c6834e7700f1f6e417f1fd6651f4cbbb0ed67e78b029",
+    "summary.json": "27c27c158b76d0328540a71277aeabfeed0ff83e52c54342114cb952272d3c69",
+    "truth_telemetry.csv": "e0616ea8885ca80c984f2184aaa69670bdedb700003bb4fde552e965b60f9fef"
+  },
+  "mission_id": "hummingbird-pad-to-pad-altitude-yaw-individual-rotor-v1",
+  "schema_version": 1,
+  "summary": "summary.json",
+  "truth_telemetry": "truth_telemetry.csv"
+}

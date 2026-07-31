@@ -1,0 +1,136 @@
+{
+  "binding_id": "x8-point-mass",
+  "binding_status": "nominal_case_pass_overall_qualification_pending",
+  "fidelity": "point_mass_3dof",
+  "gates": [
+    {
+      "gate_normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "id": "high-altitude-level-gate",
+      "phase": "outbound-level",
+      "target": {
+        "altitude_m": 188.0,
+        "east_m": 700.0,
+        "north_m": 0.0,
+        "speed_m_s": 17.9
+      }
+    },
+    {
+      "gate_normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "id": "left-turn-exit-gate",
+      "phase": "left-turn",
+      "target": {
+        "altitude_m": 188.0,
+        "east_m": 700.0,
+        "north_m": 500.0,
+        "speed_m_s": 17.9
+      }
+    },
+    {
+      "gate_normal": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "id": "low-altitude-level-gate",
+      "phase": "inbound-level",
+      "target": {
+        "altitude_m": 178.0,
+        "east_m": 0.0,
+        "north_m": 500.0,
+        "speed_m_s": 17.9
+      }
+    },
+    {
+      "gate_normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "id": "terminal-start-finish-gate",
+      "phase": "right-turn",
+      "target": {
+        "altitude_m": 178.0,
+        "east_m": 0.0,
+        "north_m": 0.0,
+        "speed_m_s": 17.9
+      }
+    }
+  ],
+  "phase_windows": [
+    {
+      "end_s": 20.0,
+      "name": "outbound-climb",
+      "start_s": 0.0
+    },
+    {
+      "end_s": 39.106145251396654,
+      "name": "outbound-level",
+      "start_s": 20.0
+    },
+    {
+      "end_s": 82.98313761996918,
+      "name": "left-turn",
+      "start_s": 39.106145251396654
+    },
+    {
+      "end_s": 116.31647095330251,
+      "name": "inbound-descent",
+      "start_s": 82.98313761996918
+    },
+    {
+      "end_s": 122.08928287136584,
+      "name": "inbound-level",
+      "start_s": 116.31647095330251
+    },
+    {
+      "end_s": 165.96627523993837,
+      "name": "right-turn",
+      "start_s": 122.08928287136584
+    }
+  ],
+  "route_attributes": {
+    "duration-s": "165.9662752399384",
+    "mode": "racetrack",
+    "position-capture-gain": "0.01",
+    "position-capture-max-correction-mps": "2",
+    "racetrack-altitude-capture-gain-per-s": "0.1",
+    "racetrack-altitude-capture-max-mps": "2",
+    "racetrack-climb-rate-mps": "0.5",
+    "racetrack-descent-rate-mps": "0.3",
+    "racetrack-high-altitude-m": "188",
+    "racetrack-left-bank-deg": "-8",
+    "racetrack-length-m": "700",
+    "racetrack-low-altitude-m": "178",
+    "racetrack-right-bank-deg": "-8",
+    "racetrack-speed-mps": "17.9",
+    "racetrack-turn-radius-m": "250"
+  },
+  "schema_version": 1,
+  "source_realization": "source_table_point_mass_route",
+  "template_id": "powered_fixed_wing_racetrack_v1",
+  "timing": {
+    "climb_time_s": 20.0,
+    "descent_time_s": 33.333333333333336,
+    "gate_altitude_tolerance_m": 35.0,
+    "gate_corridor_m": 250.0,
+    "gate_speed_tolerance_mps": 12.0,
+    "inbound_level_time_s": 5.772811918063319,
+    "outbound_level_time_s": 19.106145251396654,
+    "position_capture_bank_gain_rad_per_m": 2.5e-05,
+    "position_capture_max_bank_correction_deg": 3.0,
+    "route_duration_s": 165.96627523993837,
+    "simulation_horizon_s": 169.96627523993837,
+    "straight_time_s": 39.106145251396654,
+    "turn_rate_command_scale": 1.0,
+    "turn_time_s": 43.87699236857253
+  },
+  "vehicle_id": "skywalker_x8"
+}

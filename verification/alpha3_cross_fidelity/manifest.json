@@ -1,0 +1,53 @@
+{
+  "family_count": 9,
+  "interpretation": "Cross-fidelity reports are semantic comparisons. They do not promote development records or claim physical-effector fidelity.",
+  "reports": [
+    {
+      "artifact": "verification/alpha3_cross_fidelity/a320.json",
+      "family_id": "a320",
+      "status": "pass"
+    },
+    {
+      "artifact": "verification/alpha3_cross_fidelity/b747.json",
+      "family_id": "b747",
+      "status": "pass"
+    },
+    {
+      "artifact": "verification/alpha3_cross_fidelity/f16_s119.json",
+      "family_id": "f16_s119",
+      "status": "pass"
+    },
+    {
+      "artifact": "verification/alpha3_cross_fidelity/hl20_mod_k.json",
+      "family_id": "hl20_mod_k",
+      "status": "pass"
+    },
+    {
+      "artifact": "verification/alpha3_cross_fidelity/hummingbird.json",
+      "family_id": "hummingbird",
+      "status": "pass"
+    },
+    {
+      "artifact": "verification/alpha3_cross_fidelity/reference_nesc_two_stage_rocket.json",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "status": "pass"
+    },
+    {
+      "artifact": "verification/alpha3_cross_fidelity/skywalker_x8.json",
+      "family_id": "skywalker_x8",
+      "status": "pass"
+    },
+    {
+      "artifact": "verification/alpha3_cross_fidelity/tumbling_body.json",
+      "family_id": "tumbling_body",
+      "status": "pass"
+    },
+    {
+      "artifact": "verification/alpha3_cross_fidelity/x15.json",
+      "family_id": "x15",
+      "status": "pass"
+    }
+  ],
+  "schema": "taoryx.alpha3-cross-fidelity-manifest/v1alpha1",
+  "status": "pass"
+}

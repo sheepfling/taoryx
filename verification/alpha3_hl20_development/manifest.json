@@ -1,0 +1,23 @@
+{
+  "comparison": "comparison.json",
+  "family_id": "hl20_mod_k",
+  "nominal_case_scope": "hl20.synthetic_release_glide_impact_v1",
+  "promotion_blocker": "source-bound trim and controlled bank/alpha/energy qualification remain pending",
+  "records": [
+    {
+      "artifact": "verification/alpha3_hl20_development/point_mass_3dof_evidence.json",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_hl20_development/pseudo_6dof_evidence.json",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hl20_fidelity_ladder.py",
+  "schema": "taoryx.hl20-fidelity-ladder/v1alpha1",
+  "status": "nominal_case_pass"
+}

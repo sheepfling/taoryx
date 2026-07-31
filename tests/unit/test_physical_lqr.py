@@ -14,8 +14,11 @@ from taoryx.control_allocation import (
     allocate_and_advance_wrench,
 )
 from taoryx.physical_lqr import (
+    PhysicalWrenchLqrSchedule,
+    PhysicalWrenchLqrScheduleNode,
     design_physical_wrench_lqr,
     project_linearization_to_wrench,
+    run_scheduled_physical_wrench_transition,
     validate_nonlinear_wrench_lqr,
 )
 from taoryx.trim import DynamicsLinearization, TrimResult, TrimSpec
@@ -213,6 +216,89 @@ def test_physical_wrench_lqr_accepts_explicit_local_state_reference() -> None:
 
     assert requested["pitch_moment_nm"] == pytest.approx(increment["pitch_moment_nm"])
     assert increment["pitch_moment_nm"] > 0.0
+    ####
+
+
+def test_physical_wrench_lqr_schedule_interpolates_without_bypassing_allocator() -> None:
+    """A scheduled demand is continuous and remains a wrench request only."""
+
+    projection = project_linearization_to_wrench(
+        _linearization(),
+        _effectiveness(),
+        state_names=("angle_rad", "rate_rad_s"),
+        wrench_names=("pitch_moment_nm",),
+        effector_names=("elevon_rad",),
+    )
+    design = design_physical_wrench_lqr(
+        "schedule-node",
+        projection,
+        q_diagonal=(10.0, 1.0),
+        r_diagonal=(1.0,),
+        state_scales=(0.2, 1.0),
+        wrench_scales=(1.0,),
+    )
+    schedule = PhysicalWrenchLqrSchedule(
+        (
+            PhysicalWrenchLqrScheduleNode(0.0, design),
+            PhysicalWrenchLqrScheduleNode(10.0, design),
+        )
+    )
+    command = schedule.command({"angle_rad": 0.02, "rate_rad_s": 0.0}, 5.0)
+    assert command.lower_node == design.id
+    assert command.upper_node == design.id
+    assert command.interpolation_fraction == pytest.approx(0.5)
+    assert set(command.requested_wrench) == {"pitch_moment_nm"}
+    assert not hasattr(command, "effectors")
+    left = schedule.command({"angle_rad": 0.02, "rate_rad_s": 0.0}, -1.0)
+    right = schedule.command({"angle_rad": 0.02, "rate_rad_s": 0.0}, 11.0)
+    assert left.interpolation_fraction == pytest.approx(0.0)
+    assert right.interpolation_fraction == pytest.approx(0.0)
+    ####
+
+
+def test_scheduled_transition_runner_reuses_bounded_physical_path() -> None:
+    """The shared transition runner integrates a plant through real effectors."""
+
+    projection = project_linearization_to_wrench(
+        _linearization(),
+        _effectiveness(),
+        state_names=("angle_rad", "rate_rad_s"),
+        wrench_names=("pitch_moment_nm",),
+        effector_names=("elevon_rad",),
+    )
+    design = design_physical_wrench_lqr(
+        "transition-runner-node",
+        projection,
+        q_diagonal=(10.0, 1.0),
+        r_diagonal=(1.0,),
+        state_scales=(0.2, 1.0),
+        wrench_scales=(1.0,),
+    )
+    schedule = PhysicalWrenchLqrSchedule(
+        (
+            PhysicalWrenchLqrScheduleNode(0.0, design),
+            PhysicalWrenchLqrScheduleNode(10.0, design),
+        )
+    )
+    result = run_scheduled_physical_wrench_transition(
+        schedule,
+        start_coordinate=0.0,
+        end_coordinate=10.0,
+        initial_state={"angle_rad": 0.02, "rate_rad_s": 0.0},
+        initial_effectors={"elevon_rad": 0.0},
+        plant_for_coordinate=lambda _coordinate: _SecondOrderPhysicalPlant(),
+        state_scales=(0.2, 1.0),
+        duration_s=3.0,
+        dt_s=0.01,
+        sample_stride_steps=100,
+    )
+
+    assert result["passed"] is True
+    assert result["direct_wrench_injection"] is False
+    assert result["allocation_statuses"] == ["feasible"]
+    assert result["saturation_steps"] == 0
+    assert result["final_normalized_error"] < result["initial_normalized_error"] * 0.05
+    assert result["samples"][-1]["lower_node"] == design.id
     ####
 
 

@@ -1,0 +1,134 @@
+{
+  "case_count": 8,
+  "cases": [
+    {
+      "artifact": "verification/alpha3_nesc_r1/response_lag_fast/pseudo_6dof_evidence.json",
+      "case_id": "response_lag_fast",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "initial_attitude_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "response_time_scale": 0.8
+      }
+    },
+    {
+      "artifact": "verification/alpha3_nesc_r1/response_lag_fast/point_mass_3dof_evidence.json",
+      "case_id": "response_lag_fast",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "initial_attitude_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "response_time_scale": 0.8
+      }
+    },
+    {
+      "artifact": "verification/alpha3_nesc_r1/response_lag_slow/pseudo_6dof_evidence.json",
+      "case_id": "response_lag_slow",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "initial_attitude_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "response_time_scale": 1.2
+      }
+    },
+    {
+      "artifact": "verification/alpha3_nesc_r1/response_lag_slow/point_mass_3dof_evidence.json",
+      "case_id": "response_lag_slow",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "initial_attitude_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "response_time_scale": 1.2
+      }
+    },
+    {
+      "artifact": "verification/alpha3_nesc_r1/initial_attitude_offset/pseudo_6dof_evidence.json",
+      "case_id": "initial_attitude_offset",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "initial_attitude_rad": [
+          0.05,
+          -0.04,
+          0.08
+        ],
+        "response_time_scale": 1.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_nesc_r1/initial_attitude_offset/point_mass_3dof_evidence.json",
+      "case_id": "initial_attitude_offset",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "initial_attitude_rad": [
+          0.05,
+          -0.04,
+          0.08
+        ],
+        "response_time_scale": 1.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_nesc_r1/nominal_replay_integrity/pseudo_6dof_evidence.json",
+      "case_id": "nominal_replay_integrity",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "initial_attitude_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "response_time_scale": 1.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_nesc_r1/nominal_replay_integrity/point_mass_3dof_evidence.json",
+      "case_id": "nominal_replay_integrity",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "initial_attitude_rad": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "response_time_scale": 1.0
+      }
+    }
+  ],
+  "claim": "Fixed source-translation and bounded attitude-response sensitivity evidence for the NESC reduced tiers.",
+  "claim_boundary": "The source stage/mass/translation history remains fixed. The pseudo tier varies only its declared response-law lag and initial attitude. No source-exact gimbal effectiveness, plume interaction, staging-control law, statistical reliability, or full-envelope qualification is claimed.",
+  "failed_case_count": 0,
+  "passed_case_count": 8,
+  "perturbation_contract": {
+    "dimensions": [
+      "response_lag_fast",
+      "response_lag_slow",
+      "initial_attitude_offset",
+      "nominal_replay_integrity"
+    ],
+    "physical_gimbal_allocation": false,
+    "source_translation_fixed": true
+  },
+  "reproduction": "PYTHONPATH=src python3 tools/validate_nesc_r1_matrix.py",
+  "schema": "taoryx.nesc-r1-matrix/v1alpha1",
+  "status": "R1_fixed_matrix_complete"
+}

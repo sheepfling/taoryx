@@ -117,3 +117,44 @@ recipes:
     emphasis: [high-energy parent trajectory, accepted-boundary separation, synthetic cylinder, parent-child accounting]
     required_events: [liftoff_stage1_ignition, stage1_burnout, synthetic_child_separation, stage2_ignition, terminal_checkpoint]
     lineage_required: true
+
+  - id: x8-fixed-wing-racetrack-response-v1
+    family: powered_fixed_wing
+    display_name: X8 fixed-wing racetrack and response-boundary pack
+    priority: 8
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    emphasis:
+      - truth-evaluated altitude and speed gates
+      - isolated bank and pitch reversal
+      - source-table beta-domain boundary
+      - mapped physical elevon evidence where available
+    required_events: [trim_capture, ascent_gate, left_turn_gate, descent_gate, right_turn_gate, terminal_gate]
+    lineage_required: false
+
+  - id: hummingbird-multirotor-hover-yaw-contact-v1
+    family: multirotor
+    display_name: Hummingbird hover, yaw, disturbance, and contact pack
+    priority: 9
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    emphasis:
+      - vertical takeoff and altitude gates
+      - independent yaw checkout
+      - ordered hover-box capture and dwell
+      - disturbance recovery and post-contact shutdown
+      - aggregate pseudo response versus individual-rotor evidence
+    required_events: [rotor_spool, takeoff_gate, yaw_gate, recovery_dwell, touchdown, shutdown]
+    lineage_required: false
+
+  - id: tumbling-body-passive-deployment-v1
+    family: passive_ballistic_body
+    display_name: Passive tumbling-body deployment and rotational-state pack
+    priority: 10
+    archetypes: [mission_geometry, mission_timeline, dynamics_and_resources, envelope_and_qualification]
+    emphasis:
+      - orientation-averaged 3DOF area policy
+      - native rigid-body pseudo reuse
+      - projected-area and drag variation
+      - aerodynamic moments, angular energy, and angular momentum
+      - explicit no-controller claim
+    required_events: [release, rotational_state_capture, damping_or_tumble, impact]
+    lineage_required: false

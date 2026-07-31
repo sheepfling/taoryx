@@ -287,6 +287,7 @@ def _render_board(
     truth_evaluation: dict[str, object],
     status: str,
     mission: dict[str, Any],
+    runtime_diagnostics: tuple[dict[str, str], ...] = (),
 ) -> None:
     """Render a qualification board from the same truth results as the JSON."""
 
@@ -311,12 +312,17 @@ def _render_board(
             fontweight="bold",
             color="#991b1b",
         )
+        diagnostic_lines = [
+            f"{item['code']}: {item['message']}" for item in runtime_diagnostics
+        ] or ["The runtime returned no diagnostic message."]
         axis.text(
             0.02,
             0.78,
-            "No truth telemetry was produced. See summary.json and runtime diagnostics for the failure.",
-            fontsize=14,
+            "No truth telemetry was produced. The independent evaluator therefore cannot pass any objective.\n\n"
+            + "\n".join(diagnostic_lines),
+            fontsize=11,
             color="#334155",
+            wrap=True,
         )
         figure.savefig(packet / "qualification_board.png", dpi=180, bbox_inches="tight", pad_inches=0.25)
         plt.close(figure)
@@ -638,7 +644,13 @@ def _render_board(
     plt.close(figure)
 
 
-def build(output: Path, mission_id: str) -> Path:
+def build(
+    output: Path,
+    mission_id: str,
+    *,
+    problem_override: Path | None = None,
+    reproduction_command: str | None = None,
+) -> Path:
     catalog = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
     mission = next(item for item in catalog["missions"] if item["id"] == mission_id)
     packet = output / mission_id
@@ -646,7 +658,7 @@ def build(output: Path, mission_id: str) -> Path:
     inputs = packet / "inputs"
     run_dir.mkdir(parents=True, exist_ok=True)
     inputs.mkdir(parents=True, exist_ok=True)
-    problem = ROOT / mission["problem"]
+    problem = problem_override if problem_override is not None else ROOT / mission["problem"]
     tables = tuple(ROOT / path for path in mission["tables"])
     resolved_racetrack = None
     if "racetrack_binding" in mission:
@@ -666,6 +678,22 @@ def build(output: Path, mission_id: str) -> Path:
     )
     states = tuple(next(iter(report.results[0].states.values()), ())) if report.results else ()
     rows = _local_rows(states)
+    runtime_diagnostics = tuple(
+        {
+            "code": str(item.code),
+            "message": str(item.message),
+        }
+        for item in report.diagnostics
+    )
+    _write_json(
+        packet / "runtime_diagnostics.json",
+        {
+            "schema_version": 1,
+            "exit_code": report.exit_code,
+            "diagnostics": list(runtime_diagnostics),
+            "note": "Runtime diagnostics are preserved even when no truth telemetry exists; they cannot be converted into objective success.",
+        },
+    )
     _write_csv(packet / "truth_telemetry.csv", rows)
     controller_transitions = _diagnostic_controller_transitions(mission, rows)
     objective_specs = tuple(
@@ -824,7 +852,12 @@ def build(output: Path, mission_id: str) -> Path:
     )
     (packet / "mission.yaml").write_text(yaml.safe_dump(mission, sort_keys=False), encoding="utf-8")
     (packet / "reproduction.txt").write_text(
-        f"PYTHONPATH=src python3 tools/build_family_qualification_packet.py --output {output} --mission {mission_id}\n",
+        (
+            reproduction_command
+            if reproduction_command is not None
+            else f"PYTHONPATH=src python3 tools/build_family_qualification_packet.py --output {output} --mission {mission_id}"
+        )
+        + "\n",
         encoding="utf-8",
     )
     if report.artifacts:
@@ -843,7 +876,7 @@ def build(output: Path, mission_id: str) -> Path:
                 "taos.rotation_equation_residual_normalized",
             ),
         )
-    _render_board(packet, rows, truth_evaluation, str(summary["status"]), mission)
+    _render_board(packet, rows, truth_evaluation, str(summary["status"]), mission, runtime_diagnostics)
     _render_mission_sequence(packet, truth_evaluation, mission)
     manifest = {
         "schema_version": 1,

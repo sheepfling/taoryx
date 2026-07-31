@@ -15,6 +15,7 @@ import math
 from pathlib import Path
 from typing import Any
 
+from taoryx.airbreathing_control_mapping import x8_mapping_hypotheses, x8_source_mapping
 from taoryx.contracts import Vector3
 from taoryx.control_allocation import EffectorLimits
 from taoryx.language.grammar_contracts import GrammarProfile
@@ -24,7 +25,7 @@ from taoryx.physical_lqr import (
     validate_nonlinear_wrench_lqr,
 )
 from taoryx.runtime.program import LoadedProgram
-from taoryx.runtime_control_adapter import local_rigid_body_plant_from_vehicle
+from taoryx.runtime_control_adapter import RuntimeRigidBodyLocalPlant, local_rigid_body_plant_from_vehicle
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBLEM = ROOT / "examples/generated/vehicles/skywalker_x8_table_coordinate_trim_6dof.prb"
@@ -42,7 +43,7 @@ ACTUATOR_LIMITS = TABLE_ROOT.parent / "cruise_class_uav_skywalker_x8/controls/ac
 CONTROL_MAPPING_STATUS = TABLE_ROOT.parent / "cruise_class_uav_skywalker_x8/controls/control_mapping_status.csv"
 
 
-def build_plant():
+def build_plant() -> RuntimeRigidBodyLocalPlant:
     """Build the table-backed source-trim local plant with declared actuator limits."""
 
     program = LoadedProgram.load(PROBLEM, TABLES, profile=GrammarProfile.TAORYX)
@@ -141,7 +142,7 @@ def build_artifact() -> dict[str, Any]:
         duration_s=8.0,
         dt_s=0.01,
     )
-    acceptance = {
+    acceptance: dict[str, Any] = {
         "derivative_maximum_relative_difference": 0.10,
         "final_feedback_error_fraction_of_initial": 0.05,
         "final_controlled_actual_residual_nm": 0.005,
@@ -189,6 +190,15 @@ def build_artifact() -> dict[str, Any]:
             }
             for name, limits in plant.effector_limits.items()
         },
+        "physical_mapping": {
+            "status": "resolved_by_source_equation",
+            "source_status": "verify_before_use_original_package_note",
+            "selected_hypothesis": x8_source_mapping().as_dict(),
+            "hypotheses": [mapping.as_dict() for mapping in x8_mapping_hypotheses()],
+            "source_equation": "[delta_e, delta_a]^T = 1/2 [[1, 1], [-1, 1]] [delta_er, delta_el]^T",
+            "source_url": "https://doi.org/10.1007/s13272-025-00816-3",
+            "claim_boundary": "The source paper resolves the collective/differential-to-left/right sign mapping; servo wiring, hinge convention, individual actuator telemetry, and end-to-end mapped-surface validation remain separate gates.",
+        },
         "claim": {
             "status": "local_nonlinear_table_coordinate_validation" if completed else "local_validation_failed",
             "proves": (
@@ -197,15 +207,15 @@ def build_artifact() -> dict[str, Any]:
                 "elevon coordinates with declared lag/rate limits, and evaluated again by the nonlinear plant."
             ),
             "nonclaims": [
-                "The public package does not resolve the physical left/right elevon differential sign mapping; this is not a hardware-ready left/right allocation claim.",
+                "The source paper resolves the mathematical left/right mapping, but this artifact does not prove servo wiring, hinge sign, or hardware actuator dynamics.",
                 "This is one local operating point, not a gain-scheduled or envelope-wide controller qualification.",
                 "Yaw is declared unallocated because the flying-wing table coordinate pair does not provide independent yaw-moment authority.",
                 "The current short case has fixed mass and does not qualify battery discharge or endurance.",
             ],
-            "earned_controller_evidence_tier": "T3_linearly_controlled",
+            "earned_controller_evidence_tier": "T4_physically_allocated_source_coordinate",
             "nonlinear_table_coordinate_evidence": "passed" if completed else "failed",
-            "promotion_blocker": "physical_left_right_elevon_sign_mapping_unresolved",
-            "physical_allocation_evidence": "table_coordinate_candidate_unpromoted_pending_left_right_mapping",
+            "promotion_blocker": "individual_left_right_actuator_and_end_to_end_racetrack_evidence_pending",
+            "physical_allocation_evidence": "source_coordinate_allocation_with_resolved_left_right_mapping",
             "direct_body_moment_injection": False,
         },
         "acceptance": {

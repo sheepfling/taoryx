@@ -1,0 +1,55 @@
+{
+  "comparison_artifact": "verification/alpha3_tumbling_body/fidelity_ladder/pseudo_6dof_evidence.json",
+  "comparison_fidelity": "pseudo_6dof",
+  "comparison_status": "pass",
+  "control_realization": {
+    "comparison": "rigid_body_6dof_reuse",
+    "reference": "averaged_area_translation"
+  },
+  "family_id": "tumbling_body",
+  "interpretation": "The report measures semantic agreement, event-time deltas, and available objective margins. It does not rank fidelities or imply that absent physical effectors exist.",
+  "mission_result": {
+    "agreement": true,
+    "comparison_pass": true,
+    "reference_pass": true
+  },
+  "mission_semantics": {
+    "common_objective_ids": [
+      "cone_terminal_impact",
+      "cylinder_terminal_impact",
+      "sphere_terminal_impact",
+      "triaxial_ellipsoid_terminal_impact"
+    ],
+    "objective_sequence_preserved": true,
+    "unmatched_objective_ids": []
+  },
+  "objective_deltas": [
+    {
+      "id": "cone_terminal_impact",
+      "left_result": "PASS",
+      "right_result": "PASS"
+    },
+    {
+      "id": "cylinder_terminal_impact",
+      "left_result": "PASS",
+      "right_result": "PASS"
+    },
+    {
+      "id": "sphere_terminal_impact",
+      "left_result": "PASS",
+      "right_result": "PASS"
+    },
+    {
+      "id": "triaxial_ellipsoid_terminal_impact",
+      "left_result": "PASS",
+      "right_result": "PASS"
+    }
+  ],
+  "passive_loss_report": {
+    "artifact": "verification/alpha3_tumbling_body/fidelity_ladder/comparison.json",
+    "claim": "Measured terminal and projected-area differences between averaged-area translation and native rigid-body reuse; this is not a scalar quality score."
+  },
+  "reference_artifact": "verification/alpha3_tumbling_body/fidelity_ladder/point_mass_3dof_evidence.json",
+  "reference_fidelity": "point_mass_3dof",
+  "schema": "taoryx.alpha3-cross-fidelity-comparison/v1alpha1"
+}

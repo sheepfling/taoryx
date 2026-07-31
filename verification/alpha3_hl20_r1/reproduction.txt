@@ -1,0 +1,1 @@
+PYTHONPATH=src python3 tools/validate_hl20_r1_matrix.py

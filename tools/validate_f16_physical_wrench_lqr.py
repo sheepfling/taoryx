@@ -32,17 +32,24 @@ def _limits(payload: dict[str, Any]) -> dict[str, EffectorLimits]:
         "rudder": "rudder_deg",
         "throttle": "throttle_fraction",
     }
-    return {
-        names[source_name]: EffectorLimits(
+    limits: dict[str, EffectorLimits] = {}
+    dynamics = payload.get("dynamics", {})
+    default_time_constant = float(dynamics.get("time_constant_s", 0.0))
+    for source_name, values in payload["limits"].items():
+        position = values.get("position")
+        if position is None:
+            position = [values["lower"], values["upper"]]
+        rate = values.get("rate_per_s", values.get("rate_limit_per_s"))
+        unit = values.get("unit", "fraction" if source_name == "throttle" else "deg")
+        limits[names[source_name]] = EffectorLimits(
             names[source_name],
-            float(values["lower"]),
-            float(values["upper"]),
-            str(values["unit"]),
-            float(values["rate_limit_per_s"]),
-            float(values["time_constant_s"]),
+            float(position[0]),
+            float(position[1]),
+            str(unit),
+            float(rate) if rate is not None else None,
+            float(values.get("time_constant_s", default_time_constant)),
         )
-        for source_name, values in payload["limits"].items()
-    }
+    return limits
     ####
 
 
@@ -118,6 +125,7 @@ def main() -> int:
             "family_id": "reference_f16_s119",
             "plant_id": "reference-f16-s119-source-runtime-plant",
             "actuator_profile_id": actuator_profile["profile_id"],
+            "tuning_profile": "state_and_wrench_balanced_q10_r0p01",
             "control_path": "lqr_to_desired_wrench_to_bounded_effectors_to_source_nonlinear_plant",
             "claim_boundary": (
                 "local nonlinear trim-hold screen using plant-derived wrench LQR, source-load effectiveness, "

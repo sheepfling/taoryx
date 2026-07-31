@@ -23,6 +23,8 @@ from ..racetrack_guidance import RacetrackGuidanceReference, racetrack_reference
 from ..racetrack_template import ResolvedRacetrack
 from ..trim import TrimResult
 from .f16_reductions import F16AttitudeResponsePseudo6DOFModel, F16PointMass3DOFModel
+from .pseudo6dof_profiles import Pseudo6DOFProfile
+from .response_laws import AxisResponseState, step_bounded_axis_response
 
 F16ReducedRacetrackMode = Literal["point_mass_3dof", "pseudo_6dof_kinematic_bridge"]
 _Model = F16PointMass3DOFModel | F16AttitudeResponsePseudo6DOFModel
@@ -71,6 +73,14 @@ class F16ReducedRacetrackRunner:
     maximum_speed_acceleration_mps2: float = 8.0
     maximum_turn_rate_rad_s: float = math.radians(8.0)
     maximum_flight_path_rate_rad_s: float = math.radians(6.0)
+    response_profile: Pseudo6DOFProfile | None = None
+    initial_north_offset_m: float = 0.0
+    initial_east_offset_m: float = 0.0
+    initial_altitude_offset_m: float = 0.0
+    initial_speed_offset_m_s: float = 0.0
+    initial_heading_offset_rad: float = 0.0
+    initial_flight_path_offset_rad: float = 0.0
+    initial_bank_offset_rad: float = 0.0
 
     def __post_init__(self) -> None:
         if self.mode == "point_mass_3dof" and not isinstance(self.model, F16PointMass3DOFModel):
@@ -79,6 +89,8 @@ class F16ReducedRacetrackRunner:
             self.model, F16AttitudeResponsePseudo6DOFModel
         ):
             raise ValueError("pseudo-6DOF mode requires F16AttitudeResponsePseudo6DOFModel")
+        if self.response_profile is not None and self.mode != "pseudo_6dof_kinematic_bridge":
+            raise ValueError("response profiles apply only to pseudo-6DOF mode")
         if not math.isfinite(self.dt_s) or self.dt_s <= 0.0:
             raise ValueError("reduced F-16 racetrack step must be finite and positive")
         values = (
@@ -89,9 +101,18 @@ class F16ReducedRacetrackRunner:
             self.maximum_speed_acceleration_mps2,
             self.maximum_turn_rate_rad_s,
             self.maximum_flight_path_rate_rad_s,
+            self.initial_north_offset_m,
+            self.initial_east_offset_m,
+            self.initial_altitude_offset_m,
+            self.initial_speed_offset_m_s,
+            self.initial_heading_offset_rad,
+            self.initial_flight_path_offset_rad,
+            self.initial_bank_offset_rad,
         )
-        if not all(math.isfinite(value) and value > 0.0 for value in values):
+        if not all(math.isfinite(value) and value > 0.0 for value in values[:7]):
             raise ValueError("reduced F-16 response parameters must be finite and positive")
+        if not all(math.isfinite(value) for value in values[7:]):
+            raise ValueError("reduced F-16 initial offsets must be finite")
         ####
 
     @property
@@ -198,6 +219,7 @@ class F16ReducedRacetrackRunner:
             "aero_alpha_deg": source_observables["source_alpha_deg"],
             "aero_beta_deg": source_observables["source_beta_deg"],
             "control_path": self.mode,
+            "response_profile_id": self.response_profile.id if self.response_profile is not None else "legacy_runner_defaults",
             "elevator_deg": controls["elevator_deg"],
             "aileron_deg": controls["aileron_deg"],
             "rudder_deg": controls["rudder_deg"],
@@ -215,14 +237,14 @@ class F16ReducedRacetrackRunner:
         if not math.isfinite(horizon) or horizon <= 0.0:
             raise ValueError("reduced F-16 racetrack horizon must be finite and positive")
         controls = dict(self.trim.controls)
-        north_m = 0.0
-        east_m = 0.0
-        altitude_m = float(self.route.low_altitude_m)
-        speed_m_s = float(self.route.speed_m_s)
-        heading_rad = math.pi / 2.0
-        flight_path_angle_rad = 0.0
-        roll_rad = 0.0
-        pitch_rad = self.trim_pitch_rad
+        north_m = self.initial_north_offset_m
+        east_m = self.initial_east_offset_m
+        altitude_m = float(self.route.low_altitude_m) + self.initial_altitude_offset_m
+        speed_m_s = max(1.0, float(self.route.speed_m_s) + self.initial_speed_offset_m_s)
+        heading_rad = _wrap(math.pi / 2.0 + self.initial_heading_offset_rad)
+        flight_path_angle_rad = _clamp(self.initial_flight_path_offset_rad, -0.8, 0.8)
+        roll_rad = self.initial_bank_offset_rad if self.mode == "pseudo_6dof_kinematic_bridge" else 0.0
+        pitch_rad = self.trim_pitch_rad + flight_path_angle_rad
         yaw_rad = heading_rad
         p_rad_s = q_rad_s = r_rad_s = 0.0
         rows: list[dict[str, float | int | str]] = []
@@ -233,7 +255,7 @@ class F16ReducedRacetrackRunner:
         for _ in range(steps + 1):
             try:
                 dt = min(self.dt_s, horizon - time_s)
-                if dt < 0.0:
+                if dt <= 0.0:
                     break
                 reference = self._reference(time_s, north_m, east_m)
                 source_observables = self._source_observables(
@@ -275,15 +297,38 @@ class F16ReducedRacetrackRunner:
                     roll_target = reference.bank_rad
                     pitch_target = self.trim_pitch_rad + reference.flight_path_angle_rad
                     yaw_target = reference.heading_rad
-                    roll_rate_target = _wrap(roll_target - roll_rad) / self.attitude_time_constant_s
-                    pitch_rate_target = _wrap(pitch_target - pitch_rad) / self.attitude_time_constant_s
-                    yaw_rate_target = _wrap(yaw_target - yaw_rad) / self.attitude_time_constant_s
-                    p_rad_s = _slew(p_rad_s, _clamp(roll_rate_target, -0.5, 0.5), self.attitude_time_constant_s, dt)
-                    q_rad_s = _slew(q_rad_s, _clamp(pitch_rate_target, -0.5, 0.5), self.attitude_time_constant_s, dt)
-                    r_rad_s = _slew(r_rad_s, _clamp(yaw_rate_target, -0.5, 0.5), self.attitude_time_constant_s, dt)
-                    roll_rad += p_rad_s * dt
-                    pitch_rad += q_rad_s * dt
-                    yaw_rad = _wrap(yaw_rad + r_rad_s * dt)
+                    if self.response_profile is None:
+                        roll_rate_target = _wrap(roll_target - roll_rad) / self.attitude_time_constant_s
+                        pitch_rate_target = _wrap(pitch_target - pitch_rad) / self.attitude_time_constant_s
+                        yaw_rate_target = _wrap(yaw_target - yaw_rad) / self.attitude_time_constant_s
+                        p_rad_s = _slew(p_rad_s, _clamp(roll_rate_target, -0.5, 0.5), self.attitude_time_constant_s, dt)
+                        q_rad_s = _slew(q_rad_s, _clamp(pitch_rate_target, -0.5, 0.5), self.attitude_time_constant_s, dt)
+                        r_rad_s = _slew(r_rad_s, _clamp(yaw_rate_target, -0.5, 0.5), self.attitude_time_constant_s, dt)
+                        roll_rad += p_rad_s * dt
+                        pitch_rad += q_rad_s * dt
+                        yaw_rad = _wrap(yaw_rad + r_rad_s * dt)
+                    else:
+                        roll_state = step_bounded_axis_response(
+                            self.response_profile.response["roll"],
+                            AxisResponseState(roll_rad, p_rad_s),
+                            roll_target,
+                            dt,
+                        )
+                        pitch_state = step_bounded_axis_response(
+                            self.response_profile.response["pitch"],
+                            AxisResponseState(pitch_rad, q_rad_s),
+                            pitch_target,
+                            dt,
+                        )
+                        yaw_state = step_bounded_axis_response(
+                            self.response_profile.response["yaw"],
+                            AxisResponseState(yaw_rad, r_rad_s),
+                            yaw_target,
+                            dt,
+                        )
+                        roll_rad, p_rad_s = roll_state.angle_rad, roll_state.rate_rad_s
+                        pitch_rad, q_rad_s = pitch_state.angle_rad, pitch_state.rate_rad_s
+                        yaw_rad, r_rad_s = _wrap(yaw_state.angle_rad), yaw_state.rate_rad_s
                 rows.append(
                     self._sample(
                         time_s,

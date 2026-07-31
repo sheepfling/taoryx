@@ -143,6 +143,7 @@ def main() -> int:
         "family_id": "reference_f16_s119",
         "plant_id": "reference-f16-s119-source-runtime-plant",
         "controller_id": design.id,
+        "tuning_profile": "state_and_wrench_balanced_q10_r0p01",
         "control_path": "lqr_to_desired_wrench_to_bounded_effectors_to_source_nonlinear_plant",
         "horizon_s": 5.0,
         "step_s": 0.02,

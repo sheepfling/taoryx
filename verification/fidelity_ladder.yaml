@@ -24,6 +24,13 @@ families:
     showcase_point_mass_problem: examples/mission_families/slower_b747/SV01_climb_cruise_3dof.prb
     showcase_rigid_body_problem: examples/mission_families/slower_b747/SV01_long_trim_hold_120_6dof.prb
     showcase_max_steps: 30000
+    control_realization:
+      point_mass_3dof: force_model
+      kinematic_3_plus_3_dof: response_law
+      rigid_body_6dof: direct_wrench
+    control_claim_boundary: >-
+      The canonical overview is a source-load/direct-wrench bridge; it does
+      not certify physical elevator, aileron, rudder, or throttle allocation.
     source_validation: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/checks/validation_report.json
   - id: skywalker_x8
     display_name: Skywalker X8
@@ -47,6 +54,13 @@ families:
     showcase_point_mass_problem: examples/mission_families/slower_x8/SV03_rectangle_course_3dof.prb
     showcase_rigid_body_problem: examples/mission_families/slower_x8/SV03_source_trim_hold_30_6dof.prb
     showcase_max_steps: 30000
+    control_realization:
+      point_mass_3dof: force_model
+      kinematic_3_plus_3_dof: response_law
+      rigid_body_6dof: direct_wrench
+    control_claim_boundary: >-
+      The canonical overview remains a direct-wrench/source-table screen;
+      physical left/right elevon allocation is a separate qualification path.
     source_validation: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/checks/validation_report.json
     diagnostic_cases:
       - id: source-composed-trim-hold
@@ -81,6 +95,14 @@ families:
     showcase_point_mass_problem: examples/mission_families/slower_hummingbird/SV05_rectangle_course_3dof.prb
     showcase_rigid_body_problem: examples/mission_families/slower_hummingbird/SV05_long_hover_6dof.prb
     showcase_max_steps: 50000
+    control_realization:
+      point_mass_3dof: force_model
+      kinematic_3_plus_3_dof: response_law
+      rigid_body_6dof: surface_allocated
+    control_claim_boundary: >-
+      The native rotor run exercises individual rotor channels and bounded
+      allocation; rotor inflow and full flight-control-law fidelity remain
+      outside the claim.
     source_validation: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/checks/validation_report.json
   - id: x15
     display_name: X-15
@@ -100,6 +122,14 @@ families:
     showcase_point_mass_problem: examples/showcases/x15_rocket_to_hawaii/mission_3dof.prb
     showcase_rigid_body_problem: examples/showcases/x15_rocket_to_hawaii/long_unpowered_glide_bank_reversal_6dof.prb
     showcase_max_steps: 30000
+    control_realization:
+      point_mass_3dof: force_model
+      kinematic_3_plus_3_dof: response_law
+      rigid_body_6dof: direct_wrench
+    control_claim_boundary: >-
+      The canonical overview is a source-load/direct-wrench comparison
+      screen; physical stabilator, rudder, and propulsion allocation are not
+      certified by this ladder fixture.
     source_validation: tests/fixtures/x15_coherent_6dof_public_research_v1/checks/validation_report.json
     diagnostic_cases:
       - id: source-trim-hold

@@ -6,7 +6,12 @@ import pytest
 
 from taoryx.contracts import Vector3
 from taoryx.hl20_controls import HL20ActuatorProfile
-from taoryx.hl20_reachability import hl20_ca_hi_terminal_criteria, hl20_source_release_vehicle, run_hl20_source_release
+from taoryx.hl20_reachability import (
+    hl20_ca_hi_terminal_criteria,
+    hl20_source_release_vehicle,
+    hl20_source_surface_replay_vehicle,
+    run_hl20_source_release,
+)
 from taoryx.reachability_aerodynamics import (
     HL20_SOURCE_MODEL_ID,
     HL20DavemlAerodynamics,
@@ -155,6 +160,7 @@ def test_source_vehicle_variant_serializes_wind_and_explicit_mass_properties() -
         configuration_variant_id="crosswind_probe",
         wind_velocity_m_s=Vector3(0.0, 10.0, 0.0),
     )
+    assert vehicle.pseudo6dof_profile_id == "hl20.attitude_response_p6dof.v1"
     result = run_reachability_envelope(
         vehicle,
         (LaunchCommand(0.0, math.radians(60.0)),),
@@ -166,8 +172,28 @@ def test_source_vehicle_variant_serializes_wind_and_explicit_mass_properties() -
     payload = result.as_dict(include_trajectories=True)
     parameters = payload["study"]["vehicle_parameters"]
     assert parameters["configuration_variant_id"] == "crosswind_probe"
+    assert parameters["pseudo6dof_profile_id"] == "hl20.attitude_response_p6dof.v1"
     assert parameters["wind_velocity_m_s"] == [0.0, 10.0, 0.0]
     assert parameters["inertia_body_kg_m2"]
     source_rows = [row["source_aerodynamics"] for row in payload["samples"][0]["telemetry"] if "source_aerodynamics" in row]
     assert source_rows
     assert abs(float(dict(source_rows[0]["operating_point"])["beta_deg"])) > 0.0
+
+
+def test_hl20_surface_replay_uses_source_loads_without_direct_control_moment() -> None:
+    vehicle = hl20_source_surface_replay_vehicle()
+    command = LaunchCommand(0.0, 0.0, surface_commands_deg=(0.0, 0.0, 0.0, 0.0, 30.0, 30.0, 0.0))
+    result = run_reachability_envelope(
+        vehicle,
+        (command,),
+        fidelity=ReachabilityFidelity.RIGID_BODY_6DOF_SURFACE_ALLOCATED,
+        step_size_s=0.01,
+        horizon_s=0.5,
+        spawn_children=False,
+    )
+    sample = result.samples[0]
+    assert sample.feasible
+    assert sample.failure_reasons == ()
+    assert all(row.get("direct_body_moment_injection") == 0.0 for row in sample.trajectory.telemetry)
+    assert all(row.get("surface_allocation_mode") == "source_open_loop_replay" for row in sample.trajectory.telemetry)
+    assert all("source_aerodynamics" in row for row in sample.trajectory.telemetry)

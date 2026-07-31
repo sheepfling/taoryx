@@ -141,6 +141,8 @@ from .f16_reference import (
 )
 from .fidelity_ladder import FidelityProblem, project_state, render_fidelity_problems, scale_problem_step
 from .fidelity_selection import FidelitySelectionRequest, FidelitySelectionResult, select_validated_fidelity
+from .hummingbird_pseudo6dof import HummingbirdPseudo6DOFCommand, HummingbirdPseudo6DOFModel, HummingbirdPseudo6DOFState
+from .nesc_pseudo6dof import NESCCompositePseudo6DOFResult, build_nesc_composite_pseudo6dof
 from .providers import (
     CompiledCase,
     ProviderCapabilities,
@@ -153,6 +155,19 @@ from .providers import (
     TrajectoryResult,
     TranslationEntry,
     TranslationReport,
+)
+from .pseudo6dof_profiles import (
+    AutomaticLoweringReport,
+    AutomaticLoweringStep,
+    AxisResponseProfile,
+    DirectWrenchProfile,
+    FidelityBinding,
+    FidelityEvidenceRecord,
+    Pseudo6DOFCatalog,
+    Pseudo6DOFProfile,
+    build_automatic_lowering_report,
+    load_pseudo6dof_catalog,
+    load_qualified_fidelity_evidence,
 )
 from .reference_families import (
     ReferenceFamilyManifest,
@@ -168,6 +183,7 @@ from .reference_families import (
 )
 from .reference_packages import ReferencePackageBindingError, ReferencePackageInspection, inspect_reference_package
 from .resolution import ResolutionError, diff_resolved_cases, load_case_intent, resolve_case
+from .response_laws import AxisResponseState, bounded_axis_rate_command, step_bounded_axis_response
 
 __all__ = [
     "AllocationSchema",
@@ -205,6 +221,8 @@ __all__ = [
     "FamilyCatalog",
     "FamilyPackage",
     "FidelityProfile",
+    "FidelityBinding",
+    "FidelityEvidenceRecord",
     "HoldBehavior",
     "ModifierOperation",
     "ModeTransitionSchema",
@@ -216,6 +234,8 @@ __all__ = [
     "ProviderCapabilities",
     "ProviderRegistry",
     "ProviderSession",
+    "Pseudo6DOFCatalog",
+    "Pseudo6DOFProfile",
     "ReferencePointMassProvider",
     "ResolvedCase",
     "ResolvedVariant",
@@ -245,6 +265,7 @@ __all__ = [
     "ReferencePackageBindingError",
     "ReferencePackageInspection",
     "inspect_reference_package",
+    "bounded_axis_rate_command",
     "write_deterministic_collection",
     "DAVEMLReplayReport",
     "DAVEMLFamilyImport",
@@ -291,6 +312,7 @@ __all__ = [
     "RacetrackGuidanceReference",
     "racetrack_reference_at_time",
     "select_validated_fidelity",
+    "step_bounded_axis_response",
     "DAVEMLFixedWingDynamicsBinding",
     "DAVEMLGraph",
     "evaluate_daveml_checkdata",
@@ -309,7 +331,20 @@ __all__ = [
     "A320RacetrackMode",
     "A320RacetrackRun",
     "A320RacetrackRunner",
+    "AxisResponseProfile",
+    "AxisResponseState",
+    "AutomaticLoweringReport",
+    "AutomaticLoweringStep",
+    "DirectWrenchProfile",
+    "build_automatic_lowering_report",
+    "HummingbirdPseudo6DOFCommand",
+    "HummingbirdPseudo6DOFModel",
+    "HummingbirdPseudo6DOFState",
+    "NESCCompositePseudo6DOFResult",
+    "build_nesc_composite_pseudo6dof",
     "load_daveml_atmosphere",
+    "load_pseudo6dof_catalog",
+    "load_qualified_fidelity_evidence",
     "DAVEMLCheckRecord",
     "DAVEMLCheckSignalRecord",
     "DAVEMLComponentRecord",

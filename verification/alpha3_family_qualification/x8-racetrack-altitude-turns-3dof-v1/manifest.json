@@ -1,0 +1,38 @@
+{
+  "claim_boundary": "independent truth-evaluated family qualification; integration baselines remain nonqualified",
+  "fidelity_tier": "point_mass_3dof",
+  "files": {
+    "README.md": "1240ef3f1daa7039163d00c3b91d7478ece5e3addbe86b7bcb50ba54f884c5dc",
+    "controller_transitions.json": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc",
+    "envelope_report.json": "12ac7202f5e087b37b733b3d9454b8451e6ba976f79083c4d46c49eacac4bd13",
+    "events.json": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c",
+    "inputs/SV03_racetrack_altitude_turns_3dof.prb": "97254b114f65f8bdcc41d67bbf3ed894b90085e37e098689afa6297b1cec99de",
+    "inputs/skywalker_x8_collective_elevon_6axis.tbl": "b3c5c31a8ae134a48974afcff51200bc9235f23550173053baad79e93693adc4",
+    "inputs/skywalker_x8_differential_elevon_6axis.tbl": "e0f0122dac5ae341b35bdff075269d28bf1ca480be16bab01caa1b0a336cbc25",
+    "inputs/skywalker_x8_static_6axis.tbl": "434d6d373147381b5af63a8aef5780b49624a3f4533a7f7d995f450942bf727e",
+    "inputs/skywalker_x8_thrust.tbl": "9b05bb9eb2a70a14ec8edb3446fa631040ccff5abcacc2ba9f0780b7711fdca8",
+    "mission.yaml": "0f894b86105dcd2c796601285e85ee3ac26383f5244f563fb4e71fbff0e8d506",
+    "mission_sequence.png": "32c847d0dc7fca54b8f22072255b5c7b6b351b93382758bfa7242174a9cf81cb",
+    "objective_report.json": "a5edef1d25c2bf1090e55e5bb333c7f41545bec194a06537230ef964424aa644",
+    "plots/plot-manifest.json": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa",
+    "preflight_timing_estimate.json": "ae641affcaea3172d7596d35ed91e659ea5da2bf092a7ae97747238a48841692",
+    "qualification_board.png": "c9d6350333d107b08c9c7b89b81bd67ef3de6589d32ac6e467a3fb2e5486b756",
+    "reproduction.txt": "a4e12762ed3f3b926fc9c1ed1da201362ee2cd3be2da337e6ed4545d7a0db255",
+    "resolved_racetrack.json": "6ad4898921a576a7292580b81c936a3a2cf03aec9a54b8bfb235df3a0b89b255",
+    "run/1.print": "49853cac5b714057e9bba8039f01e041c2c620dd323be289a6ff38c0d996fc62",
+    "summary.json": "aae2bb574e722495e155af9e791ffc9463c32edfcb9e78c033027d8663ab5f07",
+    "truth_telemetry.csv": "bf7997575b613d60b8c60c21b948e307b4bf81688a33029dffc68783ad594117"
+  },
+  "mission_id": "x8-racetrack-altitude-turns-3dof-v1",
+  "realization": {
+    "actuator_realization": "kinematic_route_command_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_point_mass_3dof",
+    "note": "The point-mass adapter integrates translational motion and resolves speed, heading, and flight-path commands from the shared racetrack. No attitude, moment, or individual surface signal is used to pass the mission.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant"
+  },
+  "schema_version": 1,
+  "summary": "summary.json",
+  "truth_telemetry": "truth_telemetry.csv"
+}

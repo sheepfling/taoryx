@@ -1,0 +1,64 @@
+{
+  "claim": {
+    "boundary": "The full route reaches the declared beta table boundary and fails closed because the two-elevon plant has no independent yaw effector.",
+    "nonclaims": [
+      "No direct body-moment injection is used by either run.",
+      "The short witness is not an end-to-end racetrack qualification.",
+      "The boundary is not evidence for widening the source tables or inventing yaw authority."
+    ],
+    "proves": "A source-domain short witness allocates X8 roll/pitch demand through the mapped physical left/right elevons and evaluates the resulting aerodynamic loads."
+  },
+  "family_id": "skywalker_x8",
+  "fidelity": "rigid_body_6dof_surface_allocated",
+  "full_route_boundary": {
+    "beta_boundary_reported": true,
+    "diagnostics": [
+      {
+        "code": "runtime-execution-failed",
+        "message": "coefficient table 'cx-static' query (17.905151948846335, 178.06734840665013, 0.13721870523856333, 0.08746770034561749) is outside its declared envelope on axis 'beta': value=0.08746770034561749, range=[-0.0872664625997, 0.0872664625997], distance_to_boundary=0.00020123774591748744"
+      }
+    ],
+    "envelope_exit_reported": true,
+    "exit_code": 2,
+    "mission_pass": false,
+    "status": "source_beta_boundary_fail_closed"
+  },
+  "reproduction": "PYTHONPATH=src python3 tools/validate_x8_physical_surface_boundary.py",
+  "schema": "taoryx.x8-physical-surface-boundary/v1alpha1",
+  "short_witness": {
+    "active_surface_counts": [
+      2
+    ],
+    "allocation_status_codes": [
+      0,
+      3
+    ],
+    "direct_moment_active_samples": 0,
+    "duration_s": 4.999999999999981,
+    "effectiveness_rank": [
+      2
+    ],
+    "left_right_mapping_signs": [
+      1.0
+    ],
+    "max_abs_aero_yaw_moment_nm": 0.029145957172775912,
+    "max_abs_propulsion_yaw_moment_nm": 0.0,
+    "max_abs_sideslip_deg": 1.0724785079975723,
+    "max_actual_residual_nm": 0.1253189178518556,
+    "max_controlled_residual_nm": 1.052552373965016e-06,
+    "mission_pass": true,
+    "status": "short_source_domain_witness_pass"
+  },
+  "source": {
+    "control_space": "two physical elevons mapped from source collective/differential coordinates",
+    "problem": "examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_6dof.prb",
+    "tables": [
+      "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_static_6axis.tbl",
+      "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_collective_elevon_6axis.tbl",
+      "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_differential_elevon_6axis.tbl",
+      "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/skywalker_x8_thrust.tbl"
+    ],
+    "uncontrolled_axis": "aerodynamic yaw/sideslip residual"
+  },
+  "status": "boundary_witness"
+}

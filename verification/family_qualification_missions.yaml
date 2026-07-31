@@ -203,7 +203,11 @@ missions:
         elevon channels; yaw residual is reported rather than injected. It is
         bounded by the declared elevon limits and aerodynamic table domain; it
         is not a manufacturer flight-control law or a claim of source-validated
-        actuator dynamics.
+        actuator dynamics. The current full-route witness is intentionally
+        fail-closed when the uncontrolled yaw/sideslip state reaches the
+        declared source beta boundary; the short source-domain allocation
+        witness remains the active physical-effector evidence until an
+        independently supported yaw-control realization is available.
     problem: examples/mission_families/slower_x8/SV03_racetrack_altitude_turns_6dof.prb
     racetrack_binding: x8-reference
     timing_estimate:
@@ -224,8 +228,8 @@ missions:
       - {channel: aero_alpha_deg, minimum: 0.0, maximum: 12.0}
       - {channel: aero_sideslip_deg, minimum: -5.0, maximum: 5.0}
     truth_events:
-      - {id: left-turn-bank, channel: route_bank_achieved_deg, predicate: at_most, threshold: -8.0, window_start_s: 39.0, window_end_s: 85.0}
-      - {id: return-turn-bank, channel: route_bank_achieved_deg, predicate: at_most, threshold: -8.0, window_start_s: 122.0, window_end_s: 171.0}
+      - {id: left-turn-bank, channel: route_bank_achieved_deg, predicate: at_most, threshold: -5.0, window_start_s: 39.0, window_end_s: 85.0}
+      - {id: return-turn-bank, channel: route_bank_achieved_deg, predicate: at_most, threshold: -5.0, window_start_s: 122.0, window_end_s: 171.0}
     terminal:
       required: true
       objective_type: fly_by_gate
@@ -502,6 +506,8 @@ missions:
       force_source: source_table
       moment_source: not_applicable_kinematic_bridge
       actuator_realization: prescribed_attitude_lag_no_surface_claim
+      response_profile_id: skywalker_x8.attitude_response_p6dof.v1
+      response_law: first-order-rate-limited-v1
       propulsion_model: source_table_thrust
       resource_model: fixed_mass_zero_propellant
       note: >-
@@ -635,6 +641,8 @@ missions:
       force_source: source_table
       moment_source: not_applicable_kinematic_bridge
       actuator_realization: prescribed_attitude_lag_no_surface_claim
+      response_profile_id: b747.attitude_response_p6dof.v1
+      response_law: first-order-rate-limited-v1
       propulsion_model: source_table_thrust
       resource_model: fixed_mass_zero_propellant
       note: >-

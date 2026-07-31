@@ -1,0 +1,1 @@
+PYTHONPATH=src python3 tools/validate_tumbling_body_r1_matrix.py

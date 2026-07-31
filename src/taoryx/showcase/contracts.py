@@ -31,6 +31,13 @@ ShowcaseArchetype = Literal[
     "envelope_and_qualification",
     "object_lineage",
 ]
+ControlRealization = Literal[
+    "unspecified",
+    "force_model",
+    "response_law",
+    "direct_wrench",
+    "surface_allocated",
+]
 LineageEventType = Literal["spawn", "release", "separation", "terminal", "death"]
 StartContractType = Literal[
     "grounded",
@@ -313,6 +320,7 @@ class FidelityShowcaseRealization(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     fidelity: FidelityProfile
+    control_realization: ControlRealization = "unspecified"
     realization_id: str = Field(min_length=1)
     state_schema: tuple[str, ...] = Field(min_length=1)
     semantic_command_mapping: dict[str, str] = Field(default_factory=dict)
@@ -321,6 +329,16 @@ class FidelityShowcaseRealization(BaseModel):
     claim: str = Field(min_length=1)
     nonclaims: tuple[str, ...] = ()
     evidence_grade: EvidenceGrade
+
+    @model_validator(mode="after")
+    def validate_control_boundary(self) -> FidelityShowcaseRealization:
+        if self.control_realization == "surface_allocated" and not self.physical_effectors:
+            raise ValueError("surface_allocated showcase realizations must declare physical effectors")
+        if self.control_realization == "direct_wrench" and self.physical_effectors:
+            raise ValueError("direct_wrench showcase realizations must not imply active physical effectors")
+        return self
+        ####
+    ####
 ####
 
 
@@ -359,6 +377,7 @@ class ShowcaseRunArtifact(BaseModel):
     showcase_id: str = Field(min_length=1)
     vehicle_binding_id: str = Field(min_length=1)
     fidelity: FidelityProfile
+    control_realization: ControlRealization = "unspecified"
     scenario_contract_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     outcome: Literal[
         "completed",
@@ -394,6 +413,7 @@ class ShowcaseRunArtifact(BaseModel):
 
 __all__ = [
     "ArtifactFile",
+    "ControlRealization",
     "EvidenceBoardSpec",
     "FailureCode",
     "LineageEventType",

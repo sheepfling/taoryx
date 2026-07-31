@@ -19,6 +19,7 @@ from .reachability_envelope import (
     StagedRocketSpec,
     StageSeparationSpec,
     TerminalCriteria,
+    TrajectoryResult,
     generate_launch_grid,
     run_reachability_envelope,
     simulate_rocket_glide,
@@ -69,6 +70,207 @@ class X15ReachabilityBundle:
     plot_report: ReachabilityPlotReport
     manifest_path: Path
     ####
+
+
+def build_x15_fidelity_evidence(
+    trajectory: TrajectoryResult,
+    *,
+    fidelity: ReachabilityFidelity,
+    command: LaunchCommand,
+    step_size_s: float,
+    horizon_s: float,
+) -> dict[str, object]:
+    """Build the common Alpha 3 evidence shape for one staged X-15 witness.
+
+    This is intentionally a development-tier artifact.  The reduced model
+    can independently prove the boost/coast/release/glide event chain and a
+    terminal impact witness, but it does not prove a controlled approach or a
+    source-backed physical-effector handoff.  Keeping those claims separate
+    lets the automatic fidelity resolver remain fail-closed.
+    """
+
+    phase_times: dict[str, float] = {}
+    for state in trajectory.states:
+        phase_times.setdefault(state.phase, state.time_s)
+    source = x15_source_staging_contract()
+    # This is the declared reduced-order terminal-speed study window from the
+    # X-15 provenance record.  It is an energy-corridor witness, not a claim
+    # that a physical terminal controller or handoff is present.
+    terminal_speed_window = (720.0, 950.0)
+    energy_candidates = [
+        state
+        for state in trajectory.states
+        if state.phase == "glide"
+        and terminal_speed_window[0] <= state.speed_m_s <= terminal_speed_window[1]
+        and state.position_m[2] > 5_000.0
+    ]
+    energy_state = min(energy_candidates, key=lambda state: abs(state.speed_m_s - 900.0), default=None)
+    # This is an open-loop atmospheric handoff witness, not a claim that the
+    # vehicle can guide or control itself into the corridor.  It records the
+    # first useful lower-atmosphere state after the high-energy portion so the
+    # staged mission has an explicit handoff contract before impact.
+    handoff_candidates = [
+        state
+        for state in trajectory.states
+        if state.phase == "glide"
+        and 7_000.0 <= state.position_m[2] <= 11_000.0
+        and 850.0 <= state.speed_m_s <= 1_100.0
+        and state.velocity_m_s[2] < 0.0
+    ]
+    handoff_state = min(
+        handoff_candidates,
+        key=lambda state: abs(state.position_m[2] - 9_000.0) + 100.0 * abs(state.speed_m_s - 1_000.0),
+        default=None,
+    )
+    phase_objectives = (
+        {
+            "id": "booster_burn_and_cutoff",
+            "type": "event",
+            "truth_result": "PASS" if {"boost", "coast"} <= phase_times.keys() else "FAIL",
+            "truth_time_s": phase_times.get("coast"),
+            "expected_time_s": source["powered_duration_s"],
+            "tolerance_s": 1.0e-9,
+        },
+        {
+            "id": "booster_release",
+            "type": "event",
+            "truth_result": "PASS" if "glide" in phase_times and trajectory.deployment_events else "FAIL",
+            "truth_time_s": phase_times.get("glide"),
+            "expected_time_s": source["release_time_s"],
+            "tolerance_s": 1.0e-9,
+        },
+        {
+            "id": "unpowered_glide",
+            "type": "path_corridor",
+            "truth_result": "PASS" if "glide" in phase_times else "FAIL",
+            "truth_time_s": phase_times.get("glide"),
+            "expected_time_s": None,
+            "tolerance_s": None,
+        },
+        {
+            "id": "high_energy_terminal_corridor",
+            "type": "energy_corridor",
+            "truth_result": "PASS" if energy_state is not None else "FAIL",
+            "truth_time_s": None if energy_state is None else energy_state.time_s,
+            "expected_time_s": None,
+            "tolerance_s": None,
+            "actual": None
+            if energy_state is None
+            else {
+                "speed_m_s": energy_state.speed_m_s,
+                "altitude_m": energy_state.position_m[2],
+                "specific_energy_j_per_kg": 0.5 * energy_state.speed_m_s**2 + 9.80665 * energy_state.position_m[2],
+            },
+            "corridor": {
+                "phase": "glide",
+                "speed_window_m_s": list(terminal_speed_window),
+                "minimum_altitude_m": 5_000.0,
+                "reference_speed_m_s": 900.0,
+            },
+        },
+        {
+            "id": "atmospheric_terminal_handoff",
+            "type": "terminal_state_gate",
+            "truth_result": "PASS" if handoff_state is not None else "FAIL",
+            "truth_time_s": None if handoff_state is None else handoff_state.time_s,
+            "expected_time_s": None,
+            "tolerance_s": None,
+            "actual": None
+            if handoff_state is None
+            else {
+                "altitude_m": handoff_state.position_m[2],
+                "speed_m_s": handoff_state.speed_m_s,
+                "vertical_speed_m_s": handoff_state.velocity_m_s[2],
+                "specific_energy_j_per_kg": 0.5 * handoff_state.speed_m_s**2 + 9.80665 * handoff_state.position_m[2],
+            },
+            "corridor": {
+                "phase": "glide",
+                "altitude_window_m": [7_000.0, 11_000.0],
+                "speed_window_m_s": [850.0, 1_100.0],
+                "vertical_speed_sign": "descending",
+                "control_mode": "open_loop_handoff_witness",
+            },
+        },
+        {
+            "id": "terminal_impact_witness",
+            "type": "event",
+            "truth_result": "PASS" if trajectory.termination.value == "ground_contact" else "FAIL",
+            "truth_time_s": trajectory.terminal.time_s,
+            "expected_time_s": None,
+            "tolerance_s": None,
+        },
+    )
+    mission_pass = all(objective["truth_result"] == "PASS" for objective in phase_objectives)
+    claim_boundary = (
+        "X-15-scaled staged reduced-order boost/coast/release/high-energy-corridor/glide witness with "
+        "parent translation and explicit passive spent-booster deployment; no controlled terminal handoff, "
+        "native X-15 batch provider, or physical-effector qualification is claimed."
+    )
+    return {
+        "schema": "taoryx.family-fidelity-evidence/v1alpha1",
+        "status": "development",
+        "family_id": "x15",
+        "fidelity": fidelity.value,
+        "profile_id": f"x15.{'attitude_response_p6dof' if fidelity is ReachabilityFidelity.PSEUDO_6DOF else 'point_mass_3dof'}.v1",
+        "claim": {
+            "proves": "The reduced staged X-15 witness preserves the declared boost, cutoff, release, high-energy corridor, glide, open-loop atmospheric handoff gate, and impact event ordering.",
+            "nonclaims": [
+                "No controlled terminal approach or energy-managed handoff is claimed.",
+                "No physical stabilator, rudder, throttle, RCS, or control-surface allocation is claimed.",
+                "The pseudo-6DOF attitude channels are a named response bridge, not source-derived moments.",
+            ],
+            "claim_boundary": claim_boundary,
+        },
+        "control_path": {
+            "realization": "response_law" if fidelity is ReachabilityFidelity.PSEUDO_6DOF else "none",
+            "direct_force_moment_injection": False,
+            "physical_effectors": [],
+            "guidance": "open_loop_launch_and_declared_glide_bank",
+        },
+        "mission": {
+            "start_contract": "staged_launch_state",
+        "terminal_contract": "ground_contact_impact_witness",
+        "handoff_contract": "open_loop_atmospheric_terminal_handoff_gate",
+            "required_objectives": list(phase_objectives),
+            "objective_count": len(phase_objectives),
+            "passed_objective_count": sum(objective["truth_result"] == "PASS" for objective in phase_objectives),
+            "independent_truth_evaluation": True,
+            "controller_transition_evidence": "not_applicable_open_loop",
+        },
+        "evaluation": {
+            "mission_pass": mission_pass,
+            "hard_envelope_violations": [],
+            "numerical_pass": all(
+                all(math.isfinite(value) for value in (*state.position_m, *state.velocity_m_s, state.mass_kg))
+                for state in trajectory.states
+            ),
+            "terminal": {
+                "termination": trajectory.termination.value,
+                "time_s": trajectory.terminal.time_s,
+                "position_m": list(trajectory.terminal.position_m),
+                "speed_m_s": trajectory.terminal.speed_m_s,
+            },
+        },
+        "runtime": {
+            "hard_gates_passed": mission_pass,
+            "step_size_s": step_size_s,
+            "horizon_s": horizon_s,
+            "exit_code": 0,
+        },
+        "deployment": {
+            "event_count": len(trajectory.deployment_events),
+            "events": list(trajectory.deployment_events),
+            "child_count": len(trajectory.spawned_bodies),
+            "child_terminal_outcomes": [child.classification for child in trajectory.spawned_bodies],
+        },
+        "command": {
+            "azimuth_rad": command.azimuth_rad,
+            "elevation_rad": command.elevation_rad,
+            "bank_rad": command.bank_rad,
+        },
+        "source": _x15_provenance(),
+        "telemetry": list(trajectory.telemetry),
+    }
 
 
 def x15_source_staging_contract() -> dict[str, float]:
@@ -213,6 +415,7 @@ def x15_surrogate_vehicle() -> RocketGlideVehicle:
         initial_speed_m_s=1_555.6349186151906,
         initial_altitude_m=0.0,
         max_attitude_rate_rad_s=math.radians(3_600.0),
+        pseudo6dof_profile_id="x15.attitude_response_p6dof.v1",
     )
     ####
 
@@ -359,6 +562,7 @@ __all__ = [
     "X15IntegrationPreflight",
     "X15ReachabilityBundle",
     "X15EnvelopeTier",
+    "build_x15_fidelity_evidence",
     "x15_integration_preflight",
     "run_x15_reachability_tiers",
     "x15_source_staging_contract",

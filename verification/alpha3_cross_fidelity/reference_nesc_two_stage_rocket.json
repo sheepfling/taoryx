@@ -1,0 +1,45 @@
+{
+  "comparison_artifact": "verification/alpha3_nesc_development/pseudo_6dof_evidence.json",
+  "comparison_fidelity": "pseudo_6dof",
+  "comparison_status": "pass",
+  "control_realization": {
+    "comparison": "response_law",
+    "reference": "none"
+  },
+  "family_id": "reference_nesc_two_stage_rocket",
+  "interpretation": "The report measures semantic agreement, event-time deltas, and available objective margins. It does not rank fidelities or imply that absent physical effectors exist.",
+  "mission_result": {
+    "agreement": true,
+    "comparison_pass": true,
+    "reference_pass": true
+  },
+  "mission_semantics": {
+    "common_objective_ids": [
+      "mass_and_translation_replay",
+      "stage_sequence",
+      "terminal_orbit_coast_state"
+    ],
+    "objective_sequence_preserved": true,
+    "unmatched_objective_ids": []
+  },
+  "objective_deltas": [
+    {
+      "id": "mass_and_translation_replay",
+      "left_result": "PASS",
+      "right_result": "PASS"
+    },
+    {
+      "id": "stage_sequence",
+      "left_result": "PASS",
+      "right_result": "PASS"
+    },
+    {
+      "id": "terminal_orbit_coast_state",
+      "left_result": "PASS",
+      "right_result": "PASS"
+    }
+  ],
+  "reference_artifact": "verification/alpha3_nesc_development/point_mass_3dof_evidence.json",
+  "reference_fidelity": "point_mass_3dof",
+  "schema": "taoryx.alpha3-cross-fidelity-comparison/v1alpha1"
+}

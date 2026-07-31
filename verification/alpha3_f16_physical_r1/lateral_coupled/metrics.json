@@ -1,0 +1,20 @@
+{
+  "allocation_statuses": [
+    "feasible"
+  ],
+  "failure_reason": null,
+  "final_normalized_feedback_error_fraction": 0.020866126913188728,
+  "final_normalized_feedback_error_norm": 4.336943036498787e-05,
+  "initial_normalized_feedback_error_norm": 0.002078460969082653,
+  "maximum_continuous_saturation_duration_s": 0.0,
+  "maximum_controlled_actual_residual": 363.2623605393174,
+  "mission_pass": true,
+  "numerical_valid": true,
+  "perturbation": {
+    "p_rad_s": 0.0002,
+    "r_rad_s": -0.0002,
+    "v_m_s": 0.1
+  },
+  "saturation_fraction": 0.0,
+  "status": "pass"
+}

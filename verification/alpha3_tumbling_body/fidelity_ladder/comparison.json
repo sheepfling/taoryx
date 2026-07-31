@@ -1,0 +1,123 @@
+{
+  "comparison_fidelity": "pseudo_6dof",
+  "interpretation": "Differences are shape- and orientation-dependent passive-body outcomes; neither tier has control authority.",
+  "loss_definition": {
+    "comparison": "pseudo_6dof_native_rigid_body_reuse",
+    "not_a_score": true,
+    "reference": "point_mass_3dof_orientation_averaged_area",
+    "reported_channels": [
+      "terminal footprint",
+      "terminal speed",
+      "terminal altitude",
+      "projected-area ratio",
+      "angular rate"
+    ]
+  },
+  "pseudo_model_form": "native_rigid_body_equations_reused",
+  "records": [
+    {
+      "area_policy_loss": {
+        "point_policy": [
+          "orientation_averaged_projected_area"
+        ],
+        "point_ratio_to_average_max": 0.9999999999999997,
+        "point_ratio_to_average_min": 0.9999999999999997,
+        "pseudo_angular_rate_max_rad_s": 0.7632168761236874,
+        "pseudo_instantaneous_span_m2": 0.0,
+        "pseudo_policy": [
+          "native_rigid_body_reuse_instantaneous_projected_area"
+        ],
+        "pseudo_ratio_to_average_max": 0.9999999999999997,
+        "pseudo_ratio_to_average_min": 0.9999999999999997
+      },
+      "shape": "sphere",
+      "terminal_delta": {
+        "altitude_m": 0.006042350855145706,
+        "crossrange_m": 1.802841971003545e-15,
+        "downrange_m": 0.13071435760491568,
+        "footprint_radius_m": 0.13071435760491568,
+        "speed_m_s": -1.2542163652540239e-05
+      }
+    },
+    {
+      "area_policy_loss": {
+        "point_policy": [
+          "orientation_averaged_projected_area"
+        ],
+        "point_ratio_to_average_max": 1.0,
+        "point_ratio_to_average_min": 1.0,
+        "pseudo_angular_rate_max_rad_s": 48.03042826952975,
+        "pseudo_instantaneous_span_m2": 1.0396735635124217,
+        "pseudo_policy": [
+          "native_rigid_body_reuse_instantaneous_projected_area"
+        ],
+        "pseudo_ratio_to_average_max": 1.2777727238726535,
+        "pseudo_ratio_to_average_min": 0.3627884673040693
+      },
+      "shape": "cylinder",
+      "terminal_delta": {
+        "altitude_m": 3.0121802148196783,
+        "crossrange_m": 4.487497447445062e-15,
+        "downrange_m": 7.3580442814575235,
+        "footprint_radius_m": 7.3580442814575235,
+        "speed_m_s": 12.455875628198559
+      }
+    },
+    {
+      "area_policy_loss": {
+        "point_policy": [
+          "orientation_averaged_projected_area"
+        ],
+        "point_ratio_to_average_max": 1.0,
+        "point_ratio_to_average_min": 1.0,
+        "pseudo_angular_rate_max_rad_s": 10.228345031098462,
+        "pseudo_instantaneous_span_m2": 0.25711706733384654,
+        "pseudo_policy": [
+          "native_rigid_body_reuse_instantaneous_projected_area"
+        ],
+        "pseudo_ratio_to_average_max": 1.134230980015202,
+        "pseudo_ratio_to_average_min": 0.8005943509766098
+      },
+      "shape": "cone",
+      "terminal_delta": {
+        "altitude_m": 5.327013256483417,
+        "crossrange_m": 3.4911453949634355e-15,
+        "downrange_m": 3.2295912058738168,
+        "footprint_radius_m": 3.2295912058738168,
+        "speed_m_s": 3.3393616837217124
+      }
+    },
+    {
+      "area_policy_loss": {
+        "point_policy": [
+          "orientation_averaged_projected_area"
+        ],
+        "point_ratio_to_average_max": 1.0,
+        "point_ratio_to_average_min": 1.0,
+        "pseudo_angular_rate_max_rad_s": 19.16095513372302,
+        "pseudo_instantaneous_span_m2": 1.9384010272294228,
+        "pseudo_policy": [
+          "native_rigid_body_reuse_instantaneous_projected_area"
+        ],
+        "pseudo_ratio_to_average_max": 3.11111111111111,
+        "pseudo_ratio_to_average_min": 1.0016676569027674
+      },
+      "shape": "triaxial_ellipsoid",
+      "terminal_delta": {
+        "altitude_m": 2.518103782585706,
+        "crossrange_m": -8.175917007818103e-15,
+        "downrange_m": -54.36451702420695,
+        "footprint_radius_m": -54.36451702420695,
+        "speed_m_s": -12.57840968349311
+      }
+    }
+  ],
+  "reference_fidelity": "point_mass_3dof",
+  "schema": "taoryx.tumbling-body-fidelity-comparison/v1alpha1",
+  "shapes": [
+    "sphere",
+    "cylinder",
+    "cone",
+    "triaxial_ellipsoid"
+  ]
+}

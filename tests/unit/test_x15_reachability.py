@@ -49,6 +49,7 @@ def test_x15_surrogate_uses_registry_mass_and_geometry() -> None:
     assert vehicle.release_mass_kg == 14_641.0545
     assert vehicle.initial_mass_kg == 30_000.0
     assert vehicle.reference_area_m2 == definition["reference_area_m2"]
+    assert vehicle.pseudo6dof_profile_id == "x15.attitude_response_p6dof.v1"
     ####
 
 
@@ -71,6 +72,28 @@ def test_x15_surrogate_exposes_boost_coast_release_and_glide() -> None:
     assert release_state.mass_kg == vehicle.release_mass_kg
     assert vehicle.booster_detached_body is not None
     assert vehicle.booster_detached_body.shape.value == "cylinder"
+    ####
+
+
+def test_x15_pseudo_telemetry_records_the_active_phase_response_schedule() -> None:
+    """The staged response bridge must not hide regime changes in telemetry."""
+
+    result = simulate_rocket_glide(
+        x15_surrogate_vehicle(),
+        LaunchCommand(0.0, math.radians(45.0)),
+        fidelity=ReachabilityFidelity.PSEUDO_6DOF,
+        step_size_s=5.0,
+        horizon_s=60.0,
+    )
+
+    rows_by_phase = {
+        str(row["phase"]): row
+        for row in result.telemetry
+        if row.get("phase") in {"boost", "coast", "glide"}
+    }
+    assert set(rows_by_phase) == {"boost", "coast", "glide"}
+    assert all(row["pseudo6dof_response_schedule_applied"] is True for row in rows_by_phase.values())
+    assert {row["pseudo6dof_response_phase"] for row in rows_by_phase.values()} == {"boost", "coast", "glide"}
     ####
 
 

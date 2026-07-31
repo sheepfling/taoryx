@@ -1,0 +1,340 @@
+{
+  "handoff_continuity_checked": true,
+  "handoffs": [
+    {
+      "from_phase": "takeoff",
+      "max_abs_state_residual": 0.0,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 0.0,
+        "x": 0.0,
+        "xdt": 0.0,
+        "y": 0.0,
+        "ydt": 0.0,
+        "z": 0.0,
+        "zdt": 0.0
+      },
+      "to_phase": "hover-dwell"
+    },
+    {
+      "from_phase": "hover-dwell",
+      "max_abs_state_residual": 5.421010862427522e-20,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 0.0,
+        "x": 0.0,
+        "xdt": 5.421010862427522e-20,
+        "y": 0.0,
+        "ydt": 0.0,
+        "z": 0.0,
+        "zdt": 0.0
+      },
+      "to_phase": "yaw-step"
+    },
+    {
+      "from_phase": "yaw-step",
+      "max_abs_state_residual": 3.944304526105059e-31,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 0.0,
+        "x": 0.0,
+        "xdt": 0.0,
+        "y": 0.0,
+        "ydt": 3.944304526105059e-31,
+        "z": 3.944304526105059e-31,
+        "zdt": 0.0
+      },
+      "to_phase": "climb-altitude-gate"
+    },
+    {
+      "from_phase": "climb-altitude-gate",
+      "max_abs_state_residual": 0.0,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 0.0,
+        "x": 0.0,
+        "xdt": 0.0,
+        "y": 0.0,
+        "ydt": 0.0,
+        "z": 0.0,
+        "zdt": 0.0
+      },
+      "to_phase": "box-south-east"
+    },
+    {
+      "from_phase": "box-south-east",
+      "max_abs_state_residual": 1.1102230246251565e-16,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 1.1102230246251565e-16,
+        "qx": 1.6940658945086007e-21,
+        "qy": 1.1102230246251565e-16,
+        "qz": 8.470329472543003e-22,
+        "x": 0.0,
+        "xdt": 6.776263578034403e-21,
+        "y": 0.0,
+        "ydt": 0.0,
+        "z": 1.6543612251060553e-24,
+        "zdt": 4.1359030627651384e-25
+      },
+      "to_phase": "box-north-east"
+    },
+    {
+      "from_phase": "box-north-east",
+      "max_abs_state_residual": 1.6940658945086007e-21,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 0.0,
+        "x": 0.0,
+        "xdt": 1.6940658945086007e-21,
+        "y": 0.0,
+        "ydt": 2.117582368135751e-22,
+        "z": 0.0,
+        "zdt": 0.0
+      },
+      "to_phase": "box-north-west"
+    },
+    {
+      "from_phase": "box-north-west",
+      "max_abs_state_residual": 5.551115123125783e-17,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 0.0,
+        "x": 0.0,
+        "xdt": 5.082197683525802e-21,
+        "y": 2.168404344971009e-19,
+        "ydt": 0.0,
+        "z": 5.551115123125783e-17,
+        "zdt": 4.235164736271502e-22
+      },
+      "to_phase": "box-south-west"
+    },
+    {
+      "from_phase": "box-south-west",
+      "max_abs_state_residual": 2.168404344971009e-19,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 3.308722450212111e-24,
+        "x": 0.0,
+        "xdt": 1.6940658945086007e-21,
+        "y": 2.117582368135751e-22,
+        "ydt": 4.235164736271502e-22,
+        "z": 2.168404344971009e-19,
+        "zdt": 0.0
+      },
+      "to_phase": "return-home"
+    },
+    {
+      "from_phase": "return-home",
+      "max_abs_state_residual": 4.235164736271502e-22,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 0.0,
+        "x": 0.0,
+        "xdt": 0.0,
+        "y": 4.1359030627651384e-25,
+        "ydt": 2.0679515313825692e-25,
+        "z": 4.235164736271502e-22,
+        "zdt": 0.0
+      },
+      "to_phase": "descent-altitude-gate"
+    },
+    {
+      "from_phase": "descent-altitude-gate",
+      "max_abs_state_residual": 4.1359030627651384e-25,
+      "pass": true,
+      "state_residuals": {
+        "mass": 0.0,
+        "propellant_mass": 0.0,
+        "qw": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 0.0,
+        "x": 0.0,
+        "xdt": 0.0,
+        "y": 0.0,
+        "ydt": 4.0389678347315804e-28,
+        "z": 4.1359030627651384e-25,
+        "zdt": 2.0679515313825692e-25
+      },
+      "to_phase": "touchdown"
+    }
+  ],
+  "phases": [
+    {
+      "duration_s": 10.0,
+      "end_time_s": 9.999999999999897,
+      "exit_code": 0,
+      "id": "takeoff",
+      "index": 0,
+      "sample_count": 10001,
+      "start_time_s": 0.0,
+      "target_altitude_m": 2.0,
+      "target_east_m": 0.0,
+      "target_north_m": 0.0
+    },
+    {
+      "duration_s": 3.0,
+      "end_time_s": 12.999999999999677,
+      "exit_code": 0,
+      "id": "hover-dwell",
+      "index": 1,
+      "sample_count": 3001,
+      "start_time_s": 9.999999999999897,
+      "target_altitude_m": 2.0,
+      "target_east_m": 0.0,
+      "target_north_m": 0.0
+    },
+    {
+      "duration_s": 8.0,
+      "end_time_s": 20.999999999999677,
+      "exit_code": 0,
+      "id": "yaw-step",
+      "index": 2,
+      "sample_count": 8001,
+      "start_time_s": 12.999999999999677,
+      "target_altitude_m": 2.0,
+      "target_east_m": 0.0,
+      "target_north_m": 0.0
+    },
+    {
+      "duration_s": 8.0,
+      "end_time_s": 28.999999999999677,
+      "exit_code": 0,
+      "id": "climb-altitude-gate",
+      "index": 3,
+      "sample_count": 8001,
+      "start_time_s": 20.999999999999677,
+      "target_altitude_m": 3.0,
+      "target_east_m": 0.0,
+      "target_north_m": 0.0
+    },
+    {
+      "duration_s": 8.0,
+      "end_time_s": 36.99999999999967,
+      "exit_code": 0,
+      "id": "box-south-east",
+      "index": 4,
+      "sample_count": 8001,
+      "start_time_s": 28.999999999999677,
+      "target_altitude_m": 3.0,
+      "target_east_m": 0.49999999999999994,
+      "target_north_m": 0.0
+    },
+    {
+      "duration_s": 8.0,
+      "end_time_s": 44.99999999999967,
+      "exit_code": 0,
+      "id": "box-north-east",
+      "index": 5,
+      "sample_count": 8001,
+      "start_time_s": 36.99999999999967,
+      "target_altitude_m": 3.0,
+      "target_east_m": 0.49999999999999994,
+      "target_north_m": 0.49999999999999994
+    },
+    {
+      "duration_s": 8.0,
+      "end_time_s": 52.99999999999967,
+      "exit_code": 0,
+      "id": "box-north-west",
+      "index": 6,
+      "sample_count": 8001,
+      "start_time_s": 44.99999999999967,
+      "target_altitude_m": 3.0,
+      "target_east_m": 0.0,
+      "target_north_m": 0.49999999999999994
+    },
+    {
+      "duration_s": 8.0,
+      "end_time_s": 60.99999999999967,
+      "exit_code": 0,
+      "id": "box-south-west",
+      "index": 7,
+      "sample_count": 8001,
+      "start_time_s": 52.99999999999967,
+      "target_altitude_m": 3.0,
+      "target_east_m": 0.0,
+      "target_north_m": 0.0
+    },
+    {
+      "duration_s": 8.0,
+      "end_time_s": 68.99999999999967,
+      "exit_code": 0,
+      "id": "return-home",
+      "index": 8,
+      "sample_count": 8001,
+      "start_time_s": 60.99999999999967,
+      "target_altitude_m": 3.0,
+      "target_east_m": 0.0,
+      "target_north_m": 0.0
+    },
+    {
+      "duration_s": 8.0,
+      "end_time_s": 76.99999999999967,
+      "exit_code": 0,
+      "id": "descent-altitude-gate",
+      "index": 9,
+      "sample_count": 8001,
+      "start_time_s": 68.99999999999967,
+      "target_altitude_m": 2.18,
+      "target_east_m": 0.0,
+      "target_north_m": 0.0
+    },
+    {
+      "duration_s": 13.0,
+      "end_time_s": 91.99999999999967,
+      "exit_code": 0,
+      "id": "touchdown",
+      "index": 10,
+      "sample_count": 15002,
+      "start_time_s": 76.99999999999967,
+      "target_altitude_m": 0.0,
+      "target_east_m": 0.0,
+      "target_north_m": 0.0
+    }
+  ],
+  "schema_version": 1
+}

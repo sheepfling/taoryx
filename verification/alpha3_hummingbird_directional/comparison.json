@@ -1,0 +1,13 @@
+{
+  "body_direction_interpretation": "pseudo uses achieved response-law yaw; point mass uses declared guidance-frame yaw only",
+  "mission_semantics_equal": true,
+  "point_mass_mission_pass": true,
+  "point_mass_yaw_objective": "NOT_APPLICABLE",
+  "pseudo_mission_pass": true,
+  "schema": "taoryx.hummingbird-directional-comparison/v1alpha1",
+  "terminal_position_delta_m": [
+    9.401758546226438e-07,
+    -1.5001274437803627e-06,
+    0.0
+  ]
+}

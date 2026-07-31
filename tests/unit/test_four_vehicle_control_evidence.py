@@ -19,7 +19,7 @@ def test_four_vehicle_control_evidence_keeps_tiers_and_blockers_distinct() -> No
     assert report["claim"]["direct_wrench_results_are_screen_only"] is True
     assert report["promotion_summary"] == {
         "T5_local_nonlinear": ["hummingbird", "b747"],
-        "T3_source_table_coordinate_only": ["skywalker_x8"],
+        "T4_source_coordinate_physical": ["skywalker_x8"],
         "T0_blocked_before_trim": ["x15"],
     }
     for vehicle in report["vehicles"].values():

@@ -1,0 +1,9 @@
+{
+  "climb_time_s": 20.0,
+  "descent_time_s": 33.333333333333336,
+  "inbound_level_time_s": 5.772811918063319,
+  "outbound_level_time_s": 19.106145251396654,
+  "straight_time_s": 39.106145251396654,
+  "total_time_s": 165.96627523993837,
+  "turn_time_s": 43.87699236857253
+}

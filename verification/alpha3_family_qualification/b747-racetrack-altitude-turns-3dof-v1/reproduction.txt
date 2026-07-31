@@ -1,0 +1,1 @@
+PYTHONPATH=src python3 tools/build_family_qualification_packet.py --output verification/alpha3_family_qualification --mission b747-racetrack-altitude-turns-3dof-v1

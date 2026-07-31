@@ -1,0 +1,16 @@
+{
+  "artifact": "evidence.json",
+  "board": "native_horizontal_translation_evidence_board.png",
+  "direct_body_moment_injection": false,
+  "family_id": "hummingbird",
+  "fidelity": "rigid_body_6dof",
+  "mission_id": "hummingbird_native_horizontal_translation_v1",
+  "mission_pass": true,
+  "objective_count": 5,
+  "passed_objective_count": 5,
+  "physical_motor_allocation": true,
+  "promotion_boundary": "This is a local source-plant horizontal translation witness. Altitude/collective regulation, electrical battery/SOC, contact, landing, wind, and full-envelope promotion remain open.",
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hummingbird_native_horizontal_mission.py",
+  "schema": "taoryx.hummingbird-native-horizontal-mission/v1alpha1",
+  "status": "native_horizontal_translation_witness_pass_with_authority_boundary"
+}

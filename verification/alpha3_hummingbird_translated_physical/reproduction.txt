@@ -1,0 +1,1 @@
+PYTHONPATH=src python3 tools/validate_hummingbird_translated_physical_witness.py

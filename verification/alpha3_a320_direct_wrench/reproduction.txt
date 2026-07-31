@@ -1,0 +1,1 @@
+PYTHONPATH=src python3 tools/validate_a320_direct_wrench.py

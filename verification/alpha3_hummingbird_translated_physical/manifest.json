@@ -1,0 +1,281 @@
+{
+  "claims": [
+    "the source individual-rotor load model remains numerically evaluable under declared translated body velocities",
+    "the local physical rotor allocator remains feasible while regulating attitude/rate perturbations in those translated-load cases"
+  ],
+  "control_path": "body-velocity source loads -> attitude/rate error -> plant-derived LQR -> desired body moments -> bounded four-rotor speed allocation -> motor lag -> nonlinear rigid-body plant",
+  "controller_id": "hummingbird-source-hover-translated-body-wrench-lqr-v1",
+  "fidelity": "rigid_body_6dof",
+  "next_gate": "Connect the native rotor allocator to a translated position/velocity mission runner and compare its physical telemetry with the aggregate pseudo tier; retain battery and wind as separate boundaries.",
+  "nonclaims": [
+    "position or velocity guidance and waypoint completion",
+    "translated-flight family qualification",
+    "battery electrical model or endurance",
+    "wind variation, blade-resolved aerodynamics, or statistical robustness"
+  ],
+  "records": [
+    {
+      "case_id": "forward_body_velocity_5mps",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "body_velocity_update_m_s": {
+          "u_m_s": 5.0
+        },
+        "failure_reason": null,
+        "final_controlled_actual_residual_nm": 4.562098346140601e-11,
+        "final_feedback_error_fraction": 8.73629060685618e-07,
+        "maximum_controlled_actual_residual_nm": 0.19477168801511008,
+        "mission_pass": true,
+        "sample_count": 1000,
+        "saturation_fraction": 0.0
+      }
+    },
+    {
+      "case_id": "rearward_body_velocity_5mps",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "body_velocity_update_m_s": {
+          "u_m_s": -5.0
+        },
+        "failure_reason": null,
+        "final_controlled_actual_residual_nm": 4.5612408163853156e-11,
+        "final_feedback_error_fraction": 8.74758526740122e-07,
+        "maximum_controlled_actual_residual_nm": 0.18881628338543224,
+        "mission_pass": true,
+        "sample_count": 1000,
+        "saturation_fraction": 0.0
+      }
+    },
+    {
+      "case_id": "lateral_body_velocity_3mps",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "body_velocity_update_m_s": {
+          "v_m_s": 3.0
+        },
+        "failure_reason": null,
+        "final_controlled_actual_residual_nm": 4.5693635598809026e-11,
+        "final_feedback_error_fraction": 8.745247032947125e-07,
+        "maximum_controlled_actual_residual_nm": 0.19070833047725783,
+        "mission_pass": true,
+        "sample_count": 1000,
+        "saturation_fraction": 0.0
+      }
+    },
+    {
+      "case_id": "combined_body_velocity",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "body_velocity_update_m_s": {
+          "u_m_s": 5.0,
+          "v_m_s": 3.0
+        },
+        "failure_reason": null,
+        "final_controlled_actual_residual_nm": 4.575639754999975e-11,
+        "final_feedback_error_fraction": 8.739119577821014e-07,
+        "maximum_controlled_actual_residual_nm": 0.19368827840325786,
+        "mission_pass": true,
+        "sample_count": 1000,
+        "saturation_fraction": 0.0
+      }
+    },
+    {
+      "case_id": "vertical_body_velocity_2mps",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "body_velocity_update_m_s": {
+          "w_m_s": -2.0
+        },
+        "failure_reason": null,
+        "final_controlled_actual_residual_nm": 4.570025955240147e-11,
+        "final_feedback_error_fraction": 8.745218333729698e-07,
+        "maximum_controlled_actual_residual_nm": 0.19229367835997527,
+        "mission_pass": true,
+        "sample_count": 1000,
+        "saturation_fraction": 0.0
+      }
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hummingbird_translated_physical_witness.py",
+  "schema": "taoryx.hummingbird-translated-physical-witness/v1alpha1",
+  "source_trim": {
+    "controls": {
+      "rotor-1-speed": 468.92422568254807,
+      "rotor-2-speed": 468.92422568254807,
+      "rotor-3-speed": 468.92422568254807,
+      "rotor-4-speed": 468.92422568254807
+    },
+    "cost": 2.6252467477653134e-26,
+    "diagnostics": [
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": -2.5434913019383115e-24
+        },
+        "field": "roll_error_rad",
+        "message": "trim solution for 'roll_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": -2.5434913019383115e-24
+        },
+        "field": "pitch_error_rad",
+        "message": "trim solution for 'pitch_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "yaw_error_rad",
+        "message": "trim solution for 'yaw_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "u_m_s",
+        "message": "trim solution for 'u_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "v_m_s",
+        "message": "trim solution for 'v_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": -3.5491997604294075e-12
+        },
+        "field": "w_m_s",
+        "message": "trim solution for 'w_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "p_rad_s",
+        "message": "trim solution for 'p_rad_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "q_rad_s",
+        "message": "trim solution for 'q_rad_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "r_rad_s",
+        "message": "trim solution for 'r_rad_s' is at a declared bound",
+        "severity": "warning"
+      }
+    ],
+    "iterations": 3,
+    "max_residual": 1.1235457009206584e-12,
+    "message": "`gtol` termination condition is satisfied.",
+    "operating_point": {},
+    "residuals": {
+      "body_x_force_n": 0.0,
+      "body_z_force_n": -1.1235457009206584e-12,
+      "pitch_moment_nm": 0.0,
+      "roll_moment_nm": 0.0,
+      "yaw_moment_nm": 0.0
+    },
+    "scaled_residual_norm": 2.2913955345008917e-13,
+    "state": {
+      "p_rad_s": 0.0,
+      "pitch_error_rad": -2.5434913019383115e-24,
+      "q_rad_s": 0.0,
+      "r_rad_s": 0.0,
+      "roll_error_rad": -2.5434913019383115e-24,
+      "u_m_s": 0.0,
+      "v_m_s": 0.0,
+      "w_m_s": -3.5491997604294075e-12,
+      "yaw_error_rad": 0.0
+    },
+    "status": 1,
+    "success": true
+  },
+  "source_validity_basis": {
+    "body_velocity_witness_range_m_s": {
+      "u": [
+        -10.0,
+        10.0
+      ],
+      "v": [
+        -10.0,
+        10.0
+      ],
+      "w": [
+        -5.0,
+        5.0
+      ]
+    },
+    "fixture": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/quadcopter_hummingbird/VALIDITY.md",
+    "source": "RotorPy-derived deterministic body-velocity wrench grid"
+  },
+  "status": "translated_body_physical_rotor_witness_pass",
+  "summary": {
+    "all_allocation_statuses_feasible": true,
+    "case_count": 5,
+    "failed_case_count": 0,
+    "passed_case_count": 5
+  },
+  "vehicle": "hummingbird"
+}

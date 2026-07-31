@@ -1,0 +1,127 @@
+{
+  "claim_boundary": "passive child terminal footprints and deployment lineage; not controller-effective reachability, source-exact child aerodynamics, or parent capability",
+  "files": [
+    {
+      "path": "verification/alpha3_tumbling_body/qualification.json",
+      "sha256": "0ffc8c49708cb0d8770936456276a27df8ae73f20316769815d466271e4cb03f",
+      "size_bytes": 41971
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/terminal-footprint-samples.csv",
+      "sha256": "3573ec943b6027154cc05d9ddebabaa74d437ce493238f7ba66eb81068fc197e",
+      "size_bytes": 10574
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/ensemble-plots/terminal-footprints.png",
+      "sha256": "913ab98168393d6d907358991445bb2a134ea4be38e2b02e6dc9ea8b1e310587",
+      "size_bytes": 111290
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/ensemble-plots/terminal-footprint-distributions.png",
+      "sha256": "d418a59336ea1bf39227fa4866ed3aa80292890e49f22879c4c636cf9d851254",
+      "size_bytes": 27221
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-sphere-point_mass_3dof.json",
+      "sha256": "13ce67c5d94cf3944a47d37524a06c82d42166e8d64bcbe0855d7a9de9b97a22",
+      "size_bytes": 327296
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-sphere-pseudo_6dof.json",
+      "sha256": "aef65b501500727353b14d07e4aaa6658ceed7ca9c00dc83e38b1047dc7d8dd5",
+      "size_bytes": 832132
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-sphere-rigid_body_6dof.json",
+      "sha256": "924c5555e5ae5ae902591d830c797c3fe3764d350fa6c276924463568761d908",
+      "size_bytes": 988544
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/plots/sphere/plot-manifest.json",
+      "sha256": "3f899de6e11a1a6851c48933e9e291e02effad55e53fec77af3f37ccb32dd704",
+      "size_bytes": 1708
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/plots/sphere/area-policy-rotation.png",
+      "sha256": "f45137816cc142aaf004cff342fdc0892ce51f0f47577d872c27fdf862e5839a",
+      "size_bytes": 115233
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-cylinder-point_mass_3dof.json",
+      "sha256": "3338ede0deccd48a0507e123c9b8a2f3977b6176833c1e5b14b577e856971dda",
+      "size_bytes": 385946
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-cylinder-pseudo_6dof.json",
+      "sha256": "86c305850957bda5898b1c7baa6a5659e61ea65641c9894a6cf1ebac56c2b93e",
+      "size_bytes": 930800
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-cylinder-rigid_body_6dof.json",
+      "sha256": "388339860b95ce85c573985e81c2e538e080a8e9930f331349da60460aa54ced",
+      "size_bytes": 1086685
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/plots/cylinder/plot-manifest.json",
+      "sha256": "547ab0d7e39dc4cad0890e3be2a6d67c159da1542c2d647d8283b3377725e6a2",
+      "size_bytes": 1710
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/plots/cylinder/area-policy-rotation.png",
+      "sha256": "6a5b23ce93c851efd150fcd29f724b20bb57e9a2dd282fc5290b14b5ecae124e",
+      "size_bytes": 189144
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-cone-point_mass_3dof.json",
+      "sha256": "206d74f2f66e808980264e906b8cc9b255316d10de992f0f96a9f176ce3ec0f5",
+      "size_bytes": 342611
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-cone-pseudo_6dof.json",
+      "sha256": "b57215b65ba7b74bfb4f8b25142a05531659769d82433b97ea30afcf92b63617",
+      "size_bytes": 852625
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-cone-rigid_body_6dof.json",
+      "sha256": "ca890b694269ca4483f88e06e57f22a8fd6be374bde83e67be5cfb3f6b4c93f7",
+      "size_bytes": 1008426
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/plots/cone/plot-manifest.json",
+      "sha256": "ad9e7ce7596b2fafa1e1e5b6b02c41b7753675de0e736468d0fd3bfd3a566873",
+      "size_bytes": 1706
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/plots/cone/area-policy-rotation.png",
+      "sha256": "52b1df3b36c094650e1d0b69f391ca8b9cead461c461e86d7b051066dcd16507",
+      "size_bytes": 170981
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-triaxial_ellipsoid-point_mass_3dof.json",
+      "sha256": "6ba29e4498fbac2ac72c27acbc738ac7d3cd01d3c551b99a1a5542043b86c4e1",
+      "size_bytes": 363279
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-triaxial_ellipsoid-pseudo_6dof.json",
+      "sha256": "7747faa7dd9a7188973819b1e62ba98c6b349c87a9f95a6dca507b2de3da6d47",
+      "size_bytes": 1477219
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/nominal-triaxial_ellipsoid-rigid_body_6dof.json",
+      "sha256": "686e341a6a7ad50e6f1b932d465f837a541ad6e5f2b38ceff26b9ad6a8f5c38f",
+      "size_bytes": 1632888
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/plots/triaxial_ellipsoid/plot-manifest.json",
+      "sha256": "490f09315eb46753f448fcb886319ae4b75a5c8092290ae10e8fac9ed8d611a5",
+      "size_bytes": 1720
+    },
+    {
+      "path": "verification/alpha3_tumbling_body/plots/triaxial_ellipsoid/area-policy-rotation.png",
+      "sha256": "f3cfea764e1cbe0cf0676a3496e7b13f7ae05ab77c3a8bbb99d7e96693bd9a8f",
+      "size_bytes": 132176
+    }
+  ],
+  "qualification_report": "verification/alpha3_tumbling_body/qualification.json",
+  "schema": "taoryx.alpha3-passive-deployment-artifact-manifest/v1alpha1"
+}

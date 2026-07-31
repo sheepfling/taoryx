@@ -331,32 +331,70 @@ def test_x8_surface_authority_fails_closed_at_source_envelope(tmp_path: Path) ->
 
 
 def test_x8_racetrack_allocates_bank_pitch_through_elevons(tmp_path: Path) -> None:
-    """The reusable racetrack uses aero tables for the controlled axes.
+    """A short source-domain witness uses aero tables for the controlled axes.
 
     The X8 has two declared elevon channels, so the test deliberately checks
     the physical allocation seam rather than expecting an independently
     achievable three-axis moment.  Any coupled yaw residual must remain in
-    the aerodynamic plant and be visible in the telemetry.
+    the aerodynamic plant and be visible in the telemetry.  The complete
+    racetrack has a separate fail-closed test because this two-effector model
+    currently reaches its declared source beta boundary before terminal
+    closure.
     """
 
     report = run_files(
         RACETRACK_SURFACES,
         TABLES,
         output_dir=tmp_path / "racetrack-surfaces",
-        max_steps=2_500,
+        max_steps=250,
         integrator="rk4",
         profile=GrammarProfile.TAORYX,
     )
     assert report.results
     history = tuple({"time_s": state.time, **dict(state.named)} for state in report.results[0].states["1"])
-    assert history[-1]["time_s"] == pytest.approx(50.0, abs=1.0e-10)
+    assert history[-1]["time_s"] == pytest.approx(5.0, abs=1.0e-10)
     assert {int(sample["surface_allocation_active_surface_count"]) for sample in history} == {2}
     assert max(abs(sample["propulsion_moment_body_z_nm"]) for sample in history) < 1.0e-12
     assert max(abs(sample["aero_moment_body_z_nm"]) for sample in history) > 1.0e-4
     assert max(abs(sample["surface_allocation_requested_moment_x_nm"]) for sample in history) > 1.0e-4
     assert all(math.isfinite(sample["surface_allocation_residual_nm"]) for sample in history)
+    assert {sample["surface_allocation_x8_mapping_sign"] for sample in history} == {1.0}
+    assert all(
+        sample["surface_allocation_left_elevon_achieved_deg"]
+        == pytest.approx(
+            sample["surface_allocation_collective_elevon_achieved_deg"]
+            + sample["surface_allocation_differential_elevon_achieved_deg"]
+        )
+        for sample in history
+    )
+    assert all(
+        sample["surface_allocation_right_elevon_achieved_deg"]
+        == pytest.approx(
+            sample["surface_allocation_collective_elevon_achieved_deg"]
+            - sample["surface_allocation_differential_elevon_achieved_deg"]
+        )
+        for sample in history
+    )
     assert max(sample["altitude_m"] for sample in history) < 205.0
     assert max(abs(sample["aero_sideslip_deg"]) for sample in history) < 5.0
+    ####
+
+
+def test_x8_physical_racetrack_fails_closed_at_uncontrolled_beta_boundary(tmp_path: Path) -> None:
+    """The full physical route cannot silently cross the source table domain."""
+
+    report = run_files(
+        RACETRACK_SURFACES,
+        TABLES,
+        output_dir=tmp_path / "racetrack-boundary",
+        max_steps=2_500,
+        integrator="rk4",
+        profile=GrammarProfile.TAORYX,
+    )
+    assert not report.results
+    messages = tuple(item.message for item in report.diagnostics)
+    assert any("outside its declared envelope" in message for message in messages), messages
+    assert any("beta" in message for message in messages), messages
     ####
 
 

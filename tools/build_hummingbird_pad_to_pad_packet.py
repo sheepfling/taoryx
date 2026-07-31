@@ -217,10 +217,16 @@ def _render_overview(packet: Path, rows: tuple[dict[str, object], ...], evaluati
     axes[1, 1].plot(times, [numeric(row, "rotorcraft_yaw_achieved_deg") for row in sampled], label="yaw achieved (deg)", color="#16a34a")
     axes[1, 1].plot(times, [numeric(row, "rotorcraft_yaw_error_deg") for row in sampled], label="yaw error (deg)", color="#dc2626")
     rotor_axis = axes[1, 1].twinx()
-    rotor_axis.plot(times, [numeric(row, "aero_query_rotor_speed") for row in sampled], label="aggregate rotor speed (rad/s)", color="#ea580c")
+    individual_rotor_keys = tuple(f"rotor_{index}_speed" for index in range(1, 5))
+    if all(key in sampled[0] for key in individual_rotor_keys):
+        rotor_colors = ("#ea580c", "#f59e0b", "#84cc16", "#06b6d4")
+        for index, (key, color) in enumerate(zip(individual_rotor_keys, rotor_colors, strict=True), start=1):
+            rotor_axis.plot(times, [numeric(row, key) for row in sampled], label=f"rotor {index} source speed (rad/s)", color=color)
+    else:
+        rotor_axis.plot(times, [numeric(row, "aero_query_rotor_speed") for row in sampled], label="aggregate rotor speed (rad/s)", color="#ea580c")
     rotor_axis.plot(times, [numeric(row, "motor_shutdown", 0.0) for row in sampled], label="motor shutdown flag", color="#111827", linestyle="--")
     rotor_axis.set_ylabel("rotor speed / shutdown")
-    axes[1, 1].set_title("Yaw exercise and modeled actuator evidence")
+    axes[1, 1].set_title("Yaw exercise and rotor-source actuator evidence")
     axes[1, 1].set_xlabel("time (s)")
     axes[1, 1].set_ylabel("deg")
     handles, labels = axes[1, 1].get_legend_handles_labels()
@@ -304,7 +310,7 @@ def _render_overview(packet: Path, rows: tuple[dict[str, object], ...], evaluati
         0.005,
         "CLAIM: airborne altitude-gated perimeter, yaw exercise, and truth-evaluated objective behavior. "
         "CONTACT CLAIM: explicit static-pad impulse, normal reaction, and post-contact settle. "
-        "NONCLAIMS: landing-gear, tire, ground-effect, or rotor-resolved landing dynamics.",
+        "NONCLAIMS: landing-gear, tire, ground-effect, electrical battery/SOC, or full-envelope rotor dynamics.",
         fontsize=8,
         color="#334155",
     )
@@ -356,8 +362,25 @@ def _phase_problem(
     duration_s: float,
     motor_shutdown_s: float | None = None,
     guidance_extra: str = "",
+    individual_rotor_source: bool = False,
 ) -> str:
     text = _replace_initial(template.read_text(encoding="utf-8"), state)
+    if individual_rotor_source:
+        text = re.sub(
+            r"^(\*runtime status vehicle .*)$",
+            lambda match: match.group(1)
+            + " rotor-force-model=individual-rotor-source"
+            + " rotor-drag-xy-coefficient=0.000119"
+            + " rotor-drag-z-coefficient=0.000232"
+            + " rotor-translational-lift-coefficient=0.00339"
+            + " rotor-frame-drag-x-coefficient=0.005"
+            + " rotor-frame-drag-y-coefficient=0.005"
+            + " rotor-frame-drag-z-coefficient=0.01"
+            + " aero-source-quality=source-derived",
+            text,
+            count=1,
+            flags=re.MULTILINE,
+        )
     text = _replace_status(
         text,
         "target",
@@ -397,8 +420,12 @@ def _run_phase(text: str, phase_dir: Path) -> tuple[Any, tuple[Any, ...]]:
     return report, tuple(report.results[0].states["1"])
 
 
-def build(output: Path) -> Path:
-    mission_id = "hummingbird-pad-to-pad-altitude-yaw-v2"
+def build(output: Path, *, individual_rotor_source: bool = False) -> Path:
+    mission_id = (
+        "hummingbird-pad-to-pad-altitude-yaw-individual-rotor-v1"
+        if individual_rotor_source
+        else "hummingbird-pad-to-pad-altitude-yaw-v2"
+    )
     packet = output / mission_id
     packet.mkdir(parents=True, exist_ok=True)
     inputs = packet / "inputs"
@@ -433,7 +460,17 @@ def build(output: Path) -> Path:
                 initial = next(iter(run_files(template, TABLES, output_dir=phase_root / "seed", max_steps=1, profile=GrammarProfile.TAORYX).results[0].states["1"]))
             else:
                 initial = previous_state
-            text = _phase_problem(template, initial, target_lat=target_lat, target_lon=target_lon, target_altitude=target_altitude, duration_s=duration_s, motor_shutdown_s=shutdown_s, guidance_extra=guidance_extra)
+            text = _phase_problem(
+                template,
+                initial,
+                target_lat=target_lat,
+                target_lon=target_lon,
+                target_altitude=target_altitude,
+                duration_s=duration_s,
+                motor_shutdown_s=shutdown_s,
+                guidance_extra=guidance_extra,
+                individual_rotor_source=individual_rotor_source,
+            )
             report, states = _run_phase(text, phase_root / phase_id)
             generated_problem = packet / "inputs" / f"{index:02d}_{phase_id}.prb"
             generated_problem.write_text(text, encoding="utf-8")
@@ -520,10 +557,23 @@ def build(output: Path) -> Path:
         "mission_id": mission_id,
         "family": "hummingbird",
         "fidelity": "rigid_body_6dof",
+        "control_path": (
+            "individual_rotor_source_equations_with_bounded_quad_x_allocation_and_motor_lag"
+            if individual_rotor_source
+            else "aggregate_direct_wrench_tables_with_quad_x_command_allocation"
+        ),
         "status": "nominal_case_pass_overall_qualification_pending" if evaluation["mission_pass"] else ("nominal_case_pass_terminal_contact_pending" if all(item.get("status") == "pass" for item in evaluation["results"] if item["id"] not in {"touchdown", "post-touchdown-settle", "motor-shutdown"}) else "nominal_case_objective_pending"),
         "mission_pass": evaluation["mission_pass"],
-        "claim": "The source-bounded Hummingbird rigid-body surrogate executes a declared altitude-gated perimeter sequence and yaw step, then commits an explicit static-pad contact impulse and post-contact settle under independent truth evaluation.",
-        "nonclaims": ["landing-gear, tire, or ground-effect dynamics", "wind/gust recovery", "independent rotor aerodynamics", "family-wide multirotor qualification"],
+        "claim": (
+            "The source-bounded Hummingbird rigid-body surrogate executes a declared altitude-gated perimeter sequence and yaw step through individual rotor-source equations, bounded quad-X allocation, and motor lag, then commits an explicit static-pad contact impulse and post-contact settle under independent truth evaluation."
+            if individual_rotor_source
+            else "The source-bounded Hummingbird rigid-body surrogate executes a declared altitude-gated perimeter sequence and yaw step, then commits an explicit static-pad contact impulse and post-contact settle under independent truth evaluation."
+        ),
+        "nonclaims": (
+            ["landing-gear, tire, or ground-effect dynamics", "wind/gust recovery", "blade-resolved aerodynamics", "electrical battery/SOC depletion", "family-wide multirotor qualification"]
+            if individual_rotor_source
+            else ["landing-gear, tire, or ground-effect dynamics", "wind/gust recovery", "independent rotor aerodynamics", "family-wide multirotor qualification"]
+        ),
         "phase_timeline": phase_records,
         "truth_evaluation": evaluation,
         "landing_evidence": landing_evidence,
@@ -561,8 +611,13 @@ def build(output: Path) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=Path("/tmp/taoryx-family-qualification"))
+    parser.add_argument(
+        "--individual-rotor-source",
+        action="store_true",
+        help="use the source-derived individual-rotor force/moment equations instead of the aggregate table bridge",
+    )
     args = parser.parse_args()
-    print(build(args.output))
+    print(build(args.output, individual_rotor_source=args.individual_rotor_source))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,20 @@
+{
+  "claim_boundary": {
+    "boundary": "The full route reaches the declared beta table boundary and fails closed because the two-elevon plant has no independent yaw effector.",
+    "nonclaims": [
+      "No direct body-moment injection is used by either run.",
+      "The short witness is not an end-to-end racetrack qualification.",
+      "The boundary is not evidence for widening the source tables or inventing yaw authority."
+    ],
+    "proves": "A source-domain short witness allocates X8 roll/pitch demand through the mapped physical left/right elevons and evaluates the resulting aerodynamic loads."
+  },
+  "files": [
+    {
+      "path": "boundary_witness.json",
+      "sha256": "a2e9be9a9bfb48070f06f340e3cf59cb1bfd1b174b0ee1d9bd4445dab25910cc",
+      "size_bytes": 2848
+    }
+  ],
+  "report": "boundary_witness.json",
+  "schema": "taoryx.x8-physical-surface-boundary-manifest/v1alpha1"
+}

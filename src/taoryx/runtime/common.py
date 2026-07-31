@@ -193,6 +193,7 @@ class RuntimeVehicle:
     publish_derived_rates: bool = True
     kinematic_state: Kinematic6DofState | None = None
     body_rate_provider: BodyRateProvider | None = None
+    kinematic_response_profile_id: str | None = None
     stall_detector: StallDetector | None = None
     vehicle_kind: VehicleKind = VehicleKind.GENERIC
     model_id: str | None = None

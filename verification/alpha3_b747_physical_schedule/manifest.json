@@ -1,0 +1,3008 @@
+{
+  "claim_boundary": "Source-derived physical-surface node evidence only. No schedule interpolation, continuous transition replay, full-envelope qualification, servo dynamics, fuel-flow validation, runway operation, or reliability claim is made until every declared node completes. Blocked nodes carry machine-readable integration codes and remedies.",
+  "control_path": "source_condition_deck -> physical trim -> source linearization -> desired wrench -> bounded elevator/aileron/rudder/throttle -> nonlinear plant",
+  "controller_profile": "generic_profile_sweep_per_source_condition",
+  "direct_body_moment_injection": false,
+  "family_id": "b747",
+  "nodes": [
+    {
+      "altitude_m": 0.0,
+      "boundary_witness": {
+        "allocation_statuses": [
+          "feasible",
+          "partially_achievable"
+        ],
+        "case_id": "coupled_rate_authority_boundary",
+        "final_controlled_actual_residual_nm": 2.8994211652800163e-10,
+        "final_normalized_feedback_error_fraction": 0.08310890782043359,
+        "maximum_continuous_saturation_duration_s": 3.85,
+        "passed": false,
+        "saturation_fraction": 0.0625
+      },
+      "cases": {
+        "nominal_local": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "final_controlled_actual_residual_nm": 5.2548880889011564e-11,
+          "final_normalized_feedback_error_fraction": 0.08556749777943626,
+          "maximum_continuous_saturation_duration_s": 0.35000000000000003,
+          "passed": true,
+          "saturation_fraction": 0.004375
+        },
+        "speed_minus_5m_s": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "final_controlled_actual_residual_nm": 5.7708965547540675e-11,
+          "final_normalized_feedback_error_fraction": 0.030960790525474152,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "passed": true,
+          "saturation_fraction": 0.0
+        },
+        "speed_plus_5m_s": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "final_controlled_actual_residual_nm": 9.002863468630259e-11,
+          "final_normalized_feedback_error_fraction": 0.030592674434716628,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "passed": true,
+          "saturation_fraction": 0.0
+        }
+      },
+      "derivative_consistent": true,
+      "direct_body_moment_injection": false,
+      "effectiveness_rank": 3,
+      "initialization": {
+        "alpha0_deg": 3.1,
+        "attitude_policy": "source_condition_alpha0_applied_as_local_body_pitch_offset",
+        "body_pitch_offset_from_condition3_deg": 0.0,
+        "published_alpha0_deg": 3.1,
+        "reference_condition3_alpha0_deg": 3.1,
+        "retrim_alpha_delta_deg": -0.42477625326959423,
+        "retrim_domain": "published_alpha0_deg +/- 3.9 degrees",
+        "retrim_state_channel": "w_m_s",
+        "retrimmed_body_alpha_deg": 2.675223746730406
+      },
+      "interior_passed": true,
+      "mach": 0.45,
+      "maximum_real_pole": -0.05306284917380039,
+      "point_id": "3",
+      "selected_design": {
+        "id": "b747-condition3-aggressive-surface-wrench-lqr-v1",
+        "tuning": {
+          "closed_loop_eigenvalues": [
+            [
+              -0.7929765787748009,
+              0.8404758595066506
+            ],
+            [
+              -0.7929765787748009,
+              -0.8404758595066506
+            ],
+            [
+              -0.3039270307972683,
+              0.30604485150266864
+            ],
+            [
+              -0.3039270307972683,
+              -0.30604485150266864
+            ],
+            [
+              -2.5375271886518664,
+              2.670599976068039
+            ],
+            [
+              -2.5375271886518664,
+              -2.670599976068039
+            ],
+            -0.06622760799846977,
+            -0.20396792720139356,
+            -0.05306284917380039
+          ],
+          "condition_number": 1.0,
+          "control_names": [
+            "moment_x_nm",
+            "moment_y_nm",
+            "moment_z_nm"
+          ],
+          "control_scales": [
+            34191.969081821895,
+            2781444.053488925,
+            414248.85612411564
+          ],
+          "matrix_sha256": {
+            "a": "509d3b3bf7ac8a6dfff52fc753d8cd7fc2a020bef5d8d2905de4aad3209f856f",
+            "b": "b1081d9c7e35710063691c7b8e1a36fa9cdd3d75b64ca24415b3e2489c21891b",
+            "k": "cad4d8268887ceb92b4a6d82f635117f9185523f191ed02b3123df4f0a096006",
+            "q": "7f53b20d856724509256162a9de99c5886bc5cf6a447977b2cf7c143a76b0ad9",
+            "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+          },
+          "metrics": {
+            "condition_number": 1.0,
+            "maximum_real_pole": -0.05306284917380039
+          },
+          "profile_id": "aggressive",
+          "robustness": null,
+          "score": 1e-06,
+          "state_names": [
+            "roll_error_rad",
+            "pitch_error_rad",
+            "yaw_error_rad",
+            "u_m_s",
+            "v_m_s",
+            "w_m_s",
+            "p_rad_s",
+            "q_rad_s",
+            "r_rad_s"
+          ],
+          "state_scales": [
+            0.05235987755982989,
+            0.05235987755982989,
+            0.05235987755982989,
+            5.0,
+            3.0,
+            3.0,
+            0.15707963267948966,
+            0.15707963267948966,
+            0.15707963267948966
+          ],
+          "status": "safe",
+          "vehicle_id": "b747",
+          "violations": [],
+          "weights": {
+            "q_diagonal": [
+              4.0,
+              4.0,
+              4.0,
+              0.5,
+              4.0,
+              4.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "r_diagonal": [
+              0.25,
+              0.25,
+              0.25
+            ]
+          }
+        }
+      },
+      "source_condition": {
+        "Ixx_slug_ft2": "18200000.0",
+        "Ixz_slug_ft2": "970000.0",
+        "Iyy_slug_ft2": "33100000.0",
+        "Izz_slug_ft2": "49700000.0",
+        "alpha0_deg": "3.1",
+        "altitude_ft": "0.0",
+        "altitude_m": "0.0",
+        "cg_fraction_cbar": "0.25",
+        "configuration": "nominal",
+        "fc_id": "3",
+        "fidelity": "DIRECT_TRANSCRIPTION_FROM_IMPLEMENTATION_OF_NASA_TABLE_IX_3",
+        "gamma_deg": "0.0",
+        "mach": "0.45",
+        "q_psf": "300.0",
+        "qc_psf": "315.0",
+        "source_id": "NASA_CR_2144",
+        "stabilizer_trim_deg": "-10.0",
+        "velocity_ft_s": "502.0",
+        "velocity_ktas": "298.0",
+        "velocity_m_s": "153.0096",
+        "weight_N": "2831898.01625298",
+        "weight_lb": "636636.0"
+      },
+      "status": "physical_surface_node_complete",
+      "trim": {
+        "controls": {
+          "aileron-deg": 4.606437865694127e-12,
+          "elevator-deg": 0.38616013358269535,
+          "rudder-deg": 1.1977530947242955e-11,
+          "throttle": 0.2854488091176285
+        },
+        "cost": 1.3704152655340179e-17,
+        "diagnostics": [
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 6.400763719572426e-20
+            },
+            "field": "roll_error_rad",
+            "message": "trim solution for 'roll_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -3.6436082324092496e-14
+            },
+            "field": "pitch_error_rad",
+            "message": "trim solution for 'pitch_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 1.7113456515413656e-20
+            },
+            "field": "yaw_error_rad",
+            "message": "trim solution for 'yaw_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": 152.8428427456678,
+              "upper": 152.84284274586778,
+              "value": 152.8428427457678
+            },
+            "field": "u_m_s",
+            "message": "trim solution for 'u_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -4.398462507413098e-21
+            },
+            "field": "v_m_s",
+            "message": "trim solution for 'v_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "p_rad_s",
+            "message": "trim solution for 'p_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "q_rad_s",
+            "message": "trim solution for 'q_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "r_rad_s",
+            "message": "trim solution for 'r_rad_s' is at a declared bound",
+            "severity": "warning"
+          }
+        ],
+        "iterations": 9,
+        "max_residual": 0.11186390697101206,
+        "message": "`xtol` termination condition is satisfied.",
+        "operating_point": {},
+        "residuals": {
+          "body_x_force_n": 0.006139796421687486,
+          "body_z_force_n": -0.001219660516762654,
+          "pitch_moment_nm": 0.11186390697101206,
+          "roll_moment_nm": 6.300127243248784e-08,
+          "yaw_moment_nm": -1.283373333409195e-06
+        },
+        "scaled_residual_norm": 5.235294195236822e-09,
+        "state": {
+          "p_rad_s": 0.0,
+          "pitch_error_rad": -3.6436082324092496e-14,
+          "q_rad_s": 0.0,
+          "r_rad_s": 0.0,
+          "roll_error_rad": 6.400763719572426e-20,
+          "u_m_s": 152.8428427457678,
+          "v_m_s": -4.398462507413098e-21,
+          "w_m_s": 7.141646448453789,
+          "yaw_error_rad": 1.7113456515413656e-20
+        },
+        "status": 3,
+        "success": true
+      },
+      "true_airspeed_m_s": 153.0096
+    },
+    {
+      "altitude_m": 0.0,
+      "boundary_contract": "source trim passed; controller/effector authority remains unqualified until one generic candidate passes every declared interior witness",
+      "controller_trials": [
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable",
+                "solver_failure"
+              ],
+              "final_controlled_actual_residual_nm": 2.0016839935701597e-10,
+              "final_normalized_feedback_error_fraction": 4.337923468159064,
+              "maximum_continuous_saturation_duration_s": 0.30000000000000004,
+              "passed": false,
+              "saturation_fraction": 0.00375
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 2.691280825719956e-11,
+              "final_normalized_feedback_error_fraction": 2.1675220836884153,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 4.712418733692188e-11,
+              "final_normalized_feedback_error_fraction": 2.131232024169705,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-gentle-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -0.22320452786712847,
+                0.5937832983740643
+              ],
+              [
+                -0.22320452786712847,
+                -0.5937832983740643
+              ],
+              [
+                -0.3131521299345793,
+                0.22292787869853756
+              ],
+              [
+                -0.3131521299345793,
+                -0.22292787869853756
+              ],
+              [
+                -1.021455124057471,
+                1.4969485284777517
+              ],
+              [
+                -1.021455124057471,
+                -1.4969485284777517
+              ],
+              -0.04497745186196341,
+              -0.09109826312407278,
+              -0.1451863991680926
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              143032.75407432334,
+              4558983.010167421,
+              629894.2485804735
+            ],
+            "matrix_sha256": {
+              "a": "4fbc93c03e7b1de3932078eac71ecfd69996ae766a83a339553da66cce91bd2f",
+              "b": "8cd0cc6017ce0922e135ccebc4e40c28282838d2de19ac49077a4ea0ecdc4d0b",
+              "k": "52117da80d4af1dc103676b7e576b5b64a6a427ffb35ceb01c4f3f790266eb3c",
+              "q": "8481e51990cd076f1a6d070602e577f05fb3b624b29e6db712b2fb581e72ab03",
+              "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.04497745186196341
+            },
+            "profile_id": "gentle",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                0.25,
+                0.25,
+                0.25,
+                0.1,
+                0.25,
+                0.25,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                2.0,
+                2.0,
+                2.0
+              ]
+            }
+          }
+        },
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 1.9091060248684465e-11,
+              "final_normalized_feedback_error_fraction": 4.428091500380714,
+              "maximum_continuous_saturation_duration_s": 0.45,
+              "passed": false,
+              "saturation_fraction": 0.005625
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 4.073642874691999e-12,
+              "final_normalized_feedback_error_fraction": 2.27431060885757,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 9.851964996132568e-12,
+              "final_normalized_feedback_error_fraction": 2.234847499774728,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-standard-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -1.8537992870239528,
+                2.127522106642403
+              ],
+              [
+                -1.8537992870239528,
+                -2.127522106642403
+              ],
+              [
+                -0.48190685527843735,
+                0.7150486720307484
+              ],
+              [
+                -0.48190685527843735,
+                -0.7150486720307484
+              ],
+              [
+                -0.372732273344501,
+                0.32881522334372304
+              ],
+              [
+                -0.372732273344501,
+                -0.32881522334372304
+              ],
+              -0.04699140989977497,
+              -0.06328556964797637,
+              -0.19607806796928787
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              143032.75407432334,
+              4558983.010167421,
+              629894.2485804735
+            ],
+            "matrix_sha256": {
+              "a": "4fbc93c03e7b1de3932078eac71ecfd69996ae766a83a339553da66cce91bd2f",
+              "b": "8cd0cc6017ce0922e135ccebc4e40c28282838d2de19ac49077a4ea0ecdc4d0b",
+              "k": "0fc53e5aa1e710480801e86dd7583ab24303de269ffb76a5867af0814362ec22",
+              "q": "51318537af56c5dee6d6c41d2355e041fd2a8e5a3d049bd20ead6ca99921dc89",
+              "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.04699140989977497
+            },
+            "profile_id": "standard",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                1.0,
+                1.0,
+                1.0,
+                0.25,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                1.0,
+                1.0,
+                1.0
+              ]
+            }
+          }
+        },
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 6.946244852239979e-12,
+              "final_normalized_feedback_error_fraction": 5.12825468499157,
+              "maximum_continuous_saturation_duration_s": 1.05,
+              "passed": false,
+              "saturation_fraction": 0.013125
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.2228813313861668e-12,
+              "final_normalized_feedback_error_fraction": 2.652466196297469,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.3420836420734004e-12,
+              "final_normalized_feedback_error_fraction": 2.575114967425784,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-aggressive-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -1.1596362035099408,
+                1.2269165602731482
+              ],
+              [
+                -1.1596362035099408,
+                -1.2269165602731482
+              ],
+              [
+                -0.5025746639449588,
+                0.4974206871090628
+              ],
+              [
+                -0.5025746639449588,
+                -0.4974206871090628
+              ],
+              [
+                -3.920201934993122,
+                3.957994762543675
+              ],
+              [
+                -3.920201934993122,
+                -3.957994762543675
+              ],
+              -0.054059889300614054,
+              -0.04638209012315158,
+              -0.20701311402419842
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              143032.75407432334,
+              4558983.010167421,
+              629894.2485804735
+            ],
+            "matrix_sha256": {
+              "a": "4fbc93c03e7b1de3932078eac71ecfd69996ae766a83a339553da66cce91bd2f",
+              "b": "8cd0cc6017ce0922e135ccebc4e40c28282838d2de19ac49077a4ea0ecdc4d0b",
+              "k": "b4af8cd090f1c9d24a11d288213bf057b713c6b46375065de58e29d5bddca542",
+              "q": "7f53b20d856724509256162a9de99c5886bc5cf6a447977b2cf7c143a76b0ad9",
+              "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.04638209012315158
+            },
+            "profile_id": "aggressive",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                4.0,
+                4.0,
+                4.0,
+                0.5,
+                4.0,
+                4.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          }
+        }
+      ],
+      "derivative_consistent": true,
+      "initialization": {
+        "alpha0_deg": 0.0,
+        "attitude_policy": "source_condition_alpha0_applied_as_local_body_pitch_offset",
+        "body_pitch_offset_from_condition3_deg": -3.1,
+        "published_alpha0_deg": 0.0,
+        "reference_condition3_alpha0_deg": 3.1,
+        "retrim_alpha_delta_deg": -0.34328746872351473,
+        "retrim_domain": "published_alpha0_deg +/- 3.9 degrees",
+        "retrim_state_channel": "w_m_s",
+        "retrimmed_body_alpha_deg": -0.34328746872351473
+      },
+      "mach": 0.65,
+      "point_id": "4",
+      "reason": "no generic local design passed all interior witnesses",
+      "source_condition": {
+        "Ixx_slug_ft2": "18200000.0",
+        "Ixz_slug_ft2": "970000.0",
+        "Iyy_slug_ft2": "33100000.0",
+        "Izz_slug_ft2": "49700000.0",
+        "alpha0_deg": "0.0",
+        "altitude_ft": "0.0",
+        "altitude_m": "0.0",
+        "cg_fraction_cbar": "0.25",
+        "configuration": "nominal",
+        "fc_id": "4",
+        "fidelity": "DIRECT_TRANSCRIPTION_FROM_IMPLEMENTATION_OF_NASA_TABLE_IX_3",
+        "gamma_deg": "0.0",
+        "mach": "0.65",
+        "q_psf": "626.0",
+        "qc_psf": "695.0",
+        "source_id": "NASA_CR_2144",
+        "stabilizer_trim_deg": "-10.0",
+        "velocity_ft_s": "726.0",
+        "velocity_ktas": "430.0",
+        "velocity_m_s": "221.2848",
+        "weight_N": "2831898.01625298",
+        "weight_lb": "636636.0"
+      },
+      "status": "physical_surface_node_boundary",
+      "trim": {
+        "controls": {
+          "aileron-deg": 2.0785531871308116e-07,
+          "elevator-deg": 0.2503979199181229,
+          "rudder-deg": -2.8076763927442302e-08,
+          "throttle": 0.5826873953214009
+        },
+        "cost": 1.0194277571458868e-16,
+        "diagnostics": [
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -6.506224827034861e-16
+            },
+            "field": "roll_error_rad",
+            "message": "trim solution for 'roll_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -9.85320150758832e-11
+            },
+            "field": "pitch_error_rad",
+            "message": "trim solution for 'pitch_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -4.460775418031811e-16
+            },
+            "field": "yaw_error_rad",
+            "message": "trim solution for 'yaw_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": 221.2847999999,
+              "upper": 221.28480000009998,
+              "value": 221.2847999999987
+            },
+            "field": "u_m_s",
+            "message": "trim solution for 'u_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -1.676998123877134e-16
+            },
+            "field": "v_m_s",
+            "message": "trim solution for 'v_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "p_rad_s",
+            "message": "trim solution for 'p_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "q_rad_s",
+            "message": "trim solution for 'q_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "r_rad_s",
+            "message": "trim solution for 'r_rad_s' is at a declared bound",
+            "severity": "warning"
+          }
+        ],
+        "iterations": 44,
+        "max_residual": 0.04034155118304506,
+        "message": "`xtol` termination condition is satisfied.",
+        "operating_point": {},
+        "residuals": {
+          "body_x_force_n": -0.04034155118304506,
+          "body_z_force_n": -0.002572382796306112,
+          "pitch_moment_nm": -0.0029046237767075224,
+          "roll_moment_nm": 0.004413420586159148,
+          "yaw_moment_nm": 0.005548500283007956
+        },
+        "scaled_residual_norm": 1.4278849793634548e-08,
+        "state": {
+          "p_rad_s": 0.0,
+          "pitch_error_rad": -9.85320150758832e-11,
+          "q_rad_s": 0.0,
+          "r_rad_s": 0.0,
+          "roll_error_rad": -6.506224827034861e-16,
+          "u_m_s": 221.2847999999987,
+          "v_m_s": -1.676998123877134e-16,
+          "w_m_s": -1.3258429941475403,
+          "yaw_error_rad": -4.460775418031811e-16
+        },
+        "status": 3,
+        "success": true
+      },
+      "true_airspeed_m_s": 221.2848
+    },
+    {
+      "altitude_m": 6096.0,
+      "boundary_contract": "source trim passed; controller/effector authority remains unqualified until one generic candidate passes every declared interior witness",
+      "controller_trials": [
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 7.077514709476463e-11,
+              "final_normalized_feedback_error_fraction": 2.274606855837265,
+              "maximum_continuous_saturation_duration_s": 11.450000000000001,
+              "passed": false,
+              "saturation_fraction": 0.39875
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 7.220057434867456e-11,
+              "final_normalized_feedback_error_fraction": 0.541019790357516,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 2.772924806577946e-10,
+              "final_normalized_feedback_error_fraction": 0.3496656670551483,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-gentle-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -0.09918661522874066,
+                0.3528865513813853
+              ],
+              [
+                -0.09918661522874066,
+                -0.3528865513813853
+              ],
+              [
+                -0.45269761885771015,
+                0.9731797053732352
+              ],
+              [
+                -0.45269761885771015,
+                -0.9731797053732352
+              ],
+              [
+                -0.15860604329963185,
+                0.11375172070096176
+              ],
+              [
+                -0.15860604329963185,
+                -0.11375172070096176
+              ],
+              -0.06289490361745059,
+              [
+                -0.05447599609263378,
+                0.07384334833232074
+              ],
+              [
+                -0.05447599609263378,
+                -0.07384334833232074
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              17905.727782875692,
+              1802738.0628043178,
+              225198.95218302717
+            ],
+            "matrix_sha256": {
+              "a": "f84ff1d948bf9ce3c4ed18f2522e416a5412a30de6d709346b1add8c21f9f3eb",
+              "b": "306766e26e42d642e917d65e842978e095167c356a4f5817a8c116532ce470f8",
+              "k": "c29e50e92a5e5d84136de6eec9232d9a74bceefcb496860f4005c7b5fdd9711d",
+              "q": "8481e51990cd076f1a6d070602e577f05fb3b624b29e6db712b2fb581e72ab03",
+              "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.05447599609263378
+            },
+            "profile_id": "gentle",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                0.25,
+                0.25,
+                0.25,
+                0.1,
+                0.25,
+                0.25,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                2.0,
+                2.0,
+                2.0
+              ]
+            }
+          }
+        },
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable",
+                "solver_failure"
+              ],
+              "final_controlled_actual_residual_nm": 7.344514606602108e-09,
+              "final_normalized_feedback_error_fraction": 1.6998343514934229,
+              "maximum_continuous_saturation_duration_s": 10.350000000000001,
+              "passed": false,
+              "saturation_fraction": 0.35
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 6.9149314652639e-11,
+              "final_normalized_feedback_error_fraction": 0.3829721809682879,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 4.768486252867253e-10,
+              "final_normalized_feedback_error_fraction": 0.32609638453717066,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-standard-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -0.22144800448676094,
+                0.4006193336482152
+              ],
+              [
+                -0.22144800448676094,
+                -0.4006193336482152
+              ],
+              [
+                -0.20099657316860225,
+                0.1741313990742207
+              ],
+              [
+                -0.20099657316860225,
+                -0.1741313990742207
+              ],
+              -0.062245318471299854,
+              [
+                -0.9120741086585921,
+                1.2491622089948178
+              ],
+              [
+                -0.9120741086585921,
+                -1.2491622089948178
+              ],
+              [
+                -0.06939166629579814,
+                0.05498770816423345
+              ],
+              [
+                -0.06939166629579814,
+                -0.05498770816423345
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              17905.727782875692,
+              1802738.0628043178,
+              225198.95218302717
+            ],
+            "matrix_sha256": {
+              "a": "f84ff1d948bf9ce3c4ed18f2522e416a5412a30de6d709346b1add8c21f9f3eb",
+              "b": "306766e26e42d642e917d65e842978e095167c356a4f5817a8c116532ce470f8",
+              "k": "8ab1c04342335d9cacc53b955788ec5055865eee1d89cecb73a8761d2f795ea8",
+              "q": "51318537af56c5dee6d6c41d2355e041fd2a8e5a3d049bd20ead6ca99921dc89",
+              "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.062245318471299854
+            },
+            "profile_id": "standard",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                1.0,
+                1.0,
+                1.0,
+                0.25,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                1.0,
+                1.0,
+                1.0
+              ]
+            }
+          }
+        },
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 7.087741510580898e-10,
+              "final_normalized_feedback_error_fraction": 0.6461891171386751,
+              "maximum_continuous_saturation_duration_s": 0.7000000000000001,
+              "passed": false,
+              "saturation_fraction": 0.00875
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 8.822832390488526e-10,
+              "final_normalized_feedback_error_fraction": 0.332692762989306,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 7.588166185112043e-10,
+              "final_normalized_feedback_error_fraction": 0.31957415402475253,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-aggressive-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -2.0471608276552185,
+                2.1900113424075864
+              ],
+              [
+                -2.0471608276552185,
+                -2.1900113424075864
+              ],
+              [
+                -0.5770895481539352,
+                0.6430855926687323
+              ],
+              [
+                -0.5770895481539352,
+                -0.6430855926687323
+              ],
+              [
+                -0.21455573523066773,
+                0.22378438343214274
+              ],
+              [
+                -0.21455573523066773,
+                -0.22378438343214274
+              ],
+              -0.06160684799633146,
+              [
+                -0.06907701095063785,
+                0.04106905348690047
+              ],
+              [
+                -0.06907701095063785,
+                -0.04106905348690047
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              17905.727782875692,
+              1802738.0628043178,
+              225198.95218302717
+            ],
+            "matrix_sha256": {
+              "a": "f84ff1d948bf9ce3c4ed18f2522e416a5412a30de6d709346b1add8c21f9f3eb",
+              "b": "306766e26e42d642e917d65e842978e095167c356a4f5817a8c116532ce470f8",
+              "k": "60d44d9d7de91c6d9da331665d93c0617ba2f948f9968bae0294c6dfaefc3586",
+              "q": "7f53b20d856724509256162a9de99c5886bc5cf6a447977b2cf7c143a76b0ad9",
+              "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.06160684799633146
+            },
+            "profile_id": "aggressive",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                4.0,
+                4.0,
+                4.0,
+                0.5,
+                4.0,
+                4.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          }
+        }
+      ],
+      "derivative_consistent": true,
+      "initialization": {
+        "alpha0_deg": 6.8,
+        "attitude_policy": "source_condition_alpha0_applied_as_local_body_pitch_offset",
+        "body_pitch_offset_from_condition3_deg": 3.6999999999999997,
+        "published_alpha0_deg": 6.8,
+        "reference_condition3_alpha0_deg": 3.1,
+        "retrim_alpha_delta_deg": 1.6200655591602198,
+        "retrim_domain": "published_alpha0_deg +/- 3.9 degrees",
+        "retrim_state_channel": "w_m_s",
+        "retrimmed_body_alpha_deg": 8.42006555916022
+      },
+      "mach": 0.5,
+      "point_id": "5",
+      "reason": "no generic local design passed all interior witnesses",
+      "source_condition": {
+        "Ixx_slug_ft2": "18200000.0",
+        "Ixz_slug_ft2": "970000.0",
+        "Iyy_slug_ft2": "33100000.0",
+        "Izz_slug_ft2": "49700000.0",
+        "alpha0_deg": "6.8",
+        "altitude_ft": "20000.0",
+        "altitude_m": "6096.0",
+        "cg_fraction_cbar": "0.25",
+        "configuration": "nominal",
+        "fc_id": "5",
+        "fidelity": "DIRECT_TRANSCRIPTION_FROM_IMPLEMENTATION_OF_NASA_TABLE_IX_3",
+        "gamma_deg": "0.0",
+        "mach": "0.5",
+        "q_psf": "170.0",
+        "qc_psf": "181.0",
+        "source_id": "NASA_CR_2144",
+        "stabilizer_trim_deg": "-10.0",
+        "velocity_ft_s": "518.0",
+        "velocity_ktas": "307.0",
+        "velocity_m_s": "157.8864",
+        "weight_N": "2831898.01625298",
+        "weight_lb": "636636.0"
+      },
+      "status": "physical_surface_node_boundary",
+      "trim": {
+        "controls": {
+          "aileron-deg": 1.9178867965392158e-07,
+          "elevator-deg": -1.2744515217704895,
+          "rudder-deg": 8.749884096973639e-07,
+          "throttle": 0.3438773017911364
+        },
+        "cost": 9.92619419024291e-18,
+        "diagnostics": [
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 6.65951341080774e-15
+            },
+            "field": "roll_error_rad",
+            "message": "trim solution for 'roll_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 9.989442646345906e-11
+            },
+            "field": "pitch_error_rad",
+            "message": "trim solution for 'pitch_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 1.1836365080530214e-14
+            },
+            "field": "yaw_error_rad",
+            "message": "trim solution for 'yaw_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": 156.7757493990111,
+              "upper": 156.77574939921107,
+              "value": 156.77574939912046
+            },
+            "field": "u_m_s",
+            "message": "trim solution for 'u_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 3.04647933275921e-15
+            },
+            "field": "v_m_s",
+            "message": "trim solution for 'v_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "p_rad_s",
+            "message": "trim solution for 'p_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "q_rad_s",
+            "message": "trim solution for 'q_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "r_rad_s",
+            "message": "trim solution for 'r_rad_s' is at a declared bound",
+            "severity": "warning"
+          }
+        ],
+        "iterations": 20,
+        "max_residual": 0.051905160406986166,
+        "message": "`gtol` termination condition is satisfied.",
+        "operating_point": {},
+        "residuals": {
+          "body_x_force_n": 0.0061550137626116665,
+          "body_z_force_n": 0.007505201715202858,
+          "pitch_moment_nm": -0.042501560099050324,
+          "roll_moment_nm": 0.001373646127486456,
+          "yaw_moment_nm": -0.051905160406986166
+        },
+        "scaled_residual_norm": 4.455601910010119e-09,
+        "state": {
+          "p_rad_s": 0.0,
+          "pitch_error_rad": 9.989442646345906e-11,
+          "q_rad_s": 0.0,
+          "r_rad_s": 0.0,
+          "roll_error_rad": 6.65951341080774e-15,
+          "u_m_s": 156.77574939912046,
+          "v_m_s": 3.04647933275921e-15,
+          "w_m_s": 23.20673308593006,
+          "yaw_error_rad": 1.1836365080530214e-14
+        },
+        "status": 1,
+        "success": true
+      },
+      "true_airspeed_m_s": 157.8864
+    },
+    {
+      "altitude_m": 6096.0,
+      "boundary_contract": "source trim passed; controller/effector authority remains unqualified until one generic candidate passes every declared interior witness",
+      "controller_trials": [
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 7417.237682826841,
+              "final_normalized_feedback_error_fraction": 3.6196867955276173,
+              "maximum_continuous_saturation_duration_s": 8.6,
+              "passed": false,
+              "saturation_fraction": 0.220625
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.1293946548362833e-09,
+              "final_normalized_feedback_error_fraction": 0.15832688664389385,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.0232179386809017e-09,
+              "final_normalized_feedback_error_fraction": 0.23213886344614615,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-gentle-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -0.154438689886041,
+                0.43426033111471185
+              ],
+              [
+                -0.154438689886041,
+                -0.43426033111471185
+              ],
+              [
+                -0.20470874681525503,
+                0.15426278232813173
+              ],
+              [
+                -0.20470874681525503,
+                -0.15426278232813173
+              ],
+              -0.0479509158092739,
+              [
+                -0.6932865039976517,
+                1.1583326999095382
+              ],
+              [
+                -0.6932865039976517,
+                -1.1583326999095382
+              ],
+              [
+                -0.06766973990995478,
+                0.05417931165624641
+              ],
+              [
+                -0.06766973990995478,
+                -0.05417931165624641
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              62696.5648026049,
+              2693167.343468967,
+              352958.4380564415
+            ],
+            "matrix_sha256": {
+              "a": "d8184e0550104c2b70c70e8dca63c7f69d0ba5d08ea8ad7afd0ac165021dc3bb",
+              "b": "aa11dc6c6c5503dd9721283321870381b0c6170986b1af62d4b14731bdca9302",
+              "k": "6605363aac08114b359633466048910da9b802c2d82b9eb034395d730837351b",
+              "q": "8481e51990cd076f1a6d070602e577f05fb3b624b29e6db712b2fb581e72ab03",
+              "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.0479509158092739
+            },
+            "profile_id": "gentle",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                0.25,
+                0.25,
+                0.25,
+                0.1,
+                0.25,
+                0.25,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                2.0,
+                2.0,
+                2.0
+              ]
+            }
+          }
+        },
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 4.151943938745178e-10,
+              "final_normalized_feedback_error_fraction": 0.41974752809717464,
+              "maximum_continuous_saturation_duration_s": 0.8500000000000001,
+              "passed": false,
+              "saturation_fraction": 0.010625
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 2.2220239445788282e-10,
+              "final_normalized_feedback_error_fraction": 0.16705991479639254,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 5.373114431015252e-10,
+              "final_normalized_feedback_error_fraction": 0.2050181429881747,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-standard-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -1.3349820314111858,
+                1.6140604111328685
+              ],
+              [
+                -1.3349820314111858,
+                -1.6140604111328685
+              ],
+              [
+                -0.3460906739517018,
+                0.5229296675369955
+              ],
+              [
+                -0.3460906739517018,
+                -0.5229296675369955
+              ],
+              [
+                -0.24367020815219564,
+                0.22358733557620927
+              ],
+              [
+                -0.24367020815219564,
+                -0.22358733557620927
+              ],
+              -0.048025053518671694,
+              [
+                -0.07379866048709052,
+                0.038399462926755
+              ],
+              [
+                -0.07379866048709052,
+                -0.038399462926755
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              62696.5648026049,
+              2693167.343468967,
+              352958.4380564415
+            ],
+            "matrix_sha256": {
+              "a": "d8184e0550104c2b70c70e8dca63c7f69d0ba5d08ea8ad7afd0ac165021dc3bb",
+              "b": "aa11dc6c6c5503dd9721283321870381b0c6170986b1af62d4b14731bdca9302",
+              "k": "6234ccff3e6c4b9311ec874dfc96a66319a1af3cbaddae9b2e6b739b720fb1b7",
+              "q": "51318537af56c5dee6d6c41d2355e041fd2a8e5a3d049bd20ead6ca99921dc89",
+              "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.048025053518671694
+            },
+            "profile_id": "standard",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                1.0,
+                1.0,
+                1.0,
+                0.25,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                1.0,
+                1.0,
+                1.0
+              ]
+            }
+          }
+        },
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 1.154056405288854e-09,
+              "final_normalized_feedback_error_fraction": 0.4054692534225044,
+              "maximum_continuous_saturation_duration_s": 2.0500000000000003,
+              "passed": false,
+              "saturation_fraction": 0.025625
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.0453366671901423e-10,
+              "final_normalized_feedback_error_fraction": 0.17904131658274308,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.9667481505729384e-10,
+              "final_normalized_feedback_error_fraction": 0.22028818769892825,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-aggressive-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -2.87655258867459,
+                2.9685130219532003
+              ],
+              [
+                -2.87655258867459,
+                -2.9685130219532003
+              ],
+              [
+                -0.8321259637130844,
+                0.8942628380156723
+              ],
+              [
+                -0.8321259637130844,
+                -0.8942628380156723
+              ],
+              [
+                -0.33132223886107665,
+                0.33265244728449694
+              ],
+              [
+                -0.33132223886107665,
+                -0.33265244728449694
+              ],
+              -0.04859175744776108,
+              [
+                -0.07042506254533688,
+                0.02205078145221137
+              ],
+              [
+                -0.07042506254533688,
+                -0.02205078145221137
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              62696.5648026049,
+              2693167.343468967,
+              352958.4380564415
+            ],
+            "matrix_sha256": {
+              "a": "d8184e0550104c2b70c70e8dca63c7f69d0ba5d08ea8ad7afd0ac165021dc3bb",
+              "b": "aa11dc6c6c5503dd9721283321870381b0c6170986b1af62d4b14731bdca9302",
+              "k": "364a402e12cdd33c33ba0df32508ad618414660b519579ae3872dcb34fddd1df",
+              "q": "7f53b20d856724509256162a9de99c5886bc5cf6a447977b2cf7c143a76b0ad9",
+              "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.04859175744776108
+            },
+            "profile_id": "aggressive",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                4.0,
+                4.0,
+                4.0,
+                0.5,
+                4.0,
+                4.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          }
+        }
+      ],
+      "derivative_consistent": true,
+      "initialization": {
+        "alpha0_deg": 2.5,
+        "attitude_policy": "source_condition_alpha0_applied_as_local_body_pitch_offset",
+        "body_pitch_offset_from_condition3_deg": -0.6000000000000001,
+        "published_alpha0_deg": 2.5,
+        "reference_condition3_alpha0_deg": 3.1,
+        "retrim_alpha_delta_deg": 1.6494045799978698,
+        "retrim_domain": "published_alpha0_deg +/- 3.9 degrees",
+        "retrim_state_channel": "w_m_s",
+        "retrimmed_body_alpha_deg": 4.14940457999787
+      },
+      "mach": 0.65,
+      "point_id": "6",
+      "reason": "no generic local design passed all interior witnesses",
+      "source_condition": {
+        "Ixx_slug_ft2": "18200000.0",
+        "Ixz_slug_ft2": "970000.0",
+        "Iyy_slug_ft2": "33100000.0",
+        "Izz_slug_ft2": "49700000.0",
+        "alpha0_deg": "2.5",
+        "altitude_ft": "20000.0",
+        "altitude_m": "6096.0",
+        "cg_fraction_cbar": "0.25",
+        "configuration": "nominal",
+        "fc_id": "6",
+        "fidelity": "DIRECT_TRANSCRIPTION_FROM_IMPLEMENTATION_OF_NASA_TABLE_IX_3",
+        "gamma_deg": "0.0",
+        "mach": "0.65",
+        "q_psf": "288.0",
+        "qc_psf": "320.0",
+        "source_id": "NASA_CR_2144",
+        "stabilizer_trim_deg": "-10.0",
+        "velocity_ft_s": "674.0",
+        "velocity_ktas": "399.0",
+        "velocity_m_s": "205.4352",
+        "weight_N": "2831898.01625298",
+        "weight_lb": "636636.0"
+      },
+      "status": "physical_surface_node_boundary",
+      "trim": {
+        "controls": {
+          "aileron-deg": -4.894546780249994e-07,
+          "elevator-deg": -1.0784567997745533,
+          "rudder-deg": -8.185707657264422e-07,
+          "throttle": 0.2505208216348146
+        },
+        "cost": 1.3383916773528484e-16,
+        "diagnostics": [
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -2.9703493886040128e-15
+            },
+            "field": "roll_error_rad",
+            "message": "trim solution for 'roll_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 9.645069442159477e-11
+            },
+            "field": "pitch_error_rad",
+            "message": "trim solution for 'pitch_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -8.929346868325902e-15
+            },
+            "field": "yaw_error_rad",
+            "message": "trim solution for 'yaw_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": 205.23967121022338,
+              "upper": 205.23967121042335,
+              "value": 205.23967121032956
+            },
+            "field": "u_m_s",
+            "message": "trim solution for 'u_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -4.55150073567012e-15
+            },
+            "field": "v_m_s",
+            "message": "trim solution for 'v_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "p_rad_s",
+            "message": "trim solution for 'p_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "q_rad_s",
+            "message": "trim solution for 'q_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "r_rad_s",
+            "message": "trim solution for 'r_rad_s' is at a declared bound",
+            "severity": "warning"
+          }
+        ],
+        "iterations": 42,
+        "max_residual": 0.07512271824587678,
+        "message": "`xtol` termination condition is satisfied.",
+        "operating_point": {},
+        "residuals": {
+          "body_x_force_n": 0.0447140749678627,
+          "body_z_force_n": -0.005275208893511229,
+          "pitch_moment_nm": -0.04949821156694298,
+          "roll_moment_nm": -0.013058685571687826,
+          "yaw_moment_nm": 0.07512271824587678
+        },
+        "scaled_residual_norm": 1.6360878199857418e-08,
+        "state": {
+          "p_rad_s": 0.0,
+          "pitch_error_rad": 9.645069442159477e-11,
+          "q_rad_s": 0.0,
+          "r_rad_s": 0.0,
+          "roll_error_rad": -2.9703493886040128e-15,
+          "u_m_s": 205.23967121032956,
+          "v_m_s": -4.55150073567012e-15,
+          "w_m_s": 14.889655454108594,
+          "yaw_error_rad": -8.929346868325902e-15
+        },
+        "status": 3,
+        "success": true
+      },
+      "true_airspeed_m_s": 205.4352
+    },
+    {
+      "altitude_m": 6096.0,
+      "boundary_contract": "source trim passed; controller/effector authority remains unqualified until one generic candidate passes every declared interior witness",
+      "controller_trials": [
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 8.578012715409968e-09,
+              "final_normalized_feedback_error_fraction": 1.6875013074209597,
+              "maximum_continuous_saturation_duration_s": 5.8500000000000005,
+              "passed": false,
+              "saturation_fraction": 0.073125
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.6063823397496838e-09,
+              "final_normalized_feedback_error_fraction": 0.4930859276098161,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.1194255563786295e-09,
+              "final_normalized_feedback_error_fraction": 0.4510517940681669,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-gentle-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -0.2321484386586528,
+                0.541621257873638
+              ],
+              [
+                -0.2321484386586528,
+                -0.541621257873638
+              ],
+              [
+                -0.22582287106044677,
+                0.18680829700820495
+              ],
+              [
+                -0.22582287106044677,
+                -0.18680829700820495
+              ],
+              [
+                -0.9185680297560921,
+                1.3453872790285464
+              ],
+              [
+                -0.9185680297560921,
+                -1.3453872790285464
+              ],
+              -0.03903886218435851,
+              [
+                -0.06961924538470537,
+                0.04712121991043725
+              ],
+              [
+                -0.06961924538470537,
+                -0.04712121991043725
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              87815.22537925513,
+              3484082.694562778,
+              553235.9151165136
+            ],
+            "matrix_sha256": {
+              "a": "d7285a45d76ef00a1296de108ab22c6f2ea408b61422d569441192e6258669f2",
+              "b": "cbb4d14e5dabc2416178dd45237a08c6000eecdb104d622e42f15f649c4cac99",
+              "k": "3020d3f4e9c49579b04fabd0f09326e10d566d68d0bbdc8814b0818cb4ae8a8a",
+              "q": "8481e51990cd076f1a6d070602e577f05fb3b624b29e6db712b2fb581e72ab03",
+              "r": "4c3c3e505bdf29ae58121c486c57e1cc1e35edbfbc44d426c1546991f654cca3"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.03903886218435851
+            },
+            "profile_id": "gentle",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                0.25,
+                0.25,
+                0.25,
+                0.1,
+                0.25,
+                0.25,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                2.0,
+                2.0,
+                2.0
+              ]
+            }
+          }
+        },
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 1.1060960394240358e-10,
+              "final_normalized_feedback_error_fraction": 0.9619932900194469,
+              "maximum_continuous_saturation_duration_s": 0.75,
+              "passed": false,
+              "saturation_fraction": 0.009375
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.6816088838275794e-10,
+              "final_normalized_feedback_error_fraction": 0.4968709561935991,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 4.4857461289968577e-10,
+              "final_normalized_feedback_error_fraction": 0.46850722136285194,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-standard-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -0.506563344039702,
+                0.6942672762020512
+              ],
+              [
+                -0.506563344039702,
+                -0.6942672762020512
+              ],
+              [
+                -1.7203751093578283,
+                1.9646745263989673
+              ],
+              [
+                -1.7203751093578283,
+                -1.9646745263989673
+              ],
+              [
+                -0.2597748519681541,
+                0.2491759400035364
+              ],
+              [
+                -0.2597748519681541,
+                -0.2491759400035364
+              ],
+              -0.039819590118352045,
+              [
+                -0.0709070647653802,
+                0.03506184172350167
+              ],
+              [
+                -0.0709070647653802,
+                -0.03506184172350167
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              87815.22537925513,
+              3484082.694562778,
+              553235.9151165136
+            ],
+            "matrix_sha256": {
+              "a": "d7285a45d76ef00a1296de108ab22c6f2ea408b61422d569441192e6258669f2",
+              "b": "cbb4d14e5dabc2416178dd45237a08c6000eecdb104d622e42f15f649c4cac99",
+              "k": "48607204a67d70d7fc02312e7b7372d694d0639deb5ef0db0951c39e746f09f4",
+              "q": "51318537af56c5dee6d6c41d2355e041fd2a8e5a3d049bd20ead6ca99921dc89",
+              "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.039819590118352045
+            },
+            "profile_id": "standard",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                1.0,
+                1.0,
+                1.0,
+                0.25,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                1.0,
+                1.0,
+                1.0
+              ]
+            }
+          }
+        },
+        {
+          "cases": {
+            "nominal_local": {
+              "allocation_statuses": [
+                "feasible",
+                "partially_achievable"
+              ],
+              "final_controlled_actual_residual_nm": 1.3767935459877973e-09,
+              "final_normalized_feedback_error_fraction": 1.056419041303704,
+              "maximum_continuous_saturation_duration_s": 1.8,
+              "passed": false,
+              "saturation_fraction": 0.0225
+            },
+            "speed_minus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 7.602073668984501e-10,
+              "final_normalized_feedback_error_fraction": 0.5655877588601433,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            },
+            "speed_plus_5m_s": {
+              "allocation_statuses": [
+                "feasible"
+              ],
+              "final_controlled_actual_residual_nm": 1.037788106894843e-09,
+              "final_normalized_feedback_error_fraction": 0.5181328231919983,
+              "maximum_continuous_saturation_duration_s": 0.0,
+              "passed": false,
+              "saturation_fraction": 0.0
+            }
+          },
+          "design_id": "b747-condition3-aggressive-surface-wrench-lqr-v1",
+          "interior_passed": false,
+          "tuning": {
+            "closed_loop_eigenvalues": [
+              [
+                -1.15637954564852,
+                1.2283028854376052
+              ],
+              [
+                -1.15637954564852,
+                -1.2283028854376052
+              ],
+              [
+                -0.38445818908754825,
+                0.38389005958676187
+              ],
+              [
+                -0.38445818908754825,
+                -0.38389005958676187
+              ],
+              [
+                -3.6367987602651772,
+                3.695263850018269
+              ],
+              [
+                -3.6367987602651772,
+                -3.695263850018269
+              ],
+              -0.04193083392442463,
+              [
+                -0.06646893900414536,
+                0.02023288936740208
+              ],
+              [
+                -0.06646893900414536,
+                -0.02023288936740208
+              ]
+            ],
+            "condition_number": 1.0,
+            "control_names": [
+              "moment_x_nm",
+              "moment_y_nm",
+              "moment_z_nm"
+            ],
+            "control_scales": [
+              87815.22537925513,
+              3484082.694562778,
+              553235.9151165136
+            ],
+            "matrix_sha256": {
+              "a": "d7285a45d76ef00a1296de108ab22c6f2ea408b61422d569441192e6258669f2",
+              "b": "cbb4d14e5dabc2416178dd45237a08c6000eecdb104d622e42f15f649c4cac99",
+              "k": "16b18fc0eaf978bb8e8ac7b81605ad797247a3b77fa56f94717e126affb94247",
+              "q": "7f53b20d856724509256162a9de99c5886bc5cf6a447977b2cf7c143a76b0ad9",
+              "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+            },
+            "metrics": {
+              "condition_number": 1.0,
+              "maximum_real_pole": -0.04193083392442463
+            },
+            "profile_id": "aggressive",
+            "robustness": null,
+            "score": 1e-06,
+            "state_names": [
+              "roll_error_rad",
+              "pitch_error_rad",
+              "yaw_error_rad",
+              "u_m_s",
+              "v_m_s",
+              "w_m_s",
+              "p_rad_s",
+              "q_rad_s",
+              "r_rad_s"
+            ],
+            "state_scales": [
+              0.05235987755982989,
+              0.05235987755982989,
+              0.05235987755982989,
+              5.0,
+              3.0,
+              3.0,
+              0.15707963267948966,
+              0.15707963267948966,
+              0.15707963267948966
+            ],
+            "status": "safe",
+            "vehicle_id": "b747",
+            "violations": [],
+            "weights": {
+              "q_diagonal": [
+                4.0,
+                4.0,
+                4.0,
+                0.5,
+                4.0,
+                4.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "r_diagonal": [
+                0.25,
+                0.25,
+                0.25
+              ]
+            }
+          }
+        }
+      ],
+      "derivative_consistent": true,
+      "initialization": {
+        "alpha0_deg": 0.0,
+        "attitude_policy": "source_condition_alpha0_applied_as_local_body_pitch_offset",
+        "body_pitch_offset_from_condition3_deg": -3.1,
+        "published_alpha0_deg": 0.0,
+        "reference_condition3_alpha0_deg": 3.1,
+        "retrim_alpha_delta_deg": 1.6634021633447065,
+        "retrim_domain": "published_alpha0_deg +/- 3.9 degrees",
+        "retrim_state_channel": "w_m_s",
+        "retrimmed_body_alpha_deg": 1.6634021633447065
+      },
+      "mach": 0.8,
+      "point_id": "7",
+      "reason": "no generic local design passed all interior witnesses",
+      "source_condition": {
+        "Ixx_slug_ft2": "18200000.0",
+        "Ixz_slug_ft2": "970000.0",
+        "Iyy_slug_ft2": "33100000.0",
+        "Izz_slug_ft2": "49700000.0",
+        "alpha0_deg": "0.0",
+        "altitude_ft": "20000.0",
+        "altitude_m": "6096.0",
+        "cg_fraction_cbar": "0.25",
+        "configuration": "nominal",
+        "fc_id": "7",
+        "fidelity": "DIRECT_TRANSCRIPTION_FROM_IMPLEMENTATION_OF_NASA_TABLE_IX_3",
+        "gamma_deg": "0.0",
+        "mach": "0.8",
+        "q_psf": "436.0",
+        "qc_psf": "510.0",
+        "source_id": "NASA_CR_2144",
+        "stabilizer_trim_deg": "-10.0",
+        "velocity_ft_s": "830.0",
+        "velocity_ktas": "492.0",
+        "velocity_m_s": "252.984",
+        "weight_N": "2831898.01625298",
+        "weight_lb": "636636.0"
+      },
+      "status": "physical_surface_node_boundary",
+      "trim": {
+        "controls": {
+          "aileron-deg": 1.1288818640949188e-07,
+          "elevator-deg": -0.9829194940319356,
+          "rudder-deg": -4.914309065749115e-07,
+          "throttle": 0.38361576591957214
+        },
+        "cost": 8.288866702269243e-17,
+        "diagnostics": [
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -1.417183098277189e-15
+            },
+            "field": "roll_error_rad",
+            "message": "trim solution for 'roll_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": -8.327716291940316e-11
+            },
+            "field": "pitch_error_rad",
+            "message": "trim solution for 'pitch_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 1.0895355602572416e-15
+            },
+            "field": "yaw_error_rad",
+            "message": "trim solution for 'yaw_error_rad' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": 252.98399999990002,
+              "upper": 252.9840000001,
+              "value": 252.98400000000498
+            },
+            "field": "u_m_s",
+            "message": "trim solution for 'u_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 4.6902805919040145e-17
+            },
+            "field": "v_m_s",
+            "message": "trim solution for 'v_m_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "p_rad_s",
+            "message": "trim solution for 'p_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "q_rad_s",
+            "message": "trim solution for 'q_rad_s' is at a declared bound",
+            "severity": "warning"
+          },
+          {
+            "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+            "code": "solution-at-bound",
+            "details": {
+              "lower": -1e-10,
+              "upper": 1e-10,
+              "value": 0.0
+            },
+            "field": "r_rad_s",
+            "message": "trim solution for 'r_rad_s' is at a declared bound",
+            "severity": "warning"
+          }
+        ],
+        "iterations": 38,
+        "max_residual": 0.07250059558759273,
+        "message": "`xtol` termination condition is satisfied.",
+        "operating_point": {},
+        "residuals": {
+          "body_x_force_n": -0.03477501682954209,
+          "body_z_force_n": -0.002048890103484029,
+          "pitch_moment_nm": 0.052354304981130945,
+          "roll_moment_nm": -0.005318689731321317,
+          "yaw_moment_nm": 0.07250059558759273
+        },
+        "scaled_residual_norm": 1.2875454712179484e-08,
+        "state": {
+          "p_rad_s": 0.0,
+          "pitch_error_rad": -8.327716291940316e-11,
+          "q_rad_s": 0.0,
+          "r_rad_s": 0.0,
+          "roll_error_rad": -1.417183098277189e-15,
+          "u_m_s": 252.98400000000498,
+          "v_m_s": 4.6902805919040145e-17,
+          "w_m_s": 7.346656312056856,
+          "yaw_error_rad": 1.0895355602572416e-15
+        },
+        "status": 3,
+        "success": true
+      },
+      "true_airspeed_m_s": 252.984
+    },
+    {
+      "altitude_m": 12192.0,
+      "blocker": {
+        "code": "source_trim_residual_above_tolerance",
+        "details": {
+          "candidate_controls": {
+            "aileron-deg": -7.725698254995762e-07,
+            "elevator-deg": -2.9234098259842574,
+            "rudder-deg": -1.1422372696373936e-07,
+            "throttle": 0.9999999999999987
+          },
+          "candidate_state": {
+            "p_rad_s": 0.0,
+            "pitch_error_rad": -9.999999999999999e-11,
+            "q_rad_s": 0.0,
+            "r_rad_s": 0.0,
+            "roll_error_rad": -2.9996911947535763e-14,
+            "u_m_s": 204.97935089681255,
+            "v_m_s": 1.0545502900049413e-14,
+            "w_m_s": 40.918543357375434,
+            "yaw_error_rad": -1.4641897398306758e-14
+          },
+          "maximum_residual": 34421.375187152524,
+          "residuals": {
+            "body_x_force_n": -34421.375187152524,
+            "body_z_force_n": -54.340565084836285,
+            "pitch_moment_nm": -13911.88965867679,
+            "roll_moment_nm": -0.004698329770814157,
+            "yaw_moment_nm": 0.005783514784204547
+          },
+          "scaled_residual_norm": 0.012169900345793041,
+          "source_condition": "8",
+          "worst_residual": -34421.375187152524,
+          "worst_residual_name": "body_x_force_n"
+        },
+        "hint": "Resolve the source operating-point attitude, stabilizer/trim-bias convention, mass properties, and control-table closure before scheduling this node.",
+        "message": "source condition 8 trim did not converge"
+      },
+      "initialization": {
+        "alpha0_deg": 7.3,
+        "attitude_policy": "source_condition_alpha0_applied_as_local_body_pitch_offset",
+        "body_pitch_offset_from_condition3_deg": 4.199999999999999,
+        "reference_condition3_alpha0_deg": 3.1
+      },
+      "mach": 0.7,
+      "point_id": "8",
+      "reason": "source condition 8 trim did not converge",
+      "source_condition": {
+        "Ixx_slug_ft2": "18200000.0",
+        "Ixz_slug_ft2": "970000.0",
+        "Iyy_slug_ft2": "33100000.0",
+        "Izz_slug_ft2": "49700000.0",
+        "alpha0_deg": "7.3",
+        "altitude_ft": "40000.0",
+        "altitude_m": "12192.0",
+        "cg_fraction_cbar": "0.25",
+        "configuration": "nominal",
+        "fc_id": "8",
+        "fidelity": "DIRECT_TRANSCRIPTION_FROM_IMPLEMENTATION_OF_NASA_TABLE_IX_3",
+        "gamma_deg": "0.0",
+        "mach": "0.7",
+        "q_psf": "135.0",
+        "qc_psf": "153.0",
+        "source_id": "NASA_CR_2144",
+        "stabilizer_trim_deg": "-10.0",
+        "velocity_ft_s": "678.0",
+        "velocity_ktas": "402.0",
+        "velocity_m_s": "206.6544",
+        "weight_N": "2831898.01625298",
+        "weight_lb": "636636.0"
+      },
+      "status": "physical_surface_node_blocked",
+      "true_airspeed_m_s": 206.6544
+    },
+    {
+      "altitude_m": 12192.0,
+      "blocker": {
+        "code": "source_trim_residual_above_tolerance",
+        "details": {
+          "candidate_controls": {
+            "aileron-deg": -1.8273641907722996e-06,
+            "elevator-deg": -2.0686887295963254,
+            "rudder-deg": -6.279151459315526e-08,
+            "throttle": 0.9999999970804273
+          },
+          "candidate_state": {
+            "p_rad_s": 0.0,
+            "pitch_error_rad": -9.999999999999999e-11,
+            "q_rad_s": 0.0,
+            "r_rad_s": 0.0,
+            "roll_error_rad": 1.2485624960330897e-14,
+            "u_m_s": 235.15528846672834,
+            "v_m_s": 1.3049356983517625e-14,
+            "w_m_s": 30.765107437605263,
+            "yaw_error_rad": 9.86072406882994e-15
+          },
+          "maximum_residual": 19037.414540197162,
+          "residuals": {
+            "body_x_force_n": -19037.414540197162,
+            "body_z_force_n": -3435.9872308706126,
+            "pitch_moment_nm": 1992.0404405932018,
+            "roll_moment_nm": -0.015784676924950062,
+            "yaw_moment_nm": 0.005104892241187892
+          },
+          "scaled_residual_norm": 0.00683201788560442,
+          "source_condition": "9",
+          "worst_residual": -19037.414540197162,
+          "worst_residual_name": "body_x_force_n"
+        },
+        "hint": "Resolve the source operating-point attitude, stabilizer/trim-bias convention, mass properties, and control-table closure before scheduling this node.",
+        "message": "source condition 9 trim did not converge"
+      },
+      "initialization": {
+        "alpha0_deg": 4.6,
+        "attitude_policy": "source_condition_alpha0_applied_as_local_body_pitch_offset",
+        "body_pitch_offset_from_condition3_deg": 1.4999999999999996,
+        "reference_condition3_alpha0_deg": 3.1
+      },
+      "mach": 0.8,
+      "point_id": "9",
+      "reason": "source condition 9 trim did not converge",
+      "source_condition": {
+        "Ixx_slug_ft2": "18200000.0",
+        "Ixz_slug_ft2": "970000.0",
+        "Iyy_slug_ft2": "33100000.0",
+        "Izz_slug_ft2": "49700000.0",
+        "alpha0_deg": "4.6",
+        "altitude_ft": "40000.0",
+        "altitude_m": "12192.0",
+        "cg_fraction_cbar": "0.25",
+        "configuration": "nominal",
+        "fc_id": "9",
+        "fidelity": "DIRECT_TRANSCRIPTION_FROM_IMPLEMENTATION_OF_NASA_TABLE_IX_3",
+        "gamma_deg": "0.0",
+        "mach": "0.8",
+        "q_psf": "177.0",
+        "qc_psf": "207.0",
+        "source_id": "NASA_CR_2144",
+        "stabilizer_trim_deg": "-10.0",
+        "velocity_ft_s": "774.0",
+        "velocity_ktas": "459.0",
+        "velocity_m_s": "235.9152",
+        "weight_N": "2831898.01625298",
+        "weight_lb": "636636.0"
+      },
+      "status": "physical_surface_node_blocked",
+      "true_airspeed_m_s": 235.9152
+    },
+    {
+      "altitude_m": 12192.0,
+      "blocker": {
+        "code": "source_trim_residual_above_tolerance",
+        "details": {
+          "candidate_controls": {
+            "aileron-deg": -3.68343659515287e-07,
+            "elevator-deg": -3.571614102052008,
+            "rudder-deg": 1.5513569034682869e-07,
+            "throttle": 0.9999935085849645
+          },
+          "candidate_state": {
+            "p_rad_s": 0.0,
+            "pitch_error_rad": -9.999999999999999e-11,
+            "q_rad_s": 0.0,
+            "r_rad_s": 0.0,
+            "roll_error_rad": 4.636992014854277e-15,
+            "u_m_s": 265.2479282328896,
+            "v_m_s": 8.380636994380232e-15,
+            "w_m_s": 23.5368230821429,
+            "yaw_error_rad": -4.608781090109259e-17
+          },
+          "maximum_residual": 289163.1755836717,
+          "residuals": {
+            "body_x_force_n": -289163.1755836717,
+            "body_z_force_n": -30254.296084700047,
+            "pitch_moment_nm": 9524.66944445017,
+            "roll_moment_nm": -0.003076294588161864,
+            "yaw_moment_nm": -0.012117473157529632
+          },
+          "scaled_residual_norm": 0.10267328529224119,
+          "source_condition": "10",
+          "worst_residual": -289163.1755836717,
+          "worst_residual_name": "body_x_force_n"
+        },
+        "hint": "Resolve the source operating-point attitude, stabilizer/trim-bias convention, mass properties, and control-table closure before scheduling this node.",
+        "message": "source condition 10 trim did not converge"
+      },
+      "initialization": {
+        "alpha0_deg": 2.4,
+        "attitude_policy": "source_condition_alpha0_applied_as_local_body_pitch_offset",
+        "body_pitch_offset_from_condition3_deg": -0.7000000000000002,
+        "reference_condition3_alpha0_deg": 3.1
+      },
+      "mach": 0.9,
+      "point_id": "10",
+      "reason": "source condition 10 trim did not converge",
+      "source_condition": {
+        "Ixx_slug_ft2": "18200000.0",
+        "Ixz_slug_ft2": "970000.0",
+        "Iyy_slug_ft2": "33100000.0",
+        "Izz_slug_ft2": "49700000.0",
+        "alpha0_deg": "2.4",
+        "altitude_ft": "40000.0",
+        "altitude_m": "12192.0",
+        "cg_fraction_cbar": "0.25",
+        "configuration": "nominal",
+        "fc_id": "10",
+        "fidelity": "DIRECT_TRANSCRIPTION_FROM_IMPLEMENTATION_OF_NASA_TABLE_IX_3",
+        "gamma_deg": "0.0",
+        "mach": "0.9",
+        "q_psf": "224.0",
+        "qc_psf": "273.0",
+        "source_id": "NASA_CR_2144",
+        "stabilizer_trim_deg": "-10.0",
+        "velocity_ft_s": "871.0",
+        "velocity_ktas": "516.0",
+        "velocity_m_s": "265.4808",
+        "weight_N": "2831898.01625298",
+        "weight_lb": "636636.0"
+      },
+      "status": "physical_surface_node_blocked",
+      "true_airspeed_m_s": 265.4808
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_b747_physical_schedule.py",
+  "schedule_contract": {
+    "node_ids": [
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "runtime_gain_interpolation": "not_run_until_all_source_nodes_complete",
+    "transition_evidence": "blocked until every promoted node has a physical plant and trim"
+  },
+  "schema": "taoryx.b747-physical-effector-schedule/v1alpha1",
+  "source_deck_generation": {
+    "attitude_initialization_policy": "preserve the checked-in condition-3 quaternion and apply each source row alpha0 delta about the local body pitch axis; condition 3 remains byte-for-byte equivalent in orientation",
+    "bounded_retrim_policy": "allow only local body w velocity to move within source alpha0 +/- 3.9 degrees; published alpha0 remains the initial catalog label and re-trimmed alpha is reported from truth state",
+    "filters": [
+      "configuration=nominal",
+      "reference_fc_id=node.fc_id",
+      "mach=node.mach",
+      "altitude_ft=node.altitude_ft"
+    ],
+    "mass_policy": "retain the accepted 288756.9 kg runtime mass snapshot while varying source condition decks; source CSV weight conversion is recorded but not silently substituted",
+    "source_condition_catalog": "tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/jet_b747/aero/flight_conditions.csv",
+    "source_control_tables": [
+      "static_six_axis_grid.csv",
+      "elevator_grid.csv",
+      "aileron_grid.csv",
+      "rudder_grid.csv"
+    ],
+    "temporary_deck_policy": "materialized from source CSV for each run; no interpolated coefficient deck is persisted as qualified evidence"
+  },
+  "status": "B747_physical_effector_schedule_boundary_recorded",
+  "summary": {
+    "blocked_node_count": 3,
+    "blockers_by_code": {
+      "source_trim_residual_above_tolerance": 3
+    },
+    "boundary_node_count": 4,
+    "interior_case_count": 24,
+    "interior_passed_case_count": 3,
+    "node_count": 8,
+    "passed_node_count": 1
+  }
+}

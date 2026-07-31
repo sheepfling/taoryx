@@ -1,0 +1,13 @@
+{
+  "attitude_channels_added": [
+    "commanded_attitude_rad",
+    "achieved_attitude_rad",
+    "body_rate_rad_s"
+  ],
+  "interpretation": "The pseudo bridge adds response-law attitude channels; it does not add source gimbal physics.",
+  "physical_gimbal_allocation": false,
+  "pseudo_terminal_phase": "orbit_coast",
+  "schema": "taoryx.nesc-fidelity-comparison/v1alpha1",
+  "source_terminal_phase": "orbit_coast",
+  "translation_rows_equal": true
+}

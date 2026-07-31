@@ -13,6 +13,7 @@ from typing import Any, TypeAlias, cast
 from pydantic import BaseModel
 
 from taoryx.aerodynamics import maximum_lift_to_drag
+from taoryx.airbreathing_control_mapping import x8_source_mapping
 from taoryx.attitude import EulerAngles, euler_angles_to_body_basis
 from taoryx.contracts import Angle, Basis3, EarthModel, Frame, FrameVector3, Latitude, Longitude, Quantity, Unit, Vector3
 from taoryx.control_allocation import EffectorEffectiveness, EffectorLimits, allocate_and_advance_wrench
@@ -105,6 +106,8 @@ from taoryx.tables import (
     prepare_skewed_table,
     prepare_table,
 )
+from taoryx.trajectory.pseudo6dof_profiles import Pseudo6DOFProfile, load_pseudo6dof_catalog
+from taoryx.trajectory.response_laws import bounded_axis_rate_command
 from taoryx.vehicle import AeroQueryContext, DirectWrenchTableModel, PreparedAerodynamicCoefficients, TableAerodynamicModel
 
 from .common import EventCondition, RuntimeProblem, RuntimeState, RuntimeVehicle
@@ -1216,6 +1219,7 @@ def _lower_case(
             length_scale_to_m=0.3048 if point_mass_si_contract else 1.0,
         )
         truth_provider = KinematicTruthProvider(base_truth_provider) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else base_truth_provider
+        kinematic_profile = _kinematic_response_profile(problem) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None
         vehicle = RuntimeVehicle(
             str(trajectory.number),
             initial_state,
@@ -1239,7 +1243,8 @@ def _lower_case(
             event_handlers=event_handlers,
             activation_handler=activation_handler,
             dynamics_mode=dynamics_mode,
-            body_rate_provider=_build_kinematic_body_rate_provider(problem) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None,
+            body_rate_provider=_build_kinematic_body_rate_provider(problem, kinematic_profile) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None,
+            kinematic_response_profile_id=kinematic_profile.id if kinematic_profile is not None else None,
             publish_derived_rates=publish_derived_rates,
             kinematic_state=_kinematic_state(initial_state) if dynamics_mode is DynamicsMode.KINEMATIC_6DOF else None,
             stall_detector=stall_detector,
@@ -2053,10 +2058,11 @@ def _lower_rigid_body_case(
                     air_velocity_body.y,
                     max(math.hypot(air_velocity_body.x, air_velocity_body.z), 1.0e-12),
                 )
+                beta_error = _runtime_fixed_wing_beta_command_rad(guidance_attributes) - sideslip_angle
                 inversion_target = inversion_target + Vector3(
                     0.0,
                     0.0,
-                    -sideslip_gain * sideslip_angle - sideslip_rate_damping * state.body_rate.z,
+                    sideslip_gain * beta_error - sideslip_rate_damping * state.body_rate.z,
                 )
             controller_saturated["value"] = controller_saturated["value"] or _apply_surface_control_inversion(
                 aerodynamic_model,
@@ -2196,26 +2202,25 @@ def _lower_rigid_body_case(
             return propulsion
         aero = aero_sample if aero_sample is not None else aerodynamic_model.evaluate(state)
         heat_rate_coefficient = max(0.0, float(thermal_attributes.get("heat-rate-coefficient", "0.002")))
+        guidance_moment = Vector3(
+            control_values.get("_rotor_guidance_moment_x", 0.0),
+            control_values.get("_rotor_guidance_moment_y", 0.0),
+            control_values.get("_rotor_guidance_moment_z", 0.0),
+        )
+        if rotor_allocation is not None and rotor_allocation.individual_rotor_source_available:
+            # The individual rotor source path already generates its applied
+            # attitude/yaw moment from the four allocated rotor speeds.  Do
+            # not add the pre-allocation guidance request a second time.
+            guidance_moment = Vector3(0.0, 0.0, 0.0)
         return RigidBodyForceMoment(
             propulsion.force_body + aero.force_body_n,
-            propulsion.moment_body
-            + Vector3(
-                control_values.get("_rotor_guidance_moment_x", 0.0),
-                control_values.get("_rotor_guidance_moment_y", 0.0),
-                control_values.get("_rotor_guidance_moment_z", 0.0),
-            )
-            + aero.moment_body_nm,
+            propulsion.moment_body + guidance_moment + aero.moment_body_nm,
             propulsion.propellant_mass_rate,
             aero.dynamic_pressure_pa * aero.airspeed_m_s * heat_rate_coefficient,
             aero_force_body=aero.force_body_n,
             propulsion_force_body=propulsion.force_body,
             aero_moment_body=aero.moment_body_nm,
-            propulsion_moment_body=propulsion.moment_body
-            + Vector3(
-                control_values.get("_rotor_guidance_moment_x", 0.0),
-                control_values.get("_rotor_guidance_moment_y", 0.0),
-                control_values.get("_rotor_guidance_moment_z", 0.0),
-            ),
+            propulsion_moment_body=propulsion.moment_body + guidance_moment,
         )
     ####
 
@@ -2410,6 +2415,13 @@ def _lower_rigid_body_case(
             "surface_allocation_differential_elevon_commanded_deg",
             "surface_allocation_differential_elevon_achieved_deg",
             "surface_allocation_differential_elevon_rate_deg_s",
+            "surface_allocation_x8_mapping_sign",
+            "surface_allocation_left_elevon_commanded_deg",
+            "surface_allocation_right_elevon_commanded_deg",
+            "surface_allocation_left_elevon_achieved_deg",
+            "surface_allocation_right_elevon_achieved_deg",
+            "surface_allocation_left_elevon_rate_deg_s",
+            "surface_allocation_right_elevon_rate_deg_s",
             "surface_allocation_elevator_commanded_deg",
             "surface_allocation_elevator_achieved_deg",
             "surface_allocation_elevator_rate_deg_s",
@@ -4142,6 +4154,19 @@ def _rigid_body_aerodynamic_model(
             ####
         ####
 
+        def apply_motor_shutdown_override() -> None:
+            """Keep the terminal shutdown event authoritative after guidance."""
+
+            if not motor_shutdown:
+                return
+            values["rotor_speed"] = 0.0
+            for index in range(1, 5):
+                values[f"rotor-{index}-speed"] = 0.0
+                control_state[f"rotor_{index}_speed"] = 0.0
+            control_state["rotor_physical_guidance_allocation_active"] = 0.0
+            ####
+        ####
+
         # The grammar-facing controls are degree-labelled, while coefficient
         # tables use the canonical radian ``alpha``/``bank`` axes. Keep both
         # names in the query context rather than making table data guess.
@@ -4169,6 +4194,7 @@ def _rigid_body_aerodynamic_model(
             for index in range(1, 5):
                 values[f"rotor-{index}-speed"] = 0.0
         values["motor_shutdown"] = 1.0 if motor_shutdown else 0.0
+        individual_rotor_source = rotor_allocation is not None and rotor_allocation.individual_rotor_source_available
         altitude_hold_gain = float(guidance_attributes.get("altitude-hold-gain-rad-s-per-m", "0.0"))
         altitude_target = target_attributes.get("altitude-m")
         if altitude_hold_gain != 0.0 and altitude_target is not None and not rotorcraft_guidance:
@@ -4205,6 +4231,7 @@ def _rigid_body_aerodynamic_model(
                 commands = rotor_allocation.allocate(float(values["rotor_speed"]), requested_moment)
                 for index, speed in enumerate(commands.values, start=1):
                     values[f"rotor-{index}-speed"] = speed
+                    control_state[f"rotor_{index}_speed"] = speed
                 control_state["rate_lqr_request_moment_x_nm"] = canonical_moment.x
                 control_state["rate_lqr_request_moment_y_nm"] = canonical_moment.y
                 control_state["rate_lqr_request_moment_z_nm"] = canonical_moment.z
@@ -4227,6 +4254,7 @@ def _rigid_body_aerodynamic_model(
                 commands = rotor_allocation.allocate(float(values["rotor_speed"]), requested_moment)
                 for index, speed in enumerate(commands.values, start=1):
                     values[f"rotor-{index}-speed"] = speed
+                    control_state[f"rotor_{index}_speed"] = speed
                 values["rotor_command_saturated"] = float(
                     any(speed in {rotor_allocation.minimum_speed_rad_s, rotor_allocation.maximum_speed_rad_s} for speed in commands.values)
                 )
@@ -4322,6 +4350,39 @@ def _rigid_body_aerodynamic_model(
                     0.0,
                     min(1500.0, values["rotor_speed"] + collective_gain * (altitude_gain * altitude_error - altitude_damping * radial_speed + tilt_compensation)),
                 )
+                if individual_rotor_source:
+                    # The individual-source mode must realize the guidance
+                    # moment through the four rotor effectors.  The legacy
+                    # common-speed path retains its historical direct-wrench
+                    # bridge, but this branch is the physical allocation
+                    # contract used by promoted rotor witnesses.
+                    canonical_guidance_moment = Vector3(
+                        control_state.get("_rotor_guidance_moment_x", 0.0),
+                        control_state.get("_rotor_guidance_moment_y", 0.0),
+                        control_state.get("_rotor_guidance_moment_z", 0.0),
+                    )
+                    if aero_wrench_frame.casefold() == "source-z-up":
+                        source_guidance_moment = Vector3(
+                            -canonical_guidance_moment.x,
+                            -canonical_guidance_moment.y,
+                            canonical_guidance_moment.z,
+                        )
+                    else:
+                        source_guidance_moment = canonical_guidance_moment
+                    commands = rotor_allocation.allocate(float(values["rotor_speed"]), source_guidance_moment)
+                    for index, speed in enumerate(commands.values, start=1):
+                        values[f"rotor-{index}-speed"] = speed
+                        control_state[f"rotor_{index}_speed"] = speed
+                    control_state["rotor_physical_guidance_allocation_active"] = 1.0
+                    control_state["rotor_physical_guidance_moment_x_nm"] = source_guidance_moment.x
+                    control_state["rotor_physical_guidance_moment_y_nm"] = source_guidance_moment.y
+                    control_state["rotor_physical_guidance_moment_z_nm"] = source_guidance_moment.z
+                    control_state["rotor_physical_guidance_command_saturated"] = float(
+                        any(
+                            speed in {rotor_allocation.minimum_speed_rad_s, rotor_allocation.maximum_speed_rad_s}
+                            for speed in commands.values
+                        )
+                    )
         alpha_hold_gain = float(guidance_attributes.get("alpha-hold-gain-deg-per-deg", "0.0"))
         if alpha_hold_gain != 0.0 and "elevator-deg" in values:
             position_ecfc, _ = EarthRotationAdapter(earth).ecic_to_ecfc(state.position, state.velocity, time_seconds=state.time)
@@ -4441,10 +4502,12 @@ def _rigid_body_aerodynamic_model(
         )
         if target_position is None or navigation_gain <= 0.0 or not (active_segment_guidance or _runtime_pure_propnav_active(route_attributes, state.time)):
             apply_surface_allocation_override()
+            apply_motor_shutdown_override()
             return values
         target_ecic = _runtime_target_position(target_attributes, earth, EarthRotationAdapter(earth), state.time)
         if target_ecic is None:
             apply_surface_allocation_override()
+            apply_motor_shutdown_override()
             return values
         demand = cast(Vector3, _runtime_propnav_command(state, target_attributes, navigation_gain, earth_mu, earth_omega)["demand"])
         allocation = allocate_alpha_bank(
@@ -4483,6 +4546,7 @@ def _rigid_body_aerodynamic_model(
             values["energy_speed_mps"] = airspeed
             values["energy_alpha_deg"] = values["alpha-deg"]
         apply_surface_allocation_override()
+        apply_motor_shutdown_override()
         return values
     ####
 
@@ -4781,7 +4845,51 @@ def _runtime_attributes(problem: Problem, name: str) -> Mapping[str, str]:
     ####
 
 
-def _build_kinematic_body_rate_provider(problem: Problem) -> Callable[[RuntimeState], Vector3]:
+def _kinematic_response_profile(problem: Problem) -> Pseudo6DOFProfile | None:
+    """Resolve an optional catalog-backed native kinematic response profile.
+
+    Native ``kinematic-6dof`` problems historically used one scalar lag and
+    rate bound.  A profile declaration upgrades that bridge to per-axis
+    catalog values while preserving the old syntax when no profile is
+    declared.  The profile remains a response surrogate; it does not add
+    physical moments or effectors to the native runtime.
+    """
+
+    attributes = _runtime_attributes(problem, "attitude")
+    profile_id = attributes.get("response-profile-id")
+    if profile_id is None:
+        return None
+    catalog = load_pseudo6dof_catalog()
+    profile = next((item for item in catalog.profiles if item.id == profile_id), None)
+    if profile is None:
+        raise FidelitySetupError(
+            "unknown-kinematic-response-profile",
+            f"attitude response profile {profile_id!r} is not present in the canonical pseudo-6DOF catalog",
+            "add the profile to verification/pseudo6dof_profiles.yaml or remove response-profile-id",
+            field="attitude.response-profile-id",
+        )
+    if profile.model_kind == "rigid_body_reuse":
+        raise FidelitySetupError(
+            "invalid-kinematic-response-profile",
+            "rigid-body reuse profiles cannot be lowered into the kinematic attitude bridge",
+            "run the rigid-body plant for this profile instead of using mode=kinematic-6dof",
+            field="attitude.response-profile-id",
+        )
+    if attributes.get("response-law", "first-order-rate-limited-v1") != "first-order-rate-limited-v1":
+        raise FidelitySetupError(
+            "unsupported-kinematic-response-law",
+            "the native kinematic bridge supports only first-order-rate-limited-v1",
+            "set response-law=first-order-rate-limited-v1 or use a dedicated reduced-order runner",
+            field="attitude.response-law",
+        )
+    return profile
+    ####
+
+
+def _build_kinematic_body_rate_provider(
+    problem: Problem,
+    response_profile: Pseudo6DOFProfile | None = None,
+) -> Callable[[RuntimeState], Vector3]:
     """Build the generic prescribed/lagged attitude bridge controller.
 
     The kinematic bridge deliberately commands body rates instead of moments.
@@ -4791,6 +4899,7 @@ def _build_kinematic_body_rate_provider(problem: Problem) -> Callable[[RuntimeSt
     """
 
     attributes = _runtime_attributes(problem, "attitude")
+    response_profile = response_profile if response_profile is not None else _kinematic_response_profile(problem)
     mode = attributes.get("mode", "prescribed").casefold()
     if mode not in {"prescribed", "lag", "rate"}:
         raise FidelitySetupError(
@@ -4838,11 +4947,18 @@ def _build_kinematic_body_rate_provider(problem: Problem) -> Callable[[RuntimeSt
         target_attitude = _quaternion_from_euler(target)
         error = target_attitude.multiply(current.conjugate()).normalized()
         sign = -1.0 if error.w < 0.0 else 1.0
-        rate = Vector3(
-            sign * 2.0 * error.x / lag_s,
-            sign * 2.0 * error.y / lag_s,
-            sign * 2.0 * error.z / lag_s,
-        )
+        if response_profile is None:
+            rate = Vector3(
+                sign * 2.0 * error.x / lag_s,
+                sign * 2.0 * error.y / lag_s,
+                sign * 2.0 * error.z / lag_s,
+            )
+        else:
+            rate = Vector3(
+                bounded_axis_rate_command(response_profile.response["roll"], sign * 2.0 * error.x),
+                bounded_axis_rate_command(response_profile.response["pitch"], sign * 2.0 * error.y),
+                bounded_axis_rate_command(response_profile.response["yaw"], sign * 2.0 * error.z),
+            )
         magnitude = rate.norm()
         if magnitude > maximum_rate:
             rate = rate.scaled(maximum_rate / magnitude)
@@ -7930,6 +8046,35 @@ def _apply_surface_control_inversion(
         control_values[f"surface_allocation_{surface_name}_commanded_deg"] = allocation.actuator.commanded_positions[degree_name]
         control_values[f"surface_allocation_{surface_name}_achieved_deg"] = actual
         control_values[f"surface_allocation_{surface_name}_rate_deg_s"] = allocation.actuator.rates_per_s[degree_name]
+    # The X8 source deck is identified in elevator/aileron coordinates, while
+    # the vehicle has two physical elevons.  Record the source-paper inverse
+    # mapping alongside the source-coordinate commands so a mission artifact
+    # cannot imply left/right actuator evidence without showing the conversion.
+    if {
+        "collective-elevon-deg",
+        "differential-elevon-deg",
+    }.issubset(effectors):
+        mapping = x8_source_mapping()
+        collective_commanded = allocation.actuator.commanded_positions["collective-elevon-deg"]
+        differential_commanded = allocation.actuator.commanded_positions["differential-elevon-deg"]
+        collective_actual = allocation.actuator.actual_positions["collective-elevon-deg"]
+        differential_actual = allocation.actuator.actual_positions["differential-elevon-deg"]
+        collective_rate = allocation.actuator.rates_per_s["collective-elevon-deg"]
+        differential_rate = allocation.actuator.rates_per_s["differential-elevon-deg"]
+        left_commanded, right_commanded = mapping.virtual_to_physical(collective_commanded, differential_commanded)
+        left_actual, right_actual = mapping.virtual_to_physical(collective_actual, differential_actual)
+        left_rate, right_rate = mapping.virtual_to_physical(collective_rate, differential_rate)
+        control_values.update(
+            {
+                "surface_allocation_x8_mapping_sign": float(mapping.differential_sign),
+                "surface_allocation_left_elevon_commanded_deg": left_commanded,
+                "surface_allocation_right_elevon_commanded_deg": right_commanded,
+                "surface_allocation_left_elevon_achieved_deg": left_actual,
+                "surface_allocation_right_elevon_achieved_deg": right_actual,
+                "surface_allocation_left_elevon_rate_deg_s": left_rate,
+                "surface_allocation_right_elevon_rate_deg_s": right_rate,
+            }
+        )
     actual_moment = aerodynamic_model.evaluate(state).moment_body_nm
     linearized_achieved = allocation.allocation.predicted_wrench
     actual_residual = {

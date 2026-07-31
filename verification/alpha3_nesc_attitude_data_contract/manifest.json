@@ -1,0 +1,8 @@
+{
+  "artifact": "attitude_data_contract.json",
+  "claim_boundary": "Source-data availability diagnostic only; no parent attitude or gimbal qualification.",
+  "plot": "attitude_data_contract_board.png",
+  "reproduction": "PYTHONPATH=src python3 tools/validate_nesc_attitude_data_contract.py",
+  "schema": "taoryx.nesc-attitude-data-contract-manifest/v1alpha1",
+  "status": "blocked_parent_attitude_data_unavailable"
+}

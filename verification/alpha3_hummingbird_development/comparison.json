@@ -1,0 +1,101 @@
+{
+  "comparison_fidelity": "pseudo_6dof",
+  "interpretation": "The point-mass and pseudo records use independent translational realizations. Point-mass yaw is explicitly not applicable; the native rigid-body packet is additionally compared by semantic objective mapping, while pseudo motor allocation and sample-for-sample trajectory equivalence remain unclaimed.",
+  "mission_semantics_equal": true,
+  "native_parent": {
+    "all_mapped_objectives_agree": true,
+    "artifact": "artifacts/showcases/alpha2/final-catalog-v1/packs/hummingbird-pad-to-pad-altitude-yaw-v2/summary.json",
+    "comparison_boundary": "semantic objective comparison only; native and pseudo runtimes use different controllers, horizons, and sample rates, so trajectory/time deltas are not asserted",
+    "control_boundary": "native packet is the rigid-body/direct-wrench parent evidence; pseudo packet remains aggregate thrust-vector response-law evidence and does not inherit motor allocation",
+    "fidelity": "rigid_body_6dof",
+    "landing_evidence": {
+      "geometric_ground_crossing_time_s": 86.09500000000007,
+      "ground_contact_time_s": 86.09561652036267,
+      "ground_reaction_peak_n": 4.899150700205356,
+      "motor_shutdown_time_s": 86.00000000000013,
+      "note": "The rigid-body runtime records an explicit static-pad contact impulse, normal reaction, and post-contact settle segment; landing gear, tire, and ground-effect dynamics remain outside this claim.",
+      "physical_contact_state_available": true,
+      "post_contact_settle_pass": true,
+      "post_crossing_max_speed_m_s": 1.1134047298167688e-16,
+      "post_crossing_sample_count": 5905
+    },
+    "mapping_boundary": "The disturbance-recovery objective is new to the pseudo mission and has no equivalent in the legacy native packet; it is therefore reported as unmapped rather than as a disagreement.",
+    "mission_id": "hummingbird-pad-to-pad-altitude-yaw-v2",
+    "mission_pass": true,
+    "objective_mapping": [
+      {
+        "native_objective_id": "takeoff",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 5.050000000000021,
+        "pseudo_objective_id": "takeoff_altitude_gate",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "yaw-step",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 17.859999999999634,
+        "pseudo_objective_id": "yaw_gate",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-south-east",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 32.344999999999416,
+        "pseudo_objective_id": "box_east",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-north-east",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 40.35999999999942,
+        "pseudo_objective_id": "box_north",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-north-west",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 48.34399999999942,
+        "pseudo_objective_id": "box_west",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-south-west",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 56.35999999999942,
+        "pseudo_objective_id": "box_south_return",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "touchdown",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 86.09661652036267,
+        "pseudo_objective_id": "touchdown_and_post_contact_settle",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      }
+    ],
+    "unmapped_pseudo_objectives": [
+      "disturbance_recovery"
+    ]
+  },
+  "point_mass_terminal_pass": true,
+  "point_mass_unsupported_objectives": [
+    "yaw_gate"
+  ],
+  "pseudo_terminal_pass": true,
+  "reference_fidelity": "point_mass_3dof",
+  "schema": "taoryx.hummingbird-fidelity-comparison/v1alpha1",
+  "terminal_position_delta_m": [
+    0.00010903605445739106,
+    -8.926666105663238e-05,
+    0.0
+  ],
+  "terminal_speed_delta_m_s": -9.78685739116393e-05,
+  "translation_source": "independent_point_mass_force_model"
+}

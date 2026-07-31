@@ -101,6 +101,32 @@ def test_kinematic_problem_mode_tracks_a_lagged_prescribed_attitude() -> None:
     assert history[-1].named["qw"] > 0.9
 
 
+def test_kinematic_problem_mode_consumes_catalog_response_profile() -> None:
+    document = parse_problem_text(
+        "(kinematic-profile-bridge-smoke)\n"
+        "*mode kinematic-6dof\n"
+        "*atmos none\n"
+        "*earth spherical gm=0 omega=0\n"
+        "*runtime status attitude mode=lag roll-deg=0 pitch-deg=0 yaw-deg=30 "
+        "response-profile-id=skywalker_x8.attitude_response_p6dof.v1 "
+        "response-law=first-order-rate-limited-v1 lag-s=0.5 max-rate-deg-s=180\n"
+        "*trajectory 1 vehicle start on 1\n"
+        "  *initial ecic x=7000000 y=0 z=0 xdt=0 ydt=100 zdt=0 time=0 mass=1\n"
+        "  *segment 1 coast\n"
+        "    *integ dtprnt=0.1 dt=0.1\n"
+        "    *when time>1.0 stop\n"
+        "*end\n",
+        profile="taoryx",
+    )
+
+    lowered = lower_problem_document(document)
+    vehicle = lowered.cases[0].problem.vehicles["1"]
+    assert vehicle.kinematic_response_profile_id == "skywalker_x8.attitude_response_p6dof.v1"
+    result = compute_trajectories(lowered.cases[0].problem, max_steps=20)
+    assert result.states["1"][-1].named["qz"] > 0.0
+    ####
+
+
 def test_kinematic_problem_mode_accepts_prescribed_body_rates() -> None:
     document = parse_problem_text(
         "(kinematic-rate-smoke)\n"

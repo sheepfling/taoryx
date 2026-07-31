@@ -1,0 +1,1 @@
+PYTHONPATH=src python3 tools/build_alpha3_direct_wrench_contract.py

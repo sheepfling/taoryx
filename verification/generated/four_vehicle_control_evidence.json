@@ -12,7 +12,7 @@
     "T0_blocked_before_trim": [
       "x15"
     ],
-    "T3_source_table_coordinate_only": [
+    "T4_source_coordinate_physical": [
       "skywalker_x8"
     ],
     "T5_local_nonlinear": [
@@ -28,7 +28,7 @@
     "PYTHONPATH=src python3 tools/validate_four_vehicle_control_evidence.py"
   ],
   "schema": "taoryx.four-vehicle-control-evidence/v1alpha1",
-  "scope": "Alpha-2 local physical-controller evidence ledger",
+  "scope": "Alpha-3 local physical-controller evidence ledger",
   "status": "tiered_evidence_complete",
   "vehicles": {
     "b747": {
@@ -65,16 +65,16 @@
     },
     "skywalker_x8": {
       "artifact": "verification/generated/x8_table_coordinate_physical_lqr.json",
-      "artifact_sha256": "397e8d6a63d50755506ed13be0a9bbf19b58c7f5983e97061860f0142698c6b2",
+      "artifact_sha256": "d6d61322275bdfffda8bfbb764fcf029d7ffbc769f74a06da16477548a798305",
       "direct_body_moment_injection": false,
-      "evidence_tier": "T3_linearly_controlled",
+      "evidence_tier": "T4_physically_allocated_source_coordinate",
       "nonclaims": [
-        "The public package does not resolve the physical left/right elevon differential sign mapping; this is not a hardware-ready left/right allocation claim.",
+        "The source paper resolves the mathematical left/right mapping, but this artifact does not prove servo wiring, hinge sign, or hardware actuator dynamics.",
         "This is one local operating point, not a gain-scheduled or envelope-wide controller qualification.",
         "Yaw is declared unallocated because the flying-wing table coordinate pair does not provide independent yaw-moment authority.",
         "The current short case has fixed mass and does not qualify battery discharge or endurance."
       ],
-      "physical_allocation_evidence": "table_coordinate_candidate_unpromoted_pending_left_right_mapping",
+      "physical_allocation_evidence": "source_coordinate_allocation_with_resolved_left_right_mapping",
       "proves": "At the declared source-trim point, a nonlinear table-backed X8 local plant is trimmed, linearized, controlled through roll/pitch wrench demands, allocated through bounded source-table elevon coordinates with declared lag/rate limits, and evaluated again by the nonlinear plant.",
       "reproduction": "PYTHONPATH=src python3 tools/validate_x8_physical_lqr.py",
       "schema": "taoryx.x8-table-coordinate-physical-lqr/v1alpha1",

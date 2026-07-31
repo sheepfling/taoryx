@@ -1,0 +1,24 @@
+{
+  "nominal_case_scope": "x15.staged_event_energy_corridor_impact_v1",
+  "promotion_blocker": "controlled terminal handoff and source-backed physical-effector validation remain pending",
+  "records": [
+    {
+      "artifact": "verification/x15_fidelity_ladder/point_mass_3dof_evidence.json",
+      "claim_boundary": "X-15-scaled staged reduced-order boost/coast/release/high-energy-corridor/glide witness with parent translation and explicit passive spent-booster deployment; no controlled terminal handoff, native X-15 batch provider, or physical-effector qualification is claimed.",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/x15_fidelity_ladder/pseudo_6dof_evidence.json",
+      "claim_boundary": "X-15-scaled staged reduced-order boost/coast/release/high-energy-corridor/glide witness with parent translation and explicit passive spent-booster deployment; no controlled terminal handoff, native X-15 batch provider, or physical-effector qualification is claimed.",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_x15_fidelity_ladder.py",
+  "schema": "taoryx.x15-fidelity-ladder/v1alpha1",
+  "status": "nominal_case_pass",
+  "vehicle_id": "x15"
+}

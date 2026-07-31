@@ -1,0 +1,96 @@
+{
+  "aggregate": {
+    "attitude_input_count": 0,
+    "control_input_count": 0,
+    "declared_attitude_input_ids": [],
+    "declared_control_input_ids": [],
+    "declared_gimbal_ids": [],
+    "gimbal_candidate_count": 0
+  },
+  "claims": [
+    "The pinned source members were inspected through their normalized variable inventories.",
+    "The parent package has no declared control-input or gimbal channel from which Taoryx can derive a physical allocator.",
+    "The absence is recorded as a promotion blocker rather than repaired with invented effectivity."
+  ],
+  "family_id": "reference_nesc_two_stage_rocket",
+  "findings": [
+    "The aerodynamics source declares alpha and beta as inputs, but they are state/environment inputs rather than control effectors.",
+    "The aerodynamics source declares static roll, pitch, and yaw moment coefficient outputs; these are not an effector-effectiveness matrix.",
+    "The propulsion source declares axial thrust and mass-flow outputs plus firing flags, but no gimbal angle, thrust-vector, or control-moment input.",
+    "The inertia source supplies scheduled mass properties and center-of-mass data, not actuator authority."
+  ],
+  "next_gate": "Provide authoritative gimbal/effectivity and event-aligned attitude data, then run source-direction, trim, linearization, and bounded allocation probes before promoting the NESC pseudo tier.",
+  "nonclaims": [
+    "source-exact attitude response",
+    "source-exact gimbal or thrust-vector allocation",
+    "closed-loop trim or controlled-flight qualification",
+    "that static aerodynamic moment outputs can be treated as control derivatives"
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_nesc_attitude_data_contract.py",
+  "required_input_to_unblock": [
+    "declared thrust-vector or gimbal input channels and sign conventions",
+    "control-dependent force and moment outputs or an authoritative effectiveness deck",
+    "actuator ranges, rates, neutral positions, and stage-dependent availability",
+    "attitude history, body-rate history, and event-aligned parent telemetry for comparison",
+    "a trim or guidance definition identifying the intended attitude command during powered phases"
+  ],
+  "schema": "taoryx.nesc-attitude-data-contract/v1alpha1",
+  "source_members": {
+    "aerodynamics": {
+      "attitude_candidate_count": 3,
+      "attitude_candidates": [
+        "aeroBodyMomentCoefficient_Roll",
+        "aeroBodyMomentCoefficient_Pitch",
+        "aeroBodyMomentCoefficient_Yaw"
+      ],
+      "control_candidate_count": 0,
+      "control_candidates": [],
+      "control_input_count": 0,
+      "control_inputs": [],
+      "gimbal_candidate_count": 0,
+      "input_count": 2,
+      "output_count": 9,
+      "relative_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/normalized/nesc-all-models-two-stage-package-twostage-aero/variables.csv",
+      "variable_count": 12
+    },
+    "mass_properties": {
+      "attitude_candidate_count": 6,
+      "attitude_candidates": [
+        "fullVehXref",
+        "stg2Xref",
+        "XIXX",
+        "XIYY",
+        "XIZZ",
+        "vrsPositionOfMrc_X"
+      ],
+      "control_candidate_count": 0,
+      "control_candidates": [],
+      "control_input_count": 0,
+      "control_inputs": [],
+      "gimbal_candidate_count": 0,
+      "input_count": 0,
+      "output_count": 13,
+      "relative_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/normalized/nesc-all-models-two-stage-package-twostage-inertia/variables.csv",
+      "variable_count": 43
+    },
+    "propulsion": {
+      "attitude_candidate_count": 3,
+      "attitude_candidates": [
+        "thrustll",
+        "thrustlm",
+        "thrustln"
+      ],
+      "control_candidate_count": 0,
+      "control_candidates": [],
+      "control_input_count": 0,
+      "control_inputs": [],
+      "gimbal_candidate_count": 0,
+      "input_count": 2,
+      "output_count": 8,
+      "relative_path": "resources/aerospace/daveml/nesc-model-catalog-v1.0/normalized/nesc-all-models-two-stage-package-twostage-prop/variables.csv",
+      "variable_count": 14
+    }
+  },
+  "source_package": "nasa-nesc-two-stage-rocket-scenario17",
+  "status": "blocked_parent_attitude_data_unavailable"
+}

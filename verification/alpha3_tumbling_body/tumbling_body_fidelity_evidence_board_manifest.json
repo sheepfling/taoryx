@@ -1,0 +1,37 @@
+{
+  "board": {
+    "path": "verification/alpha3_tumbling_body/tumbling_body_fidelity_evidence_board.png",
+    "sha256": "baf30caaf3ce1e110cdc322d7214b46c4fd3dc747da38ce3623169af414fbb28"
+  },
+  "claim_boundary": {
+    "nonclaims": [
+      "No controller, actuator, guidance, or control-authority claim.",
+      "No source-exact child aerodynamics or impact certification.",
+      "No parent capability or controller-effective reachability claim."
+    ],
+    "proves": "The declared passive cylinder deployment produces an impact witness and exposes the difference between orientation-averaged translation and native rigid-body rotation."
+  },
+  "comparison_artifact": {
+    "path": "verification/alpha3_tumbling_body/fidelity_ladder/comparison.json",
+    "sha256": "323d16bc4de244c835059d1a4abbfe9e85e3124541aedd423f80a6751e5598c1"
+  },
+  "family_id": "tumbling_body",
+  "fidelity_records": [
+    {
+      "artifact": "verification/alpha3_tumbling_body/nominal-cylinder-point_mass_3dof.json",
+      "classification": "impact",
+      "fidelity": "point_mass_3dof",
+      "sha256": "3338ede0deccd48a0507e123c9b8a2f3977b6176833c1e5b14b577e856971dda"
+    },
+    {
+      "artifact": "verification/alpha3_tumbling_body/nominal-cylinder-pseudo_6dof.json",
+      "classification": "impact",
+      "fidelity": "pseudo_6dof",
+      "sha256": "86c305850957bda5898b1c7baa6a5659e61ea65641c9894a6cf1ebac56c2b93e"
+    }
+  ],
+  "representative_shape": "cylinder",
+  "reproduction": "PYTHONPATH=src python3 tools/render_tumbling_body_fidelity_board.py",
+  "schema": "taoryx.tumbling-body-fidelity-evidence-board/v1alpha1",
+  "status": "verified"
+}

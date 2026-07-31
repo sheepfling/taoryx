@@ -1,0 +1,137 @@
+schema: taoryx.alpha3-fidelity-evidence/v1alpha1
+description: >-
+  Checked nominal-case artifacts that may authorize automatic fidelity
+  lowering. Missing, stale, failed, or incomplete artifacts are ignored by
+  the resolver. Family qualification requires additional operating-point,
+  robustness, and cross-fidelity evidence.
+records:
+  - profile_id: skywalker_x8.point_mass_3dof.v1
+    fidelity: point_mass_3dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_family_qualification/x8-racetrack-altitude-turns-3dof-v1/summary.json
+    claim_boundary: Source-table point-mass translation, route geometry, and truth-evaluated racetrack gates only.
+  - profile_id: skywalker_x8.attitude_response_p6dof.v1
+    fidelity: pseudo_6dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_family_qualification/x8-racetrack-altitude-turns-pseudo-6dof-v1/summary.json
+    claim_boundary: Source-table translation plus the named kinematic attitude-response bridge; no physical elevon allocation.
+  - profile_id: a320_openap_3dof.point_mass_3dof.v1
+    fidelity: point_mass_3dof
+    status: nominal_case_pass
+    artifact: verification/a320_racetrack/point_mass_3dof_evidence.json
+    claim_boundary: OpenAP point-mass performance and truth-evaluated racetrack geometry only.
+  - profile_id: b747.point_mass_3dof.v1
+    fidelity: point_mass_3dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_family_qualification/b747-racetrack-altitude-turns-3dof-v1/summary.json
+    claim_boundary: Source-table point-mass transport racetrack geometry, altitude, speed, and truth gates only.
+  - profile_id: b747.attitude_response_p6dof.v1
+    fidelity: pseudo_6dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_family_qualification/b747-racetrack-altitude-turns-pseudo-6dof-v1/summary.json
+    claim_boundary: Transport-scaled source-table translation plus named kinematic attitude response; no physical surface allocation.
+  - profile_id: a320.attitude_response_p6dof.v1
+    fidelity: pseudo_6dof
+    status: nominal_case_pass
+    artifact: verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json
+    claim_boundary: OpenAP performance plus the named kinematic attitude-response law; no physical effectors.
+  - profile_id: f16_s119.point_mass_3dof.v1
+    fidelity: point_mass_3dof
+    status: nominal_case_pass
+    artifact: verification/f16_racetrack/point_mass_3dof_evidence.json
+    claim_boundary: Reduced source-grounded point-mass racetrack geometry and energy behavior only.
+  - profile_id: f16_s119.attitude_response_p6dof.v1
+    fidelity: pseudo_6dof
+    status: nominal_case_pass
+    artifact: verification/f16_racetrack/pseudo_6dof_kinematic_bridge_evidence.json
+    claim_boundary: Named bounded attitude/rate response bridge; no physical surface or actuator qualification.
+  - profile_id: a320.direct_wrench_6dof.v1
+    fidelity: rigid_body_6dof_direct_wrench
+    status: nominal_case_pass
+    artifact: verification/alpha3_a320_direct_wrench/manifest.json
+    claim_boundary: Local OpenAP/JSBSim-derived rigid-body direct-wrench recovery; no physical surface/throttle allocation or scheduled envelope claim.
+  - profile_id: f16_s119.direct_wrench_6dof.v1
+    fidelity: rigid_body_6dof_direct_wrench
+    status: nominal_case_pass
+    artifact: verification/alpha3_f16_direct_wrench/manifest.json
+    claim_boundary: Local F-16 source-plant rigid-body direct-wrench recovery; no physical surface allocation, racetrack closure, or full-envelope claim.
+  - profile_id: hummingbird.point_mass_3dof.v1
+    fidelity: point_mass_3dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_hummingbird_development/point_mass_3dof_evidence.json
+    claim_boundary: Independent point-mass translational force model for the declared hover-box, disturbance, contact, and shutdown mission; yaw, attitude, and motor allocation are not represented.
+  - profile_id: hummingbird.attitude_response_p6dof.v1
+    fidelity: pseudo_6dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_hummingbird_development/pseudo_6dof_evidence.json
+    claim_boundary: Nominal aggregate-thrust response-law evidence scoped to hover-box/yaw/contact semantics; no individual-rotor allocation, translated-flight, electrical battery/SOC, wind, or family-wide robustness claim.
+  - profile_id: x15.point_mass_3dof.v1
+    fidelity: point_mass_3dof
+    status: nominal_case_pass
+    artifact: verification/x15_fidelity_ladder/point_mass_3dof_evidence.json
+    claim_boundary: Independently evaluated staged X-15 event/energy/impact witness only; no controlled terminal handoff, native batch-provider equivalence, or physical-effector allocation.
+  - profile_id: x15.attitude_response_p6dof.v1
+    fidelity: pseudo_6dof
+    status: nominal_case_pass
+    artifact: verification/x15_fidelity_ladder/pseudo_6dof_evidence.json
+    claim_boundary: Phase-scheduled response-law realization of the staged event/energy/impact witness; no source-exact attitude law, controlled terminal handoff, or physical-effector allocation.
+  - profile_id: hl20_mod_k.point_mass_3dof.v1
+    fidelity: point_mass_3dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_hl20_development/point_mass_3dof_evidence.json
+    claim_boundary: Source-geometry/fixed-mass reduced release, glide, and impact witness with synthetic booster and surrogate aerodynamics; no source-exact DAVE-ML flight dynamics or closed-loop controls.
+  - profile_id: hl20.attitude_response_p6dof.v1
+    fidelity: pseudo_6dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_hl20_development/pseudo_6dof_evidence.json
+    claim_boundary: Same bounded reduced release/glide/impact mission with named response law; no source-exact attitude dynamics, physical surface allocation, thermal model, or terminal arrival.
+  - profile_id: nesc_rocket.performance_3dof.v1
+    fidelity: point_mass_3dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_nesc_development/point_mass_3dof_evidence.json
+    claim_boundary: Retained NESC source translation, stage timing, mass-flow replay, and orbit-coast terminal state; no source attitude or gimbal claim.
+  - profile_id: nesc_rocket.attitude_response_p6dof.v1
+    fidelity: pseudo_6dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_nesc_development/pseudo_6dof_evidence.json
+    claim_boundary: Retained source translation plus explicitly scheduled pseudo attitude response; no source-exact attitude data, gimbal/effectivity, plume, flex, or controller-law claim.
+  - profile_id: skywalker_x8.direct_wrench_6dof.v1
+    fidelity: rigid_body_6dof_direct_wrench
+    status: nominal_case_pass
+    artifact: verification/alpha3_x8_direct_wrench/manifest.json
+    claim_boundary: Bounded direct generalized wrench through the table-backed rigid-body plant; no physical elevon, servo, throttle, or family schedule claim.
+  - profile_id: b747.direct_wrench_6dof.v1
+    fidelity: rigid_body_6dof_direct_wrench
+    status: nominal_case_pass
+    artifact: artifacts/showcases/airbreathing-racetrack-fidelity-ladder/b747-racetrack-altitude-turns-6dof-v1/summary.json
+    claim_boundary: Source-table transport rigid-body mission with a declared direct wrench; no physical surface allocation, fuel-burn, or full-envelope claim.
+  - profile_id: x15.direct_wrench_6dof.v1
+    fidelity: rigid_body_6dof_direct_wrench
+    status: nominal_case_pass
+    artifact: verification/alpha3_x15_direct_wrench/manifest.json
+    claim_boundary: Local X-15 source-load direct-wrench recovery with explicit balance boundary; no source-exact trim, physical surface, or controlled terminal-handoff claim.
+  - profile_id: hummingbird.direct_wrench_6dof.v1
+    fidelity: rigid_body_6dof_direct_wrench
+    status: debug_comparator_pass
+    artifact: verification/alpha3_hummingbird_direct_wrench_debug/manifest.json
+    claim_boundary: Local Hummingbird direct-wrench comparator against the native rotor plant; no motor-level allocation or battery/flight-envelope claim.
+  - profile_id: hl20.direct_wrench_6dof.v1
+    fidelity: rigid_body_6dof_direct_wrench
+    status: nominal_case_pass
+    artifact: verification/alpha3_hl20_direct_wrench/manifest.json
+    claim_boundary: Local HL-20 source-load direct-wrench recovery with explicit balance boundary; no source-exact trim or physical surface allocation claim.
+  - profile_id: nesc_rocket.direct_wrench_6dof.v1
+    fidelity: rigid_body_6dof_direct_wrench
+    status: nominal_case_pass
+    artifact: verification/alpha3_nesc_direct_wrench/manifest.json
+    claim_boundary: Translation-derived engineering direct-wrench bridge with declared inertia; no source attitude, gimbal, plume, or exact moment claim.
+  - profile_id: tumbling_body.average_area_3dof.v1
+    fidelity: point_mass_3dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_tumbling_body/fidelity_ladder/point_mass_3dof_evidence.json
+    claim_boundary: Orientation-averaged or scheduled-area passive translation reduction; no attitude or controller claim.
+  - profile_id: tumbling_body.rigid_body_reuse_p6dof.v1
+    fidelity: pseudo_6dof
+    status: nominal_case_pass
+    artifact: verification/alpha3_tumbling_body/fidelity_ladder/pseudo_6dof_evidence.json
+    claim_boundary: Native uncontrolled rigid-body reuse for passive rotation; no invented response law or control-surface claim.

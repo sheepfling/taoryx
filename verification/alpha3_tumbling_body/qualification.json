@@ -1,0 +1,1216 @@
+{
+  "claim_boundary": "passive child terminal footprints and deployment lineage; not controller-effective reachability, source-exact child aerodynamics, or parent capability",
+  "contract": {
+    "child_policy": "passive_tumble",
+    "event_contract": "accepted_booster_release_with_parent_child_lineage",
+    "fidelities": [
+      "point_mass_3dof",
+      "pseudo_6dof",
+      "rigid_body_6dof"
+    ],
+    "parent_model": "synthetic_fixed_mass_release_parent_v1",
+    "release_state": {
+      "azimuth_rad": 0.0,
+      "bank_rad": 0.0,
+      "elevation_rad": 0.0,
+      "initial_altitude_m": 1000.0,
+      "initial_speed_m_s": 250.0,
+      "separation_impulse_n_s": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "shapes": [
+      "sphere",
+      "cylinder",
+      "cone",
+      "triaxial_ellipsoid"
+    ]
+  },
+  "ensemble_artifacts": {
+    "plots": [
+      "ensemble-plots/terminal-footprints.png",
+      "ensemble-plots/terminal-footprint-distributions.png"
+    ],
+    "terminal_samples_csv": "terminal-footprint-samples.csv"
+  },
+  "execution": {
+    "deterministic": true,
+    "horizon_s": 90.0,
+    "random_stream_policy": "seed_plus_shape_index",
+    "samples_per_shape": 16,
+    "seed": 31415,
+    "step_size_s": 0.25
+  },
+  "lineage_policy": {
+    "accepted_event_id_required": true,
+    "child_result_separate_from_parent_envelope": true,
+    "parent_and_child_ids_required": true,
+    "physical_footprint_not_controller_reachability": true
+  },
+  "parent_capability_claim": "not_promoted",
+  "passive_physics_contract": {
+    "point_mass_3dof": {
+      "claim": "center-of-mass translation using a deterministic geometry-specific orientation average",
+      "nonclaim": "instantaneous attitude-dependent drag or moment-driven tumble",
+      "projected_area_policy": "orientation_averaged_projected_area"
+    },
+    "pseudo_6dof": {
+      "claim": "native rigid-body rotational and attitude state exposed through the pseudo interface",
+      "nonclaim": "prescribed attitude response or control authority",
+      "projected_area_policy": "native_rigid_body_reuse_instantaneous_projected_area"
+    },
+    "rigid_body_6dof": {
+      "claim": "passive attitude-dependent projected area, drag, aerodynamic moment, and body-rate evolution",
+      "nonclaim": "active control, actuator, or guidance authority",
+      "projected_area_policy": "instantaneous_geometry_projected_area"
+    }
+  },
+  "schema": "taoryx.alpha3-passive-deployment-qualification/v1alpha1",
+  "shapes": [
+    {
+      "area_policy_plot": "plots/sphere/area-policy-rotation.png",
+      "dimensions_contract": [
+        0.45
+      ],
+      "nominal": {
+        "point_mass_3dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 0.0,
+            "finite": true,
+            "policies": [
+              "orientation_averaged_projected_area"
+            ],
+            "projected_area_max_m2": 0.6361725123519332,
+            "projected_area_min_m2": 0.6361725123519332,
+            "projected_area_span_m2": 0.0,
+            "ratio_to_reference_average_max": 0.9999999999999997,
+            "ratio_to_reference_average_min": 0.9999999999999997,
+            "reference_average_area_m2": 0.6361725123519334,
+            "sample_count": 128
+          },
+          "artifact": "nominal-sphere-point_mass_3dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 0.0,
+            "downrange": 402.24235753127516,
+            "radius": 402.24235753127516
+          },
+          "lineage": {
+            "accepted_time_s": 0.5,
+            "child_model_id": "passive-sphere",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-sphere-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -6.682264490516889,
+            "mass_kg": 12.0,
+            "position_m": [
+              527.1386811389968,
+              0.0,
+              -6.682264490516889
+            ],
+            "speed_m_s": 34.871317696901166,
+            "velocity_m_s": [
+              0.015582141768748418,
+              0.0,
+              -34.87131421548477
+            ]
+          }
+        },
+        "pseudo_6dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 0.7632168761236874,
+            "finite": true,
+            "policies": [
+              "native_rigid_body_reuse_instantaneous_projected_area"
+            ],
+            "projected_area_max_m2": 0.6361725123519332,
+            "projected_area_min_m2": 0.6361725123519332,
+            "projected_area_span_m2": 0.0,
+            "ratio_to_reference_average_max": 0.9999999999999997,
+            "ratio_to_reference_average_min": 0.9999999999999997,
+            "reference_average_area_m2": 0.6361725123519334,
+            "sample_count": 128
+          },
+          "artifact": "nominal-sphere-pseudo_6dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 1.802841971003545e-15,
+            "downrange": 402.3730718888801,
+            "radius": 402.3730718888801
+          },
+          "lineage": {
+            "accepted_time_s": 0.5,
+            "child_model_id": "passive-sphere",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-sphere-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -6.676222139661744,
+            "mass_kg": 12.0,
+            "position_m": [
+              527.2693954966018,
+              1.802841971003545e-15,
+              -6.676222139661744
+            ],
+            "speed_m_s": 34.87130515473751,
+            "velocity_m_s": [
+              0.015582000633155126,
+              1.7035948269356683e-16,
+              -34.87130167338293
+            ]
+          }
+        },
+        "rigid_body_6dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 0.7632168761236874,
+            "finite": true,
+            "policies": [
+              "instantaneous_geometry_projected_area"
+            ],
+            "projected_area_max_m2": 0.6361725123519332,
+            "projected_area_min_m2": 0.6361725123519332,
+            "projected_area_span_m2": 0.0,
+            "ratio_to_reference_average_max": 0.9999999999999997,
+            "ratio_to_reference_average_min": 0.9999999999999997,
+            "reference_average_area_m2": 0.6361725123519334,
+            "sample_count": 128
+          },
+          "artifact": "nominal-sphere-rigid_body_6dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 1.2540603923746575e-15,
+            "downrange": 402.37245661302256,
+            "radius": 402.37245661302256
+          },
+          "lineage": {
+            "accepted_time_s": 0.49999999999999994,
+            "child_model_id": "passive-sphere",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-sphere-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -6.679995304420109,
+            "mass_kg": 12.0,
+            "position_m": [
+              527.2687802209208,
+              1.2540603923746575e-15,
+              -6.679995304420109
+            ],
+            "speed_m_s": 34.8712981549062,
+            "velocity_m_s": [
+              0.01558188030126091,
+              -2.1447446442292118e-16,
+              -34.87129467360469
+            ]
+          }
+        }
+      },
+      "plot_manifest": "plots/sphere/plot-manifest.json",
+      "rotation_policy_witness": {
+        "claim_boundary": "The zero-moment baseline is a diagnostic passive reference, not a physical controller or a prescribed-tumble qualification.",
+        "comparison": "passive_aerodynamic_moment_vs_zero_moment_spin_baseline",
+        "records": {
+          "passive_aerodynamic_moment": {
+            "aerodynamic_moment_norm_max_nm": 0.14836936071844484,
+            "aerodynamic_moment_norm_min_nm": 0.0002591637560821254,
+            "angular_rate_norm_max_rad_s": 0.7632168761236874,
+            "classification": "impact",
+            "finite": true,
+            "telemetry_sample_count": 128,
+            "termination": "ground_contact",
+            "tumbling_policy": "passive_tumble"
+          },
+          "prescribed_spin_zero_aerodynamic_moment": {
+            "aerodynamic_moment_norm_max_nm": 0.0,
+            "aerodynamic_moment_norm_min_nm": 0.0,
+            "angular_rate_norm_max_rad_s": 0.7632168761236874,
+            "classification": "impact",
+            "finite": true,
+            "telemetry_sample_count": 128,
+            "termination": "ground_contact",
+            "tumbling_policy": "prescribed_spin"
+          }
+        }
+      },
+      "shape": "sphere",
+      "uncertainty": {
+        "classification_counts": {
+          "impact": 16
+        },
+        "fidelity": "pseudo_6dof",
+        "impact_distribution": {
+          "classification": "impact",
+          "finite_count": 16,
+          "quantiles": {
+            "altitude_m": {
+              "0": -7.883960826707825,
+              "100": -1.177515242479876,
+              "5": -7.860567981982056,
+              "50": -5.063964343533406,
+              "95": -1.2139922706615258
+            },
+            "crossrange_m": {
+              "0": -0.0012979836749347604,
+              "100": 0.0015690847208969087,
+              "5": -0.0012760607634179598,
+              "50": -0.00011428948044316475,
+              "95": 0.0012660827596117667
+            },
+            "downrange_m": {
+              "0": 346.12673299897904,
+              "100": 441.3330471119753,
+              "5": 373.3300501081185,
+              "50": 407.04365423758384,
+              "95": 432.2560455843151
+            },
+            "radius_m": {
+              "0": 346.1267329997879,
+              "100": 441.33304711351315,
+              "5": 373.33005010832704,
+              "50": 407.0436542379498,
+              "95": 432.2560455868505
+            },
+            "speed_m_s": {
+              "0": 31.714868914824837,
+              "100": 36.767246324916904,
+              "5": 33.26069943654317,
+              "50": 35.108177060518486,
+              "95": 36.33847090862086
+            }
+          },
+          "sample_count": 16
+        },
+        "sample_count": 16,
+        "terminal_distribution": {
+          "classification": "all_finite_terminals",
+          "finite_count": 16,
+          "quantiles": {
+            "altitude_m": {
+              "0": -7.883960826707825,
+              "100": -1.177515242479876,
+              "5": -7.860567981982056,
+              "50": -5.063964343533406,
+              "95": -1.2139922706615258
+            },
+            "crossrange_m": {
+              "0": -0.0012979836749347604,
+              "100": 0.0015690847208969087,
+              "5": -0.0012760607634179598,
+              "50": -0.00011428948044316475,
+              "95": 0.0012660827596117667
+            },
+            "downrange_m": {
+              "0": 346.12673299897904,
+              "100": 441.3330471119753,
+              "5": 373.3300501081185,
+              "50": 407.04365423758384,
+              "95": 432.2560455843151
+            },
+            "radius_m": {
+              "0": 346.1267329997879,
+              "100": 441.33304711351315,
+              "5": 373.33005010832704,
+              "50": 407.0436542379498,
+              "95": 432.2560455868505
+            },
+            "speed_m_s": {
+              "0": 31.714868914824837,
+              "100": 36.767246324916904,
+              "5": 33.26069943654317,
+              "50": 35.108177060518486,
+              "95": 36.33847090862086
+            }
+          },
+          "sample_count": 16
+        }
+      }
+    },
+    {
+      "area_policy_plot": "plots/cylinder/area-policy-rotation.png",
+      "dimensions_contract": [
+        0.35,
+        2.0
+      ],
+      "nominal": {
+        "point_mass_3dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 0.0,
+            "finite": true,
+            "policies": [
+              "orientation_averaged_projected_area"
+            ],
+            "projected_area_max_m2": 1.1362748113409653,
+            "projected_area_min_m2": 1.1362748113409653,
+            "projected_area_span_m2": 0.0,
+            "ratio_to_reference_average_max": 1.0,
+            "ratio_to_reference_average_min": 1.0,
+            "reference_average_area_m2": 1.1362748113409653,
+            "sample_count": 162
+          },
+          "artifact": "nominal-cylinder-point_mass_3dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 0.0,
+            "downrange": 246.64849308954595,
+            "radius": 246.64849308954595
+          },
+          "lineage": {
+            "accepted_time_s": 0.5,
+            "child_model_id": "passive-cylinder",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-cylinder-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -4.5051404484456645,
+            "mass_kg": 12.0,
+            "position_m": [
+              371.5448166972676,
+              0.0,
+              -4.5051404484456645
+            ],
+            "speed_m_s": 26.053394947143165,
+            "velocity_m_s": [
+              2.8676723632290673e-05,
+              0.0,
+              -26.053394947127384
+            ]
+          }
+        },
+        "pseudo_6dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 48.03042826952975,
+            "finite": true,
+            "policies": [
+              "native_rigid_body_reuse_instantaneous_projected_area"
+            ],
+            "projected_area_max_m2": 1.4519009607550308,
+            "projected_area_min_m2": 0.41222739724260926,
+            "projected_area_span_m2": 1.0396735635124217,
+            "ratio_to_reference_average_max": 1.2777727238726535,
+            "ratio_to_reference_average_min": 0.3627884673040693,
+            "reference_average_area_m2": 1.1362748113409653,
+            "sample_count": 147
+          },
+          "artifact": "nominal-cylinder-pseudo_6dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 4.487497447445062e-15,
+            "downrange": 254.00653737100347,
+            "radius": 254.00653737100347
+          },
+          "lineage": {
+            "accepted_time_s": 0.5,
+            "child_model_id": "passive-cylinder",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-cylinder-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -1.492960233625986,
+            "mass_kg": 12.0,
+            "position_m": [
+              378.90286097872513,
+              4.487497447445062e-15,
+              -1.492960233625986
+            ],
+            "speed_m_s": 38.50927057534172,
+            "velocity_m_s": [
+              0.00041674427638099256,
+              1.5064627785961859e-16,
+              -38.50927057308674
+            ]
+          }
+        },
+        "rigid_body_6dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 48.0308765062441,
+            "finite": true,
+            "policies": [
+              "instantaneous_geometry_projected_area"
+            ],
+            "projected_area_max_m2": 1.4518990817361936,
+            "projected_area_min_m2": 0.41224294641072334,
+            "projected_area_span_m2": 1.0396561353254703,
+            "ratio_to_reference_average_max": 1.2777710702068164,
+            "ratio_to_reference_average_min": 0.36280215164165985,
+            "reference_average_area_m2": 1.1362748113409653,
+            "sample_count": 147
+          },
+          "artifact": "nominal-cylinder-rigid_body_6dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 6.543436544858086e-15,
+            "downrange": 254.00645489465134,
+            "radius": 254.00645489465134
+          },
+          "lineage": {
+            "accepted_time_s": 0.49999999999999994,
+            "child_model_id": "passive-cylinder",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-cylinder-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -1.5011290338808028,
+            "mass_kg": 12.0,
+            "position_m": [
+              378.90277850254955,
+              6.543436544858086e-15,
+              -1.5011290338808028
+            ],
+            "speed_m_s": 38.50945002189999,
+            "velocity_m_s": [
+              0.00041677134323176297,
+              4.6031007901952725e-17,
+              -38.50945001964472
+            ]
+          }
+        }
+      },
+      "plot_manifest": "plots/cylinder/plot-manifest.json",
+      "rotation_policy_witness": {
+        "claim_boundary": "The zero-moment baseline is a diagnostic passive reference, not a physical controller or a prescribed-tumble qualification.",
+        "comparison": "passive_aerodynamic_moment_vs_zero_moment_spin_baseline",
+        "records": {
+          "passive_aerodynamic_moment": {
+            "aerodynamic_moment_norm_max_nm": 1105.5868941782196,
+            "aerodynamic_moment_norm_min_nm": 4.12907740319569,
+            "angular_rate_norm_max_rad_s": 48.0308765062441,
+            "classification": "impact",
+            "finite": true,
+            "telemetry_sample_count": 147,
+            "termination": "ground_contact",
+            "tumbling_policy": "passive_tumble"
+          },
+          "prescribed_spin_zero_aerodynamic_moment": {
+            "aerodynamic_moment_norm_max_nm": 0.0,
+            "aerodynamic_moment_norm_min_nm": 0.0,
+            "angular_rate_norm_max_rad_s": 0.7632168761236874,
+            "classification": "impact",
+            "finite": true,
+            "telemetry_sample_count": 179,
+            "termination": "ground_contact",
+            "tumbling_policy": "prescribed_spin"
+          }
+        }
+      },
+      "shape": "cylinder",
+      "uncertainty": {
+        "classification_counts": {
+          "impact": 16
+        },
+        "fidelity": "pseudo_6dof",
+        "impact_distribution": {
+          "classification": "impact",
+          "finite_count": 16,
+          "quantiles": {
+            "altitude_m": {
+              "0": -9.315490990758523,
+              "100": -0.2661744933493164,
+              "5": -8.367896880060014,
+              "50": -4.796642018683828,
+              "95": -0.9091530531827479
+            },
+            "crossrange_m": {
+              "0": -0.0008489345200098402,
+              "100": 0.0008866631655361625,
+              "5": -0.0008298764498835146,
+              "50": -0.00025538967781876354,
+              "95": 0.0008498005830945033
+            },
+            "downrange_m": {
+              "0": 227.78131429109607,
+              "100": 316.07960111847933,
+              "5": 230.3440646536165,
+              "50": 251.4230137308559,
+              "95": 279.5471244701022
+            },
+            "radius_m": {
+              "0": 227.78131429282178,
+              "100": 316.0796011185836,
+              "5": 230.3440646546623,
+              "50": 251.42301373091325,
+              "95": 279.5471244710794
+            },
+            "speed_m_s": {
+              "0": 36.610822404610836,
+              "100": 42.380672584150446,
+              "5": 37.01759065240462,
+              "50": 38.24204034831554,
+              "95": 39.87393727852369
+            }
+          },
+          "sample_count": 16
+        },
+        "sample_count": 16,
+        "terminal_distribution": {
+          "classification": "all_finite_terminals",
+          "finite_count": 16,
+          "quantiles": {
+            "altitude_m": {
+              "0": -9.315490990758523,
+              "100": -0.2661744933493164,
+              "5": -8.367896880060014,
+              "50": -4.796642018683828,
+              "95": -0.9091530531827479
+            },
+            "crossrange_m": {
+              "0": -0.0008489345200098402,
+              "100": 0.0008866631655361625,
+              "5": -0.0008298764498835146,
+              "50": -0.00025538967781876354,
+              "95": 0.0008498005830945033
+            },
+            "downrange_m": {
+              "0": 227.78131429109607,
+              "100": 316.07960111847933,
+              "5": 230.3440646536165,
+              "50": 251.4230137308559,
+              "95": 279.5471244701022
+            },
+            "radius_m": {
+              "0": 227.78131429282178,
+              "100": 316.0796011185836,
+              "5": 230.3440646546623,
+              "50": 251.42301373091325,
+              "95": 279.5471244710794
+            },
+            "speed_m_s": {
+              "0": 36.610822404610836,
+              "100": 42.380672584150446,
+              "5": 37.01759065240462,
+              "50": 38.24204034831554,
+              "95": 39.87393727852369
+            }
+          },
+          "sample_count": 16
+        }
+      }
+    },
+    {
+      "area_policy_plot": "plots/cone/area-policy-rotation.png",
+      "dimensions_contract": [
+        0.45,
+        1.8
+      ],
+      "nominal": {
+        "point_mass_3dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 0.0,
+            "finite": true,
+            "policies": [
+              "orientation_averaged_projected_area"
+            ],
+            "projected_area_max_m2": 0.7706499974980432,
+            "projected_area_min_m2": 0.7706499974980432,
+            "projected_area_span_m2": 0.0,
+            "ratio_to_reference_average_max": 1.0,
+            "ratio_to_reference_average_min": 1.0,
+            "reference_average_area_m2": 0.7706499974980432,
+            "sample_count": 138
+          },
+          "artifact": "nominal-cone-point_mass_3dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 0.0,
+            "downrange": 343.024331060564,
+            "radius": 343.024331060564
+          },
+          "lineage": {
+            "accepted_time_s": 0.5,
+            "child_model_id": "passive-cone",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-cone-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -6.18144222122929,
+            "mass_kg": 12.0,
+            "position_m": [
+              467.92065466828564,
+              0.0,
+              -6.18144222122929
+            ],
+            "speed_m_s": 31.66363470471547,
+            "velocity_m_s": [
+              0.00280918735192435,
+              0.0,
+              -31.66363458010038
+            ]
+          }
+        },
+        "pseudo_6dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 10.228345031098462,
+            "finite": true,
+            "policies": [
+              "native_rigid_body_reuse_instantaneous_projected_area"
+            ],
+            "projected_area_max_m2": 0.8740951019109184,
+            "projected_area_min_m2": 0.6169780345770719,
+            "projected_area_span_m2": 0.25711706733384654,
+            "ratio_to_reference_average_max": 1.134230980015202,
+            "ratio_to_reference_average_min": 0.8005943509766098,
+            "reference_average_area_m2": 0.7706499974980432,
+            "sample_count": 133
+          },
+          "artifact": "nominal-cone-pseudo_6dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 3.4911453949634355e-15,
+            "downrange": 346.2539222664378,
+            "radius": 346.2539222664378
+          },
+          "lineage": {
+            "accepted_time_s": 0.5,
+            "child_model_id": "passive-cone",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-cone-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -0.8544289647458732,
+            "mass_kg": 12.0,
+            "position_m": [
+              471.15024587415945,
+              3.4911453949634355e-15,
+              -0.8544289647458732
+            ],
+            "speed_m_s": 35.00299638843718,
+            "velocity_m_s": [
+              0.006071967770237466,
+              4.1231372880449117e-16,
+              -35.00299586178523
+            ]
+          }
+        },
+        "rigid_body_6dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 10.228459918521086,
+            "finite": true,
+            "policies": [
+              "instantaneous_geometry_projected_area"
+            ],
+            "projected_area_max_m2": 0.8740949565879094,
+            "projected_area_min_m2": 0.6169782707322946,
+            "projected_area_span_m2": 0.25711668585561476,
+            "ratio_to_reference_average_max": 1.1342307914432048,
+            "ratio_to_reference_average_min": 0.8005946574130252,
+            "reference_average_area_m2": 0.7706499974980432,
+            "sample_count": 133
+          },
+          "artifact": "nominal-cone-rigid_body_6dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 7.81798196601743e-15,
+            "downrange": 346.25322762073324,
+            "radius": 346.25322762073324
+          },
+          "lineage": {
+            "accepted_time_s": 0.49999999999999994,
+            "child_model_id": "passive-cone",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-cone-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -0.8575991298143371,
+            "mass_kg": 12.0,
+            "position_m": [
+              471.1495512286314,
+              7.81798196601743e-15,
+              -0.8575991298143371
+            ],
+            "speed_m_s": 35.00298955740145,
+            "velocity_m_s": [
+              0.006071907068607052,
+              1.995272316388579e-16,
+              -35.00298903075992
+            ]
+          }
+        }
+      },
+      "plot_manifest": "plots/cone/plot-manifest.json",
+      "rotation_policy_witness": {
+        "claim_boundary": "The zero-moment baseline is a diagnostic passive reference, not a physical controller or a prescribed-tumble qualification.",
+        "comparison": "passive_aerodynamic_moment_vs_zero_moment_spin_baseline",
+        "records": {
+          "passive_aerodynamic_moment": {
+            "aerodynamic_moment_norm_max_nm": 749.3597224160554,
+            "aerodynamic_moment_norm_min_nm": 4.5149754882403075,
+            "angular_rate_norm_max_rad_s": 10.228459918521086,
+            "classification": "impact",
+            "finite": true,
+            "telemetry_sample_count": 133,
+            "termination": "ground_contact",
+            "tumbling_policy": "passive_tumble"
+          },
+          "prescribed_spin_zero_aerodynamic_moment": {
+            "aerodynamic_moment_norm_max_nm": 0.0,
+            "aerodynamic_moment_norm_min_nm": 0.0,
+            "angular_rate_norm_max_rad_s": 0.7632168761236874,
+            "classification": "impact",
+            "finite": true,
+            "telemetry_sample_count": 144,
+            "termination": "ground_contact",
+            "tumbling_policy": "prescribed_spin"
+          }
+        }
+      },
+      "shape": "cone",
+      "uncertainty": {
+        "classification_counts": {
+          "impact": 16
+        },
+        "fidelity": "pseudo_6dof",
+        "impact_distribution": {
+          "classification": "impact",
+          "finite_count": 16,
+          "quantiles": {
+            "altitude_m": {
+              "0": -8.825725607751814,
+              "100": -0.02712108399790858,
+              "5": -8.377879955372203,
+              "50": -4.902088141583155,
+              "95": -0.028941371348632727
+            },
+            "crossrange_m": {
+              "0": -0.001148384188753782,
+              "100": 0.0009847282469526773,
+              "5": -0.0011187501175278797,
+              "50": -0.00027813462063901363,
+              "95": 0.0006839646517474611
+            },
+            "downrange_m": {
+              "0": 312.3480631051912,
+              "100": 394.93529550881584,
+              "5": 319.38506807487323,
+              "50": 344.7115061196898,
+              "95": 392.25012078192884
+            },
+            "radius_m": {
+              "0": 312.3480631053772,
+              "100": 394.9352955089041,
+              "5": 319.3850680749356,
+              "50": 344.7115061205312,
+              "95": 392.25012078234386
+            },
+            "speed_m_s": {
+              "0": 32.530350150353726,
+              "100": 37.41963256468295,
+              "5": 32.88743824133299,
+              "50": 34.61306538926928,
+              "95": 37.210060216472556
+            }
+          },
+          "sample_count": 16
+        },
+        "sample_count": 16,
+        "terminal_distribution": {
+          "classification": "all_finite_terminals",
+          "finite_count": 16,
+          "quantiles": {
+            "altitude_m": {
+              "0": -8.825725607751814,
+              "100": -0.02712108399790858,
+              "5": -8.377879955372203,
+              "50": -4.902088141583155,
+              "95": -0.028941371348632727
+            },
+            "crossrange_m": {
+              "0": -0.001148384188753782,
+              "100": 0.0009847282469526773,
+              "5": -0.0011187501175278797,
+              "50": -0.00027813462063901363,
+              "95": 0.0006839646517474611
+            },
+            "downrange_m": {
+              "0": 312.3480631051912,
+              "100": 394.93529550881584,
+              "5": 319.38506807487323,
+              "50": 344.7115061196898,
+              "95": 392.25012078192884
+            },
+            "radius_m": {
+              "0": 312.3480631053772,
+              "100": 394.9352955089041,
+              "5": 319.3850680749356,
+              "50": 344.7115061205312,
+              "95": 392.25012078234386
+            },
+            "speed_m_s": {
+              "0": 32.530350150353726,
+              "100": 37.41963256468295,
+              "5": 32.88743824133299,
+              "50": 34.61306538926928,
+              "95": 37.210060216472556
+            }
+          },
+          "sample_count": 16
+        }
+      }
+    },
+    {
+      "area_policy_plot": "plots/triaxial_ellipsoid/area-policy-rotation.png",
+      "dimensions_contract": [
+        1.4,
+        0.65,
+        0.45
+      ],
+      "nominal": {
+        "point_mass_3dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 0.0,
+            "finite": true,
+            "policies": [
+              "orientation_averaged_projected_area"
+            ],
+            "projected_area_max_m2": 0.918915851175015,
+            "projected_area_min_m2": 0.918915851175015,
+            "projected_area_span_m2": 0.0,
+            "ratio_to_reference_average_max": 1.0,
+            "ratio_to_reference_average_min": 1.0,
+            "reference_average_area_m2": 0.918915851175015,
+            "sample_count": 148
+          },
+          "artifact": "nominal-triaxial_ellipsoid-point_mass_3dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": 0.0,
+            "downrange": 295.87931307595966,
+            "radius": 295.87931307595966
+          },
+          "lineage": {
+            "accepted_time_s": 0.5,
+            "child_model_id": "passive-triaxial-ellipsoid",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-triaxial_ellipsoid-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -3.9100074591485514,
+            "mass_kg": 12.0,
+            "position_m": [
+              420.7756366836813,
+              0.0,
+              -3.9100074591485514
+            ],
+            "speed_m_s": 28.98617399808617,
+            "velocity_m_s": [
+              0.0004413939125112346,
+              0.0,
+              -28.986173994725455
+            ]
+          }
+        },
+        "pseudo_6dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 19.16095513372302,
+            "finite": true,
+            "policies": [
+              "native_rigid_body_reuse_instantaneous_projected_area"
+            ],
+            "projected_area_max_m2": 2.858849314766712,
+            "projected_area_min_m2": 0.9204482875372892,
+            "projected_area_span_m2": 1.9384010272294228,
+            "ratio_to_reference_average_max": 3.11111111111111,
+            "ratio_to_reference_average_min": 1.0016676569027674,
+            "reference_average_area_m2": 0.918915851175015,
+            "sample_count": 244
+          },
+          "artifact": "nominal-triaxial_ellipsoid-pseudo_6dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": -8.175917007818103e-15,
+            "downrange": 241.5147960517527,
+            "radius": 241.5147960517527
+          },
+          "lineage": {
+            "accepted_time_s": 0.5,
+            "child_model_id": "passive-triaxial-ellipsoid",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-triaxial_ellipsoid-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -1.3919036765628454,
+            "mass_kg": 12.0,
+            "position_m": [
+              366.41111965947437,
+              -8.175917007818103e-15,
+              -1.3919036765628454
+            ],
+            "speed_m_s": 16.40776431459306,
+            "velocity_m_s": [
+              5.885675690304639e-14,
+              4.4481502297110366e-17,
+              -16.40776431459306
+            ]
+          }
+        },
+        "rigid_body_6dof": {
+          "area_policy_witness": {
+            "angular_rate_max_rad_s": 19.16074008687564,
+            "finite": true,
+            "policies": [
+              "instantaneous_geometry_projected_area"
+            ],
+            "projected_area_max_m2": 2.858849314766712,
+            "projected_area_min_m2": 0.920450031702721,
+            "projected_area_span_m2": 1.938399283063991,
+            "ratio_to_reference_average_max": 3.11111111111111,
+            "ratio_to_reference_average_min": 1.0016695549714854,
+            "reference_average_area_m2": 0.918915851175015,
+            "sample_count": 244
+          },
+          "artifact": "nominal-triaxial_ellipsoid-rigid_body_6dof.json",
+          "child_classification_counts": {
+            "impact": 1
+          },
+          "classification": "impact",
+          "footprint_m": {
+            "crossrange": -1.6236595672559232e-15,
+            "downrange": 241.51330183586904,
+            "radius": 241.51330183586904
+          },
+          "lineage": {
+            "accepted_time_s": 0.49999999999999994,
+            "child_model_id": "passive-triaxial-ellipsoid",
+            "event_id": "booster-release",
+            "parent_model_id": "alpha3-passive-parent-triaxial_ellipsoid-v1"
+          },
+          "parent_classification_counts": {
+            "feasible": 1
+          },
+          "terminal_state": {
+            "altitude_m": -1.3941031018599872,
+            "mass_kg": 12.0,
+            "position_m": [
+              366.40962544376725,
+              -1.6236595672559232e-15,
+              -1.3941031018599872
+            ],
+            "speed_m_s": 16.407762409110042,
+            "velocity_m_s": [
+              5.900018251790524e-14,
+              -4.96624828452492e-19,
+              -16.407762409110042
+            ]
+          }
+        }
+      },
+      "plot_manifest": "plots/triaxial_ellipsoid/plot-manifest.json",
+      "rotation_policy_witness": {
+        "claim_boundary": "The zero-moment baseline is a diagnostic passive reference, not a physical controller or a prescribed-tumble qualification.",
+        "comparison": "passive_aerodynamic_moment_vs_zero_moment_spin_baseline",
+        "records": {
+          "passive_aerodynamic_moment": {
+            "aerodynamic_moment_norm_max_nm": 893.7566389063859,
+            "aerodynamic_moment_norm_min_nm": 0.024217826208905082,
+            "angular_rate_norm_max_rad_s": 19.16074008687564,
+            "classification": "impact",
+            "finite": true,
+            "telemetry_sample_count": 244,
+            "termination": "ground_contact",
+            "tumbling_policy": "passive_tumble"
+          },
+          "prescribed_spin_zero_aerodynamic_moment": {
+            "aerodynamic_moment_norm_max_nm": 0.0,
+            "aerodynamic_moment_norm_min_nm": 0.0,
+            "angular_rate_norm_max_rad_s": 0.7866567879004182,
+            "classification": "impact",
+            "finite": true,
+            "telemetry_sample_count": 244,
+            "termination": "ground_contact",
+            "tumbling_policy": "prescribed_spin"
+          }
+        }
+      },
+      "shape": "triaxial_ellipsoid",
+      "uncertainty": {
+        "classification_counts": {
+          "impact": 16
+        },
+        "fidelity": "pseudo_6dof",
+        "impact_distribution": {
+          "classification": "impact",
+          "finite_count": 16,
+          "quantiles": {
+            "altitude_m": {
+              "0": -4.218761628121752,
+              "100": -0.09395392666259261,
+              "5": -4.0464633493982145,
+              "50": -1.3360649818383477,
+              "95": -0.16885616268484388
+            },
+            "crossrange_m": {
+              "0": -0.0008968524635341213,
+              "100": 0.0009715751536040668,
+              "5": -0.0008641505597249176,
+              "50": 8.575842909895723e-06,
+              "95": 0.0008509481399247719
+            },
+            "downrange_m": {
+              "0": 220.19573682195042,
+              "100": 269.58000835123346,
+              "5": 224.41323648381055,
+              "50": 250.77713166430289,
+              "95": 263.6065415740944
+            },
+            "radius_m": {
+              "0": 220.19573682285176,
+              "100": 269.5800083520703,
+              "5": 224.41323648441994,
+              "50": 250.7771316651033,
+              "95": 263.6065415743385
+            },
+            "speed_m_s": {
+              "0": 15.645009253859492,
+              "100": 17.613145631183933,
+              "5": 15.712283459510425,
+              "50": 16.74818871674305,
+              "95": 17.285160347167444
+            }
+          },
+          "sample_count": 16
+        },
+        "sample_count": 16,
+        "terminal_distribution": {
+          "classification": "all_finite_terminals",
+          "finite_count": 16,
+          "quantiles": {
+            "altitude_m": {
+              "0": -4.218761628121752,
+              "100": -0.09395392666259261,
+              "5": -4.0464633493982145,
+              "50": -1.3360649818383477,
+              "95": -0.16885616268484388
+            },
+            "crossrange_m": {
+              "0": -0.0008968524635341213,
+              "100": 0.0009715751536040668,
+              "5": -0.0008641505597249176,
+              "50": 8.575842909895723e-06,
+              "95": 0.0008509481399247719
+            },
+            "downrange_m": {
+              "0": 220.19573682195042,
+              "100": 269.58000835123346,
+              "5": 224.41323648381055,
+              "50": 250.77713166430289,
+              "95": 263.6065415740944
+            },
+            "radius_m": {
+              "0": 220.19573682285176,
+              "100": 269.5800083520703,
+              "5": 224.41323648441994,
+              "50": 250.7771316651033,
+              "95": 263.6065415743385
+            },
+            "speed_m_s": {
+              "0": 15.645009253859492,
+              "100": 17.613145631183933,
+              "5": 15.712283459510425,
+              "50": 16.74818871674305,
+              "95": 17.285160347167444
+            }
+          },
+          "sample_count": 16
+        }
+      }
+    }
+  ],
+  "status": "qualified_witness_with_physical_footprint_uncertainty",
+  "uncertainty_axes": {
+    "density_scale": [
+      0.9,
+      1.1
+    ],
+    "drag_scale": [
+      0.9,
+      1.1
+    ],
+    "initial_angular_rate_rad_s": [
+      -0.6,
+      0.6
+    ],
+    "mass_scale": [
+      0.9,
+      1.1
+    ],
+    "release_bank_rad": [
+      -0.3490658503988659,
+      0.3490658503988659
+    ],
+    "release_speed_m_s": [
+      237.5,
+      262.5
+    ],
+    "scale_height_scale": [
+      0.95,
+      1.05
+    ]
+  }
+}

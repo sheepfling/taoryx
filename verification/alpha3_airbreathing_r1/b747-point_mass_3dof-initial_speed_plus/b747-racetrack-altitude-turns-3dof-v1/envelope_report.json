@@ -1,0 +1,20 @@
+{
+  "checks": [
+    {
+      "channel": "speed_m_s",
+      "maximum": 220.0,
+      "minimum": 100.0,
+      "pass": true,
+      "violations": []
+    },
+    {
+      "channel": "altitude_m",
+      "maximum": 350.0,
+      "minimum": 50.0,
+      "pass": true,
+      "violations": []
+    }
+  ],
+  "pass": true,
+  "schema_version": 1
+}

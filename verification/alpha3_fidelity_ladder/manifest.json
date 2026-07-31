@@ -1,0 +1,166 @@
+{
+  "cross_fidelity_manifest": "verification/alpha3_cross_fidelity/manifest.json",
+  "families": [
+    "a320",
+    "b747",
+    "f16_s119",
+    "hl20_mod_k",
+    "hummingbird",
+    "reference_nesc_two_stage_rocket",
+    "skywalker_x8",
+    "tumbling_body",
+    "x15"
+  ],
+  "family_count": 9,
+  "incomplete_pairs": [],
+  "interpretation": "Development records prove executable nominal witnesses; nominal_case_pass records are the only records currently authorized for automatic lowering.",
+  "missing_families": [],
+  "records": [
+    {
+      "artifact": "verification/a320_racetrack/point_mass_3dof_evidence.json",
+      "claim_boundary": "OpenAP point-mass performance and truth-evaluated racetrack geometry only.",
+      "family_id": "a320",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
+      "claim_boundary": "OpenAP performance plus the named kinematic attitude-response law; no physical effectors.",
+      "family_id": "a320",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_family_qualification/b747-racetrack-altitude-turns-3dof-v1/summary.json",
+      "claim_boundary": "Source-table point-mass transport racetrack geometry, altitude, speed, and truth gates only.",
+      "family_id": "b747",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_family_qualification/b747-racetrack-altitude-turns-pseudo-6dof-v1/summary.json",
+      "claim_boundary": "Transport-scaled source-table translation plus named kinematic attitude response; no physical surface allocation.",
+      "family_id": "b747",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/f16_racetrack/point_mass_3dof_evidence.json",
+      "claim_boundary": "Reduced source-grounded point-mass racetrack geometry and energy behavior only.",
+      "family_id": "f16_s119",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/f16_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
+      "claim_boundary": "Named bounded attitude/rate response bridge; no physical surface or actuator qualification.",
+      "family_id": "f16_s119",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_hl20_development/point_mass_3dof_evidence.json",
+      "claim_boundary": "Source-geometry/fixed-mass reduced release, glide, and impact witness with synthetic booster and surrogate aerodynamics; no source-exact DAVE-ML flight dynamics or closed-loop controls.",
+      "family_id": "hl20_mod_k",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_hl20_development/pseudo_6dof_evidence.json",
+      "claim_boundary": "Same bounded reduced release/glide/impact mission with named response law; no source-exact attitude dynamics, physical surface allocation, thermal model, or terminal arrival.",
+      "family_id": "hl20_mod_k",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_development/point_mass_3dof_evidence.json",
+      "claim_boundary": "Independent point-mass translational force model for the declared hover-box, disturbance, contact, and shutdown mission; yaw, attitude, and motor allocation are not represented.",
+      "family_id": "hummingbird",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_development/pseudo_6dof_evidence.json",
+      "claim_boundary": "Nominal aggregate-thrust response-law evidence scoped to hover-box/yaw/contact semantics; no individual-rotor allocation, translated-flight, electrical battery/SOC, wind, or family-wide robustness claim.",
+      "family_id": "hummingbird",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_nesc_development/point_mass_3dof_evidence.json",
+      "claim_boundary": "Retained NESC source translation, stage timing, mass-flow replay, and orbit-coast terminal state; no source attitude or gimbal claim.",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_nesc_development/pseudo_6dof_evidence.json",
+      "claim_boundary": "Retained source translation plus explicitly scheduled pseudo attitude response; no source-exact attitude data, gimbal/effectivity, plume, flex, or controller-law claim.",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_family_qualification/x8-racetrack-altitude-turns-3dof-v1/summary.json",
+      "claim_boundary": "Source-table point-mass translation, route geometry, and truth-evaluated racetrack gates only.",
+      "family_id": "skywalker_x8",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_family_qualification/x8-racetrack-altitude-turns-pseudo-6dof-v1/summary.json",
+      "claim_boundary": "Source-table translation plus the named kinematic attitude-response bridge; no physical elevon allocation.",
+      "family_id": "skywalker_x8",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_tumbling_body/fidelity_ladder/point_mass_3dof_evidence.json",
+      "claim_boundary": "parent capability and source-exact passive-body aerodynamics remain outside this witness",
+      "family_id": "tumbling_body",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/alpha3_tumbling_body/fidelity_ladder/pseudo_6dof_evidence.json",
+      "claim_boundary": "parent capability and source-exact passive-body aerodynamics remain outside this witness",
+      "family_id": "tumbling_body",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/x15_fidelity_ladder/point_mass_3dof_evidence.json",
+      "claim_boundary": "Independently evaluated staged X-15 event/energy/impact witness only; no controlled terminal handoff, native batch-provider equivalence, or physical-effector allocation.",
+      "family_id": "x15",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "verification/x15_fidelity_ladder/pseudo_6dof_evidence.json",
+      "claim_boundary": "Phase-scheduled response-law realization of the staged event/energy/impact witness; no source-exact attitude law, controlled terminal handoff, or physical-effector allocation.",
+      "family_id": "x15",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    }
+  ],
+  "schema": "taoryx.alpha3-fidelity-ladder-index/v1alpha1",
+  "status": "pass"
+}

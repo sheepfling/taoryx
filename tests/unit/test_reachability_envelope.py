@@ -381,12 +381,55 @@ def test_pseudo_sixdof_passive_tumble_changes_projected_area_and_records_rates()
         spawn_children=True,
     )
     child = result.spawned_bodies[0]
+    assert child.fidelity is ReachabilityFidelity.RIGID_BODY_6DOF
+    assert child.requested_fidelity is ReachabilityFidelity.PSEUDO_6DOF
+    assert isinstance(child.states[0], RigidBody6DofReachabilityState)
     areas = [float(row["projected_area_m2"]) for row in child.telemetry]
     rates = [tuple(row["attitude_rate_rad_s"]) for row in child.telemetry if "attitude_rate_rad_s" in row]
 
     assert max(areas) > min(areas)
     assert rates[0] != rates[-1]
     assert all("drag_force_n" in row and "event_id" in row for row in child.telemetry)
+
+
+def test_point_mass_passive_tumble_uses_orientation_averaged_area() -> None:
+    body = DetachedBodyDefinition.cylinder(
+        "average-area-stage",
+        mass_kg=5.0,
+        radius_m=0.2,
+        length_m=2.0,
+        inertia_kg_m2=Vector3(1.0, 2.0, 3.0),
+        initial_angular_rate_body_rad_s=Vector3(0.25, 0.4, 0.6),
+    )
+    vehicle = RocketGlideVehicle(
+        dry_mass_kg=100.0,
+        propellant_mass_kg=10.0,
+        thrust_n=1_000.0,
+        burn_time_s=2.0,
+        initial_altitude_m=100.0,
+        booster_dry_mass_kg=5.0,
+        booster_propellant_mass_kg=5.0,
+        booster_thrust_n=1_000.0,
+        booster_burn_time_s=1.0,
+        booster_release_time_s=1.5,
+        booster_detached_body=body,
+    )
+
+    result = simulate_rocket_glide(
+        vehicle,
+        LaunchCommand(0.0, math.radians(45.0)),
+        fidelity=ReachabilityFidelity.POINT_MASS_3DOF,
+        horizon_s=2.0,
+        step_size_s=0.1,
+        spawn_children=True,
+    )
+    child = result.spawned_bodies[0]
+    areas = [float(row["projected_area_m2"]) for row in child.telemetry]
+    assert areas
+    assert all(area == pytest.approx(areas[0]) for area in areas)
+    assert areas[0] > body.reference_area_m2
+    assert areas[0] < 2.0 * body.dimensions_m[0] * body.dimensions_m[1]
+    ####
 
 
 def test_rigid_body_tier_uses_native_state_and_records_force_moment_telemetry() -> None:

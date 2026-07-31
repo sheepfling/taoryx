@@ -1,0 +1,23 @@
+{
+  "comparison": "comparison.json",
+  "family_id": "tumbling_body",
+  "nominal_case_scope": "tumbling_body.passive_deployment_impact_v1",
+  "promotion_blocker": "parent capability and source-exact passive-body aerodynamics remain outside this witness",
+  "records": [
+    {
+      "artifact": "point_mass_3dof_evidence.json",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "pseudo_6dof_evidence.json",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_passive_deployment.py --output verification/alpha3_tumbling_body/qualification.json --artifact-dir verification/alpha3_tumbling_body",
+  "schema": "taoryx.tumbling-body-fidelity-ladder/v1alpha1",
+  "status": "nominal_case_pass"
+}

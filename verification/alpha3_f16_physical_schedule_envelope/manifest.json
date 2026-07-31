@@ -1,0 +1,618 @@
+{
+  "case_contract": {
+    "dt_s": 0.02,
+    "duration_s": 2.0,
+    "failure_policy": "retain partial-authority and recovery failures as boundary witnesses",
+    "recovery_threshold": 0.25
+  },
+  "claim_boundary": "This is a local physical-effector schedule envelope witness around four source-retrimmed nodes. Boundary cases are evidence of authority limits; no full-envelope, wind, servo-certification, statistical-reliability, or operational-flight claim is made.",
+  "control_path": "source-trimmed node -> plant-derived LQR -> desired wrench -> bounded elevator/aileron/rudder/throttle -> source nonlinear plant",
+  "direct_body_moment_injection": false,
+  "family_id": "reference_f16_s119",
+  "nodes": [
+    {
+      "alpha_trim_deg": 2.1452348297818276,
+      "altitude_m": 0.0,
+      "boundary_case_count": 1,
+      "cases": {
+        "alpha_minus_1mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 2875.9607528521105,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "w_m_s": -1.0
+          },
+          "recovery_ratio": 0.026633287393050053,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "alpha_plus_1mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 2876.0328074382483,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "w_m_s": 1.0
+          },
+          "recovery_ratio": 0.026926025955380663,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "beta_minus_2mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 8505.454295844289,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "v_m_s": -2.0
+          },
+          "recovery_ratio": 0.23011717065465437,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "beta_plus_2mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 8505.415922993969,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "v_m_s": 2.0
+          },
+          "recovery_ratio": 0.23006549186845898,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "coupled_high_rate": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 7547.152156597695,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "p_rad_s": 0.01,
+            "q_rad_s": -0.01,
+            "r_rad_s": 0.01
+          },
+          "recovery_ratio": 0.023292123480853487,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "high_pitch_rate_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 8116.127307002117,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "q_rad_s": 0.02
+          },
+          "recovery_ratio": 0.004993306683909192,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "high_roll_rate_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 8407.827649405077,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "p_rad_s": 0.02
+          },
+          "recovery_ratio": 0.0009089008636951635,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "high_yaw_rate_plus": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.02,
+          "maximum_controlled_actual_residual": 9684.203249397095,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "r_rad_s": 0.02
+          },
+          "recovery_ratio": 0.042435568581378966,
+          "saturation_fraction": 0.01,
+          "status": "boundary"
+        }
+      },
+      "controller_id": "f16.physical_schedule.f16-sea-level-152mps",
+      "direct_body_moment_injection": false,
+      "passed_case_count": 7,
+      "point_id": "f16-sea-level-152mps",
+      "true_airspeed_m_s": 152.4
+    },
+    {
+      "alpha_trim_deg": 3.3906337409669205,
+      "altitude_m": 3000.0,
+      "boundary_case_count": 1,
+      "cases": {
+        "alpha_minus_1mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 3192.188343337892,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "w_m_s": -1.0
+          },
+          "recovery_ratio": 0.040418174214188245,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "alpha_plus_1mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 3192.3522297767413,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "w_m_s": 1.0
+          },
+          "recovery_ratio": 0.041095728440136356,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "beta_minus_2mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 6368.961721103318,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "v_m_s": -2.0
+          },
+          "recovery_ratio": 0.19932702263107818,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "beta_plus_2mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 6368.938343780976,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "v_m_s": 2.0
+          },
+          "recovery_ratio": 0.19932228251934953,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "coupled_high_rate": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 7973.030119745399,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "p_rad_s": 0.01,
+            "q_rad_s": -0.01,
+            "r_rad_s": 0.01
+          },
+          "recovery_ratio": 0.019518118963403577,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "high_pitch_rate_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 8866.341879619365,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "q_rad_s": 0.02
+          },
+          "recovery_ratio": 0.00645934716565564,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "high_roll_rate_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 8787.186381995043,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "p_rad_s": 0.02
+          },
+          "recovery_ratio": 0.0008073385867768098,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "high_yaw_rate_plus": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.06,
+          "maximum_controlled_actual_residual": 10856.325443003785,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "r_rad_s": 0.02
+          },
+          "recovery_ratio": 0.03948791740607174,
+          "saturation_fraction": 0.03,
+          "status": "boundary"
+        }
+      },
+      "controller_id": "f16.physical_schedule.f16-3km-152mps",
+      "direct_body_moment_injection": false,
+      "passed_case_count": 7,
+      "point_id": "f16-3km-152mps",
+      "true_airspeed_m_s": 152.4
+    },
+    {
+      "alpha_trim_deg": 5.2069828607451125,
+      "altitude_m": 6000.0,
+      "boundary_case_count": 4,
+      "cases": {
+        "alpha_minus_1mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 3265.1932260075005,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "w_m_s": -1.0
+          },
+          "recovery_ratio": 0.06017573405709722,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "alpha_plus_1mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 3190.724865361356,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "w_m_s": 1.0
+          },
+          "recovery_ratio": 0.06112771178459872,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "beta_minus_2mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 4984.792357750365,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "v_m_s": -2.0
+          },
+          "recovery_ratio": 0.17228441376708012,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "beta_plus_2mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 4984.789522104743,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "v_m_s": 2.0
+          },
+          "recovery_ratio": 0.17230698047848417,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "coupled_high_rate": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.02,
+          "maximum_controlled_actual_residual": 8363.500422376046,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "p_rad_s": 0.01,
+            "q_rad_s": -0.01,
+            "r_rad_s": 0.01
+          },
+          "recovery_ratio": 0.016945850911823886,
+          "saturation_fraction": 0.01,
+          "status": "boundary"
+        },
+        "high_pitch_rate_plus": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.04,
+          "maximum_controlled_actual_residual": 10225.343089139673,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "q_rad_s": 0.02
+          },
+          "recovery_ratio": 0.009767492834890822,
+          "saturation_fraction": 0.02,
+          "status": "boundary"
+        },
+        "high_roll_rate_plus": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.02,
+          "maximum_controlled_actual_residual": 9724.170393149436,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "p_rad_s": 0.02
+          },
+          "recovery_ratio": 0.0004710698831934652,
+          "saturation_fraction": 0.01,
+          "status": "boundary"
+        },
+        "high_yaw_rate_plus": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.1,
+          "maximum_controlled_actual_residual": 11827.89475116008,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "r_rad_s": 0.02
+          },
+          "recovery_ratio": 0.03953212043712547,
+          "saturation_fraction": 0.05,
+          "status": "boundary"
+        }
+      },
+      "controller_id": "f16.physical_schedule.f16-6km-152mps",
+      "direct_body_moment_injection": false,
+      "passed_case_count": 4,
+      "point_id": "f16-6km-152mps",
+      "true_airspeed_m_s": 152.4
+    },
+    {
+      "alpha_trim_deg": 7.949593280417001,
+      "altitude_m": 9000.0,
+      "boundary_case_count": 6,
+      "cases": {
+        "alpha_minus_1mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 3565.2187849079864,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "w_m_s": -1.0
+          },
+          "recovery_ratio": 0.08112797293750312,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "alpha_plus_1mps": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "failure_reason": null,
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 3565.2766638394587,
+          "mission_pass": true,
+          "numerical_valid": true,
+          "perturbation": {
+            "w_m_s": 1.0
+          },
+          "recovery_ratio": 0.08264932645912766,
+          "saturation_fraction": 0.0,
+          "status": "pass"
+        },
+        "beta_minus_2mps": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.04,
+          "maximum_controlled_actual_residual": 4955.802222138819,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "v_m_s": -2.0
+          },
+          "recovery_ratio": 0.14881614839050078,
+          "saturation_fraction": 0.02,
+          "status": "boundary"
+        },
+        "beta_plus_2mps": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.04,
+          "maximum_controlled_actual_residual": 4946.504566575155,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "v_m_s": 2.0
+          },
+          "recovery_ratio": 0.14883249348738797,
+          "saturation_fraction": 0.02,
+          "status": "boundary"
+        },
+        "coupled_high_rate": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.06,
+          "maximum_controlled_actual_residual": 9164.411704338827,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "p_rad_s": 0.01,
+            "q_rad_s": -0.01,
+            "r_rad_s": 0.01
+          },
+          "recovery_ratio": 0.016066397725765704,
+          "saturation_fraction": 0.03,
+          "status": "boundary"
+        },
+        "high_pitch_rate_plus": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.08,
+          "maximum_controlled_actual_residual": 11344.178077610879,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "q_rad_s": 0.02
+          },
+          "recovery_ratio": 0.012555430501956209,
+          "saturation_fraction": 0.04,
+          "status": "boundary"
+        },
+        "high_roll_rate_plus": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.04,
+          "maximum_controlled_actual_residual": 10592.875137347584,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "p_rad_s": 0.02
+          },
+          "recovery_ratio": 0.00016635797468928589,
+          "saturation_fraction": 0.03,
+          "status": "boundary"
+        },
+        "high_yaw_rate_plus": {
+          "allocation_statuses": [
+            "feasible",
+            "partially_achievable"
+          ],
+          "failure_reason": "authority_or_recovery_boundary",
+          "maximum_continuous_saturation_duration_s": 0.16,
+          "maximum_controlled_actual_residual": 12629.535767316731,
+          "mission_pass": false,
+          "numerical_valid": true,
+          "perturbation": {
+            "r_rad_s": 0.02
+          },
+          "recovery_ratio": 0.04277896567466513,
+          "saturation_fraction": 0.1,
+          "status": "boundary"
+        }
+      },
+      "controller_id": "f16.physical_schedule.f16-9km-152mps",
+      "direct_body_moment_injection": false,
+      "passed_case_count": 2,
+      "point_id": "f16-9km-152mps",
+      "true_airspeed_m_s": 152.4
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_f16_physical_schedule_envelope.py",
+  "schedule_envelope": {
+    "alpha_witness": "body w perturbation +/-1.0 m/s at each source node",
+    "altitude_m": [
+      0.0,
+      3000.0,
+      6000.0,
+      9000.0
+    ],
+    "beta_witness": "body v perturbation +/-2.0 m/s at each source node",
+    "interpretation": "local source-node authority envelope; not a Mach, dynamic-pressure, wind, or statistical envelope",
+    "rate_witness": "p/q/r perturbations up to 0.02 rad/s at each source node",
+    "true_airspeed_m_s": 152.4
+  },
+  "schema": "taoryx.f16-physical-effector-schedule-envelope/v1alpha1",
+  "source_schedule_artifact": "verification/alpha3_f16_physical_schedule/manifest.json",
+  "status": "F16_physical_effector_schedule_envelope_boundary_recorded",
+  "summary": {
+    "all_numerically_valid": true,
+    "boundary_case_count": 12,
+    "case_count": 32,
+    "node_count": 4,
+    "passed_case_count": 20
+  }
+}

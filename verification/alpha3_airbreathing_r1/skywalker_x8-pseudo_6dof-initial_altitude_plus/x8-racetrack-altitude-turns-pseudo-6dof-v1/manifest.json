@@ -1,0 +1,40 @@
+{
+  "claim_boundary": "independent truth-evaluated family qualification; integration baselines remain nonqualified",
+  "fidelity_tier": "pseudo_6dof_kinematic_bridge",
+  "files": {
+    "README.md": "614237d78c2c0a3420ec4ee74710c06af6b39f278e9455cefa82add22f68a697",
+    "controller_transitions.json": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc",
+    "envelope_report.json": "dcb9daf7c20930e357b4deee5e28018b7030b8ac000b9de6d5c4fe91522abcc3",
+    "events.json": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c",
+    "inputs/skywalker_x8-pseudo_6dof-initial_altitude_plus.prb": "61c385cfc7e4d87d3ade0f2404178f40d27146d8b05b6aa40da93d392d91cf61",
+    "inputs/skywalker_x8_collective_elevon_6axis.tbl": "b3c5c31a8ae134a48974afcff51200bc9235f23550173053baad79e93693adc4",
+    "inputs/skywalker_x8_differential_elevon_6axis.tbl": "e0f0122dac5ae341b35bdff075269d28bf1ca480be16bab01caa1b0a336cbc25",
+    "inputs/skywalker_x8_static_6axis.tbl": "434d6d373147381b5af63a8aef5780b49624a3f4533a7f7d995f450942bf727e",
+    "inputs/skywalker_x8_thrust.tbl": "9b05bb9eb2a70a14ec8edb3446fa631040ccff5abcacc2ba9f0780b7711fdca8",
+    "mission.yaml": "002f3d4317ef33a39403e26da8f17fe703e86ea53528fd74ec780a493e17cc92",
+    "mission_sequence.png": "211369a3513e8ab8a317840d0ce93ace9d1f40b0998d4cc85f400e0f9b3a3321",
+    "objective_report.json": "7584b78818cbbd8d751bec8d45416468f4987dbec7b7e8f2a170d1bc1140a178",
+    "plots/plot-manifest.json": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa",
+    "preflight_timing_estimate.json": "ae641affcaea3172d7596d35ed91e659ea5da2bf092a7ae97747238a48841692",
+    "qualification_board.png": "f5d6abb45bc76b96d59747834da226477c7693e76104c4ccfd7174cd69113f2c",
+    "reproduction.txt": "cf0133a19924c10d2b8cbf758b1bff342204c5deb2b8562a66e06138949747a1",
+    "resolved_racetrack.json": "fa68d71ce98d2fd35ffc9f48b89f8c9c9f1f4a1528cbe5ebbc9404194654d4e6",
+    "run/1.print": "12400b022049bed1eca3568b93681f5a12ee88372b8884aa22a111d57849ebba",
+    "summary.json": "3cd48f17a8210acd5b6903552e38dce350ff1ba5669aa5307553901ae9b0081c",
+    "truth_telemetry.csv": "790eb6aecd7d479e78b11180aa1b98e6ae181034fead3c546d1a72c4db6e0953"
+  },
+  "mission_id": "x8-racetrack-altitude-turns-pseudo-6dof-v1",
+  "realization": {
+    "actuator_realization": "prescribed_attitude_lag_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_kinematic_bridge",
+    "note": "Translation is the same force-integrated point-mass realization used by the 3DOF packet. Quaternion and body-rate channels are supplied by the declared kinematic attitude bridge; they are not moment-derived.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant",
+    "response_law": "first-order-rate-limited-v1",
+    "response_profile_id": "skywalker_x8.attitude_response_p6dof.v1"
+  },
+  "schema_version": 1,
+  "summary": "summary.json",
+  "truth_telemetry": "truth_telemetry.csv"
+}

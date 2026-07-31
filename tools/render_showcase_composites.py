@@ -65,12 +65,17 @@ def _contract_comparison(left: dict[str, Any], right: dict[str, Any]) -> dict[st
 ####
 
 
-def _run_family(family: dict[str, Any], output_dir: Path) -> tuple[RunArtifact | None, RunArtifact | None, RunArtifact | None, dict[str, str], dict[str, Any]]:
+def _run_family(
+    family: dict[str, Any],
+    output_dir: Path,
+    *,
+    max_steps_override: int | None = None,
+) -> tuple[RunArtifact | None, RunArtifact | None, RunArtifact | None, dict[str, str], dict[str, Any]]:
     point_problem = ROOT / str(family.get("showcase_point_mass_problem", family["point_mass_problem"]))
     rigid_problem = ROOT / str(family.get("showcase_rigid_body_problem", family["rigid_body_problem"]))
     tables = tuple(ROOT / str(path) for path in family["tables"])
     rigid_tables = tuple(ROOT / str(path) for path in family["rigid_tables"])
-    max_steps = int(family.get("showcase_max_steps", family["max_steps"]))
+    max_steps = int(max_steps_override or family.get("showcase_max_steps", family["max_steps"]))
     baseline = run_files(point_problem, tables, output_dir=output_dir / family["id"] / "3dof", max_steps=max_steps, profile=GrammarProfile.TAORYX)
     bridge_problem = _kinematic_problem(point_problem, output_dir / family["id"] / "kinematic.prb")
     bridge = run_files(bridge_problem, tables, output_dir=output_dir / family["id"] / "bridge", max_steps=max_steps, profile=GrammarProfile.TAORYX)
@@ -78,19 +83,28 @@ def _run_family(family: dict[str, Any], output_dir: Path) -> tuple[RunArtifact |
     statuses: dict[str, str] = {}
     artifacts: list[RunArtifact | None] = []
     for label, report in (("3dof", baseline), ("bridge", bridge), ("6dof", high_fidelity)):
-        if report.exit_code != 0 or not report.artifacts:
+        if not report.artifacts:
             statuses[label] = "; ".join(f"{item.code}: {item.message}" for item in report.diagnostics) or "no artifact"
             artifacts.append(None)
+        elif report.exit_code != 0:
+            statuses[label] = "incomplete: " + ("; ".join(f"{item.code}: {item.message}" for item in report.diagnostics) or "runtime did not complete")
+            artifacts.append(report.artifacts[0])
         else:
             statuses[label] = "pass"
             artifacts.append(report.artifacts[0])
     unit_point = str(family["point_mass_unit_system"])
     unit_rigid = str(family["rigid_body_unit_system"])
-    contracts = {
+    contracts: dict[str, Any] = {
         "3dof": _scenario_contract(point_problem, tables, "point-mass-3dof", unit_point, _duration(artifacts[0])),
         "bridge": _scenario_contract(point_problem, tables, "kinematic-3-plus-3-dof", unit_point, _duration(artifacts[1])),
         "6dof": _scenario_contract(rigid_problem, rigid_tables, "rigid-body-6dof", unit_rigid, _duration(artifacts[2])),
     }
+    control_realization = family.get("control_realization", {})
+    if isinstance(control_realization, dict):
+        tier_keys = {"3dof": "point_mass_3dof", "bridge": "kinematic_3_plus_3_dof", "6dof": "rigid_body_6dof"}
+        for tier, contract in contracts.items():
+            contract["control_realization"] = str(control_realization.get(tier_keys[tier], "unspecified"))
+    contracts["control_claim_boundary"] = str(family.get("control_claim_boundary", "not declared"))
     contracts["comparisons"] = {
         "3dof_vs_bridge": _contract_comparison(contracts["3dof"], contracts["bridge"]),
         "3dof_vs_6dof": _contract_comparison(contracts["3dof"], contracts["6dof"]),
@@ -166,10 +180,23 @@ def _plot_family(name: str, baseline: RunArtifact | None, bridge: RunArtifact | 
         else:
             axis.text(0.5, 0.5, "channel unavailable", ha="center", va="center", transform=axis.transAxes)
     mismatch = contracts["comparisons"]["3dof_vs_6dof"]["mismatches"]
-    title = f"{name}: 3-DOF / kinematic 3+3 bridge / canonical 6-DOF overview"
+    title = (
+        f"{name}: 3-DOF / kinematic 3+3 bridge / canonical 6-DOF overview\n"
+        f"control realization: 3DOF={contracts['3dof'].get('control_realization', 'unspecified')} | "
+        f"pseudo={contracts['bridge'].get('control_realization', 'unspecified')} | "
+        f"6DOF={contracts['6dof'].get('control_realization', 'unspecified')}"
+    )
     if mismatch:
         title += "\nNOT COMPARABLE: scenario-contract mismatch — " + ", ".join(mismatch)
     figure.suptitle(title, fontsize=16, fontweight="bold", color="#991b1b" if mismatch else "#111827")
+    figure.text(
+        0.01,
+        0.005,
+        f"Control claim boundary: {contracts.get('control_claim_boundary', 'not declared')}",
+        fontsize=8,
+        color="#475569",
+        ha="left",
+    )
     figure.savefig(path, dpi=150, bbox_inches="tight")
     plt.close(figure)
 ####
@@ -232,8 +259,8 @@ def _comparison_warning(left: RunArtifact | None, right: RunArtifact | None) -> 
 ####
 
 
-def generate(output_dir: Path) -> Path:
-    """Run nominal paired examples and write family/all-family composites."""
+def generate(output_dir: Path, *, max_steps_override: int | None = None) -> Path:
+    """Run paired examples and retain incomplete artifacts under a bound."""
     output_dir.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(output_dir / ".mplconfig"))
     import matplotlib
@@ -243,7 +270,11 @@ def generate(output_dir: Path) -> Path:
 
     records: list[dict[str, Any]] = []
     for family in _families():
-        baseline, bridge, high_fidelity, statuses, contracts = _run_family(family, output_dir / "runs")
+        baseline, bridge, high_fidelity, statuses, contracts = _run_family(
+            family,
+            output_dir / "runs",
+            max_steps_override=max_steps_override,
+        )
         baseline_units = str(family["point_mass_unit_system"])
         bridge_units = baseline_units
         high_fidelity_units = str(family["rigid_body_unit_system"])
@@ -254,6 +285,11 @@ def generate(output_dir: Path) -> Path:
         "families": [{"id": record["id"], "name": record["name"], "composite": f"{record['id'].lower()}_composite.png", "statuses": record["statuses"], "unit_systems": {"3dof": record["baseline_units"], "bridge": record["bridge_units"], "6dof": record["six_dof_units"]}, "durations_s": record["durations_s"], "scenario_contract": record["contracts"]} for record in records],
         "overview": "all_families_overview.png",
         "tiers": ["point-mass-3dof", "kinematic-3-plus-3-dof", "rigid-body-6dof"],
+        "render_policy": {
+            "max_steps_override": max_steps_override,
+            "incomplete_runs_retained": True,
+            "qualification_claim": "none; visual diagnostic pack unless every tier status is pass",
+        },
         "claim_boundary": {"engineering_validity": False, "historical_taos_96_compatibility": False, "source_data": "public_research_surrogates"},
     }
     manifest_path = output_dir / "manifest.json"
@@ -265,8 +301,11 @@ def generate(output_dir: Path) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=ROOT / "artifacts/showcases/slower_vehicle_composites")
+    parser.add_argument("--max-steps", type=int, default=None, help="bound every tier run and retain incomplete artifacts")
     arguments = parser.parse_args()
-    print(generate(arguments.output_dir))
+    if arguments.max_steps is not None and arguments.max_steps <= 0:
+        parser.error("--max-steps must be positive")
+    print(generate(arguments.output_dir, max_steps_override=arguments.max_steps))
     ####
 
 

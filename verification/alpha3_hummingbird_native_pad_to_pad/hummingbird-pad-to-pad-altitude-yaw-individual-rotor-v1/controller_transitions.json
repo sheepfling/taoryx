@@ -1,0 +1,135 @@
+{
+  "note": "Scheduler transitions are diagnostic. Objective pass/fail is computed independently from truth telemetry.",
+  "objective_transitions": [
+    {
+      "objective_id": "takeoff",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 9.999999999999897
+    },
+    {
+      "objective_id": "hover-dwell",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 12.999999999999677
+    },
+    {
+      "objective_id": "yaw-step",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 20.999999999999677
+    },
+    {
+      "objective_id": "climb-altitude-gate",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 28.999999999999677
+    },
+    {
+      "objective_id": "box-south-east",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 36.99999999999967
+    },
+    {
+      "objective_id": "box-north-east",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 44.99999999999967
+    },
+    {
+      "objective_id": "box-north-west",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 52.99999999999967
+    },
+    {
+      "objective_id": "box-south-west",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 60.99999999999967
+    },
+    {
+      "objective_id": "return-home",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 68.99999999999967
+    },
+    {
+      "objective_id": "descent-altitude-gate",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 76.99999999999967
+    },
+    {
+      "objective_id": "touchdown",
+      "reason": "EVENT_COMPLETE",
+      "source": "segment_handoff_scheduler",
+      "time_s": 91.99999999999967
+    }
+  ],
+  "schema_version": 1,
+  "source": "segment_handoff_scheduler",
+  "transitions": [
+    {
+      "from_phase": "takeoff",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 9.999999999999897,
+      "to_phase": "hover-dwell"
+    },
+    {
+      "from_phase": "hover-dwell",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 12.999999999999677,
+      "to_phase": "yaw-step"
+    },
+    {
+      "from_phase": "yaw-step",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 20.999999999999677,
+      "to_phase": "climb-altitude-gate"
+    },
+    {
+      "from_phase": "climb-altitude-gate",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 28.999999999999677,
+      "to_phase": "box-south-east"
+    },
+    {
+      "from_phase": "box-south-east",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 36.99999999999967,
+      "to_phase": "box-north-east"
+    },
+    {
+      "from_phase": "box-north-east",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 44.99999999999967,
+      "to_phase": "box-north-west"
+    },
+    {
+      "from_phase": "box-north-west",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 52.99999999999967,
+      "to_phase": "box-south-west"
+    },
+    {
+      "from_phase": "box-south-west",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 60.99999999999967,
+      "to_phase": "return-home"
+    },
+    {
+      "from_phase": "return-home",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 68.99999999999967,
+      "to_phase": "descent-altitude-gate"
+    },
+    {
+      "from_phase": "descent-altitude-gate",
+      "reason": "EVENT_COMPLETE",
+      "time_s": 76.99999999999967,
+      "to_phase": "touchdown"
+    }
+  ]
+}

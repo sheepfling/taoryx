@@ -1,0 +1,264 @@
+{
+  "case_count": 16,
+  "cases": [
+    {
+      "case_id": "initial_altitude_plus",
+      "family_id": "skywalker_x8",
+      "fidelity": "point_mass_3dof",
+      "first_failure": {
+        "envelope_pass": false,
+        "id": "hard_gates",
+        "message": "independent envelope or numerical gate failed",
+        "status": "fail"
+      },
+      "mission_pass": false,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/skywalker_x8-point_mass_3dof-initial_altitude_plus/x8-racetrack-altitude-turns-3dof-v1",
+      "perturbation": {
+        "initial_altitude_offset_m": 50.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_speed_plus",
+      "family_id": "skywalker_x8",
+      "fidelity": "point_mass_3dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/skywalker_x8-point_mass_3dof-initial_speed_plus/x8-racetrack-altitude-turns-3dof-v1",
+      "perturbation": {
+        "initial_speed_scale": 1.05
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_cross_velocity_plus",
+      "family_id": "skywalker_x8",
+      "fidelity": "point_mass_3dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/skywalker_x8-point_mass_3dof-initial_cross_velocity_plus/x8-racetrack-altitude-turns-3dof-v1",
+      "perturbation": {
+        "initial_cross_velocity_m_s": 2.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_mass_plus",
+      "family_id": "skywalker_x8",
+      "fidelity": "point_mass_3dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/skywalker_x8-point_mass_3dof-initial_mass_plus/x8-racetrack-altitude-turns-3dof-v1",
+      "perturbation": {
+        "initial_mass_scale": 1.02
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_altitude_plus",
+      "family_id": "skywalker_x8",
+      "fidelity": "pseudo_6dof",
+      "first_failure": {
+        "envelope_pass": false,
+        "id": "hard_gates",
+        "message": "independent envelope or numerical gate failed",
+        "status": "fail"
+      },
+      "mission_pass": false,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/skywalker_x8-pseudo_6dof-initial_altitude_plus/x8-racetrack-altitude-turns-pseudo-6dof-v1",
+      "perturbation": {
+        "initial_altitude_offset_m": 50.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_speed_plus",
+      "family_id": "skywalker_x8",
+      "fidelity": "pseudo_6dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/skywalker_x8-pseudo_6dof-initial_speed_plus/x8-racetrack-altitude-turns-pseudo-6dof-v1",
+      "perturbation": {
+        "initial_speed_scale": 1.05
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_cross_velocity_plus",
+      "family_id": "skywalker_x8",
+      "fidelity": "pseudo_6dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/skywalker_x8-pseudo_6dof-initial_cross_velocity_plus/x8-racetrack-altitude-turns-pseudo-6dof-v1",
+      "perturbation": {
+        "initial_cross_velocity_m_s": 2.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_mass_plus",
+      "family_id": "skywalker_x8",
+      "fidelity": "pseudo_6dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/skywalker_x8-pseudo_6dof-initial_mass_plus/x8-racetrack-altitude-turns-pseudo-6dof-v1",
+      "perturbation": {
+        "initial_mass_scale": 1.02
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_altitude_plus",
+      "family_id": "b747",
+      "fidelity": "point_mass_3dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/b747-point_mass_3dof-initial_altitude_plus/b747-racetrack-altitude-turns-3dof-v1",
+      "perturbation": {
+        "initial_altitude_offset_m": 50.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_speed_plus",
+      "family_id": "b747",
+      "fidelity": "point_mass_3dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/b747-point_mass_3dof-initial_speed_plus/b747-racetrack-altitude-turns-3dof-v1",
+      "perturbation": {
+        "initial_speed_scale": 1.05
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_cross_velocity_plus",
+      "family_id": "b747",
+      "fidelity": "point_mass_3dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/b747-point_mass_3dof-initial_cross_velocity_plus/b747-racetrack-altitude-turns-3dof-v1",
+      "perturbation": {
+        "initial_cross_velocity_m_s": 2.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_mass_plus",
+      "family_id": "b747",
+      "fidelity": "point_mass_3dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/b747-point_mass_3dof-initial_mass_plus/b747-racetrack-altitude-turns-3dof-v1",
+      "perturbation": {
+        "initial_mass_scale": 1.02
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_altitude_plus",
+      "family_id": "b747",
+      "fidelity": "pseudo_6dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/b747-pseudo_6dof-initial_altitude_plus/b747-racetrack-altitude-turns-pseudo-6dof-v1",
+      "perturbation": {
+        "initial_altitude_offset_m": 50.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_speed_plus",
+      "family_id": "b747",
+      "fidelity": "pseudo_6dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/b747-pseudo_6dof-initial_speed_plus/b747-racetrack-altitude-turns-pseudo-6dof-v1",
+      "perturbation": {
+        "initial_speed_scale": 1.05
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_cross_velocity_plus",
+      "family_id": "b747",
+      "fidelity": "pseudo_6dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/b747-pseudo_6dof-initial_cross_velocity_plus/b747-racetrack-altitude-turns-pseudo-6dof-v1",
+      "perturbation": {
+        "initial_cross_velocity_m_s": 2.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "case_id": "initial_mass_plus",
+      "family_id": "b747",
+      "fidelity": "pseudo_6dof",
+      "first_failure": null,
+      "mission_pass": true,
+      "numerical_valid": true,
+      "packet": "verification/alpha3_airbreathing_r1/b747-pseudo_6dof-initial_mass_plus/b747-racetrack-altitude-turns-pseudo-6dof-v1",
+      "perturbation": {
+        "initial_mass_scale": 1.02
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    }
+  ],
+  "claim": "Fixed initial-state perturbation evidence for the X8 and B747 point-mass and pseudo-6DOF racetrack realizations.",
+  "claim_boundary": "This is a deterministic development R1 matrix, not a statistical reliability claim, wind robustness claim, physical-surface qualification, or full-envelope aircraft qualification.",
+  "failed_case_count": 2,
+  "families": [
+    "skywalker_x8",
+    "b747"
+  ],
+  "fidelities": [
+    "point_mass_3dof",
+    "pseudo_6dof"
+  ],
+  "passed_case_count": 14,
+  "perturbation_contract": {
+    "dimensions": [
+      "initial_altitude_plus",
+      "initial_speed_plus",
+      "initial_cross_velocity_plus",
+      "initial_mass_plus"
+    ],
+    "failure_policy": "retain and classify each failed objective; never convert boundary failure to pass",
+    "source_problem_unchanged_except_initial_state": true,
+    "temporary_problem_policy": "mutated copies are retained inside each packet input manifest; source files are not modified"
+  },
+  "schema": "taoryx.airbreathing-r1-matrix/v1alpha1",
+  "status": "R1_fixed_matrix_complete"
+}

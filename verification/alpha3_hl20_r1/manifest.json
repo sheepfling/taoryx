@@ -1,0 +1,110 @@
+{
+  "case_count": 8,
+  "cases": [
+    {
+      "artifact": "verification/alpha3_hl20_r1/point_mass_3dof/release_elevation_low/evidence.json",
+      "case_id": "release_elevation_low",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 60.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_hl20_r1/point_mass_3dof/release_elevation_high/evidence.json",
+      "case_id": "release_elevation_high",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 80.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_hl20_r1/point_mass_3dof/release_speed_low/evidence.json",
+      "case_id": "release_speed_low",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 70.0,
+        "initial_speed_m_s": 225.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_hl20_r1/point_mass_3dof/wind_vector_plus/evidence.json",
+      "case_id": "wind_vector_plus",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 70.0,
+        "wind_velocity_m_s": [
+          5.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "artifact": "verification/alpha3_hl20_r1/pseudo_6dof/release_elevation_low/evidence.json",
+      "case_id": "release_elevation_low",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 60.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_hl20_r1/pseudo_6dof/release_elevation_high/evidence.json",
+      "case_id": "release_elevation_high",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 80.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_hl20_r1/pseudo_6dof/release_speed_low/evidence.json",
+      "case_id": "release_speed_low",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 70.0,
+        "initial_speed_m_s": 225.0
+      }
+    },
+    {
+      "artifact": "verification/alpha3_hl20_r1/pseudo_6dof/wind_vector_plus/evidence.json",
+      "case_id": "wind_vector_plus",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "parameters": {
+        "elevation_deg": 70.0,
+        "wind_velocity_m_s": [
+          5.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ],
+  "claim": "Fixed open-loop release and passive energy witnesses for the HL-20 point-mass and pseudo-6DOF tiers.",
+  "claim_boundary": "The booster and reduced aerodynamics are declared engineering surrogates. This matrix does not establish source-exact attitude dynamics, closed-loop control, physical surface allocation, thermal protection, statistical reliability, or full-envelope qualification.",
+  "failed_case_count": 0,
+  "fidelities": [
+    "point_mass_3dof",
+    "pseudo_6dof"
+  ],
+  "passed_case_count": 8,
+  "perturbation_contract": {
+    "control_authority": "not_applicable_passive_open_loop",
+    "dimensions": [
+      "release_elevation_low",
+      "release_elevation_high",
+      "release_speed_low",
+      "wind_vector_plus"
+    ],
+    "failure_policy": "retain failed terminal or phase witnesses as boundary evidence"
+  },
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hl20_r1_matrix.py",
+  "schema": "taoryx.hl20-r1-matrix/v1alpha1",
+  "status": "R1_fixed_matrix_complete"
+}

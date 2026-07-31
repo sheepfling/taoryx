@@ -1,0 +1,1195 @@
+{
+  "claim_boundary": "This matrix inventories evidence and missing gates. A nominal paired-fidelity pass is not R1 robustness or family qualification.",
+  "families": [
+    {
+      "automatic_lowering_authorized": true,
+      "cross_fidelity_status": "pass",
+      "direct_wrench": {
+        "artifact": "verification/alpha3_a320_direct_wrench/manifest.json",
+        "claim_boundary": [
+          "physical elevator, aileron, rudder, or engine allocation",
+          "full aircraft mission closure at rigid-body 6DOF",
+          "manufacturer-validated A320 flight dynamics",
+          "scheduled envelope qualification or fuel depletion"
+        ],
+        "control_path": "source-calibrated local state response -> bounded six-axis direct wrench -> pseudo-source nonlinear rotational load",
+        "direct_body_moment_injection": true,
+        "evidence_tier": "T3_screen_only",
+        "fidelity": "rigid_body_6dof_direct_wrench",
+        "mission_pass": true,
+        "physical_effector_allocation": false,
+        "status": "nominal_case_pass"
+      },
+      "directional_translation": null,
+      "family_id": "a320",
+      "fidelity_records": [
+        {
+          "artifact": "verification/a320_racetrack/point_mass_3dof_evidence.json",
+          "claim_boundary": "OpenAP point-mass performance and truth-evaluated racetrack geometry only.",
+          "family_id": "a320",
+          "fidelity": "point_mass_3dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        },
+        {
+          "artifact": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
+          "claim_boundary": "OpenAP performance plus the named kinematic attitude-response law; no physical effectors.",
+          "family_id": "a320",
+          "fidelity": "pseudo_6dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        }
+      ],
+      "native_horizontal": null,
+      "native_pad_to_pad": null,
+      "native_vertical": null,
+      "next_gate": "Use the completed calibrated reduced R1 matrix; next add throttle and physical-control evidence.",
+      "nominal_pair_ready": true,
+      "pair_outcome": "nominal_pair_ready",
+      "paired_fidelity": true,
+      "passive_pair_ready": false,
+      "physical_effector": {
+        "artifact": null,
+        "evidence_tier": null,
+        "interpretation": "No physical-effector artifact is attached to this family yet.",
+        "status": "not_run"
+      },
+      "physical_mapping": null,
+      "physical_r1": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "physical_schedule": null,
+      "physical_schedule_envelope": null,
+      "physical_schedule_interior": null,
+      "physical_schedule_transition": null,
+      "r1_fixed_matrix": {
+        "artifacts": [
+          {
+            "artifact": "verification/alpha3_a320_r1/manifest.json",
+            "id": "paired_reduced_r1",
+            "schema": "taoryx.a320-r1-matrix/v1alpha1",
+            "status": "R1_fixed_matrix_complete"
+          }
+        ],
+        "interpretation": "The paired 3DOF/pseudo fixed initial-state R1 matrix is complete; physical-effector claims remain separate.",
+        "status": "paired_reduced_r1_complete"
+      },
+      "reduced_r1": {
+        "artifact": "verification/alpha3_a320_r1/manifest.json",
+        "case_count": 12,
+        "claim_boundary": "This is deterministic reduced-tier development evidence, not a physical-surface, manufacturer-aircraft, wind, statistical reliability, or full-envelope qualification.",
+        "failed_case_count": 0,
+        "passed_case_count": 12,
+        "status": "complete"
+      },
+      "regime_direct_wrench": {
+        "artifact": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+        "status": "not_applicable"
+      },
+      "required_r1_cases": [
+        "initial_position_offset",
+        "initial_speed_offset",
+        "initial_altitude_offset",
+        "throttle_scale"
+      ],
+      "solid_pair_ready": true
+    },
+    {
+      "automatic_lowering_authorized": true,
+      "cross_fidelity_status": "pass",
+      "direct_wrench": {
+        "artifact": "artifacts/showcases/airbreathing-racetrack-fidelity-ladder/b747-racetrack-altitude-turns-6dof-v1/summary.json",
+        "claim_boundary": [
+          "physical elevator, aileron, or rudder allocation",
+          "source-validated transport flight-control law",
+          "fuel depletion or certified JT9D performance",
+          "takeoff, landing, wind robustness, or manufacturer fidelity"
+        ],
+        "control_path": null,
+        "direct_body_moment_injection": true,
+        "evidence_tier": "bounded_direct_wrench_nominal_case",
+        "fidelity": "rigid_body_6dof_direct_wrench",
+        "mission_pass": true,
+        "physical_effector_allocation": false,
+        "status": "nominal_case_pass_overall_qualification_pending"
+      },
+      "directional_translation": null,
+      "family_id": "b747",
+      "fidelity_records": [
+        {
+          "artifact": "verification/alpha3_family_qualification/b747-racetrack-altitude-turns-3dof-v1/summary.json",
+          "claim_boundary": "Source-table point-mass transport racetrack geometry, altitude, speed, and truth gates only.",
+          "family_id": "b747",
+          "fidelity": "point_mass_3dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        },
+        {
+          "artifact": "verification/alpha3_family_qualification/b747-racetrack-altitude-turns-pseudo-6dof-v1/summary.json",
+          "claim_boundary": "Transport-scaled source-table translation plus named kinematic attitude response; no physical surface allocation.",
+          "family_id": "b747",
+          "fidelity": "pseudo_6dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        }
+      ],
+      "native_horizontal": null,
+      "native_pad_to_pad": null,
+      "native_vertical": null,
+      "next_gate": "Source-derived condition-node intake now closes FC3--FC7 source trim; FC4--FC7 remain physical controller-authority boundary witnesses and FC8--FC10 remain source-trim/table-domain blockers before schedule interpolation can be promoted.",
+      "nominal_pair_ready": true,
+      "pair_outcome": "nominal_pair_ready",
+      "paired_fidelity": true,
+      "passive_pair_ready": false,
+      "physical_effector": {
+        "artifact": "verification/generated/b747_condition3_physical_surface_lqr.json",
+        "direct_body_moment_injection": false,
+        "evidence_tier": "T5_nonlinearly_validated",
+        "interpretation": "Physical-effector evidence is local to the declared operating point and does not imply family or envelope qualification.",
+        "physical_allocation_evidence": "source_table_elevator_aileron_rudder_with_bounded_deflection",
+        "promotion_blocker": null,
+        "status": "local_nonlinear_surface_validation"
+      },
+      "physical_mapping": null,
+      "physical_r1": {
+        "artifact": "verification/alpha3_b747_physical_r1/manifest.json",
+        "boundary_failure_count": 1,
+        "case_count": 4,
+        "claim_boundary": "This is local physical-surface evidence at one source condition. The matrix does not establish gain scheduling, full-envelope transport control, source servo dynamics, fuel-flow/engine-spool dynamics, wind robustness, statistical reliability, or runway operations.",
+        "direct_body_moment_injection": false,
+        "failed_case_count": 1,
+        "passed_case_count": 3,
+        "status": "R1_physical_surface_matrix_complete"
+      },
+      "physical_schedule": {
+        "artifact": "verification/alpha3_b747_physical_schedule/manifest.json",
+        "blocked_nodes": [
+          {
+            "code": "source_trim_residual_above_tolerance",
+            "hint": "Resolve the source operating-point attitude, stabilizer/trim-bias convention, mass properties, and control-table closure before scheduling this node.",
+            "point_id": "8",
+            "scaled_residual_norm": 0.012169900345793041,
+            "worst_residual_name": "body_x_force_n"
+          },
+          {
+            "code": "source_trim_residual_above_tolerance",
+            "hint": "Resolve the source operating-point attitude, stabilizer/trim-bias convention, mass properties, and control-table closure before scheduling this node.",
+            "point_id": "9",
+            "scaled_residual_norm": 0.00683201788560442,
+            "worst_residual_name": "body_x_force_n"
+          },
+          {
+            "code": "source_trim_residual_above_tolerance",
+            "hint": "Resolve the source operating-point attitude, stabilizer/trim-bias convention, mass properties, and control-table closure before scheduling this node.",
+            "point_id": "10",
+            "scaled_residual_norm": 0.10267328529224119,
+            "worst_residual_name": "body_x_force_n"
+          }
+        ],
+        "blockers_by_code": {
+          "source_trim_residual_above_tolerance": 3
+        },
+        "boundary_nodes": [
+          {
+            "controller_trial_count": 3,
+            "interior_passed": false,
+            "point_id": "4",
+            "reason": "no generic local design passed all interior witnesses"
+          },
+          {
+            "controller_trial_count": 3,
+            "interior_passed": false,
+            "point_id": "5",
+            "reason": "no generic local design passed all interior witnesses"
+          },
+          {
+            "controller_trial_count": 3,
+            "interior_passed": false,
+            "point_id": "6",
+            "reason": "no generic local design passed all interior witnesses"
+          },
+          {
+            "controller_trial_count": 3,
+            "interior_passed": false,
+            "point_id": "7",
+            "reason": "no generic local design passed all interior witnesses"
+          }
+        ],
+        "case_count": null,
+        "claim_boundary": "Source-derived physical-surface node evidence only. No schedule interpolation, continuous transition replay, full-envelope qualification, servo dynamics, fuel-flow validation, runway operation, or reliability claim is made until every declared node completes. Blocked nodes carry machine-readable integration codes and remedies.",
+        "failed_case_count": null,
+        "node_count": 8,
+        "passed_node_count": 1,
+        "runtime_gain_interpolation": "not_run_until_all_source_nodes_complete",
+        "status": "B747_physical_effector_schedule_boundary_recorded",
+        "transition_probe_count": null,
+        "transition_probe_failed_count": null,
+        "transition_probe_passed_count": null
+      },
+      "physical_schedule_envelope": null,
+      "physical_schedule_interior": null,
+      "physical_schedule_transition": null,
+      "r1_fixed_matrix": {
+        "artifacts": [
+          {
+            "artifact": "verification/alpha3_airbreathing_r1/manifest.json",
+            "id": "paired_reduced_r1",
+            "schema": "taoryx.airbreathing-r1-matrix/v1alpha1",
+            "status": "R1_fixed_matrix_complete"
+          }
+        ],
+        "interpretation": "The paired 3DOF/pseudo fixed initial-state R1 matrix is complete; physical-effector claims remain separate.",
+        "status": "paired_reduced_r1_complete"
+      },
+      "reduced_r1": {
+        "artifact": "verification/alpha3_airbreathing_r1/manifest.json",
+        "case_count": 16,
+        "claim_boundary": "This is a deterministic development R1 matrix, not a statistical reliability claim, wind robustness claim, physical-surface qualification, or full-envelope aircraft qualification.",
+        "failed_case_count": 2,
+        "passed_case_count": 14,
+        "status": "complete"
+      },
+      "regime_direct_wrench": {
+        "artifact": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+        "status": "not_applicable"
+      },
+      "required_r1_cases": [
+        "initial_altitude_plus",
+        "initial_speed_plus",
+        "initial_cross_velocity_plus",
+        "initial_mass_plus"
+      ],
+      "solid_pair_ready": true
+    },
+    {
+      "automatic_lowering_authorized": true,
+      "cross_fidelity_status": "pass",
+      "direct_wrench": {
+        "artifact": "verification/alpha3_f16_direct_wrench/manifest.json",
+        "claim_boundary": [
+          "physical elevator/aileron/rudder/throttle allocation",
+          "racetrack route closure",
+          "scheduled or full-envelope control",
+          "manufacturer flight-control fidelity"
+        ],
+        "control_path": "source-plant local state error -> bounded six-axis direct wrench -> source nonlinear body-load plant",
+        "direct_body_moment_injection": true,
+        "evidence_tier": null,
+        "fidelity": "rigid_body_6dof_direct_wrench",
+        "mission_pass": true,
+        "physical_effector_allocation": false,
+        "status": "nominal_case_pass"
+      },
+      "directional_translation": null,
+      "family_id": "f16_s119",
+      "fidelity_records": [
+        {
+          "artifact": "verification/f16_racetrack/point_mass_3dof_evidence.json",
+          "claim_boundary": "Reduced source-grounded point-mass racetrack geometry and energy behavior only.",
+          "family_id": "f16_s119",
+          "fidelity": "point_mass_3dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        },
+        {
+          "artifact": "verification/f16_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
+          "claim_boundary": "Named bounded attitude/rate response bridge; no physical surface or actuator qualification.",
+          "family_id": "f16_s119",
+          "fidelity": "pseudo_6dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        }
+      ],
+      "native_horizontal": null,
+      "native_pad_to_pad": null,
+      "native_vertical": null,
+      "next_gate": "The conservative four-node alpha interior is qualified; next broaden the physical schedule into beta/high-rate and higher-dynamic-pressure witnesses.",
+      "nominal_pair_ready": true,
+      "pair_outcome": "nominal_pair_ready",
+      "paired_fidelity": true,
+      "passive_pair_ready": false,
+      "physical_effector": {
+        "artifact": null,
+        "evidence_tier": null,
+        "interpretation": "No physical-effector artifact is attached to this family yet.",
+        "status": "not_run"
+      },
+      "physical_mapping": null,
+      "physical_r1": {
+        "artifact": "verification/alpha3_f16_physical_r1/manifest.json",
+        "boundary_failure_count": 0,
+        "case_count": 5,
+        "claim_boundary": "The source nonlinear plant, finite-difference effectiveness, bounded elevator/aileron/rudder/throttle allocation, and actuator overlays are exercised. A complete local matrix still does not establish scheduled control, statistical reliability, or full-envelope flight-control qualification.",
+        "direct_body_moment_injection": false,
+        "failed_case_count": 0,
+        "passed_case_count": 5,
+        "status": "R1_physical_effector_matrix_complete"
+      },
+      "physical_schedule": {
+        "artifact": "verification/alpha3_f16_physical_schedule/manifest.json",
+        "blocked_nodes": [],
+        "blockers_by_code": {},
+        "boundary_nodes": [],
+        "case_count": 20,
+        "claim_boundary": "Four source-retrimmed local physical-effector nodes pass the declared perturbation matrix. The generic scheduled wrench-demand contract is exercised at adjacent midpoints and endpoint physical allocation probes, but no time-marching nonlinear continuous transition replay, statistical reliability, or full-envelope flight-control qualification is claimed. Actuator dynamics remain the declared engineering first-order overlay.",
+        "failed_case_count": 0,
+        "node_count": 4,
+        "passed_node_count": 4,
+        "runtime_gain_interpolation": "generic_command_contract_exercised",
+        "status": "F16_physical_effector_schedule_nodes_complete",
+        "transition_probe_count": 15,
+        "transition_probe_failed_count": 0,
+        "transition_probe_passed_count": 15
+      },
+      "physical_schedule_envelope": {
+        "artifact": "verification/alpha3_f16_physical_schedule_envelope/manifest.json",
+        "boundary_case_count": 12,
+        "case_count": 32,
+        "claim_boundary": "This is a local physical-effector schedule envelope witness around four source-retrimmed nodes. Boundary cases are evidence of authority limits; no full-envelope, wind, servo-certification, statistical-reliability, or operational-flight claim is made.",
+        "node_count": 4,
+        "passed_case_count": 20,
+        "status": "F16_physical_effector_schedule_envelope_boundary_recorded"
+      },
+      "physical_schedule_interior": {
+        "artifact": "verification/alpha3_f16_physical_schedule_envelope/interior_qualification.json",
+        "boundary_case_count": 24,
+        "boundary_case_ids": [
+          "beta_minus_2mps",
+          "beta_plus_2mps",
+          "coupled_high_rate",
+          "high_pitch_rate_plus",
+          "high_roll_rate_plus",
+          "high_yaw_rate_plus"
+        ],
+        "claim_boundary": "Local schedule-wide interior physical-effector evidence only. This does not claim beta/high-rate authority outside the retained boundary cases, a full Mach/dynamic-pressure envelope, wind robustness, servo certification, statistical reliability, or operational flight control.",
+        "direct_body_moment_injection": false,
+        "interior_case_count": 8,
+        "interior_case_ids": [
+          "alpha_minus_1mps",
+          "alpha_plus_1mps"
+        ],
+        "node_count": 4,
+        "status": "F16_physical_schedule_interior_qualified"
+      },
+      "physical_schedule_transition": {
+        "artifact": "verification/alpha3_f16_physical_schedule_transition/manifest.json",
+        "case_count": 4,
+        "claim_boundary": "Local scheduled-transition evidence only. Endpoint source derivatives and effectiveness are linearly blended by explicit policy; no new aerodynamic table, servo certification, wind robustness, statistical reliability, or full-envelope flight-control qualification is claimed.",
+        "failed_case_count": 0,
+        "passed_case_count": 4,
+        "status": "F16_physical_effector_schedule_transition_complete"
+      },
+      "r1_fixed_matrix": {
+        "artifacts": [
+          {
+            "artifact": "verification/f16_racetrack_robustness_evidence.json",
+            "id": "physical_surface_r1",
+            "schema": "taoryx.f16-racetrack-robustness/v1",
+            "status": "R1_fixed_matrix_boundary_failure_recorded"
+          }
+        ],
+        "interpretation": "Physical-surface R1 evidence exists, but it is not inherited by the reduced 3DOF/pseudo pair.",
+        "status": "boundary_witness_available"
+      },
+      "reduced_r1": {
+        "artifact": "verification/alpha3_f16_r1/manifest.json",
+        "case_count": 8,
+        "claim_boundary": "This is deterministic reduced-tier development evidence. It does not establish physical surface allocation, manufacturer-aircraft fidelity, wind robustness, statistical reliability, or full-envelope qualification. The altitude-boundary case is retained when its truth gates fail.",
+        "failed_case_count": 2,
+        "passed_case_count": 6,
+        "status": "complete"
+      },
+      "regime_direct_wrench": {
+        "artifact": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+        "status": "not_applicable"
+      },
+      "required_r1_cases": [
+        "initial_position_offset",
+        "initial_speed_offset",
+        "initial_bank_offset",
+        "surface_authority"
+      ],
+      "solid_pair_ready": true
+    },
+    {
+      "automatic_lowering_authorized": true,
+      "cross_fidelity_status": "pass",
+      "direct_wrench": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "directional_translation": null,
+      "family_id": "hl20_mod_k",
+      "fidelity_records": [
+        {
+          "artifact": "verification/alpha3_hl20_development/point_mass_3dof_evidence.json",
+          "claim_boundary": "Source-geometry/fixed-mass reduced release, glide, and impact witness with synthetic booster and surrogate aerodynamics; no source-exact DAVE-ML flight dynamics or closed-loop controls.",
+          "family_id": "hl20_mod_k",
+          "fidelity": "point_mass_3dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        },
+        {
+          "artifact": "verification/alpha3_hl20_development/pseudo_6dof_evidence.json",
+          "claim_boundary": "Same bounded reduced release/glide/impact mission with named response law; no source-exact attitude dynamics, physical surface allocation, thermal model, or terminal arrival.",
+          "family_id": "hl20_mod_k",
+          "fidelity": "pseudo_6dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        }
+      ],
+      "native_horizontal": null,
+      "native_pad_to_pad": null,
+      "native_vertical": null,
+      "next_gate": "The pinned DAVE-ML source-direction, bounded six-axis allocation, and native open-loop surface replay probes now record source effectivity and no-direct-moment realization; next connect that source path to source-bound trim and controlled bank/alpha/energy evidence.",
+      "nominal_pair_ready": true,
+      "pair_outcome": "nominal_pair_ready",
+      "paired_fidelity": true,
+      "passive_pair_ready": false,
+      "physical_effector": {
+        "artifact": null,
+        "evidence_tier": null,
+        "interpretation": "No physical-effector artifact is attached to this family yet.",
+        "status": "not_run"
+      },
+      "physical_mapping": null,
+      "physical_r1": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "physical_schedule": null,
+      "physical_schedule_envelope": null,
+      "physical_schedule_interior": null,
+      "physical_schedule_transition": null,
+      "r1_fixed_matrix": {
+        "artifacts": [
+          {
+            "artifact": "verification/alpha3_hl20_r1/manifest.json",
+            "id": "paired_reduced_r1",
+            "schema": "taoryx.hl20-r1-matrix/v1alpha1",
+            "status": "R1_fixed_matrix_complete"
+          },
+          {
+            "artifact": "verification/alpha3_hl20_source_control/manifest.json",
+            "id": "source_control_direction",
+            "schema": "taoryx.hl20-source-control-direction-manifest/v1alpha1",
+            "status": "open_loop_source_direction_pass_with_boundary"
+          },
+          {
+            "artifact": "verification/alpha3_hl20_source_allocation/manifest.json",
+            "id": "source_allocation",
+            "schema": "taoryx.hl20-source-allocation-manifest/v1alpha1",
+            "status": "open_loop_source_allocation_pass_with_boundary"
+          },
+          {
+            "artifact": "verification/alpha3_hl20_source_surface_replay/manifest.json",
+            "id": "source_surface_replay",
+            "schema": "taoryx.hl20-source-surface-replay-manifest/v1alpha1",
+            "status": "source_surface_replay_pass_with_open_loop_boundary"
+          }
+        ],
+        "interpretation": "The paired passive/open-loop reduced R1 matrix is complete; source-exact controlled-flight claims remain separate.",
+        "status": "paired_reduced_r1_complete"
+      },
+      "reduced_r1": {
+        "artifact": "verification/alpha3_hl20_r1/manifest.json",
+        "case_count": 8,
+        "claim_boundary": "The booster and reduced aerodynamics are declared engineering surrogates. This matrix does not establish source-exact attitude dynamics, closed-loop control, physical surface allocation, thermal protection, statistical reliability, or full-envelope qualification.",
+        "failed_case_count": 0,
+        "passed_case_count": 8,
+        "status": "complete"
+      },
+      "regime_direct_wrench": {
+        "artifact": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+        "blocker": "the local source-load direct-wrench screen is available for diagnostics, but source surface replay and bounded source-load allocation remain more informative until source-bound trim is connected",
+        "direct_wrench_mode": "debug_only",
+        "evidence_tier": "T0_source_effectivity",
+        "fidelity": "rigid_body_6dof_direct_wrench_debug",
+        "mission_pass": null,
+        "required_inputs_to_promote": [
+          "source-bound equilibrium with seven surface commands",
+          "nonlinear source-load residual after trim",
+          "surface actuator dynamics and rate limits",
+          "closed-loop bank, alpha, and energy mission contract"
+        ],
+        "status": "surface_path_preferred_direct_wrench_debug_not_promoted"
+      },
+      "required_r1_cases": [
+        "release_state_offset",
+        "mass_scale",
+        "wind_vector",
+        "alpha_boundary"
+      ],
+      "solid_pair_ready": true
+    },
+    {
+      "automatic_lowering_authorized": true,
+      "cross_fidelity_status": "pass",
+      "direct_wrench": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "directional_translation": {
+        "artifact": "verification/alpha3_hummingbird_directional/manifest.json",
+        "claim_boundary": "directional point-mass and aggregate pseudo evidence only; native rotor translation and electrical battery remain separate",
+        "fidelity_records": [
+          {
+            "artifact": "point_mass_3dof_evidence.json",
+            "fidelity": "point_mass_3dof",
+            "mission_pass": true
+          },
+          {
+            "artifact": "pseudo_6dof_evidence.json",
+            "fidelity": "pseudo_6dof",
+            "mission_pass": true
+          }
+        ],
+        "mission_id": "hummingbird_directional_translation_v1",
+        "objective_count": 10,
+        "passed_objective_count": 10,
+        "physical_motor_allocation": false,
+        "status": "directional_translation_witness_pass"
+      },
+      "family_id": "hummingbird",
+      "fidelity_records": [
+        {
+          "artifact": "verification/alpha3_hummingbird_development/point_mass_3dof_evidence.json",
+          "claim_boundary": "Independent point-mass translational force model for the declared hover-box, disturbance, contact, and shutdown mission; yaw, attitude, and motor allocation are not represented.",
+          "family_id": "hummingbird",
+          "fidelity": "point_mass_3dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        },
+        {
+          "artifact": "verification/alpha3_hummingbird_development/pseudo_6dof_evidence.json",
+          "claim_boundary": "Nominal aggregate-thrust response-law evidence scoped to hover-box/yaw/contact semantics; no individual-rotor allocation, translated-flight, electrical battery/SOC, wind, or family-wide robustness claim.",
+          "family_id": "hummingbird",
+          "fidelity": "pseudo_6dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        }
+      ],
+      "native_horizontal": {
+        "allocation_summary": {
+          "all_statuses_feasible": false,
+          "allocation_pass": true,
+          "authority_boundary": true,
+          "disallowed_statuses": [],
+          "maximum_realized_residual_nm": 0.4463287777877218,
+          "saturation_fraction": 0.0011111111111111111,
+          "statuses": [
+            "feasible",
+            "partially_achievable"
+          ]
+        },
+        "artifact": "verification/alpha3_hummingbird_native_horizontal/manifest.json",
+        "claim_boundary": "This is a local source-plant horizontal translation witness. Altitude/collective regulation, electrical battery/SOC, contact, landing, wind, and full-envelope promotion remain open.",
+        "direct_body_moment_injection": false,
+        "mission_pass": true,
+        "objective_count": 5,
+        "passed_objective_count": 5,
+        "physical_motor_allocation": true,
+        "status": "native_horizontal_translation_witness_pass_with_authority_boundary"
+      },
+      "native_pad_to_pad": {
+        "artifact": "verification/alpha3_hummingbird_native_pad_to_pad/hummingbird-pad-to-pad-altitude-yaw-individual-rotor-v1/summary.json",
+        "claim_boundary": [
+          "landing-gear, tire, or ground-effect dynamics",
+          "wind/gust recovery",
+          "blade-resolved aerodynamics",
+          "electrical battery/SOC depletion",
+          "family-wide multirotor qualification"
+        ],
+        "control_path": "individual_rotor_source_equations_with_bounded_quad_x_allocation_and_motor_lag",
+        "fidelity": "rigid_body_6dof",
+        "landing_evidence": {
+          "geometric_ground_crossing_time_s": 86.01400000000012,
+          "ground_contact_time_s": 86.01941087584868,
+          "ground_reaction_peak_n": 4.899150700205357,
+          "motor_shutdown_time_s": 86.00000000000013,
+          "note": "The rigid-body runtime records an explicit static-pad contact impulse, normal reaction, and post-contact settle segment; landing gear, tire, and ground-effect dynamics remain outside this claim.",
+          "physical_contact_state_available": true,
+          "post_contact_settle_pass": true,
+          "post_crossing_max_speed_m_s": 1.125190208496194e-16,
+          "post_crossing_sample_count": 5981
+        },
+        "mission_id": "hummingbird-pad-to-pad-altitude-yaw-individual-rotor-v1",
+        "mission_pass": true,
+        "objective_count": 13,
+        "passed_objective_count": 13,
+        "status": "nominal_case_pass_overall_qualification_pending"
+      },
+      "native_vertical": {
+        "allocation_summary": {
+          "all_statuses_feasible": true,
+          "allocation_pass": true,
+          "authority_boundary": false,
+          "disallowed_statuses": [],
+          "maximum_realized_residual": 0.07517781598440276,
+          "saturation_fraction": 0.0,
+          "statuses": [
+            "feasible"
+          ]
+        },
+        "artifact": "verification/alpha3_hummingbird_native_vertical/manifest.json",
+        "claim_boundary": "This is a local source-plant vertical-force witness. Electrical battery/SOC, contact, landing, wind, and full-envelope promotion remain open.",
+        "direct_body_force_injection": false,
+        "direct_body_moment_injection": false,
+        "mission_pass": true,
+        "objective_count": 4,
+        "passed_objective_count": 4,
+        "physical_motor_allocation": true,
+        "status": "native_vertical_force_witness_pass"
+      },
+      "next_gate": "The aggregate runtime pad-to-pad packet and the separate individual-rotor native horizontal and vertical witnesses now pass; remaining gates are electrical battery/SOC, rotor-resolved wind/full-envelope promotion, and replacing the explicit static-pad contact contract with landing-gear or ground-effect physics if those are claimed.",
+      "nominal_pair_ready": true,
+      "pair_outcome": "nominal_pair_ready",
+      "paired_fidelity": true,
+      "passive_pair_ready": false,
+      "physical_effector": {
+        "artifact": "verification/generated/hummingbird_individual_rotor_physical_lqr.json",
+        "direct_body_moment_injection": false,
+        "evidence_tier": "T5_nonlinearly_validated",
+        "interpretation": "Physical-effector evidence is local to the declared operating point and does not imply family or envelope qualification.",
+        "physical_allocation_evidence": "individual_rotor_source_equations_with_motor_lag",
+        "promotion_blocker": null,
+        "status": "local_nonlinear_individual_rotor_validation"
+      },
+      "physical_mapping": null,
+      "physical_r1": {
+        "artifact": "verification/alpha3_hummingbird_physical_r1/manifest.json",
+        "boundary_failure_count": 1,
+        "case_count": 4,
+        "claim_boundary": "This is local hover physical-effector evidence. It does not establish translated flight, landing contact, battery discharge, blade-resolved aerodynamics, wind robustness, statistical reliability, or full-envelope multirotor qualification.",
+        "direct_body_moment_injection": false,
+        "failed_case_count": 1,
+        "passed_case_count": 3,
+        "status": "R1_physical_individual_rotor_matrix_complete"
+      },
+      "physical_schedule": null,
+      "physical_schedule_envelope": null,
+      "physical_schedule_interior": null,
+      "physical_schedule_transition": null,
+      "r1_fixed_matrix": {
+        "artifacts": [
+          {
+            "artifact": "verification/alpha3_hummingbird_r1/manifest.json",
+            "id": "paired_reduced_r1",
+            "schema": "taoryx.hummingbird-r1-matrix/v1alpha1",
+            "status": "R1_fixed_matrix_complete"
+          },
+          {
+            "artifact": "artifacts/verification/fidelity_parity_hummingbird_euler/report.json",
+            "id": "native_hover_parent_parity",
+            "schema": 1,
+            "status": "available"
+          },
+          {
+            "artifact": "artifacts/showcases/alpha2/final-catalog-v1/packs/hummingbird-pad-to-pad-altitude-yaw-v2/summary.json",
+            "id": "native_semantic_parent",
+            "schema": 1,
+            "status": "nominal_case_pass_overall_qualification_pending"
+          },
+          {
+            "artifact": "verification/alpha3_hummingbird_native_comparison/manifest.json",
+            "id": "native_pseudo_channel_comparison",
+            "schema": "taoryx.hummingbird-native-pseudo-comparison-manifest/v1alpha1",
+            "status": "comparison_pass_with_resource_boundary"
+          },
+          {
+            "artifact": "verification/alpha3_hummingbird_translated_physical/manifest.json",
+            "id": "translated_physical_witness",
+            "schema": "taoryx.hummingbird-translated-physical-witness/v1alpha1",
+            "status": "translated_body_physical_rotor_witness_pass"
+          },
+          {
+            "artifact": "verification/alpha3_hummingbird_directional/manifest.json",
+            "id": "directional_translation_witness",
+            "schema": "taoryx.hummingbird-directional-mission/v1alpha1",
+            "status": "directional_translation_witness_pass"
+          },
+          {
+            "artifact": "verification/alpha3_hummingbird_native_horizontal/manifest.json",
+            "id": "native_horizontal_translation_witness",
+            "schema": "taoryx.hummingbird-native-horizontal-mission/v1alpha1",
+            "status": "native_horizontal_translation_witness_pass_with_authority_boundary"
+          },
+          {
+            "artifact": "verification/alpha3_hummingbird_native_vertical/manifest.json",
+            "id": "native_vertical_force_witness",
+            "schema": "taoryx.hummingbird-native-vertical-mission/v1alpha1",
+            "status": "native_vertical_force_witness_pass"
+          }
+        ],
+        "interpretation": "The aggregate-thrust pseudo and independent translation-only force-model R1 matrix is complete; individual-rotor claims remain separate.",
+        "status": "paired_reduced_r1_complete"
+      },
+      "reduced_r1": {
+        "artifact": "verification/alpha3_hummingbird_r1/manifest.json",
+        "case_count": 8,
+        "claim_boundary": "The pseudo tier uses an aggregate thrust-vector and bounded attitude-response surrogate. The 3DOF tier uses an independent translation-only force model. Neither tier establishes individual motor/rotor allocation, rotor inflow, reaction torque, physical moment balance, wind robustness, or statistical reliability.",
+        "failed_case_count": 0,
+        "passed_case_count": 8,
+        "status": "complete"
+      },
+      "regime_direct_wrench": {
+        "artifact": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+        "blocker": "none for the declared native rotor path; direct wrench remains a diagnostic bypass and cannot replace rotor allocation",
+        "direct_wrench_mode": "physical_preferred",
+        "evidence_tier": "T5_nonlinearly_validated_native_rotor",
+        "fidelity": "rigid_body_6dof_individual_rotor",
+        "mission_pass": null,
+        "required_inputs_to_promote": [
+          "rotor-resolved wind and voltage envelope before broader promotion",
+          "explicit motor failure and battery authority cases"
+        ],
+        "status": "native_rotor_path_preferred_direct_wrench_debug_only"
+      },
+      "required_r1_cases": [
+        "initial_position_offset",
+        "initial_yaw_offset",
+        "thrust_authority_minus_10pct",
+        "battery_energy_minus_40pct"
+      ],
+      "solid_pair_ready": true
+    },
+    {
+      "automatic_lowering_authorized": true,
+      "cross_fidelity_status": "pass",
+      "direct_wrench": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "directional_translation": null,
+      "family_id": "reference_nesc_two_stage_rocket",
+      "fidelity_records": [
+        {
+          "artifact": "verification/alpha3_nesc_development/point_mass_3dof_evidence.json",
+          "claim_boundary": "Retained NESC source translation, stage timing, mass-flow replay, and orbit-coast terminal state; no source attitude or gimbal claim.",
+          "family_id": "reference_nesc_two_stage_rocket",
+          "fidelity": "point_mass_3dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        },
+        {
+          "artifact": "verification/alpha3_nesc_development/pseudo_6dof_evidence.json",
+          "claim_boundary": "Retained source translation plus explicitly scheduled pseudo attitude response; no source-exact attitude data, gimbal/effectivity, plume, flex, or controller-law claim.",
+          "family_id": "reference_nesc_two_stage_rocket",
+          "fidelity": "pseudo_6dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        }
+      ],
+      "native_horizontal": null,
+      "native_pad_to_pad": null,
+      "native_vertical": null,
+      "next_gate": "The pinned source-data audit confirms no declared control input, gimbal channel, or attitude input; next obtain authoritative gimbal/effectivity and event-aligned attitude data before parent comparison or allocation.",
+      "nominal_pair_ready": true,
+      "pair_outcome": "nominal_pair_ready",
+      "paired_fidelity": true,
+      "passive_pair_ready": false,
+      "physical_effector": {
+        "artifact": null,
+        "evidence_tier": null,
+        "interpretation": "No physical-effector artifact is attached to this family yet.",
+        "status": "not_run"
+      },
+      "physical_mapping": null,
+      "physical_r1": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "physical_schedule": null,
+      "physical_schedule_envelope": null,
+      "physical_schedule_interior": null,
+      "physical_schedule_transition": null,
+      "r1_fixed_matrix": {
+        "artifacts": [
+          {
+            "artifact": "verification/alpha3_nesc_r1/manifest.json",
+            "id": "paired_reduced_r1",
+            "schema": "taoryx.nesc-r1-matrix/v1alpha1",
+            "status": "R1_fixed_matrix_complete"
+          },
+          {
+            "artifact": "verification/alpha3_nesc_attitude_data_contract/manifest.json",
+            "id": "attitude_data_contract",
+            "schema": "taoryx.nesc-attitude-data-contract-manifest/v1alpha1",
+            "status": "blocked_parent_attitude_data_unavailable"
+          }
+        ],
+        "interpretation": "The source-replay and bounded response-law R1 matrix is complete; source-exact gimbal effectiveness and physical thrust-vector allocation remain separate.",
+        "status": "paired_reduced_r1_complete"
+      },
+      "reduced_r1": {
+        "artifact": "verification/alpha3_nesc_r1/manifest.json",
+        "case_count": 8,
+        "claim_boundary": "The source stage/mass/translation history remains fixed. The pseudo tier varies only its declared response-law lag and initial attitude. No source-exact gimbal effectiveness, plume interaction, staging-control law, statistical reliability, or full-envelope qualification is claimed.",
+        "failed_case_count": 0,
+        "passed_case_count": 8,
+        "status": "complete"
+      },
+      "regime_direct_wrench": {
+        "artifact": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+        "blocker": "the retained NESC package is a translation/mass/staging replay and declares no participating attitude or gimbal input",
+        "direct_wrench_mode": "debug_only",
+        "evidence_tier": "T0_translation_only",
+        "fidelity": "rigid_body_6dof_direct_wrench_screen",
+        "mission_pass": null,
+        "required_inputs_to_promote": [
+          "gimbal or thrust-vector input channels and signs",
+          "control-dependent force and moment outputs or effectiveness deck",
+          "stage-dependent actuator limits and rates",
+          "event-aligned attitude and body-rate history"
+        ],
+        "status": "blocked_parent_attitude_data_unavailable"
+      },
+      "required_r1_cases": [
+        "response_lag_fast",
+        "response_lag_slow",
+        "initial_attitude_offset",
+        "nominal_replay_integrity"
+      ],
+      "solid_pair_ready": true
+    },
+    {
+      "automatic_lowering_authorized": true,
+      "cross_fidelity_status": "pass",
+      "direct_wrench": {
+        "artifact": "verification/alpha3_x8_direct_wrench/manifest.json",
+        "claim_boundary": null,
+        "control_path": "local attitude/rate error -> bounded six-axis direct wrench -> table-backed nonlinear rigid-body plant",
+        "direct_body_moment_injection": true,
+        "evidence_tier": null,
+        "fidelity": "rigid_body_6dof_direct_wrench",
+        "mission_pass": true,
+        "physical_effector_allocation": false,
+        "status": "nominal_case_pass"
+      },
+      "directional_translation": null,
+      "family_id": "skywalker_x8",
+      "fidelity_records": [
+        {
+          "artifact": "verification/alpha3_family_qualification/x8-racetrack-altitude-turns-3dof-v1/summary.json",
+          "claim_boundary": "Source-table point-mass translation, route geometry, and truth-evaluated racetrack gates only.",
+          "family_id": "skywalker_x8",
+          "fidelity": "point_mass_3dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        },
+        {
+          "artifact": "verification/alpha3_family_qualification/x8-racetrack-altitude-turns-pseudo-6dof-v1/summary.json",
+          "claim_boundary": "Source-table translation plus the named kinematic attitude-response bridge; no physical elevon allocation.",
+          "family_id": "skywalker_x8",
+          "fidelity": "pseudo_6dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        }
+      ],
+      "native_horizontal": null,
+      "native_pad_to_pad": null,
+      "native_vertical": null,
+      "next_gate": "The mapped two-elevon short physical-surface witness passes roll/pitch allocation and the full route now records a reproducible beta-domain fail-closed boundary; end-to-end physical racetrack promotion still requires an independent yaw realization or a deliberately source-bounded route contract.",
+      "nominal_pair_ready": true,
+      "pair_outcome": "nominal_pair_ready",
+      "paired_fidelity": true,
+      "passive_pair_ready": false,
+      "physical_effector": {
+        "artifact": "verification/generated/x8_table_coordinate_physical_lqr.json",
+        "direct_body_moment_injection": false,
+        "evidence_tier": "T4_physically_allocated_source_coordinate",
+        "interpretation": "Physical-effector evidence is local to the declared operating point and does not imply family or envelope qualification.",
+        "physical_allocation_evidence": "source_coordinate_allocation_with_resolved_left_right_mapping",
+        "promotion_blocker": "individual_left_right_actuator_and_end_to_end_racetrack_evidence_pending",
+        "status": "local_nonlinear_table_coordinate_validation"
+      },
+      "physical_mapping": {
+        "artifact": "verification/alpha3_x8_physical_mapping/manifest.json",
+        "claim_boundary": [
+          "This resolves the source coordinate mapping, but does not prove servo wiring, hinge-sign calibration, or hardware-level actuator dynamics.",
+          "No sign is inferred from trajectory appearance or controller success.",
+          "The source-table plant remains a source-coordinate realization until mapped left/right actuator telemetry is exercised end to end."
+        ],
+        "hypothesis_count": 2,
+        "promotion_authorized": true,
+        "promotion_blocker": "individual_left_right_actuator_and_end_to_end_racetrack_evidence_pending",
+        "status": "X8_physical_left_right_mapping_resolved_by_source_equation"
+      },
+      "physical_r1": {
+        "artifact": "verification/alpha3_x8_physical_r1/manifest.json",
+        "boundary_failure_count": 1,
+        "case_count": 5,
+        "claim_boundary": "This matrix proves only local roll/pitch allocation through bounded source-coordinate elevon commands. It does not establish independent yaw authority, mapped hardware servo wiring, end-to-end racetrack completion, scheduled control, wind robustness, or family qualification.",
+        "direct_body_moment_injection": false,
+        "failed_case_count": 1,
+        "passed_case_count": 4,
+        "status": "R1_physical_source_coordinate_matrix_complete"
+      },
+      "physical_schedule": null,
+      "physical_schedule_envelope": null,
+      "physical_schedule_interior": null,
+      "physical_schedule_transition": null,
+      "r1_fixed_matrix": {
+        "artifacts": [
+          {
+            "artifact": "verification/alpha3_airbreathing_r1/manifest.json",
+            "id": "paired_reduced_r1",
+            "schema": "taoryx.airbreathing-r1-matrix/v1alpha1",
+            "status": "R1_fixed_matrix_complete"
+          },
+          {
+            "artifact": "verification/alpha3_x8_physical_surface_boundary/manifest.json",
+            "id": "physical_surface_boundary",
+            "schema": "taoryx.x8-physical-surface-boundary-manifest/v1alpha1",
+            "status": "available"
+          },
+          {
+            "artifact": "verification/alpha3_x8_direct_wrench/manifest.json",
+            "id": "direct_wrench_6dof",
+            "schema": "taoryx.x8-direct-wrench-6dof/v1alpha1",
+            "status": "available"
+          }
+        ],
+        "interpretation": "The paired 3DOF/pseudo fixed initial-state R1 matrix is complete; physical-effector claims remain separate.",
+        "status": "paired_reduced_r1_complete"
+      },
+      "reduced_r1": {
+        "artifact": "verification/alpha3_airbreathing_r1/manifest.json",
+        "case_count": 16,
+        "claim_boundary": "This is a deterministic development R1 matrix, not a statistical reliability claim, wind robustness claim, physical-surface qualification, or full-envelope aircraft qualification.",
+        "failed_case_count": 2,
+        "passed_case_count": 14,
+        "status": "complete"
+      },
+      "regime_direct_wrench": {
+        "artifact": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+        "status": "not_applicable"
+      },
+      "required_r1_cases": [
+        "initial_altitude_plus",
+        "initial_speed_plus",
+        "initial_cross_velocity_plus",
+        "initial_mass_plus"
+      ],
+      "solid_pair_ready": true
+    },
+    {
+      "automatic_lowering_authorized": false,
+      "cross_fidelity_status": "pass",
+      "direct_wrench": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "directional_translation": null,
+      "family_id": "tumbling_body",
+      "fidelity_records": [
+        {
+          "artifact": "verification/alpha3_tumbling_body/fidelity_ladder/point_mass_3dof_evidence.json",
+          "claim_boundary": "parent capability and source-exact passive-body aerodynamics remain outside this witness",
+          "family_id": "tumbling_body",
+          "fidelity": "point_mass_3dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        },
+        {
+          "artifact": "verification/alpha3_tumbling_body/fidelity_ladder/pseudo_6dof_evidence.json",
+          "claim_boundary": "parent capability and source-exact passive-body aerodynamics remain outside this witness",
+          "family_id": "tumbling_body",
+          "fidelity": "pseudo_6dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        }
+      ],
+      "native_horizontal": null,
+      "native_pad_to_pad": null,
+      "native_vertical": null,
+      "next_gate": "Area-policy, passive-rotation, and cross-fidelity loss witnesses now pass for the four declared shapes; remaining promotion requires source-exact passive aerodynamics or parent-capability evidence, not a controller.",
+      "nominal_pair_ready": true,
+      "pair_outcome": "nominal_pair_ready",
+      "paired_fidelity": true,
+      "passive_pair_ready": true,
+      "physical_effector": {
+        "artifact": null,
+        "evidence_tier": null,
+        "interpretation": "No physical-effector artifact is attached to this family yet.",
+        "status": "not_run"
+      },
+      "physical_mapping": null,
+      "physical_r1": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "physical_schedule": null,
+      "physical_schedule_envelope": null,
+      "physical_schedule_interior": null,
+      "physical_schedule_transition": null,
+      "r1_fixed_matrix": {
+        "artifacts": [
+          {
+            "artifact": "verification/alpha3_tumbling_body/r1_matrix/manifest.json",
+            "id": "passive_r1_matrix",
+            "schema": "taoryx.tumbling-body-passive-r1-matrix/v1alpha1",
+            "status": "PASSIVE_R1_MATRIX_COMPLETE"
+          },
+          {
+            "artifact": "verification/alpha3_tumbling_body/qualification.json",
+            "id": "passive_shape_ensemble",
+            "schema": "taoryx.alpha3-passive-deployment-qualification/v1alpha1",
+            "status": "qualified_witness_with_physical_footprint_uncertainty"
+          }
+        ],
+        "interpretation": "The passive shape/uncertainty matrix is complete; this is not controller robustness or parent capability qualification.",
+        "status": "passive_reduced_r1_complete"
+      },
+      "reduced_r1": {
+        "artifact": "verification/alpha3_tumbling_body/r1_matrix/manifest.json",
+        "case_count": 8,
+        "claim_boundary": "This is passive-body evidence, not controller robustness. The pseudo tier reuses native rigid-body equations; no prescribed tumble, control surface, wheel, thruster, or authority claim is introduced.",
+        "failed_case_count": 0,
+        "passed_case_count": 8,
+        "status": "complete"
+      },
+      "regime_direct_wrench": {
+        "artifact": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+        "status": "not_applicable"
+      },
+      "required_r1_cases": [
+        "shape_geometry",
+        "initial_attitude",
+        "initial_rate",
+        "area_policy"
+      ],
+      "solid_pair_ready": true
+    },
+    {
+      "automatic_lowering_authorized": true,
+      "cross_fidelity_status": "pass",
+      "direct_wrench": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "directional_translation": null,
+      "family_id": "x15",
+      "fidelity_records": [
+        {
+          "artifact": "verification/x15_fidelity_ladder/point_mass_3dof_evidence.json",
+          "claim_boundary": "Independently evaluated staged X-15 event/energy/impact witness only; no controlled terminal handoff, native batch-provider equivalence, or physical-effector allocation.",
+          "family_id": "x15",
+          "fidelity": "point_mass_3dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        },
+        {
+          "artifact": "verification/x15_fidelity_ladder/pseudo_6dof_evidence.json",
+          "claim_boundary": "Phase-scheduled response-law realization of the staged event/energy/impact witness; no source-exact attitude law, controlled terminal handoff, or physical-effector allocation.",
+          "family_id": "x15",
+          "fidelity": "pseudo_6dof",
+          "mission_pass": true,
+          "status": "nominal_case_pass"
+        }
+      ],
+      "native_horizontal": null,
+      "native_pad_to_pad": null,
+      "native_vertical": null,
+      "next_gate": "The powered/coast/glide response schedule now runs from phase state and is recorded in telemetry; next add a controlled terminal-handoff gate and source-backed physical-effector evidence.",
+      "nominal_pair_ready": true,
+      "pair_outcome": "nominal_pair_ready",
+      "paired_fidelity": true,
+      "passive_pair_ready": false,
+      "physical_effector": {
+        "artifact": "verification/generated/x15_physical_lqr_readiness.json",
+        "direct_body_moment_injection": false,
+        "evidence_tier": "T0_structural",
+        "interpretation": "Physical-effector evidence is local to the declared operating point and does not imply family or envelope qualification.",
+        "physical_allocation_evidence": null,
+        "promotion_blocker": null,
+        "status": "blocked_before_T1_trim"
+      },
+      "physical_mapping": null,
+      "physical_r1": {
+        "artifact": null,
+        "status": "not_run"
+      },
+      "physical_schedule": null,
+      "physical_schedule_envelope": null,
+      "physical_schedule_interior": null,
+      "physical_schedule_transition": null,
+      "r1_fixed_matrix": {
+        "artifacts": [
+          {
+            "artifact": "verification/alpha3_x15_r1/manifest.json",
+            "id": "paired_reduced_r1",
+            "schema": "taoryx.x15-r1-matrix/v1alpha1",
+            "status": "R1_fixed_matrix_complete"
+          }
+        ],
+        "interpretation": "The staged reduced-order event-chain R1 matrix is complete; controlled terminal-handoff and physical-effector claims remain separate.",
+        "status": "paired_reduced_r1_complete"
+      },
+      "reduced_r1": {
+        "artifact": "verification/alpha3_x15_r1/manifest.json",
+        "case_count": 10,
+        "claim_boundary": "This is deterministic X-15-scaled reduced-order evidence with explicit deployment events. It does not establish a controlled terminal handoff, native X-15 batch dynamics, physical stabilator/rudder/throttle/RCS allocation, wind robustness, statistical reliability, or full-envelope qualification.",
+        "failed_case_count": 0,
+        "passed_case_count": 10,
+        "status": "complete"
+      },
+      "regime_direct_wrench": {
+        "artifact": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+        "blocker": "source-bounded trim must pass before a direct-wrench recovery screen can be promoted beyond structural readiness",
+        "direct_wrench_mode": "debug_only",
+        "evidence_tier": "T0_structural",
+        "fidelity": "rigid_body_6dof_direct_wrench_screen",
+        "mission_pass": null,
+        "required_inputs_to_promote": [
+          "source-bounded powered or glide trim with residual contract",
+          "resolved symmetric/differential stabilator gearing and signs",
+          "propulsion command contract or explicit coast-only scope",
+          "RCS geometry and impulse data before low-authority blending"
+        ],
+        "status": "blocked_before_T1_trim"
+      },
+      "required_r1_cases": [
+        "release_angle_low",
+        "release_angle_high",
+        "initial_speed_plus",
+        "booster_thrust_minus_10pct",
+        "wind_vector_plus"
+      ],
+      "solid_pair_ready": true
+    }
+  ],
+  "interpretation": "Automatic lowering may use only the evidence-keyed nominal pairs. R1 and higher claims require family-specific reruns and are never inferred from this index.",
+  "schema": "taoryx.alpha3-readiness-matrix/v1alpha1",
+  "source_manifests": {
+    "cross_fidelity": "verification/alpha3_cross_fidelity/manifest.json",
+    "fidelity_ladder": "verification/alpha3_fidelity_ladder/manifest.json"
+  },
+  "status": "development_readiness_report",
+  "summary": {
+    "cross_fidelity_pass_count": 9,
+    "direct_wrench_nominal_pass_count": 4,
+    "direct_wrench_witness_count": 4,
+    "directional_translation_witness_count": 1,
+    "family_count": 9,
+    "native_horizontal_witness_count": 1,
+    "native_pad_to_pad_witness_count": 1,
+    "native_vertical_witness_count": 1,
+    "nominal_pair_ready_count": 9,
+    "paired_fidelity_count": 9,
+    "passive_pair_ready_count": 1,
+    "physical_effector_t5_count": 2,
+    "physical_effector_witness_count": 4,
+    "physical_r1_matrix_count": 4,
+    "physical_schedule_envelope_count": 1,
+    "physical_schedule_interior_count": 1,
+    "r1_boundary_witness_count": 1,
+    "r1_matrix_complete_count": 9,
+    "r1_pending_count": 0,
+    "reduced_r1_complete_count": 9,
+    "regime_direct_wrench_promoted_count": 0,
+    "regime_direct_wrench_record_count": 4,
+    "solid_pair_ready_count": 9
+  }
+}

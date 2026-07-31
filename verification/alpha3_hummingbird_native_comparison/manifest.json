@@ -1,0 +1,8 @@
+{
+  "claim_boundary": "The native packet exposes rotor speed, source-derived thrust/power proxy, and shutdown but no electrical battery/SOC model; the pseudo battery is an engineering reserve and is not numerically compared to native energy.",
+  "comparison": "comparison.json",
+  "plot": "native_pseudo_comparison_board.png",
+  "reproduction": "MPLCONFIGDIR=/tmp/taoryx-mpl PYTHONPATH=src python3 tools/validate_hummingbird_native_pseudo_comparison.py",
+  "schema": "taoryx.hummingbird-native-pseudo-comparison-manifest/v1alpha1",
+  "status": "comparison_pass_with_resource_boundary"
+}

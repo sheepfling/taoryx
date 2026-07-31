@@ -1,0 +1,1124 @@
+{
+  "claims": [
+    "the seven declared source surface channels are converted into six-axis local force/moment effectiveness matrices",
+    "feasible local wrench requests are solved with explicit surface bounds",
+    "an intentionally over-demanded request is retained as an authority boundary rather than silently clipped into a pass",
+    "the declared HL-20 first-order actuator profile is exercised for a source-load replay probe"
+  ],
+  "control_path": "source aerodynamic graph -> finite-difference six-axis effectiveness -> bounded least-squares surface allocation -> source-load replay",
+  "family_id": "hl20_mod_k",
+  "next_gate": "Use this source effectivity and allocator in a source-bound pitch/bank/alpha/energy response adapter; retain the Mach-3 rudder boundary and do not call this closed-loop flight evidence.",
+  "nonclaims": [
+    "closed-loop trim or trajectory qualification",
+    "physical force/moment closure beyond the pinned source graph",
+    "source-exact guidance or flight-control law",
+    "family envelope, landing, thermal, or statistical reliability qualification"
+  ],
+  "operating_points": [
+    {
+      "actuator_probe": {
+        "achieved_command_deg": {
+          "left_wing_flap": 1.133874757704843,
+          "lower_left_body_flap": 0.8504060682786322,
+          "lower_right_body_flap": 0.5669373788524215,
+          "right_wing_flap": -1.133874757704843,
+          "rudder": 0.8504060682786322,
+          "upper_left_body_flap": -0.8504060682786322,
+          "upper_right_body_flap": -0.5669373788524215
+        },
+        "achieved_source_wrench_delta": [
+          -171.64977255228587,
+          3516.960591868401,
+          -45.60603024197917,
+          8535.248146780074,
+          3196.9151985478784,
+          -11979.094664128364
+        ],
+        "actuated_request_residual_norm": 87304.58148569403,
+        "rate_deg_s": {
+          "left_wing_flap": 22.677495154096857,
+          "lower_left_body_flap": 17.00812136557264,
+          "lower_right_body_flap": 11.338747577048428,
+          "right_wing_flap": -22.677495154096857,
+          "rudder": 17.00812136557264,
+          "upper_left_body_flap": -17.00812136557264,
+          "upper_right_body_flap": -11.338747577048428
+        },
+        "rate_limited": [
+          "upper_left_body_flap",
+          "lower_left_body_flap",
+          "upper_right_body_flap",
+          "lower_right_body_flap",
+          "left_wing_flap",
+          "right_wing_flap",
+          "rudder"
+        ],
+        "requested_command_deg": {
+          "left_wing_flap": 4.0,
+          "lower_left_body_flap": 3.0,
+          "lower_right_body_flap": 2.0,
+          "right_wing_flap": -4.0,
+          "rudder": 3.0,
+          "upper_left_body_flap": -3.0,
+          "upper_right_body_flap": -2.0
+        },
+        "saturated": []
+      },
+      "allocator": {
+        "actuator_model": "bounded_position_rate_first_order",
+        "effectiveness_source": "hl20_mod_k_daveml_source_v1:centered-source-load-derivative",
+        "implementation": "taoryx.control_allocation.allocate_and_advance_wrench"
+      },
+      "alpha_deg": 5.0,
+      "bounds_deg": {
+        "left_wing_flap": [
+          -30.0,
+          30.0
+        ],
+        "lower_left_body_flap": [
+          0.0,
+          60.0
+        ],
+        "lower_right_body_flap": [
+          0.0,
+          60.0
+        ],
+        "right_wing_flap": [
+          -30.0,
+          30.0
+        ],
+        "rudder": [
+          -30.0,
+          30.0
+        ],
+        "upper_left_body_flap": [
+          -60.0,
+          0.0
+        ],
+        "upper_right_body_flap": [
+          -60.0,
+          0.0
+        ]
+      },
+      "effectiveness_matrix_n_or_nm_per_deg": [
+        [
+          -66.99005504359957,
+          -112.77497534194845,
+          -66.99005504359957,
+          -112.77497534194845,
+          -184.3349671575088,
+          -184.3349671575088,
+          0.0
+        ],
+        [
+          -86.71107527996728,
+          152.94705828908113,
+          86.71107527996728,
+          -152.94705828908113,
+          1134.3095599988274,
+          -1134.3095599988274,
+          1030.913457141618
+        ],
+        [
+          -1136.5613731222693,
+          -671.6863115144806,
+          -1136.5613731222693,
+          -671.6863115144806,
+          -1001.0154625999567,
+          -1001.0154625999567,
+          0.0
+        ],
+        [
+          623.7234109369714,
+          966.7159158793354,
+          -623.7234109369714,
+          -966.7159158793354,
+          3607.8648076517684,
+          -3607.8648076517684,
+          301.3699587349582
+        ],
+        [
+          -3207.4450170271193,
+          -1034.8223093767956,
+          -3207.4450170271193,
+          -1034.8223093767956,
+          -3427.475437495121,
+          -3427.475437495121,
+          0.0
+        ],
+        [
+          144.37061932131544,
+          -302.7398347960876,
+          -144.37061932131544,
+          302.7398347960876,
+          -4049.3430095457898,
+          4049.3430095457898,
+          -3139.0382802057366
+        ]
+      ],
+      "feasible_request": {
+        "achieved_command_deg": {
+          "left_wing_flap": 3.931881681836754,
+          "lower_left_body_flap": 2.997792901631196,
+          "lower_right_body_flap": 1.9958439293609167,
+          "right_wing_flap": -3.931881681838319,
+          "rudder": 3.1875357606367483,
+          "upper_left_body_flap": -2.680329903483757,
+          "upper_right_body_flap": -2.3133069275074845
+        },
+        "achieved_wrench": {
+          "force_x_n": -35104.10619467597,
+          "force_y_n": 12391.0855765096,
+          "force_z_n": -65285.48007369105,
+          "moment_x_nm": 30071.701812078354,
+          "moment_y_nm": 29347.29633955481,
+          "moment_z_nm": -42205.189178269466
+        },
+        "allocated_command_deg": {
+          "left_wing_flap": 3.9368919035454266,
+          "lower_left_body_flap": 3.001612855609781,
+          "lower_right_body_flap": 1.998387144389029,
+          "right_wing_flap": -3.936891903546994,
+          "rudder": 3.19159749548978,
+          "upper_left_body_flap": -2.6837453285029977,
+          "upper_right_body_flap": -2.31625467149494
+        },
+        "allocation_status": "feasible",
+        "known_command_seed_deg": [
+          -3.0,
+          3.0,
+          -2.0,
+          2.0,
+          4.0,
+          -4.0,
+          3.0
+        ],
+        "realized_residual_norm": 69.35360040803322,
+        "requested_wrench": [
+          -35104.39753186207,
+          12406.87498498452,
+          -65282.52199510706,
+          30110.020842361388,
+          29361.121105031394,
+          -42258.96937110093
+        ],
+        "residual_norm": 2.8701439483574846e-10,
+        "solver_success": true
+      },
+      "infeasible_request": {
+        "achieved_command_deg": {
+          "left_wing_flap": 29.961820985959804,
+          "lower_left_body_flap": 59.92364197191961,
+          "lower_right_body_flap": 10.272544146009018,
+          "right_wing_flap": -29.961820985959804,
+          "rudder": 29.961820985959804,
+          "upper_left_body_flap": -7.066349059676049e-14,
+          "upper_right_body_flap": -59.92364197191581
+        },
+        "achieved_wrench": {
+          "force_x_n": -38777.55801480696,
+          "force_y_n": 101257.95033680933,
+          "force_z_n": -46649.817836993505,
+          "moment_x_nm": 310600.2766466548,
+          "moment_y_nm": 138059.21498372022,
+          "moment_z_nm": -343082.8355949031
+        },
+        "allocated_command_deg": {
+          "left_wing_flap": 29.999999999999996,
+          "lower_left_body_flap": 59.99999999999999,
+          "lower_right_body_flap": 10.285633991494803,
+          "right_wing_flap": -29.999999999999996,
+          "rudder": 29.999999999999996,
+          "upper_left_body_flap": -7.075353393561119e-14,
+          "upper_right_body_flap": -59.9999999999962
+        },
+        "allocation_status": "partially_achievable",
+        "boundary_recorded": true,
+        "realized_residual_norm": 1607953.985999481,
+        "requested_wrench": [
+          -702087.9506372415,
+          248137.4996996904,
+          -1305650.4399021412,
+          602200.4168472277,
+          587222.4221006279,
+          -845179.3874220187
+        ],
+        "residual_norm": 1607710.3163116635,
+        "solver_success": true
+      },
+      "mach": 0.5,
+      "matrix_rank": 6,
+      "singular_values": [
+        8405.654160769027,
+        7179.674502662657,
+        2160.7080017424382,
+        487.20351263251644,
+        139.66721436553632,
+        135.9801880946887
+      ],
+      "surface_names": [
+        "upper_left_body_flap",
+        "lower_left_body_flap",
+        "upper_right_body_flap",
+        "lower_right_body_flap",
+        "left_wing_flap",
+        "right_wing_flap",
+        "rudder"
+      ],
+      "wrench_names": [
+        "force_x_n",
+        "force_y_n",
+        "force_z_n",
+        "moment_x_nm",
+        "moment_y_nm",
+        "moment_z_nm"
+      ]
+    },
+    {
+      "actuator_probe": {
+        "achieved_command_deg": {
+          "left_wing_flap": 1.133874757704843,
+          "lower_left_body_flap": 0.8504060682786322,
+          "lower_right_body_flap": 0.5669373788524215,
+          "right_wing_flap": -1.133874757704843,
+          "rudder": 0.8504060682786322,
+          "upper_left_body_flap": -0.8504060682786322,
+          "upper_right_body_flap": -0.5669373788524215
+        },
+        "achieved_source_wrench_delta": [
+          -199.3302424531721,
+          13931.878886673803,
+          -1101.5098051135428,
+          32092.32061413757,
+          8134.015965031373,
+          -47595.51413452549
+        ],
+        "actuated_request_residual_norm": 449909.0956582828,
+        "rate_deg_s": {
+          "left_wing_flap": 22.677495154096857,
+          "lower_left_body_flap": 17.00812136557264,
+          "lower_right_body_flap": 11.338747577048428,
+          "right_wing_flap": -22.677495154096857,
+          "rudder": 17.00812136557264,
+          "upper_left_body_flap": -17.00812136557264,
+          "upper_right_body_flap": -11.338747577048428
+        },
+        "rate_limited": [
+          "upper_left_body_flap",
+          "lower_left_body_flap",
+          "upper_right_body_flap",
+          "lower_right_body_flap",
+          "left_wing_flap",
+          "right_wing_flap",
+          "rudder"
+        ],
+        "requested_command_deg": {
+          "left_wing_flap": 4.0,
+          "lower_left_body_flap": 3.0,
+          "lower_right_body_flap": 2.0,
+          "right_wing_flap": -4.0,
+          "rudder": 3.0,
+          "upper_left_body_flap": -3.0,
+          "upper_right_body_flap": -2.0
+        },
+        "saturated": []
+      },
+      "allocator": {
+        "actuator_model": "bounded_position_rate_first_order",
+        "effectiveness_source": "hl20_mod_k_daveml_source_v1:centered-source-load-derivative",
+        "implementation": "taoryx.control_allocation.allocate_and_advance_wrench"
+      },
+      "alpha_deg": 5.0,
+      "bounds_deg": {
+        "left_wing_flap": [
+          -30.0,
+          30.0
+        ],
+        "lower_left_body_flap": [
+          0.0,
+          60.0
+        ],
+        "lower_right_body_flap": [
+          0.0,
+          60.0
+        ],
+        "right_wing_flap": [
+          -30.0,
+          30.0
+        ],
+        "rudder": [
+          -30.0,
+          30.0
+        ],
+        "upper_left_body_flap": [
+          -60.0,
+          0.0
+        ],
+        "upper_right_body_flap": [
+          -60.0,
+          0.0
+        ]
+      },
+      "effectiveness_matrix_n_or_nm_per_deg": [
+        [
+          -211.78805278698565,
+          -669.4832710328919,
+          -211.78805278698565,
+          -669.4832710328919,
+          -707.2751809024339,
+          -707.2751809024339,
+          0.0
+        ],
+        [
+          -292.49009784905246,
+          790.5937711850595,
+          292.49009784905246,
+          -790.5937711850595,
+          4262.00997996349,
+          -4262.00997996349,
+          4656.2314201986665
+        ],
+        [
+          -3920.0279015661217,
+          -3527.3029338928172,
+          -3920.0279015661217,
+          -3527.3029338928172,
+          -3740.167826116405,
+          -3740.167826116405,
+          0.0
+        ],
+        [
+          2243.8919495202344,
+          5082.835112004453,
+          -2243.8919495202344,
+          -5082.835112004453,
+          13556.72313757694,
+          -13556.72313757694,
+          640.0669174798561
+        ],
+        [
+          -11058.730195248776,
+          -5667.343616938,
+          -11058.730195248776,
+          -5667.343616938,
+          -12840.805686022504,
+          -12840.805686022504,
+          0.0
+        ],
+        [
+          511.0373229070606,
+          -1627.3741366096478,
+          -511.0373229070606,
+          1627.3741366096478,
+          -15322.312191580388,
+          15322.312191580388,
+          -14395.682074576685
+        ]
+      ],
+      "feasible_request": {
+        "achieved_command_deg": {
+          "left_wing_flap": 3.9099392901308123,
+          "lower_left_body_flap": 3.000638270553889,
+          "lower_right_body_flap": 1.9929985604393605,
+          "right_wing_flap": -3.9099392901308856,
+          "rudder": 3.2096234277753743,
+          "upper_left_body_flap": -2.523361302127947,
+          "upper_right_body_flap": -2.4702755288652383
+        },
+        "achieved_wrench": {
+          "force_x_n": -258331.28794627945,
+          "force_y_n": 49085.31074402279,
+          "force_z_n": -307689.8731133161,
+          "moment_x_nm": 113068.85041532526,
+          "moment_y_nm": 147723.67501919428,
+          "moment_z_nm": -167690.27496710335
+        },
+        "allocated_command_deg": {
+          "left_wing_flap": 3.9149215516270064,
+          "lower_left_body_flap": 3.0044618502593647,
+          "lower_right_body_flap": 1.9955381497405835,
+          "right_wing_flap": -3.9149215516270797,
+          "rudder": 3.213713307958898,
+          "upper_left_body_flap": -2.526576709049561,
+          "upper_right_body_flap": -2.473423290950323
+        },
+        "allocation_status": "feasible",
+        "known_command_seed_deg": [
+          -3.0,
+          3.0,
+          -2.0,
+          2.0,
+          4.0,
+          -4.0,
+          3.0
+        ],
+        "realized_residual_norm": 267.43540631987935,
+        "requested_wrench": [
+          -258334.20033830678,
+          49147.85796933803,
+          -307687.37413797365,
+          113212.92901553931,
+          147757.98132317257,
+          -167903.95521588987
+        ],
+        "residual_norm": 2.810441643789522e-10,
+        "solver_success": true
+      },
+      "infeasible_request": {
+        "achieved_command_deg": {
+          "left_wing_flap": 29.961820985959804,
+          "lower_left_body_flap": 59.92364197191961,
+          "lower_right_body_flap": 53.58620209250229,
+          "right_wing_flap": -29.961820985959804,
+          "rudder": 29.961820985959804,
+          "upper_left_body_flap": -43.39477763304311,
+          "upper_right_body_flap": -59.92364197191961
+        },
+        "achieved_wrench": {
+          "force_x_n": -310157.0590405961,
+          "force_y_n": 395080.1437473897,
+          "force_z_n": -305023.51737332164,
+          "moment_x_nm": 900846.9415732024,
+          "moment_y_nm": 620072.284824274,
+          "moment_z_nm": -1351356.118409148
+        },
+        "allocated_command_deg": {
+          "left_wing_flap": 29.999999999999996,
+          "lower_left_body_flap": 59.99999999999999,
+          "lower_right_body_flap": 53.65448460320179,
+          "right_wing_flap": -29.999999999999996,
+          "rudder": 29.999999999999996,
+          "upper_left_body_flap": -43.45007366546048,
+          "upper_right_body_flap": -59.99999999999999
+        },
+        "allocation_status": "partially_achievable",
+        "boundary_recorded": true,
+        "realized_residual_norm": 8335315.634976666,
+        "requested_wrench": [
+          -5166684.006766136,
+          982957.1593867606,
+          -6153747.482759473,
+          2264258.580310786,
+          2955159.6264634514,
+          -3358079.1043177973
+        ],
+        "residual_norm": 8334463.789558975,
+        "solver_success": true
+      },
+      "mach": 1.0,
+      "matrix_rank": 6,
+      "singular_values": [
+        32679.432683093375,
+        26803.281198653116,
+        10168.764565565414,
+        2330.5933632271194,
+        634.7497950160025,
+        578.7123043220965
+      ],
+      "surface_names": [
+        "upper_left_body_flap",
+        "lower_left_body_flap",
+        "upper_right_body_flap",
+        "lower_right_body_flap",
+        "left_wing_flap",
+        "right_wing_flap",
+        "rudder"
+      ],
+      "wrench_names": [
+        "force_x_n",
+        "force_y_n",
+        "force_z_n",
+        "moment_x_nm",
+        "moment_y_nm",
+        "moment_z_nm"
+      ]
+    },
+    {
+      "actuator_probe": {
+        "achieved_command_deg": {
+          "left_wing_flap": 1.133874757704843,
+          "lower_left_body_flap": 0.8504060682786322,
+          "lower_right_body_flap": 0.5669373788524215,
+          "right_wing_flap": -1.133874757704843,
+          "rudder": 0.8504060682786322,
+          "upper_left_body_flap": -0.8504060682786322,
+          "upper_right_body_flap": -0.5669373788524215
+        },
+        "achieved_source_wrench_delta": [
+          -10254.500324013876,
+          15909.692065153667,
+          -8919.980994329206,
+          29556.51986927622,
+          -8332.18156837998,
+          -69554.6355103438
+        ],
+        "actuated_request_residual_norm": 1977395.4214956714,
+        "rate_deg_s": {
+          "left_wing_flap": 22.677495154096857,
+          "lower_left_body_flap": 17.00812136557264,
+          "lower_right_body_flap": 11.338747577048428,
+          "right_wing_flap": -22.677495154096857,
+          "rudder": 17.00812136557264,
+          "upper_left_body_flap": -17.00812136557264,
+          "upper_right_body_flap": -11.338747577048428
+        },
+        "rate_limited": [
+          "upper_left_body_flap",
+          "lower_left_body_flap",
+          "upper_right_body_flap",
+          "lower_right_body_flap",
+          "left_wing_flap",
+          "right_wing_flap",
+          "rudder"
+        ],
+        "requested_command_deg": {
+          "left_wing_flap": 4.0,
+          "lower_left_body_flap": 3.0,
+          "lower_right_body_flap": 2.0,
+          "right_wing_flap": -4.0,
+          "rudder": 3.0,
+          "upper_left_body_flap": -3.0,
+          "upper_right_body_flap": -2.0
+        },
+        "saturated": []
+      },
+      "allocator": {
+        "actuator_model": "bounded_position_rate_first_order",
+        "effectiveness_source": "hl20_mod_k_daveml_source_v1:centered-source-load-derivative",
+        "implementation": "taoryx.control_allocation.allocate_and_advance_wrench"
+      },
+      "alpha_deg": 5.0,
+      "bounds_deg": {
+        "left_wing_flap": [
+          -30.0,
+          30.0
+        ],
+        "lower_left_body_flap": [
+          0.0,
+          60.0
+        ],
+        "lower_right_body_flap": [
+          0.0,
+          60.0
+        ],
+        "right_wing_flap": [
+          -30.0,
+          30.0
+        ],
+        "rudder": [
+          -30.0,
+          30.0
+        ],
+        "upper_left_body_flap": [
+          -60.0,
+          0.0
+        ],
+        "upper_right_body_flap": [
+          -60.0,
+          0.0
+        ]
+      },
+      "effectiveness_matrix_n_or_nm_per_deg": [
+        [
+          907.4102406518068,
+          -3677.353321219096,
+          907.4102406518068,
+          -3677.353321219096,
+          -994.3968653065385,
+          -994.3968653065385,
+          0.0
+        ],
+        [
+          403.15461269052525,
+          128.10401624222746,
+          -403.15461269052525,
+          -128.10401624222746,
+          3402.52675447918,
+          -3402.52675447918,
+          9726.626146211784
+        ],
+        [
+          -226.0850535609061,
+          -5734.99328293663,
+          -226.0850535609061,
+          -5734.99328293663,
+          -2072.022841307393,
+          -2072.022841307393,
+          0.0
+        ],
+        [
+          4571.791125345421,
+          5052.515169280109,
+          -4571.791125345421,
+          -5052.515169280109,
+          10633.558123587696,
+          -10633.558123587696,
+          6239.376188201377
+        ],
+        [
+          -5954.464598601218,
+          -17645.851930026663,
+          -5954.464598601218,
+          -17645.851930026663,
+          -9302.20992098481,
+          -9302.20992098481,
+          0.0
+        ],
+        [
+          424.88544283630796,
+          -2785.7661953337515,
+          -424.88544283630796,
+          2785.7661953337515,
+          -15821.880380468563,
+          15821.880380468563,
+          -38528.01144623869
+        ]
+      ],
+      "feasible_request": {
+        "achieved_command_deg": {
+          "left_wing_flap": 3.2006983687330006,
+          "lower_left_body_flap": 4.082931807220517,
+          "lower_right_body_flap": 0.9107050237727861,
+          "right_wing_flap": -3.2006983687329966,
+          "rudder": 3.4980278108479794,
+          "upper_left_body_flap": -2.6923912357444792,
+          "upper_right_body_flap": -2.301245595248824
+        },
+        "achieved_wrench": {
+          "force_x_n": -1199994.6285602008,
+          "force_y_n": 56053.61525262492,
+          "force_z_n": -1031399.7434024453,
+          "moment_x_nm": 104134.62348449114,
+          "moment_y_nm": -1196068.8777164926,
+          "moment_z_nm": -245057.46320965744
+        },
+        "allocated_command_deg": {
+          "left_wing_flap": 3.204776876111292,
+          "lower_left_body_flap": 4.088134505376483,
+          "lower_right_body_flap": 0.9118654946235194,
+          "right_wing_flap": -3.204776876111288,
+          "rudder": 3.502485191891873,
+          "upper_left_body_flap": -2.695822029982231,
+          "upper_right_body_flap": -2.304177970017771
+        },
+        "allocation_status": "feasible",
+        "known_command_seed_deg": [
+          -3.0,
+          3.0,
+          -2.0,
+          2.0,
+          4.0,
+          -4.0,
+          3.0
+        ],
+        "realized_residual_norm": 357.53856623465555,
+        "requested_wrench": [
+          -1200023.8021856006,
+          56125.04187802049,
+          -1031434.7975165512,
+          104267.31759724038,
+          -1196143.2719900052,
+          -245369.72902063464
+        ],
+        "residual_norm": 9.203439287865708e-11,
+        "solver_success": true
+      },
+      "infeasible_request": {
+        "achieved_command_deg": {
+          "left_wing_flap": 29.961820985959765,
+          "lower_left_body_flap": 59.92364197191961,
+          "lower_right_body_flap": 59.92364197191961,
+          "right_wing_flap": 29.961820985959786,
+          "rudder": 29.961820985953178,
+          "upper_left_body_flap": -2.411603600011172e-16,
+          "upper_right_body_flap": -2.3460180063622678e-17
+        },
+        "achieved_wrench": {
+          "force_x_n": -1677408.6737608393,
+          "force_y_n": 291427.43139008904,
+          "force_z_n": -1815376.779665933,
+          "moment_x_nm": 186943.07241490833,
+          "moment_y_nm": -3809916.058874459,
+          "moment_z_nm": -1154369.3818969585
+        },
+        "allocated_command_deg": {
+          "left_wing_flap": 29.999999999999957,
+          "lower_left_body_flap": 59.99999999999999,
+          "lower_right_body_flap": 59.99999999999999,
+          "right_wing_flap": 29.99999999999998,
+          "rudder": 29.999999999993364,
+          "upper_left_body_flap": -2.4146765990704535e-16,
+          "upper_right_body_flap": -2.349007432620619e-17
+        },
+        "allocation_status": "partially_achievable",
+        "boundary_recorded": true,
+        "realized_residual_norm": 35709534.63683388,
+        "requested_wrench": [
+          -24000476.043712012,
+          1122500.83756041,
+          -20628695.950331025,
+          2085346.3519448077,
+          -23922865.439800102,
+          -4907394.580412692
+        ],
+        "residual_norm": 35706497.62884747,
+        "solver_success": true
+      },
+      "mach": 2.0,
+      "matrix_rank": 6,
+      "singular_values": [
+        48085.06234280058,
+        30955.63054872324,
+        12789.091801207549,
+        3684.9198902988123,
+        1127.9345724285026,
+        188.07846410088172
+      ],
+      "surface_names": [
+        "upper_left_body_flap",
+        "lower_left_body_flap",
+        "upper_right_body_flap",
+        "lower_right_body_flap",
+        "left_wing_flap",
+        "right_wing_flap",
+        "rudder"
+      ],
+      "wrench_names": [
+        "force_x_n",
+        "force_y_n",
+        "force_z_n",
+        "moment_x_nm",
+        "moment_y_nm",
+        "moment_z_nm"
+      ]
+    },
+    {
+      "actuator_probe": {
+        "achieved_command_deg": {
+          "left_wing_flap": 1.133874757704843,
+          "lower_left_body_flap": 0.8504060682786322,
+          "lower_right_body_flap": 0.5669373788524215,
+          "right_wing_flap": -1.133874757704843,
+          "rudder": 0.8504060682786322,
+          "upper_left_body_flap": -0.8504060682786322,
+          "upper_right_body_flap": -0.5669373788524215
+        },
+        "achieved_source_wrench_delta": [
+          -8297.72839375399,
+          10894.631789464986,
+          -3936.7966840658337,
+          36203.74847955456,
+          -13766.684682126506,
+          -51225.50364651884
+        ],
+        "actuated_request_residual_norm": 2601971.7790640313,
+        "rate_deg_s": {
+          "left_wing_flap": 22.677495154096857,
+          "lower_left_body_flap": 17.00812136557264,
+          "lower_right_body_flap": 11.338747577048428,
+          "right_wing_flap": -22.677495154096857,
+          "rudder": 17.00812136557264,
+          "upper_left_body_flap": -17.00812136557264,
+          "upper_right_body_flap": -11.338747577048428
+        },
+        "rate_limited": [
+          "upper_left_body_flap",
+          "lower_left_body_flap",
+          "upper_right_body_flap",
+          "lower_right_body_flap",
+          "left_wing_flap",
+          "right_wing_flap",
+          "rudder"
+        ],
+        "requested_command_deg": {
+          "left_wing_flap": 4.0,
+          "lower_left_body_flap": 3.0,
+          "lower_right_body_flap": 2.0,
+          "right_wing_flap": -4.0,
+          "rudder": 3.0,
+          "upper_left_body_flap": -3.0,
+          "upper_right_body_flap": -2.0
+        },
+        "saturated": []
+      },
+      "allocator": {
+        "actuator_model": "bounded_position_rate_first_order",
+        "effectiveness_source": "hl20_mod_k_daveml_source_v1:centered-source-load-derivative",
+        "implementation": "taoryx.control_allocation.allocate_and_advance_wrench"
+      },
+      "alpha_deg": 5.0,
+      "bounds_deg": {
+        "left_wing_flap": [
+          -30.0,
+          30.0
+        ],
+        "lower_left_body_flap": [
+          0.0,
+          60.0
+        ],
+        "lower_right_body_flap": [
+          0.0,
+          60.0
+        ],
+        "right_wing_flap": [
+          -30.0,
+          30.0
+        ],
+        "rudder": [
+          -30.0,
+          30.0
+        ],
+        "upper_left_body_flap": [
+          -60.0,
+          0.0
+        ],
+        "upper_right_body_flap": [
+          -60.0,
+          0.0
+        ]
+      },
+      "effectiveness_matrix_n_or_nm_per_deg": [
+        [
+          80.54230871517211,
+          -3633.912058226764,
+          80.54230871517211,
+          -3633.912058226764,
+          -1016.6573663342278,
+          -1016.6573663342278,
+          0.0
+        ],
+        [
+          -813.7185644086463,
+          -4.5842867132781615,
+          813.7185644086463,
+          4.5842867132781615,
+          4703.018337662434,
+          -4703.018337662434,
+          0.0
+        ],
+        [
+          -2269.223220691085,
+          -6014.168040250894,
+          -2269.223220691085,
+          -6014.168040250894,
+          -3700.221014797571,
+          -3700.221014797571,
+          0.0
+        ],
+        [
+          3222.3563786627174,
+          7809.368494650108,
+          -3222.3563786627174,
+          -7809.368494650108,
+          15391.238727857417,
+          -15391.238727857417,
+          0.0
+        ],
+        [
+          -8466.68877146882,
+          -23720.902683454216,
+          -8466.68877146882,
+          -23720.902683454216,
+          -14194.802254237351,
+          -14194.802254237351,
+          0.0
+        ],
+        [
+          5116.591473040694,
+          -5131.894373225555,
+          -5116.591473040694,
+          5131.894373225555,
+          -21307.634933545654,
+          21307.634933545654,
+          0.0
+        ]
+      ],
+      "feasible_request": {
+        "achieved_command_deg": {
+          "left_wing_flap": 3.99490946241695,
+          "lower_left_body_flap": 2.9961820993055834,
+          "lower_right_body_flap": 1.997454733106895,
+          "right_wing_flap": -3.9949094671723255,
+          "rudder": 0.0,
+          "upper_left_body_flap": -2.9961820965978463,
+          "upper_right_body_flap": -1.9974547303991652
+        },
+        "achieved_wrench": {
+          "force_x_n": -2160557.4759676494,
+          "force_y_n": 38384.36948652456,
+          "force_z_n": -1312553.0870824652,
+          "moment_x_nm": 127554.38506698434,
+          "moment_y_nm": -645725.9879194666,
+          "moment_z_nm": -180479.58821358677
+        },
+        "allocated_command_deg": {
+          "left_wing_flap": 3.9999999976192795,
+          "lower_left_body_flap": 3.000000000710507,
+          "lower_right_body_flap": 2.000000000710479,
+          "right_wing_flap": -4.000000002380714,
+          "rudder": 0.0,
+          "upper_left_body_flap": -2.9999999979993195,
+          "upper_right_body_flap": -1.9999999979992986
+        },
+        "allocation_status": "feasible",
+        "known_command_seed_deg": [
+          -3.0,
+          3.0,
+          -2.0,
+          2.0,
+          4.0,
+          -4.0,
+          3.0
+        ],
+        "realized_residual_norm": 303.7238535402384,
+        "requested_wrench": [
+          -2160581.111668553,
+          38433.28097899484,
+          -1312576.9167992652,
+          127716.92193884672,
+          -645823.053060655,
+          -180709.5653146315
+        ],
+        "residual_norm": 8.019372871089877e-09,
+        "solver_success": true
+      },
+      "infeasible_request": {
+        "achieved_command_deg": {
+          "left_wing_flap": 29.961820985959804,
+          "lower_left_body_flap": 59.92364197191961,
+          "lower_right_body_flap": 59.92364197191961,
+          "right_wing_flap": 29.961820985959804,
+          "rudder": 0.0,
+          "upper_left_body_flap": -3.0253707808069328e-27,
+          "upper_right_body_flap": -1.04879520401307e-26
+        },
+        "achieved_wrench": {
+          "force_x_n": -2638445.1421314147,
+          "force_y_n": 0.0,
+          "force_z_n": -2236364.616815081,
+          "moment_x_nm": 5.820766091346741e-11,
+          "moment_y_nm": -4263041.9909539595,
+          "moment_z_nm": 0.0
+        },
+        "allocated_command_deg": {
+          "left_wing_flap": 29.999999999999996,
+          "lower_left_body_flap": 59.99999999999999,
+          "lower_right_body_flap": 59.99999999999999,
+          "right_wing_flap": 29.999999999999996,
+          "rudder": 0.0,
+          "upper_left_body_flap": -3.0292258760486853e-27,
+          "upper_right_body_flap": -1.0501316370302109e-26
+        },
+        "allocation_status": "partially_achievable",
+        "boundary_recorded": true,
+        "realized_residual_norm": 48145309.222577035,
+        "requested_wrench": [
+          -43211622.233371064,
+          768665.6195798968,
+          -26251538.335985303,
+          2554338.4387769345,
+          -12916461.0612131,
+          -3614191.30629263
+        ],
+        "residual_norm": 48143331.35273615,
+        "solver_success": true
+      },
+      "mach": 3.0,
+      "matrix_rank": 6,
+      "singular_values": [
+        42492.89962121315,
+        39825.29242359826,
+        9320.753784832452,
+        2140.9419076598138,
+        1487.6542920170627,
+        1.7795939463518686
+      ],
+      "surface_names": [
+        "upper_left_body_flap",
+        "lower_left_body_flap",
+        "upper_right_body_flap",
+        "lower_right_body_flap",
+        "left_wing_flap",
+        "right_wing_flap",
+        "rudder"
+      ],
+      "wrench_names": [
+        "force_x_n",
+        "force_y_n",
+        "force_z_n",
+        "moment_x_nm",
+        "moment_y_nm",
+        "moment_z_nm"
+      ]
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hl20_source_allocation_probe.py",
+  "schema": "taoryx.hl20-source-allocation/v1alpha1",
+  "source_provenance": {
+    "aerodynamic_model": "hl20_mod_k_daveml_source_v1",
+    "atmosphere_model": "exponential_density",
+    "source_coefficient_channels": [
+      "CL",
+      "CD",
+      "CY",
+      "CR",
+      "CM",
+      "CN"
+    ],
+    "source_control_envelope_deg": {
+      "left_wing_flap": [
+        -30.0,
+        30.0
+      ],
+      "lower_left_body_flap": [
+        0.0,
+        60.0
+      ],
+      "lower_right_body_flap": [
+        0.0,
+        60.0
+      ],
+      "right_wing_flap": [
+        -30.0,
+        30.0
+      ],
+      "rudder": [
+        -30.0,
+        30.0
+      ],
+      "upper_left_body_flap": [
+        -60.0,
+        0.0
+      ],
+      "upper_right_body_flap": [
+        -60.0,
+        0.0
+      ]
+    },
+    "source_document_sha256": "b2ec6260ed60d241de250599b269ad35d0b96865b50da5e7f9ef7e04de3844ec",
+    "source_force_frame": "body_axes_frd",
+    "source_numerical_boundary_tolerance_rad": 0.01,
+    "source_package_sha256": "443e2ed905e310cc57014dc3bad8d3b24b6b5954b8423de9110d405d66154e63",
+    "source_sidecar": "families/reference_hl20_mod_k/plant/daveml-import.json",
+    "source_validity_envelope": {
+      "alpha_max_rad": 0.2617993877991494,
+      "alpha_min_rad": 0.0,
+      "altitude_max_m": 20000.0,
+      "altitude_min_m": -1000.0,
+      "beta_max_rad": 0.17453292519943295,
+      "beta_min_rad": -0.17453292519943295,
+      "dynamic_pressure_min_pa": 0.0,
+      "mach_max": 4.0,
+      "mach_min": 0.3
+    },
+    "speed_of_sound_model": "constant_340.294_m_s_assumption"
+  },
+  "status": "open_loop_source_allocation_pass_with_boundary",
+  "summary": {
+    "all_feasible_solver_requests_succeeded": true,
+    "maximum_feasible_static_residual_norm": 8.019372871089877e-09,
+    "minimum_matrix_rank": 6,
+    "operating_point_count": 4,
+    "stress_boundary_count": 4
+  }
+}

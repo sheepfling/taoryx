@@ -20,6 +20,8 @@ from ..racetrack_template import ResolvedRacetrack
 from ..trim import TrimResult
 from .a320_openap import A320OpenAPModel, A320OpenAPOperatingPoint
 from .a320_pseudo6dof import A320Pseudo6DOFModel, A320Pseudo6DOFOperatingPoint
+from .pseudo6dof_profiles import Pseudo6DOFProfile
+from .response_laws import AxisResponseState, step_bounded_axis_response
 
 A320RacetrackMode = Literal["point_mass_3dof", "pseudo_6dof_kinematic_bridge"]
 _Model = A320OpenAPModel | A320Pseudo6DOFModel
@@ -68,12 +70,15 @@ class A320RacetrackRunner:
     maximum_speed_acceleration_mps2: float = 3.0
     maximum_turn_rate_rad_s: float = math.radians(8.0)
     maximum_flight_path_rate_rad_s: float = math.radians(3.0)
+    response_profile: Pseudo6DOFProfile | None = None
 
     def __post_init__(self) -> None:
         if self.mode == "point_mass_3dof" and not isinstance(self.model, A320OpenAPModel):
             raise ValueError("point-mass mode requires A320OpenAPModel")
         if self.mode == "pseudo_6dof_kinematic_bridge" and not isinstance(self.model, A320Pseudo6DOFModel):
             raise ValueError("pseudo-6DOF mode requires A320Pseudo6DOFModel")
+        if self.response_profile is not None and self.mode != "pseudo_6dof_kinematic_bridge":
+            raise ValueError("response profiles apply only to pseudo-6DOF mode")
         values = (
             self.dt_s,
             self.speed_time_constant_s,
@@ -225,6 +230,7 @@ class A320RacetrackRunner:
             "pitch_moment_nm": observables["pitch_moment_nm"],
             "yaw_moment_nm": observables["yaw_moment_nm"],
             "control_path": self.mode,
+            "response_profile_id": self.response_profile.id if self.response_profile is not None else "legacy_runner_defaults",
             "allocation_status": "not_applicable" if self.mode == "point_mass_3dof" else "surrogate_policy_overlay",
             "allocation_residual_norm": 0.0,
             "saturation_count": 0,
@@ -392,16 +398,39 @@ class A320RacetrackRunner:
                     target_roll = reference.bank_rad
                     target_pitch = reference.flight_path_angle_rad + self._trim_alpha
                     target_yaw = reference.heading_rad
-                    rate_targets = {
-                        "roll_rate_rad_s": _clamp(_wrap(target_roll - state["roll_rad"]) / self.attitude_time_constant_s, -0.25, 0.25),
-                        "pitch_rate_rad_s": _clamp((target_pitch - state["pitch_rad"]) / self.attitude_time_constant_s, -0.25, 0.25),
-                        "yaw_rate_rad_s": _clamp(_wrap(target_yaw - state["yaw_rad"]) / self.attitude_time_constant_s, -0.25, 0.25),
-                    }
-                    for name, target in rate_targets.items():
-                        state[name] = _slew(state[name], target, self.attitude_time_constant_s, dt)
-                    state["roll_rad"] += state["roll_rate_rad_s"] * dt
-                    state["pitch_rad"] += state["pitch_rate_rad_s"] * dt
-                    state["yaw_rad"] = _wrap(state["yaw_rad"] + state["yaw_rate_rad_s"] * dt)
+                    if self.response_profile is None:
+                        rate_targets = {
+                            "roll_rate_rad_s": _clamp(_wrap(target_roll - state["roll_rad"]) / self.attitude_time_constant_s, -0.25, 0.25),
+                            "pitch_rate_rad_s": _clamp((target_pitch - state["pitch_rad"]) / self.attitude_time_constant_s, -0.25, 0.25),
+                            "yaw_rate_rad_s": _clamp(_wrap(target_yaw - state["yaw_rad"]) / self.attitude_time_constant_s, -0.25, 0.25),
+                        }
+                        for name, target in rate_targets.items():
+                            state[name] = _slew(state[name], target, self.attitude_time_constant_s, dt)
+                        state["roll_rad"] += state["roll_rate_rad_s"] * dt
+                        state["pitch_rad"] += state["pitch_rate_rad_s"] * dt
+                        state["yaw_rad"] = _wrap(state["yaw_rad"] + state["yaw_rate_rad_s"] * dt)
+                    else:
+                        roll_state = step_bounded_axis_response(
+                            self.response_profile.response["roll"],
+                            AxisResponseState(state["roll_rad"], state["roll_rate_rad_s"]),
+                            target_roll,
+                            dt,
+                        )
+                        pitch_state = step_bounded_axis_response(
+                            self.response_profile.response["pitch"],
+                            AxisResponseState(state["pitch_rad"], state["pitch_rate_rad_s"]),
+                            target_pitch,
+                            dt,
+                        )
+                        yaw_state = step_bounded_axis_response(
+                            self.response_profile.response["yaw"],
+                            AxisResponseState(state["yaw_rad"], state["yaw_rate_rad_s"]),
+                            target_yaw,
+                            dt,
+                        )
+                        state["roll_rad"], state["roll_rate_rad_s"] = roll_state.angle_rad, roll_state.rate_rad_s
+                        state["pitch_rad"], state["pitch_rate_rad_s"] = pitch_state.angle_rad, pitch_state.rate_rad_s
+                        state["yaw_rad"], state["yaw_rate_rad_s"] = _wrap(yaw_state.angle_rad), yaw_state.rate_rad_s
                     state["alpha_rad"] = _slew(state["alpha_rad"], self._trim_alpha, self.attitude_time_constant_s, dt)
                     state["beta_rad"] = _slew(state["beta_rad"], 0.0, self.attitude_time_constant_s, dt)
                 time_s = min(horizon, time_s + dt)

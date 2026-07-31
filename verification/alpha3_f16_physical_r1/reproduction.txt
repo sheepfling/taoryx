@@ -1,0 +1,1 @@
+PYTHONPATH=src python3 tools/validate_f16_physical_r1_matrix.py

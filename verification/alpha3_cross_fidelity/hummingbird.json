@@ -1,0 +1,82 @@
+{
+  "comparison_artifact": "verification/alpha3_hummingbird_development/pseudo_6dof_evidence.json",
+  "comparison_fidelity": "pseudo_6dof",
+  "comparison_status": "pass",
+  "control_realization": {
+    "comparison": "response_law",
+    "reference": "force_model"
+  },
+  "family_id": "hummingbird",
+  "interpretation": "The report measures semantic agreement, event-time deltas, and available objective margins. It does not rank fidelities or imply that absent physical effectors exist.",
+  "mission_result": {
+    "agreement": true,
+    "comparison_pass": true,
+    "reference_pass": true
+  },
+  "mission_semantics": {
+    "common_objective_ids": [
+      "box_east",
+      "box_north",
+      "box_south_return",
+      "box_west",
+      "disturbance_recovery",
+      "takeoff_altitude_gate",
+      "touchdown_and_post_contact_settle",
+      "yaw_gate"
+    ],
+    "objective_sequence_preserved": true,
+    "unmatched_objective_ids": []
+  },
+  "objective_deltas": [
+    {
+      "id": "box_east",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "truth_time_delta_s": -0.10000000000000142
+    },
+    {
+      "id": "box_north",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "truth_time_delta_s": -0.10000000000000142
+    },
+    {
+      "id": "box_south_return",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "truth_time_delta_s": -0.10000000000000142
+    },
+    {
+      "id": "box_west",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "truth_time_delta_s": -0.10000000000000142
+    },
+    {
+      "id": "disturbance_recovery",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "truth_time_delta_s": -0.10000000000000142
+    },
+    {
+      "id": "takeoff_altitude_gate",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "truth_time_delta_s": 0.0
+    },
+    {
+      "id": "touchdown_and_post_contact_settle",
+      "left_result": "PASS",
+      "right_result": "PASS",
+      "truth_time_delta_s": 0.0
+    },
+    {
+      "id": "yaw_gate",
+      "left_result": "NOT_APPLICABLE",
+      "right_result": "PASS"
+    }
+  ],
+  "reference_artifact": "verification/alpha3_hummingbird_development/point_mass_3dof_evidence.json",
+  "reference_fidelity": "point_mass_3dof",
+  "schema": "taoryx.alpha3-cross-fidelity-comparison/v1alpha1"
+}

@@ -11,10 +11,10 @@
     {
       "evidence": {
         "artifact_sha256": {
-          "point_mass_3dof": "7b3e121d2734fad94100a681eeadba2c9cab0b64f657fe66a766b40587988333",
-          "pseudo_6dof": "5255d8f1a7d975dfcc0acdd816ec016f06059a5fc0a7a59b382ce1d4e3c360ec",
-          "rigid_body_6dof": "c84ac22126048204a25a6a5c2088fc5501337d2904f10f97d89198ce5237e5f9",
-          "rigid_body_6dof_surface_allocated": "fe8d7551f031563521ae31d284a50fd11a9e0f796b156605036b8bd5ec36be9b"
+          "point_mass_3dof": "af83a991affbc1728c7aded2f7c478c1fd950b62f4a9526feb9e09de1aca3813",
+          "pseudo_6dof": "d094c74f2ddbc34afa0fbd15412de367b0012b6ac7254cfee3827e4d2fa99f23",
+          "rigid_body_6dof": "4fed033aa244e708a65aa0e288fd6024c60afef16bc2f293259cca4ad308a746",
+          "rigid_body_6dof_surface_allocated": "0739c89c538488056ada5405026d5f6734db924404535c1fe6b39f0335469c78"
         },
         "provenance_scenario_ids": [
           "hl20-rocket-release-point_mass_3dof-v1",

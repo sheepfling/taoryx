@@ -1,0 +1,340 @@
+{
+  "claims": [
+    "semantic objective status agrees for all mapped pseudo/native objectives",
+    "pseudo hover thrust is calibrated to the native source rotor map within the declared tolerance",
+    "both packets independently expose contact and post-contact/shutdown evidence",
+    "pseudo battery evolution is bounded and monotone for its declared engineering reserve"
+  ],
+  "contact_comparison": {
+    "native_contact_state_available": true,
+    "native_contact_time_s": 86.09500000000007,
+    "native_post_contact_settle_pass": true,
+    "native_shutdown_time_s": 86.00000000000013,
+    "pseudo_terminal_pass": true,
+    "status": "pass"
+  },
+  "family_id": "hummingbird",
+  "hover_thrust_comparison": {
+    "absolute_difference_n": 0.00293128556433242,
+    "native_source_derived_mean_thrust_n": 4.897591857490539,
+    "pseudo_mean_thrust_n": 4.900523143054872,
+    "relative_difference": 0.0005985156888582324,
+    "source": "ROTORPY_HUMMINGBIRD rotor_static_map.csv",
+    "status": "pass"
+  },
+  "mission_semantics": {
+    "native": "hummingbird-pad-to-pad-altitude-yaw-v2",
+    "pseudo": "hummingbird hover-box/yaw/contact nominal pseudo mission",
+    "trajectory_time_equivalence_claimed": false
+  },
+  "native_phase_metrics": {
+    "box-north-east": {
+      "contact_at_end": false,
+      "duration_s": 8.0,
+      "maximum_altitude_m": 3.0191989187151194,
+      "maximum_horizontal_range_m": 0.706272394852323,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "box-north-west": {
+      "contact_at_end": false,
+      "duration_s": 8.0,
+      "maximum_altitude_m": 3.037920688278973,
+      "maximum_horizontal_range_m": 0.7056387390437917,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "box-south-east": {
+      "contact_at_end": false,
+      "duration_s": 7.9999999999999964,
+      "maximum_altitude_m": 3.034841027110815,
+      "maximum_horizontal_range_m": 0.49779493028845073,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "box-south-west": {
+      "contact_at_end": false,
+      "duration_s": 8.0,
+      "maximum_altitude_m": 3.01927602943033,
+      "maximum_horizontal_range_m": 0.49999678582684093,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "climb-altitude-gate": {
+      "contact_at_end": false,
+      "duration_s": 8.0,
+      "maximum_altitude_m": 2.9885816695168614,
+      "maximum_horizontal_range_m": 1.7364342848498787e-17,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "descent-altitude-gate": {
+      "contact_at_end": false,
+      "duration_s": 8.0,
+      "maximum_altitude_m": 3.0001702439039946,
+      "maximum_horizontal_range_m": 1.1378119945969666e-05,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "hover-dwell": {
+      "contact_at_end": false,
+      "duration_s": 2.9999999999997797,
+      "maximum_altitude_m": 1.9983929703012109,
+      "maximum_horizontal_range_m": 0.0,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "return-home": {
+      "contact_at_end": false,
+      "duration_s": 8.0,
+      "maximum_altitude_m": 3.0054033119231462,
+      "maximum_horizontal_range_m": 0.002247880871463422,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "takeoff": {
+      "contact_at_end": false,
+      "duration_s": 9.999999999999897,
+      "maximum_altitude_m": 1.99289077706635,
+      "maximum_horizontal_range_m": 0.0,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "touchdown": {
+      "contact_at_end": true,
+      "duration_s": 15.0,
+      "maximum_altitude_m": 2.2090145219117403,
+      "maximum_horizontal_range_m": 1.7636025648944835e-07,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": true,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    },
+    "yaw-step": {
+      "contact_at_end": false,
+      "duration_s": 8.0,
+      "maximum_altitude_m": 1.999969338066876,
+      "maximum_horizontal_range_m": 1.1686200814849514e-17,
+      "rotor_speed_end_rad_s": 468.7244338633868,
+      "rotor_speed_start_rad_s": 468.7244338633868,
+      "shutdown_at_end": false,
+      "source_derived_collective_thrust_n": 4.897591857490539,
+      "source_derived_shaft_power_proxy_w": 56.05106858432339
+    }
+  },
+  "nonclaims": [
+    "sample-for-sample trajectory or controller equivalence",
+    "native electrical battery or state-of-charge validation",
+    "translated-flight physical rotor allocation qualification",
+    "family-wide multirotor qualification"
+  ],
+  "objective_status_comparison": {
+    "all_mapped_statuses_agree": true,
+    "mapped_count": 7,
+    "mapping": [
+      {
+        "native_objective_id": "takeoff",
+        "native_pass": true,
+        "pseudo_objective_id": "takeoff_altitude_gate",
+        "pseudo_pass": true,
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "yaw-step",
+        "native_pass": true,
+        "pseudo_objective_id": "yaw_gate",
+        "pseudo_pass": true,
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-south-east",
+        "native_pass": true,
+        "pseudo_objective_id": "box_east",
+        "pseudo_pass": true,
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-north-east",
+        "native_pass": true,
+        "pseudo_objective_id": "box_north",
+        "pseudo_pass": true,
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-north-west",
+        "native_pass": true,
+        "pseudo_objective_id": "box_west",
+        "pseudo_pass": true,
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-south-west",
+        "native_pass": true,
+        "pseudo_objective_id": "box_south_return",
+        "pseudo_pass": true,
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": null,
+        "native_pass": null,
+        "pseudo_objective_id": "disturbance_recovery",
+        "pseudo_pass": true,
+        "status_agrees": null
+      },
+      {
+        "native_objective_id": "touchdown",
+        "native_pass": true,
+        "pseudo_objective_id": "touchdown_and_post_contact_settle",
+        "pseudo_pass": true,
+        "status_agrees": true
+      }
+    ],
+    "unmapped_pseudo_objectives": [
+      "disturbance_recovery"
+    ]
+  },
+  "pseudo_phase_metrics": {
+    "box_east": {
+      "battery_end_fraction": 0.9656385723489908,
+      "battery_monotone_nonincreasing": true,
+      "battery_start_fraction": 0.977808625301995,
+      "contact_at_end": false,
+      "duration_s": 4.95000000000007,
+      "maximum_altitude_m": 2.016070194388581,
+      "maximum_horizontal_range_m": 2.0467402552729648,
+      "maximum_thrust_n": 5.0473023240048915,
+      "shutdown_at_end": false
+    },
+    "box_north": {
+      "battery_end_fraction": 0.9533422492952369,
+      "battery_monotone_nonincreasing": true,
+      "battery_start_fraction": 0.9655123891930336,
+      "contact_at_end": false,
+      "duration_s": 4.95000000000007,
+      "maximum_altitude_m": 2.0162279408043395,
+      "maximum_horizontal_range_m": 2.8612683978962847,
+      "maximum_thrust_n": 5.047326238284351,
+      "shutdown_at_end": false
+    },
+    "box_south_return": {
+      "battery_end_fraction": 0.928749592989185,
+      "battery_monotone_nonincreasing": true,
+      "battery_start_fraction": 0.9409197372993707,
+      "contact_at_end": false,
+      "duration_s": 4.95000000000007,
+      "maximum_altitude_m": 2.016231880471008,
+      "maximum_horizontal_range_m": 1.999646447066676,
+      "maximum_thrust_n": 5.047354700574376,
+      "shutdown_at_end": false
+    },
+    "box_west": {
+      "battery_end_fraction": 0.9410459211668851,
+      "battery_monotone_nonincreasing": true,
+      "battery_start_fraction": 0.9532160654419197,
+      "contact_at_end": false,
+      "duration_s": 4.95000000000007,
+      "maximum_altitude_m": 2.016231800720217,
+      "maximum_horizontal_range_m": 2.846318865864502,
+      "maximum_thrust_n": 5.047354132686914,
+      "shutdown_at_end": false
+    },
+    "disturbance_recovery": {
+      "battery_end_fraction": 0.9140180966055395,
+      "battery_monotone_nonincreasing": true,
+      "battery_start_fraction": 0.9286254164360216,
+      "contact_at_end": false,
+      "duration_s": 5.949999999999871,
+      "maximum_altitude_m": 2.0096370823615834,
+      "maximum_horizontal_range_m": 0.46106482605416815,
+      "maximum_thrust_n": 4.967062126537674,
+      "shutdown_at_end": false
+    },
+    "landing_contact": {
+      "battery_end_fraction": 0.9018366468397309,
+      "battery_monotone_nonincreasing": true,
+      "battery_start_fraction": 0.9138980134772717,
+      "contact_at_end": false,
+      "duration_s": 4.949999999999719,
+      "maximum_altitude_m": 1.9996445290710265,
+      "maximum_horizontal_range_m": 0.004198072234400945,
+      "maximum_thrust_n": 4.986293555424403,
+      "shutdown_at_end": false
+    },
+    "post_contact_shutdown": {
+      "battery_end_fraction": 0.9018366468397309,
+      "battery_monotone_nonincreasing": true,
+      "battery_start_fraction": 0.9018366468397309,
+      "contact_at_end": true,
+      "duration_s": 2.4499999999998607,
+      "maximum_altitude_m": 0.16280965061935695,
+      "maximum_horizontal_range_m": 9.005633929193196e-05,
+      "maximum_thrust_n": 0.0,
+      "shutdown_at_end": true
+    },
+    "takeoff_altitude_gate": {
+      "battery_end_fraction": 0.9877536548685458,
+      "battery_monotone_nonincreasing": true,
+      "battery_start_fraction": 0.999864916875,
+      "contact_at_end": false,
+      "duration_s": 4.94999999999999,
+      "maximum_altitude_m": 2.0922451884647617,
+      "maximum_horizontal_range_m": 0.0,
+      "maximum_thrust_n": 5.403325,
+      "shutdown_at_end": false
+    },
+    "yaw_gate": {
+      "battery_end_fraction": 0.9779348078600951,
+      "battery_monotone_nonincreasing": true,
+      "battery_start_fraction": 0.9876306401580136,
+      "contact_at_end": false,
+      "duration_s": 3.950000000000003,
+      "maximum_altitude_m": 2.026380738371474,
+      "maximum_horizontal_range_m": 0.0,
+      "maximum_thrust_n": 4.922026105972542,
+      "shutdown_at_end": false
+    }
+  },
+  "reproduction": "MPLCONFIGDIR=/tmp/taoryx-mpl PYTHONPATH=src python3 tools/validate_hummingbird_native_pseudo_comparison.py",
+  "resource_comparison": {
+    "boundary": "The native packet exposes rotor speed, source-derived thrust/power proxy, and shutdown but no electrical battery/SOC model; the pseudo battery is an engineering reserve and is not numerically compared to native energy.",
+    "native_electrical_battery_model_available": false,
+    "native_rotor_shutdown_observed": true,
+    "native_rotor_speed_channel_available": true,
+    "native_source_derived_shaft_power_proxy_available": true,
+    "pseudo_battery_consumed_fraction": 0.09802827003526915,
+    "pseudo_battery_end_fraction": 0.9018366468397309,
+    "pseudo_battery_monotone_nonincreasing": true,
+    "pseudo_battery_start_fraction": 0.999864916875,
+    "status": "partial_pass"
+  },
+  "schema": "taoryx.hummingbird-native-pseudo-comparison/v1alpha1",
+  "status": "comparison_pass_with_resource_boundary"
+}

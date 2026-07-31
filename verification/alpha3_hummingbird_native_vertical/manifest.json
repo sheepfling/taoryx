@@ -1,0 +1,17 @@
+{
+  "artifact": "evidence.json",
+  "board": "native_vertical_force_evidence_board.png",
+  "direct_body_force_injection": false,
+  "direct_body_moment_injection": false,
+  "family_id": "hummingbird",
+  "fidelity": "rigid_body_6dof",
+  "mission_id": "hummingbird_native_vertical_force_v1",
+  "mission_pass": true,
+  "objective_count": 4,
+  "passed_objective_count": 4,
+  "physical_motor_allocation": true,
+  "promotion_boundary": "This is a local source-plant vertical-force witness. Electrical battery/SOC, contact, landing, wind, and full-envelope promotion remain open.",
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hummingbird_native_vertical_mission.py",
+  "schema": "taoryx.hummingbird-native-vertical-mission/v1alpha1",
+  "status": "native_vertical_force_witness_pass"
+}

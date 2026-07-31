@@ -1,0 +1,1533 @@
+{
+  "cases": {
+    "downward_coupled_reversal": {
+      "allocation_statuses": [
+        "feasible"
+      ],
+      "control_path": "scheduled wrench demand -> bounded physical effectors -> accepted plant derivative",
+      "direct_wrench_injection": false,
+      "dt_s": 0.05,
+      "duration_s": 60.0,
+      "end_coordinate_m": 0.0,
+      "final_normalized_error": 0.0019936955445120524,
+      "initial_command": {
+        "coordinate": 9000.0,
+        "interpolation_fraction": 0.0,
+        "lower_node": "f16.physical_schedule.f16-9km-152mps",
+        "requested_wrench": {
+          "total_force_x_n": 13052.854526122625,
+          "total_moment_x_nm": -1.3902520407813871e-12,
+          "total_moment_y_nm": 71405.77741204367,
+          "total_moment_z_nm": -7.50760356250313e-14
+        },
+        "upper_node": "f16.physical_schedule.f16-9km-152mps",
+        "wrench_increment": {
+          "total_force_x_n": 441.31027135939377,
+          "total_moment_x_nm": -1.3902520407813871e-12,
+          "total_moment_y_nm": 71405.77741204371,
+          "total_moment_z_nm": -7.50760356250313e-14
+        }
+      },
+      "initial_normalized_error": 0.002190890230020559,
+      "maximum_controlled_allocation_residual": 211.83393160420633,
+      "maximum_normalized_error": 0.0058932644878748825,
+      "passed": true,
+      "perturbation": {
+        "q_rad_s": 0.0004,
+        "u_m_s": 0.1,
+        "w_m_s": 0.02
+      },
+      "plant_policy": "linear_blend_of_validated_source_endpoint_derivatives_and_effectiveness; actual bounded effectors at every sample",
+      "samples": [
+        {
+          "actual_effectors": {
+            "aileron_deg": 0.0,
+            "elevator_deg": -0.5580361912371726,
+            "rudder_deg": 0.0,
+            "throttle_fraction": 0.2113118146305974
+          },
+          "allocation_residual": 211.83393160420633,
+          "allocation_status": "feasible",
+          "coordinate": 9000.0,
+          "interpolation_fraction": 0.0,
+          "lower_node": "f16.physical_schedule.f16-9km-152mps",
+          "normalized_error": 0.002190890230020559,
+          "time_s": 0.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.5370563920726905e-16,
+            "elevator_deg": -0.5650863203760548,
+            "rudder_deg": 6.0785987532615524e-33,
+            "throttle_fraction": 0.1917205014983614
+          },
+          "allocation_residual": 9.525477627447001,
+          "allocation_status": "feasible",
+          "coordinate": 8550.0,
+          "interpolation_fraction": 0.85,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.005161777232341507,
+          "time_s": 3.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -3.0038481560242594e-20,
+            "elevator_deg": -0.5584194994523142,
+            "rudder_deg": 2.459373999025376e-37,
+            "throttle_fraction": 0.1800117389528588
+          },
+          "allocation_residual": 9.210458485532849,
+          "allocation_status": "feasible",
+          "coordinate": 8100.0,
+          "interpolation_fraction": 0.7,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.00420375497705488,
+          "time_s": 6.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 3.6755473717664474e-17,
+            "elevator_deg": -0.5507566146617885,
+            "rudder_deg": 1.57192565483134e-33,
+            "throttle_fraction": 0.16980653839287757
+          },
+          "allocation_residual": 8.560464042963202,
+          "allocation_status": "feasible",
+          "coordinate": 7650.0,
+          "interpolation_fraction": 0.55,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.003775684654007004,
+          "time_s": 9.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.8373602495341735e-16,
+            "elevator_deg": -0.5423883587888916,
+            "rudder_deg": 1.0306092973731362e-33,
+            "throttle_fraction": 0.16112523441575022
+          },
+          "allocation_residual": 7.792542831779826,
+          "allocation_status": "feasible",
+          "coordinate": 7200.0,
+          "interpolation_fraction": 0.4,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.003791452582878587,
+          "time_s": 12.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.9165002309578633e-16,
+            "elevator_deg": -0.5333234726281663,
+            "rudder_deg": 2.4915862298260974e-32,
+            "throttle_fraction": 0.15382776271576354
+          },
+          "allocation_residual": 6.999592958784982,
+          "allocation_status": "feasible",
+          "coordinate": 6750.0,
+          "interpolation_fraction": 0.25,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.004194257438699691,
+          "time_s": 15.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.6876502431739998e-16,
+            "elevator_deg": -0.5235814464231039,
+            "rudder_deg": 4.746734360035461e-33,
+            "throttle_fraction": 0.14775578955559218
+          },
+          "allocation_residual": 6.205755664395174,
+          "allocation_status": "feasible",
+          "coordinate": 6300.0,
+          "interpolation_fraction": 0.1,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.0050392757744818625,
+          "time_s": 18.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.8934944062054975e-16,
+            "elevator_deg": -0.521134159335142,
+            "rudder_deg": 2.02090961801342e-33,
+            "throttle_fraction": 0.14222589272157116
+          },
+          "allocation_residual": 7.587692740590986,
+          "allocation_status": "feasible",
+          "coordinate": 5850.0,
+          "interpolation_fraction": 0.95,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.004315091690272772,
+          "time_s": 21.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.7274480934178003e-18,
+            "elevator_deg": -0.5279739987524665,
+            "rudder_deg": 4.7634433104547716e-35,
+            "throttle_fraction": 0.13569761259940274
+          },
+          "allocation_residual": 10.567365293477224,
+          "allocation_status": "feasible",
+          "coordinate": 5400.0,
+          "interpolation_fraction": 0.8,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.002710520439141333,
+          "time_s": 24.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -8.940502627151434e-35,
+            "elevator_deg": -0.5522504767872407,
+            "rudder_deg": 2.465346287027771e-51,
+            "throttle_fraction": 0.12885244131356796
+          },
+          "allocation_residual": 9.228172008368459,
+          "allocation_status": "feasible",
+          "coordinate": 4950.0,
+          "interpolation_fraction": 0.65,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0019585848712401414,
+          "time_s": 27.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 5.470464516432372e-20,
+            "elevator_deg": -0.5754014612513786,
+            "rudder_deg": -1.7346960274668815e-36,
+            "throttle_fraction": 0.1231972460073834
+          },
+          "allocation_residual": 8.392513315317965,
+          "allocation_status": "feasible",
+          "coordinate": 4500.0,
+          "interpolation_fraction": 0.5,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0016420822728790581,
+          "time_s": 30.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -5.637478257299125e-17,
+            "elevator_deg": -0.597416138392399,
+            "rudder_deg": 3.457961198580886e-33,
+            "throttle_fraction": 0.11832797256576633
+          },
+          "allocation_residual": 7.812005311996226,
+          "allocation_status": "feasible",
+          "coordinate": 4050.0,
+          "interpolation_fraction": 0.35,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0016990583691962634,
+          "time_s": 33.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -2.7575867447617378e-17,
+            "elevator_deg": -0.6182045773558497,
+            "rudder_deg": -9.434186162255428e-33,
+            "throttle_fraction": 0.11407364966626546
+          },
+          "allocation_residual": 7.2997823458183735,
+          "allocation_status": "feasible",
+          "coordinate": 3600.0,
+          "interpolation_fraction": 0.2,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.002125891237047646,
+          "time_s": 36.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.8634943877104446e-16,
+            "elevator_deg": -0.6377381168283393,
+            "rudder_deg": 7.28331180881326e-34,
+            "throttle_fraction": 0.11034753176108211
+          },
+          "allocation_residual": 6.80664315914941,
+          "allocation_status": "feasible",
+          "coordinate": 3150.0,
+          "interpolation_fraction": 0.05,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0029734701660102648,
+          "time_s": 39.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 4.640632455117169e-17,
+            "elevator_deg": -0.6595515708424726,
+            "rudder_deg": -1.585020797764269e-33,
+            "throttle_fraction": 0.10607378418861281
+          },
+          "allocation_residual": 8.48329680150698,
+          "allocation_status": "feasible",
+          "coordinate": 2700.0,
+          "interpolation_fraction": 0.9,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0020155140947589827,
+          "time_s": 42.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.4124081539202152e-17,
+            "elevator_deg": -0.6769857698491898,
+            "rudder_deg": 1.4322943907010119e-32,
+            "throttle_fraction": 0.10213417331267677
+          },
+          "allocation_residual": 7.3612925683983885,
+          "allocation_status": "feasible",
+          "coordinate": 2250.0,
+          "interpolation_fraction": 0.75,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0011962096418756908,
+          "time_s": 45.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -4.512310283652549e-17,
+            "elevator_deg": -0.6935042400198306,
+            "rudder_deg": -2.9239053293520233e-33,
+            "throttle_fraction": 0.09886767630592962
+          },
+          "allocation_residual": 6.753655212209155,
+          "allocation_status": "feasible",
+          "coordinate": 1800.0,
+          "interpolation_fraction": 0.6,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0007506991669051586,
+          "time_s": 48.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.1198707994973268e-16,
+            "elevator_deg": -0.7090964557041363,
+            "rudder_deg": 1.478816968326261e-32,
+            "throttle_fraction": 0.09602930377105437
+          },
+          "allocation_residual": 6.331934547433739,
+          "allocation_status": "feasible",
+          "coordinate": 1350.0,
+          "interpolation_fraction": 0.45,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0006213087128155137,
+          "time_s": 51.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.041900755605251e-16,
+            "elevator_deg": -0.7238253175857845,
+            "rudder_deg": -5.385144500490287e-33,
+            "throttle_fraction": 0.09352525453953382
+          },
+          "allocation_residual": 5.981611264823714,
+          "allocation_status": "feasible",
+          "coordinate": 900.0,
+          "interpolation_fraction": 0.3,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0007524031753187894,
+          "time_s": 54.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -2.719617897412697e-17,
+            "elevator_deg": -0.7378144057157291,
+            "rudder_deg": 7.008294270081926e-34,
+            "throttle_fraction": 0.09134825241694307
+          },
+          "allocation_residual": 5.539877293833703,
+          "allocation_status": "feasible",
+          "coordinate": 450.0,
+          "interpolation_fraction": 0.15,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0011191204808491506,
+          "time_s": 57.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -4.28017009046831e-17,
+            "elevator_deg": -0.7501687543523913,
+            "rudder_deg": -1.641372079860861e-33,
+            "throttle_fraction": 0.08939837343771927
+          },
+          "allocation_residual": 5.257283254060841,
+          "allocation_status": "feasible",
+          "coordinate": 7.5,
+          "interpolation_fraction": 0.0025,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.001974877813523516,
+          "time_s": 59.95,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        }
+      ],
+      "saturation_steps": 0,
+      "start_coordinate_m": 9000.0
+    },
+    "downward_q_perturbation": {
+      "allocation_statuses": [
+        "feasible"
+      ],
+      "control_path": "scheduled wrench demand -> bounded physical effectors -> accepted plant derivative",
+      "direct_wrench_injection": false,
+      "dt_s": 0.05,
+      "duration_s": 60.0,
+      "end_coordinate_m": 0.0,
+      "final_normalized_error": 0.001993695545113674,
+      "initial_command": {
+        "coordinate": 9000.0,
+        "interpolation_fraction": 0.0,
+        "lower_node": "f16.physical_schedule.f16-9km-152mps",
+        "requested_wrench": {
+          "total_force_x_n": 13052.854526492054,
+          "total_moment_x_nm": -3.8131579722738306e-13,
+          "total_moment_y_nm": 71405.77741193568,
+          "total_moment_z_nm": -2.504562544792007e-14
+        },
+        "upper_node": "f16.physical_schedule.f16-9km-152mps",
+        "wrench_increment": {
+          "total_force_x_n": 441.3102717288243,
+          "total_moment_x_nm": -3.8131579722738306e-13,
+          "total_moment_y_nm": 71405.77741193572,
+          "total_moment_z_nm": -2.504562544792007e-14
+        }
+      },
+      "initial_normalized_error": 0.0008,
+      "maximum_controlled_allocation_residual": 135.7188681592015,
+      "maximum_normalized_error": 0.005893901026689387,
+      "passed": true,
+      "perturbation": {
+        "q_rad_s": -0.0004
+      },
+      "plant_policy": "linear_blend_of_validated_source_endpoint_derivatives_and_effectiveness; actual bounded effectors at every sample",
+      "samples": [
+        {
+          "actual_effectors": {
+            "aileron_deg": 0.0,
+            "elevator_deg": -0.6037726932690428,
+            "rudder_deg": 0.0,
+            "throttle_fraction": 0.21560490413554803
+          },
+          "allocation_residual": 135.7188681592015,
+          "allocation_status": "feasible",
+          "coordinate": 9000.0,
+          "interpolation_fraction": 0.0,
+          "lower_node": "f16.physical_schedule.f16-9km-152mps",
+          "normalized_error": 0.0008,
+          "time_s": 0.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 8.660665741343641e-17,
+            "elevator_deg": -0.5650322726965228,
+            "rudder_deg": 4.735009605994161e-32,
+            "throttle_fraction": 0.19453792788909682
+          },
+          "allocation_residual": 12.028972751479765,
+          "allocation_status": "feasible",
+          "coordinate": 8550.0,
+          "interpolation_fraction": 0.85,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.005167260596099259,
+          "time_s": 3.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 8.112808544326305e-17,
+            "elevator_deg": -0.558406079682817,
+            "rudder_deg": -3.0004788061150806e-34,
+            "throttle_fraction": 0.18090741584758072
+          },
+          "allocation_residual": 10.06803123804983,
+          "allocation_status": "feasible",
+          "coordinate": 8100.0,
+          "interpolation_fraction": 0.7,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.004256665905573729,
+          "time_s": 6.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.0113267917900392e-16,
+            "elevator_deg": -0.5507518807357697,
+            "rudder_deg": -1.2518573469042558e-33,
+            "throttle_fraction": 0.1700944261948966
+          },
+          "allocation_residual": 8.855979278759081,
+          "allocation_status": "feasible",
+          "coordinate": 7650.0,
+          "interpolation_fraction": 0.55,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.003809163680237275,
+          "time_s": 9.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.3309092583595473e-16,
+            "elevator_deg": -0.5423866806656344,
+            "rudder_deg": -3.1527366889209493e-33,
+            "throttle_fraction": 0.16121869601927852
+          },
+          "allocation_residual": 7.89469935299317,
+          "allocation_status": "feasible",
+          "coordinate": 7200.0,
+          "interpolation_fraction": 0.4,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.00380583980904047,
+          "time_s": 12.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.779127962856988e-16,
+            "elevator_deg": -0.5333228814184621,
+            "rudder_deg": -4.3601748007971854e-33,
+            "throttle_fraction": 0.15385839418822633
+          },
+          "allocation_residual": 7.03500356250752,
+          "allocation_status": "feasible",
+          "coordinate": 6750.0,
+          "interpolation_fraction": 0.25,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.004199248238209837,
+          "time_s": 15.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.8515005851707358e-16,
+            "elevator_deg": -0.5235812398658924,
+            "rudder_deg": 7.91274785709095e-33,
+            "throttle_fraction": 0.14776592012546289
+          },
+          "allocation_residual": 6.2180514565414455,
+          "allocation_status": "feasible",
+          "coordinate": 6300.0,
+          "interpolation_fraction": 0.1,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.005040777989666579,
+          "time_s": 18.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -2.5085805301024465e-16,
+            "elevator_deg": -0.5211340711724217,
+            "rudder_deg": -1.0796136992379706e-32,
+            "throttle_fraction": 0.1422292690336457
+          },
+          "allocation_residual": 7.592086002273131,
+          "allocation_status": "feasible",
+          "coordinate": 5850.0,
+          "interpolation_fraction": 0.95,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0043155668996594015,
+          "time_s": 21.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 6.347063269889956e-17,
+            "elevator_deg": -0.5279739122232616,
+            "rudder_deg": 1.7210864076137997e-33,
+            "throttle_fraction": 0.13569875295680345
+          },
+          "allocation_residual": 10.568854042307281,
+          "allocation_status": "feasible",
+          "coordinate": 5400.0,
+          "interpolation_fraction": 0.8,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.002710687905545519,
+          "time_s": 24.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -8.04539285042802e-26,
+            "elevator_deg": -0.5522504461927028,
+            "rudder_deg": 7.16341646484143e-41,
+            "throttle_fraction": 0.12885282577465174
+          },
+          "allocation_residual": 9.228688747994733,
+          "allocation_status": "feasible",
+          "coordinate": 4950.0,
+          "interpolation_fraction": 0.65,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.001958657690942789,
+          "time_s": 27.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.9573508773244038e-16,
+            "elevator_deg": -0.5754014504175636,
+            "rudder_deg": 2.012829646556823e-32,
+            "throttle_fraction": 0.12319737610331416
+          },
+          "allocation_residual": 8.392695808867092,
+          "allocation_status": "feasible",
+          "coordinate": 4500.0,
+          "interpolation_fraction": 0.5,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0016421140805572417,
+          "time_s": 30.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -2.1220662073780167e-17,
+            "elevator_deg": -0.5974161345420476,
+            "rudder_deg": 3.369750786266253e-33,
+            "throttle_fraction": 0.11832801673763763
+          },
+          "allocation_residual": 7.812069348239833,
+          "allocation_status": "feasible",
+          "coordinate": 4050.0,
+          "interpolation_fraction": 0.35,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.001699069843375929,
+          "time_s": 33.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 9.731211810551559e-17,
+            "elevator_deg": -0.6182045759821346,
+            "rudder_deg": -8.344866754796038e-33,
+            "throttle_fraction": 0.11407366471114282
+          },
+          "allocation_residual": 7.299804832892402,
+          "allocation_status": "feasible",
+          "coordinate": 3600.0,
+          "interpolation_fraction": 0.2,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.002125894607616232,
+          "time_s": 36.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -9.166023102580933e-17,
+            "elevator_deg": -0.6377381163362533,
+            "rudder_deg": -4.4502473841382664e-32,
+            "throttle_fraction": 0.1103475369003316
+          },
+          "allocation_residual": 6.8066510550254025,
+          "allocation_status": "feasible",
+          "coordinate": 3150.0,
+          "interpolation_fraction": 0.05,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.002973471040344269,
+          "time_s": 39.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.2502276629506782e-16,
+            "elevator_deg": -0.6595515706726751,
+            "rudder_deg": -9.689270293676142e-33,
+            "throttle_fraction": 0.10607378594166122
+          },
+          "allocation_residual": 8.483299798245348,
+          "allocation_status": "feasible",
+          "coordinate": 2700.0,
+          "interpolation_fraction": 0.9,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.002015514383003424,
+          "time_s": 42.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.7292761401423497e-16,
+            "elevator_deg": -0.6769857697838286,
+            "rudder_deg": -3.8579836622385966e-33,
+            "throttle_fraction": 0.10213417391254521
+          },
+          "allocation_residual": 7.361293599218941,
+          "allocation_status": "feasible",
+          "coordinate": 2250.0,
+          "interpolation_fraction": 0.75,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0011962097709127015,
+          "time_s": 45.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 3.2148487070330315e-18,
+            "elevator_deg": -0.6935042399948906,
+            "rudder_deg": -3.6349848787295917e-34,
+            "throttle_fraction": 0.09886767651251513
+          },
+          "allocation_residual": 6.753655571680083,
+          "allocation_status": "feasible",
+          "coordinate": 1800.0,
+          "interpolation_fraction": 0.6,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0007506992375343047,
+          "time_s": 48.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.139152461069205e-17,
+            "elevator_deg": -0.7090964556946782,
+            "rudder_deg": 1.0666775905923672e-33,
+            "throttle_fraction": 0.09602930384263628
+          },
+          "allocation_residual": 6.331934673921808,
+          "allocation_status": "feasible",
+          "coordinate": 1350.0,
+          "interpolation_fraction": 0.45,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0006213087441946969,
+          "time_s": 51.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.3529631051203487e-19,
+            "elevator_deg": -0.7238253175822125,
+            "rudder_deg": 1.206205604934167e-35,
+            "throttle_fraction": 0.09352525456448234
+          },
+          "allocation_residual": 5.981611309124089,
+          "allocation_status": "feasible",
+          "coordinate": 900.0,
+          "interpolation_fraction": 0.3,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0007524031850206426,
+          "time_s": 54.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -2.858010577469609e-17,
+            "elevator_deg": -0.737814405714391,
+            "rudder_deg": 7.493758393242024e-33,
+            "throttle_fraction": 0.0913482524256886
+          },
+          "allocation_residual": 5.5398773098230985,
+          "allocation_status": "feasible",
+          "coordinate": 450.0,
+          "interpolation_fraction": 0.15,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0011191204834418923,
+          "time_s": 57.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.2327940596644728e-18,
+            "elevator_deg": -0.7501687543518832,
+            "rudder_deg": -9.521433886773015e-35,
+            "throttle_fraction": 0.08939837344085635
+          },
+          "allocation_residual": 5.25728326003058,
+          "allocation_status": "feasible",
+          "coordinate": 7.5,
+          "interpolation_fraction": 0.0025,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.001974877814139821,
+          "time_s": 59.95,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        }
+      ],
+      "saturation_steps": 0,
+      "start_coordinate_m": 9000.0
+    },
+    "upward_coupled_reversal": {
+      "allocation_statuses": [
+        "feasible"
+      ],
+      "control_path": "scheduled wrench demand -> bounded physical effectors -> accepted plant derivative",
+      "direct_wrench_injection": false,
+      "dt_s": 0.05,
+      "duration_s": 60.0,
+      "end_coordinate_m": 9000.0,
+      "final_normalized_error": 0.006730318149743096,
+      "initial_command": {
+        "coordinate": 0.0,
+        "interpolation_fraction": 0.0,
+        "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+        "requested_wrench": {
+          "total_force_x_n": 5926.881534751743,
+          "total_moment_x_nm": 7.285965975725016e-13,
+          "total_moment_y_nm": -50255.54984873795,
+          "total_moment_z_nm": 4.471776170678241e-14
+        },
+        "upper_node": "f16.physical_schedule.f16-sea-level-152mps",
+        "wrench_increment": {
+          "total_force_x_n": 2513.4513522833204,
+          "total_moment_x_nm": 7.285965975725016e-13,
+          "total_moment_y_nm": -50255.54984873797,
+          "total_moment_z_nm": 4.471776170678241e-14
+        }
+      },
+      "initial_normalized_error": 0.002190890230020559,
+      "maximum_controlled_allocation_residual": 212.61682560885512,
+      "maximum_normalized_error": 0.00899780944940399,
+      "passed": true,
+      "perturbation": {
+        "q_rad_s": -0.0004,
+        "u_m_s": -0.1,
+        "w_m_s": -0.02
+      },
+      "plant_policy": "linear_blend_of_validated_source_endpoint_derivatives_and_effectiveness; actual bounded effectors at every sample",
+      "samples": [
+        {
+          "actual_effectors": {
+            "aileron_deg": 0.0,
+            "elevator_deg": -0.7656375761615336,
+            "rudder_deg": 0.0,
+            "throttle_fraction": 0.09057974520318358
+          },
+          "allocation_residual": 212.61682560885512,
+          "allocation_status": "feasible",
+          "coordinate": 0.0,
+          "interpolation_fraction": 0.0,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.002190890230020559,
+          "time_s": 0.0,
+          "upper_node": "f16.physical_schedule.f16-sea-level-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -8.013776523604414e-18,
+            "elevator_deg": -0.7499357282401214,
+            "rudder_deg": -1.8508948732681e-34,
+            "throttle_fraction": 0.09247177417218375
+          },
+          "allocation_residual": 3.8545674250982276,
+          "allocation_status": "feasible",
+          "coordinate": 450.0,
+          "interpolation_fraction": 0.15,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.00308055391054688,
+          "time_s": 3.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -6.035307790698138e-17,
+            "elevator_deg": -0.7364618274503852,
+            "rudder_deg": -1.0589065007862285e-34,
+            "throttle_fraction": 0.09401835501952072
+          },
+          "allocation_residual": 5.265051262246578,
+          "allocation_status": "feasible",
+          "coordinate": 900.0,
+          "interpolation_fraction": 0.3,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0037255272220253887,
+          "time_s": 6.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -7.102703157547667e-17,
+            "elevator_deg": -0.7220854297267059,
+            "rudder_deg": -5.654879296883177e-33,
+            "throttle_fraction": 0.0962927601985606
+          },
+          "allocation_residual": 6.142138934257904,
+          "allocation_status": "feasible",
+          "coordinate": 1350.0,
+          "interpolation_fraction": 0.45,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.004059049942695013,
+          "time_s": 9.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 7.252648523653984e-17,
+            "elevator_deg": -0.7067932765895731,
+            "rudder_deg": -7.736504284495969e-33,
+            "throttle_fraction": 0.09910606992962692
+          },
+          "allocation_residual": 6.768457130014437,
+          "allocation_status": "feasible",
+          "coordinate": 1800.0,
+          "interpolation_fraction": 0.6,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.004100585608635404,
+          "time_s": 12.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 6.058150893455792e-17,
+            "elevator_deg": -0.6905300407784267,
+            "rudder_deg": 8.583438132430042e-33,
+            "throttle_fraction": 0.1023734179709925
+          },
+          "allocation_residual": 7.276551542673272,
+          "allocation_status": "feasible",
+          "coordinate": 2250.0,
+          "interpolation_fraction": 0.75,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.003816691266243143,
+          "time_s": 15.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 7.486030782033087e-17,
+            "elevator_deg": -0.6733096783408961,
+            "rudder_deg": -1.2166673331839637e-32,
+            "throttle_fraction": 0.10608880526677013
+          },
+          "allocation_residual": 7.7351841628329705,
+          "allocation_status": "feasible",
+          "coordinate": 2700.0,
+          "interpolation_fraction": 0.9,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0032167142708838096,
+          "time_s": 18.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.8051566120664486e-20,
+            "elevator_deg": -0.6587051444083742,
+            "rudder_deg": 2.8236071628350312e-36,
+            "throttle_fraction": 0.10989078151152393
+          },
+          "allocation_residual": 6.280537913100575,
+          "allocation_status": "feasible",
+          "coordinate": 3150.0,
+          "interpolation_fraction": 0.05,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.003632275451795064,
+          "time_s": 21.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -2.5434589822850175e-22,
+            "elevator_deg": -0.6394739981971496,
+            "rudder_deg": 4.3086055124475843e-39,
+            "throttle_fraction": 0.11339342944723275
+          },
+          "allocation_residual": 7.166440987448659,
+          "allocation_status": "feasible",
+          "coordinate": 3600.0,
+          "interpolation_fraction": 0.2,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.004943351352762445,
+          "time_s": 24.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -9.626390341555152e-17,
+            "elevator_deg": -0.6190152239948856,
+            "rudder_deg": 2.255694119941949e-33,
+            "throttle_fraction": 0.11771000750708414
+          },
+          "allocation_residual": 7.918252307067356,
+          "allocation_status": "feasible",
+          "coordinate": 4050.0,
+          "interpolation_fraction": 0.35,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.005707316585781447,
+          "time_s": 27.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 2.2804423446627308e-21,
+            "elevator_deg": -0.5973150031886753,
+            "rudder_deg": -2.287580954384236e-38,
+            "throttle_fraction": 0.122788952954867
+          },
+          "allocation_residual": 8.648127213458181,
+          "allocation_status": "feasible",
+          "coordinate": 4500.0,
+          "interpolation_fraction": 0.5,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0060575182674329955,
+          "time_s": 30.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.0588959472765335e-16,
+            "elevator_deg": -0.5744180121622946,
+            "rudder_deg": -3.895725412122426e-34,
+            "throttle_fraction": 0.12865581632295667
+          },
+          "allocation_residual": 9.293792677686218,
+          "allocation_status": "feasible",
+          "coordinate": 4950.0,
+          "interpolation_fraction": 0.65,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.005998564989628751,
+          "time_s": 33.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -2.9692235888687822e-27,
+            "elevator_deg": -0.5502811214890659,
+            "rudder_deg": -1.2599171882154204e-43,
+            "throttle_fraction": 0.13538757120383835
+          },
+          "allocation_residual": 9.93797561002832,
+          "allocation_status": "feasible",
+          "coordinate": 5400.0,
+          "interpolation_fraction": 0.8,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0055356904887367405,
+          "time_s": 36.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -7.689460603913771e-17,
+            "elevator_deg": -0.5295331483341522,
+            "rudder_deg": -1.514710158903731e-33,
+            "throttle_fraction": 0.1426295987897079
+          },
+          "allocation_residual": 5.332859098058235,
+          "allocation_status": "feasible",
+          "coordinate": 5850.0,
+          "interpolation_fraction": 0.95,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.004677622537515996,
+          "time_s": 39.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.7920875932120238e-16,
+            "elevator_deg": -0.5425943779250689,
+            "rudder_deg": -7.673281517252577e-33,
+            "throttle_fraction": 0.14684145661998813
+          },
+          "allocation_residual": 5.06729029853826,
+          "allocation_status": "feasible",
+          "coordinate": 6300.0,
+          "interpolation_fraction": 0.1,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.006749277018686155,
+          "time_s": 42.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.5457164181081026e-16,
+            "elevator_deg": -0.5522065646095774,
+            "rudder_deg": -3.613784091658397e-32,
+            "throttle_fraction": 0.15259805479889949
+          },
+          "allocation_residual": 7.380069917518088,
+          "allocation_status": "feasible",
+          "coordinate": 6750.0,
+          "interpolation_fraction": 0.25,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.00809343423587301,
+          "time_s": 45.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 2.409536235451579e-17,
+            "elevator_deg": -0.5612363361273802,
+            "rudder_deg": -2.2114991291065803e-33,
+            "throttle_fraction": 0.16070729951110338
+          },
+          "allocation_residual": 9.03326570570313,
+          "allocation_status": "feasible",
+          "coordinate": 7200.0,
+          "interpolation_fraction": 0.4,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.008806369666007823,
+          "time_s": 48.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 3.819495605640691e-17,
+            "elevator_deg": -0.5694730874752235,
+            "rudder_deg": -2.6949266801125313e-33,
+            "throttle_fraction": 0.17104177037474402
+          },
+          "allocation_residual": 10.439004916314337,
+          "allocation_status": "feasible",
+          "coordinate": 7650.0,
+          "interpolation_fraction": 0.55,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.008997458316631889,
+          "time_s": 51.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -7.70132799721855e-17,
+            "elevator_deg": -0.5768973369345839,
+            "rudder_deg": 3.6041718732535234e-33,
+            "throttle_fraction": 0.1838225275618435
+          },
+          "allocation_residual": 11.805913044276004,
+          "allocation_status": "feasible",
+          "coordinate": 8100.0,
+          "interpolation_fraction": 0.7,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.008697810998573299,
+          "time_s": 54.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.343280310022348e-17,
+            "elevator_deg": -0.5834573121406031,
+            "rudder_deg": 2.625858710643727e-33,
+            "throttle_fraction": 0.19952098423378942
+          },
+          "allocation_residual": 13.234848677416899,
+          "allocation_status": "feasible",
+          "coordinate": 8550.0,
+          "interpolation_fraction": 0.85,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.007932645042016287,
+          "time_s": 57.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 8.33309489281391e-17,
+            "elevator_deg": -0.5891866291490409,
+            "rudder_deg": -8.43440009531557e-33,
+            "throttle_fraction": 0.21851326735905283
+          },
+          "allocation_residual": 14.7927913518237,
+          "allocation_status": "feasible",
+          "coordinate": 8992.5,
+          "interpolation_fraction": 0.9975,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.00675598025811078,
+          "time_s": 59.95,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        }
+      ],
+      "saturation_steps": 0,
+      "start_coordinate_m": 0.0
+    },
+    "upward_q_perturbation": {
+      "allocation_statuses": [
+        "feasible"
+      ],
+      "control_path": "scheduled wrench demand -> bounded physical effectors -> accepted plant derivative",
+      "direct_wrench_injection": false,
+      "dt_s": 0.05,
+      "duration_s": 60.0,
+      "end_coordinate_m": 9000.0,
+      "final_normalized_error": 0.006730318149666671,
+      "initial_command": {
+        "coordinate": 0.0,
+        "interpolation_fraction": 0.0,
+        "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+        "requested_wrench": {
+          "total_force_x_n": 5926.881534367718,
+          "total_moment_x_nm": -1.0995712000538409e-13,
+          "total_moment_y_nm": -50255.54984882321,
+          "total_moment_z_nm": -3.345256729002253e-14
+        },
+        "upper_node": "f16.physical_schedule.f16-sea-level-152mps",
+        "wrench_increment": {
+          "total_force_x_n": 2513.451351899296,
+          "total_moment_x_nm": -1.0995712000538409e-13,
+          "total_moment_y_nm": -50255.549848823226,
+          "total_moment_z_nm": -3.345256729002253e-14
+        }
+      },
+      "initial_normalized_error": 0.0008,
+      "maximum_controlled_allocation_residual": 111.56254566810337,
+      "maximum_normalized_error": 0.00899780945009104,
+      "passed": true,
+      "perturbation": {
+        "q_rad_s": 0.0004
+      },
+      "plant_policy": "linear_blend_of_validated_source_endpoint_derivatives_and_effectiveness; actual bounded effectors at every sample",
+      "samples": [
+        {
+          "actual_effectors": {
+            "aileron_deg": 0.0,
+            "elevator_deg": -0.7489432193536679,
+            "rudder_deg": 0.0,
+            "throttle_fraction": 0.08927924300043728
+          },
+          "allocation_residual": 111.56254566810337,
+          "allocation_status": "feasible",
+          "coordinate": 0.0,
+          "interpolation_fraction": 0.0,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0008,
+          "time_s": 0.0,
+          "upper_node": "f16.physical_schedule.f16-sea-level-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 4.655697080506691e-17,
+            "elevator_deg": -0.750097742139603,
+            "rudder_deg": 5.090384143043331e-33,
+            "throttle_fraction": 0.09148487163010036
+          },
+          "allocation_residual": 5.339276078609016,
+          "allocation_status": "feasible",
+          "coordinate": 450.0,
+          "interpolation_fraction": 0.15,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.0030764588958995514,
+          "time_s": 3.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 2.057863885949016e-17,
+            "elevator_deg": -0.736519745541639,
+            "rudder_deg": -7.655982060596969e-33,
+            "throttle_fraction": 0.09363863147611526
+          },
+          "allocation_residual": 5.868611038451922,
+          "allocation_status": "feasible",
+          "coordinate": 900.0,
+          "interpolation_fraction": 0.3,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.003746514119835577,
+          "time_s": 6.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -7.688356734578036e-17,
+            "elevator_deg": -0.7221059792350735,
+            "rudder_deg": -8.924984851218594e-33,
+            "throttle_fraction": 0.09614698816627297
+          },
+          "allocation_residual": 6.377812638206111,
+          "allocation_status": "feasible",
+          "coordinate": 1350.0,
+          "interpolation_fraction": 0.45,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.004067738904204915,
+          "time_s": 9.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -3.7369966019567484e-17,
+            "elevator_deg": -0.7068004675973872,
+            "rudder_deg": -5.262065412563084e-34,
+            "throttle_fraction": 0.09905026945767359
+          },
+          "allocation_residual": 6.857375545800209,
+          "allocation_status": "feasible",
+          "coordinate": 1800.0,
+          "interpolation_fraction": 0.6,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.004103387237735528,
+          "time_s": 12.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -4.414957536595121e-20,
+            "elevator_deg": -0.6905325200147303,
+            "rudder_deg": 7.437340789812946e-38,
+            "throttle_fraction": 0.10235211930615376
+          },
+          "allocation_residual": 7.309715425664028,
+          "allocation_status": "feasible",
+          "coordinate": 2250.0,
+          "interpolation_fraction": 0.75,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.003817540923359578,
+          "time_s": 15.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.0453373283298178e-16,
+            "elevator_deg": -0.6733105193432979,
+            "rudder_deg": 3.6894516806624526e-33,
+            "throttle_fraction": 0.10608069877210097
+          },
+          "allocation_residual": 7.747457889376557,
+          "allocation_status": "feasible",
+          "coordinate": 2700.0,
+          "interpolation_fraction": 0.9,
+          "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+          "normalized_error": 0.003216991083112691,
+          "time_s": 18.0,
+          "upper_node": "f16.physical_schedule.f16-3km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 2.2365175155496228e-17,
+            "elevator_deg": -0.6587054050355364,
+            "rudder_deg": -3.459731508762063e-33,
+            "throttle_fraction": 0.10988771042291505
+          },
+          "allocation_residual": 6.284716556858911,
+          "allocation_status": "feasible",
+          "coordinate": 3150.0,
+          "interpolation_fraction": 0.05,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0036324218056087323,
+          "time_s": 21.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 2.8187445258045695e-17,
+            "elevator_deg": -0.6394740923987621,
+            "rudder_deg": -1.3892951397048553e-33,
+            "throttle_fraction": 0.1133922716715911
+          },
+          "allocation_residual": 7.16801315112489,
+          "allocation_status": "feasible",
+          "coordinate": 3600.0,
+          "interpolation_fraction": 0.2,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0049434095579377405,
+          "time_s": 24.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -2.664683508122536e-22,
+            "elevator_deg": -0.619015257919764,
+            "rudder_deg": 5.0573692652167283e-39,
+            "throttle_fraction": 0.11770957031062432
+          },
+          "allocation_residual": 7.918829945711949,
+          "allocation_status": "feasible",
+          "coordinate": 4050.0,
+          "interpolation_fraction": 0.35,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.005707334514352642,
+          "time_s": 27.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 7.0426574026079495e-19,
+            "elevator_deg": -0.5973150154493772,
+            "rudder_deg": 3.2527743420733297e-35,
+            "throttle_fraction": 0.12278878752915079
+          },
+          "allocation_residual": 8.648335543630663,
+          "allocation_status": "feasible",
+          "coordinate": 4500.0,
+          "interpolation_fraction": 0.5,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.006057523556955267,
+          "time_s": 30.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -5.217556801166115e-17,
+            "elevator_deg": -0.5744180166088911,
+            "rudder_deg": -1.3093145282997282e-32,
+            "throttle_fraction": 0.12865575358366252
+          },
+          "allocation_residual": 9.293868355077091,
+          "allocation_status": "feasible",
+          "coordinate": 4950.0,
+          "interpolation_fraction": 0.65,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.005998566601130773,
+          "time_s": 33.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 7.051498778384342e-31,
+            "elevator_deg": -0.5502811231069541,
+            "rudder_deg": 4.631447374501438e-47,
+            "throttle_fraction": 0.13538754734509206
+          },
+          "allocation_residual": 9.938003024443178,
+          "allocation_status": "feasible",
+          "coordinate": 5400.0,
+          "interpolation_fraction": 0.8,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.0055356910411736735,
+          "time_s": 36.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 1.7487665132193544e-16,
+            "elevator_deg": -0.5295331485114813,
+            "rudder_deg": -2.126974024468997e-32,
+            "throttle_fraction": 0.14262958974089074
+          },
+          "allocation_residual": 5.332869506229814,
+          "allocation_status": "feasible",
+          "coordinate": 5850.0,
+          "interpolation_fraction": 0.95,
+          "lower_node": "f16.physical_schedule.f16-3km-152mps",
+          "normalized_error": 0.004677622779135521,
+          "time_s": 39.0,
+          "upper_node": "f16.physical_schedule.f16-6km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 2.837660077217395e-16,
+            "elevator_deg": -0.5425943779952048,
+            "rudder_deg": 3.5337080288749044e-32,
+            "throttle_fraction": 0.14684145315573097
+          },
+          "allocation_residual": 5.0672939347871315,
+          "allocation_status": "feasible",
+          "coordinate": 6300.0,
+          "interpolation_fraction": 0.1,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.006749277189371169,
+          "time_s": 42.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -1.9533230965549647e-16,
+            "elevator_deg": -0.5522065646334936,
+            "rudder_deg": -9.402094476496164e-34,
+            "throttle_fraction": 0.15259805347063848
+          },
+          "allocation_residual": 7.380071245067705,
+          "allocation_status": "feasible",
+          "coordinate": 6750.0,
+          "interpolation_fraction": 0.25,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.00809343428511573,
+          "time_s": 45.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 2.632454540866616e-23,
+            "elevator_deg": -0.5612363361355792,
+            "rudder_deg": -4.3820918480770037e-41,
+            "throttle_fraction": 0.16070729900205766
+          },
+          "allocation_residual": 9.03326618324053,
+          "allocation_status": "feasible",
+          "coordinate": 7200.0,
+          "interpolation_fraction": 0.4,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.008806369675638408,
+          "time_s": 48.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 9.665052048947201e-18,
+            "elevator_deg": -0.5694730874779773,
+            "rudder_deg": 3.376065162272246e-34,
+            "throttle_fraction": 0.17104177017959263
+          },
+          "allocation_residual": 10.439005086543075,
+          "allocation_status": "feasible",
+          "coordinate": 7650.0,
+          "interpolation_fraction": 0.55,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.008997458317422198,
+          "time_s": 51.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": 9.70230210454053e-17,
+            "elevator_deg": -0.5768973369354925,
+            "rudder_deg": -4.298642565650859e-33,
+            "throttle_fraction": 0.18382252748692723
+          },
+          "allocation_residual": 11.805913104470608,
+          "allocation_status": "feasible",
+          "coordinate": 8100.0,
+          "interpolation_fraction": 0.7,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.008697810998140376,
+          "time_s": 54.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -2.1244518642865324e-16,
+            "elevator_deg": -0.5834573121409006,
+            "rudder_deg": -4.227800740459869e-33,
+            "throttle_fraction": 0.19952098420494593
+          },
+          "allocation_residual": 13.234848698318181,
+          "allocation_status": "feasible",
+          "coordinate": 8550.0,
+          "interpolation_fraction": 0.85,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.007932645041730626,
+          "time_s": 57.0,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        },
+        {
+          "actual_effectors": {
+            "aileron_deg": -3.4649023844901856e-17,
+            "elevator_deg": -0.5891866291491369,
+            "rudder_deg": -6.935495785978015e-33,
+            "throttle_fraction": 0.21851326734769405
+          },
+          "allocation_residual": 14.792791359782587,
+          "allocation_status": "feasible",
+          "coordinate": 8992.5,
+          "interpolation_fraction": 0.9975,
+          "lower_node": "f16.physical_schedule.f16-6km-152mps",
+          "normalized_error": 0.006755980258031705,
+          "time_s": 59.95,
+          "upper_node": "f16.physical_schedule.f16-9km-152mps"
+        }
+      ],
+      "saturation_steps": 0,
+      "start_coordinate_m": 0.0
+    }
+  },
+  "claim_boundary": "Local scheduled-transition evidence only. Endpoint source derivatives and effectiveness are linearly blended by explicit policy; no new aerodynamic table, servo certification, wind robustness, statistical reliability, or full-envelope flight-control qualification is claimed.",
+  "control_path": "scheduled source-derived wrench demand -> blended endpoint effectiveness -> bounded physical effectors -> blended source nonlinear derivative",
+  "direct_body_moment_injection": false,
+  "family_id": "reference_f16_s119",
+  "reproduction": "PYTHONPATH=src python3 tools/validate_f16_physical_schedule_transition.py",
+  "schema": "taoryx.f16-physical-effector-schedule-transition/v1alpha1",
+  "source_schedule_artifact": "verification/alpha3_f16_physical_schedule/manifest.json",
+  "status": "F16_physical_effector_schedule_transition_complete",
+  "summary": {
+    "all_allocation_statuses": [
+      "feasible"
+    ],
+    "case_count": 4,
+    "failed_case_count": 0,
+    "maximum_controlled_allocation_residual": 212.61682560885512,
+    "passed_case_count": 4
+  }
+}

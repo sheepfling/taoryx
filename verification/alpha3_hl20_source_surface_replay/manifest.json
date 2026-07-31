@@ -1,0 +1,7 @@
+{
+  "artifact": "source_surface_replay.json",
+  "claim_boundary": "Short open-loop source-surface replay only; no trim, controller, or mission qualification.",
+  "reproduction": "PYTHONPATH=src MPLCONFIGDIR=/tmp/taoryx-mpl python3 tools/validate_hl20_source_surface_replay.py",
+  "schema": "taoryx.hl20-source-surface-replay-manifest/v1alpha1",
+  "status": "source_surface_replay_pass_with_open_loop_boundary"
+}

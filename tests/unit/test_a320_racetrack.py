@@ -13,6 +13,7 @@ from taoryx.trajectory import (
     A320Pseudo6DOFModel,
     A320RacetrackRunner,
 )
+from taoryx.trajectory.pseudo6dof_profiles import load_pseudo6dof_catalog
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -64,6 +65,26 @@ def test_a320_pseudo6dof_racetrack_passes_without_physical_actuator_claim() -> N
     assert report["mission_pass"] is True
     assert all(row["allocation_status"] == "surrogate_policy_overlay" for row in run.rows)
     assert all(row["control_effectivity_source"] == "jsbsim-1.3.1-a320-coefficient-surrogate" for row in run.rows)
+    ####
+
+
+def test_a320_pseudo6dof_can_use_shared_catalog_response_law() -> None:
+    catalog = load_racetrack_template_catalog(ROOT / "verification/racetrack_templates.yaml")
+    route = catalog.get("a320-openap-pseudo6dof")
+    model = A320Pseudo6DOFModel.from_repository(ROOT)
+    trim = model.trim_pseudo6dof(A320OpenAPOperatingPoint(10500.0, 0.78, 60000.0))
+    _, profile = load_pseudo6dof_catalog(ROOT / "verification/pseudo6dof_profiles.yaml").for_family("a320_openap_3dof")
+    run = A320RacetrackRunner(
+        model,
+        trim,
+        route,
+        "pseudo_6dof_kinematic_bridge",
+        dt_s=0.2,
+        response_profile=profile,
+    ).run()
+
+    assert run.numerical_valid is True
+    assert {row["response_profile_id"] for row in run.rows} == {profile.id}
     ####
 
 

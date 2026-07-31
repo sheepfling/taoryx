@@ -143,7 +143,7 @@ be mistaken for actuator-realizable control:
 
 | Vehicle | Current highest evidence | Actual control path | Boundary |
 | --- | --- | --- | --- |
-| Skywalker X8 | T3 local table-coordinate result | collective/differential elevon source-table coordinates with declared travel, lag, and rate bounds | Public left/right elevon sign/gearing is unresolved, so it is not a hardware-surface claim. |
+| Skywalker X8 | T4 source-coordinate allocation result | collective/differential elevon source-table coordinates with declared travel, lag, and rate bounds plus the source-paper left/right conversion | Servo wiring, hinge sign, mapped actuator telemetry, and end-to-end physical racetrack evidence remain separate gates. |
 | Hummingbird | T5 local hover result | four individual motor-speed commands, source rotor thrust/reaction torque, and 5 ms motor lag | Attitude/rate recovery only; waypoint, contact, battery, and envelope cases are still separate work. |
 | B747 | T5 local condition-3 result | elevator, aileron, rudder, and installed-engine throttle trim; moments allocated through the three aerodynamic surfaces | One clean condition, ideal-declared servo response, and no schedule/fuel/high-lift claim. |
 | X-15 | T0 structural readiness | source stabilator/rudder coordinates are inventoried, but no physical LQR is synthesized | Both source-bounded trim attempts fail; XLR99 is a time history rather than a throttle map, and RCS/gearing/rate data are incomplete. |

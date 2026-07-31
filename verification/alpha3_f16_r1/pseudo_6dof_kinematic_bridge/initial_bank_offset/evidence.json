@@ -1,0 +1,187 @@
+{
+  "binding_id": "f16-s119-pseudo-6dof",
+  "claim_boundary": "The reduced route preserves shared geometry and truth objectives. Point-mass mode uses bounded translational kinematics; pseudo-6DOF mode adds a named attitude/rate response bridge. Source forces are diagnostic observables only; neither mode claims physical moments, control-surface allocation, or actuator realization.",
+  "evaluation": {
+    "claim_boundary": "truth telemetry verifies objective geometry; controller transitions are diagnostic and cannot create a pass",
+    "evaluator": "independent_truth_telemetry",
+    "hard_gates_passed": true,
+    "mission_pass": true,
+    "objective_pass": true,
+    "required_objectives": 4,
+    "required_passed": 4,
+    "results": [
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 12.0,
+          "margin": 12.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "high-altitude-level-gate",
+        "margin": 12.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 12.0,
+        "truth_time_s": 80.0
+      },
+      {
+        "closest_error": 30.28155774272028,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 30.28155774272028,
+          "channel": "gate_altitude_error",
+          "error": 30.28155774272028,
+          "limit": 35.0,
+          "margin": 4.718442257279719,
+          "target": 0.0,
+          "units": "m"
+        },
+        "dwell_actual_s": null,
+        "id": "left-turn-exit-gate",
+        "margin": 4.718442257279719,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 35.0,
+        "truth_time_s": 606.0
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 12.0,
+          "margin": 12.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "low-altitude-level-gate",
+        "margin": 12.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 12.0,
+        "truth_time_s": 684.0
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 12.0,
+          "margin": 12.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "terminal-start-finish-gate",
+        "margin": 12.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 12.0,
+        "truth_time_s": 1190.0
+      }
+    ],
+    "schema_version": 1
+  },
+  "family_id": "reference_f16_s119",
+  "fidelity": "pseudo_6dof_kinematic_bridge",
+  "mode": "pseudo_6dof_kinematic_bridge",
+  "perturbation": {
+    "initial_bank_offset_rad": 0.08
+  },
+  "route": {
+    "gates": [
+      {
+        "altitude_m": 300.0,
+        "east_m": 12000.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
+        "id": "high-altitude-level-gate",
+        "north_m": 0.0,
+        "phase": "outbound-level"
+      },
+      {
+        "altitude_m": 300.0,
+        "east_m": 12000.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
+        "id": "left-turn-exit-gate",
+        "north_m": 50000.0,
+        "phase": "left-turn"
+      },
+      {
+        "altitude_m": 0.0,
+        "east_m": 0.0,
+        "gate_normal_east": -1.0,
+        "gate_normal_north": 0.0,
+        "id": "low-altitude-level-gate",
+        "north_m": 50000.0,
+        "phase": "inbound-level"
+      },
+      {
+        "altitude_m": 0.0,
+        "east_m": 0.0,
+        "gate_normal_east": 1.0,
+        "gate_normal_north": 0.0,
+        "id": "terminal-start-finish-gate",
+        "north_m": 0.0,
+        "phase": "right-turn"
+      }
+    ],
+    "source_realization": "f16_source_force_plus_named_response_bridge_pending_route_adapter",
+    "template_id": "powered_fixed_wing_racetrack_v1",
+    "timing": {
+      "climb_time_s": 50.0,
+      "descent_time_s": 50.0,
+      "gate_altitude_tolerance_m": 35.0,
+      "gate_corridor_m": 500.0,
+      "gate_speed_tolerance_mps": 12.0,
+      "inbound_level_time_s": 28.740157480314963,
+      "outbound_level_time_s": 28.740157480314963,
+      "position_capture_bank_gain_rad_per_m": 0.0,
+      "position_capture_max_bank_correction_deg": 3.0,
+      "route_duration_s": 1188.1865661383836,
+      "simulation_horizon_s": 1308.1865661383836,
+      "straight_time_s": 78.74015748031496,
+      "turn_rate_command_scale": 1.0,
+      "turn_time_s": 515.3531255888768
+    }
+  },
+  "runtime": {
+    "dt_s": 2.0,
+    "duration_s": 1308.0,
+    "envelope_violations": [],
+    "failure": null,
+    "hard_gates_passed": true,
+    "numerical_valid": true
+  },
+  "schema_version": "taoryx.f16-racetrack-evidence/v1",
+  "status": "nominal_case_pass",
+  "vehicle_id": "reference_f16_s119"
+}

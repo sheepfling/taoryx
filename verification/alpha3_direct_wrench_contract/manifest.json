@@ -1,0 +1,395 @@
+{
+  "claim_boundary": "This ledger normalizes the direct-wrench bridge contract; it does not promote generalized-wrench evidence to physical-effector qualification.",
+  "failures": [],
+  "records": [
+    {
+      "control_realization": "direct_wrench",
+      "envelope": {
+        "limits": [
+          "declared source attitude/rate bounds",
+          "local table domain"
+        ],
+        "status": "local_source_table_domain"
+      },
+      "evidence_artifact": "verification/alpha3_x8_direct_wrench/manifest.json",
+      "evidence_status": "nominal_case_pass",
+      "evidence_tier": "passive_native",
+      "family_id": "skywalker_x8",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "force_moment": {
+        "composition": "source loads plus achieved injected wrench",
+        "control_loads": "bounded direct body wrench",
+        "source_loads": "table-backed nonlinear loads"
+      },
+      "nonclaims": [
+        "No left/right elevon, servo, throttle, or physical-effector allocation is used by this witness.",
+        "The direct wrench is an explicit injected control load and is not a hardware-realizable control claim.",
+        "This is one source-trim local operating point, not a scheduled or family-wide qualification."
+      ],
+      "promotion_status": "T3_direct_wrench_nominal_local",
+      "proves": "A bounded six-axis direct body-wrench command can recover a coupled local X8 rigid-body perturbation through the table-backed nonlinear plant.",
+      "resources": {
+        "modeled": [
+          "mass"
+        ],
+        "not_modeled": [
+          "fuel burn",
+          "actuator energy"
+        ],
+        "status": "fixed_mass_local_screen"
+      },
+      "trim": {
+        "source": "table-backed local trim; boundary findings retained",
+        "status": "source_trim_recorded"
+      }
+    },
+    {
+      "control_realization": "direct_wrench",
+      "envelope": {
+        "limits": [
+          "source table domain",
+          "declared beta and rate limits",
+          "route terminal gates"
+        ],
+        "status": "nominal_transport_racetrack"
+      },
+      "evidence_artifact": "artifacts/showcases/airbreathing-racetrack-fidelity-ladder/b747-racetrack-altitude-turns-6dof-v1/summary.json",
+      "evidence_status": "nominal_case_pass_overall_qualification_pending",
+      "evidence_tier": "bounded_direct_wrench_nominal_case",
+      "family_id": "b747",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "force_moment": {
+        "composition": "source loads plus logged direct-wrench control load",
+        "control_loads": "bounded direct body wrench",
+        "source_loads": "source-table aerodynamic loads"
+      },
+      "nonclaims": [
+        "physical elevator, aileron, or rudder allocation",
+        "source-validated transport flight-control law",
+        "fuel depletion or certified JT9D performance",
+        "takeoff, landing, wind robustness, or manufacturer fidelity"
+      ],
+      "promotion_status": "T3_direct_wrench_nominal_mission",
+      "proves": "",
+      "resources": {
+        "modeled": [
+          "fixed mass"
+        ],
+        "not_modeled": [
+          "fuel burn",
+          "surface actuator energy"
+        ],
+        "status": "explicit_fixed_mass_zero_propellant"
+      },
+      "trim": {
+        "source": "declared transport operating condition",
+        "status": "source_table_transport_trim_or_local_balance"
+      }
+    },
+    {
+      "control_realization": "direct_wrench",
+      "envelope": {
+        "limits": [
+          "declared Mach/altitude point",
+          "local alpha/beta/rate bounds"
+        ],
+        "status": "single_local_operating_point"
+      },
+      "evidence_artifact": "verification/alpha3_a320_direct_wrench/manifest.json",
+      "evidence_status": "nominal_case_pass",
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "a320",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "force_moment": {
+        "composition": "local source response plus achieved injected wrench",
+        "control_loads": "bounded direct body wrench",
+        "source_loads": "source-calibrated surrogate loads"
+      },
+      "nonclaims": [
+        "physical elevator, aileron, rudder, or engine allocation",
+        "full aircraft mission closure at rigid-body 6DOF",
+        "manufacturer-validated A320 flight dynamics",
+        "scheduled envelope qualification or fuel depletion"
+      ],
+      "promotion_status": "T3_direct_wrench_nominal_local",
+      "proves": "A bounded direct body wrench recovers a coupled A320 local attitude/rate and speed perturbation using the pinned OpenAP/JSBSim surrogate channels.",
+      "resources": {
+        "modeled": [
+          "mass"
+        ],
+        "not_modeled": [
+          "fuel burn",
+          "surface actuator energy"
+        ],
+        "status": "fixed_mass_local_screen"
+      },
+      "trim": {
+        "source": "OpenAP/JSBSim-derived local operating point",
+        "status": "operating_point_trim_recorded"
+      }
+    },
+    {
+      "control_realization": "direct_wrench",
+      "envelope": {
+        "limits": [
+          "source alpha/beta domain",
+          "declared local rate limits",
+          "route boundary retained separately"
+        ],
+        "status": "local_subsonic_source_point"
+      },
+      "evidence_artifact": "verification/alpha3_f16_direct_wrench/manifest.json",
+      "evidence_status": "nominal_case_pass",
+      "evidence_tier": "passive_native",
+      "family_id": "f16_s119",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "force_moment": {
+        "composition": "source loads plus achieved injected wrench",
+        "control_loads": "bounded direct body wrench",
+        "source_loads": "source nonlinear loads"
+      },
+      "nonclaims": [
+        "physical elevator/aileron/rudder/throttle allocation",
+        "racetrack route closure",
+        "scheduled or full-envelope control",
+        "manufacturer flight-control fidelity"
+      ],
+      "promotion_status": "T3_direct_wrench_nominal_local",
+      "proves": "A bounded six-axis direct body wrench recovers a local F-16 source-plant velocity/rate perturbation.",
+      "resources": {
+        "modeled": [
+          "mass"
+        ],
+        "not_modeled": [
+          "fuel burn",
+          "physical surface energy"
+        ],
+        "status": "fixed_mass_local_screen"
+      },
+      "trim": {
+        "source": "F-16 S-119 source-plant local trim",
+        "status": "source_trim_recorded"
+      }
+    },
+    {
+      "control_realization": "direct_wrench",
+      "envelope": {
+        "limits": [
+          "source aerodynamic table domain",
+          "local Mach/alpha/beta region",
+          "no terminal handoff"
+        ],
+        "status": "unpowered_release_glide_local"
+      },
+      "evidence_artifact": "verification/alpha3_x15_direct_wrench/manifest.json",
+      "evidence_status": "nominal_case_pass",
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "x15",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "force_moment": {
+        "composition": "source loads plus explicit local load-balance bias and feedback wrench",
+        "control_loads": "bounded direct body wrench",
+        "source_loads": "retained X-15 source rigid-body loads"
+      },
+      "nonclaims": [
+        "source-bounded trim or equilibrium",
+        "physical stabilator/rudder/RCS/propulsion allocation",
+        "powered-to-coast authority transition",
+        "controlled terminal handoff or mission qualification",
+        "full-envelope or manufacturer validation"
+      ],
+      "promotion_status": "T3_direct_wrench_bridge_local_source_trim_blocked",
+      "proves": "A bounded six-axis direct-wrench controller recovers a small local X-15 release/glide source-plant velocity/rate perturbation.",
+      "resources": {
+        "modeled": [
+          "fixed release mass"
+        ],
+        "not_modeled": [
+          "powered propellant flow",
+          "phase-dependent actuator energy"
+        ],
+        "status": "release_glide_screen_only"
+      },
+      "trim": {
+        "source": "source-trim readiness artifact; direct balance bias is not trim",
+        "status": "source_trim_blocked_before_T1"
+      }
+    },
+    {
+      "control_realization": "direct_wrench_debug_bypass",
+      "envelope": {
+        "limits": [
+          "local hover response envelope",
+          "direct comparator bounds"
+        ],
+        "status": "hover_local_debug"
+      },
+      "evidence_artifact": "verification/alpha3_hummingbird_direct_wrench_debug/manifest.json",
+      "evidence_status": "debug_comparator_pass",
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "hummingbird",
+      "fidelity": "rigid_body_6dof_direct_wrench_debug",
+      "force_moment": {
+        "composition": "debug source loads plus achieved injected wrench; native rotor allocation separate",
+        "control_loads": "bounded direct body wrench for comparator only",
+        "source_loads": "RotorPy-derived local loads"
+      },
+      "nonclaims": [
+        "motor or rotor allocation",
+        "motor lag or rotor authority qualification",
+        "translation, contact, battery, wind, or envelope qualification"
+      ],
+      "promotion_status": "T3_direct_wrench_bridge_native_rotor_preferred",
+      "proves": "The common bounded direct-wrench seam can be compared against the Hummingbird source individual-rotor plant at one local hover condition.",
+      "resources": {
+        "modeled": [
+          "mass in comparator"
+        ],
+        "not_modeled": [
+          "motor-level battery draw in direct comparator"
+        ],
+        "status": "native_path_resource_model_preferred"
+      },
+      "trim": {
+        "source": "debug comparator local trim; native rotor packet is authoritative physical path",
+        "status": "native_rotor_trim_preferred"
+      }
+    },
+    {
+      "control_realization": "direct_wrench",
+      "envelope": {
+        "limits": [
+          "DAVE-ML source domain",
+          "declared alpha/beta point",
+          "no closed-loop bank/energy mission"
+        ],
+        "status": "Mach/alpha/altitude_single_point"
+      },
+      "evidence_artifact": "verification/alpha3_hl20_direct_wrench/manifest.json",
+      "evidence_status": "nominal_case_pass",
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "hl20_mod_k",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "force_moment": {
+        "composition": "source loads plus explicit local balance bias and feedback wrench",
+        "control_loads": "bounded direct body wrench",
+        "source_loads": "pinned DAVE-ML source loads"
+      },
+      "nonclaims": [
+        "source-bounded trim or equilibrium using physical surfaces",
+        "closed-loop surface allocation",
+        "bank reversal, glide energy, landing, or family envelope qualification",
+        "source-exact flight-control law",
+        "hardware or manufacturer validation"
+      ],
+      "promotion_status": "T3_direct_wrench_bridge_source_surface_preferred",
+      "proves": "A bounded six-axis direct-wrench controller recovers a small local HL-20 source-load velocity/rate perturbation at one declared source operating point.",
+      "resources": {
+        "modeled": [
+          "fixed mass"
+        ],
+        "not_modeled": [
+          "booster/propellant transients",
+          "surface actuator energy"
+        ],
+        "status": "fixed_mass_release_screen"
+      },
+      "trim": {
+        "source": "source-load operating point; local balance bias is not source trim",
+        "status": "source_trim_pending"
+      }
+    },
+    {
+      "control_realization": "direct_wrench",
+      "envelope": {
+        "limits": [
+          "source translation history",
+          "declared engineering inertia",
+          "ECI/body alignment assumption"
+        ],
+        "status": "translation_extension_only"
+      },
+      "evidence_artifact": "verification/alpha3_nesc_direct_wrench/manifest.json",
+      "evidence_status": "nominal_case_pass",
+      "evidence_tier": "T3_direct_wrench_bridge",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "fidelity": "rigid_body_6dof_direct_wrench",
+      "force_moment": {
+        "composition": "engineering translation extension plus achieved injected wrench",
+        "control_loads": "bounded direct body wrench",
+        "source_loads": "translation-derived force; source force/moment channels unavailable"
+      },
+      "nonclaims": [
+        "source-exact NESC attitude or gimbal response",
+        "source force/moment balance",
+        "physical thrust-vector allocation",
+        "stage-dependent controlled 6DOF mission",
+        "source-exact inertia or body-frame mapping"
+      ],
+      "promotion_status": "T3_direct_wrench_bridge_engineering_translation",
+      "proves": "The common bounded six-axis direct-wrench contract can recover a local perturbation around an engineering extension of retained NESC translation data.",
+      "resources": {
+        "modeled": [
+          "mass/stage history"
+        ],
+        "not_modeled": [
+          "attitude propellant allocation",
+          "gimbal energy"
+        ],
+        "status": "source_staging_history"
+      },
+      "trim": {
+        "source": "retained translation/staging history only",
+        "status": "source_attitude_trim_unavailable"
+      }
+    },
+    {
+      "control_realization": "native_uncontrolled",
+      "envelope": {
+        "limits": [
+          "declared shape/rate/area policy",
+          "passive deployment domain"
+        ],
+        "status": "native_rigid_body_and_averaged_area_reduction"
+      },
+      "evidence_artifact": "verification/alpha3_tumbling_body/fidelity_ladder/manifest.json",
+      "evidence_status": "nominal_case_pass",
+      "evidence_tier": "passive_native",
+      "family_id": "tumbling_body",
+      "fidelity": "native_rigid_body_6dof",
+      "force_moment": {
+        "composition": "uncontrolled rigid-body equations",
+        "control_loads": "none",
+        "source_loads": "native passive aerodynamic/gravity loads"
+      },
+      "nonclaims": [
+        "Claim boundary is declared in the source artifact."
+      ],
+      "promotion_status": "native_uncontrolled_6dof; direct_wrench_not_applicable",
+      "proves": "Passive native rigid-body and averaged-area reduction evidence.",
+      "resources": {
+        "modeled": [
+          "mass"
+        ],
+        "not_modeled": [
+          "controller resource use"
+        ],
+        "status": "passive_no_consumable"
+      },
+      "trim": {
+        "source": "native uncontrolled rigid-body release",
+        "status": "passive_initial_release"
+      }
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/build_alpha3_direct_wrench_contract.py",
+  "required_dimensions": [
+    "trim",
+    "force_moment",
+    "resources",
+    "envelope",
+    "claim_boundary"
+  ],
+  "schema": "taoryx.alpha3-direct-wrench-contract/v1alpha1",
+  "status": "contract_verified"
+}

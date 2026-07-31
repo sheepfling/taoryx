@@ -17,9 +17,9 @@ responsibility.
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Protocol
 
 import numpy as np
 
@@ -202,6 +202,418 @@ class PhysicalWrenchLqrDesign:
             },
         }
         ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicalWrenchLqrScheduleNode:
+    """One physical-wrench LQR design at a scalar operating coordinate."""
+
+    coordinate: float
+    design: PhysicalWrenchLqrDesign
+
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.coordinate):
+            raise ValueError("physical-wrench schedule coordinates must be finite")
+        ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class ScheduledPhysicalWrenchCommand:
+    """Interpolated wrench demand that still requires physical allocation."""
+
+    coordinate: float
+    lower_node: str
+    upper_node: str
+    interpolation_fraction: float
+    requested_wrench: Mapping[str, float]
+    wrench_increment: Mapping[str, float]
+
+    def as_dict(self) -> dict[str, object]:
+        """Return schedule provenance alongside the demand."""
+
+        return {
+            "coordinate": self.coordinate,
+            "lower_node": self.lower_node,
+            "upper_node": self.upper_node,
+            "interpolation_fraction": self.interpolation_fraction,
+            "requested_wrench": dict(self.requested_wrench),
+            "wrench_increment": dict(self.wrench_increment),
+        }
+        ####
+    ####
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicalWrenchLqrSchedule:
+    """Continuously interpolate local wrench demands between validated nodes.
+
+    The schedule interpolates gain, trim state, nominal wrench, and node
+    provenance. It never applies a force or moment directly; callers must pass
+    the returned demand through the plant's bounded allocator. This makes the
+    schedule useful for fixed-wing, rotorcraft, spacecraft, and other adapters
+    without changing their physical-effector boundary.
+    """
+
+    nodes: tuple[PhysicalWrenchLqrScheduleNode, ...]
+
+    def __post_init__(self) -> None:
+        if not self.nodes:
+            raise ValueError("physical-wrench schedule requires at least one node")
+        coordinates = tuple(node.coordinate for node in self.nodes)
+        if any(right <= left for left, right in zip(coordinates, coordinates[1:], strict=False)):
+            raise ValueError("physical-wrench schedule coordinates must be strictly increasing")
+        first = self.nodes[0].design
+        for node in self.nodes[1:]:
+            design = node.design
+            if design.projection.state_names != first.projection.state_names:
+                raise ValueError("physical-wrench schedule state channels must match")
+            if design.projection.wrench_names != first.projection.wrench_names:
+                raise ValueError("physical-wrench schedule wrench channels must match")
+            if design.result.gain.shape != first.result.gain.shape:
+                raise ValueError("physical-wrench schedule gain dimensions must match")
+        ####
+    ####
+
+
+    @property
+    def state_names(self) -> tuple[str, ...]:
+        """Return the scheduled state channels."""
+
+        return self.nodes[0].design.projection.state_names
+        ####
+    ####
+
+    @property
+    def wrench_names(self) -> tuple[str, ...]:
+        """Return the scheduled wrench channels."""
+
+        return self.nodes[0].design.projection.wrench_names
+        ####
+    ####
+
+    def _bracket(self, coordinate: float) -> tuple[PhysicalWrenchLqrScheduleNode, PhysicalWrenchLqrScheduleNode, float]:
+        if not math.isfinite(coordinate):
+            raise ValueError("physical-wrench schedule coordinate must be finite")
+        if coordinate <= self.nodes[0].coordinate:
+            return self.nodes[0], self.nodes[0], 0.0
+        if coordinate >= self.nodes[-1].coordinate:
+            return self.nodes[-1], self.nodes[-1], 0.0
+        for lower, upper in zip(self.nodes[:-1], self.nodes[1:], strict=True):
+            if lower.coordinate <= coordinate <= upper.coordinate:
+                fraction = (coordinate - lower.coordinate) / (upper.coordinate - lower.coordinate)
+                return lower, upper, fraction
+        raise RuntimeError("physical-wrench schedule failed to bracket coordinate")
+        ####
+
+    def bracket(
+        self,
+        coordinate: float,
+    ) -> tuple[PhysicalWrenchLqrScheduleNode, PhysicalWrenchLqrScheduleNode, float]:
+        """Return the public schedule bracket used by transition replays.
+
+        A transition runner needs the same endpoint provenance as
+        :meth:`command`.  Exposing that lookup here prevents family tools from
+        duplicating coordinate clamping and interpolation-boundary rules.
+        """
+
+        return self._bracket(coordinate)
+        ####
+
+    def state_reference(self, coordinate: float) -> dict[str, float]:
+        """Return the interpolated trim-state reference at ``coordinate``."""
+
+        lower, upper, fraction = self._bracket(coordinate)
+        return self._interpolate_mapping(
+            lower.design.projection.trim_state,
+            upper.design.projection.trim_state,
+            fraction,
+            self.state_names,
+        )
+        ####
+
+    @staticmethod
+    def _interpolate_mapping(
+        lower: Mapping[str, float],
+        upper: Mapping[str, float],
+        fraction: float,
+        names: Sequence[str],
+    ) -> dict[str, float]:
+        return {
+            name: (1.0 - fraction) * float(lower[name]) + fraction * float(upper[name])
+            for name in names
+        }
+        ####
+
+    def command(
+        self,
+        state: Mapping[str, float],
+        coordinate: float,
+        *,
+        state_reference: Mapping[str, float] | None = None,
+    ) -> ScheduledPhysicalWrenchCommand:
+        """Return an interpolated demand for the current operating coordinate."""
+
+        lower, upper, fraction = self._bracket(coordinate)
+        lower_design = lower.design
+        upper_design = upper.design
+        state_names = self.state_names
+        wrench_names = self.wrench_names
+        missing = set(state_names) - set(state)
+        if missing:
+            raise KeyError(f"scheduled physical LQR state is missing: {', '.join(sorted(missing))}")
+        reference = self._interpolate_mapping(
+            lower_design.projection.trim_state,
+            upper_design.projection.trim_state,
+            fraction,
+            state_names,
+        )
+        if state_reference is not None:
+            missing_reference = set(state_names) - set(state_reference)
+            if missing_reference:
+                raise KeyError(f"scheduled physical LQR reference is missing: {', '.join(sorted(missing_reference))}")
+            reference = {name: float(state_reference[name]) for name in state_names}
+        error = np.asarray([float(state[name]) - reference[name] for name in state_names], dtype=float)
+        lower_gain = np.asarray(lower_design.result.gain, dtype=float)
+        upper_gain = np.asarray(upper_design.result.gain, dtype=float)
+        gain = (1.0 - fraction) * lower_gain + fraction * upper_gain
+        increment_values = -gain @ error
+        lower_nominal = lower_design.projection.nominal_wrench
+        upper_nominal = upper_design.projection.nominal_wrench
+        nominal = self._interpolate_mapping(lower_nominal, upper_nominal, fraction, wrench_names)
+        increment = {name: float(value) for name, value in zip(wrench_names, increment_values, strict=True)}
+        requested = {name: nominal[name] + increment[name] for name in wrench_names}
+        return ScheduledPhysicalWrenchCommand(
+            coordinate=float(coordinate),
+            lower_node=lower_design.id,
+            upper_node=upper_design.id,
+            interpolation_fraction=float(fraction),
+            requested_wrench=requested,
+            wrench_increment=increment,
+        )
+        ####
+    ####
+
+
+class ScheduledPhysicalPlant(Protocol):
+    """Minimal plant seam required by a scheduled time-marching witness."""
+
+    @property
+    def state_names(self) -> Sequence[str]:
+        """Return the state ordering used by the schedule."""
+        ...
+
+    @property
+    def control_names(self) -> Sequence[str]:
+        """Return the physical effectors used by the schedule."""
+        ...
+
+    def state_derivative(
+        self,
+        state: Mapping[str, float],
+        effectors: Mapping[str, float],
+        environment: Mapping[str, float | str],
+    ) -> Mapping[str, float]:
+        """Evaluate the declared plant derivative."""
+        ...
+
+    def allocate(
+        self,
+        state: Mapping[str, float],
+        desired_wrench: Mapping[str, float],
+        previous_effectors: Mapping[str, float],
+        dt_s: float,
+    ) -> PhysicalAllocationStep:
+        """Allocate a demand through bounded physical effectors."""
+        ...
+
+
+def run_scheduled_physical_wrench_transition(
+    schedule: PhysicalWrenchLqrSchedule,
+    *,
+    start_coordinate: float,
+    end_coordinate: float,
+    initial_state: Mapping[str, float],
+    initial_effectors: Mapping[str, float],
+    plant_for_coordinate: Callable[[float], ScheduledPhysicalPlant],
+    state_scales: Sequence[float],
+    duration_s: float,
+    dt_s: float,
+    perturbation: Mapping[str, float] | None = None,
+    environment_for_coordinate: Callable[[float], Mapping[str, float | str]] | None = None,
+    state_reference_for_coordinate: Callable[[float], Mapping[str, float]] | None = None,
+    recovery_threshold: float = 0.25,
+    minimum_final_norm: float = 0.05,
+    sample_stride_steps: int = 60,
+) -> dict[str, Any]:
+    """Replay a scheduled physical controller through a bounded plant.
+
+    This is the family-neutral time-marching contract for scheduled local
+    evidence.  At each committed sample it computes a scheduled wrench
+    demand, allocates that demand through the plant's actual effectors, and
+    then integrates the state with the committed actuator positions held over
+    the accepted RK4 interval.  The function never applies the requested
+    wrench directly.
+
+    ``plant_for_coordinate`` is intentionally supplied by the family adapter:
+    it may select a source table node, a validated endpoint blend, a rotor
+    model, or a spacecraft actuator model.  The generic runner owns only the
+    control/evidence protocol and therefore cannot silently invent family
+    dynamics or actuator mappings.
+    """
+
+    if not math.isfinite(start_coordinate) or not math.isfinite(end_coordinate):
+        raise ValueError("scheduled transition coordinates must be finite")
+    if not math.isfinite(duration_s) or duration_s <= 0.0:
+        raise ValueError("scheduled transition duration must be finite and positive")
+    if not math.isfinite(dt_s) or dt_s <= 0.0:
+        raise ValueError("scheduled transition step must be finite and positive")
+    if not math.isfinite(recovery_threshold) or recovery_threshold < 0.0:
+        raise ValueError("scheduled transition recovery threshold must be finite and nonnegative")
+    if not math.isfinite(minimum_final_norm) or minimum_final_norm < 0.0:
+        raise ValueError("scheduled transition minimum final norm must be finite and nonnegative")
+    if sample_stride_steps <= 0:
+        raise ValueError("scheduled transition sample stride must be positive")
+    state_names = schedule.state_names
+    state_scales = tuple(float(value) for value in state_scales)
+    if len(state_scales) != len(state_names) or any(not math.isfinite(value) or value <= 0.0 for value in state_scales):
+        raise ValueError("scheduled transition state scales must be finite and positive")
+    missing_state = set(state_names) - set(initial_state)
+    if missing_state:
+        raise KeyError(f"scheduled transition initial state is missing: {', '.join(sorted(missing_state))}")
+    if not math.isfinite(start_coordinate) or not math.isfinite(end_coordinate):
+        raise ValueError("scheduled transition coordinates must be finite")
+    perturbation_values = {name: float(value) for name, value in (perturbation or {}).items()}
+    unknown_perturbations = set(perturbation_values) - set(state_names)
+    if unknown_perturbations:
+        raise KeyError(f"scheduled transition perturbation is missing state channels: {', '.join(sorted(unknown_perturbations))}")
+    state = {name: float(initial_state[name]) + perturbation_values.get(name, 0.0) for name in state_names}
+    if any(not math.isfinite(value) for value in state.values()):
+        raise ValueError("scheduled transition initial state must be finite")
+    actual_effectors = {name: float(value) for name, value in initial_effectors.items()}
+    plant0 = plant_for_coordinate(start_coordinate)
+    if tuple(plant0.state_names) != state_names:
+        raise ValueError("scheduled transition plant state channels do not match schedule")
+    if set(actual_effectors) != set(plant0.control_names):
+        raise ValueError("scheduled transition effectors do not match the starting plant")
+    environment_for_coordinate = environment_for_coordinate or (lambda coordinate: {})
+    state_reference_for_coordinate = state_reference_for_coordinate or schedule.state_reference
+
+    def normalized_error(values: Mapping[str, float], coordinate: float) -> float:
+        reference = state_reference_for_coordinate(coordinate)
+        missing_reference = set(state_names) - set(reference)
+        if missing_reference:
+            raise KeyError(
+                "scheduled transition reference is missing: " + ", ".join(sorted(missing_reference))
+            )
+        return math.sqrt(
+            sum(
+                ((float(values[name]) - float(reference[name])) / scale) ** 2
+                for name, scale in zip(state_names, state_scales, strict=True)
+            )
+        )
+
+    def rk4_step(
+        plant: ScheduledPhysicalPlant,
+        values: Mapping[str, float],
+        coordinate: float,
+        step_s: float,
+    ) -> dict[str, float]:
+        environment = environment_for_coordinate(coordinate)
+
+        def derivative(candidate: Mapping[str, float]) -> np.ndarray:
+            result = plant.state_derivative(candidate, actual_effectors, environment)
+            vector = np.asarray([float(result[name]) for name in state_names], dtype=float)
+            if not np.all(np.isfinite(vector)):
+                raise ValueError("scheduled physical transition derivative is non-finite")
+            return vector
+
+        base = np.asarray([float(values[name]) for name in state_names], dtype=float)
+        k1 = derivative(values)
+        k2 = derivative({name: float(value) for name, value in zip(state_names, base + 0.5 * step_s * k1, strict=True)})
+        k3 = derivative({name: float(value) for name, value in zip(state_names, base + 0.5 * step_s * k2, strict=True)})
+        k4 = derivative({name: float(value) for name, value in zip(state_names, base + step_s * k3, strict=True)})
+        result = base + step_s * (k1 + 2.0 * k2 + 2.0 * k3 + k4) / 6.0
+        if not np.all(np.isfinite(result)):
+            raise ValueError("scheduled physical transition state is non-finite")
+        return {name: float(value) for name, value in zip(state_names, result, strict=True)}
+
+    initial_norm = normalized_error(state, start_coordinate)
+    statuses: list[str] = []
+    saturation_steps = 0
+    max_residual = 0.0
+    max_norm = initial_norm
+    samples: list[dict[str, Any]] = []
+    steps = int(math.ceil(duration_s / dt_s))
+    time_s = 0.0
+    for step_index in range(steps):
+        elapsed = min(step_index * dt_s, duration_s)
+        fraction = 0.0 if duration_s == 0.0 else elapsed / duration_s
+        coordinate = start_coordinate + (end_coordinate - start_coordinate) * fraction
+        plant = plant_for_coordinate(coordinate)
+        command = schedule.command(state, coordinate)
+        allocation = plant.allocate(state, dict(command.requested_wrench), actual_effectors, dt_s)
+        statuses.append(allocation.allocation.status)
+        constrained = (
+            allocation.allocation.status != "feasible"
+            or bool(allocation.actuator.position_saturated)
+            or bool(allocation.actuator.rate_limited)
+            or bool(allocation.actuator.unavailable_effectors)
+        )
+        if constrained:
+            saturation_steps += 1
+        max_residual = max(max_residual, allocation.achieved_controlled_residual_norm)
+        norm = normalized_error(state, coordinate)
+        max_norm = max(max_norm, norm)
+        if step_index % sample_stride_steps == 0 or step_index == steps - 1:
+            lower, upper, interpolation_fraction = schedule.bracket(coordinate)
+            samples.append(
+                {
+                    "time_s": elapsed,
+                    "coordinate": coordinate,
+                    "lower_node": lower.design.id,
+                    "upper_node": upper.design.id,
+                    "interpolation_fraction": interpolation_fraction,
+                    "normalized_error": norm,
+                    "allocation_status": allocation.allocation.status,
+                    "allocation_residual": allocation.achieved_controlled_residual_norm,
+                    "actual_effectors": dict(allocation.actuator.actual_positions),
+                }
+            )
+        actual_effectors = dict(allocation.actuator.actual_positions)
+        step = min(dt_s, duration_s - time_s)
+        if step <= 0.0:
+            break
+        state = rk4_step(plant, state, coordinate, step)
+        time_s += step
+
+    final_norm = normalized_error(state, end_coordinate)
+    disallowed = {"infeasible", "partially_achievable", "numerically_singular", "solver_failure"}
+    passed = (
+        final_norm <= max(initial_norm * recovery_threshold, minimum_final_norm)
+        and not disallowed.intersection(statuses)
+        and saturation_steps == 0
+        and math.isfinite(max_residual)
+    )
+    return {
+        "passed": passed,
+        "start_coordinate": start_coordinate,
+        "end_coordinate": end_coordinate,
+        "duration_s": duration_s,
+        "dt_s": dt_s,
+        "perturbation": perturbation_values,
+        "initial_command": schedule.command(state, start_coordinate).as_dict(),
+        "initial_normalized_error": initial_norm,
+        "final_normalized_error": final_norm,
+        "maximum_normalized_error": max_norm,
+        "maximum_controlled_allocation_residual": max_residual,
+        "allocation_statuses": sorted(set(statuses)),
+        "saturation_steps": saturation_steps,
+        "samples": samples,
+        "direct_wrench_injection": False,
+        "control_path": "scheduled wrench demand -> bounded physical effectors -> accepted plant derivative",
+    }
     ####
 
 

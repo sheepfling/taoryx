@@ -1,0 +1,159 @@
+{
+  "claim": {
+    "nonclaims": [
+      "This is not controller-effective reachability or parent capability qualification.",
+      "The 3DOF tier uses an orientation-averaged or scheduled-area translation reduction.",
+      "The pseudo-6DOF tier reuses the native rigid-body equations; it does not invent a response law or control surfaces.",
+      "Source-exact child aerodynamics and impact certification are not claimed."
+    ],
+    "proves": "Passive deployment child impact and terminal-footprint witnesses for the declared body-shape ensemble."
+  },
+  "control_path": {
+    "controller": "not_applicable_passive_body",
+    "direct_force_moment_injection": false,
+    "physical_effectors": [],
+    "realization": "averaged_area_translation"
+  },
+  "evaluation": {
+    "hard_envelope_violations": [],
+    "mission_pass": true,
+    "numerical_pass": true
+  },
+  "family_id": "tumbling_body",
+  "fidelity": "point_mass_3dof",
+  "mission": {
+    "controller_transition_evidence": "not_applicable_passive_body",
+    "independent_truth_evaluation": true,
+    "required_objectives": [
+      {
+        "classification": "impact",
+        "controller_transition": "not_applicable_passive_body",
+        "footprint_m": {
+          "crossrange": 0.0,
+          "downrange": 402.24235753127516,
+          "radius": 402.24235753127516
+        },
+        "id": "sphere_terminal_impact",
+        "terminal_state": {
+          "altitude_m": -6.682264490516889,
+          "mass_kg": 12.0,
+          "position_m": [
+            527.1386811389968,
+            0.0,
+            -6.682264490516889
+          ],
+          "speed_m_s": 34.871317696901166,
+          "velocity_m_s": [
+            0.015582141768748418,
+            0.0,
+            -34.87131421548477
+          ]
+        },
+        "truth_result": "PASS",
+        "type": "event"
+      },
+      {
+        "classification": "impact",
+        "controller_transition": "not_applicable_passive_body",
+        "footprint_m": {
+          "crossrange": 0.0,
+          "downrange": 246.64849308954595,
+          "radius": 246.64849308954595
+        },
+        "id": "cylinder_terminal_impact",
+        "terminal_state": {
+          "altitude_m": -4.5051404484456645,
+          "mass_kg": 12.0,
+          "position_m": [
+            371.5448166972676,
+            0.0,
+            -4.5051404484456645
+          ],
+          "speed_m_s": 26.053394947143165,
+          "velocity_m_s": [
+            2.8676723632290673e-05,
+            0.0,
+            -26.053394947127384
+          ]
+        },
+        "truth_result": "PASS",
+        "type": "event"
+      },
+      {
+        "classification": "impact",
+        "controller_transition": "not_applicable_passive_body",
+        "footprint_m": {
+          "crossrange": 0.0,
+          "downrange": 343.024331060564,
+          "radius": 343.024331060564
+        },
+        "id": "cone_terminal_impact",
+        "terminal_state": {
+          "altitude_m": -6.18144222122929,
+          "mass_kg": 12.0,
+          "position_m": [
+            467.92065466828564,
+            0.0,
+            -6.18144222122929
+          ],
+          "speed_m_s": 31.66363470471547,
+          "velocity_m_s": [
+            0.00280918735192435,
+            0.0,
+            -31.66363458010038
+          ]
+        },
+        "truth_result": "PASS",
+        "type": "event"
+      },
+      {
+        "classification": "impact",
+        "controller_transition": "not_applicable_passive_body",
+        "footprint_m": {
+          "crossrange": 0.0,
+          "downrange": 295.87931307595966,
+          "radius": 295.87931307595966
+        },
+        "id": "triaxial_ellipsoid_terminal_impact",
+        "terminal_state": {
+          "altitude_m": -3.9100074591485514,
+          "mass_kg": 12.0,
+          "position_m": [
+            420.7756366836813,
+            0.0,
+            -3.9100074591485514
+          ],
+          "speed_m_s": 28.98617399808617,
+          "velocity_m_s": [
+            0.0004413939125112346,
+            0.0,
+            -28.986173994725455
+          ]
+        },
+        "truth_result": "PASS",
+        "type": "event"
+      }
+    ],
+    "start_contract": "accepted_booster_release_with_parent_child_lineage",
+    "terminal_contract": "passive_child_impact"
+  },
+  "profile_id": "tumbling_body.averaged_area_3dof.v1",
+  "qualification": {
+    "controller_applicability": "not_applicable_passive_body",
+    "family_status": "qualification_pending_parent_capability_and_source_exact_aerodynamics",
+    "nominal_case_status": "pass"
+  },
+  "schema": "taoryx.family-fidelity-evidence/v1alpha1",
+  "source_boundary": {
+    "lineage_policy": {
+      "accepted_event_id_required": true,
+      "child_result_separate_from_parent_envelope": true,
+      "parent_and_child_ids_required": true,
+      "physical_footprint_not_controller_reachability": true
+    },
+    "parent_capability_claim": "not_promoted",
+    "source_artifact": "../qualification.json",
+    "source_status": "qualified_witness_with_physical_footprint_uncertainty"
+  },
+  "status": "nominal_case_pass"
+}

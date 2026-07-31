@@ -1,0 +1,175 @@
+{
+  "claim": "The B747 public-research point-mass reduction resolves the same powered fixed-wing racetrack mission contract as the X8 at transport scale, with longer legs, larger turns, slower vertical changes, and independent truth-based altitude, speed, route, and terminal gates.",
+  "display_name": "B747 transport-scaled racetrack climb, level, turn, descent, and start/finish gate",
+  "envelope_report": {
+    "checks": [
+      {
+        "channel": "speed_m_s",
+        "maximum": 220.0,
+        "minimum": 100.0,
+        "pass": true,
+        "violations": []
+      },
+      {
+        "channel": "altitude_m",
+        "maximum": 350.0,
+        "minimum": 50.0,
+        "pass": true,
+        "violations": []
+      }
+    ],
+    "pass": true,
+    "schema_version": 1
+  },
+  "evidence_level": "nominal_case_pass_overall_qualification_pending",
+  "family": "b747",
+  "fidelity_tier": "point_mass_3dof",
+  "mission_id": "b747-racetrack-altitude-turns-3dof-v1",
+  "mission_pass": true,
+  "nonclaims": [
+    "rigid-body attitude or bank dynamics",
+    "physical elevator, aileron, or rudder allocation",
+    "source-validated transport flight-control law",
+    "fuel depletion or certified JT9D performance",
+    "takeoff, landing, wind robustness, or manufacturer fidelity"
+  ],
+  "numerical_valid": true,
+  "preflight_timing_estimate": {
+    "climb_time_s": 100.0,
+    "descent_time_s": 125.0,
+    "inbound_level_time_s": 31.862745098039227,
+    "outbound_level_time_s": 56.86274509803923,
+    "straight_time_s": 156.86274509803923,
+    "total_time_s": 560.1249140070427,
+    "turn_time_s": 123.19971190548208
+  },
+  "realization": {
+    "actuator_realization": "kinematic_route_command_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_point_mass_3dof",
+    "note": "This is the first scaled realization of the shared powered-fixed-wing template. The point-mass adapter commands speed, heading, and flight-path angle from the racetrack tangent and bounded position/ altitude corrections; it does not create attitude or surface telemetry.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant"
+  },
+  "run": {
+    "completed": [
+      true
+    ],
+    "duration_s": 570.124914007043,
+    "exit_code": 0,
+    "sample_count": 11404,
+    "stop_reasons": [
+      "stop_condition"
+    ]
+  },
+  "schema_version": 1,
+  "status": "nominal_case_pass_overall_qualification_pending",
+  "truth_evaluation": {
+    "claim_boundary": "truth telemetry verifies objective geometry; controller transitions are diagnostic and cannot create a pass",
+    "evaluator": "independent_truth_telemetry",
+    "hard_gates_passed": true,
+    "mission_pass": true,
+    "objective_pass": true,
+    "required_objectives": 4,
+    "required_passed": 4,
+    "results": [
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 8.0,
+          "margin": 8.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "high-altitude-level-gate",
+        "margin": 8.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 156.70000000000138
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 8.0,
+          "margin": 8.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "left-turn-exit-gate",
+        "margin": 8.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 280.30000000002946
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 8.0,
+          "margin": 8.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "low-altitude-level-gate",
+        "margin": 8.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 437.0000000000651
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 8.0,
+          "margin": 8.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "terminal-contract",
+        "margin": 8.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 8.0,
+        "truth_time_s": 560.2000000000382
+      }
+    ],
+    "schema_version": 1
+  }
+}

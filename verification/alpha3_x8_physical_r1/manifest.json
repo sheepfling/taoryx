@@ -1,0 +1,493 @@
+{
+  "boundary_failure_count": 1,
+  "case_count": 5,
+  "cases": [
+    {
+      "boundary_witness": false,
+      "case_id": "nominal_coupled",
+      "description": "source-trim coupled roll/pitch recovery",
+      "failure": null,
+      "metrics": {
+        "allocation_statuses": [
+          "feasible",
+          "partially_achievable"
+        ],
+        "final_controlled_actual_residual_nm": 0.0004507885456860877,
+        "final_feedback_error_fraction": 0.0017449642931808246,
+        "maximum_continuous_saturation_duration_s": 0.14,
+        "mission_pass": true,
+        "samples": 400,
+        "saturation_fraction": 0.035,
+        "uncontrolled_wrench_axes": [
+          "moment_z_nm"
+        ]
+      },
+      "status": "pass"
+    },
+    {
+      "boundary_witness": false,
+      "case_id": "roll_reversal",
+      "description": "opposite-sign roll recovery through differential elevon",
+      "failure": null,
+      "metrics": {
+        "allocation_statuses": [
+          "feasible",
+          "partially_achievable"
+        ],
+        "final_controlled_actual_residual_nm": 0.00039461972386481056,
+        "final_feedback_error_fraction": 0.010798469440421975,
+        "maximum_continuous_saturation_duration_s": 0.08,
+        "mission_pass": true,
+        "samples": 400,
+        "saturation_fraction": 0.02,
+        "uncontrolled_wrench_axes": [
+          "moment_z_nm"
+        ]
+      },
+      "status": "pass"
+    },
+    {
+      "boundary_witness": false,
+      "case_id": "pitch_reversal",
+      "description": "opposite-sign pitch recovery through collective elevon",
+      "failure": null,
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "final_controlled_actual_residual_nm": 0.0005330430465165234,
+        "final_feedback_error_fraction": 0.005928875398111974,
+        "maximum_continuous_saturation_duration_s": 0.0,
+        "mission_pass": true,
+        "samples": 400,
+        "saturation_fraction": 0.0,
+        "uncontrolled_wrench_axes": [
+          "moment_z_nm"
+        ]
+      },
+      "status": "pass"
+    },
+    {
+      "boundary_witness": false,
+      "case_id": "coupled_reversal",
+      "description": "simultaneous roll/pitch reversal inside the local source envelope",
+      "failure": null,
+      "metrics": {
+        "allocation_statuses": [
+          "feasible",
+          "partially_achievable"
+        ],
+        "final_controlled_actual_residual_nm": 0.0005019366666922765,
+        "final_feedback_error_fraction": 0.00506463817313548,
+        "maximum_continuous_saturation_duration_s": 0.07,
+        "mission_pass": true,
+        "samples": 400,
+        "saturation_fraction": 0.0175,
+        "uncontrolled_wrench_axes": [
+          "moment_z_nm"
+        ]
+      },
+      "status": "pass"
+    },
+    {
+      "boundary_witness": true,
+      "case_id": "beta_table_boundary",
+      "description": "high-demand case retained at the declared beta table boundary",
+      "failure": {
+        "code": "DATA_DOMAIN_VIOLATION",
+        "message": "coefficient table 'cx-static' query (18.58792780349615, 178.0, 0.09685025201179473, 0.08796763950277493) is outside its declared envelope on axis 'beta': value=0.08796763950277493, range=[-0.0872664625997, 0.0872664625997], distance_to_boundary=0.0007011769030749321"
+      },
+      "metrics": {
+        "allocation_statuses": [
+          "source_domain_boundary"
+        ],
+        "mission_pass": false,
+        "samples": 0,
+        "uncontrolled_wrench_axes": [
+          "moment_z_nm"
+        ]
+      },
+      "status": "boundary"
+    }
+  ],
+  "claim": "Fixed local X8 source-coordinate physical-effector evidence around the source-trim operating point.",
+  "claim_boundary": "This matrix proves only local roll/pitch allocation through bounded source-coordinate elevon commands. It does not establish independent yaw authority, mapped hardware servo wiring, end-to-end racetrack completion, scheduled control, wind robustness, or family qualification.",
+  "control_path": "attitude/rate error -> plant-derived roll/pitch LQR -> desired roll/pitch moments -> bounded collective/differential elevon allocation -> actuator lag/rate limits -> nonlinear source-table plant",
+  "direct_body_moment_injection": false,
+  "effectors": [
+    "differential-elevon-deg",
+    "collective-elevon-deg"
+  ],
+  "failed_case_count": 1,
+  "linearization": {
+    "control_names": [
+      "collective-elevon-deg",
+      "differential-elevon-deg",
+      "throttle"
+    ],
+    "derivative_consistent": true,
+    "effectiveness": [
+      [
+        0.0,
+        0.0923759294479208,
+        0.0
+      ],
+      [
+        -0.24995839733943515,
+        -4.50071530129707e-16,
+        0.0
+      ],
+      [
+        0.0,
+        -0.00633952456802219,
+        0.0
+      ]
+    ],
+    "state_names": [
+      "roll_error_rad",
+      "pitch_error_rad",
+      "yaw_error_rad",
+      "u_m_s",
+      "v_m_s",
+      "w_m_s",
+      "p_rad_s",
+      "q_rad_s",
+      "r_rad_s"
+    ]
+  },
+  "passed_case_count": 4,
+  "physical_mapping": {
+    "differential_sign": 1,
+    "left": "collective + differential_sign * differential",
+    "mapping_id": "x8-low-hansen-2025-eq14-left-plus-differential",
+    "right": "collective - differential_sign * differential",
+    "source": "L\u00f8w-Hansen et al., Modeling and identification of a small fixed-wing UAV using estimated aerodynamic angles, CEAS Aeronautical Journal 16 (2025), Eq. (14), doi:10.1007/s13272-025-00816-3",
+    "status": "selected"
+  },
+  "reproduction": "PYTHONPATH=src python3 tools/validate_x8_physical_r1_matrix.py",
+  "schema": "taoryx.x8-physical-r1-matrix/v1alpha1",
+  "selected_design": {
+    "closed_loop_poles": [
+      {
+        "imaginary": 2.5673617624229257,
+        "real": -2.740844774221304
+      },
+      {
+        "imaginary": -2.5673617624229257,
+        "real": -2.740844774221304
+      },
+      {
+        "imaginary": 3.726779790707439,
+        "real": -4.341838070175763
+      },
+      {
+        "imaginary": -3.726779790707439,
+        "real": -4.341838070175763
+      }
+    ],
+    "condition_number": 1.0,
+    "controllable": true,
+    "gain": [
+      [
+        4.583662361039613,
+        -8.264673724529073e-13,
+        1.7815491032438964,
+        2.690054586433799e-13
+      ],
+      [
+        1.0729695192739453e-11,
+        4.583662361044338,
+        8.105969304563098e-13,
+        1.2157146596489936
+      ]
+    ],
+    "id": "skywalker-x8-source-trim-roll-pitch-wrench-lqr-v1",
+    "matrix_sha256": {
+      "a": "4a94f91e55ae42e8099217fba83e4e7ee9c1fe7c4a941c0b2fef908e0fd67765",
+      "b": "169dd497e4115114f5fa6cdcc81b6766fb705201265ce158a8a30b10fd72871f",
+      "k": "4efa70a1d01af765788dd3129b5d01ee4f5e55d9c128e0173df57a13452bb295",
+      "q": "41dd38aa1d6c08a82fa8e62213cd6038246db0de7e1c72046a748e76f9c3fe57",
+      "r": "49c4598f769266fa272281265d80aea44057e42f09ddfec4db80221654a5fba0"
+    },
+    "maximum_real_pole": -2.740844774221304,
+    "projection": {
+      "a_matrix": [
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -2.1468287217385473e-11,
+          4.336808689942018e-15,
+          0.0,
+          0.0
+        ],
+        [
+          7.072552616230254e-11,
+          -1.6073983218546502e-11,
+          0.0,
+          0.0
+        ]
+      ],
+      "b_matrix": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          3.076923076922993,
+          -2.578825032433375e-13
+        ],
+        [
+          -8.489715690017592e-13,
+          7.142857142858436
+        ]
+      ],
+      "effectiveness_matrix": [
+        [
+          0.0923759294479208,
+          0.0
+        ],
+        [
+          -4.50071530129707e-16,
+          -0.24995839733943515
+        ]
+      ],
+      "effector_increment_per_wrench": [
+        [
+          10.825330862449126,
+          -3.1554436208840472e-30
+        ],
+        [
+          -1.9491936567374334e-14,
+          -4.000665753357482
+        ]
+      ],
+      "effector_names": [
+        "differential-elevon-deg",
+        "collective-elevon-deg"
+      ],
+      "inverse_residual_norm": 4.28466827325198e-31,
+      "nominal_wrench": {
+        "moment_x_nm": -0.0005302649348508288,
+        "moment_y_nm": -1.4318215602178431e-11,
+        "moment_z_nm": -0.0077267175545044885
+      },
+      "source_derivative_provenance": {
+        "comparison_absolute_floor": 1e-08,
+        "derivative_consistent": true,
+        "maximum_absolute_difference": 1.2213979161401767e-08,
+        "maximum_relative_difference": 0.015796391972244805,
+        "method": "centered-finite-difference",
+        "nonlinear_plant_id": "skywalker-x8-table-coordinate-plant",
+        "nonlinear_plant_revision": "source-trim-local-v1"
+      },
+      "state_names": [
+        "roll_error_rad",
+        "pitch_error_rad",
+        "p_rad_s",
+        "q_rad_s"
+      ],
+      "trim_effectors": {
+        "collective-elevon-deg": -2.147887654393667,
+        "differential-elevon-deg": -3.9378035933567617,
+        "throttle": 0.5773431905510489
+      },
+      "trim_state": {
+        "p_rad_s": 0.0,
+        "pitch_error_rad": 0.0,
+        "q_rad_s": 0.0,
+        "r_rad_s": 0.0,
+        "roll_error_rad": 0.0,
+        "u_m_s": 17.73398329990527,
+        "v_m_s": 0.0,
+        "w_m_s": 2.4322492303793712,
+        "yaw_error_rad": 0.0
+      },
+      "wrench_names": [
+        "moment_x_nm",
+        "moment_y_nm"
+      ]
+    },
+    "q_diagonal": [
+      16.0,
+      16.0,
+      3.0,
+      3.0
+    ],
+    "r_diagonal": [
+      1.0,
+      1.0
+    ],
+    "state_scales": [
+      0.17453292519943295,
+      0.17453292519943295,
+      0.7853981633974483,
+      0.7853981633974483
+    ],
+    "wrench_scales": [
+      0.2,
+      0.2
+    ]
+  },
+  "source_trim": {
+    "controls": {
+      "collective-elevon-deg": -2.147887654393667,
+      "differential-elevon-deg": -3.9378035933567617,
+      "throttle": 0.5773431905510489
+    },
+    "cost": 2.1263872455365997e-07,
+    "diagnostics": [
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "roll_error_rad",
+        "message": "trim solution for 'roll_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "pitch_error_rad",
+        "message": "trim solution for 'pitch_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "yaw_error_rad",
+        "message": "trim solution for 'yaw_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": 17.73398329980527,
+          "upper": 17.733983300005267,
+          "value": 17.73398329990527
+        },
+        "field": "u_m_s",
+        "message": "trim solution for 'u_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "v_m_s",
+        "message": "trim solution for 'v_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": 2.4322492302793712,
+          "upper": 2.4322492304793712,
+          "value": 2.4322492303793712
+        },
+        "field": "w_m_s",
+        "message": "trim solution for 'w_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "p_rad_s",
+        "message": "trim solution for 'p_rad_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "q_rad_s",
+        "message": "trim solution for 'q_rad_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "r_rad_s",
+        "message": "trim solution for 'r_rad_s' is at a declared bound",
+        "severity": "warning"
+      }
+    ],
+    "iterations": 1,
+    "max_residual": 0.0077267175545044885,
+    "message": "`gtol` termination condition is satisfied.",
+    "operating_point": {},
+    "residuals": {
+      "body_x_force_n": -2.3704480323072375e-12,
+      "body_z_force_n": 4.236232531429351e-12,
+      "pitch_moment_nm": -1.4318215602178431e-11,
+      "roll_moment_nm": -0.0005302649348508288,
+      "yaw_moment_nm": -0.0077267175545044885
+    },
+    "scaled_residual_norm": 0.0006521329995540173,
+    "state": {
+      "p_rad_s": 0.0,
+      "pitch_error_rad": 0.0,
+      "q_rad_s": 0.0,
+      "r_rad_s": 0.0,
+      "roll_error_rad": 0.0,
+      "u_m_s": 17.73398329990527,
+      "v_m_s": 0.0,
+      "w_m_s": 2.4322492303793712,
+      "yaw_error_rad": 0.0
+    },
+    "status": 1,
+    "success": true
+  },
+  "status": "R1_physical_source_coordinate_matrix_complete",
+  "uncontrolled_wrench_axes": [
+    "moment_z_nm"
+  ],
+  "vehicle": "skywalker_x8"
+}

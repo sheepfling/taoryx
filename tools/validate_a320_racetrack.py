@@ -34,6 +34,7 @@ from taoryx.trajectory import (  # noqa: E402
     A320RacetrackMode,
     A320RacetrackRun,
     A320RacetrackRunner,
+    load_pseudo6dof_catalog,
 )
 
 CATALOG = ROOT / "verification/racetrack_templates.yaml"
@@ -75,11 +76,15 @@ def _finite_rows(rows: list[dict[str, float | int | str]]) -> bool:
     ####
 
 
-def _build_run(mode: A320RacetrackMode, dt_s: float) -> tuple[ResolvedRacetrack, A320RacetrackRun, dict[str, Any]]:
+def _build_run(
+    mode: A320RacetrackMode,
+    dt_s: float,
+    operating_point: A320OpenAPOperatingPoint | None = None,
+) -> tuple[ResolvedRacetrack, A320RacetrackRun, dict[str, Any]]:
     catalog = load_racetrack_template_catalog(CATALOG)
     binding_id = "a320-openap-3dof" if mode == "point_mass_3dof" else "a320-openap-pseudo6dof"
     route = catalog.get(binding_id)
-    operating_point = A320OpenAPOperatingPoint(10500.0, 0.78, 60000.0)
+    operating_point = operating_point or A320OpenAPOperatingPoint(10500.0, 0.78, 60000.0)
     model: A320OpenAPModel | A320Pseudo6DOFModel
     if mode == "point_mass_3dof":
         model = A320OpenAPModel.from_repository(ROOT)
@@ -87,7 +92,10 @@ def _build_run(mode: A320RacetrackMode, dt_s: float) -> tuple[ResolvedRacetrack,
     else:
         model = A320Pseudo6DOFModel.from_repository(ROOT)
         trim = model.trim_pseudo6dof(operating_point)
-    result = A320RacetrackRunner(model, trim, route, mode, dt_s=dt_s).run()
+    response_profile = None
+    if mode == "pseudo_6dof_kinematic_bridge":
+        _, response_profile = load_pseudo6dof_catalog(ROOT / "verification/pseudo6dof_profiles.yaml").for_family("a320_openap_3dof")
+    result = A320RacetrackRunner(model, trim, route, mode, dt_s=dt_s, response_profile=response_profile).run()
     return route, result, {
         "binding_id": binding_id,
         "trim": trim.as_dict(),
@@ -96,10 +104,14 @@ def _build_run(mode: A320RacetrackMode, dt_s: float) -> tuple[ResolvedRacetrack,
     ####
 
 
-def run_case(mode: A320RacetrackMode, dt_s: float) -> tuple[dict[str, Any], list[dict[str, float | int | str]]]:
+def run_case(
+    mode: A320RacetrackMode,
+    dt_s: float,
+    operating_point: A320OpenAPOperatingPoint | None = None,
+) -> tuple[dict[str, Any], list[dict[str, float | int | str]]]:
     """Execute one A320 lane and evaluate it only from truth telemetry."""
 
-    route, result, metadata = _build_run(mode, dt_s)
+    route, result, metadata = _build_run(mode, dt_s, operating_point)
     rows = [dict(row) for row in result.rows]
     hard_gates_passed = result.numerical_valid and _finite_rows(rows)
     evaluation = evaluate_truth_objectives(_objective_specs(route), rows, hard_gates_passed=hard_gates_passed)
@@ -136,6 +148,11 @@ def run_case(mode: A320RacetrackMode, dt_s: float) -> tuple[dict[str, Any], list
             ],
         },
         "trim": metadata["trim"],
+        "operating_point": {
+            "altitude_m": (operating_point.altitude_m if operating_point is not None else 10500.0),
+            "mach": operating_point.mach if operating_point is not None else 0.78,
+            "mass_kg": operating_point.mass_kg if operating_point is not None else 60000.0,
+        },
         "model_provenance": metadata["model_provenance"],
         "runtime": {
             "dt_s": dt_s,

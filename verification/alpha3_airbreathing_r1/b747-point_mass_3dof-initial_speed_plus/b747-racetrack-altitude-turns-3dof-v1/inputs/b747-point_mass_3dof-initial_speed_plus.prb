@@ -1,0 +1,26 @@
+(slower-b747-sv01-racetrack-altitude-turns-3dof)
+*title B747 transport-scaled powered racetrack point-mass realization
+*mode point-mass
+*atmos standard
+*earth wgs-84 omega=0.0
+*units/fmt alt m f.3
+*units/fmt vel m/sec f.3
+*units/fmt mass kg f.3
+*units/fmt long deg f.3
+*units/fmt lat deg f.3
+*units/fmt gama deg f.3
+*units/fmt psi deg f.3
+*runtime status vehicle reference-area=510.96672 reference-length=8.324088 dry-mass-kg=288756.9 nominal-mass-kg=288756.9 inertia-x=24675886.7 inertia-y=44877574.1 inertia-z=67384152.0 envelope-min-forward-speed=20 envelope-max-mach=0.9 envelope-max-alpha-deg=4 envelope-max-beta-deg=5 aero-alpha-reference-deg=3.1
+*runtime control throttle vehicle=1 default=0.2854 lower=0 upper=1
+*runtime control elevator-deg vehicle=1 default=0.3861602391 lower=-10 upper=10
+*runtime status target latitude-deg=0.0 longitude-deg=0.0 altitude-m=100.0
+*runtime status route mode=racetrack start-latitude-deg=0.0 start-longitude-deg=0.0 duration-s=560.1249140070427 racetrack-length-m=24000 racetrack-turn-radius-m=6000 racetrack-speed-mps=153 racetrack-low-altitude-m=100 racetrack-high-altitude-m=250 racetrack-climb-rate-mps=1.5 racetrack-descent-rate-mps=1.2 racetrack-left-bank-deg=-18 racetrack-right-bank-deg=18 racetrack-coordinated-turn=false racetrack-altitude-capture-gain-per-s=0.25 racetrack-altitude-capture-max-mps=3 position-capture-gain=0.002 position-capture-max-correction-mps=20
+*trajectory 1 b747 start on 1
+  *initial geodetic alt=100.0 long=0.0 lat=0.0 vel=160.65 gama=0.0 psi=90.0 time=0.0 mass=288756.9
+  *segment 1 racetrack-altitude-turns
+    *integ dtprnt=1.0 dt=0.05
+    *fly alpha=3.1
+    *aero cx=(cx) cy=(cy) cz=(cz) sref=510.96672
+    *prop thrust=(thrust) mdot=0
+    *when time>570.1249140070427 stop
+*end

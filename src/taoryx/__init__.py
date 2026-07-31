@@ -77,6 +77,13 @@ from .controller_registry import (
     ControllerBackendStatus,
     default_controller_backend_registry,
 )
+from .direct_wrench import (
+    DIRECT_WRENCH_NAMES,
+    DirectWrenchLimits,
+    DirectWrenchProjection,
+    add_direct_wrench_to_local_derivative,
+    compose_direct_wrench_load,
+)
 from .family_debug_rendering import FamilyDebugRenderReport, render_family_debug_artifacts
 from .family_debugging import DebugFamily, FamilyDebugPlan, build_family_debug_plan, family_profile
 from .generic_tuning import (
@@ -358,6 +365,13 @@ __all__ = ["__version__", "AutoTuneCandidate", "AutoTuneLimits", "AutoTuneReport
 __all__ += ["TrimGate", "TrimGateResult", "TrimProcedure", "TrimProcedureResult", "solve_trim_continuation", "solve_trim_procedure", "objective_report_to_evaluation"]
 __all__ += ["showcase", "ArtifactFile", "EvidenceBoardSpec", "FailureCode", "FidelityShowcaseRealization", "FamilyShowcaseTemplate", "MissionSegmentSpec", "ShowcaseRunArtifact", "StartContract", "TerminalContract", "VehicleShowcaseBinding"]
 __all__ += ["ControllerTransition", "TruthObjectiveResult", "TruthObjectiveSpec", "evaluate_truth_objectives"]
+__all__ += [
+    "DIRECT_WRENCH_NAMES",
+    "DirectWrenchLimits",
+    "DirectWrenchProjection",
+    "add_direct_wrench_to_local_derivative",
+    "compose_direct_wrench_load",
+]
 __all__ += [
     "GenericLqrCandidate",
     "GenericLqrProfile",

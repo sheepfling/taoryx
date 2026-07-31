@@ -1,0 +1,79 @@
+id: b747-racetrack-altitude-turns-pseudo-6dof-v1
+family: b747
+display_name: B747 transport-scaled racetrack kinematic pseudo-6DOF
+evidence_level: nominal_case_pass_overall_qualification_pending
+claim: The B747 public-research kinematic bridge completes the transport-scale powered
+  fixed-wing racetrack with truth-evaluated altitude, speed, route, and terminal gates
+  while exposing a named attitude-response sidecar.
+nonclaims:
+- physical transport moments or surface allocation
+- source-validated flight-control law
+- fuel depletion or certified JT9D performance
+- takeoff, landing, wind robustness, or manufacturer fidelity
+realization:
+  force_source: source_table
+  moment_source: not_applicable_kinematic_bridge
+  actuator_realization: prescribed_attitude_lag_no_surface_claim
+  response_profile_id: b747.attitude_response_p6dof.v1
+  response_law: first-order-rate-limited-v1
+  propulsion_model: source_table_thrust
+  resource_model: fixed_mass_zero_propellant
+  note: The bridge supplies quaternion and body-rate response independently of the
+    point-mass translation. It is a named pseudo-6DOF realization, not a physical
+    B747 surface or moment qualification.
+problem: examples/mission_families/slower_b747/SV01_racetrack_altitude_turns_pseudo_6dof.prb
+racetrack_binding: b747-transport-scaled-kinematic
+tables:
+- tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_nominal_static_6axis.tbl
+- tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/tables/b747_jt9d_thrust.tbl
+max_steps: 12000
+envelope:
+- channel: speed_m_s
+  minimum: 100.0
+  maximum: 220.0
+- channel: altitude_m
+  minimum: 50.0
+  maximum: 350.0
+terminal:
+  required: true
+  objective_type: fly_by_gate
+  racetrack_gate_id: terminal-start-finish-gate
+  dwell_s: 0.0
+  window_start_s: 550.0
+  window_end_s: 570.5
+  tolerance:
+    corridor_m: 2000.0
+    altitude_m: 35.0
+    speed_m_s: 8.0
+  crossing_direction: 1
+objectives:
+- id: high-altitude-level-gate
+  objective_type: fly_by_gate
+  racetrack_gate_id: high-altitude-level-gate
+  tolerance:
+    corridor_m: 2000.0
+    altitude_m: 35.0
+    speed_m_s: 8.0
+  crossing_direction: 1
+  window_start_s: 145.0
+  window_end_s: 175.0
+- id: left-turn-exit-gate
+  objective_type: fly_by_gate
+  racetrack_gate_id: left-turn-exit-gate
+  tolerance:
+    corridor_m: 2000.0
+    altitude_m: 35.0
+    speed_m_s: 8.0
+  crossing_direction: 1
+  window_start_s: 265.0
+  window_end_s: 295.0
+- id: low-altitude-level-gate
+  objective_type: fly_by_gate
+  racetrack_gate_id: low-altitude-level-gate
+  tolerance:
+    corridor_m: 2000.0
+    altitude_m: 35.0
+    speed_m_s: 8.0
+  crossing_direction: 1
+  window_start_s: 420.0
+  window_end_s: 455.0

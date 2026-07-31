@@ -80,14 +80,14 @@ vehicles:
       actuator_realization: source_table_coordinate_allocator_candidate_or_direct_wrench_screen
       propulsion_model: table_thrust
       resource_model: fixed_mass
-      claim: source-bounded X8 response; bounded collective/differential source-table-coordinate allocation only in declared candidate fixtures
-      nonclaims: [resolved hardware left/right elevon mapping, full flight-control-law fidelity, fuel depletion]
+      claim: source-bounded X8 response; bounded collective/differential source-table-coordinate allocation with an explicit source-paper left/right conversion in declared candidate fixtures
+      nonclaims: [servo wiring and hinge-sign calibration, full flight-control-law fidelity, fuel depletion]
     allocation:
       model: bounded_local_table_coordinate_inversion
       controls: [collective-elevon-deg, differential-elevon-deg]
       derivative_step_deg: 1.0
       source: tests/fixtures/slower_airbreathing_and_multirotor_6dof_bundle_v1/cruise_class_uav_skywalker_x8/controls/actuator_limits.csv
-      qualification_status: local_table_coordinate_candidate_pending_left_right_sign_mapping
+      qualification_status: local_source_coordinate_t4_pending_mapped_left_right_end_to_end_evidence
     trajectory_vehicle: x8
     earth_model: wgs-84
     earth_omega_rad_s: 0.0

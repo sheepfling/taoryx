@@ -108,7 +108,7 @@ def build() -> dict[str, Any]:
             x8,
             ARTIFACTS["skywalker_x8"],
             expected_schema="taoryx.x8-table-coordinate-physical-lqr/v1alpha1",
-            expected_tier="T3_linearly_controlled",
+            expected_tier="T4_physically_allocated_source_coordinate",
             expected_status="local_nonlinear_table_coordinate_validation",
         ),
         "hummingbird": _record(
@@ -140,7 +140,7 @@ def build() -> dict[str, Any]:
         raise ValueError("X-15 readiness artifact must explicitly block T1 trim")
     return {
         "schema": "taoryx.four-vehicle-control-evidence/v1alpha1",
-        "scope": "Alpha-2 local physical-controller evidence ledger",
+        "scope": "Alpha-3 local physical-controller evidence ledger",
         "status": "tiered_evidence_complete",
         "claim": {
             "proves": (
@@ -157,7 +157,7 @@ def build() -> dict[str, Any]:
         "vehicles": records,
         "promotion_summary": {
             "T5_local_nonlinear": ["hummingbird", "b747"],
-            "T3_source_table_coordinate_only": ["skywalker_x8"],
+            "T4_source_coordinate_physical": ["skywalker_x8"],
             "T0_blocked_before_trim": ["x15"],
         },
         "required_regeneration_order": [

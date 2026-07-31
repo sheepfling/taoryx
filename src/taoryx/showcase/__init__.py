@@ -2,6 +2,7 @@
 
 from .contracts import (
     ArtifactFile,
+    ControlRealization,
     EvidenceBoardSpec,
     FailureCode,
     FamilyShowcaseTemplate,
@@ -23,6 +24,7 @@ from .contracts import (
 
 __all__ = [
     "ArtifactFile",
+    "ControlRealization",
     "EvidenceBoardSpec",
     "FailureCode",
     "FidelityShowcaseRealization",

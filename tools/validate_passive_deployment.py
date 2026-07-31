@@ -55,7 +55,12 @@ def _inertia_for_shape(shape: DetachedBodyShape, mass_kg: float) -> Vector3:
     )
 
 
-def _body_for_shape(shape: DetachedBodyShape, *, angular_rate: Vector3 = Vector3(0.25, 0.4, 0.6)) -> DetachedBodyDefinition:
+def _body_for_shape(
+    shape: DetachedBodyShape,
+    *,
+    angular_rate: Vector3 = Vector3(0.25, 0.4, 0.6),
+    tumbling_policy: TumblingPolicy = TumblingPolicy.PASSIVE_TUMBLE,
+) -> DetachedBodyDefinition:
     """Return one canonical passive body profile with explicit inertia."""
 
     mass_kg = 12.0
@@ -65,7 +70,7 @@ def _body_for_shape(shape: DetachedBodyShape, *, angular_rate: Vector3 = Vector3
             "passive-sphere",
             mass_kg=mass_kg,
             radius_m=0.45,
-            tumbling_policy=TumblingPolicy.PASSIVE_TUMBLE,
+            tumbling_policy=tumbling_policy,
             inertia_kg_m2=inertia,
             initial_angular_rate_body_rad_s=angular_rate,
         )
@@ -75,7 +80,7 @@ def _body_for_shape(shape: DetachedBodyShape, *, angular_rate: Vector3 = Vector3
             mass_kg=mass_kg,
             radius_m=0.35,
             length_m=2.0,
-            tumbling_policy=TumblingPolicy.PASSIVE_TUMBLE,
+            tumbling_policy=tumbling_policy,
             inertia_kg_m2=inertia,
             initial_angular_rate_body_rad_s=angular_rate,
         )
@@ -85,7 +90,7 @@ def _body_for_shape(shape: DetachedBodyShape, *, angular_rate: Vector3 = Vector3
             mass_kg=mass_kg,
             base_radius_m=0.45,
             height_m=1.8,
-            tumbling_policy=TumblingPolicy.PASSIVE_TUMBLE,
+            tumbling_policy=tumbling_policy,
             inertia_kg_m2=inertia,
             initial_angular_rate_body_rad_s=angular_rate,
         )
@@ -95,7 +100,7 @@ def _body_for_shape(shape: DetachedBodyShape, *, angular_rate: Vector3 = Vector3
         semi_axis_x_m=1.4,
         semi_axis_y_m=0.65,
         semi_axis_z_m=0.45,
-        tumbling_policy=TumblingPolicy.PASSIVE_TUMBLE,
+        tumbling_policy=tumbling_policy,
         inertia_kg_m2=inertia,
         initial_angular_rate_body_rad_s=angular_rate,
     )
@@ -297,6 +302,88 @@ def _distribution(records: list[dict[str, object]], *, classification: str | Non
     }
 
 
+def _area_policy_witness(telemetry: tuple[dict[str, object], ...]) -> dict[str, object]:
+    """Summarize the declared area reduction and native area evolution."""
+
+    policies = sorted({str(row["projected_area_policy"]) for row in telemetry})
+    areas = [float(row["projected_area_m2"]) for row in telemetry]
+    ratios = [float(row["projected_area_ratio_to_reference_average"]) for row in telemetry]
+    rates = [float(row["angular_rate_norm_rad_s"]) for row in telemetry]
+    references = [float(row["projected_area_reference_average_m2"]) for row in telemetry]
+    finite = all(math.isfinite(value) for value in (*areas, *ratios, *rates, *references))
+    return {
+        "policies": policies,
+        "finite": finite,
+        "reference_average_area_m2": references[0] if references else None,
+        "projected_area_min_m2": min(areas) if areas else None,
+        "projected_area_max_m2": max(areas) if areas else None,
+        "projected_area_span_m2": max(areas) - min(areas) if areas else None,
+        "ratio_to_reference_average_min": min(ratios) if ratios else None,
+        "ratio_to_reference_average_max": max(ratios) if ratios else None,
+        "angular_rate_max_rad_s": max(rates) if rates else None,
+        "sample_count": len(telemetry),
+    }
+    ####
+
+
+def _rotation_policy_witness(
+    shape: DetachedBodyShape,
+    *,
+    horizon_s: float,
+    step_size_s: float,
+) -> dict[str, object]:
+    """Compare passive aerodynamic moments with a zero-moment spin baseline."""
+
+    records: dict[str, dict[str, object]] = {}
+    for policy, label in (
+        (TumblingPolicy.PASSIVE_TUMBLE, "passive_aerodynamic_moment"),
+        (TumblingPolicy.PRESCRIBED_SPIN, "prescribed_spin_zero_aerodynamic_moment"),
+    ):
+        body = _body_for_shape(shape, tumbling_policy=policy)
+        vehicle = _vehicle(
+            body,
+            initial_speed_m_s=250.0,
+            bank_rad=0.0,
+            drag_scale=1.0,
+            density_scale=1.0,
+            scale_height_scale=1.0,
+            sample_id=f"rotation-policy-{shape.value}-{label}",
+        )
+        trajectory = simulate_rocket_glide(
+            vehicle,
+            _command(0.0),
+            fidelity=ReachabilityFidelity.RIGID_BODY_6DOF,
+            step_size_s=step_size_s,
+            horizon_s=horizon_s,
+            spawn_children=True,
+        )
+        child = trajectory.spawned_bodies[0]
+        telemetry = child.telemetry
+        moments = [
+            math.sqrt(
+                sum(float(row[f"aero_moment_body_{axis}_nm"]) ** 2 for axis in ("x", "y", "z"))
+            )
+            for row in telemetry
+        ]
+        rates = [float(row["angular_rate_norm_rad_s"]) for row in telemetry]
+        records[label] = {
+            "tumbling_policy": policy.value,
+            "classification": child.classification,
+            "termination": child.termination.value,
+            "aerodynamic_moment_norm_max_nm": max(moments) if moments else None,
+            "aerodynamic_moment_norm_min_nm": min(moments) if moments else None,
+            "angular_rate_norm_max_rad_s": max(rates) if rates else None,
+            "telemetry_sample_count": len(telemetry),
+            "finite": all(math.isfinite(value) for value in (*moments, *rates)),
+        }
+    return {
+        "comparison": "passive_aerodynamic_moment_vs_zero_moment_spin_baseline",
+        "records": records,
+        "claim_boundary": "The zero-moment baseline is a diagnostic passive reference, not a physical controller or a prescribed-tumble qualification.",
+    }
+    ####
+
+
 def _write_footprint_plots(records: list[dict[str, object]], destination: Path, dpi: int) -> list[Path]:
     import matplotlib
 
@@ -352,6 +439,64 @@ def _write_footprint_plots(records: list[dict[str, object]], destination: Path, 
     figure.savefig(paths[-1], dpi=dpi, bbox_inches="tight")
     plt.close(figure)
     return paths
+
+
+def _write_area_policy_plot(
+    envelopes: dict[ReachabilityFidelity, ReachabilityEnvelope],
+    destination: Path,
+    shape: DetachedBodyShape,
+    dpi: int,
+) -> Path:
+    """Render the passive area-policy and rotational-state diagnostic board."""
+
+    import matplotlib
+
+    matplotlib.use("Agg", force=True)
+    import matplotlib.pyplot as plt
+
+    destination.mkdir(parents=True, exist_ok=True)
+    figure, axes = plt.subplots(2, 2, figsize=(12.0, 8.0), constrained_layout=True)
+    colors = {
+        ReachabilityFidelity.POINT_MASS_3DOF: "#4c78a8",
+        ReachabilityFidelity.PSEUDO_6DOF: "#f58518",
+        ReachabilityFidelity.RIGID_BODY_6DOF: "#54a24b",
+    }
+    for fidelity in FIDELITIES:
+        child = envelopes[fidelity].samples[0].trajectory.spawned_bodies[0]
+        telemetry = child.telemetry
+        time = [float(row["time_s"]) for row in telemetry]
+        label = fidelity.value.replace("_", " ")
+        color = colors[fidelity]
+        axes[0, 0].plot(time, [float(row["projected_area_m2"]) for row in telemetry], color=color, label=label)
+        axes[0, 1].plot(
+            time,
+            [float(row["projected_area_ratio_to_reference_average"]) for row in telemetry],
+            color=color,
+            label=label,
+        )
+        axes[1, 0].plot(time, [float(row["angular_rate_norm_rad_s"]) for row in telemetry], color=color, label=label)
+        if fidelity is not ReachabilityFidelity.POINT_MASS_3DOF:
+            moment = [
+                math.sqrt(
+                    sum(float(row[f"aero_moment_body_{axis}_nm"]) ** 2 for axis in ("x", "y", "z"))
+                )
+                for row in telemetry
+            ]
+            axes[1, 1].plot(time, moment, color=color, label=label)
+    axes[0, 0].set_ylabel("projected area (m²)")
+    axes[0, 1].axhline(1.0, color="#777777", linestyle="--", linewidth=1.0)
+    axes[0, 1].set_ylabel("area / orientation average")
+    axes[1, 0].set_ylabel("angular rate norm (rad/s)")
+    axes[1, 1].set_ylabel("aerodynamic moment norm (N·m)")
+    for axis in axes.flat:
+        axis.set_xlabel("time after release (s)")
+        axis.grid(alpha=0.25)
+        axis.legend(fontsize=7)
+    figure.suptitle(f"Passive {shape.value}: area policy and rotational evidence")
+    path = destination / "area-policy-rotation.png"
+    figure.savefig(path, dpi=dpi, bbox_inches="tight")
+    plt.close(figure)
+    return path
 
 
 def _write_csv(records: list[dict[str, object]], path: Path) -> None:
@@ -465,6 +610,7 @@ def run_qualification(
                 parameters={"mass_scale": 1.0, "drag_scale": 1.0, "density_scale": 1.0, "scale_height_scale": 1.0, "initial_speed_m_s": 250.0, "bank_rad": 0.0, "angular_rate_x_rad_s": 0.25, "angular_rate_y_rad_s": 0.4, "angular_rate_z_rad_s": 0.6},
                 parent_model_id=vehicle.vehicle_id,
             )
+            child = sample.trajectory.spawned_bodies[0]
             shape_nominal[fidelity.value] = {
                 "artifact": artifact_path.relative_to(artifact_dir).as_posix(),
                 "classification": record["classification"],
@@ -473,6 +619,7 @@ def run_qualification(
                 "lineage": record["lineage"],
                 "terminal_state": record.get("terminal_state"),
                 "footprint_m": record.get("footprint_m"),
+                "area_policy_witness": _area_policy_witness(child.telemetry),
             }
         plot_dir = artifact_dir / "plots" / shape.value
         plot_report = render_reachability_plot_bundle(
@@ -480,6 +627,17 @@ def run_qualification(
             plot_dir,
             comparison_sources=(nominal_envelopes[FIDELITIES[0]], nominal_envelopes[FIDELITIES[2]]),
             dpi=dpi,
+        )
+        rotation_policy = _rotation_policy_witness(
+            shape,
+            horizon_s=horizon_s,
+            step_size_s=step_size_s,
+        )
+        area_policy_plot = _write_area_policy_plot(
+            nominal_envelopes,
+            plot_dir,
+            shape,
+            dpi,
         )
         rng = random.Random(seed + shape_index)
         shape_records: list[dict[str, object]] = []
@@ -524,6 +682,8 @@ def run_qualification(
                     "impact_distribution": _distribution(shape_records, classification="impact"),
                 },
                 "plot_manifest": plot_report.manifest_path.relative_to(artifact_dir).as_posix(),
+                "area_policy_plot": area_policy_plot.relative_to(artifact_dir).as_posix(),
+                "rotation_policy_witness": rotation_policy,
             }
         )
     csv_path = artifact_dir / "terminal-footprint-samples.csv"
@@ -534,6 +694,23 @@ def run_qualification(
         "status": "qualified_witness_with_physical_footprint_uncertainty",
         "claim_boundary": "passive child terminal footprints and deployment lineage; not controller-effective reachability, source-exact child aerodynamics, or parent capability",
         "parent_capability_claim": "not_promoted",
+        "passive_physics_contract": {
+            "point_mass_3dof": {
+                "projected_area_policy": "orientation_averaged_projected_area",
+                "claim": "center-of-mass translation using a deterministic geometry-specific orientation average",
+                "nonclaim": "instantaneous attitude-dependent drag or moment-driven tumble",
+            },
+            "pseudo_6dof": {
+                "projected_area_policy": "native_rigid_body_reuse_instantaneous_projected_area",
+                "claim": "native rigid-body rotational and attitude state exposed through the pseudo interface",
+                "nonclaim": "prescribed attitude response or control authority",
+            },
+            "rigid_body_6dof": {
+                "projected_area_policy": "instantaneous_geometry_projected_area",
+                "claim": "passive attitude-dependent projected area, drag, aerodynamic moment, and body-rate evolution",
+                "nonclaim": "active control, actuator, or guidance authority",
+            },
+        },
         "contract": {
             "shapes": [shape.value for shape in SHAPES],
             "fidelities": [fidelity.value for fidelity in FIDELITIES],
@@ -589,6 +766,8 @@ def run_qualification(
                     manifest_files.append(artifact_dir / str(fidelity_report["artifact"]))
         if "plot_manifest" in shape_report:
             manifest_files.append(artifact_dir / str(shape_report["plot_manifest"]))
+        if "area_policy_plot" in shape_report:
+            manifest_files.append(artifact_dir / str(shape_report["area_policy_plot"]))
     manifest = {
         "schema": "taoryx.alpha3-passive-deployment-artifact-manifest/v1alpha1",
         "qualification_report": _root_relative(output),

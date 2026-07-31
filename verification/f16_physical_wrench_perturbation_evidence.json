@@ -4,10 +4,10 @@
       "allocation_statuses": [
         "feasible"
       ],
-      "final_normalized_feedback_error_norm": 0.00018644984396441635,
-      "initial_normalized_feedback_error_norm": 0.203960780700593,
+      "final_normalized_feedback_error_norm": 0.00039369540679377554,
+      "initial_normalized_feedback_error_norm": 0.002190890230020559,
       "maximum_continuous_saturation_duration_s": 0.0,
-      "maximum_controlled_actual_residual": 937.8710736568053,
+      "maximum_controlled_actual_residual": 309.35565586428186,
       "passed": true,
       "perturbation": {
         "q_rad_s": -0.0004,
@@ -20,10 +20,10 @@
       "allocation_statuses": [
         "feasible"
       ],
-      "final_normalized_feedback_error_norm": 0.0003462033082255575,
-      "initial_normalized_feedback_error_norm": 0.20000000008000002,
+      "final_normalized_feedback_error_norm": 4.336943036498787e-05,
+      "initial_normalized_feedback_error_norm": 0.002078460969082653,
       "maximum_continuous_saturation_duration_s": 0.0,
-      "maximum_controlled_actual_residual": 707.7382728161178,
+      "maximum_controlled_actual_residual": 363.2623605393174,
       "passed": true,
       "perturbation": {
         "p_rad_s": 0.0002,
@@ -36,10 +36,10 @@
       "allocation_statuses": [
         "feasible"
       ],
-      "final_normalized_feedback_error_norm": 3.072856681173339e-07,
-      "initial_normalized_feedback_error_norm": 8e-06,
+      "final_normalized_feedback_error_norm": 7.612606100159767e-07,
+      "initial_normalized_feedback_error_norm": 0.0008,
       "maximum_continuous_saturation_duration_s": 0.0,
-      "maximum_controlled_actual_residual": 106.80684995507761,
+      "maximum_controlled_actual_residual": 162.3225461413427,
       "passed": true,
       "perturbation": {
         "q_rad_s": 0.0004
@@ -50,10 +50,10 @@
       "allocation_statuses": [
         "feasible"
       ],
-      "final_normalized_feedback_error_norm": 0.0001856131102830878,
-      "initial_normalized_feedback_error_norm": 0.19999999999998863,
+      "final_normalized_feedback_error_norm": 0.000393449292465825,
+      "initial_normalized_feedback_error_norm": 0.0019999999999998864,
       "maximum_continuous_saturation_duration_s": 0.0,
-      "maximum_controlled_actual_residual": 874.7628824822946,
+      "maximum_controlled_actual_residual": 220.8866296979053,
       "passed": true,
       "perturbation": {
         "u_m_s": 0.1
@@ -64,10 +64,10 @@
       "allocation_statuses": [
         "feasible"
       ],
-      "final_normalized_feedback_error_norm": 1.1726252633476196e-06,
-      "initial_normalized_feedback_error_norm": 0.03999999999999915,
+      "final_normalized_feedback_error_norm": 1.0118476144858894e-06,
+      "initial_normalized_feedback_error_norm": 0.00039999999999999145,
       "maximum_continuous_saturation_duration_s": 0.0,
-      "maximum_controlled_actual_residual": 224.51374311011097,
+      "maximum_controlled_actual_residual": 57.51973428568946,
       "passed": true,
       "perturbation": {
         "w_m_s": 0.02
@@ -83,5 +83,6 @@
   "plant_id": "reference-f16-s119-source-runtime-plant",
   "schema_version": "taoryx.f16-physical-wrench-perturbation-evidence/v1",
   "status": "development_screen_passed",
-  "step_s": 0.02
+  "step_s": 0.02,
+  "tuning_profile": "state_and_wrench_balanced_q10_r0p01"
 }

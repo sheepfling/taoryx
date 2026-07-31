@@ -1,0 +1,6 @@
+{
+  "note": "Events are detected from truth telemetry channels; controller event flags are not used to pass objectives.",
+  "schema_version": 1,
+  "truth_event_times_s": {},
+  "truth_events": []
+}

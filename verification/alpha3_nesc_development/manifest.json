@@ -1,0 +1,23 @@
+{
+  "comparison": "comparison.json",
+  "family_id": "reference_nesc_two_stage_rocket",
+  "nominal_case_scope": "nesc.source_translation_staged_orbit_coast_v1",
+  "promotion_blocker": "independent parent attitude-response evidence and physical gimbal allocation remain pending",
+  "records": [
+    {
+      "artifact": "point_mass_3dof_evidence.json",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "pseudo_6dof_evidence.json",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_nesc_fidelity_ladder.py",
+  "schema": "taoryx.nesc-fidelity-ladder/v1alpha1",
+  "status": "nominal_case_pass"
+}

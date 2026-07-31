@@ -12,6 +12,7 @@ from taoryx.trajectory import (
     F16PointMass3DOFModel,
     F16ReducedRacetrackRunner,
 )
+from taoryx.trajectory.pseudo6dof_profiles import load_pseudo6dof_catalog
 from tools.validate_f16_reductions import _build_case
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -69,4 +70,32 @@ def test_f16_pseudo6dof_racetrack_exposes_named_response_channels() -> None:
     assert all(np.isfinite(float(row["p_rad_s"])) for row in run.rows)
     assert all(np.isfinite(float(row["route_pitch_achieved_deg"])) for row in run.rows)
     assert all(row["allocation_status"] == "reduced_response_law" for row in run.rows)
+    ####
+
+
+def test_f16_pseudo6dof_can_use_shared_catalog_response_law() -> None:
+    """The F-16 runner can execute through the common Alpha 3 profile."""
+
+    source, trim, trim_pitch_rad = _build_case()
+    linearization = source.linearize_local(
+        trim.state,
+        trim.controls,
+        trim_pitch_rad=trim_pitch_rad,
+        altitude_m=0.0,
+        state_step=1.0e-5,
+        control_step=1.0e-5,
+    )
+    route = load_racetrack_template_catalog(ROOT / "verification/racetrack_templates.yaml").get("f16-s119-pseudo-6dof")
+    _, profile = load_pseudo6dof_catalog(ROOT / "verification/pseudo6dof_profiles.yaml").for_family("f16_s119")
+    run = F16ReducedRacetrackRunner(
+        F16AttitudeResponsePseudo6DOFModel(source, trim, linearization, trim_pitch_rad),
+        trim,
+        route,
+        "pseudo_6dof_kinematic_bridge",
+        dt_s=2.0,
+        response_profile=profile,
+    ).run(duration_s=route.declared_duration_s)
+
+    assert run.numerical_valid is True
+    assert {row["response_profile_id"] for row in run.rows} == {profile.id}
     ####

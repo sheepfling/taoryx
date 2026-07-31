@@ -9,7 +9,11 @@ from pathlib import Path
 
 from .contracts import Vector3
 from .hl20_showcase import render_hl20_ca_hi_showcase_composites
-from .reachability_aerodynamics import HL20_SOURCE_DOCUMENT_SHA256, HL20_SOURCE_MODEL_ID
+from .reachability_aerodynamics import (
+    HL20_SOURCE_DOCUMENT_SHA256,
+    HL20_SOURCE_MODEL_ID,
+    HL20_SOURCE_SPEED_OF_SOUND_M_S,
+)
 from .reachability_envelope import (
     ImpulseFrame,
     LaunchCommand,
@@ -73,9 +77,11 @@ def hl20_release_vehicle(
     attitude_control_mode: str = "open_loop",
     actuator_profile_id: str = "none",
     mission_profile_id: str = "none",
+    pseudo6dof_profile_id: str | None = None,
     glide_bank_schedule_deg: tuple[tuple[float, float], ...] = (),
     mission_segment_schedule: tuple[tuple[str, float, float], ...] = (),
     initial_speed_m_s: float = 250.0,
+    initial_altitude_m: float = 0.0,
     attitude_control_gain: float = 500_000.0,
     attitude_rate_damping: float = 300_000.0,
     configuration_variant_id: str = "nominal",
@@ -98,16 +104,20 @@ def hl20_release_vehicle(
     run the source force/moment graph through the same reachability seam.
     """
 
-    spent_booster = DetachedBodyDefinition.cylinder(
-        "hl20-synthetic-spent-booster",
-        mass_kg=booster_dry_mass_kg,
-        radius_m=0.8,
-        length_m=6.0,
-        inertia_kg_m2=Vector3(
-            5_000.0 * booster_dry_mass_kg / 1_500.0,
-            5_000.0 * booster_dry_mass_kg / 1_500.0,
-            500.0 * booster_dry_mass_kg / 1_500.0,
-        ),
+    spent_booster = (
+        DetachedBodyDefinition.cylinder(
+            "hl20-synthetic-spent-booster",
+            mass_kg=booster_dry_mass_kg,
+            radius_m=0.8,
+            length_m=6.0,
+            inertia_kg_m2=Vector3(
+                5_000.0 * booster_dry_mass_kg / 1_500.0,
+                5_000.0 * booster_dry_mass_kg / 1_500.0,
+                500.0 * booster_dry_mass_kg / 1_500.0,
+            ),
+        )
+        if booster_dry_mass_kg > 0.0
+        else None
     )
     return RocketGlideVehicle(
         vehicle_id="hl20-low-fidelity-release-v1",
@@ -120,6 +130,7 @@ def hl20_release_vehicle(
         lift_to_drag=3.2,
         aerodynamic_model_id=aerodynamic_model_id,
         actuator_profile_id=actuator_profile_id,
+        pseudo6dof_profile_id=pseudo6dof_profile_id,
         attitude_control_mode=attitude_control_mode,
         mission_profile_id=mission_profile_id,
         glide_bank_schedule_deg=glide_bank_schedule_deg,
@@ -131,7 +142,7 @@ def hl20_release_vehicle(
         mass_property_profile_id=mass_property_profile_id,
         inertia_body_kg_m2=inertia_body_kg_m2,
         wind_velocity_m_s=wind_velocity_m_s,
-        initial_altitude_m=0.0,
+        initial_altitude_m=initial_altitude_m,
         booster_dry_mass_kg=booster_dry_mass_kg,
         booster_propellant_mass_kg=booster_propellant_mass_kg,
         booster_thrust_n=booster_thrust_n,
@@ -161,6 +172,7 @@ def hl20_low_fidelity_provenance(
     attitude_control_mode: str = "open_loop",
     actuator_profile_id: str = "none",
     mission_profile_id: str = "none",
+    pseudo6dof_profile_id: str | None = None,
     glide_bank_schedule_deg: tuple[tuple[float, float], ...] = (),
     mission_segment_schedule: tuple[tuple[str, float, float], ...] = (),
     initial_speed_m_s: float = 250.0,
@@ -190,6 +202,7 @@ def hl20_low_fidelity_provenance(
         "aerodynamic_model": aerodynamic_model_id,
         "attitude_control_mode": attitude_control_mode,
         "actuator_profile_id": actuator_profile_id,
+        "pseudo6dof_profile_id": pseudo6dof_profile_id,
         "mission_profile_id": mission_profile_id,
         "glide_bank_schedule_deg": [list(item) for item in glide_bank_schedule_deg],
         "mission_segment_schedule": [list(item) for item in mission_segment_schedule],
@@ -235,6 +248,7 @@ def run_hl20_release(
     attitude_control_mode: str = "open_loop",
     actuator_profile_id: str = "none",
     mission_profile_id: str = "none",
+    pseudo6dof_profile_id: str | None = None,
     glide_bank_schedule_deg: tuple[tuple[float, float], ...] = (),
     mission_segment_schedule: tuple[tuple[str, float, float], ...] = (),
     initial_speed_m_s: float = 250.0,
@@ -255,6 +269,7 @@ def run_hl20_release(
             aerodynamic_model_id=aerodynamic_model_id,
             attitude_control_mode=attitude_control_mode,
             actuator_profile_id=actuator_profile_id,
+            pseudo6dof_profile_id=pseudo6dof_profile_id,
             mission_profile_id=mission_profile_id,
             glide_bank_schedule_deg=glide_bank_schedule_deg,
             mission_segment_schedule=mission_segment_schedule,
@@ -277,6 +292,7 @@ def run_hl20_release(
             aerodynamic_model_id=aerodynamic_model_id,
             attitude_control_mode=attitude_control_mode,
             actuator_profile_id=actuator_profile_id,
+            pseudo6dof_profile_id=pseudo6dof_profile_id,
             mission_profile_id=mission_profile_id,
             glide_bank_schedule_deg=glide_bank_schedule_deg,
             mission_segment_schedule=mission_segment_schedule,
@@ -380,6 +396,7 @@ def hl20_source_release_vehicle(
         aerodynamic_model_id=HL20_SOURCE_MODEL_ID,
         attitude_control_mode="velocity_aligned",
         actuator_profile_id="hl20.reference_first_order.v1",
+        pseudo6dof_profile_id="hl20.attitude_response_p6dof.v1",
         mission_profile_id="hl20.energy_managed_entry_glide.v1",
         glide_bank_schedule_deg=HL20_ENERGY_MANAGED_BANK_SCHEDULE_DEG,
         mission_segment_schedule=HL20_ENERGY_MANAGED_SEGMENTS,
@@ -398,6 +415,39 @@ def hl20_source_release_vehicle(
         booster_propellant_mass_kg=booster_propellant_mass_kg,
         booster_separation_impulse_n_s=booster_separation_impulse_n_s,
         booster_separation_impulse_frame=booster_separation_impulse_frame,
+    )
+
+
+def hl20_source_surface_replay_vehicle(
+    *,
+    configuration_variant_id: str = "hl20_source_surface_replay_nominal_v1",
+    initial_speed_m_s: float = HL20_SOURCE_SPEED_OF_SOUND_M_S,
+    initial_altitude_m: float = 5_000.0,
+) -> RocketGlideVehicle:
+    """Build a no-booster source vehicle for explicit surface replay.
+
+    This is intentionally open loop. Seven surface commands are passed to the
+    pinned DAVE-ML aerodynamic graph, while no velocity-alignment or direct
+    control moment is injected. It proves source-load realization only; it is
+    not a trimmed or closed-loop flight-control vehicle.
+    """
+
+    return hl20_release_vehicle(
+        aerodynamic_model_id=HL20_SOURCE_MODEL_ID,
+        attitude_control_mode="surface_open_loop",
+        actuator_profile_id="hl20.reference_ideal_direct.v1",
+        pseudo6dof_profile_id="hl20.attitude_response_p6dof.v1",
+        mission_profile_id="hl20.source_surface_open_loop_replay.v1",
+        initial_speed_m_s=initial_speed_m_s,
+        initial_altitude_m=initial_altitude_m,
+        configuration_variant_id=configuration_variant_id,
+        mass_property_profile_id="hl20_mod_k_fixed_mass_inertia_v1",
+        inertia_body_kg_m2=HL20_REFERENCE_INERTIA_KG_M2,
+        booster_dry_mass_kg=0.0,
+        booster_propellant_mass_kg=0.0,
+        booster_thrust_n=0.0,
+        booster_burn_time_s=0.0,
+        booster_release_time_s=0.0,
     )
 
 
@@ -422,6 +472,7 @@ def run_hl20_source_release(
         aerodynamic_model_id=HL20_SOURCE_MODEL_ID,
         attitude_control_mode="velocity_aligned",
         actuator_profile_id="hl20.reference_first_order.v1",
+        pseudo6dof_profile_id="hl20.attitude_response_p6dof.v1",
         mission_profile_id="hl20.energy_managed_entry_glide.v1",
         glide_bank_schedule_deg=HL20_ENERGY_MANAGED_BANK_SCHEDULE_DEG,
         mission_segment_schedule=HL20_ENERGY_MANAGED_SEGMENTS,
@@ -648,6 +699,7 @@ __all__ = [
     "hl20_ca_hi_terminal_criteria",
     "hl20_source_release_commands",
     "hl20_source_release_vehicle",
+    "hl20_source_surface_replay_vehicle",
     "hl20_release_vehicle",
     "run_hl20_low_fidelity_release",
     "run_hl20_fidelity_ladder",

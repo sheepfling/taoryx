@@ -1,0 +1,201 @@
+{
+  "case_count": 12,
+  "cases": [
+    {
+      "artifact": "verification/alpha3_a320_r1/point_mass_3dof/altitude_minus_500m/evidence.json",
+      "case_id": "altitude_minus_500m",
+      "mission_pass": true,
+      "mode": "point_mass_3dof",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10000.0,
+        "mach": 0.78,
+        "mass_kg": 60000.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/point_mass_3dof/altitude_plus_500m/evidence.json",
+      "case_id": "altitude_plus_500m",
+      "mission_pass": true,
+      "mode": "point_mass_3dof",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 11000.0,
+        "mach": 0.78,
+        "mass_kg": 60000.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/point_mass_3dof/mach_minus_020/evidence.json",
+      "case_id": "mach_minus_020",
+      "mission_pass": true,
+      "mode": "point_mass_3dof",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10500.0,
+        "mach": 0.76,
+        "mass_kg": 60000.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/point_mass_3dof/mach_plus_020/evidence.json",
+      "case_id": "mach_plus_020",
+      "mission_pass": true,
+      "mode": "point_mass_3dof",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10500.0,
+        "mach": 0.8,
+        "mass_kg": 60000.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/point_mass_3dof/mass_minus_2pct/evidence.json",
+      "case_id": "mass_minus_2pct",
+      "mission_pass": true,
+      "mode": "point_mass_3dof",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10500.0,
+        "mach": 0.78,
+        "mass_kg": 58800.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/point_mass_3dof/mass_plus_2pct/evidence.json",
+      "case_id": "mass_plus_2pct",
+      "mission_pass": true,
+      "mode": "point_mass_3dof",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10500.0,
+        "mach": 0.78,
+        "mass_kg": 61200.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/pseudo_6dof_kinematic_bridge/altitude_minus_500m/evidence.json",
+      "case_id": "altitude_minus_500m",
+      "mission_pass": true,
+      "mode": "pseudo_6dof_kinematic_bridge",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10000.0,
+        "mach": 0.78,
+        "mass_kg": 60000.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/pseudo_6dof_kinematic_bridge/altitude_plus_500m/evidence.json",
+      "case_id": "altitude_plus_500m",
+      "mission_pass": true,
+      "mode": "pseudo_6dof_kinematic_bridge",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 11000.0,
+        "mach": 0.78,
+        "mass_kg": 60000.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/pseudo_6dof_kinematic_bridge/mach_minus_020/evidence.json",
+      "case_id": "mach_minus_020",
+      "mission_pass": true,
+      "mode": "pseudo_6dof_kinematic_bridge",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10500.0,
+        "mach": 0.76,
+        "mass_kg": 60000.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/pseudo_6dof_kinematic_bridge/mach_plus_020/evidence.json",
+      "case_id": "mach_plus_020",
+      "mission_pass": true,
+      "mode": "pseudo_6dof_kinematic_bridge",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10500.0,
+        "mach": 0.8,
+        "mass_kg": 60000.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/pseudo_6dof_kinematic_bridge/mass_minus_2pct/evidence.json",
+      "case_id": "mass_minus_2pct",
+      "mission_pass": true,
+      "mode": "pseudo_6dof_kinematic_bridge",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10500.0,
+        "mach": 0.78,
+        "mass_kg": 58800.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    },
+    {
+      "artifact": "verification/alpha3_a320_r1/pseudo_6dof_kinematic_bridge/mass_plus_2pct/evidence.json",
+      "case_id": "mass_plus_2pct",
+      "mission_pass": true,
+      "mode": "pseudo_6dof_kinematic_bridge",
+      "numerical_valid": true,
+      "operating_point": {
+        "altitude_m": 10500.0,
+        "mach": 0.78,
+        "mass_kg": 61200.0
+      },
+      "required_objectives": 4,
+      "required_passed": 4
+    }
+  ],
+  "claim": "Fixed calibrated operating-point evidence for the A320 point-mass and pseudo-6DOF racetrack reductions.",
+  "claim_boundary": "This is deterministic reduced-tier development evidence, not a physical-surface, manufacturer-aircraft, wind, statistical reliability, or full-envelope qualification.",
+  "failed_case_count": 0,
+  "modes": [
+    "point_mass_3dof",
+    "pseudo_6dof_kinematic_bridge"
+  ],
+  "operating_point_contract": {
+    "dimensions": [
+      "altitude_minus_500m",
+      "altitude_plus_500m",
+      "mach_minus_020",
+      "mach_plus_020",
+      "mass_minus_2pct",
+      "mass_plus_2pct"
+    ],
+    "failure_policy": "retain failed truth objectives and hard gates as boundary evidence",
+    "nominal": {
+      "altitude_m": 10500.0,
+      "mach": 0.78,
+      "mass_kg": 60000.0
+    },
+    "source_model": "OpenAP calibrated A320 performance model"
+  },
+  "passed_case_count": 12,
+  "reproduction": "PYTHONPATH=src python3 tools/validate_a320_r1_matrix.py",
+  "schema": "taoryx.a320-r1-matrix/v1alpha1",
+  "status": "R1_fixed_matrix_complete"
+}

@@ -1,0 +1,377 @@
+{
+  "board_count": 9,
+  "catalog": {
+    "path": "verification/showcase_archetype_catalog.yaml",
+    "recipe_count": 10,
+    "sha256": "7f6eba016a940fe5d4ae8856583b77ec6806e5b1094f59f7c481686235decab4"
+  },
+  "claim_boundary": "This verifies artifact composition and declared evidence boundaries; it does not promote a family to physical-effector, source-exact, operational, or full-envelope qualification.",
+  "cross_fidelity_pass_count": 9,
+  "direct_wrench_contract": {
+    "path": "verification/alpha3_direct_wrench_contract/manifest.json",
+    "record_count": 9,
+    "sha256": "62baeb055510bf9cbb3ef17a32254a7a35a947a5a9f584171e46aacb12681896",
+    "status": "contract_verified"
+  },
+  "failures": [],
+  "families": [
+    {
+      "auxiliary_evidence": null,
+      "board": {
+        "path": "verification/alpha3_family_qualification/x8-racetrack-altitude-turns-pseudo-6dof-v1/qualification_board.png",
+        "sha256": "91d3bb52003ca316e9ea74fc2a85dea0270375ec207ab45ea1288a7ee02f76c2"
+      },
+      "claim_boundary": "Source-table point-mass translation, route geometry, and truth-evaluated racetrack gates only.",
+      "cross_fidelity_status": "pass",
+      "family_id": "skywalker_x8",
+      "paired_fidelity": {
+        "mission_pass": true,
+        "records": [
+          {
+            "artifact": "verification/alpha3_family_qualification/x8-racetrack-altitude-turns-3dof-v1/summary.json",
+            "fidelity": "point_mass_3dof",
+            "sha256": "aae2bb574e722495e155af9e791ffc9463c32edfcb9e78c033027d8663ab5f07"
+          },
+          {
+            "artifact": "verification/alpha3_family_qualification/x8-racetrack-altitude-turns-pseudo-6dof-v1/summary.json",
+            "fidelity": "pseudo_6dof",
+            "sha256": "5b98fd7c572cdde8fa7242110ac443203ef32ddaf8eadbb42af12c3245ab6923"
+          }
+        ],
+        "status": "nominal_pair_ready"
+      },
+      "recipe_family": "powered_fixed_wing",
+      "recipe_id": "x8-fixed-wing-racetrack-response-v1",
+      "recipe_priority": 8,
+      "supplemental_evidence": [
+        {
+          "path": "verification/alpha3_x8_direct_wrench/manifest.json",
+          "sha256": "b6c0fdf19d7153f086204e3ed2cc0e36f88b0ffc11ec57909ad793d7ff594f4c"
+        }
+      ]
+    },
+    {
+      "auxiliary_evidence": null,
+      "board": {
+        "path": "verification/alpha3_family_qualification/b747-racetrack-altitude-turns-pseudo-6dof-v1/qualification_board.png",
+        "sha256": "9498ad1e487baf5a19276e5028bc5c932b0fc0696dfef9a1682e13f5e40f4c9d"
+      },
+      "claim_boundary": "Source-table point-mass transport racetrack geometry, altitude, speed, and truth gates only.",
+      "cross_fidelity_status": "pass",
+      "family_id": "b747",
+      "paired_fidelity": {
+        "mission_pass": true,
+        "records": [
+          {
+            "artifact": "verification/alpha3_family_qualification/b747-racetrack-altitude-turns-3dof-v1/summary.json",
+            "fidelity": "point_mass_3dof",
+            "sha256": "87f54495b8f4340e9db0df1ce098e6ecf491ab898054a91122ed2c548635b1b9"
+          },
+          {
+            "artifact": "verification/alpha3_family_qualification/b747-racetrack-altitude-turns-pseudo-6dof-v1/summary.json",
+            "fidelity": "pseudo_6dof",
+            "sha256": "2e0a64b8baf49e3a6617345e7d5c4012102d6a6e79436fc30e7e8f102c6170ad"
+          }
+        ],
+        "status": "nominal_pair_ready"
+      },
+      "recipe_family": "heavy_transport",
+      "recipe_id": "b747-transport-energy-arrival-v1",
+      "recipe_priority": 1,
+      "supplemental_evidence": [
+        {
+          "path": "artifacts/showcases/airbreathing-racetrack-fidelity-ladder/b747-racetrack-altitude-turns-6dof-v1/summary.json",
+          "sha256": "185d6ae2e13ffaca4d08c554ee4f7e7eeab788c94f4578bae0f42a571acae18b"
+        }
+      ]
+    },
+    {
+      "auxiliary_evidence": null,
+      "board": {
+        "path": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_board.png",
+        "sha256": "cfaa9582ebe662a38a12b44da09d12b3656bc3b0e5908043d5650daa8806fc91"
+      },
+      "claim_boundary": "OpenAP point-mass performance and truth-evaluated racetrack geometry only.",
+      "cross_fidelity_status": "pass",
+      "family_id": "a320",
+      "paired_fidelity": {
+        "mission_pass": true,
+        "records": [
+          {
+            "artifact": "verification/a320_racetrack/point_mass_3dof_evidence.json",
+            "fidelity": "point_mass_3dof",
+            "sha256": "b3ca553fe9ddbedfc2bc35df9427f6c8961cbc0a43ca1154658d6f8665427b17"
+          },
+          {
+            "artifact": "verification/a320_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
+            "fidelity": "pseudo_6dof",
+            "sha256": "7a6e7f27c4e6f56890c0f53c30630da76e609878a0902e8f5aa88073c91361d6"
+          }
+        ],
+        "status": "nominal_pair_ready"
+      },
+      "recipe_family": "transport_comparison",
+      "recipe_id": "a320-derived-versus-surrogate-v1",
+      "recipe_priority": 6,
+      "supplemental_evidence": [
+        {
+          "path": "verification/alpha3_a320_direct_wrench/manifest.json",
+          "sha256": "81328e064f626517e0ce67257abf79f1145c3bb16ad6c02058a23642009a744d"
+        }
+      ]
+    },
+    {
+      "auxiliary_evidence": null,
+      "board": {
+        "path": "verification/f16_racetrack/pseudo_6dof_kinematic_bridge_board.png",
+        "sha256": "5418da239ff1a312ade99d38c05ecc5bf2f130384f6cde625cf84d9704064866"
+      },
+      "claim_boundary": "Reduced source-grounded point-mass racetrack geometry and energy behavior only.",
+      "cross_fidelity_status": "pass",
+      "family_id": "f16_s119",
+      "paired_fidelity": {
+        "mission_pass": true,
+        "records": [
+          {
+            "artifact": "verification/f16_racetrack/point_mass_3dof_evidence.json",
+            "fidelity": "point_mass_3dof",
+            "sha256": "a39343fa39c076f1f102267a9bd3e48d1720d67d647d62621a03cb992e1c976b"
+          },
+          {
+            "artifact": "verification/f16_racetrack/pseudo_6dof_kinematic_bridge_evidence.json",
+            "fidelity": "pseudo_6dof",
+            "sha256": "9b19b2d6f9bb4d5921453ecba70f30c4b3015f5b03d260bfad891a276e3ae9c5"
+          }
+        ],
+        "status": "nominal_pair_ready"
+      },
+      "recipe_family": "fighter",
+      "recipe_id": "f16-maneuver-trim-evidence-v1",
+      "recipe_priority": 3,
+      "supplemental_evidence": [
+        {
+          "path": "verification/alpha3_f16_direct_wrench/manifest.json",
+          "sha256": "8cbbc56432f858d677f7cacf9b25622a9e37e811d499f5b8a5a7d6ed6aef5033"
+        },
+        {
+          "path": "artifacts/showcases/f16-s119-racetrack-fidelity-ladder/6dof-direct-wrench/evidence.json",
+          "sha256": "a8c86d6ea28e25a1542384bfd41238e848056e9d24d50273283cc5c595d5df6b"
+        }
+      ]
+    },
+    {
+      "auxiliary_evidence": null,
+      "board": {
+        "path": "verification/x15_fidelity_ladder/x15_fidelity_evidence_board.png",
+        "sha256": "6ff4f73f7f79726fa2332f85e7017259f17d4c4d1105ef13a4180050b421ee82"
+      },
+      "claim_boundary": "Independently evaluated staged X-15 event/energy/impact witness only; no controlled terminal handoff, native batch-provider equivalence, or physical-effector allocation.",
+      "cross_fidelity_status": "pass",
+      "family_id": "x15",
+      "paired_fidelity": {
+        "mission_pass": true,
+        "records": [
+          {
+            "artifact": "verification/x15_fidelity_ladder/point_mass_3dof_evidence.json",
+            "fidelity": "point_mass_3dof",
+            "sha256": "cc8d8dd17898858598c9971777ab11db18c529b2ff273c2dbb57b21d55fdb1dd"
+          },
+          {
+            "artifact": "verification/x15_fidelity_ladder/pseudo_6dof_evidence.json",
+            "fidelity": "pseudo_6dof",
+            "sha256": "520195cfb3ed267e0f370c5e8d4f13de1f67fffda37a2e600d45cb03d2c39601"
+          }
+        ],
+        "status": "nominal_pair_ready"
+      },
+      "recipe_family": "rocket_glide",
+      "recipe_id": "x15-boost-glide-storyboard-v1",
+      "recipe_priority": 2,
+      "supplemental_evidence": [
+        {
+          "path": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+          "sha256": "a158accdf9f423ebebe7cedec6d668c60a6d4f2ecd82b9ee3582a99d479e695c"
+        },
+        {
+          "path": "verification/alpha3_x15_direct_wrench/manifest.json",
+          "sha256": "6529095ed2e083f9ad0b328e4d85839ad0fdba7f7fb67b54b92e145181f06545"
+        }
+      ]
+    },
+    {
+      "auxiliary_evidence": {
+        "path": "verification/alpha3_hummingbird_directional/manifest.json",
+        "sha256": "dcdd783f072c625a91aab1697622299572cc8e3a6f6036210adaf0f4652e4c00"
+      },
+      "board": {
+        "path": "verification/alpha3_hummingbird_directional/directional_translation_evidence_board.png",
+        "sha256": "8f45d5309e0a46e64f46892b8d083970cae28ce233f7d6443739cd339ef1b56a"
+      },
+      "claim_boundary": "Independent point-mass translational force model for the declared hover-box, disturbance, contact, and shutdown mission; yaw, attitude, and motor allocation are not represented.",
+      "cross_fidelity_status": "pass",
+      "family_id": "hummingbird",
+      "paired_fidelity": {
+        "mission_pass": true,
+        "records": [
+          {
+            "artifact": "verification/alpha3_hummingbird_development/point_mass_3dof_evidence.json",
+            "fidelity": "point_mass_3dof",
+            "sha256": "71a67b5b097a45eb9b8827aae772cab88e01985cb6b99c2ffad735c09658d45e"
+          },
+          {
+            "artifact": "verification/alpha3_hummingbird_development/pseudo_6dof_evidence.json",
+            "fidelity": "pseudo_6dof",
+            "sha256": "f3f9e3f230027a79f7ca1f0026d90b1997028d3b26ed4f66e27df1e4195702a5"
+          }
+        ],
+        "status": "nominal_pair_ready"
+      },
+      "recipe_family": "multirotor",
+      "recipe_id": "hummingbird-multirotor-hover-yaw-contact-v1",
+      "recipe_priority": 9,
+      "supplemental_evidence": [
+        {
+          "path": "verification/alpha3_hummingbird_native_horizontal/manifest.json",
+          "sha256": "d7448d3c871a1d1a69c0b2f863a90be3185e7cc6db9d3b3fc94c427e0aa98c94"
+        },
+        {
+          "path": "verification/alpha3_hummingbird_native_vertical/manifest.json",
+          "sha256": "e7470a043f2ed6ec558ed41fbb3d614ef5df58489bca7f508499fc06c1551442"
+        },
+        {
+          "path": "verification/alpha3_hummingbird_native_pad_to_pad/hummingbird-pad-to-pad-altitude-yaw-individual-rotor-v1/summary.json",
+          "sha256": "27c27c158b76d0328540a71277aeabfeed0ff83e52c54342114cb952272d3c69"
+        },
+        {
+          "path": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+          "sha256": "a158accdf9f423ebebe7cedec6d668c60a6d4f2ecd82b9ee3582a99d479e695c"
+        }
+      ]
+    },
+    {
+      "auxiliary_evidence": null,
+      "board": {
+        "path": "verification/alpha3_hl20_fidelity/composites/hl20-ca-hi-flight-composite.png",
+        "sha256": "bf3caab7c92fce76eece983cfee27c7078c2d8d197ce814c256f2a52f23918cb"
+      },
+      "claim_boundary": "Source-geometry/fixed-mass reduced release, glide, and impact witness with synthetic booster and surrogate aerodynamics; no source-exact DAVE-ML flight dynamics or closed-loop controls.",
+      "cross_fidelity_status": "pass",
+      "family_id": "hl20_mod_k",
+      "paired_fidelity": {
+        "mission_pass": true,
+        "records": [
+          {
+            "artifact": "verification/alpha3_hl20_development/point_mass_3dof_evidence.json",
+            "fidelity": "point_mass_3dof",
+            "sha256": "035045ea7a6defe7b1b4d39f85b0cd3967f691a808a08b1b743a2928b31946a0"
+          },
+          {
+            "artifact": "verification/alpha3_hl20_development/pseudo_6dof_evidence.json",
+            "fidelity": "pseudo_6dof",
+            "sha256": "193724b5cc224a226475e43164401a7615bd97f789404f9a04bda55b999e6683"
+          }
+        ],
+        "status": "nominal_pair_ready"
+      },
+      "recipe_family": "glide_vehicle",
+      "recipe_id": "hl20-glide-entry-evidence-v1",
+      "recipe_priority": 4,
+      "supplemental_evidence": [
+        {
+          "path": "verification/alpha3_hl20_direct_wrench/manifest.json",
+          "sha256": "0c8ee4fd54abc44b54870b0058f05cabb2a9a0fb1f9345676d6dc566e5ab9919"
+        },
+        {
+          "path": "verification/alpha3_hl20_source_allocation/manifest.json",
+          "sha256": "b60239a834ab680098ae2465068496ab8ff1807de2883b7f32f3875544edb238"
+        },
+        {
+          "path": "verification/alpha3_hl20_source_surface_replay/manifest.json",
+          "sha256": "59553dd8e23775b01f8848ca08bb7811eed867f3a94ae034137f0c2cc81e896f"
+        },
+        {
+          "path": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+          "sha256": "a158accdf9f423ebebe7cedec6d668c60a6d4f2ecd82b9ee3582a99d479e695c"
+        }
+      ]
+    },
+    {
+      "auxiliary_evidence": null,
+      "board": {
+        "path": "artifacts/showcases/daveml-families/nesc-two-stage-launch-lineage-v1/evidence-board.png",
+        "sha256": "4b5c534521c0e4f8ce793f6c8fa413070707939e7ae70e2e992a1bf5a44a1d1e"
+      },
+      "claim_boundary": "Retained NESC source translation, stage timing, mass-flow replay, and orbit-coast terminal state; no source attitude or gimbal claim.",
+      "cross_fidelity_status": "pass",
+      "family_id": "reference_nesc_two_stage_rocket",
+      "paired_fidelity": {
+        "mission_pass": true,
+        "records": [
+          {
+            "artifact": "verification/alpha3_nesc_development/point_mass_3dof_evidence.json",
+            "fidelity": "point_mass_3dof",
+            "sha256": "b0ed03c9a2179335ea4e974fc79c44aab98d02533d8e1427bdd9cdcca580e418"
+          },
+          {
+            "artifact": "verification/alpha3_nesc_development/pseudo_6dof_evidence.json",
+            "fidelity": "pseudo_6dof",
+            "sha256": "d5fd995e8d7c7a0a1612434575e4004ca7423550bfaf9f69e80da2d3fd15f3ab"
+          }
+        ],
+        "status": "nominal_pair_ready"
+      },
+      "recipe_family": "staged_rocket",
+      "recipe_id": "nesc-two-stage-launch-lineage-v1",
+      "recipe_priority": 5,
+      "supplemental_evidence": [
+        {
+          "path": "verification/alpha3_regime_direct_wrench_readiness/manifest.json",
+          "sha256": "a158accdf9f423ebebe7cedec6d668c60a6d4f2ecd82b9ee3582a99d479e695c"
+        },
+        {
+          "path": "verification/alpha3_nesc_direct_wrench/manifest.json",
+          "sha256": "47310b73dc990b6bef8c580f7ab5eff96603b851680c49822973a065c97a8276"
+        }
+      ]
+    },
+    {
+      "auxiliary_evidence": null,
+      "board": {
+        "path": "verification/alpha3_tumbling_body/tumbling_body_fidelity_evidence_board.png",
+        "sha256": "baf30caaf3ce1e110cdc322d7214b46c4fd3dc747da38ce3623169af414fbb28"
+      },
+      "claim_boundary": "parent capability and source-exact passive-body aerodynamics remain outside this witness",
+      "cross_fidelity_status": "pass",
+      "family_id": "tumbling_body",
+      "paired_fidelity": {
+        "mission_pass": true,
+        "records": [
+          {
+            "artifact": "verification/alpha3_tumbling_body/fidelity_ladder/point_mass_3dof_evidence.json",
+            "fidelity": "point_mass_3dof",
+            "sha256": "d23192fa4894984e149442938ed5a19a8de59e940d949723437556af631a0c77"
+          },
+          {
+            "artifact": "verification/alpha3_tumbling_body/fidelity_ladder/pseudo_6dof_evidence.json",
+            "fidelity": "pseudo_6dof",
+            "sha256": "de96c190af15fe317bf8b1463be91743045bebe7ea53c792b1edd7ac63730ce7"
+          }
+        ],
+        "status": "nominal_pair_ready"
+      },
+      "recipe_family": "passive_ballistic_body",
+      "recipe_id": "tumbling-body-passive-deployment-v1",
+      "recipe_priority": 10,
+      "supplemental_evidence": []
+    }
+  ],
+  "family_count": 9,
+  "paired_fidelity_count": 9,
+  "readiness": {
+    "path": "verification/alpha3_robustness_matrix/manifest.json",
+    "sha256": "08ec94683dd36ae05ec73d1d16d0a02a88be5e8252cbf6c4bc443d8fd9c5a4f5"
+  },
+  "reproduction": "PYTHONPATH=src python3 tools/validate_alpha3_showcase_catalog.py",
+  "schema": "taoryx.alpha3-showcase-catalog/v1alpha1",
+  "status": "development_catalog_verified"
+}

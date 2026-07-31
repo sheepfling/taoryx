@@ -1,0 +1,1194 @@
+{
+  "claim_boundary": "Four source-retrimmed local physical-effector nodes pass the declared perturbation matrix. The generic scheduled wrench-demand contract is exercised at adjacent midpoints and endpoint physical allocation probes, but no time-marching nonlinear continuous transition replay, statistical reliability, or full-envelope flight-control qualification is claimed. Actuator dynamics remain the declared engineering first-order overlay.",
+  "control_path": "source_trim -> source_linearization -> desired_wrench -> bounded_elevator_aileron_rudder_throttle -> source_nonlinear_plant",
+  "controller_profile": "state_and_wrench_balanced_q10_r0p01",
+  "direct_body_moment_injection": false,
+  "family_id": "reference_f16_s119",
+  "nodes": [
+    {
+      "altitude_m": 0.0,
+      "cases": {
+        "coupled_reversal": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 309.35565586425645,
+          "passed": true,
+          "perturbation": {
+            "q_rad_s": -0.0004,
+            "u_m_s": -0.1,
+            "w_m_s": -0.02
+          },
+          "recovery_ratio": 0.17969654590569403,
+          "saturation_fraction": 0.0
+        },
+        "lateral_coupled": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 363.26236053931865,
+          "passed": true,
+          "perturbation": {
+            "p_rad_s": 0.0002,
+            "r_rad_s": -0.0002,
+            "v_m_s": 0.1
+          },
+          "recovery_ratio": 0.020866126913188947,
+          "saturation_fraction": 0.0
+        },
+        "q_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 162.3225461400424,
+          "passed": true,
+          "perturbation": {
+            "q_rad_s": 0.0004
+          },
+          "recovery_ratio": 0.0009515757625376011,
+          "saturation_fraction": 0.0
+        },
+        "u_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 220.8866296978605,
+          "passed": true,
+          "perturbation": {
+            "u_m_s": 0.1
+          },
+          "recovery_ratio": 0.1967246462332011,
+          "saturation_fraction": 0.0
+        },
+        "w_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 57.51973428638044,
+          "passed": true,
+          "perturbation": {
+            "w_m_s": 0.02
+          },
+          "recovery_ratio": 0.0025296190375695927,
+          "saturation_fraction": 0.0
+        }
+      },
+      "condition_number": 1.0,
+      "controllable": true,
+      "derivative_consistent": true,
+      "effectiveness_rank": 4,
+      "failed_case_count": 0,
+      "mach": 0.447869133900138,
+      "maximum_real_pole": -0.3418599608884319,
+      "passed_case_count": 5,
+      "point_id": "f16-sea-level-152mps",
+      "trim_controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.7562951013162249,
+        "rudder_deg": 0.0,
+        "throttle_fraction": 0.0893225837337992
+      },
+      "trim_max_residual": 1.4686065696878359e-08,
+      "trim_scaled_residual_norm": 1.4686072993731055e-12,
+      "true_airspeed_m_s": 152.4
+    },
+    {
+      "altitude_m": 3000.0,
+      "cases": {
+        "coupled_reversal": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 308.3933759109575,
+          "passed": true,
+          "perturbation": {
+            "q_rad_s": -0.0004,
+            "u_m_s": -0.1,
+            "w_m_s": -0.02
+          },
+          "recovery_ratio": 0.1719572427756003,
+          "saturation_fraction": 0.0
+        },
+        "lateral_coupled": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 267.16796125281627,
+          "passed": true,
+          "perturbation": {
+            "p_rad_s": 0.0002,
+            "r_rad_s": -0.0002,
+            "v_m_s": 0.1
+          },
+          "recovery_ratio": 0.013524533959201324,
+          "saturation_fraction": 0.0
+        },
+        "q_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 177.32683759238628,
+          "passed": true,
+          "perturbation": {
+            "q_rad_s": 0.0004
+          },
+          "recovery_ratio": 0.0010465404154355773,
+          "saturation_fraction": 0.0
+        },
+        "u_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 232.69992119530713,
+          "passed": true,
+          "perturbation": {
+            "u_m_s": 0.1
+          },
+          "recovery_ratio": 0.18760668733727048,
+          "saturation_fraction": 0.0
+        },
+        "w_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 63.84528531996245,
+          "passed": true,
+          "perturbation": {
+            "w_m_s": 0.02
+          },
+          "recovery_ratio": 0.005912079974161353,
+          "saturation_fraction": 0.0
+        }
+      },
+      "condition_number": 1.0,
+      "controllable": true,
+      "derivative_consistent": true,
+      "effectiveness_rank": 4,
+      "failed_case_count": 0,
+      "mach": 0.4638309751317455,
+      "maximum_real_pole": -0.34092120984994667,
+      "passed_case_count": 5,
+      "point_id": "f16-3km-152mps",
+      "trim_controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.654255033838822,
+        "rudder_deg": 0.0,
+        "throttle_fraction": 0.10849099700806596
+      },
+      "trim_max_residual": 4.3655745685100555e-11,
+      "trim_scaled_residual_norm": 4.385684986630386e-15,
+      "true_airspeed_m_s": 152.4
+    },
+    {
+      "altitude_m": 6000.0,
+      "cases": {
+        "coupled_reversal": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 322.77025020645385,
+          "passed": true,
+          "perturbation": {
+            "q_rad_s": -0.0004,
+            "u_m_s": -0.1,
+            "w_m_s": -0.02
+          },
+          "recovery_ratio": 0.1715782036023152,
+          "saturation_fraction": 0.0
+        },
+        "lateral_coupled": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 226.49004252564706,
+          "passed": true,
+          "perturbation": {
+            "p_rad_s": 0.0002,
+            "r_rad_s": -0.0002,
+            "v_m_s": 0.1
+          },
+          "recovery_ratio": 0.008640009459374345,
+          "saturation_fraction": 0.0
+        },
+        "q_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 188.48946624542816,
+          "passed": true,
+          "perturbation": {
+            "q_rad_s": 0.0004
+          },
+          "recovery_ratio": 0.0013681759330637882,
+          "saturation_fraction": 0.0
+        },
+        "u_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 231.4738663121807,
+          "passed": true,
+          "perturbation": {
+            "u_m_s": 0.1
+          },
+          "recovery_ratio": 0.1864644826965822,
+          "saturation_fraction": 0.0
+        },
+        "w_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 63.81423484649493,
+          "passed": true,
+          "perturbation": {
+            "w_m_s": 0.02
+          },
+          "recovery_ratio": 0.010205348122024708,
+          "saturation_fraction": 0.0
+        }
+      },
+      "condition_number": 1.0,
+      "controllable": true,
+      "derivative_consistent": true,
+      "effectiveness_rank": 4,
+      "failed_case_count": 0,
+      "mach": 0.4816125042077692,
+      "maximum_real_pole": -0.34051841282024414,
+      "passed_case_count": 5,
+      "point_id": "f16-6km-152mps",
+      "trim_controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.5258694697396235,
+        "rudder_deg": 0.0,
+        "throttle_fraction": 0.14265717048794324
+      },
+      "trim_max_residual": 4.0070965516103775e-05,
+      "trim_scaled_residual_norm": 5.323637782159201e-10,
+      "true_airspeed_m_s": 152.4
+    },
+    {
+      "altitude_m": 9000.0,
+      "cases": {
+        "coupled_reversal": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 308.22150170165986,
+          "passed": true,
+          "perturbation": {
+            "q_rad_s": -0.0004,
+            "u_m_s": -0.1,
+            "w_m_s": -0.02
+          },
+          "recovery_ratio": 0.16532154117671563,
+          "saturation_fraction": 0.0
+        },
+        "lateral_coupled": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 298.9971792136463,
+          "passed": true,
+          "perturbation": {
+            "p_rad_s": 0.0002,
+            "r_rad_s": -0.0002,
+            "v_m_s": 0.1
+          },
+          "recovery_ratio": 0.005469402710863235,
+          "saturation_fraction": 0.0
+        },
+        "q_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 197.4697879733373,
+          "passed": true,
+          "perturbation": {
+            "q_rad_s": 0.0004
+          },
+          "recovery_ratio": 0.0013733991418832258,
+          "saturation_fraction": 0.0
+        },
+        "u_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 246.6193849916352,
+          "passed": true,
+          "perturbation": {
+            "u_m_s": 0.1
+          },
+          "recovery_ratio": 0.17789226820248,
+          "saturation_fraction": 0.0
+        },
+        "w_plus": {
+          "allocation_statuses": [
+            "feasible"
+          ],
+          "maximum_continuous_saturation_duration_s": 0.0,
+          "maximum_controlled_actual_residual": 71.3049543474714,
+          "passed": true,
+          "perturbation": {
+            "w_m_s": 0.02
+          },
+          "recovery_ratio": 0.018788227189458353,
+          "saturation_fraction": 0.0
+        }
+      },
+      "condition_number": 1.0,
+      "controllable": true,
+      "derivative_consistent": true,
+      "effectiveness_rank": 4,
+      "failed_case_count": 0,
+      "mach": 0.5015898652849708,
+      "maximum_real_pole": -0.3382379211617559,
+      "passed_case_count": 5,
+      "point_id": "f16-9km-152mps",
+      "trim_controls": {
+        "aileron_deg": 0.0,
+        "elevator_deg": -0.5803189815591208,
+        "rudder_deg": 0.0,
+        "throttle_fraction": 0.21546885539596738
+      },
+      "trim_max_residual": 8.731149137020111e-11,
+      "trim_scaled_residual_norm": 8.893474105725024e-15,
+      "true_airspeed_m_s": 152.4
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_f16_physical_schedule.py",
+  "schedule_contract": {
+    "node_ids": [
+      "f16-sea-level-152mps",
+      "f16-3km-152mps",
+      "f16-6km-152mps",
+      "f16-9km-152mps"
+    ],
+    "runtime_gain_interpolation": "generic_command_contract_exercised",
+    "same_local_perturbation_matrix_at_each_node": true,
+    "transition_evidence": "adjacent gain comparison plus endpoint physical-allocation probes; time-marching nonlinear transition replay pending"
+  },
+  "schema": "taoryx.f16-physical-effector-schedule/v1alpha1",
+  "status": "F16_physical_effector_schedule_nodes_complete",
+  "summary": {
+    "case_count": 20,
+    "failed_case_count": 0,
+    "maximum_real_pole": -0.3382379211617559,
+    "maximum_trim_residual": 4.0070965516103775e-05,
+    "minimum_effectiveness_rank": 4,
+    "node_count": 4,
+    "passed_case_count": 20,
+    "passed_node_count": 4,
+    "transition_probe_count": 15,
+    "transition_probe_failed_count": 0,
+    "transition_probe_passed_count": 15
+  },
+  "transition_allocation_probes": [
+    {
+      "failed_probe_count": 0,
+      "from_point": "f16-sea-level-152mps",
+      "passed_probe_count": 5,
+      "probe_count": 5,
+      "probes": [
+        {
+          "command": {
+            "coordinate": 0.0,
+            "interpolation_fraction": 0.0,
+            "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 3413.4301824684226,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 1.601852875872411e-11,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-sea-level-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 0.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 0.0,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.7562951013162249,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.0893225837337992
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 960.892642385971,
+              "actual_effectors": {
+                "aileron_deg": -8.902291807790311e-17,
+                "elevator_deg": -0.6768262168601521,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.10675462441660877
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.0,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 750.0,
+            "interpolation_fraction": 0.25,
+            "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 3908.367980350727,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 1.7754981772083049e-12,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-3km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 750.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 266.9889017728034,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.7506615979917131,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.08943140566159379
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 720.8887327940528,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.6711927135356608,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.10718671509440138
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.25,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 1500.0,
+            "interpolation_fraction": 0.5,
+            "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 4403.305778233032,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -1.2467532404307502e-11,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-3km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 1500.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 534.0762602097085,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.7450216843400376,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.08954178105626842
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 480.73982998200376,
+              "actual_effectors": {
+                "aileron_deg": -8.902291807790311e-17,
+                "elevator_deg": -0.6655527998839762,
+                "rudder_deg": -4.3623853625117627e-32,
+                "throttle_fraction": 0.1076202133379379
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.5,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 2250.0,
+            "interpolation_fraction": 0.75,
+            "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 4898.243576115336,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -2.6710562985823306e-11,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-3km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 2250.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 801.2846945357165,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.7393756830669109,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.0896536083415089
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 240.44415379156865,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.6599067986108502,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.10805501028298388
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.75,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 3000.0,
+            "interpolation_fraction": 1.0,
+            "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 5393.181373997641,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -4.0953593567339114e-11,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-3km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 3000.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 1068.6366756620125,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.7337239182948879,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.08976678589233292
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 9.094947017729282e-13,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.654255033838822,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.10849099700806594
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 1.0,
+          "passed": true
+        }
+      ],
+      "to_point": "f16-3km-152mps"
+    },
+    {
+      "failed_probe_count": 0,
+      "from_point": "f16-3km-152mps",
+      "passed_probe_count": 5,
+      "probe_count": 5,
+      "probes": [
+        {
+          "command": {
+            "coordinate": 3000.0,
+            "interpolation_fraction": 1.0,
+            "lower_node": "f16.physical_schedule.f16-sea-level-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 5393.181373997641,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -4.0953593567339114e-11,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-3km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 3000.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 9.094947017729282e-13,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.654255033838822,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.10849099700806594
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 1292.802514692381,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5542682559833089,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.1377423521818845
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.0,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 3750.0,
+            "interpolation_fraction": 0.25,
+            "lower_node": "f16.physical_schedule.f16-3km-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 6113.816262535471,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -1.0017772094221119e-05,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-6km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 3750.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 349.3250556008949,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.6460015550373815,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.10912016955138697
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 926.7119178737241,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5460147770960763,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.13911424672678616
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.25,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 4500.0,
+            "interpolation_fraction": 0.5,
+            "lower_node": "f16.physical_schedule.f16-3km-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 6834.451151073302,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -2.003550323484867e-05,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-6km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 4500.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 698.9639193948893,
+              "actual_effectors": {
+                "aileron_deg": -9.209267387369288e-17,
+                "elevator_deg": -0.6377340177090385,
+                "rudder_deg": 1.0320192866216677e-32,
+                "throttle_fraction": 0.10975189593470086
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 560.4591310243887,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5377472396817986,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.14048893165726384
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.5,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 5250.0,
+            "interpolation_fraction": 0.75,
+            "lower_node": "f16.physical_schedule.f16-3km-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 7555.086039611133,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -3.0053234375476226e-05,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-6km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 5250.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 1048.9222546034712,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.6294534271397633,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.11038583915630691
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 194.6764857907971,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5294666490264783,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.14186599136775285
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.75,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 6000.0,
+            "interpolation_fraction": 1.0,
+            "lower_node": "f16.physical_schedule.f16-3km-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 8275.720928148963,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -4.0070965516103775e-05,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-6km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 6000.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 1165.256089763497,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.625856247938804,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.11045464359233906
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 0.0,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5258694697396235,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.14265717048794324
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 1.0,
+          "passed": true
+        }
+      ],
+      "to_point": "f16-6km-152mps"
+    },
+    {
+      "failed_probe_count": 0,
+      "from_point": "f16-6km-152mps",
+      "passed_probe_count": 5,
+      "probe_count": 5,
+      "probes": [
+        {
+          "command": {
+            "coordinate": 6000.0,
+            "interpolation_fraction": 1.0,
+            "lower_node": "f16.physical_schedule.f16-3km-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 8275.720928148963,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -4.0070965516103775e-05,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-6km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 6000.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 0.0,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5258694697396235,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.14265717048794324
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 1069.9944793268157,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5682747916641204,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.20716295796339107
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.0,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 6750.0,
+            "interpolation_fraction": 0.25,
+            "lower_node": "f16.physical_schedule.f16-6km-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 9359.676759802529,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -3.0053234768729622e-05,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-9km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 6750.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 78.22089085753213,
+              "actual_effectors": {
+                "aileron_deg": -1.227902318315905e-16,
+                "elevator_deg": -0.5288908395725489,
+                "rudder_deg": 5.894875504339619e-33,
+                "throttle_fraction": 0.14277226652110184
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 802.4598004589814,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5712961616269336,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.2092394860573023
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.25,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 7500.0,
+            "interpolation_fraction": 0.5,
+            "lower_node": "f16.physical_schedule.f16-6km-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 10443.632591456097,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -2.003550402135547e-05,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-9km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 7500.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 156.59150148363793,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5319058870789664,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.1428896371989729
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 534.7353618134091,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.57431120926312,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.21131800611400625
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.5,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 8250.0,
+            "interpolation_fraction": 0.75,
+            "lower_node": "f16.physical_schedule.f16-6km-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 11527.588423109664,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -1.0017773273981313e-05,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-9km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 8250.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 235.0244053041061,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.534913771238713,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.14300706745755828
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 267.1418571553686,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5773190935524054,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.21339547650195478
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 0.75,
+          "passed": true
+        },
+        {
+          "command": {
+            "coordinate": 9000.0,
+            "interpolation_fraction": 0.0,
+            "lower_node": "f16.physical_schedule.f16-9km-152mps",
+            "requested_wrench": {
+              "total_force_x_n": 12611.54425476323,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": -4.25266071586574e-11,
+              "total_moment_z_nm": 0.0
+            },
+            "upper_node": "f16.physical_schedule.f16-9km-152mps",
+            "wrench_increment": {
+              "total_force_x_n": 0.0,
+              "total_moment_x_nm": 0.0,
+              "total_moment_y_nm": 0.0,
+              "total_moment_z_nm": 0.0
+            }
+          },
+          "coordinate_m": 9000.0,
+          "endpoint_allocations": {
+            "lower": {
+              "achieved_controlled_residual_norm": 313.42960031817796,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5379136591162379,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.1431223412722851
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            },
+            "upper": {
+              "achieved_controlled_residual_norm": 1.8189894035458565e-12,
+              "actual_effectors": {
+                "aileron_deg": 0.0,
+                "elevator_deg": -0.5803189815591208,
+                "rudder_deg": 0.0,
+                "throttle_fraction": 0.21546885539596736
+              },
+              "position_saturated": [],
+              "rate_limited": [],
+              "status": "feasible"
+            }
+          },
+          "interpolation_fraction": 1.0,
+          "passed": true
+        }
+      ],
+      "to_point": "f16-9km-152mps"
+    }
+  ],
+  "transitions": [
+    {
+      "from_point": "f16-sea-level-152mps",
+      "midpoint_command_finite": true,
+      "midpoint_interpolation_fraction": 0.5,
+      "normalized_gain_delta_frobenius": 0.0347155511159154,
+      "to_point": "f16-3km-152mps",
+      "transition_evidence": "generic_interpolated_wrench_command"
+    },
+    {
+      "from_point": "f16-3km-152mps",
+      "midpoint_command_finite": true,
+      "midpoint_interpolation_fraction": 0.5,
+      "normalized_gain_delta_frobenius": 0.026864768107769985,
+      "to_point": "f16-6km-152mps",
+      "transition_evidence": "generic_interpolated_wrench_command"
+    },
+    {
+      "from_point": "f16-6km-152mps",
+      "midpoint_command_finite": true,
+      "midpoint_interpolation_fraction": 0.5,
+      "normalized_gain_delta_frobenius": 0.023617754161605976,
+      "to_point": "f16-9km-152mps",
+      "transition_evidence": "generic_interpolated_wrench_command"
+    }
+  ]
+}

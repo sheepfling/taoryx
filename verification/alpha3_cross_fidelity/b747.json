@@ -1,0 +1,59 @@
+{
+  "comparison_artifact": "verification/alpha3_family_qualification/b747-racetrack-altitude-turns-pseudo-6dof-v1/summary.json",
+  "comparison_fidelity": "pseudo_6dof",
+  "comparison_status": "pass",
+  "control_realization": {
+    "comparison": "{'actuator_realization': 'prescribed_attitude_lag_no_surface_claim', 'force_source': 'source_table', 'moment_source': 'not_applicable_kinematic_bridge', 'note': 'The bridge supplies quaternion and body-rate response independently of the point-mass translation. It is a named pseudo-6DOF realization, not a physical B747 surface or moment qualification.', 'propulsion_model': 'source_table_thrust', 'resource_model': 'fixed_mass_zero_propellant', 'response_law': 'first-order-rate-limited-v1', 'response_profile_id': 'b747.attitude_response_p6dof.v1'}",
+    "reference": "{'actuator_realization': 'kinematic_route_command_no_surface_claim', 'force_source': 'source_table', 'moment_source': 'not_applicable_point_mass_3dof', 'note': 'This is the first scaled realization of the shared powered-fixed-wing template. The point-mass adapter commands speed, heading, and flight-path angle from the racetrack tangent and bounded position/ altitude corrections; it does not create attitude or surface telemetry.', 'propulsion_model': 'source_table_thrust', 'resource_model': 'fixed_mass_zero_propellant'}"
+  },
+  "family_id": "b747",
+  "interpretation": "The report measures semantic agreement, event-time deltas, and available objective margins. It does not rank fidelities or imply that absent physical effectors exist.",
+  "mission_result": {
+    "agreement": true,
+    "comparison_pass": true,
+    "reference_pass": true
+  },
+  "mission_semantics": {
+    "common_objective_ids": [
+      "high-altitude-level-gate",
+      "left-turn-exit-gate",
+      "low-altitude-level-gate",
+      "terminal-contract"
+    ],
+    "objective_sequence_preserved": true,
+    "unmatched_objective_ids": []
+  },
+  "objective_deltas": [
+    {
+      "id": "high-altitude-level-gate",
+      "left_result": "pass",
+      "margin_delta": 0.0,
+      "right_result": "pass",
+      "truth_time_delta_s": 0.0
+    },
+    {
+      "id": "left-turn-exit-gate",
+      "left_result": "pass",
+      "margin_delta": 0.0,
+      "right_result": "pass",
+      "truth_time_delta_s": 0.0
+    },
+    {
+      "id": "low-altitude-level-gate",
+      "left_result": "pass",
+      "margin_delta": 0.0,
+      "right_result": "pass",
+      "truth_time_delta_s": 0.0
+    },
+    {
+      "id": "terminal-contract",
+      "left_result": "pass",
+      "margin_delta": 0.0,
+      "right_result": "pass",
+      "truth_time_delta_s": 0.0
+    }
+  ],
+  "reference_artifact": "verification/alpha3_family_qualification/b747-racetrack-altitude-turns-3dof-v1/summary.json",
+  "reference_fidelity": "point_mass_3dof",
+  "schema": "taoryx.alpha3-cross-fidelity-comparison/v1alpha1"
+}

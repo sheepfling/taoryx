@@ -1,0 +1,49 @@
+{
+  "dpi": 140,
+  "omitted": [
+    {
+      "channel": "taos.altitude_m",
+      "reason": "channel unavailable",
+      "vehicle": "1"
+    },
+    {
+      "channel": "taos.speed_m_s",
+      "reason": "channel unavailable",
+      "vehicle": "1"
+    },
+    {
+      "channel": "taos.local_roll_deg",
+      "reason": "channel unavailable",
+      "vehicle": "1"
+    },
+    {
+      "channel": "taos.local_pitch_deg",
+      "reason": "channel unavailable",
+      "vehicle": "1"
+    },
+    {
+      "channel": "taos.local_heading_deg",
+      "reason": "channel unavailable",
+      "vehicle": "1"
+    },
+    {
+      "channel": "taos.route_cross_track_error_m",
+      "reason": "channel unavailable",
+      "vehicle": "1"
+    },
+    {
+      "channel": "taos.translation_equation_residual_normalized",
+      "reason": "channel unavailable",
+      "vehicle": "1"
+    },
+    {
+      "channel": "taos.rotation_equation_residual_normalized",
+      "reason": "channel unavailable",
+      "vehicle": "1"
+    }
+  ],
+  "plots": [],
+  "renderer": "taoryx.visualization.render_run_artifact_plots",
+  "scenario_identity": null,
+  "schema_version": 1
+}

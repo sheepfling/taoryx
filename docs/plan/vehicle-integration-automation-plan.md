@@ -236,7 +236,8 @@ Exit criteria:
 
 - a physical-effector tier cannot run without actual effector state reaching
   the nonlinear plant;
-- direct-wrench results are automatically labeled screen-only;
+- direct-wrench results are automatically labeled as the integrated bridge
+  tier, separate from physical-effector allocation;
 - effectivity and actuator assumptions appear in the evidence manifest;
 - infeasible demands become structured results, never silent clipping.
 

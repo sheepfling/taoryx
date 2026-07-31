@@ -1,0 +1,508 @@
+{
+  "boundary_failure_count": 1,
+  "case_count": 4,
+  "cases": [
+    {
+      "artifact": "verification/alpha3_hummingbird_physical_r1/nominal_hover_attitude_rate/metrics.json",
+      "boundary_witness": false,
+      "case_id": "nominal_hover_attitude_rate",
+      "description": "declared local hover attitude/rate witness",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "final_controlled_actual_residual_nm": 6.307797301798502e-17,
+        "final_feedback_error_fraction": 6.560905760390108e-14,
+        "maximum_continuous_saturation_duration_s": 0.0,
+        "mission_pass": true,
+        "samples": 2000,
+        "saturation_fraction": 0.0
+      },
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_physical_r1/yaw_reverse/metrics.json",
+      "boundary_witness": false,
+      "case_id": "yaw_reverse",
+      "description": "opposite-sign yaw and yaw-rate recovery witness",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "final_controlled_actual_residual_nm": 1.471344797011953e-16,
+        "final_feedback_error_fraction": 1.0957013391476961e-13,
+        "maximum_continuous_saturation_duration_s": 0.0,
+        "mission_pass": true,
+        "samples": 2000,
+        "saturation_fraction": 0.0
+      },
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_physical_r1/coupled_rate_plus/metrics.json",
+      "boundary_witness": false,
+      "case_id": "coupled_rate_plus",
+      "description": "larger coupled attitude/rate interior witness",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "final_controlled_actual_residual_nm": 2.4445240294174004e-16,
+        "final_feedback_error_fraction": 6.258475556179259e-14,
+        "maximum_continuous_saturation_duration_s": 0.0,
+        "mission_pass": true,
+        "samples": 2000,
+        "saturation_fraction": 0.0
+      },
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_physical_r1/rotor_authority_boundary/metrics.json",
+      "boundary_witness": true,
+      "case_id": "rotor_authority_boundary",
+      "description": "large coupled demand retained as an individual-rotor authority boundary",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible",
+          "infeasible",
+          "partially_achievable"
+        ],
+        "final_controlled_actual_residual_nm": 4.610746829209684e-16,
+        "final_feedback_error_fraction": 6.083164314875212e-14,
+        "maximum_continuous_saturation_duration_s": 0.024,
+        "mission_pass": false,
+        "samples": 2000,
+        "saturation_fraction": 0.006
+      },
+      "mission_pass": false
+    }
+  ],
+  "claim": "Fixed local Hummingbird individual-rotor allocation evidence around the RotorPy-derived hover trim.",
+  "claim_boundary": "This is local hover physical-effector evidence. It does not establish translated flight, landing contact, battery discharge, blade-resolved aerodynamics, wind robustness, statistical reliability, or full-envelope multirotor qualification.",
+  "control_path": "attitude/rate error -> plant-derived LQR -> desired body moments -> bounded four-rotor speed allocation -> motor lag -> nonlinear rigid-body plant",
+  "direct_body_moment_injection": false,
+  "effectors": [
+    "rotor-1-speed",
+    "rotor-2-speed",
+    "rotor-3-speed",
+    "rotor-4-speed"
+  ],
+  "failed_case_count": 1,
+  "passed_case_count": 3,
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hummingbird_physical_r1_matrix.py",
+  "schema": "taoryx.hummingbird-physical-r1-matrix/v1alpha1",
+  "selected_design": {
+    "closed_loop_poles": [
+      {
+        "imaginary": 0.0,
+        "real": -13.90899771985979
+      },
+      {
+        "imaginary": 0.0,
+        "real": -50.471815851056995
+      },
+      {
+        "imaginary": 0.0,
+        "real": -50.02634464782704
+      },
+      {
+        "imaginary": 0.0,
+        "real": -13.918455356851254
+      },
+      {
+        "imaginary": 4.436252519994983,
+        "real": -8.138189307709627
+      },
+      {
+        "imaginary": -4.436252519994983,
+        "real": -8.138189307709627
+      }
+    ],
+    "condition_number": 1.0,
+    "controllable": true,
+    "gain": [
+      [
+        2.562345156301838,
+        9.859730133419567e-17,
+        -2.855188571106762e-17,
+        0.228701883237192,
+        1.2744609367322265e-17,
+        -2.4061343981070265e-18
+      ],
+      [
+        1.1276564285069228e-16,
+        2.5623451563018333,
+        3.024214737906606e-16,
+        1.3813036335939435e-17,
+        0.22902877772055927,
+        -3.429406751701094e-17
+      ],
+      [
+        3.467765763852549e-17,
+        -5.863789860762385e-16,
+        0.6039505452538434,
+        2.426734429372713e-18,
+        -1.7126470067598916e-17,
+        0.10797223244822156
+      ]
+    ],
+    "id": "hummingbird-source-hover-attitude-rate-wrench-lqr-v1",
+    "matrix_sha256": {
+      "a": "5dc7a7cea45e3dbe997ce9f86b2f120c699b6055a2d979c2671d9ee060815895",
+      "b": "f46f59942e67c011642bdde57f241f382ed086449cef30a68ab38759d7165045",
+      "k": "c2874cc78766719c2dc6c5ab75e57ce16b48b59ab33a1f463d08b14f0c690a04",
+      "q": "fea75c30ef2213e3301c9571202e755387505cbe479fdba573a79f3ace1cacd0",
+      "r": "d3e421ca28623419fd77ba14a5bd05eceaa199880938faa436d9b5ab7cd0f8d0"
+    },
+    "maximum_real_pole": -8.138189307709627,
+    "projection": {
+      "a_matrix": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          6.469348003035847e-48,
+          -2.5434913019383115e-24
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          2.5434913019383115e-24
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -2.5434913019383115e-24,
+          1.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          -1.7227633689472455,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.7087191023525672,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.9175973283322
+        ]
+      ],
+      "b_matrix": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          273.97260273972233,
+          4.236120948435252e-15,
+          1.3452529880460008e-14
+        ],
+        [
+          2.8276987524654286e-15,
+          271.739130434782,
+          -5.747055114779978e-14
+        ],
+        [
+          1.734642711116753e-16,
+          1.3315287227214889e-15,
+          142.24751066856385
+        ]
+      ],
+      "effectiveness_matrix": [
+        [
+          -0.0006279452568021676,
+          0.0006279452568021676,
+          0.0006279452568021676,
+          -0.0006279452568021676
+        ],
+        [
+          0.0006279452568021537,
+          0.0006279452568021537,
+          -0.0006279452568021676,
+          -0.0006279452568021676
+        ],
+        [
+          0.00012754738938565262,
+          -0.00012754738938565262,
+          0.00012754738938565262,
+          -0.00012754738938565262
+        ]
+      ],
+      "effector_increment_per_wrench": [
+        [
+          -398.12387671042126,
+          398.1238767104212,
+          1960.0557973327025
+        ],
+        [
+          398.12387671042126,
+          398.1238767104212,
+          -1960.055797332703
+        ],
+        [
+          398.12387671042126,
+          -398.1238767104301,
+          1960.055797332703
+        ],
+        [
+          -398.12387671042126,
+          -398.1238767104302,
+          -1960.055797332703
+        ]
+      ],
+      "effector_names": [
+        "rotor-1-speed",
+        "rotor-2-speed",
+        "rotor-3-speed",
+        "rotor-4-speed"
+      ],
+      "inverse_residual_norm": 2.764177608660687e-16,
+      "nominal_wrench": {
+        "moment_x_nm": 0.0,
+        "moment_y_nm": 0.0,
+        "moment_z_nm": 0.0
+      },
+      "source_derivative_provenance": {
+        "comparison_absolute_floor": 1e-07,
+        "derivative_consistent": true,
+        "maximum_absolute_difference": 1.000000082740371e-06,
+        "maximum_relative_difference": 1.148995680696723e-06,
+        "method": "centered-finite-difference",
+        "nonlinear_plant_id": "hummingbird-individual-rotor-source-plant",
+        "nonlinear_plant_revision": "rotorpy-hover-local-v1"
+      },
+      "state_names": [
+        "roll_error_rad",
+        "pitch_error_rad",
+        "yaw_error_rad",
+        "p_rad_s",
+        "q_rad_s",
+        "r_rad_s"
+      ],
+      "trim_effectors": {
+        "rotor-1-speed": 468.92422568254807,
+        "rotor-2-speed": 468.92422568254807,
+        "rotor-3-speed": 468.92422568254807,
+        "rotor-4-speed": 468.92422568254807
+      },
+      "trim_state": {
+        "p_rad_s": 0.0,
+        "pitch_error_rad": -2.5434913019383115e-24,
+        "q_rad_s": 0.0,
+        "r_rad_s": 0.0,
+        "roll_error_rad": -2.5434913019383115e-24,
+        "u_m_s": 0.0,
+        "v_m_s": 0.0,
+        "w_m_s": -3.5491997604294075e-12,
+        "yaw_error_rad": 0.0
+      },
+      "wrench_names": [
+        "moment_x_nm",
+        "moment_y_nm",
+        "moment_z_nm"
+      ]
+    },
+    "q_diagonal": [
+      20.0,
+      20.0,
+      10.0,
+      4.0,
+      4.0,
+      2.0
+    ],
+    "r_diagonal": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "state_scales": [
+      0.17453292519943295,
+      0.17453292519943295,
+      0.2617993877991494,
+      1.0471975511965976,
+      1.0471975511965976,
+      1.0471975511965976
+    ],
+    "wrench_scales": [
+      0.1,
+      0.1,
+      0.05
+    ]
+  },
+  "source_trim": {
+    "controls": {
+      "rotor-1-speed": 468.92422568254807,
+      "rotor-2-speed": 468.92422568254807,
+      "rotor-3-speed": 468.92422568254807,
+      "rotor-4-speed": 468.92422568254807
+    },
+    "cost": 2.6252467477653134e-26,
+    "diagnostics": [
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": -2.5434913019383115e-24
+        },
+        "field": "roll_error_rad",
+        "message": "trim solution for 'roll_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": -2.5434913019383115e-24
+        },
+        "field": "pitch_error_rad",
+        "message": "trim solution for 'pitch_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "yaw_error_rad",
+        "message": "trim solution for 'yaw_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "u_m_s",
+        "message": "trim solution for 'u_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "v_m_s",
+        "message": "trim solution for 'v_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": -3.5491997604294075e-12
+        },
+        "field": "w_m_s",
+        "message": "trim solution for 'w_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "p_rad_s",
+        "message": "trim solution for 'p_rad_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "q_rad_s",
+        "message": "trim solution for 'q_rad_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "r_rad_s",
+        "message": "trim solution for 'r_rad_s' is at a declared bound",
+        "severity": "warning"
+      }
+    ],
+    "iterations": 3,
+    "max_residual": 1.1235457009206584e-12,
+    "message": "`gtol` termination condition is satisfied.",
+    "operating_point": {},
+    "residuals": {
+      "body_x_force_n": 0.0,
+      "body_z_force_n": -1.1235457009206584e-12,
+      "pitch_moment_nm": 0.0,
+      "roll_moment_nm": 0.0,
+      "yaw_moment_nm": 0.0
+    },
+    "scaled_residual_norm": 2.2913955345008917e-13,
+    "state": {
+      "p_rad_s": 0.0,
+      "pitch_error_rad": -2.5434913019383115e-24,
+      "q_rad_s": 0.0,
+      "r_rad_s": 0.0,
+      "roll_error_rad": -2.5434913019383115e-24,
+      "u_m_s": 0.0,
+      "v_m_s": 0.0,
+      "w_m_s": -3.5491997604294075e-12,
+      "yaw_error_rad": 0.0
+    },
+    "status": 1,
+    "success": true
+  },
+  "status": "R1_physical_individual_rotor_matrix_complete",
+  "vehicle": "hummingbird"
+}

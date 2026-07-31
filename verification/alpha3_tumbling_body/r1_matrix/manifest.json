@@ -1,0 +1,263 @@
+{
+  "case_count": 8,
+  "claim": "Fixed passive shape and uncertainty evidence for averaged-area 3DOF and native rigid-body-reuse pseudo interfaces.",
+  "claim_boundary": "This is passive-body evidence, not controller robustness. The pseudo tier reuses native rigid-body equations; no prescribed tumble, control surface, wheel, thruster, or authority claim is introduced.",
+  "failed_case_count": 0,
+  "fidelities": [
+    "point_mass_3dof",
+    "pseudo_6dof"
+  ],
+  "passed_case_count": 8,
+  "records": [
+    {
+      "classification": "impact",
+      "fidelity": "point_mass_3dof",
+      "footprint_m": {
+        "crossrange": 0.0,
+        "downrange": 402.24235753127516,
+        "radius": 402.24235753127516
+      },
+      "shape": "sphere",
+      "source_artifact": "verification/alpha3_tumbling_body/qualification.json",
+      "terminal_state": {
+        "altitude_m": -6.682264490516889,
+        "mass_kg": 12.0,
+        "position_m": [
+          527.1386811389968,
+          0.0,
+          -6.682264490516889
+        ],
+        "speed_m_s": 34.871317696901166,
+        "velocity_m_s": [
+          0.015582141768748418,
+          0.0,
+          -34.87131421548477
+        ]
+      },
+      "truth_result": "PASS"
+    },
+    {
+      "classification": "impact",
+      "fidelity": "pseudo_6dof",
+      "footprint_m": {
+        "crossrange": 1.802841971003545e-15,
+        "downrange": 402.3730718888801,
+        "radius": 402.3730718888801
+      },
+      "shape": "sphere",
+      "source_artifact": "verification/alpha3_tumbling_body/qualification.json",
+      "terminal_state": {
+        "altitude_m": -6.676222139661744,
+        "mass_kg": 12.0,
+        "position_m": [
+          527.2693954966018,
+          1.802841971003545e-15,
+          -6.676222139661744
+        ],
+        "speed_m_s": 34.87130515473751,
+        "velocity_m_s": [
+          0.015582000633155126,
+          1.7035948269356683e-16,
+          -34.87130167338293
+        ]
+      },
+      "truth_result": "PASS"
+    },
+    {
+      "classification": "impact",
+      "fidelity": "point_mass_3dof",
+      "footprint_m": {
+        "crossrange": 0.0,
+        "downrange": 246.64849308954595,
+        "radius": 246.64849308954595
+      },
+      "shape": "cylinder",
+      "source_artifact": "verification/alpha3_tumbling_body/qualification.json",
+      "terminal_state": {
+        "altitude_m": -4.5051404484456645,
+        "mass_kg": 12.0,
+        "position_m": [
+          371.5448166972676,
+          0.0,
+          -4.5051404484456645
+        ],
+        "speed_m_s": 26.053394947143165,
+        "velocity_m_s": [
+          2.8676723632290673e-05,
+          0.0,
+          -26.053394947127384
+        ]
+      },
+      "truth_result": "PASS"
+    },
+    {
+      "classification": "impact",
+      "fidelity": "pseudo_6dof",
+      "footprint_m": {
+        "crossrange": 4.487497447445062e-15,
+        "downrange": 254.00653737100347,
+        "radius": 254.00653737100347
+      },
+      "shape": "cylinder",
+      "source_artifact": "verification/alpha3_tumbling_body/qualification.json",
+      "terminal_state": {
+        "altitude_m": -1.492960233625986,
+        "mass_kg": 12.0,
+        "position_m": [
+          378.90286097872513,
+          4.487497447445062e-15,
+          -1.492960233625986
+        ],
+        "speed_m_s": 38.50927057534172,
+        "velocity_m_s": [
+          0.00041674427638099256,
+          1.5064627785961859e-16,
+          -38.50927057308674
+        ]
+      },
+      "truth_result": "PASS"
+    },
+    {
+      "classification": "impact",
+      "fidelity": "point_mass_3dof",
+      "footprint_m": {
+        "crossrange": 0.0,
+        "downrange": 343.024331060564,
+        "radius": 343.024331060564
+      },
+      "shape": "cone",
+      "source_artifact": "verification/alpha3_tumbling_body/qualification.json",
+      "terminal_state": {
+        "altitude_m": -6.18144222122929,
+        "mass_kg": 12.0,
+        "position_m": [
+          467.92065466828564,
+          0.0,
+          -6.18144222122929
+        ],
+        "speed_m_s": 31.66363470471547,
+        "velocity_m_s": [
+          0.00280918735192435,
+          0.0,
+          -31.66363458010038
+        ]
+      },
+      "truth_result": "PASS"
+    },
+    {
+      "classification": "impact",
+      "fidelity": "pseudo_6dof",
+      "footprint_m": {
+        "crossrange": 3.4911453949634355e-15,
+        "downrange": 346.2539222664378,
+        "radius": 346.2539222664378
+      },
+      "shape": "cone",
+      "source_artifact": "verification/alpha3_tumbling_body/qualification.json",
+      "terminal_state": {
+        "altitude_m": -0.8544289647458732,
+        "mass_kg": 12.0,
+        "position_m": [
+          471.15024587415945,
+          3.4911453949634355e-15,
+          -0.8544289647458732
+        ],
+        "speed_m_s": 35.00299638843718,
+        "velocity_m_s": [
+          0.006071967770237466,
+          4.1231372880449117e-16,
+          -35.00299586178523
+        ]
+      },
+      "truth_result": "PASS"
+    },
+    {
+      "classification": "impact",
+      "fidelity": "point_mass_3dof",
+      "footprint_m": {
+        "crossrange": 0.0,
+        "downrange": 295.87931307595966,
+        "radius": 295.87931307595966
+      },
+      "shape": "triaxial_ellipsoid",
+      "source_artifact": "verification/alpha3_tumbling_body/qualification.json",
+      "terminal_state": {
+        "altitude_m": -3.9100074591485514,
+        "mass_kg": 12.0,
+        "position_m": [
+          420.7756366836813,
+          0.0,
+          -3.9100074591485514
+        ],
+        "speed_m_s": 28.98617399808617,
+        "velocity_m_s": [
+          0.0004413939125112346,
+          0.0,
+          -28.986173994725455
+        ]
+      },
+      "truth_result": "PASS"
+    },
+    {
+      "classification": "impact",
+      "fidelity": "pseudo_6dof",
+      "footprint_m": {
+        "crossrange": -8.175917007818103e-15,
+        "downrange": 241.5147960517527,
+        "radius": 241.5147960517527
+      },
+      "shape": "triaxial_ellipsoid",
+      "source_artifact": "verification/alpha3_tumbling_body/qualification.json",
+      "terminal_state": {
+        "altitude_m": -1.3919036765628454,
+        "mass_kg": 12.0,
+        "position_m": [
+          366.41111965947437,
+          -8.175917007818103e-15,
+          -1.3919036765628454
+        ],
+        "speed_m_s": 16.40776431459306,
+        "velocity_m_s": [
+          5.885675690304639e-14,
+          4.4481502297110366e-17,
+          -16.40776431459306
+        ]
+      },
+      "truth_result": "PASS"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_tumbling_body_r1_matrix.py",
+  "schema": "taoryx.tumbling-body-passive-r1-matrix/v1alpha1",
+  "source_status": "qualified_witness_with_physical_footprint_uncertainty",
+  "status": "PASSIVE_R1_MATRIX_COMPLETE",
+  "uncertainty_axes": {
+    "density_scale": [
+      0.9,
+      1.1
+    ],
+    "drag_scale": [
+      0.9,
+      1.1
+    ],
+    "initial_angular_rate_rad_s": [
+      -0.6,
+      0.6
+    ],
+    "mass_scale": [
+      0.9,
+      1.1
+    ],
+    "release_bank_rad": [
+      -0.3490658503988659,
+      0.3490658503988659
+    ],
+    "release_speed_m_s": [
+      237.5,
+      262.5
+    ],
+    "scale_height_scale": [
+      0.95,
+      1.05
+    ]
+  }
+}

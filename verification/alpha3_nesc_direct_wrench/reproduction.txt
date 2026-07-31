@@ -1,0 +1,1 @@
+PYTHONPATH=src MPLCONFIGDIR=/tmp/taoryx-mpl python3 tools/validate_nesc_direct_wrench_local.py

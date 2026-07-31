@@ -23,9 +23,14 @@ For the promotion order, evidence packet, and DaveML/IMU alignment, follow
 The runtime has three mode keywords, but a rigid-body run is not automatically
 a physical-actuator run.  The direct/induced-wrench tier integrates the rigid
 body while a controller supplies a generalized wrench or uses source-induced
-loads.  The surface-allocated tier adds an explicit bounded map from control
-demand through declared effectors and actuator limits.  A direct moment is not
-allowed to carry a surface-allocation claim.
+loads.  It is now a first-class catalog bridge named
+`rigid_body_6dof_direct_wrench`, between the pseudo-6DOF response law and the
+surface-allocated tier.  It requires checked source-load, requested-wrench,
+achieved-wrench, and residual-wrench evidence, but it does not require or imply
+elevon, rotor, gimbal, motor, wheel, or thruster allocation.  The
+surface-allocated tier adds an explicit bounded map from control demand through
+declared effectors and actuator limits.  A direct moment is not allowed to
+carry a surface-allocation claim.
 
 The kinematic mode is a bridge for model development: it exercises the same
 translational plant and aerodynamic queries while attitude is supplied by a

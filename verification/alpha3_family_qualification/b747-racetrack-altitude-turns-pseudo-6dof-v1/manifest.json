@@ -1,0 +1,38 @@
+{
+  "claim_boundary": "independent truth-evaluated family qualification; integration baselines remain nonqualified",
+  "fidelity_tier": "pseudo_6dof_kinematic_bridge",
+  "files": {
+    "README.md": "2defbc0bbf758a0f932305c30503bd811e0aecf0b1f19e970a72d6e3fcf86923",
+    "controller_transitions.json": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc",
+    "envelope_report.json": "4084bf7d5be3c353545476a4294fefb9dfc78a511856107984a1eea11568a528",
+    "events.json": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c",
+    "inputs/SV01_racetrack_altitude_turns_pseudo_6dof.prb": "d18d47d634c749f97823402d6c674cd49573e670e07c05c9ddaa09a02243cf43",
+    "inputs/b747_jt9d_thrust.tbl": "555052738e548108fb39efba3df1617fb5d8ca3ff23cdd79c8261efe97d2c5d3",
+    "inputs/b747_nominal_static_6axis.tbl": "6e6590bce179b9aa62aab919a8fe149d733e0bb4732635738f5132e18c4a530e",
+    "mission.yaml": "523c5547e4a2e5572b444b960d6e95a38e9985f271ee44cfe92bf89464f234f9",
+    "mission_sequence.png": "680c3d14b29d94576234f0f1894af7e60c96b88ff505b9e44799bbbf04f934cd",
+    "objective_report.json": "4d3f093e2ad8d9cfeda0a183177e2d82a5ec4c9796070748a4693cb1beab03b6",
+    "plots/plot-manifest.json": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa",
+    "preflight_timing_estimate.json": "583e698cd720e8f7d2a014e501f84bb702f57c939c44720f59472ab545afa6cf",
+    "qualification_board.png": "9498ad1e487baf5a19276e5028bc5c932b0fc0696dfef9a1682e13f5e40f4c9d",
+    "reproduction.txt": "8e02f9940a83253f70c057dc731336e2ea06962590f709e90d24589f1fc2052d",
+    "resolved_racetrack.json": "7dc6d8d54a6df916f89899f4f3463943becafd2cc38c1ce29940ba02a2a5eb0a",
+    "run/1.print": "a066ed2c97b4454a417f0376d1fd59f710afca6a3d31f88acafd397ef28f8c61",
+    "summary.json": "2e0a64b8baf49e3a6617345e7d5c4012102d6a6e79436fc30e7e8f102c6170ad",
+    "truth_telemetry.csv": "42f5f94048864690eb87474f62f9e19edeaedf6d6297f663fb19b18da8525568"
+  },
+  "mission_id": "b747-racetrack-altitude-turns-pseudo-6dof-v1",
+  "realization": {
+    "actuator_realization": "prescribed_attitude_lag_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_kinematic_bridge",
+    "note": "The bridge supplies quaternion and body-rate response independently of the point-mass translation. It is a named pseudo-6DOF realization, not a physical B747 surface or moment qualification.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant",
+    "response_law": "first-order-rate-limited-v1",
+    "response_profile_id": "b747.attitude_response_p6dof.v1"
+  },
+  "schema_version": 1,
+  "summary": "summary.json",
+  "truth_telemetry": "truth_telemetry.csv"
+}

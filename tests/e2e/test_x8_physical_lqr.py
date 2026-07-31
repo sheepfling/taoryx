@@ -34,10 +34,13 @@ def test_x8_table_coordinate_physical_lqr_artifact_closes_the_local_chain(tmp_pa
 
     assert payload["schema"] == "taoryx.x8-table-coordinate-physical-lqr/v1alpha1"
     assert payload["claim"]["status"] == "local_nonlinear_table_coordinate_validation"
-    assert payload["claim"]["earned_controller_evidence_tier"] == "T3_linearly_controlled"
+    assert payload["claim"]["earned_controller_evidence_tier"] == "T4_physically_allocated_source_coordinate"
     assert payload["claim"]["nonlinear_table_coordinate_evidence"] == "passed"
     assert payload["claim"]["direct_body_moment_injection"] is False
     assert "left/right" in " ".join(payload["claim"]["nonclaims"]).lower()
+    assert payload["physical_mapping"]["status"] == "resolved_by_source_equation"
+    assert len(payload["physical_mapping"]["hypotheses"]) == 2
+    assert payload["physical_mapping"]["selected_hypothesis"]["differential_sign"] == 1
     assert payload["linearization"]["provenance"]["derivative_consistent"]
     assert payload["nonlinear_validation"]["metrics"]["final_feedback_error_norm"] < (
         payload["nonlinear_validation"]["metrics"]["initial_feedback_error_norm"] * 0.05

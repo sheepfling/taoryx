@@ -1,0 +1,36 @@
+{
+  "claim_boundary": "independent truth-evaluated family qualification; integration baselines remain nonqualified",
+  "fidelity_tier": "point_mass_3dof",
+  "files": {
+    "README.md": "9c1c3a8026ed9b899920d8804b27b3d64729569c2007a6240c9710aa51fa3fca",
+    "controller_transitions.json": "3a75be3b2824130ef31245aecac9de6ad63e05e92274de53fdc579751a104cfc",
+    "envelope_report.json": "4084bf7d5be3c353545476a4294fefb9dfc78a511856107984a1eea11568a528",
+    "events.json": "1137e0a582d7f14f716d0a2e8e2c564ec1f0d3e5cb2463928b3fe1c3f35d461c",
+    "inputs/b747-point_mass_3dof-initial_cross_velocity_plus.prb": "2889c4dbbbe378c87ff5f4789ff8e7e135c61d5996a382bfd025ad27684f65cb",
+    "inputs/b747_jt9d_thrust.tbl": "555052738e548108fb39efba3df1617fb5d8ca3ff23cdd79c8261efe97d2c5d3",
+    "inputs/b747_nominal_static_6axis.tbl": "6e6590bce179b9aa62aab919a8fe149d733e0bb4732635738f5132e18c4a530e",
+    "mission.yaml": "2f17453658d2e9037ec4fd3ee65b49ef505dbb94c3166b09071cfe745c643619",
+    "mission_sequence.png": "f1ba079068205a0c1e78f6948a8ae357830b58177877838a635b646243ad425f",
+    "objective_report.json": "4d3f093e2ad8d9cfeda0a183177e2d82a5ec4c9796070748a4693cb1beab03b6",
+    "plots/plot-manifest.json": "048fa63be2661257ae2cdf5694326ad8c36304dc115f65108e4d2388f034fcaa",
+    "preflight_timing_estimate.json": "583e698cd720e8f7d2a014e501f84bb702f57c939c44720f59472ab545afa6cf",
+    "qualification_board.png": "776c2c8d2dbc954eccf7123db65d078c3071137aff970efddd2cd0d329f7f4df",
+    "reproduction.txt": "4996b638343a959bb9879d4b920387ca936c11013e63917e57f183f778a04003",
+    "resolved_racetrack.json": "2eca094547c1786a330969908479ccd098f020400c689978984d50c8d7a76d98",
+    "run/1.print": "b25feb7913f727d42eda6cf5cc098e288f89d25ef85caed54722bd31f5dedb32",
+    "summary.json": "87f54495b8f4340e9db0df1ce098e6ecf491ab898054a91122ed2c548635b1b9",
+    "truth_telemetry.csv": "c832380fdd5ea4fb868f4494aba09b3f3b96b706653f8454d128649abf321d14"
+  },
+  "mission_id": "b747-racetrack-altitude-turns-3dof-v1",
+  "realization": {
+    "actuator_realization": "kinematic_route_command_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_point_mass_3dof",
+    "note": "This is the first scaled realization of the shared powered-fixed-wing template. The point-mass adapter commands speed, heading, and flight-path angle from the racetrack tangent and bounded position/ altitude corrections; it does not create attitude or surface telemetry.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant"
+  },
+  "schema_version": 1,
+  "summary": "summary.json",
+  "truth_telemetry": "truth_telemetry.csv"
+}

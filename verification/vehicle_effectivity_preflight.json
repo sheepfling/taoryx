@@ -32,29 +32,18 @@
       "metrics": {
         "bounded_replay": {
           "effectivity_rank": 4,
-          "residual_norm": 2.998416303520215e-13,
+          "residual_norm": 2.0590470300251253e-11,
           "saturated_effectors": [],
           "status": "feasible"
         },
         "computed_rank": 4,
-        "condition_number": 20.18332572097007,
+        "condition_number": 20.183325720949885,
         "matrix_columns": 4,
         "matrix_rows": 4,
         "matrix_source": "sample",
         "nonzero_column_count": 4,
         "sign_probe": {
           "aileron_deg": {
-            "negative_axes": [
-              "total_moment_x_nm",
-              "total_moment_z_nm"
-            ],
-            "positive_axes": [],
-            "zero_axes": [
-              "total_force_x_n",
-              "total_moment_y_nm"
-            ]
-          },
-          "elevator_deg": {
             "negative_axes": [
               "total_moment_y_nm"
             ],
@@ -64,6 +53,17 @@
             "zero_axes": [
               "total_moment_x_nm",
               "total_moment_z_nm"
+            ]
+          },
+          "elevator_deg": {
+            "negative_axes": [
+              "total_moment_x_nm",
+              "total_moment_z_nm"
+            ],
+            "positive_axes": [],
+            "zero_axes": [
+              "total_force_x_n",
+              "total_moment_y_nm"
             ]
           },
           "rudder_deg": {
@@ -91,10 +91,10 @@
           }
         },
         "singular_values": [
-          114030.1229722287,
-          13192.253428005366,
+          114030.12297211464,
+          13192.253428006823,
           9539.672342686805,
-          5649.719206273012
+          5649.719206273011
         ]
       },
       "schema_version": "taoryx.vehicle-effectivity-preflight/v1",

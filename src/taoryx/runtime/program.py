@@ -416,6 +416,7 @@ class LoadedProgram:
                         "max_step_size": vehicle.max_step_size,
                         "publish_derived_rates": vehicle.publish_derived_rates,
                         "kinematic_state": _kinematic_state_payload(vehicle.kinematic_state),
+                        "kinematic_response_profile_id": vehicle.kinematic_response_profile_id,
                     }
                     for name, vehicle in problem.vehicles.items()
                 },
@@ -496,6 +497,9 @@ class LoadedProgram:
             vehicle.relative_tolerance = float(vehicle_payload["relative_tolerance"])
             vehicle.max_step_size = float(vehicle_payload["max_step_size"]) if vehicle_payload.get("max_step_size") is not None else None
             vehicle.publish_derived_rates = bool(vehicle_payload["publish_derived_rates"])
+            saved_profile_id = vehicle_payload.get("kinematic_response_profile_id")
+            if saved_profile_id is not None:
+                vehicle.kinematic_response_profile_id = str(saved_profile_id)
             saved_kinematic = vehicle_payload.get("kinematic_state")
             if saved_kinematic is not None:
                 if vehicle.kinematic_state is None:

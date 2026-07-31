@@ -1,0 +1,875 @@
+{
+  "claim": "The source-table X8 point-mass reduction completes the shared powered fixed-wing racetrack geometry with independent truth-based altitude, speed, route, and terminal gates.",
+  "display_name": "Skywalker X8 racetrack point-mass 3DOF",
+  "envelope_report": {
+    "checks": [
+      {
+        "channel": "speed_m_s",
+        "maximum": 27.0,
+        "minimum": 2.0,
+        "pass": true,
+        "violations": []
+      },
+      {
+        "channel": "altitude_m",
+        "maximum": 215.0,
+        "minimum": 150.0,
+        "pass": false,
+        "violations": [
+          {
+            "time_s": 0.0,
+            "value": 228.0
+          },
+          {
+            "time_s": 0.05,
+            "value": 227.97195076845748
+          },
+          {
+            "time_s": 0.1,
+            "value": 227.9147034553789
+          },
+          {
+            "time_s": 0.15000000000000002,
+            "value": 227.84652111560683
+          },
+          {
+            "time_s": 0.2,
+            "value": 227.77424100610378
+          },
+          {
+            "time_s": 0.25,
+            "value": 227.7004247240651
+          },
+          {
+            "time_s": 0.3,
+            "value": 227.62603249546743
+          },
+          {
+            "time_s": 0.35,
+            "value": 227.55142435114047
+          },
+          {
+            "time_s": 0.39999999999999997,
+            "value": 227.47673529521128
+          },
+          {
+            "time_s": 0.44999999999999996,
+            "value": 227.40201595327366
+          },
+          {
+            "time_s": 0.49999999999999994,
+            "value": 227.32728530982706
+          },
+          {
+            "time_s": 0.5499999999999999,
+            "value": 227.25255048405825
+          },
+          {
+            "time_s": 0.6,
+            "value": 227.17781414566684
+          },
+          {
+            "time_s": 0.65,
+            "value": 227.1030772957923
+          },
+          {
+            "time_s": 0.7000000000000001,
+            "value": 227.0283403098624
+          },
+          {
+            "time_s": 0.7500000000000001,
+            "value": 226.95360332866235
+          },
+          {
+            "time_s": 0.8000000000000002,
+            "value": 226.87886640498624
+          },
+          {
+            "time_s": 0.8500000000000002,
+            "value": 226.80412955863127
+          },
+          {
+            "time_s": 0.9000000000000002,
+            "value": 226.7293927970208
+          },
+          {
+            "time_s": 0.9500000000000003,
+            "value": 226.6546561229381
+          },
+          {
+            "time_s": 1.0000000000000002,
+            "value": 226.57991953742615
+          },
+          {
+            "time_s": 1.0500000000000003,
+            "value": 226.5051830408756
+          },
+          {
+            "time_s": 1.1000000000000003,
+            "value": 226.4304466334323
+          },
+          {
+            "time_s": 1.1500000000000004,
+            "value": 226.3557103151503
+          },
+          {
+            "time_s": 1.2000000000000004,
+            "value": 226.28097408604935
+          },
+          {
+            "time_s": 1.2500000000000004,
+            "value": 226.2062379461362
+          },
+          {
+            "time_s": 1.3000000000000005,
+            "value": 226.13150189541284
+          },
+          {
+            "time_s": 1.3500000000000005,
+            "value": 226.05676593387932
+          },
+          {
+            "time_s": 1.4000000000000006,
+            "value": 225.98203006153517
+          },
+          {
+            "time_s": 1.4500000000000006,
+            "value": 225.90729427837957
+          },
+          {
+            "time_s": 1.5000000000000007,
+            "value": 225.8325585844116
+          },
+          {
+            "time_s": 1.5500000000000007,
+            "value": 225.75782297963036
+          },
+          {
+            "time_s": 1.6000000000000008,
+            "value": 225.68308746403486
+          },
+          {
+            "time_s": 1.6500000000000008,
+            "value": 225.6083520376242
+          },
+          {
+            "time_s": 1.7000000000000008,
+            "value": 225.53361670039735
+          },
+          {
+            "time_s": 1.7500000000000009,
+            "value": 225.45888145235338
+          },
+          {
+            "time_s": 1.800000000000001,
+            "value": 225.3841462934914
+          },
+          {
+            "time_s": 1.850000000000001,
+            "value": 225.30941122381034
+          },
+          {
+            "time_s": 1.900000000000001,
+            "value": 225.23467624330937
+          },
+          {
+            "time_s": 1.950000000000001,
+            "value": 225.1599413519874
+          },
+          {
+            "time_s": 2.000000000000001,
+            "value": 225.08520654984358
+          },
+          {
+            "time_s": 2.0500000000000007,
+            "value": 225.01047183687692
+          },
+          {
+            "time_s": 2.1000000000000005,
+            "value": 224.93573721308647
+          },
+          {
+            "time_s": 2.1500000000000004,
+            "value": 224.86100267847124
+          },
+          {
+            "time_s": 2.2,
+            "value": 224.7862682330303
+          },
+          {
+            "time_s": 2.25,
+            "value": 224.7115338767627
+          },
+          {
+            "time_s": 2.3,
+            "value": 224.63679960966746
+          },
+          {
+            "time_s": 2.3499999999999996,
+            "value": 224.56206543174366
+          },
+          {
+            "time_s": 2.3999999999999995,
+            "value": 224.4873313429903
+          },
+          {
+            "time_s": 2.4499999999999993,
+            "value": 224.41259734340645
+          },
+          {
+            "time_s": 2.499999999999999,
+            "value": 224.33786343299116
+          },
+          {
+            "time_s": 2.549999999999999,
+            "value": 224.26312961174344
+          },
+          {
+            "time_s": 2.5999999999999988,
+            "value": 224.18839587966235
+          },
+          {
+            "time_s": 2.6499999999999986,
+            "value": 224.11366223674693
+          },
+          {
+            "time_s": 2.6999999999999984,
+            "value": 224.03892868299624
+          },
+          {
+            "time_s": 2.7499999999999982,
+            "value": 223.96419521840934
+          },
+          {
+            "time_s": 2.799999999999998,
+            "value": 223.88946184298524
+          },
+          {
+            "time_s": 2.849999999999998,
+            "value": 223.814728556723
+          },
+          {
+            "time_s": 2.8999999999999977,
+            "value": 223.73999535962164
+          },
+          {
+            "time_s": 2.9499999999999975,
+            "value": 223.66526225168025
+          },
+          {
+            "time_s": 2.9999999999999973,
+            "value": 223.5905292328978
+          },
+          {
+            "time_s": 3.049999999999997,
+            "value": 223.51579630327342
+          },
+          {
+            "time_s": 3.099999999999997,
+            "value": 223.44106346280608
+          },
+          {
+            "time_s": 3.149999999999997,
+            "value": 223.3663307114949
+          },
+          {
+            "time_s": 3.1999999999999966,
+            "value": 223.29159804933886
+          },
+          {
+            "time_s": 3.2499999999999964,
+            "value": 223.21686547633703
+          },
+          {
+            "time_s": 3.2999999999999963,
+            "value": 223.14213299248843
+          },
+          {
+            "time_s": 3.349999999999996,
+            "value": 223.0674005977921
+          },
+          {
+            "time_s": 3.399999999999996,
+            "value": 222.99266829224715
+          },
+          {
+            "time_s": 3.4499999999999957,
+            "value": 222.91793607585257
+          },
+          {
+            "time_s": 3.4999999999999956,
+            "value": 222.84320394860742
+          },
+          {
+            "time_s": 3.5499999999999954,
+            "value": 222.76847191051073
+          },
+          {
+            "time_s": 3.599999999999995,
+            "value": 222.69373996156153
+          },
+          {
+            "time_s": 3.649999999999995,
+            "value": 222.6190081017589
+          },
+          {
+            "time_s": 3.699999999999995,
+            "value": 222.54427633110188
+          },
+          {
+            "time_s": 3.7499999999999947,
+            "value": 222.4695446495895
+          },
+          {
+            "time_s": 3.7999999999999945,
+            "value": 222.39481305722077
+          },
+          {
+            "time_s": 3.8499999999999943,
+            "value": 222.3200815539948
+          },
+          {
+            "time_s": 3.899999999999994,
+            "value": 222.2453501399106
+          },
+          {
+            "time_s": 3.949999999999994,
+            "value": 222.17061881496724
+          },
+          {
+            "time_s": 3.999999999999994,
+            "value": 222.09588757916376
+          },
+          {
+            "time_s": 4.049999999999994,
+            "value": 222.02115643249917
+          },
+          {
+            "time_s": 4.099999999999993,
+            "value": 221.9464253749725
+          },
+          {
+            "time_s": 4.149999999999993,
+            "value": 221.87169440658286
+          },
+          {
+            "time_s": 4.199999999999993,
+            "value": 221.79696352732927
+          },
+          {
+            "time_s": 4.249999999999993,
+            "value": 221.72223273721073
+          },
+          {
+            "time_s": 4.299999999999993,
+            "value": 221.64750203622634
+          },
+          {
+            "time_s": 4.3499999999999925,
+            "value": 221.57277142437513
+          },
+          {
+            "time_s": 4.399999999999992,
+            "value": 221.4980409016561
+          },
+          {
+            "time_s": 4.449999999999992,
+            "value": 221.42331046806834
+          },
+          {
+            "time_s": 4.499999999999992,
+            "value": 221.3485801236109
+          },
+          {
+            "time_s": 4.549999999999992,
+            "value": 221.2738498682828
+          },
+          {
+            "time_s": 4.599999999999992,
+            "value": 221.1991197020831
+          },
+          {
+            "time_s": 4.6499999999999915,
+            "value": 221.12438962501082
+          },
+          {
+            "time_s": 4.699999999999991,
+            "value": 221.04965963706502
+          },
+          {
+            "time_s": 4.749999999999991,
+            "value": 220.97492973824475
+          },
+          {
+            "time_s": 4.799999999999991,
+            "value": 220.90019992854909
+          },
+          {
+            "time_s": 4.849999999999991,
+            "value": 220.825470207977
+          },
+          {
+            "time_s": 4.899999999999991,
+            "value": 220.75074057652756
+          },
+          {
+            "time_s": 4.94999999999999,
+            "value": 220.67601103419983
+          },
+          {
+            "time_s": 4.99999999999999,
+            "value": 220.60128158099283
+          },
+          {
+            "time_s": 5.04999999999999,
+            "value": 220.52655221690566
+          },
+          {
+            "time_s": 5.09999999999999,
+            "value": 220.45182294193728
+          },
+          {
+            "time_s": 5.14999999999999,
+            "value": 220.37709375608677
+          },
+          {
+            "time_s": 5.1999999999999895,
+            "value": 220.3023646593532
+          },
+          {
+            "time_s": 5.249999999999989,
+            "value": 220.2276356517356
+          },
+          {
+            "time_s": 5.299999999999989,
+            "value": 220.152906733233
+          },
+          {
+            "time_s": 5.349999999999989,
+            "value": 220.07817790384448
+          },
+          {
+            "time_s": 5.399999999999989,
+            "value": 220.00344916356903
+          },
+          {
+            "time_s": 5.449999999999989,
+            "value": 219.92872051240576
+          },
+          {
+            "time_s": 5.4999999999999885,
+            "value": 219.85399195035365
+          },
+          {
+            "time_s": 5.549999999999988,
+            "value": 219.77926347741175
+          },
+          {
+            "time_s": 5.599999999999988,
+            "value": 219.70453509357915
+          },
+          {
+            "time_s": 5.649999999999988,
+            "value": 219.6298067988549
+          },
+          {
+            "time_s": 5.699999999999988,
+            "value": 219.55507859323797
+          },
+          {
+            "time_s": 5.749999999999988,
+            "value": 219.48035047672747
+          },
+          {
+            "time_s": 5.799999999999987,
+            "value": 219.4056224493224
+          },
+          {
+            "time_s": 5.849999999999987,
+            "value": 219.33089451102188
+          },
+          {
+            "time_s": 5.899999999999987,
+            "value": 219.25616666182486
+          },
+          {
+            "time_s": 5.949999999999987,
+            "value": 219.18143890173044
+          },
+          {
+            "time_s": 5.999999999999987,
+            "value": 219.10671123073766
+          },
+          {
+            "time_s": 6.0499999999999865,
+            "value": 219.03198364884554
+          },
+          {
+            "time_s": 6.099999999999986,
+            "value": 218.95725615605318
+          },
+          {
+            "time_s": 6.149999999999986,
+            "value": 218.88252875235955
+          },
+          {
+            "time_s": 6.199999999999986,
+            "value": 218.80780143776371
+          },
+          {
+            "time_s": 6.249999999999986,
+            "value": 218.73307421226474
+          },
+          {
+            "time_s": 6.299999999999986,
+            "value": 218.65834707586168
+          },
+          {
+            "time_s": 6.349999999999985,
+            "value": 218.58362002855355
+          },
+          {
+            "time_s": 6.399999999999985,
+            "value": 218.5088930703394
+          },
+          {
+            "time_s": 6.449999999999985,
+            "value": 218.43416620121832
+          },
+          {
+            "time_s": 6.499999999999985,
+            "value": 218.35943942118928
+          },
+          {
+            "time_s": 6.549999999999985,
+            "value": 218.28471273025136
+          },
+          {
+            "time_s": 6.5999999999999845,
+            "value": 218.20998612840359
+          },
+          {
+            "time_s": 6.649999999999984,
+            "value": 218.13525961564505
+          },
+          {
+            "time_s": 6.699999999999984,
+            "value": 218.06053319197477
+          },
+          {
+            "time_s": 6.749999999999984,
+            "value": 217.98580685739176
+          },
+          {
+            "time_s": 6.799999999999984,
+            "value": 217.91108061189513
+          },
+          {
+            "time_s": 6.849999999999984,
+            "value": 217.83635445548387
+          },
+          {
+            "time_s": 6.8999999999999835,
+            "value": 217.76162838815708
+          },
+          {
+            "time_s": 6.949999999999983,
+            "value": 217.68690240991373
+          },
+          {
+            "time_s": 6.999999999999983,
+            "value": 217.6121765207529
+          },
+          {
+            "time_s": 7.049999999999983,
+            "value": 217.53745072067366
+          },
+          {
+            "time_s": 7.099999999999983,
+            "value": 217.46272500967498
+          },
+          {
+            "time_s": 7.149999999999983,
+            "value": 217.387999387756
+          },
+          {
+            "time_s": 7.199999999999982,
+            "value": 217.3132738549157
+          },
+          {
+            "time_s": 7.249999999999982,
+            "value": 217.23854841115318
+          },
+          {
+            "time_s": 7.299999999999982,
+            "value": 217.1638230564674
+          },
+          {
+            "time_s": 7.349999999999982,
+            "value": 217.0890977908575
+          },
+          {
+            "time_s": 7.399999999999982,
+            "value": 217.01437261432244
+          },
+          {
+            "time_s": 7.4499999999999815,
+            "value": 216.9396475268613
+          },
+          {
+            "time_s": 7.499999999999981,
+            "value": 216.86492252847313
+          },
+          {
+            "time_s": 7.549999999999981,
+            "value": 216.790197619157
+          },
+          {
+            "time_s": 7.599999999999981,
+            "value": 216.71547279891192
+          },
+          {
+            "time_s": 7.649999999999981,
+            "value": 216.64074806773692
+          },
+          {
+            "time_s": 7.699999999999981,
+            "value": 216.56602342563107
+          },
+          {
+            "time_s": 7.7499999999999805,
+            "value": 216.49129887259343
+          },
+          {
+            "time_s": 7.79999999999998,
+            "value": 216.41657440862298
+          },
+          {
+            "time_s": 7.84999999999998,
+            "value": 216.34185003371886
+          },
+          {
+            "time_s": 7.89999999999998,
+            "value": 216.26712574788002
+          },
+          {
+            "time_s": 7.94999999999998,
+            "value": 216.19240155110558
+          },
+          {
+            "time_s": 7.99999999999998,
+            "value": 216.11767744339457
+          },
+          {
+            "time_s": 8.04999999999998,
+            "value": 216.04295342474597
+          },
+          {
+            "time_s": 8.09999999999998,
+            "value": 215.9682294951589
+          },
+          {
+            "time_s": 8.14999999999998,
+            "value": 215.8935056546324
+          },
+          {
+            "time_s": 8.199999999999982,
+            "value": 215.8187819031655
+          },
+          {
+            "time_s": 8.249999999999982,
+            "value": 215.74405824075723
+          },
+          {
+            "time_s": 8.299999999999983,
+            "value": 215.66933466740662
+          },
+          {
+            "time_s": 8.349999999999984,
+            "value": 215.59461118311276
+          },
+          {
+            "time_s": 8.399999999999984,
+            "value": 215.51988778787467
+          },
+          {
+            "time_s": 8.449999999999985,
+            "value": 215.4451644816914
+          },
+          {
+            "time_s": 8.499999999999986,
+            "value": 215.370441264562
+          },
+          {
+            "time_s": 8.549999999999986,
+            "value": 215.2957181364855
+          },
+          {
+            "time_s": 8.599999999999987,
+            "value": 215.22099509746096
+          },
+          {
+            "time_s": 8.649999999999988,
+            "value": 215.1462721474874
+          },
+          {
+            "time_s": 8.699999999999989,
+            "value": 215.0715492865639
+          }
+        ]
+      }
+    ],
+    "pass": false,
+    "schema_version": 1
+  },
+  "evidence_level": "nominal_case_pass_overall_qualification_pending",
+  "family": "skywalker_x8",
+  "fidelity_tier": "point_mass_3dof",
+  "mission_id": "x8-racetrack-altitude-turns-3dof-v1",
+  "mission_pass": false,
+  "nonclaims": [
+    "attitude or body-rate dynamics",
+    "physical elevon, moment, or actuator authority",
+    "flight-test or manufacturer fidelity",
+    "wind robustness, takeoff, or landing"
+  ],
+  "numerical_valid": true,
+  "preflight_timing_estimate": {
+    "climb_time_s": 20.0,
+    "descent_time_s": 33.333333333333336,
+    "inbound_level_time_s": 5.772811918063319,
+    "outbound_level_time_s": 19.106145251396654,
+    "straight_time_s": 39.106145251396654,
+    "total_time_s": 165.96627523993837,
+    "turn_time_s": 43.87699236857253
+  },
+  "realization": {
+    "actuator_realization": "kinematic_route_command_no_surface_claim",
+    "force_source": "source_table",
+    "moment_source": "not_applicable_point_mass_3dof",
+    "note": "The point-mass adapter integrates translational motion and resolves speed, heading, and flight-path commands from the shared racetrack. No attitude, moment, or individual surface signal is used to pass the mission.",
+    "propulsion_model": "source_table_thrust",
+    "resource_model": "fixed_mass_zero_propellant"
+  },
+  "run": {
+    "completed": [
+      true
+    ],
+    "duration_s": 169.966275239938,
+    "exit_code": 0,
+    "sample_count": 3401,
+    "stop_reasons": [
+      "stop_condition"
+    ]
+  },
+  "schema_version": 1,
+  "status": "nominal_objective_pass_terminal_pending",
+  "truth_evaluation": {
+    "claim_boundary": "truth telemetry verifies objective geometry; controller transitions are diagnostic and cannot create a pass",
+    "evaluator": "independent_truth_telemetry",
+    "hard_gates_passed": false,
+    "mission_pass": false,
+    "objective_pass": true,
+    "required_objectives": 4,
+    "required_passed": 4,
+    "results": [
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 4.0,
+          "margin": 4.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "high-altitude-level-gate",
+        "margin": 4.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 4.0,
+        "truth_time_s": 39.14999999999991
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 4.0,
+          "margin": 4.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "left-turn-exit-gate",
+        "margin": 4.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 4.0,
+        "truth_time_s": 83.04999999999742
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 4.0,
+          "margin": 4.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "low-altitude-level-gate",
+        "margin": 4.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 4.0,
+        "truth_time_s": 122.1499999999952
+      },
+      {
+        "closest_error": 0.0,
+        "controller_reason": null,
+        "controller_time_s": null,
+        "controller_transition_valid": null,
+        "critical_metric": {
+          "actual": 0.0,
+          "channel": "gate_speed_error",
+          "error": 0.0,
+          "limit": 4.0,
+          "margin": 4.0,
+          "target": 0.0,
+          "units": "m/s"
+        },
+        "dwell_actual_s": null,
+        "id": "terminal-contract",
+        "margin": 4.0,
+        "message": null,
+        "objective_type": "fly_by_gate",
+        "required": true,
+        "status": "pass",
+        "tolerance": 4.0,
+        "truth_time_s": 166.0500000000035
+      }
+    ],
+    "schema_version": 1
+  }
+}

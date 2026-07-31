@@ -47,8 +47,8 @@ bindings:
     high_altitude_m: 188.0
     climb_rate_m_s: 0.5
     descent_rate_m_s: 0.3
-    left_turn_bank_deg: -8.0
-    right_turn_bank_deg: -8.0
+    left_turn_bank_deg: -5.0
+    right_turn_bank_deg: -5.0
     altitude_capture_gain_per_s: 0.1
     altitude_capture_max_mps: 2.0
     position_capture_gain: 0.01
@@ -66,8 +66,8 @@ bindings:
     high_altitude_m: 188.0
     climb_rate_m_s: 0.5
     descent_rate_m_s: 0.3
-    left_turn_bank_deg: -8.0
-    right_turn_bank_deg: -8.0
+    left_turn_bank_deg: -5.0
+    right_turn_bank_deg: -5.0
     altitude_capture_gain_per_s: 0.1
     altitude_capture_max_mps: 2.0
     position_capture_gain: 0.01
@@ -85,8 +85,8 @@ bindings:
     high_altitude_m: 188.0
     climb_rate_m_s: 0.5
     descent_rate_m_s: 0.3
-    left_turn_bank_deg: -8.0
-    right_turn_bank_deg: -8.0
+    left_turn_bank_deg: -5.0
+    right_turn_bank_deg: -5.0
     altitude_capture_gain_per_s: 0.1
     altitude_capture_max_mps: 2.0
     position_capture_gain: 0.01

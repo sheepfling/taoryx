@@ -1,0 +1,76 @@
+{
+  "case_count": 8,
+  "cases": {
+    "battery_energy_minus_40pct": "aggregate battery-energy reduction",
+    "initial_position_offset": "initial position offset at grounded start",
+    "initial_yaw_offset": "initial yaw offset before mission capture",
+    "thrust_authority_minus_10pct": "aggregate maximum-thrust reduction"
+  },
+  "claim": "Fixed aggregate-thrust pseudo-6DOF and translation-projection R1 evidence for the Hummingbird mission.",
+  "claim_boundary": "The pseudo tier uses an aggregate thrust-vector and bounded attitude-response surrogate. The 3DOF tier uses an independent translation-only force model. Neither tier establishes individual motor/rotor allocation, rotor inflow, reaction torque, physical moment balance, wind robustness, or statistical reliability.",
+  "failed_case_count": 0,
+  "passed_case_count": 8,
+  "perturbation_contract": {
+    "authority_model": "aggregate_thrust_vector_surrogate",
+    "dimensions": [
+      "initial_position_offset",
+      "initial_yaw_offset",
+      "thrust_authority_minus_10pct",
+      "battery_energy_minus_40pct"
+    ],
+    "failure_policy": "retain failed truth objectives as boundary evidence"
+  },
+  "records": [
+    {
+      "artifact": "verification/alpha3_hummingbird_r1/pseudo_6dof/initial_position_offset/evidence.json",
+      "case_id": "initial_position_offset",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_r1/point_mass_3dof/initial_position_offset/evidence.json",
+      "case_id": "initial_position_offset",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_r1/pseudo_6dof/initial_yaw_offset/evidence.json",
+      "case_id": "initial_yaw_offset",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_r1/point_mass_3dof/initial_yaw_offset/evidence.json",
+      "case_id": "initial_yaw_offset",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_r1/pseudo_6dof/thrust_authority_minus_10pct/evidence.json",
+      "case_id": "thrust_authority_minus_10pct",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_r1/point_mass_3dof/thrust_authority_minus_10pct/evidence.json",
+      "case_id": "thrust_authority_minus_10pct",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_r1/pseudo_6dof/battery_energy_minus_40pct/evidence.json",
+      "case_id": "battery_energy_minus_40pct",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_hummingbird_r1/point_mass_3dof/battery_energy_minus_40pct/evidence.json",
+      "case_id": "battery_energy_minus_40pct",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hummingbird_r1_matrix.py",
+  "schema": "taoryx.hummingbird-r1-matrix/v1alpha1",
+  "status": "R1_fixed_matrix_complete"
+}

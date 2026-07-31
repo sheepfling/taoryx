@@ -228,6 +228,14 @@ class RuntimeRigidBodyLocalPlant(ControlPlantAdapter):
         the body velocity and all body moments to vanish.  It is a local
         direction-hold reference for trajectory tracking, not a static force
         equilibrium and must not be promoted as one.
+
+        ``state_bounds`` may widen selected local state bounds for a bounded
+        re-trim.  This is intended for source operating-point adapters whose
+        published alpha is a catalog label but whose independently transcribed
+        force/moment rows do not close at that exact label.  Unspecified states
+        remain fixed at the target value within the usual numerical trim band;
+        widening a state is therefore explicit and remains part of the trim
+        evidence.
         """
 
         target_state = {name: float(target.get(name, self._source_local_state[name])) for name in self.state_names}
@@ -284,10 +292,17 @@ class RuntimeRigidBodyLocalPlant(ControlPlantAdapter):
             state_initial=initial_state,
             control_initial=initial_controls,
             # The source alpha/velocity condition is an explicit operating
-            # point, not an additional hidden trim variable in this local
-            # adapter.  Keep it numerically fixed while solving effectors.
-            state_lower={name: target_state[name] - 1.0e-10 for name in self.state_names},
-            state_upper={name: target_state[name] + 1.0e-10 for name in self.state_names},
+            # point unless the adapter declares a bounded re-trim interval.
+            # Keep every unspecified state numerically fixed while solving
+            # effectors; widened states remain visible in TrimResult.state.
+            state_lower={
+                name: float(self.state_bounds.get(name, (target_state[name] - 1.0e-10, target_state[name] + 1.0e-10))[0])
+                for name in self.state_names
+            },
+            state_upper={
+                name: float(self.state_bounds.get(name, (target_state[name] - 1.0e-10, target_state[name] + 1.0e-10))[1])
+                for name in self.state_names
+            },
             control_lower={name: self.effector_limits[name].lower for name in self.control_names},
             control_upper={name: self.effector_limits[name].upper for name in self.control_names},
             residual_scales=residual_scales,
@@ -399,6 +414,81 @@ class RuntimeRigidBodyLocalPlant(ControlPlantAdapter):
         )
         ####
 
+    def force_moment_effectiveness(
+        self,
+        state: Mapping[str, float],
+        effectors: Mapping[str, float],
+    ) -> EffectorEffectiveness:
+        """Differentiate the actual six-axis body wrench with respect to effectors.
+
+        The existing :meth:`effectiveness` method intentionally remains a
+        moment-only contract for attitude LQRs.  This companion method opens
+        the force channels explicitly for vehicles such as multirotors whose
+        collective actuator authority is represented by the same physical
+        effectors.  It evaluates centered differences through the nonlinear
+        runtime plant; it does not inject a requested force or moment.
+        """
+
+        wrench_names = (
+            "force_x_n",
+            "force_y_n",
+            "force_z_n",
+            "moment_x_nm",
+            "moment_y_nm",
+            "moment_z_nm",
+        )
+        baseline_force = self._physical_force(state, effectors)
+        baseline_moment = self._physical_moment(state, effectors)
+        baseline = (
+            baseline_force.x,
+            baseline_force.y,
+            baseline_force.z,
+            baseline_moment.x,
+            baseline_moment.y,
+            baseline_moment.z,
+        )
+        columns: list[tuple[float, ...]] = []
+        for name in self.control_names:
+            step = float(self.effectiveness_steps[name])
+            plus = dict(effectors)
+            minus = dict(effectors)
+            plus[name] = self.effector_limits[name].clamp(float(effectors[name]) + step)
+            minus[name] = self.effector_limits[name].clamp(float(effectors[name]) - step)
+            denominator = plus[name] - minus[name]
+            if abs(denominator) <= 1.0e-12:
+                columns.append((0.0,) * len(wrench_names))
+                continue
+            positive_force = self._physical_force(state, plus)
+            negative_force = self._physical_force(state, minus)
+            positive_moment = self._physical_moment(state, plus)
+            negative_moment = self._physical_moment(state, minus)
+            positive = (
+                positive_force.x,
+                positive_force.y,
+                positive_force.z,
+                positive_moment.x,
+                positive_moment.y,
+                positive_moment.z,
+            )
+            negative = (
+                negative_force.x,
+                negative_force.y,
+                negative_force.z,
+                negative_moment.x,
+                negative_moment.y,
+                negative_moment.z,
+            )
+            columns.append(tuple((positive[index] - negative[index]) / denominator for index in range(len(wrench_names))))
+        return EffectorEffectiveness(
+            wrench_names=wrench_names,
+            effector_names=self.control_names,
+            matrix=tuple(tuple(column[axis] for column in columns) for axis in range(len(wrench_names))),
+            reference_wrench=dict(zip(wrench_names, baseline, strict=True)),
+            reference_effectors={name: float(effectors[name]) for name in self.control_names},
+            source=f"centered-runtime-force-moment-difference:{self.id}:{self.revision}",
+        )
+        ####
+
     def allocate(
         self,
         state: Mapping[str, float],
@@ -439,6 +529,63 @@ class RuntimeRigidBodyLocalPlant(ControlPlantAdapter):
             achieved_residual_wrench={
                 name: float(desired_wrench[name]) - achieved[name]
                 for name in achieved
+            },
+        )
+        ####
+
+    def allocate_force_moment(
+        self,
+        state: Mapping[str, float],
+        desired_wrench: Mapping[str, float],
+        previous_effectors: Mapping[str, float],
+        dt_s: float,
+        *,
+        wrench_weights: Mapping[str, float] | None = None,
+    ) -> PhysicalAllocationStep:
+        """Allocate a six-axis force/moment request through actual effectors.
+
+        This is an explicit force-capable sibling of the moment-only
+        :meth:`allocate` path.  A caller must provide the desired six-axis
+        request and may set zero weights for axes it does not want to control.
+        The returned achieved wrench is recomputed by the nonlinear runtime
+        after actuator lag, so partial collective authority remains visible.
+        """
+
+        effectiveness = self.force_moment_effectiveness(state, previous_effectors)
+        predicted = allocate_and_advance_wrench(
+            effectiveness,
+            self.effector_limits,
+            desired_wrench,
+            previous_effectors,
+            dt_s,
+            preferred_effectors=self.source_effectors,
+            wrench_weights=wrench_weights,
+            regularization=self.allocation_regularization,
+            feasibility_tolerance=self.allocation_feasibility_tolerance,
+        )
+        actual_force = self._physical_force(state, predicted.actuator.actual_positions)
+        actual_moment = self._physical_moment(state, predicted.actuator.actual_positions)
+        achieved = dict(
+            zip(
+                effectiveness.wrench_names,
+                (
+                    actual_force.x,
+                    actual_force.y,
+                    actual_force.z,
+                    actual_moment.x,
+                    actual_moment.y,
+                    actual_moment.z,
+                ),
+                strict=True,
+            )
+        )
+        return PhysicalAllocationStep(
+            allocation=predicted.allocation,
+            actuator=predicted.actuator,
+            achieved_wrench=achieved,
+            achieved_residual_wrench={
+                name: float(desired_wrench[name]) - achieved[name]
+                for name in effectiveness.wrench_names
             },
         )
         ####

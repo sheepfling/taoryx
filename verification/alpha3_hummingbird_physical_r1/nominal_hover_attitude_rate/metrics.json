@@ -1,0 +1,11 @@
+{
+  "allocation_statuses": [
+    "feasible"
+  ],
+  "final_controlled_actual_residual_nm": 6.307797301798502e-17,
+  "final_feedback_error_fraction": 6.560905760390108e-14,
+  "maximum_continuous_saturation_duration_s": 0.0,
+  "mission_pass": true,
+  "samples": 2000,
+  "saturation_fraction": 0.0
+}

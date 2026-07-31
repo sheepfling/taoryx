@@ -1,0 +1,22 @@
+{
+  "family_id": "hummingbird",
+  "fidelity_records": [
+    {
+      "artifact": "point_mass_3dof_evidence.json",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true
+    },
+    {
+      "artifact": "pseudo_6dof_evidence.json",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true
+    }
+  ],
+  "mission_id": "hummingbird_directional_translation_v1",
+  "objective_count": 10,
+  "passed_objective_count": 10,
+  "physical_motor_allocation": false,
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hummingbird_directional_mission.py",
+  "schema": "taoryx.hummingbird-directional-mission/v1alpha1",
+  "status": "directional_translation_witness_pass"
+}

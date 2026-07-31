@@ -1,0 +1,108 @@
+{
+  "claim_boundary": "truth telemetry verifies objective geometry; controller transitions are diagnostic and cannot create a pass",
+  "evaluator": "independent_truth_telemetry",
+  "hard_gates_passed": false,
+  "mission_pass": false,
+  "objective_pass": true,
+  "required_objectives": 4,
+  "required_passed": 4,
+  "results": [
+    {
+      "closest_error": 0.0,
+      "controller_reason": null,
+      "controller_time_s": null,
+      "controller_transition_valid": null,
+      "critical_metric": {
+        "actual": 0.0,
+        "channel": "gate_speed_error",
+        "error": 0.0,
+        "limit": 4.0,
+        "margin": 4.0,
+        "target": 0.0,
+        "units": "m/s"
+      },
+      "dwell_actual_s": null,
+      "id": "high-altitude-level-gate",
+      "margin": 4.0,
+      "message": null,
+      "objective_type": "fly_by_gate",
+      "required": true,
+      "status": "pass",
+      "tolerance": 4.0,
+      "truth_time_s": 39.14999999999991
+    },
+    {
+      "closest_error": 0.0,
+      "controller_reason": null,
+      "controller_time_s": null,
+      "controller_transition_valid": null,
+      "critical_metric": {
+        "actual": 0.0,
+        "channel": "gate_speed_error",
+        "error": 0.0,
+        "limit": 4.0,
+        "margin": 4.0,
+        "target": 0.0,
+        "units": "m/s"
+      },
+      "dwell_actual_s": null,
+      "id": "left-turn-exit-gate",
+      "margin": 4.0,
+      "message": null,
+      "objective_type": "fly_by_gate",
+      "required": true,
+      "status": "pass",
+      "tolerance": 4.0,
+      "truth_time_s": 83.04999999999742
+    },
+    {
+      "closest_error": 0.0,
+      "controller_reason": null,
+      "controller_time_s": null,
+      "controller_transition_valid": null,
+      "critical_metric": {
+        "actual": 0.0,
+        "channel": "gate_speed_error",
+        "error": 0.0,
+        "limit": 4.0,
+        "margin": 4.0,
+        "target": 0.0,
+        "units": "m/s"
+      },
+      "dwell_actual_s": null,
+      "id": "low-altitude-level-gate",
+      "margin": 4.0,
+      "message": null,
+      "objective_type": "fly_by_gate",
+      "required": true,
+      "status": "pass",
+      "tolerance": 4.0,
+      "truth_time_s": 122.1499999999952
+    },
+    {
+      "closest_error": 0.0,
+      "controller_reason": null,
+      "controller_time_s": null,
+      "controller_transition_valid": null,
+      "critical_metric": {
+        "actual": 0.0,
+        "channel": "gate_speed_error",
+        "error": 0.0,
+        "limit": 4.0,
+        "margin": 4.0,
+        "target": 0.0,
+        "units": "m/s"
+      },
+      "dwell_actual_s": null,
+      "id": "terminal-contract",
+      "margin": 4.0,
+      "message": null,
+      "objective_type": "fly_by_gate",
+      "required": true,
+      "status": "pass",
+      "tolerance": 4.0,
+      "truth_time_s": 166.0500000000035
+    }
+  ],
+  "schema_version": 1
+}

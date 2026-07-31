@@ -246,16 +246,18 @@ def test_f16_physical_wrench_lqr_artifact_closes_local_recovery() -> None:
 
 
 def test_f16_physical_wrench_perturbation_artifact_passes_declared_local_matrix() -> None:
-    """The local wrench path passes isolated, reversal, and coupled witnesses."""
+    """The selected generic profile passes the declared local witness matrix."""
 
     artifact = json.loads(
         (ROOT / "verification/f16_physical_wrench_perturbation_evidence.json").read_text(encoding="utf-8")
     )
     assert artifact["status"] == "development_screen_passed"
     assert len(artifact["cases"]) == 5
-    assert all(case["passed"] for case in artifact["cases"].values())
+    assert sum(case["passed"] for case in artifact["cases"].values()) == 5
+    assert sum(not case["passed"] for case in artifact["cases"].values()) == 0
     assert all(case["allocation_statuses"] == ["feasible"] for case in artifact["cases"].values())
     assert all(case["saturation_fraction"] == pytest.approx(0.0) for case in artifact["cases"].values())
+    assert artifact["tuning_profile"] == "state_and_wrench_balanced_q10_r0p01"
     assert "broad envelope validation" in artifact["claim_boundary"]
     ####
 

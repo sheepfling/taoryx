@@ -189,10 +189,13 @@ runtime plant adapter then:
 7. evaluates the resulting nonlinear moment and nonlinear local recovery
    after actual coordinate lag/rate advancement.
 
-The public X8 bundle explicitly says that the physical left/right elevon
-differential sign mapping needs reconciliation before hardware use. Therefore
-the present X8 result must say `collective/differential table-coordinate
-allocation`, not `hardware-ready left/right elevon allocation`. The bundle
+The public X8 bundle explicitly preserves the original sign ambiguity because
+the TensorAeroSpace convention and the source-paper convention use opposite
+definitions of positive aileron. The primary source paper resolves the
+checked-in source coordinate with `delta_a=(delta_el-delta_er)/2`; therefore
+the present X8 result may carry an explicit `left-plus/right-minus` mapping,
+but it must still distinguish source-coordinate allocation from hardware-ready
+left/right actuator qualification. The bundle
 declares 20 degree travel, a 120 degree/s rate limit, and a 0.05 s
 implementation first-order response for the table coordinates. Those values
 are active in the local validation; their source classification remains
@@ -214,8 +217,10 @@ It writes `verification/generated/x8_table_coordinate_physical_lqr.json`.
 That packet records the trim, derivative provenance, projected LQR, real
 table-coordinate allocation, declared actuator behavior, requested versus
 actual nonlinear moments, and a coupled roll/pitch recovery. The model-level
-nonlinear evidence is retained, but the typed X8 controller remains at T3
-until the left/right physical sign mapping is source-resolved. This avoids
+nonlinear evidence is retained, and the typed X8 controller is now T4 for
+source-coordinate physical allocation. It remains below hardware-level
+qualification until mapped actuator telemetry and end-to-end surface evidence
+exist. This avoids
 promoting a model-coordinate result into a hardware-elevator claim.
 
 The reusable X8 racetrack is intentionally a different evidence case. Its
@@ -363,9 +368,10 @@ PYTHONPATH=src python3 tools/validate_x15_physical_lqr.py
 
 ## Follow-on vehicle order
 
-1. **X8:** preserve the local source-coordinate result at T3 until the public
-   left/right elevon sign mapping is resolved; then promote it through a true
-   physical-elevon proof before broad scheduling.
+1. **X8:** preserve the local source-coordinate result at T4 after the
+   source-paper sign resolution; then promote it through mapped left/right
+   actuator telemetry, an end-to-end racetrack, and local physical R1 before
+   broad scheduling.
 2. **Hummingbird:** carry the local individual-rotor T5 proof upward into
    position, yaw, waypoint, disturbance, and landing/contact loops without
    reintroducing a direct-wrench bridge.

@@ -14,7 +14,15 @@ def test_f16_effectivity_screen_reads_sample_matrix() -> None:
     assert report.metrics["condition_number"] > 1.0
     assert report.metrics["bounded_replay"]["status"] == "feasible"
     assert report.metrics["bounded_replay"]["residual_norm"] < 1.0e-9
-    assert report.metrics["sign_probe"]["elevator_deg"]["positive_axes"] == ["total_force_x_n"]
+    # The source deck's physical convention maps positive elevator to the
+    # negative pitching/yawing load columns; throttle, not elevator, is the
+    # positive axial-force channel.  Keep the sign probe tied to the declared
+    # effector ordering rather than an older logical-control assumption.
+    assert report.metrics["sign_probe"]["elevator_deg"]["positive_axes"] == []
+    assert report.metrics["sign_probe"]["elevator_deg"]["negative_axes"] == [
+        "total_moment_x_nm",
+        "total_moment_z_nm",
+    ]
     assert any(item.code == "effectivity-development-screen" for item in report.findings)
 
 

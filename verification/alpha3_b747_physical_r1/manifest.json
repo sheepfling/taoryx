@@ -1,0 +1,355 @@
+{
+  "acceptance": {
+    "disallowed_allocation_statuses": [
+      "infeasible",
+      "numerically_singular",
+      "solver_failure"
+    ],
+    "dt_s": 0.05,
+    "duration_s": 80.0,
+    "final_normalized_feedback_error_fraction": 0.1,
+    "maximum_continuous_saturation_duration_s": 0.5,
+    "maximum_saturation_fraction": 0.05
+  },
+  "boundary_failure_count": 1,
+  "case_count": 4,
+  "cases": [
+    {
+      "artifact": "verification/alpha3_b747_physical_r1/nominal_local/metrics.json",
+      "boundary_witness": false,
+      "case_id": "nominal_local",
+      "description": "declared condition-3 local coupled attitude/rate witness",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible",
+          "partially_achievable"
+        ],
+        "final_controlled_actual_residual_nm": 2.6167096932430595e-10,
+        "final_normalized_feedback_error_fraction": 0.08556749982371309,
+        "maximum_continuous_saturation_duration_s": 0.35000000000000003,
+        "mission_pass": true,
+        "samples": 1600,
+        "saturation_fraction": 0.004375
+      },
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_b747_physical_r1/speed_minus_5m_s/metrics.json",
+      "boundary_witness": false,
+      "case_id": "speed_minus_5m_s",
+      "description": "five metre-per-second below the source-trim forward speed",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "final_controlled_actual_residual_nm": 1.1303318755344944e-10,
+        "final_normalized_feedback_error_fraction": 0.030960760844648078,
+        "maximum_continuous_saturation_duration_s": 0.0,
+        "mission_pass": true,
+        "samples": 1600,
+        "saturation_fraction": 0.0
+      },
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_b747_physical_r1/speed_plus_5m_s/metrics.json",
+      "boundary_witness": false,
+      "case_id": "speed_plus_5m_s",
+      "description": "five metre-per-second above the source-trim forward speed",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible"
+        ],
+        "final_controlled_actual_residual_nm": 5.81711770757941e-11,
+        "final_normalized_feedback_error_fraction": 0.03059270410076281,
+        "maximum_continuous_saturation_duration_s": 0.0,
+        "mission_pass": true,
+        "samples": 1600,
+        "saturation_fraction": 0.0
+      },
+      "mission_pass": true
+    },
+    {
+      "artifact": "verification/alpha3_b747_physical_r1/coupled_rate_authority_boundary/metrics.json",
+      "boundary_witness": true,
+      "case_id": "coupled_rate_authority_boundary",
+      "description": "larger coupled attitude/rate demand retained as a surface-authority boundary",
+      "metrics": {
+        "allocation_statuses": [
+          "feasible",
+          "partially_achievable"
+        ],
+        "final_controlled_actual_residual_nm": 1.8579182701351413e-10,
+        "final_normalized_feedback_error_fraction": 0.08310890899288871,
+        "maximum_continuous_saturation_duration_s": 3.85,
+        "mission_pass": false,
+        "samples": 1600,
+        "saturation_fraction": 0.0625
+      },
+      "mission_pass": false
+    }
+  ],
+  "claim": "Fixed local B747 surface-allocation evidence around the NASA CR-2144 condition-3 trim.",
+  "claim_boundary": "This is local physical-surface evidence at one source condition. The matrix does not establish gain scheduling, full-envelope transport control, source servo dynamics, fuel-flow/engine-spool dynamics, wind robustness, statistical reliability, or runway operations.",
+  "control_path": "attitude/rate error -> generic plant-derived LQR -> desired body moments -> bounded elevator/aileron/rudder allocation -> nonlinear table-backed plant",
+  "direct_body_moment_injection": false,
+  "effectors": [
+    "elevator-deg",
+    "aileron-deg",
+    "rudder-deg",
+    "throttle"
+  ],
+  "failed_case_count": 1,
+  "operating_condition": "NASA CR-2144 condition 3 / Mach 0.45 local neighborhood",
+  "passed_case_count": 3,
+  "reproduction": "PYTHONPATH=src python3 tools/validate_b747_physical_r1_matrix.py",
+  "schema": "taoryx.b747-physical-surface-r1-matrix/v1alpha1",
+  "selected_design": {
+    "id": "b747-condition3-aggressive-surface-wrench-lqr-v1",
+    "tuning": {
+      "closed_loop_eigenvalues": [
+        [
+          -0.7929765787771622,
+          0.8404758594819844
+        ],
+        [
+          -0.7929765787771622,
+          -0.8404758594819844
+        ],
+        [
+          -0.30392703083013584,
+          0.3060448515171317
+        ],
+        [
+          -0.30392703083013584,
+          -0.3060448515171317
+        ],
+        [
+          -2.5375271727102393,
+          2.670599962673679
+        ],
+        [
+          -2.5375271727102393,
+          -2.670599962673679
+        ],
+        -0.06622760800059913,
+        -0.20396792720174725,
+        -0.05306284913080384
+      ],
+      "condition_number": 1.0,
+      "control_names": [
+        "moment_x_nm",
+        "moment_y_nm",
+        "moment_z_nm"
+      ],
+      "control_scales": [
+        34191.969081190415,
+        2781444.021915666,
+        414248.85611582315
+      ],
+      "matrix_sha256": {
+        "a": "7c1f60ea8ceceb416a129799ba37a6b6bb9dbfc4d24751d073c847cb171fa102",
+        "b": "9570e4ec41c3a67ef1914afec9194d91fbdd75d32c66a04a0d27cbd108642405",
+        "k": "651232cec2f66d5b02bb85862e71f2bc6691f1ebe9c2f3818313644ae5870135",
+        "q": "7f53b20d856724509256162a9de99c5886bc5cf6a447977b2cf7c143a76b0ad9",
+        "r": "97c4a533bf64debe32ffcc482bc0dc581fe6c936f03311923f2412b951afe81c"
+      },
+      "metrics": {
+        "condition_number": 1.0,
+        "maximum_real_pole": -0.05306284913080384
+      },
+      "profile_id": "aggressive",
+      "robustness": null,
+      "score": 1e-06,
+      "state_names": [
+        "roll_error_rad",
+        "pitch_error_rad",
+        "yaw_error_rad",
+        "u_m_s",
+        "v_m_s",
+        "w_m_s",
+        "p_rad_s",
+        "q_rad_s",
+        "r_rad_s"
+      ],
+      "state_scales": [
+        0.05235987755982989,
+        0.05235987755982989,
+        0.05235987755982989,
+        5.0,
+        3.0,
+        3.0,
+        0.15707963267948966,
+        0.15707963267948966,
+        0.15707963267948966
+      ],
+      "status": "safe",
+      "vehicle_id": "b747",
+      "violations": [],
+      "weights": {
+        "q_diagonal": [
+          4.0,
+          4.0,
+          4.0,
+          0.5,
+          4.0,
+          4.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "r_diagonal": [
+          0.25,
+          0.25,
+          0.25
+        ]
+      }
+    }
+  },
+  "source_trim": {
+    "controls": {
+      "aileron-deg": -4.0843865676118324e-13,
+      "elevator-deg": 0.3861602425315554,
+      "rudder-deg": -2.933987387411825e-11,
+      "throttle": 0.2854487889165715
+    },
+    "cost": 1.527309579562473e-18,
+    "diagnostics": [
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": -8.090906506837693e-21
+        },
+        "field": "roll_error_rad",
+        "message": "trim solution for 'roll_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": -3.6339576497585874e-14
+        },
+        "field": "pitch_error_rad",
+        "message": "trim solution for 'pitch_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 6.949970511952028e-21
+        },
+        "field": "yaw_error_rad",
+        "message": "trim solution for 'yaw_error_rad' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": 152.84284274566977,
+          "upper": 152.84284274586975,
+          "value": 152.84284274576976
+        },
+        "field": "u_m_s",
+        "message": "trim solution for 'u_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 8.902125291001221e-21
+        },
+        "field": "v_m_s",
+        "message": "trim solution for 'v_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": 7.1416464173514544,
+          "upper": 7.1416464175514545,
+          "value": 7.1416464174514545
+        },
+        "field": "w_m_s",
+        "message": "trim solution for 'w_m_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "p_rad_s",
+        "message": "trim solution for 'p_rad_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "q_rad_s",
+        "message": "trim solution for 'q_rad_s' is at a declared bound",
+        "severity": "warning"
+      },
+      {
+        "action": "confirm the bound is physically intended; otherwise widen the envelope or revise the initial condition/model",
+        "code": "solution-at-bound",
+        "details": {
+          "lower": -1e-10,
+          "upper": 1e-10,
+          "value": 0.0
+        },
+        "field": "r_rad_s",
+        "message": "trim solution for 'r_rad_s' is at a declared bound",
+        "severity": "warning"
+      }
+    ],
+    "iterations": 3,
+    "max_residual": 0.004860170696244413,
+    "message": "`gtol` termination condition is satisfied.",
+    "operating_point": {},
+    "residuals": {
+      "body_x_force_n": -0.004860170696244413,
+      "body_z_force_n": 0.0009022846774935693,
+      "pitch_moment_nm": -0.0020187865677019283,
+      "roll_moment_nm": -5.587816707953141e-09,
+      "yaw_moment_nm": 3.1781341173451957e-06
+    },
+    "scaled_residual_norm": 1.7477468807367233e-09,
+    "state": {
+      "p_rad_s": 0.0,
+      "pitch_error_rad": -3.6339576497585874e-14,
+      "q_rad_s": 0.0,
+      "r_rad_s": 0.0,
+      "roll_error_rad": -8.090906506837693e-21,
+      "u_m_s": 152.84284274576976,
+      "v_m_s": 8.902125291001221e-21,
+      "w_m_s": 7.1416464174514545,
+      "yaw_error_rad": 6.949970511952028e-21
+    },
+    "status": 1,
+    "success": true
+  },
+  "status": "R1_physical_surface_matrix_complete",
+  "vehicle": "b747"
+}

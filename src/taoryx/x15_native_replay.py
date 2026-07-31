@@ -15,7 +15,11 @@ _SOURCE_PROBLEM = "examples/showcases/x15_rocket_to_hawaii/release_glide_parity_
 _SOURCE_TABLE = "tests/fixtures/x15_coherent_6dof_public_research_v1/tables/x15_static_6axis.tbl"
 _EARTH_RADIUS_M = 6_378_137.0
 _NATIVE_TABLE_MAX_ALTITUDE_M = 24_384.0
-_NATIVE_REPLAY_SAFE_ALTITUDE_M = 20_000.0
+# Keep a small margin below the declared 24,384 m table ceiling while still
+# allowing the reduced staged witness to provide a native replay checkpoint.
+# This is a table-domain bridge, not permission to extrapolate above the
+# source envelope.
+_NATIVE_REPLAY_SAFE_ALTITUDE_M = 24_000.0
 
 
 @dataclass(frozen=True, slots=True)

@@ -1,0 +1,29 @@
+{
+  "comparison_fidelity": "pseudo_6dof",
+  "deltas": [
+    {
+      "query_id": "query-000000",
+      "terminal_altitude_delta_m": -5.496070723554049,
+      "terminal_crossrange_delta_m": 0.0,
+      "terminal_downrange_delta_m": -905.0193935839288,
+      "terminal_speed_delta_m_s": 14.115920337255176
+    },
+    {
+      "query_id": "query-000001",
+      "terminal_altitude_delta_m": -1.115646241421544,
+      "terminal_crossrange_delta_m": 0.0,
+      "terminal_downrange_delta_m": -84.48501824516825,
+      "terminal_speed_delta_m_s": 1.2974491232493506
+    },
+    {
+      "query_id": "query-000002",
+      "terminal_altitude_delta_m": 72.04001172215455,
+      "terminal_crossrange_delta_m": 0.0,
+      "terminal_downrange_delta_m": 49.55741778900392,
+      "terminal_speed_delta_m_s": -0.02813992597114634
+    }
+  ],
+  "interpretation": "Differences are model-form evidence, not an accuracy ranking without source-qualified attitude dynamics.",
+  "reference_fidelity": "point_mass_3dof",
+  "schema": "taoryx.hl20-fidelity-comparison/v1alpha1"
+}

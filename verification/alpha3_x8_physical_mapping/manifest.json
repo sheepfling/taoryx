@@ -1,0 +1,131 @@
+{
+  "claim": {
+    "direct_body_moment_injection": false,
+    "nonclaims": [
+      "This resolves the source coordinate mapping, but does not prove servo wiring, hinge-sign calibration, or hardware-level actuator dynamics.",
+      "No sign is inferred from trajectory appearance or controller success.",
+      "The source-table plant remains a source-coordinate realization until mapped left/right actuator telemetry is exercised end to end."
+    ],
+    "promotion_authorized": true,
+    "promotion_blocker": "individual_left_right_actuator_and_end_to_end_racetrack_evidence_pending",
+    "proves": "The two possible left/right reconstructions are explicit and invertible, and the source-paper equation selects the left-plus/right-minus mapping for the checked-in X8 source coordinate."
+  },
+  "discrimination": {
+    "reason": "The primary X8 source paper supplies Eq. (14); the alternate convention remains valid only after an explicit differential-coordinate sign conversion.",
+    "required_next_evidence": [
+      "individual actuator travel/rate and servo-neutral evidence before hardware-level promotion",
+      "nonlinear racetrack witness using mapped left/right telemetry"
+    ],
+    "selected_mapping_id": "x8-low-hansen-2025-eq14-left-plus-differential",
+    "source_selects_one_hypothesis": true
+  },
+  "hypotheses": [
+    {
+      "differential_sign": 1,
+      "invertible": true,
+      "left": "collective + differential_sign * differential",
+      "mapping_id": "x8-left-plus-differential",
+      "probes": [
+        {
+          "collective_deg": 0.0,
+          "differential_deg": 5.0,
+          "left_deg": 5.0,
+          "right_deg": -5.0,
+          "round_trip_error_deg": 0.0
+        },
+        {
+          "collective_deg": 0.0,
+          "differential_deg": -5.0,
+          "left_deg": -5.0,
+          "right_deg": 5.0,
+          "round_trip_error_deg": 0.0
+        },
+        {
+          "collective_deg": 3.0,
+          "differential_deg": 5.0,
+          "left_deg": 8.0,
+          "right_deg": -2.0,
+          "round_trip_error_deg": 0.0
+        }
+      ],
+      "right": "collective - differential_sign * differential",
+      "source": "public_package_control_mapping_status",
+      "status": "hypothesis"
+    },
+    {
+      "differential_sign": -1,
+      "invertible": true,
+      "left": "collective + differential_sign * differential",
+      "mapping_id": "x8-left-minus-differential",
+      "probes": [
+        {
+          "collective_deg": 0.0,
+          "differential_deg": 5.0,
+          "left_deg": -5.0,
+          "right_deg": 5.0,
+          "round_trip_error_deg": 0.0
+        },
+        {
+          "collective_deg": 0.0,
+          "differential_deg": -5.0,
+          "left_deg": 5.0,
+          "right_deg": -5.0,
+          "round_trip_error_deg": 0.0
+        },
+        {
+          "collective_deg": 3.0,
+          "differential_deg": 5.0,
+          "left_deg": -2.0,
+          "right_deg": 8.0,
+          "round_trip_error_deg": 0.0
+        }
+      ],
+      "right": "collective - differential_sign * differential",
+      "source": "public_package_control_mapping_status",
+      "status": "hypothesis"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_x8_physical_mapping_evidence.py",
+  "resolution": {
+    "alternate_convention": {
+      "conversion_required": "negate the source differential coordinate before applying that convention",
+      "meaning": "TensorAeroSpace-style delta_a = (delta_er - delta_el)/2"
+    },
+    "equation": "[delta_e, delta_a]^T = 1/2 [[1, 1], [-1, 1]] [delta_er, delta_el]^T",
+    "inverse": "delta_el = delta_e + delta_a; delta_er = delta_e - delta_a",
+    "selected_mapping": {
+      "differential_sign": 1,
+      "left": "collective + differential_sign * differential",
+      "mapping_id": "x8-low-hansen-2025-eq14-left-plus-differential",
+      "right": "collective - differential_sign * differential",
+      "source": "L\u00f8w-Hansen et al., Modeling and identification of a small fixed-wing UAV using estimated aerodynamic angles, CEAS Aeronautical Journal 16 (2025), Eq. (14), doi:10.1007/s13272-025-00816-3",
+      "status": "selected"
+    },
+    "selected_probe": {
+      "collective_deg": 3.0,
+      "differential_deg": 5.0,
+      "left_deg": 8.0,
+      "right_deg": -2.0
+    },
+    "source_coordinate_interpretation": "differential_elevon-deg is delta_a from the source X8 deck",
+    "source_equation_reference": "Eq. (14)",
+    "source_url": "https://doi.org/10.1007/s13272-025-00816-3",
+    "status": "selected"
+  },
+  "schema": "taoryx.x8-physical-elevon-mapping-evidence/v1alpha1",
+  "source_status": {
+    "detail": "Public implementation prose and paper matrix use opposite differential sign descriptions; package does not silently choose one",
+    "item": "physical_left_right_sign_mapping",
+    "status": "verify_before_use"
+  },
+  "status": "X8_physical_left_right_mapping_resolved_by_source_equation",
+  "vehicle": "skywalker_x8",
+  "virtual_coordinate_authority": {
+    "positive_differential_command": {
+      "moment_x_nm_per_deg": 0.0923759294479208,
+      "moment_z_nm_per_deg": -0.00633952456802219
+    },
+    "source_coordinate": "differential-elevon-deg",
+    "source_plant": "verification/generated/x8_table_coordinate_physical_lqr.json"
+  }
+}

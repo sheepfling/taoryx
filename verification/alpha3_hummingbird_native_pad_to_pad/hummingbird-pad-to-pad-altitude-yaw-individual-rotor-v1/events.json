@@ -1,0 +1,13 @@
+{
+  "geometric_ground_crossing_time_s": 86.01400000000012,
+  "ground_contact_time_s": 86.01941087584868,
+  "schema_version": 1,
+  "truth_event_times_s": {
+    "ground-contact": 86.01941087584868,
+    "motor-shutdown": 86.00000000000013
+  },
+  "truth_events": [
+    "ground-contact",
+    "motor-shutdown"
+  ]
+}

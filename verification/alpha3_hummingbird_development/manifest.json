@@ -1,0 +1,162 @@
+{
+  "comparison": "comparison.json",
+  "family_id": "hummingbird",
+  "parent_native_mission": {
+    "all_mapped_objectives_agree": true,
+    "artifact": "artifacts/showcases/alpha2/final-catalog-v1/packs/hummingbird-pad-to-pad-altitude-yaw-v2/summary.json",
+    "comparison_boundary": "semantic objective comparison only; native and pseudo runtimes use different controllers, horizons, and sample rates, so trajectory/time deltas are not asserted",
+    "control_boundary": "native packet is the rigid-body/direct-wrench parent evidence; pseudo packet remains aggregate thrust-vector response-law evidence and does not inherit motor allocation",
+    "fidelity": "rigid_body_6dof",
+    "landing_evidence": {
+      "geometric_ground_crossing_time_s": 86.09500000000007,
+      "ground_contact_time_s": 86.09561652036267,
+      "ground_reaction_peak_n": 4.899150700205356,
+      "motor_shutdown_time_s": 86.00000000000013,
+      "note": "The rigid-body runtime records an explicit static-pad contact impulse, normal reaction, and post-contact settle segment; landing gear, tire, and ground-effect dynamics remain outside this claim.",
+      "physical_contact_state_available": true,
+      "post_contact_settle_pass": true,
+      "post_crossing_max_speed_m_s": 1.1134047298167688e-16,
+      "post_crossing_sample_count": 5905
+    },
+    "mapping_boundary": "The disturbance-recovery objective is new to the pseudo mission and has no equivalent in the legacy native packet; it is therefore reported as unmapped rather than as a disagreement.",
+    "mission_id": "hummingbird-pad-to-pad-altitude-yaw-v2",
+    "mission_pass": true,
+    "objective_mapping": [
+      {
+        "native_objective_id": "takeoff",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 5.050000000000021,
+        "pseudo_objective_id": "takeoff_altitude_gate",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "yaw-step",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 17.859999999999634,
+        "pseudo_objective_id": "yaw_gate",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-south-east",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 32.344999999999416,
+        "pseudo_objective_id": "box_east",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-north-east",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 40.35999999999942,
+        "pseudo_objective_id": "box_north",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-north-west",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 48.34399999999942,
+        "pseudo_objective_id": "box_west",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "box-south-west",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 56.35999999999942,
+        "pseudo_objective_id": "box_south_return",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      },
+      {
+        "native_objective_id": "touchdown",
+        "native_truth_status": "pass",
+        "native_truth_time_s": 86.09661652036267,
+        "pseudo_objective_id": "touchdown_and_post_contact_settle",
+        "pseudo_truth_status": "pass",
+        "status_agrees": true
+      }
+    ],
+    "unmapped_pseudo_objectives": [
+      "disturbance_recovery"
+    ]
+  },
+  "parent_parity": {
+    "artifact": "artifacts/verification/fidelity_parity_hummingbird_euler/report.json",
+    "claim_boundary": "independent native hover translational parity only; not full mission qualification",
+    "convergence": {
+      "base_step": {
+        "3dof": [
+          10001
+        ],
+        "6dof": [
+          101
+        ],
+        "bridge": [
+          10001
+        ]
+      },
+      "final_difference": {
+        "3dof": {
+          "altitude_m": 0.0,
+          "mass_kg": 0.0,
+          "speed_m_s": 3.0040886038105316e-15
+        },
+        "6dof": {
+          "altitude_m": 1.8719583749771118e-07,
+          "mass_kg": 0.0,
+          "speed_m_s": 1.8416419098965867e-07
+        },
+        "bridge": {
+          "altitude_m": 0.0,
+          "mass_kg": 0.0,
+          "speed_m_s": 3.0040886038105316e-15
+        }
+      },
+      "half_step": {
+        "3dof": [
+          10001
+        ],
+        "6dof": [
+          201
+        ],
+        "bridge": [
+          10001
+        ]
+      }
+    },
+    "execution_policy": {
+      "integrator": "euler",
+      "max_steps": 10000
+    },
+    "parity_gate": "pass_translational_window",
+    "rigid_window_max_difference": {
+      "altitude_m": 4.00757417085007e-05,
+      "mass_kg": 0.0,
+      "speed_m_s": 0.0007965739613603394
+    }
+  },
+  "plot": "pseudo_6dof_development_board.png",
+  "point_mass_telemetry": "point_mass_3dof_telemetry.json",
+  "promotion_blocker": "the declared hover-box/yaw/contact pseudo case is nominal; translated position/velocity guidance, individual-rotor physical evidence, electrical battery/SOC, wind, and family-wide robustness remain separate gates",
+  "records": [
+    {
+      "artifact": "point_mass_3dof_evidence.json",
+      "fidelity": "point_mass_3dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    },
+    {
+      "artifact": "pseudo_6dof_evidence.json",
+      "fidelity": "pseudo_6dof",
+      "mission_pass": true,
+      "status": "nominal_case_pass"
+    }
+  ],
+  "reproduction": "PYTHONPATH=src python3 tools/validate_hummingbird_fidelity_ladder.py",
+  "schema": "taoryx.hummingbird-fidelity-ladder/v1alpha1",
+  "status": "development",
+  "telemetry": "pseudo_6dof_telemetry.json"
+}

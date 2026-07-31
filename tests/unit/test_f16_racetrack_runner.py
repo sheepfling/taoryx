@@ -68,3 +68,11 @@ def test_f16_racetrack_envelope_check_rejects_out_of_domain_truth() -> None:
     violations = _envelope_violations(rows)
     assert {item["channel"] for item in violations} == {"mach"}
     ####
+
+
+def test_f16_racetrack_envelope_check_ignores_roundoff_at_ground() -> None:
+    """A tiny negative ground altitude from floating point is not an excursion."""
+
+    rows = [{"time_s": 1.0, "altitude_m": -1.0e-12, "mach": 0.8, "aero_alpha_deg": 0.0, "aero_sideslip_deg": 0.0}]
+    assert _envelope_violations(rows) == []
+    ####

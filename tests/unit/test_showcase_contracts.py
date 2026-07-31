@@ -93,6 +93,7 @@ def test_showcase_binding_and_realization_preserve_claim_boundary() -> None:
     )
     realization = FidelityShowcaseRealization(
         fidelity="rigid_body_6dof",
+        control_realization="surface_allocated",
         realization_id="synthetic-rigid-v1",
         state_schema=("position_ecef_m", "quaternion_xyzw", "body_rates_rad_s"),
         semantic_command_mapping={"command.bank": "aileron_deg"},
@@ -105,6 +106,30 @@ def test_showcase_binding_and_realization_preserve_claim_boundary() -> None:
 
     assert binding.evidence_grade == "synthetic"
     assert "flight qualification" in realization.nonclaims
+    assert isinstance(realization.control_realization, str)
+
+
+def test_showcase_control_realization_rejects_hidden_effector_claims() -> None:
+    with pytest.raises(ValueError, match="direct_wrench showcase realizations"):
+        FidelityShowcaseRealization(
+            fidelity="rigid_body_6dof",
+            control_realization="direct_wrench",
+            realization_id="direct-wrench-v1",
+            state_schema=("position_m",),
+            physical_effectors=("elevator",),
+            claim="direct wrench screen",
+            evidence_grade="derived",
+        )
+
+    with pytest.raises(ValueError, match="surface_allocated showcase realizations"):
+        FidelityShowcaseRealization(
+            fidelity="rigid_body_6dof",
+            control_realization="surface_allocated",
+            realization_id="surface-v1",
+            state_schema=("position_m",),
+            claim="surface allocation",
+            evidence_grade="derived",
+        )
 
 
 def test_showcase_archetype_catalog_requires_common_proof_products() -> None:
@@ -193,3 +218,8 @@ def test_checked_in_b747_and_x15_catalog_recipes_validate() -> None:
     assert recipes["x15-boost-glide-storyboard-v1"].lineage_required is True
     assert "arrival_gate" in recipes["b747-transport-energy-arrival-v1"].required_events
     assert "separation" in recipes["x15-boost-glide-storyboard-v1"].required_events
+    assert "x8-fixed-wing-racetrack-response-v1" in recipes
+    assert "hummingbird-multirotor-hover-yaw-contact-v1" in recipes
+    assert "tumbling-body-passive-deployment-v1" in recipes
+    assert "shutdown" in recipes["hummingbird-multirotor-hover-yaw-contact-v1"].required_events
+    assert "impact" in recipes["tumbling-body-passive-deployment-v1"].required_events
